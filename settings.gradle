@@ -1,0 +1,3 @@
+rootProject.name = 'lambda-mvc'
+include 'lambda-hello'
+include 'lambda-commons'

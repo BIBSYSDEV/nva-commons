@@ -1,0 +1,47 @@
+plugins {
+    id 'java'
+    id 'idea'
+}
+
+
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+    gradleVersion = "6.2.2"
+}
+
+
+allprojects {
+    def awsSdkVersion = "1.11.739"
+    def jupiterVersion = "5.6.0"
+    repositories {
+        jcenter()
+        maven { url 'https://jitpack.io' }
+    }
+
+}
+
+
+subprojects {
+
+    apply plugin: 'java'
+
+    dependencies {
+        implementation 'com.amazonaws:aws-lambda-java-core:1.2.0'
+        implementation 'com.amazonaws:aws-lambda-java-events:2.2.7'
+        implementation 'com.amazonaws:aws-java-sdk-lambda:1.11.749'
+
+       // implementation 'com.github.BIBSYSDEV:aws-build-tools:v1.5.5'
+
+
+        testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0'
+        testImplementation 'org.hamcrest:hamcrest:2.2'
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+}
