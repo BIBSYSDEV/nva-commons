@@ -1,3 +1,1 @@
-rootProject.name = 'lambda-mvc'
-include 'lambda-hello'
-include 'lambda-commons'
+rootProject.name = 'nva-commons'

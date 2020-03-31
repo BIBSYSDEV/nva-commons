@@ -1,5 +1,0 @@
-
-
-dependencies {
-    implementation project (':lambda-commons')
-}

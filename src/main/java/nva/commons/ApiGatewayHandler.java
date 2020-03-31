@@ -157,7 +157,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      *
      * @param input                 the input object of class I
      * @param apiGatewayInputString The message of apiGateway, for extracting the headers and in case we need other
-     *                              fields during the processing
+     * fields during the processing
      * @param context               the Context
      * @return an output object of class O
      * @throws IOException        when processing fails
@@ -169,7 +169,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
     }
 
     /**
-     * This is the message for the sucess case. Sends a JSON string containing the response that APIGateway will send to
+     * This is the message for the success case. Sends a JSON string containing the response that APIGateway will send to
      * the user.
      *
      * @param input  the input object of class I

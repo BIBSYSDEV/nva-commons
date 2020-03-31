@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'idea'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
 }
 
 
@@ -13,35 +14,38 @@ wrapper {
 }
 
 
-allprojects {
-    def awsSdkVersion = "1.11.739"
-    def jupiterVersion = "5.6.0"
-    repositories {
-        jcenter()
-        maven { url 'https://jitpack.io' }
-    }
-
+repositories {
+    jcenter()
+    maven { url 'https://jitpack.io' }
 }
 
 
-subprojects {
+def jacksonVersion = "2.10.3"
+def awsSdkVersion = "1.11.739"
+def jupiterVersion = "5.6.0"
 
-    apply plugin: 'java'
+apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
 
-    dependencies {
-        implementation 'com.amazonaws:aws-lambda-java-core:1.2.0'
-        implementation 'com.amazonaws:aws-lambda-java-events:2.2.7'
-        implementation 'com.amazonaws:aws-java-sdk-lambda:1.11.749'
+dependencies {
+    implementation 'com.amazonaws:aws-lambda-java-core:1.2.0'
+    implementation 'com.amazonaws:aws-lambda-java-events:2.2.7'
+    implementation 'com.amazonaws:aws-java-sdk-lambda:1.11.749'
+    implementation group: 'org.zalando', name: 'problem', version: '0.23.0'
+    implementation group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.23.0'
+    implementation("com.amazonaws:aws-java-sdk-api-gateway:${awsSdkVersion}")
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.core:jackson-databind: ${jacksonVersion}"
+    implementation "com.fasterxml.jackson.module:jackson-module-parameter-names:${jacksonVersion}"
 
-       // implementation 'com.github.BIBSYSDEV:aws-build-tools:v1.5.5'
-
-
-        testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0'
-        testImplementation 'org.hamcrest:hamcrest:2.2'
-    }
-
-    test {
-        useJUnitPlatform()
-    }
-
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0'
+    testImplementation 'org.hamcrest:hamcrest:2.2'
 }
+
+test {
+    useJUnitPlatform()
+}
+
+
+
+
