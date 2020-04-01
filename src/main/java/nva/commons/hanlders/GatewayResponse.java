@@ -1,4 +1,4 @@
-package nva.commons;
+package nva.commons.hanlders;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,9 +16,9 @@ public class GatewayResponse<T> implements Serializable {
     /**
      * Constructor for GatewayResponse.
      *
-     * @param body  body of response
-     * @param headers   http headers for response
-     * @param statusCode    status code for response
+     * @param body       body of response
+     * @param headers    http headers for response
+     * @param statusCode status code for response
      */
     @JsonCreator
     public GatewayResponse(
@@ -42,6 +42,10 @@ public class GatewayResponse<T> implements Serializable {
         return statusCode;
     }
 
+    /**
+     *  Default Headers for all requests.
+     * @return a Map with default headers.
+     */
     public static Map<String, String> defaultHeaders() {
         Map<String, String> map = new ConcurrentHashMap<>();
         map.put("Content-Type", "application/json");

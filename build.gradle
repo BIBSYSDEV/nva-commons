@@ -1,8 +1,12 @@
 plugins {
     id 'java'
-    id 'idea'
     id 'com.github.johnrengelman.shadow' version '5.2.0'
+    id 'jacoco'
+    id 'checkstyle'
+    id 'pmd'
 }
+
+
 
 
 sourceCompatibility = JavaVersion.VERSION_11
@@ -26,6 +30,9 @@ def jupiterVersion = "5.6.0"
 
 apply plugin: 'java'
 apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'jacoco'
+apply plugin: 'checkstyle'
+apply plugin: 'pmd'
 
 dependencies {
     implementation 'com.amazonaws:aws-lambda-java-core:1.2.0'
@@ -46,6 +53,33 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    failFast = true
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+}
+
+pmd {
+    ruleSetConfig = rootProject.resources.text.fromFile('config/pmd/ruleset.xml')
+    ruleSets = []
+    ignoreFailures = false
+}
+
+checkstyle {
+    configFile = rootProject.resources.text.fromFile('config/checkstyle/checkstyle.xml').asFile()
+    showViolations = true
+}
+
+tasks.withType(Checkstyle) {
+    reports {
+        xml.enabled false
+        html.enabled true
+        html.stylesheet rootProject.resources.text.fromFile('config/checkstyle/checkstyle-simple.xsl')
+    }
 }
 
 
