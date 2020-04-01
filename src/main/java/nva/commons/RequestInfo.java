@@ -4,13 +4,14 @@ package nva.commons;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RequestInfo {
 
     public static final String PROXY_TAG = "proxy";
-    private Map<String,String> headers;
+    private Map<String, String> headers;
     private String path;
 
 

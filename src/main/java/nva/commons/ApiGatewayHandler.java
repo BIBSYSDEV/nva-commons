@@ -9,7 +9,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -19,6 +22,7 @@ import nva.commons.utils.Environment;
 import nva.commons.utils.IoUtils;
 import nva.commons.utils.JsonUtils;
 import org.apache.http.entity.ContentType;
+import org.apache.http.util.ExceptionUtils;
 
 /**
  * Template class for implementing Lambda function handlers that get activated through a call to ApiGateway. This class
@@ -224,6 +228,11 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
             writeOutput(inputObject, response);
         } catch (Exception e) {
             logger.log(e.getMessage());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            logger.log(sw.toString());
+            e.printStackTrace();
             writeFailure(inputObject, e);
         }
     }

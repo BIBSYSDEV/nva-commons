@@ -33,12 +33,14 @@ dependencies {
     implementation 'com.amazonaws:aws-java-sdk-lambda:1.11.749'
     implementation group: 'org.zalando', name: 'problem', version: '0.23.0'
     implementation group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.23.0'
-    implementation("com.amazonaws:aws-java-sdk-api-gateway:${awsSdkVersion}")
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jacksonVersion}"
-    implementation "com.fasterxml.jackson.core:jackson-databind: ${jacksonVersion}"
-    implementation "com.fasterxml.jackson.module:jackson-module-parameter-names:${jacksonVersion}"
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-api-gateway', version:awsSdkVersion
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version:jacksonVersion
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version:jacksonVersion
+    implementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: jacksonVersion
 
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.2.4'
+
     testImplementation 'org.hamcrest:hamcrest:2.2'
 }
 

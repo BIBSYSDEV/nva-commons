@@ -1,6 +1,7 @@
 package nva.commons.utils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -66,5 +67,9 @@ public final class IoUtils {
             result = buffer.replaceAll("\\s\\s", " ");
         }
         return result;
+    }
+
+    public static InputStream stringToStream(String input){
+        return  new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
     }
 }
