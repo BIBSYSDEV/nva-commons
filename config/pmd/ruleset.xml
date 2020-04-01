@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  name="PMD Rules"
+  xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+  xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+  <description>
+    PMD rules
+  </description>
+  <exclude-pattern>.*/test/.*</exclude-pattern>
+
+  <rule ref="category/java/errorprone.xml">
+    <exclude name="DataflowAnomalyAnalysis"/>
+    <exclude name="MissingSerialVersionUID"/>
+    <exclude name="BeanMembersShouldSerialize"/>
+  </rule>
+
+  <rule ref="category/java/multithreading.xml"/>
+
+  <rule ref="category/java/bestpractices.xml">
+    <exclude name="SystemPrintln"/>
+    <exclude name="GuardLogStatement"/>
+    <exclude name="AvoidPrintStackTrace"/>
+    <exclude name="UseVarargs"/>
+    <exclude name="ArrayIsStoredDirectly"/>
+
+    <!-- In TableManager we map ResourceNotFoundException to TableNotFoundException -->
+    <exclude name="PreserveStackTrace"/>
+
+  </rule>
+
+  <rule ref="category/java/codestyle.xml">
+    <exclude name="AtLeastOneConstructor"/>
+    <exclude name="LongVariable"/>
+    <exclude name="ShortVariable"/>
+    <exclude name="OnlyOneReturn"/>
+    <exclude name="LocalVariableCouldBeFinal"/>
+    <exclude name="MethodArgumentCouldBeFinal"/>
+    <exclude name="TooManyStaticImports"/>
+    <exclude name="ClassNamingConventions"/>
+    <exclude name="UnnecessaryConstructor"/>
+    <exclude name="ShortClassName"/>
+
+    <!--<exclude name="BeanMembersShouldSerialize"/>-->
+
+    <exclude name="ConfusingTernary"/>
+
+    <!-- printStackTrace is used in the Default Amazon handler in a static clause
+        We can re-enable this rule if we find a way to set a logger there
+    -->
+    <!--<exclude name="AvoidPrintStackTrace"/>-->
+
+
+    <!-- This rule does not allow us the following:
+            private static final Logger logger=...
+         It requires:
+            private static final Logger LOGGER=... -->
+    <exclude name="FieldNamingConventions"/>
+
+    <!-- Sometimes it is useful in debugging to assign the return value to a local variable  -->
+    <exclude name="UnnecessaryLocalBeforeReturn"/>
+
+
+  </rule>
+
+
+  <rule ref="category/java/performance.xml"/>
+
+
+  <rule ref="category/java/design.xml">
+    <exclude name="LoosePackageCoupling"/>
+    <exclude name="LawOfDemeter"/>
+    <exclude name="DataClass"/>
+    <exclude name="ExcessiveImports"/>
+    <exclude name="AvoidCatchingGenericException"/>
+    <exclude name="SignatureDeclareThrowsException"/>
+    <exclude name="UseUtilityClass"/>
+    <exclude name="UseObjectForClearerAPI"/>
+    <exclude name="TooManyMethods"/>
+    <exclude name="CyclomaticComplexity"/>
+
+    <!-- This rule does not allow the Lambda Handler to cast  the ContainerInitializationException
+        to a RuntimeException.
+        //TODO investigate if we replace the handler's RuntimeException with something else
+   -->
+    <exclude name="AvoidThrowingRawExceptionTypes"/>
+
+  </rule>
+
+</ruleset>

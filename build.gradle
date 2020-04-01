@@ -1,8 +1,12 @@
 plugins {
     id 'java'
-    id 'idea'
     id 'com.github.johnrengelman.shadow' version '5.2.0'
+    id 'jacoco'
+    id 'checkstyle'
+    id 'pmd'
 }
+
+
 
 
 sourceCompatibility = JavaVersion.VERSION_11
@@ -26,6 +30,9 @@ def jupiterVersion = "5.6.0"
 
 apply plugin: 'java'
 apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'jacoco'
+apply plugin: 'checkstyle'
+apply plugin: 'pmd'
 
 dependencies {
     implementation 'com.amazonaws:aws-lambda-java-core:1.2.0'
@@ -33,17 +40,46 @@ dependencies {
     implementation 'com.amazonaws:aws-java-sdk-lambda:1.11.749'
     implementation group: 'org.zalando', name: 'problem', version: '0.23.0'
     implementation group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.23.0'
-    implementation("com.amazonaws:aws-java-sdk-api-gateway:${awsSdkVersion}")
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jacksonVersion}"
-    implementation "com.fasterxml.jackson.core:jackson-databind: ${jacksonVersion}"
-    implementation "com.fasterxml.jackson.module:jackson-module-parameter-names:${jacksonVersion}"
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-api-gateway', version:awsSdkVersion
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version:jacksonVersion
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version:jacksonVersion
+    implementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: jacksonVersion
 
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.2.4'
+
     testImplementation 'org.hamcrest:hamcrest:2.2'
 }
 
 test {
     useJUnitPlatform()
+    failFast = true
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+}
+
+pmd {
+    ruleSetConfig = rootProject.resources.text.fromFile('config/pmd/ruleset.xml')
+    ruleSets = []
+    ignoreFailures = false
+}
+
+checkstyle {
+    configFile = rootProject.resources.text.fromFile('config/checkstyle/checkstyle.xml').asFile()
+    showViolations = true
+}
+
+tasks.withType(Checkstyle) {
+    reports {
+        xml.enabled false
+        html.enabled true
+        html.stylesheet rootProject.resources.text.fromFile('config/checkstyle/checkstyle-simple.xsl')
+    }
 }
 
 

@@ -5,9 +5,10 @@ import java.util.stream.Stream;
 
 public class Success<T> extends Try<T> {
 
-    public final T  value;
+    public final T value;
 
     public Success(T value) {
+        super();
         this.value = value;
     }
 
@@ -34,15 +35,14 @@ public class Success<T> extends Try<T> {
     @Override
     public <S, E extends Exception> Try<S> map(FunctionWithException<T, S, E> mapper) {
         Objects.requireNonNull(mapper);
-        return attempt(()->mapper.apply(value));
+        return attempt(() -> mapper.apply(value));
     }
 
     @Override
-    public <S,E extends Exception> Try<S> flatMap(FunctionWithException<T, Try<S>,E> action) {
-        try{
+    public <S, E extends Exception> Try<S> flatMap(FunctionWithException<T, Try<S>, E> action) {
+        try {
             return action.apply(value);
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             return new Failure<S>(e);
         }
     }
