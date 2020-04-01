@@ -1,4 +1,4 @@
-package nva.commons;
+package nva.commons.hanlders;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.TreeTraversingParser;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Optional;
+import nva.commons.exceptions.ApiIoException;
 import nva.commons.utils.JsonUtils;
 
 /**
@@ -17,11 +18,28 @@ public class ApiMessageParser<T> {
 
     private final transient ObjectMapper mapper = JsonUtils.jsonParser;
 
-    public RequestInfo getRequestInfo(String inputString) throws IOException {
-        RequestInfo requestInfo = mapper.readValue(inputString,RequestInfo.class);
-        return requestInfo;
+    /**
+     *  Get the Information about the Rest-Api Request, such as Headers.
+     * @param inputString the JSON request string.
+     * @return a {@link RequestInfo} object
+     * @throws ApiIoException when an {@link IOException} happens
+     */
+    public RequestInfo getRequestInfo(String inputString) throws ApiIoException {
+        try {
+            RequestInfo requestInfo = mapper.readValue(inputString, RequestInfo.class);
+            return requestInfo;
+        } catch (IOException e) {
+            throw new ApiIoException(e);
+        }
     }
 
+    /**
+     *  Get Request body from the JSON string of the Rest-API request.
+     * @param inputString the JSON string of the Rest-API request.
+     * @param tclass the class to map the the JSON object to.
+     * @return An instance of the input class.
+     * @throws IOException when reading fails or the JSON parser throws an Exception.
+     */
     public T getBodyElementFromJson(String inputString, Class<T> tclass) throws IOException {
 
         Optional<JsonNode> tree = Optional.ofNullable(mapper.readTree(new StringReader(inputString)));
