@@ -40,7 +40,6 @@ import org.apache.http.entity.ContentType;
 public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
 
     public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
-
     public static final String CONTENT_TYPE = "Content-Type";
 
     private static final ObjectMapper objectMapper = JsonUtils.jsonParser;
@@ -217,18 +216,28 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
     }
 
     /**
-     * Sends a message to ApiGateway and to the user, in case of failure. This method should be overriden for richer
-     * status codes.
+     * Sends a message to ApiGateway and to the API-client, in case of failure caused by an ApiGatewayException
+     * (predicted exception). This method can be overriden for richer status codes, but in the general case it should
+     * not be neccessary/
      *
      * @param input     the input object of class I
      * @param exception the exception
      * @throws IOException when serializing fails
      */
-
     protected void writeExpectedFailure(I input, ApiGatewayException exception) throws IOException {
         writeFailure(exception, exception.getStatusCode(), null);
     }
 
+    /**
+     * Method for sending error messages in case of failure. It can be overriden but it should not be necessary in the
+     * general case. It returns to the API-client a specified status code, the message of the exception and optionally
+     * another additional message.
+     *
+     * @param exception         the thrown Exception.
+     * @param statusCode        the statusCode that should be returned to the API-client
+     * @param additionalMessage any additional message that is necessary to send. Set to null for no additional message
+     * @throws IOException when the writer throws an IOException.
+     */
     protected void writeFailure(Exception exception, Integer statusCode, String additionalMessage) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
             String outputString = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
@@ -247,6 +256,15 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
         return outputString;
     }
 
+    /**
+     * Sends a message to ApiGateway and to the API-client  in case of failure caused by an Exception that is not
+     * ApiGatewayException (unpredicted exception). This method can be overriden for richer status codes, but in the
+     * general case it should not be neccessary/
+     *
+     * @param input     the input object of class I
+     * @param exception the exception
+     * @throws IOException when serializing fails
+     */
     protected void writeUnexpectedFailure(I input, Exception exception) throws IOException {
         writeFailure(exception, HttpStatus.SC_INTERNAL_SERVER_ERROR, null);
     }
@@ -290,9 +308,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
 
     private String createCauseString(Exception e) {
         List<Throwable> causeQueue = populateQueue(e);
-        String causeString =
-            causeQueue.stream().map(Throwable::toString).collect(Collectors.joining(STACK_TRACE_DELIMITER));
-        return causeString;
+        return causeQueue.stream().map(Throwable::toString).collect(Collectors.joining(STACK_TRACE_DELIMITER));
     }
 
     private List<Throwable> populateQueue(Exception e) {
