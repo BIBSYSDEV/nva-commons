@@ -150,14 +150,11 @@ public class ApiGatewayHandlerTest {
                                             .map(str -> jsonParser.readValue(str, JsonNode.class))
                                             .map(node -> node.get("body"))
                                             .map(body -> jsonParser.convertValue(body, ThrowableProblem.class));
-        assertThat(response.isSuccess(),is(true));
-        ThrowableProblem problem= response.get();
-        assertThat(problem.getMessage(),containsString(TOP_EXCEPTION_MESSAGE));
-        assertThat(problem.getMessage(),containsString(Status.NOT_FOUND.getReasonPhrase()));
-        assertThat(problem.getStatus(),is(Status.NOT_FOUND));
-
-
-
+        assertThat(response.isSuccess(), is(true));
+        ThrowableProblem problem = response.get();
+        assertThat(problem.getMessage(), containsString(TOP_EXCEPTION_MESSAGE));
+        assertThat(problem.getMessage(), containsString(Status.NOT_FOUND.getReasonPhrase()));
+        assertThat(problem.getStatus(), is(Status.NOT_FOUND));
 
         assertThat(output, containsString(new TestException("").getStatusCode().toString()));
     }

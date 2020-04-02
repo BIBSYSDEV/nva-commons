@@ -4,7 +4,7 @@ import org.apache.http.HttpStatus;
 
 public class TestException extends ApiGatewayException {
 
-    public static final Integer ERROR_STATUS_CODE= HttpStatus.SC_NOT_FOUND;
+    public static final Integer ERROR_STATUS_CODE = HttpStatus.SC_NOT_FOUND;
 
     public TestException(String message) {
         super(message);
