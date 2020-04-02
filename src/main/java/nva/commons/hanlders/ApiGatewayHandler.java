@@ -27,6 +27,9 @@ import nva.commons.utils.IoUtils;
 import nva.commons.utils.JsonUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
+import org.zalando.problem.Problem;
+import org.zalando.problem.Status;
+import org.zalando.problem.ThrowableProblem;
 
 /**
  * Template class for implementing Lambda function handlers that get activated through a call to ApiGateway. This class
@@ -240,10 +243,12 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      */
     protected void writeFailure(Exception exception, Integer statusCode, String additionalMessage) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
-            String outputString = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
-            outputString = addAdditionalMessage(additionalMessage, outputString);
-            GatewayResponse<String> gatewayResponse =
-                new GatewayResponse<>(outputString, getFailureHeaders(), statusCode);
+            String errorMessage = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
+            errorMessage = addAdditionalMessage(additionalMessage, errorMessage);
+            ThrowableProblem problem = Problem.valueOf(Status.valueOf(statusCode), errorMessage);
+
+            GatewayResponse<ThrowableProblem> gatewayResponse =
+                new GatewayResponse<>(problem, getFailureHeaders(), statusCode);
             String gateWayResponseJson = objectMapper.writeValueAsString(gatewayResponse);
             writer.write(gateWayResponseJson);
         }
