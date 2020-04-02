@@ -14,6 +14,10 @@ public abstract class ApiGatewayException extends Exception {
         super(exception);
     }
 
+    public ApiGatewayException(Exception exception, String message) {
+        super(message,exception);
+    }
+
     protected abstract Integer statusCode();
 
     /**
