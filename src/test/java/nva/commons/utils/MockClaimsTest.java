@@ -19,32 +19,32 @@ public class MockClaimsTest {
     public static final String PATH_TEMPLATE = "/%s/%s/%s/%s";
 
     @Test
-    public void mockClaimsContainsCustomFeideId(){
+    public void mockClaimsContainsCustomFeideId() {
         ObjectNode root = mockContext();
         JsonNode mockEvent = MockClaims.apiGatewayEvent(root, jsonParser);
-        String fieldIdClaimPath= String.format(PATH_TEMPLATE, REQUEST_CONTEXT_ROOT_NODE,
+        String fieldIdClaimPath = String.format(PATH_TEMPLATE, REQUEST_CONTEXT_ROOT_NODE,
             AUTHORIZER_NODE,
             CLAIMS_NODE,
             CUSTOM_FEIDE_ID);
         String actualFeideId = mockEvent.at(fieldIdClaimPath).textValue();
-        assertThat(actualFeideId,is(equalTo(MockClaims.MOCK_FEIDE_ID)));
+        assertThat(actualFeideId, is(equalTo(MockClaims.MOCK_FEIDE_ID)));
     }
 
     @Test
-    public void mockClaimsContainsCustomOrgNumber(){
+    public void mockClaimsContainsCustomOrgNumber() {
         ObjectNode root = mockContext();
         JsonNode mockEvent = MockClaims.apiGatewayEvent(root, jsonParser);
-        String fieldIdClaimPath= String.format(PATH_TEMPLATE, REQUEST_CONTEXT_ROOT_NODE,
+        String fieldIdClaimPath = String.format(PATH_TEMPLATE, REQUEST_CONTEXT_ROOT_NODE,
             AUTHORIZER_NODE,
             CLAIMS_NODE,
             CUSTOM_ORG_NUMBER);
         String actualFeideId = mockEvent.at(fieldIdClaimPath).textValue();
-        assertThat(actualFeideId,is(equalTo(MockClaims.UNIT_ORG_NUMBER)));
+        assertThat(actualFeideId, is(equalTo(MockClaims.UNIT_ORG_NUMBER)));
     }
 
     private ObjectNode mockContext() {
         ObjectNode root = jsonParser.createObjectNode();
-        root.set(REQUEST_CONTEXT_ROOT_NODE,jsonParser.createObjectNode());
+        root.set(REQUEST_CONTEXT_ROOT_NODE, jsonParser.createObjectNode());
         return root;
     }
 }
