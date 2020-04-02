@@ -32,7 +32,8 @@ public class Handler extends ApiGatewayHandler<RequestBody, String> {
     }
 
     @Override
-    protected String processInput(RequestBody input, RequestInfo requestInfo, Context context) throws ApiGatewayException {
+    protected String processInput(RequestBody input, RequestInfo requestInfo, Context context)
+        throws ApiGatewayException {
         this.headers = requestInfo.getHeaders();
         this.proxy = requestInfo.getProxy();
         this.path = requestInfo.getPath();

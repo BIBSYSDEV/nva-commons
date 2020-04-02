@@ -48,7 +48,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
     public static final String STACK_TRACE_DELIMITER = ":";
     private static final String CAUSE_PREFIX = "EXCEPTION_CAUSE:";
     private static final String STACK_TRACE_PREFIX = "STACK_TRACE:";
-    private static final String SUPPRESSED_PREFIX = "SUPPRESSED_STACK:" ;
+    private static final String SUPPRESSED_PREFIX = "SUPPRESSED_STACK:";
 
     private final transient Class<I> iclass;
     private transient LambdaLogger logger;
@@ -280,29 +280,27 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
     }
 
     private String getStackTraceString(Exception e) {
-        String causeQueue = CAUSE_PREFIX+createCauseString(e);
+        String causeQueue = CAUSE_PREFIX + createCauseString(e);
         String stackTrace = STACK_TRACE_PREFIX + arrayToStream(e.getStackTrace());
         String suppressed = Optional.ofNullable(arrayToStream(e.getSuppressed()))
-                                    .map(m->SUPPRESSED_PREFIX + m)
+                                    .map(m -> SUPPRESSED_PREFIX + m)
                                     .orElse("");
-        return String.join(STACK_TRACE_DELIMITER, causeQueue,stackTrace, suppressed);
+        return String.join(STACK_TRACE_DELIMITER, causeQueue, stackTrace, suppressed);
     }
 
-    private String createCauseString(Exception e){
+    private String createCauseString(Exception e) {
         List<Throwable> causeQueue = populateQueue(e);
-        String causeString=
+        String causeString =
             causeQueue.stream().map(Throwable::toString).collect(Collectors.joining(STACK_TRACE_DELIMITER));
         return causeString;
-
-
     }
 
     private List<Throwable> populateQueue(Exception e) {
-        List<Throwable> causeQueue= new ArrayList<>();
+        List<Throwable> causeQueue = new ArrayList<>();
         Throwable currentException = e;
-        while(currentException!=null){
+        while (currentException != null) {
             causeQueue.add(currentException);
-            currentException=currentException.getCause();
+            currentException = currentException.getCause();
         }
         return causeQueue;
     }

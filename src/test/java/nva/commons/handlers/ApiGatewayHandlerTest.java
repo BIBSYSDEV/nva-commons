@@ -32,7 +32,6 @@ import nva.commons.utils.Environment;
 import nva.commons.utils.IoUtils;
 import nva.commons.utils.TestLogger;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -76,7 +75,6 @@ public class ApiGatewayHandlerTest {
         });
     }
 
-
     @Test
     @DisplayName("handleRequest should have available the request path")
     public void handleRequestShouldHaveAvailableTheRequestPath() throws IOException {
@@ -104,39 +102,36 @@ public class ApiGatewayHandlerTest {
         assertTrue(response.getHeaders().containsKey(HttpHeaders.WARNING));
     }
 
-
-
     @Test
     @DisplayName("Logger logs the whole exception stacktrace when an exception has occurred")
     public void loggerLogsTheWholeExceptionStackTraceWhenAnExceptionHasOccurred() throws IOException {
         Handler handler = handlerThatThrowsExceptions();
 
-        handler.handleRequest(requestWithHeadersAndPath(),outputStream(),context);
-        TestLogger logger =(TestLogger)context.getLogger();
-        String logs=logger.getLogs();
+        handler.handleRequest(requestWithHeadersAndPath(), outputStream(), context);
+        TestLogger logger = (TestLogger) context.getLogger();
+        String logs = logger.getLogs();
 
-        assertThat(logs,containsString(URISyntaxException.class.getName()));
-        assertThat(logs,containsString(XMLParseException.class.getName()));
-        assertThat(logs,containsString(TestException.class.getName()));
-        assertThat(logs,containsString(FIRST_EXCEPTION_MESSAGE));
-        assertThat(logs,containsString(SECOND_EXCEPTION_MESSAGE));
-        assertThat(logs,containsString(THIRD_EXCEPTION_MESSAGE));
+        assertThat(logs, containsString(URISyntaxException.class.getName()));
+        assertThat(logs, containsString(XMLParseException.class.getName()));
+        assertThat(logs, containsString(TestException.class.getName()));
+        assertThat(logs, containsString(FIRST_EXCEPTION_MESSAGE));
+        assertThat(logs, containsString(SECOND_EXCEPTION_MESSAGE));
+        assertThat(logs, containsString(THIRD_EXCEPTION_MESSAGE));
     }
-
 
     @Test
     @DisplayName("Logger logs the whole exception stacktrace when an exception has occurred")
     public void loggerLogsTheWholeExceptionStackTraceWhenAnUncheckedExceptionHasOccurred() throws IOException {
         Handler handler = handlerThatThrowsUncheckedExceptions();
 
-        handler.handleRequest(requestWithHeadersAndPath(),outputStream(),context);
-        TestLogger logger =(TestLogger)context.getLogger();
-        String logs=logger.getLogs();
+        handler.handleRequest(requestWithHeadersAndPath(), outputStream(), context);
+        TestLogger logger = (TestLogger) context.getLogger();
+        String logs = logger.getLogs();
 
-        assertThat(logs,containsString(IllegalStateException.class.getName()));
-        assertThat(logs,containsString(IllegalArgumentException.class.getName()));
-        assertThat(logs,containsString(IllegalCallerException.class.getName()));
-        assertThat(logs,containsString(FIRST_EXCEPTION_MESSAGE));
+        assertThat(logs, containsString(IllegalStateException.class.getName()));
+        assertThat(logs, containsString(IllegalArgumentException.class.getName()));
+        assertThat(logs, containsString(IllegalCallerException.class.getName()));
+        assertThat(logs, containsString(FIRST_EXCEPTION_MESSAGE));
     }
 
     private Handler handlerThatThrowsUncheckedExceptions() {
@@ -148,7 +143,6 @@ public class ApiGatewayHandlerTest {
                 return null;
             }
         };
-
     }
 
     private Handler handlerThatThrowsExceptions() {
@@ -162,9 +156,9 @@ public class ApiGatewayHandlerTest {
         };
     }
 
-    private void throwUncheckedExceptions()  {
-        try{
-            throw new IllegalStateException( FIRST_EXCEPTION_MESSAGE);
+    private void throwUncheckedExceptions() {
+        try {
+            throw new IllegalStateException(FIRST_EXCEPTION_MESSAGE);
         } catch (IllegalStateException e) {
             try {
                 throw new IllegalArgumentException(e);
@@ -175,13 +169,13 @@ public class ApiGatewayHandlerTest {
     }
 
     private void throwExceptions() throws ApiGatewayException {
-        try{
+        try {
             throw new URISyntaxException("", FIRST_EXCEPTION_MESSAGE);
         } catch (URISyntaxException e) {
             try {
                 throw new XMLParseException(e, SECOND_EXCEPTION_MESSAGE);
             } catch (XMLParseException ex) {
-               throw new TestException(ex,THIRD_EXCEPTION_MESSAGE);
+                throw new TestException(ex, THIRD_EXCEPTION_MESSAGE);
             }
         }
     }
