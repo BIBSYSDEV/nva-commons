@@ -21,7 +21,7 @@ public class Handler extends ApiGatewayHandler<RequestBody, String> {
     private Map<String, Integer> exceptionToStatus;
 
     /**
-     * Constructor with environment
+     * Constructor with environment.
      *
      * @param environment the environment.
      */
