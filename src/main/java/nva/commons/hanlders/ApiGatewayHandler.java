@@ -301,22 +301,23 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
             writeOutput(inputObject, response);
         } catch (ApiGatewayException e) {
             logger.log(e.getMessage());
-            logger.log(getStackTraceString(e));
+            logger.log(getStackTraceString(e,context.getAwsRequestId()));
             writeExpectedFailure(inputObject, e, context.getAwsRequestId());
         } catch (Exception e) {
             logger.log(e.getMessage());
-            logger.log(getStackTraceString(e));
+            logger.log(getStackTraceString(e,context.getAwsRequestId()));
             writeUnexpectedFailure(inputObject, e, context.getAwsRequestId());
         }
     }
 
-    private String getStackTraceString(Exception e) {
+    private String getStackTraceString(Exception e, String requestId) {
+        String requestIdString = String.format("%s:%s",REQUEST_ID,requestId);
         String causeQueue = CAUSE_PREFIX + createCauseString(e);
         String stackTrace = STACK_TRACE_PREFIX + arrayToStream(e.getStackTrace());
         String suppressed = Optional.ofNullable(arrayToStream(e.getSuppressed()))
                                     .map(m -> SUPPRESSED_PREFIX + m)
                                     .orElse("");
-        return String.join(STACK_TRACE_DELIMITER, causeQueue, stackTrace, suppressed);
+        return String.join(STACK_TRACE_DELIMITER, requestIdString,causeQueue, stackTrace, suppressed);
     }
 
     private String createCauseString(Exception e) {
