@@ -82,6 +82,3 @@ tasks.withType(Checkstyle) {
     }
 }
 
-
-
-

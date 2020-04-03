@@ -1,5 +1,7 @@
 package nva.commons.hanlders;
 
+import static java.util.Objects.nonNull;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
@@ -9,18 +11,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import nva.commons.exceptions.ApiGatewayException;
 import nva.commons.utils.Environment;
 import nva.commons.utils.IoUtils;
 import nva.commons.utils.JsonUtils;
+import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 
 /**
@@ -35,11 +40,14 @@ import org.apache.http.entity.ContentType;
 public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
 
     public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
-
     public static final String CONTENT_TYPE = "Content-Type";
 
     private static final ObjectMapper objectMapper = JsonUtils.jsonParser;
     public static final String DEFAULT_ERROR_MESSAGE = "Unknown error in handler";
+    public static final String STACK_TRACE_DELIMITER = ":";
+    private static final String CAUSE_PREFIX = "EXCEPTION_CAUSE:";
+    private static final String STACK_TRACE_PREFIX = "STACK_TRACE:";
+    private static final String SUPPRESSED_PREFIX = "SUPPRESSED_STACK:";
 
     private final transient Class<I> iclass;
     private transient LambdaLogger logger;
@@ -208,22 +216,57 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
     }
 
     /**
-     * Sends a message to ApiGateway and to the user, in case of failure. This method should be overriden for richer
-     * status codes.
+     * Sends a message to ApiGateway and to the API-client, in case of failure caused by an ApiGatewayException
+     * (predicted exception). This method can be overriden for richer status codes, but in the general case it should
+     * not be neccessary/
      *
      * @param input     the input object of class I
      * @param exception the exception
      * @throws IOException when serializing fails
      */
+    protected void writeExpectedFailure(I input, ApiGatewayException exception) throws IOException {
+        writeFailure(exception, exception.getStatusCode(), null);
+    }
 
-    protected void writeFailure(I input, ApiGatewayException exception) throws IOException {
+    /**
+     * Method for sending error messages in case of failure. It can be overriden but it should not be necessary in the
+     * general case. It returns to the API-client a specified status code, the message of the exception and optionally
+     * another additional message.
+     *
+     * @param exception         the thrown Exception.
+     * @param statusCode        the statusCode that should be returned to the API-client
+     * @param additionalMessage any additional message that is necessary to send. Set to null for no additional message
+     * @throws IOException when the writer throws an IOException.
+     */
+    protected void writeFailure(Exception exception, Integer statusCode, String additionalMessage) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
             String outputString = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
+            outputString = addAdditionalMessage(additionalMessage, outputString);
             GatewayResponse<String> gatewayResponse =
-                new GatewayResponse<>(outputString, getFailureHeaders(), getFailureStatusCode(input, exception));
+                new GatewayResponse<>(outputString, getFailureHeaders(), statusCode);
             String gateWayResponseJson = objectMapper.writeValueAsString(gatewayResponse);
             writer.write(gateWayResponseJson);
         }
+    }
+
+    private String addAdditionalMessage(String additionalMessage, String outputString) {
+        if (nonNull(additionalMessage)) {
+            return outputString + System.lineSeparator() + additionalMessage;
+        }
+        return outputString;
+    }
+
+    /**
+     * Sends a message to ApiGateway and to the API-client  in case of failure caused by an Exception that is not
+     * ApiGatewayException (unpredicted exception). This method can be overriden for richer status codes, but in the
+     * general case it should not be neccessary/
+     *
+     * @param input     the input object of class I
+     * @param exception the exception
+     * @throws IOException when serializing fails
+     */
+    protected void writeUnexpectedFailure(I input, Exception exception) throws IOException {
+        writeFailure(exception, HttpStatus.SC_INTERNAL_SERVER_ERROR, null);
     }
 
     protected Map<String, String> defaultHeaders() {
@@ -245,12 +288,43 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
             writeOutput(inputObject, response);
         } catch (ApiGatewayException e) {
             logger.log(e.getMessage());
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            logger.log(sw.toString());
-            writeFailure(inputObject, e);
+            logger.log(getStackTraceString(e));
+            writeExpectedFailure(inputObject, e);
+        } catch (Exception e) {
+            logger.log(e.getMessage());
+            logger.log(getStackTraceString(e));
+            writeUnexpectedFailure(inputObject, e);
         }
+    }
+
+    private String getStackTraceString(Exception e) {
+        String causeQueue = CAUSE_PREFIX + createCauseString(e);
+        String stackTrace = STACK_TRACE_PREFIX + arrayToStream(e.getStackTrace());
+        String suppressed = Optional.ofNullable(arrayToStream(e.getSuppressed()))
+                                    .map(m -> SUPPRESSED_PREFIX + m)
+                                    .orElse("");
+        return String.join(STACK_TRACE_DELIMITER, causeQueue, stackTrace, suppressed);
+    }
+
+    private String createCauseString(Exception e) {
+        List<Throwable> causeQueue = populateQueue(e);
+        return causeQueue.stream().map(Throwable::toString).collect(Collectors.joining(STACK_TRACE_DELIMITER));
+    }
+
+    private List<Throwable> populateQueue(Exception e) {
+        List<Throwable> causeQueue = new ArrayList<>();
+        Throwable currentException = e;
+        while (currentException != null) {
+            causeQueue.add(currentException);
+            currentException = currentException.getCause();
+        }
+        return causeQueue;
+    }
+
+    private static <T> String arrayToStream(T[] suppressed) {
+        return Stream.of(suppressed)
+                     .map(Object::toString)
+                     .collect(Collectors.joining(STACK_TRACE_DELIMITER));
     }
 
     private Class<I> getIClass() {
