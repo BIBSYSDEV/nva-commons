@@ -247,7 +247,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
             String errorMessage = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
             errorMessage = addAdditionalMessage(additionalMessage, errorMessage);
-            Status status=Status.valueOf(statusCode);
+            Status status = Status.valueOf(statusCode);
 
             ThrowableProblem problem = Problem.builder().withStatus(status)
                                               .withTitle(status.getReasonPhrase())
@@ -278,8 +278,8 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @param exception the exception
      * @throws IOException when serializing fails
      */
-    protected void writeUnexpectedFailure(I input, Exception exception,String requestId) throws IOException {
-        writeFailure(exception, HttpStatus.SC_INTERNAL_SERVER_ERROR, requestId,null);
+    protected void writeUnexpectedFailure(I input, Exception exception, String requestId) throws IOException {
+        writeFailure(exception, HttpStatus.SC_INTERNAL_SERVER_ERROR, requestId, null);
     }
 
     protected Map<String, String> defaultHeaders() {
@@ -306,7 +306,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
         } catch (Exception e) {
             logger.log(e.getMessage());
             logger.log(getStackTraceString(e));
-            writeUnexpectedFailure(inputObject, e,context.getAwsRequestId());
+            writeUnexpectedFailure(inputObject, e, context.getAwsRequestId());
         }
     }
 

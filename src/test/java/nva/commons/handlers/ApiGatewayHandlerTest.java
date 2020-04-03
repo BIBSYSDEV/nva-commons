@@ -42,9 +42,10 @@ import org.junit.jupiter.api.Test;
 import org.zalando.problem.Status;
 import org.zalando.problem.ThrowableProblem;
 
+
+
 public class ApiGatewayHandlerTest {
 
-    public static final String THE_PROXY = "theProxy";
     public static final String SOME_ENV_VALUE = "SomeEnvValue";
     private static final String PATH = "path1/path2/path3";
     public static final String TOP_EXCEPTION_MESSAGE = "Third Exception";
@@ -68,6 +69,7 @@ public class ApiGatewayHandlerTest {
     }
 
     @Test
+    @DisplayName("handleRequest should have available the request headers")
     public void handleRequestShouldHaveAvailableTheRequestHeaders() throws IOException {
         Handler handler = new Handler(environment);
         InputStream input = requestWithHeaders();
@@ -148,22 +150,33 @@ public class ApiGatewayHandlerTest {
         Handler handler = handlerThatThrowsExceptions();
         ByteArrayOutputStream outputStream = outputStream();
         handler.handleRequest(requestWithHeadersAndPath(), outputStream, context);
+
         String output = outputStream.toString(StandardCharsets.UTF_8);
 
-        Try<ThrowableProblem> response = Try.of(output)
-                                            .map(str -> jsonParser.readValue(str, JsonNode.class))
-                                            .map(node -> node.get("body"))
-                                            .map(body -> jsonParser.convertValue(body, ThrowableProblem.class));
-        assertThat(response.isSuccess(), is(true));
-        ThrowableProblem problem = response.get();
+        Try<ThrowableProblem> responseParsing = tryParsingResponse(output);
+        assertThat(responseParsing.isSuccess(), is(true));
+
+        ThrowableProblem problem = responseParsing.get();
+
         assertThat(problem.getMessage(), containsString(TOP_EXCEPTION_MESSAGE));
         assertThat(problem.getMessage(), containsString(Status.NOT_FOUND.getReasonPhrase()));
 
-        String requestId = Optional.ofNullable(problem.getParameters().get(ApiGatewayHandler.REQUEST_ID))
-                                   .map(Object::toString).orElse(null);
+        String requestId = extractRequestId(problem);
         assertThat(requestId, is(equalTo(SOME_REQUEST_ID)));
         assertThat(problem.getStatus(), is(Status.NOT_FOUND));
         assertThat(output, containsString(new TestException("").getStatusCode().toString()));
+    }
+
+    private String extractRequestId(ThrowableProblem problem) {
+        return Optional.ofNullable(problem.getParameters().get(ApiGatewayHandler.REQUEST_ID))
+                       .map(Object::toString).orElse(null);
+    }
+
+    private Try<ThrowableProblem> tryParsingResponse(String output) {
+        return Try.of(output)
+                  .map(str -> jsonParser.readValue(str, JsonNode.class))
+                  .map(node -> node.get("body"))
+                  .map(body -> jsonParser.convertValue(body, ThrowableProblem.class));
     }
 
     private Handler handlerThatThrowsUncheckedExceptions() {
