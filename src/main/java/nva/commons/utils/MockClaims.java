@@ -8,7 +8,7 @@ public class MockClaims {
 
     public static final String CUSTOM_FEIDE_ID = "custom:feideId";
     public static final String CUSTOM_ORG_NUMBER = "custom:orgNumber";
-    public static final String REQUEST_CONTEXT_ROOT_NODE = "requestContext";
+    public static final String REQUEST_CONTEXT_NODE = "requestContext";
     public static final String AUTHORIZER_NODE = "authorizer";
     public static final String CLAIMS_NODE = "claims";
     public static final String MOCK_FEIDE_ID = "none@unit.no";
@@ -24,11 +24,11 @@ public class MockClaims {
     public static JsonNode apiGatewayEvent(JsonNode event, ObjectMapper jsonParser) {
         ObjectNode copy = event.deepCopy();
 
-        if (!copy.has(REQUEST_CONTEXT_ROOT_NODE)) {
-            copy.set(REQUEST_CONTEXT_ROOT_NODE, jsonParser.createObjectNode());
+        if (!copy.has(REQUEST_CONTEXT_NODE)) {
+            copy.set(REQUEST_CONTEXT_NODE, jsonParser.createObjectNode());
         }
 
-        ObjectNode requestContext = (ObjectNode) copy.get(REQUEST_CONTEXT_ROOT_NODE);
+        ObjectNode requestContext = (ObjectNode) copy.get(REQUEST_CONTEXT_NODE);
         requestContext.set(AUTHORIZER_NODE, jsonParser.createObjectNode());
         ObjectNode authorizer = (ObjectNode) requestContext.get(AUTHORIZER_NODE);
         authorizer.set(CLAIMS_NODE, jsonParser.createObjectNode());
