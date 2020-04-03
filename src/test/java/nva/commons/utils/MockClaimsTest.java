@@ -5,7 +5,7 @@ import static nva.commons.utils.MockClaims.AUTHORIZER_NODE;
 import static nva.commons.utils.MockClaims.CLAIMS_NODE;
 import static nva.commons.utils.MockClaims.CUSTOM_FEIDE_ID;
 import static nva.commons.utils.MockClaims.CUSTOM_ORG_NUMBER;
-import static nva.commons.utils.MockClaims.REQUEST_CONTEXT_ROOT_NODE;
+import static nva.commons.utils.MockClaims.REQUEST_CONTEXT_NODE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -22,7 +22,7 @@ public class MockClaimsTest {
     public void mockClaimsContainsCustomFeideId() {
         ObjectNode root = mockContext();
         JsonNode mockEvent = MockClaims.apiGatewayEvent(root, jsonParser);
-        String fieldIdClaimPath = String.format(PATH_TEMPLATE, REQUEST_CONTEXT_ROOT_NODE,
+        String fieldIdClaimPath = String.format(PATH_TEMPLATE, REQUEST_CONTEXT_NODE,
             AUTHORIZER_NODE,
             CLAIMS_NODE,
             CUSTOM_FEIDE_ID);
@@ -34,7 +34,7 @@ public class MockClaimsTest {
     public void mockClaimsContainsCustomOrgNumber() {
         ObjectNode root = mockContext();
         JsonNode mockEvent = MockClaims.apiGatewayEvent(root, jsonParser);
-        String fieldIdClaimPath = String.format(PATH_TEMPLATE, REQUEST_CONTEXT_ROOT_NODE,
+        String fieldIdClaimPath = String.format(PATH_TEMPLATE, REQUEST_CONTEXT_NODE,
             AUTHORIZER_NODE,
             CLAIMS_NODE,
             CUSTOM_ORG_NUMBER);
@@ -44,7 +44,7 @@ public class MockClaimsTest {
 
     private ObjectNode mockContext() {
         ObjectNode root = jsonParser.createObjectNode();
-        root.set(REQUEST_CONTEXT_ROOT_NODE, jsonParser.createObjectNode());
+        root.set(REQUEST_CONTEXT_NODE, jsonParser.createObjectNode());
         return root;
     }
 }
