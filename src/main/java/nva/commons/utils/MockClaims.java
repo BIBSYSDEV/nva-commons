@@ -15,17 +15,23 @@ public class MockClaims {
     public static final String UNIT_ORG_NUMBER = "NO919477822";
 
     /**
-     *  Mocks the user claims. For usage when we running it a lambda locally through SAM.
-     * @param event the ApiGateway event
-     * @param objectMapper a jsonParser
+     * Mocks the user claims. For usage when we running it a lambda locally through SAM.
+     *
+     * @param event      the ApiGateway event
+     * @param jsonParser a jsonParser
      * @return an event with mocked claims
      */
-    public static JsonNode apiGatewayEvent(JsonNode event, ObjectMapper objectMapper) {
-        JsonNode copy = event.deepCopy();
+    public static JsonNode apiGatewayEvent(JsonNode event, ObjectMapper jsonParser) {
+        ObjectNode copy = event.deepCopy();
+
+        if (!copy.has(REQUEST_CONTEXT_ROOT_NODE)) {
+            copy.set(REQUEST_CONTEXT_ROOT_NODE, jsonParser.createObjectNode());
+        }
+
         ObjectNode requestContext = (ObjectNode) copy.get(REQUEST_CONTEXT_ROOT_NODE);
-        requestContext.set(AUTHORIZER_NODE, objectMapper.createObjectNode());
+        requestContext.set(AUTHORIZER_NODE, jsonParser.createObjectNode());
         ObjectNode authorizer = (ObjectNode) requestContext.get(AUTHORIZER_NODE);
-        authorizer.set(CLAIMS_NODE, objectMapper.createObjectNode());
+        authorizer.set(CLAIMS_NODE, jsonParser.createObjectNode());
         ObjectNode claims = (ObjectNode) authorizer.get(CLAIMS_NODE);
         claims.put(CUSTOM_FEIDE_ID, MOCK_FEIDE_ID);
         claims.put(CUSTOM_ORG_NUMBER, UNIT_ORG_NUMBER);
