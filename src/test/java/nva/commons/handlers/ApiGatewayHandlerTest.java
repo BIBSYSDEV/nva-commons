@@ -36,6 +36,7 @@ import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 public class ApiGatewayHandlerTest {
 
@@ -61,6 +62,7 @@ public class ApiGatewayHandlerTest {
     }
 
     @Test
+    @DisplayName("handleRequest should have available the request headers")
     public void handleRequestShouldHaveAvailableTheRequestHeaders() throws IOException {
         Handler handler = new Handler(environment);
         InputStream input = requestWithHeaders();
