@@ -38,7 +38,7 @@ public abstract class Try<T> {
      * Try to perform the action. Any exception will be enclosed in a Failure.
      *
      * @param action a {@link Callable} action that throws or does not throw a checked Exception
-     * @param <S>    the resultin object
+     * @param <S>    the resulting object
      * @return a new {@link Try} instance
      */
     public static <S> Try<S> attempt(Callable<S> action) {
