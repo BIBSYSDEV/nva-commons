@@ -51,6 +51,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
     private static final String CAUSE_PREFIX = "EXCEPTION_CAUSE:";
     private static final String STACK_TRACE_PREFIX = "STACK_TRACE:";
     private static final String SUPPRESSED_PREFIX = "SUPPRESSED_STACK:";
+    public static final String REQUEST_ID = "requestId";
 
     private final transient Class<I> iclass;
     private transient LambdaLogger logger;
@@ -227,8 +228,8 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @param exception the exception
      * @throws IOException when serializing fails
      */
-    protected void writeExpectedFailure(I input, ApiGatewayException exception) throws IOException {
-        writeFailure(exception, exception.getStatusCode(), null);
+    protected void writeExpectedFailure(I input, ApiGatewayException exception, String requestId) throws IOException {
+        writeFailure(exception, exception.getStatusCode(), requestId, null);
     }
 
     /**
@@ -241,11 +242,18 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @param additionalMessage any additional message that is necessary to send. Set to null for no additional message
      * @throws IOException when the writer throws an IOException.
      */
-    protected void writeFailure(Exception exception, Integer statusCode, String additionalMessage) throws IOException {
+    protected void writeFailure(Exception exception, Integer statusCode, String requestId, String additionalMessage)
+        throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
             String errorMessage = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
             errorMessage = addAdditionalMessage(additionalMessage, errorMessage);
-            ThrowableProblem problem = Problem.valueOf(Status.valueOf(statusCode), errorMessage);
+            Status status=Status.valueOf(statusCode);
+
+            ThrowableProblem problem = Problem.builder().withStatus(status)
+                                              .withTitle(status.getReasonPhrase())
+                                              .withDetail(errorMessage)
+                                              .with(REQUEST_ID, requestId)
+                                              .build();
 
             GatewayResponse<ThrowableProblem> gatewayResponse =
                 new GatewayResponse<>(problem, getFailureHeaders(), statusCode);
@@ -270,8 +278,8 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @param exception the exception
      * @throws IOException when serializing fails
      */
-    protected void writeUnexpectedFailure(I input, Exception exception) throws IOException {
-        writeFailure(exception, HttpStatus.SC_INTERNAL_SERVER_ERROR, null);
+    protected void writeUnexpectedFailure(I input, Exception exception,String requestId) throws IOException {
+        writeFailure(exception, HttpStatus.SC_INTERNAL_SERVER_ERROR, requestId,null);
     }
 
     protected Map<String, String> defaultHeaders() {
@@ -294,11 +302,11 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
         } catch (ApiGatewayException e) {
             logger.log(e.getMessage());
             logger.log(getStackTraceString(e));
-            writeExpectedFailure(inputObject, e);
+            writeExpectedFailure(inputObject, e, context.getAwsRequestId());
         } catch (Exception e) {
             logger.log(e.getMessage());
             logger.log(getStackTraceString(e));
-            writeUnexpectedFailure(inputObject, e);
+            writeUnexpectedFailure(inputObject, e,context.getAwsRequestId());
         }
     }
 

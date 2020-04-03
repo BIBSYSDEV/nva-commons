@@ -20,12 +20,14 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.management.modelmbean.XMLParseException;
 import nva.commons.Handler;
 import nva.commons.RequestBody;
 import nva.commons.exceptions.ApiGatewayException;
 import nva.commons.exceptions.TestException;
+import nva.commons.hanlders.ApiGatewayHandler;
 import nva.commons.hanlders.GatewayResponse;
 import nva.commons.hanlders.RequestInfo;
 import nva.commons.utils.Environment;
@@ -48,6 +50,7 @@ public class ApiGatewayHandlerTest {
     public static final String TOP_EXCEPTION_MESSAGE = "Third Exception";
     public static final String MIDDLE_EXCEPTION_MESSAGE = "Second Exception";
     public static final String BOTTOM_EXCEPTION_MESSAGE = "First Exception";
+    public static final String SOME_REQUEST_ID = "RequestID:123456";
     public Environment environment;
     private Context context;
     private TestLogger logger = new TestLogger();
@@ -61,6 +64,7 @@ public class ApiGatewayHandlerTest {
         when(environment.readEnv(anyString())).thenReturn(SOME_ENV_VALUE);
         context = mock(Context.class);
         when(context.getLogger()).thenReturn(logger);
+        when(context.getAwsRequestId()).thenReturn(SOME_REQUEST_ID);
     }
 
     @Test
@@ -154,8 +158,11 @@ public class ApiGatewayHandlerTest {
         ThrowableProblem problem = response.get();
         assertThat(problem.getMessage(), containsString(TOP_EXCEPTION_MESSAGE));
         assertThat(problem.getMessage(), containsString(Status.NOT_FOUND.getReasonPhrase()));
-        assertThat(problem.getStatus(), is(Status.NOT_FOUND));
 
+        String requestId = Optional.ofNullable(problem.getParameters().get(ApiGatewayHandler.REQUEST_ID))
+                                   .map(Object::toString).orElse(null);
+        assertThat(requestId, is(equalTo(SOME_REQUEST_ID)));
+        assertThat(problem.getStatus(), is(Status.NOT_FOUND));
         assertThat(output, containsString(new TestException("").getStatusCode().toString()));
     }
 
