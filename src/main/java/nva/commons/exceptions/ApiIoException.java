@@ -1,11 +1,12 @@
 package nva.commons.exceptions;
 
+import java.io.IOException;
 import org.apache.http.HttpStatus;
 
 public class ApiIoException extends ApiGatewayException {
 
-    public ApiIoException(Exception e) {
-        super(e);
+    public ApiIoException(IOException e, String errorMessage) {
+        super(e, errorMessage);
     }
 
     @Override

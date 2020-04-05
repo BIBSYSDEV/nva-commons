@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 
 public class EnvironmentTest {
 
-    private static final  String EXISTING_ENV_VARIABLE = "PATH";
-    private static final  String NON_EXISTING_ENV_VARIABLE = "SOMETHING_ELSE";
+    private static final String EXISTING_ENV_VARIABLE = "PATH";
+    private static final String NON_EXISTING_ENV_VARIABLE = "SOMETHING_ELSE";
 
     private Environment environment = new Environment();
 

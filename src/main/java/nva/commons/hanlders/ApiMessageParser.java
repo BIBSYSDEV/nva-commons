@@ -1,5 +1,6 @@
 package nva.commons.hanlders;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.TreeTraversingParser;
@@ -7,6 +8,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Optional;
 import nva.commons.exceptions.ApiIoException;
+import nva.commons.utils.JacocoGenerated;
 import nva.commons.utils.JsonUtils;
 
 /**
@@ -16,10 +18,21 @@ import nva.commons.utils.JsonUtils;
  */
 public class ApiMessageParser<T> {
 
-    private final transient ObjectMapper mapper = JsonUtils.jsonParser;
+    public static final String COULD_NOT_PARSE_REQUEST_INFO = "Could not parse RequestInfo";
+    private final transient ObjectMapper mapper;
+
+    @JacocoGenerated
+    public ApiMessageParser() {
+        this.mapper = JsonUtils.jsonParser;
+    }
+
+    public ApiMessageParser(ObjectMapper mapper) {
+        this.mapper = mapper;
+    }
 
     /**
-     *  Get the Information about the Rest-Api Request, such as Headers.
+     * Get the Information about the Rest-Api Request, such as Headers.
+     *
      * @param inputString the JSON request string.
      * @return a {@link RequestInfo} object
      * @throws ApiIoException when an {@link IOException} happens
@@ -28,15 +41,16 @@ public class ApiMessageParser<T> {
         try {
             RequestInfo requestInfo = mapper.readValue(inputString, RequestInfo.class);
             return requestInfo;
-        } catch (IOException e) {
-            throw new ApiIoException(e);
+        } catch (JsonProcessingException e) {
+            throw new ApiIoException(e, COULD_NOT_PARSE_REQUEST_INFO);
         }
     }
 
     /**
-     *  Get Request body from the JSON string of the Rest-API request.
+     * Get Request body from the JSON string of the Rest-API request.
+     *
      * @param inputString the JSON string of the Rest-API request.
-     * @param tclass the class to map the the JSON object to.
+     * @param tclass      the class to map the the JSON object to.
      * @return An instance of the input class.
      * @throws IOException when reading fails or the JSON parser throws an Exception.
      */
@@ -44,20 +58,19 @@ public class ApiMessageParser<T> {
 
         Optional<JsonNode> tree = Optional.ofNullable(mapper.readTree(new StringReader(inputString)));
         JsonNode body = tree.map(node -> node.get("body")).orElse(null);
-
+        if (body == null) {
+            return null;
+        }
         if (tclass.equals(String.class)) {
             return (T) body.asText();
         } else {
             T request = null;
-            if (body != null) {
-                // body should always be a string for a lambda function connected to the API
-                if (body.isValueNode()) {
-                    request = parseBody(mapper, body.asText(), tclass);
-                } else {
-                    request = parseBody(mapper, body, tclass);
-                }
+            // body should always be a string for a lambda function connected to the API
+            if (body.isValueNode()) {
+                request = parseBody(mapper, body.asText(), tclass);
+            } else {
+                request = parseBody(mapper, body, tclass);
             }
-
             return request;
         }
     }

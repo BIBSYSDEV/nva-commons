@@ -10,7 +10,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import nva.commons.exceptions.FileNotFoundUncheckedException;
+import nva.commons.exceptions.ResourceNotFoundException;
 
 public final class IoUtils {
 
@@ -20,20 +23,26 @@ public final class IoUtils {
     }
 
     /**
-     * Read resource file as an {@link InputStream}.
-     * The root folder for the resources is considered to be the folders src/main/resources and src/test/resources/,
-     * or any other standard reosources folder.
+     * Read resource file as an {@link InputStream}. The root folder for the resources is considered to be the folders
+     * src/main/resources and src/test/resources/, or any other standard reosources folder.
      *
      * @param path the Path to the resource.
      * @return an InputStream with the data.
      */
     public static InputStream inputStreamFromResources(Path path) {
-        String pathString = path.toString();
-        return Thread.currentThread().getContextClassLoader().getResourceAsStream(pathString);
+        try {
+            String pathString = path.toString();
+            InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(pathString);
+            Objects.requireNonNull(stream);
+            return stream;
+        } catch (Exception e) {
+            throw new ResourceNotFoundException(path, e);
+        }
     }
 
     /**
-     *  Return a String the stream data encoded in UTF-8.
+     * Return a String the stream data encoded in UTF-8.
+     *
      * @param stream the {@link InputStream}
      * @return the output String.
      */
@@ -50,8 +59,8 @@ public final class IoUtils {
     }
 
     /**
-     * Read file as a {@link String}. Encoding is UTF-8.
-     * New lines are being preserved.
+     * Read file as a {@link String}. Encoding is UTF-8. New lines are being preserved.
+     *
      * @param path {@link Path} to the file
      * @return the content of the file in a String.
      */
@@ -59,16 +68,15 @@ public final class IoUtils {
         try (InputStream fileInputStream = Files.newInputStream(path)) {
             return streamToString(fileInputStream);
         } catch (IOException e) {
-            throw new UncheckedIOException(e);
+
+            throw new FileNotFoundUncheckedException(path, e);
         }
     }
 
-
     /**
-     * Read resource file as a List of Strings.
-     * The root folder for the resources is considered to be the folders src/main/resources and src/test/resources/,
-     * or any other standard resources folder.
-     * Each element of the list contains a line of the file.
+     * Read resource file as a List of Strings. The root folder for the resources is considered to be the folders
+     * src/main/resources and src/test/resources/, or any other standard resources folder. Each element of the list
+     * contains a line of the file.
      *
      * @param path the Path to the resource.
      * @return a List with the lines of the file.
@@ -81,12 +89,10 @@ public final class IoUtils {
         }
     }
 
-
     /**
-     * Read resource file as a {@link String}
-     * The root folder for the resources is considered to be the folders src/main/resources and src/test/resources/,
-     * or any other standard resources folder.
-     * New lines in the resource file are preserved
+     * Read resource file as a {@link String} The root folder for the resources is considered to be the folders
+     * src/main/resources and src/test/resources/, or any other standard resources folder. New lines in the resource
+     * file are preserved
      *
      * @param path the Path to the resource.
      * @return a {@link String} with the contents of the file.
@@ -97,6 +103,7 @@ public final class IoUtils {
 
     /**
      * Tranform a string to an inputStream. Encoding is UTF-8.
+     *
      * @param input a {@link String}
      * @return a {@link InputStream}
      */

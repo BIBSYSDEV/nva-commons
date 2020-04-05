@@ -69,10 +69,13 @@ pmd {
     ignoreFailures = false
 }
 
+
 checkstyle {
     configFile = rootProject.resources.text.fromFile('config/checkstyle/checkstyle.xml').asFile()
     showViolations = true
 }
+
+
 
 tasks.withType(Checkstyle) {
     reports {
@@ -82,3 +85,33 @@ tasks.withType(Checkstyle) {
     }
 }
 
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+}
+
+
+check.dependsOn jacocoTestCoverageVerification
+jacocoTestCoverageVerification.dependsOn(jacocoTestReport)
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                counter = 'METHOD'
+                value = 'COVEREDRATIO'
+                minimum = 0.800
+            }
+        }
+
+        rule {
+            limit {
+                counter = 'CLASS'
+                value = 'COVEREDRATIO'
+                minimum = 0.900
+            }
+        }
+    }
+}
