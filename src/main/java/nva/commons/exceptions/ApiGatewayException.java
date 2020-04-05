@@ -25,7 +25,7 @@ public abstract class ApiGatewayException extends Exception {
      *
      * @return the status code.
      */
-    public int getStatusCode() {
+    public Integer getStatusCode() {
         if (Objects.isNull(statusCode())) {
             throw new IllegalStateException(MISSING_STATUS_CODE + this.getClass().getCanonicalName());
         }

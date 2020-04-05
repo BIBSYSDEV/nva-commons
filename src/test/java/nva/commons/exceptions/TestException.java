@@ -4,6 +4,8 @@ import org.apache.http.HttpStatus;
 
 public class TestException extends ApiGatewayException {
 
+    public static final Integer ERROR_STATUS_CODE = HttpStatus.SC_NOT_FOUND;
+
     public TestException(String message) {
         super(message);
     }
@@ -18,6 +20,6 @@ public class TestException extends ApiGatewayException {
 
     @Override
     protected Integer statusCode() {
-        return HttpStatus.SC_NOT_FOUND;
+        return ERROR_STATUS_CODE;
     }
 }
