@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 public class ApiMessageParserTest {
 
     public static final String API_GATEWAY_MESSAGES_FOLDER = "apiGatewayMessages";
-    public static final Path MISSING_REQUEST_INFO = Path.of(API_GATEWAY_MESSAGES_FOLDER, "missingRequestInfo.json");
     public static final String SOME_EXCEPTION_MESSAGE = "Some error message";
     private static final Path MISSING_BODY = Path.of(API_GATEWAY_MESSAGES_FOLDER, "missingBody.json");
     private static final Path BODY_NON_JSON_STRING = Path.of(API_GATEWAY_MESSAGES_FOLDER, "bodyIsNonJsonString.json");
@@ -38,15 +37,35 @@ public class ApiMessageParserTest {
         return new ApiMessageParser<>(mapper);
     }
 
-    @DisplayName("getRequestInfo throws ApiIoException when JSON string does not contain the necessary request "
-        + "information")
+    @DisplayName("getRequestInfo throws ApiIoException when parser throws an exception")
     @Test
-    public void getRequestInfoThrowsApiIoExceptionWhenJsonStringDoesNotContainTheNecessaryRequestInformation()
+    public void getRequestInfoThrowsApiIoExceptionWhenParserThrowsAnException()
         throws JsonProcessingException {
-        String json = IoUtils.stringFromResources(MISSING_REQUEST_INFO);
+        String notImportantInput= "{}";
         ApiMessageParser<String> parser = parserWithMapperThatThrowsIoException();
-        ApiIoException exception = assertThrows(ApiIoException.class, () -> parser.getRequestInfo(json));
+        ApiIoException exception = assertThrows(ApiIoException.class, () -> parser.getRequestInfo(notImportantInput));
         assertThat(exception.getMessage(), containsString(ApiMessageParser.COULD_NOT_PARSE_REQUEST_INFO));
+    }
+
+    @DisplayName("getRequestInfo throws ApiIoException when input string does is not a JSON string")
+    @Test
+    public void getRequestInfoThrowsApiIoExceptionWhenInputStringIsNotAJsonString()
+        throws JsonProcessingException {
+        String notJsonString=  "some value";
+        ApiMessageParser<String> parser = new ApiMessageParser<>();
+        ApiIoException exception = assertThrows(ApiIoException.class, () -> parser.getRequestInfo(notJsonString));
+        assertThat(exception.getMessage(), containsString(ApiMessageParser.COULD_NOT_PARSE_REQUEST_INFO));
+    }
+
+
+    @DisplayName("getRequestInfo includes the request info string in the exception message when an exception in thrown")
+    @Test
+    public void getRequestInfoIncludesTheRequestInfoStringInTheExceptionMessageWhenAnExceptionIsThrown()
+        throws JsonProcessingException {
+        String notImportantInput = "JSON or not JSON, is not important";
+        ApiMessageParser<String> parser = parserWithMapperThatThrowsIoException();
+        ApiIoException exception = assertThrows(ApiIoException.class, () -> parser.getRequestInfo(notImportantInput));
+        assertThat(exception.getMessage(), containsString(notImportantInput));
     }
 
     @DisplayName("getBodyElementFromJson returns null for empty body")
