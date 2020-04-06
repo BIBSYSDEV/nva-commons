@@ -33,11 +33,15 @@ public final class IoUtils {
         try {
             String pathString = path.toString();
             InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(pathString);
-            Objects.requireNonNull(stream);
+            requireResourceExists(stream);
             return stream;
         } catch (Exception e) {
             throw new ResourceNotFoundException(path, e);
         }
+    }
+
+    private static void requireResourceExists(InputStream stream) {
+        Objects.requireNonNull(stream);
     }
 
     /**
