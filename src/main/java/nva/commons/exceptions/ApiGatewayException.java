@@ -5,7 +5,7 @@ import java.util.Objects;
 public abstract class ApiGatewayException extends Exception {
 
     public static final String MISSING_STATUS_CODE = "Status code cannot be null for exception:";
-    private Integer runtimeStatusCode = null;
+    private Integer runtimeStatusCode;
 
     public ApiGatewayException(String message) {
         super(message);
