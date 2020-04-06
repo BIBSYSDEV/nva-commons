@@ -32,10 +32,11 @@ public abstract class Try<T> {
 
     public abstract <S, E extends Exception> Try<S> flatMap(FunctionWithException<T, Try<S>, E> action);
 
+    public abstract T orElseThrow() throws Exception;
+
     /**
      * A wrapper for actions that throw checked Exceptions. See {@see https://www.oreilly.com/content/handling
-     * -checked-exceptions-in-java-streams/}
-     * Try to perform the action. Any exception will be enclosed in a Failure.
+     * -checked-exceptions-in-java-streams/} Try to perform the action. Any exception will be enclosed in a Failure.
      *
      * @param action a {@link Callable} action that throws or does not throw a checked Exception
      * @param <S>    the resulting object

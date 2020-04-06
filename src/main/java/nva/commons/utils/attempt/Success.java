@@ -48,6 +48,11 @@ public class Success<T> extends Try<T> {
     }
 
     @Override
+    public T orElseThrow() {
+        return get();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

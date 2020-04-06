@@ -40,4 +40,9 @@ public class Failure<T> extends Try<T> {
     public <S, E extends Exception> Try<S> flatMap(FunctionWithException<T, Try<S>, E> action) {
         return null;
     }
+
+    @Override
+    public T orElseThrow() throws Exception {
+        throw exception;
+    }
 }

@@ -19,7 +19,8 @@ public class ApiMessageParser<T> {
     private final transient ObjectMapper mapper = JsonUtils.jsonParser;
 
     /**
-     *  Get the Information about the Rest-Api Request, such as Headers.
+     * Get the Information about the Rest-Api Request, such as Headers.
+     *
      * @param inputString the JSON request string.
      * @return a {@link RequestInfo} object
      * @throws ApiIoException when an {@link IOException} happens
@@ -34,9 +35,10 @@ public class ApiMessageParser<T> {
     }
 
     /**
-     *  Get Request body from the JSON string of the Rest-API request.
+     * Get Request body from the JSON string of the Rest-API request.
+     *
      * @param inputString the JSON string of the Rest-API request.
-     * @param tclass the class to map the the JSON object to.
+     * @param tclass      the class to map the the JSON object to.
      * @return An instance of the input class.
      * @throws IOException when reading fails or the JSON parser throws an Exception.
      */
