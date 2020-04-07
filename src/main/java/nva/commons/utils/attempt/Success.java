@@ -1,7 +1,9 @@
 package nva.commons.utils.attempt;
 
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Stream;
+import nva.commons.utils.JacocoGenerated;
 
 public class Success<T> extends Try<T> {
 
@@ -48,6 +50,12 @@ public class Success<T> extends Try<T> {
     }
 
     @Override
+    public <E extends Exception> T orElseThrow(Function<Try<T>, E> action) throws E {
+        return get();
+    }
+
+    @Override
+    @JacocoGenerated
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -60,6 +68,7 @@ public class Success<T> extends Try<T> {
     }
 
     @Override
+    @JacocoGenerated
     public int hashCode() {
         return Objects.hash(value);
     }
