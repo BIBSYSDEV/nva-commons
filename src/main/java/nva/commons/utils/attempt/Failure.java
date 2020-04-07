@@ -43,7 +43,6 @@ public class Failure<T> extends Try<T> {
     }
 
     @Override
-    @SuppressWarnings("PMD.AvoidThrowingNullPointerException")
     public <E extends Exception> T orElseThrow(Function<Try<T>, E> action) throws E {
         if (action != null) {
             throw action.apply(this);
