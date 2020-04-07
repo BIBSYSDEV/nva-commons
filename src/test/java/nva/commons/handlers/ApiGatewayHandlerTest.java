@@ -1,5 +1,6 @@
 package nva.commons.handlers;
 
+import static nva.commons.hanlders.ApiGatewayHandler.REQUEST_ID;
 import static nva.commons.utils.JsonUtils.jsonParser;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.ByteArrayOutputStream;
@@ -20,7 +22,6 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.management.modelmbean.XMLParseException;
 import nva.commons.Handler;
@@ -33,14 +34,14 @@ import nva.commons.hanlders.RequestInfo;
 import nva.commons.utils.Environment;
 import nva.commons.utils.IoUtils;
 import nva.commons.utils.TestLogger;
-import nva.commons.utils.attempt.Try;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
-import org.zalando.problem.ThrowableProblem;
 
 public class ApiGatewayHandlerTest {
 
@@ -50,6 +51,7 @@ public class ApiGatewayHandlerTest {
     public static final String MIDDLE_EXCEPTION_MESSAGE = "Second Exception";
     public static final String BOTTOM_EXCEPTION_MESSAGE = "First Exception";
     public static final String SOME_REQUEST_ID = "RequestID:123456";
+    public static final int OVERRIDEN_STATUS_CODE = 418;  //I'm a teapot
     public Environment environment;
     private Context context;
     private TestLogger logger = new TestLogger();
@@ -64,6 +66,23 @@ public class ApiGatewayHandlerTest {
         context = mock(Context.class);
         when(context.getLogger()).thenReturn(logger);
         when(context.getAwsRequestId()).thenReturn(SOME_REQUEST_ID);
+    }
+
+    @Test
+    @DisplayName("ApiGatewayHandler has a constructor with input class as only parameter")
+    public void apiGatewayHandlerHasACostructorWithInputClassAsOnlyParameter() {
+        ApiGatewayHandler<String, String> handler = new ApiGatewayHandler<>(String.class) {
+            @Override
+            protected String processInput(String input, RequestInfo requestInfo, Context context)
+                throws ApiGatewayException {
+                return null;
+            }
+
+            @Override
+            protected Integer getSuccessStatusCode(String input, String output) {
+                return HttpStatus.SC_OK;
+            }
+        };
     }
 
     @Test
@@ -150,32 +169,41 @@ public class ApiGatewayHandlerTest {
         ByteArrayOutputStream outputStream = outputStream();
         handler.handleRequest(requestWithHeadersAndPath(), outputStream, context);
 
-        String output = outputStream.toString(StandardCharsets.UTF_8);
+        GatewayResponse<Problem> responseParsing = getApiGatewayResponse(outputStream);
+        Problem problem = responseParsing.getBody();
+        assertThat(problem.getDetail(), containsString(TOP_EXCEPTION_MESSAGE));
+        assertThat(problem.getTitle(), containsString(Status.NOT_FOUND.getReasonPhrase()));
 
-        Try<ThrowableProblem> responseParsing = tryParsingResponse(output);
-        assertThat(responseParsing.isSuccess(), is(true));
-
-        ThrowableProblem problem = responseParsing.get();
-
-        assertThat(problem.getMessage(), containsString(TOP_EXCEPTION_MESSAGE));
-        assertThat(problem.getMessage(), containsString(Status.NOT_FOUND.getReasonPhrase()));
-
-        String requestId = extractRequestId(problem);
-        assertThat(requestId, is(equalTo(SOME_REQUEST_ID)));
+        assertThat(problem.getParameters().get(REQUEST_ID), is(equalTo(SOME_REQUEST_ID)));
         assertThat(problem.getStatus(), is(Status.NOT_FOUND));
-        assertThat(output, containsString(new TestException("").getStatusCode().toString()));
     }
 
-    private String extractRequestId(ThrowableProblem problem) {
-        return Optional.ofNullable(problem.getParameters().get(ApiGatewayHandler.REQUEST_ID))
-                       .map(Object::toString).orElse(null);
+    @Test
+    @DisplayName("getFailureStatusCode sets the status code to the ApiGatewayResponse")
+    public void getFailureStatusCodeSetsTheStatusCodeToTheApiGatewayResponse() throws IOException {
+        Handler handler = handlerThatOverridesGetFailureStatusCode();
+        ByteArrayOutputStream outputStream = outputStream();
+        handler.handleRequest(requestWithHeadersAndPath(), outputStream, context);
+        GatewayResponse<Problem> response = getApiGatewayResponse(outputStream);
+        assertThat(response.getStatusCode(), is(equalTo(OVERRIDEN_STATUS_CODE)));
+        assertThat(response.getBody().getStatus().getStatusCode(), is(equalTo(OVERRIDEN_STATUS_CODE)));
     }
 
-    private Try<ThrowableProblem> tryParsingResponse(String output) {
-        return Try.of(output)
-                  .map(str -> jsonParser.readValue(str, JsonNode.class))
-                  .map(node -> node.get("body"))
-                  .map(body -> jsonParser.convertValue(body, ThrowableProblem.class));
+    @Test
+    @DisplayName("getFailureStatusCode returns by default the status code of the ApiGatewayException")
+    public void getFailureStatusCodeReturnsByDefaultTheStatusCodeOfTheApiGatewayException() throws IOException {
+        Handler handler = handlerThatThrowsExceptions();
+        ByteArrayOutputStream outputStream = outputStream();
+        handler.handleRequest(requestWithHeadersAndPath(), outputStream, context);
+        GatewayResponse<Problem> response = getApiGatewayResponse(outputStream);
+        assertThat(response.getStatusCode(), is(equalTo(TestException.ERROR_STATUS_CODE)));
+        assertThat(response.getBody().getStatus().getStatusCode(), is(equalTo(TestException.ERROR_STATUS_CODE)));
+    }
+
+    private GatewayResponse<Problem> getApiGatewayResponse(ByteArrayOutputStream outputStream)
+        throws JsonProcessingException {
+        TypeReference<GatewayResponse<Problem>> tr = new TypeReference<>() {};
+        return jsonParser.readValue(outputStream.toString(StandardCharsets.UTF_8), tr);
     }
 
     private Handler handlerThatThrowsUncheckedExceptions() {
@@ -196,6 +224,22 @@ public class ApiGatewayHandlerTest {
                 throws ApiGatewayException {
                 throwExceptions();
                 return null;
+            }
+        };
+    }
+
+    private Handler handlerThatOverridesGetFailureStatusCode() {
+        return new Handler(environment) {
+            @Override
+            protected String processInput(RequestBody input, RequestInfo requestInfo, Context context)
+                throws ApiGatewayException {
+                throwExceptions();
+                return null;
+            }
+
+            @Override
+            public int getFailureStatusCode(RequestBody input, ApiGatewayException exception) {
+                return OVERRIDEN_STATUS_CODE;
             }
         };
     }

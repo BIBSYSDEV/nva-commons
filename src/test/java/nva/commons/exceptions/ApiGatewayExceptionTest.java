@@ -19,14 +19,14 @@ public class ApiGatewayExceptionTest {
     public static final String INT_PRIMITIVE_TYPE = "int";
 
     @Test
-    @DisplayName("apiGatewayException has constructor for message")
+    @DisplayName("apiGatewayException has a constructor for message")
     public void apiGatewayExceptionHasConstructorForMessage() {
         ApiGatewayException exception = new TestException(MESSAGE);
         assertThat(exception.getMessage(), is(equalTo(MESSAGE)));
     }
 
     @Test
-    @DisplayName("apiGatewayException has constructor for exception")
+    @DisplayName("apiGatewayException has a constructor for exception")
     public void apiGatewayExceptionHasConstructorForException() {
         IOException inner = new IOException(MESSAGE);
         ApiGatewayException exception = new TestException(inner);
@@ -34,7 +34,8 @@ public class ApiGatewayExceptionTest {
     }
 
     @Test
-    @DisplayName("apiGatewayException contains innerClass name in message when it is instantiated with an exception ")
+    @DisplayName("apiGatewayException contains innerClass name in the message when it is instantiated with an "
+        + "exception")
     public void apiGatewayExceptionContainsInnerClassInMessage() {
         IOException inner = new IOException(MESSAGE);
         ApiGatewayException exception = new TestException(inner);

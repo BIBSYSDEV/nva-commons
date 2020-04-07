@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class GatewayResponse<T> implements Serializable {
 
@@ -40,17 +39,6 @@ public class GatewayResponse<T> implements Serializable {
 
     public int getStatusCode() {
         return statusCode;
-    }
-
-    /**
-     * Default Headers for all requests.
-     *
-     * @return a Map with default headers.
-     */
-    public static Map<String, String> defaultHeaders() {
-        Map<String, String> map = new ConcurrentHashMap<>();
-        map.put("Content-Type", "application/json");
-        return map;
     }
 }
 
