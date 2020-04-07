@@ -43,7 +43,8 @@ public class GatewayResponse<T> implements Serializable {
     }
 
     /**
-     *  Default Headers for all requests.
+     * Default Headers for all requests.
+     *
      * @return a Map with default headers.
      */
     public static Map<String, String> defaultHeaders() {
