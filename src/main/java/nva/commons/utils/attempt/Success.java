@@ -1,6 +1,7 @@
 package nva.commons.utils.attempt;
 
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class Success<T> extends Try<T> {
@@ -45,6 +46,11 @@ public class Success<T> extends Try<T> {
         } catch (Exception e) {
             return new Failure<S>(e);
         }
+    }
+
+    @Override
+    public <E extends Exception> T orElseThrow(Function<Try<T>, E> action) throws E {
+        return get();
     }
 
     @Override
