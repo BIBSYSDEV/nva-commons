@@ -42,8 +42,6 @@ import org.junit.jupiter.api.Test;
 import org.zalando.problem.Status;
 import org.zalando.problem.ThrowableProblem;
 
-
-
 public class ApiGatewayHandlerTest {
 
     public static final String SOME_ENV_VALUE = "SomeEnvValue";

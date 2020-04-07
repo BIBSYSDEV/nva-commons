@@ -7,8 +7,6 @@ plugins {
 }
 
 
-
-
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -40,9 +38,9 @@ dependencies {
     implementation 'com.amazonaws:aws-java-sdk-lambda:1.11.749'
     implementation group: 'org.zalando', name: 'problem', version: '0.23.0'
     implementation group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.23.0'
-    implementation group: 'com.amazonaws', name: 'aws-java-sdk-api-gateway', version:awsSdkVersion
-    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version:jacksonVersion
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version:jacksonVersion
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-api-gateway', version: awsSdkVersion
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
     implementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: jacksonVersion
 
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion
@@ -74,6 +72,7 @@ checkstyle {
     showViolations = true
 }
 
+
 tasks.withType(Checkstyle) {
     reports {
         xml.enabled false
@@ -82,3 +81,31 @@ tasks.withType(Checkstyle) {
     }
 }
 
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+}
+
+check.dependsOn jacocoTestCoverageVerification
+jacocoTestCoverageVerification.dependsOn(jacocoTestReport)
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                counter = 'METHOD'
+                value = 'COVEREDRATIO'
+                minimum = 0.800
+            }
+        }
+
+        rule {
+            limit {
+                counter = 'CLASS'
+                value = 'COVEREDRATIO'
+                minimum = 0.900
+            }
+        }
+    }
+}

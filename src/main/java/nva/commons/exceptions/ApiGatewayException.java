@@ -31,7 +31,7 @@ public abstract class ApiGatewayException extends Exception {
      *
      * @return the status code.
      */
-    public Integer getStatusCode() {
+    public final Integer getStatusCode() {
         if (Objects.nonNull(runtimeStatusCode)) {
             return runtimeStatusCode;
         }
