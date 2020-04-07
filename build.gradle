@@ -44,7 +44,7 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: jacksonVersion
 
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.2.4'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
 
     testImplementation 'org.hamcrest:hamcrest:2.2'
 }
