@@ -41,7 +41,7 @@ public class ApiMessageParserTest {
     @Test
     public void getRequestInfoThrowsApiIoExceptionWhenParserThrowsAnException()
         throws JsonProcessingException {
-        String notImportantInput= "{}";
+        String notImportantInput = "{}";
         ApiMessageParser<String> parser = parserWithMapperThatThrowsIoException();
         ApiIoException exception = assertThrows(ApiIoException.class, () -> parser.getRequestInfo(notImportantInput));
         assertThat(exception.getMessage(), containsString(ApiMessageParser.COULD_NOT_PARSE_REQUEST_INFO));
@@ -51,12 +51,11 @@ public class ApiMessageParserTest {
     @Test
     public void getRequestInfoThrowsApiIoExceptionWhenInputStringIsNotAJsonString()
         throws JsonProcessingException {
-        String notJsonString=  "some value";
+        String notJsonString = "some value";
         ApiMessageParser<String> parser = new ApiMessageParser<>();
         ApiIoException exception = assertThrows(ApiIoException.class, () -> parser.getRequestInfo(notJsonString));
         assertThat(exception.getMessage(), containsString(ApiMessageParser.COULD_NOT_PARSE_REQUEST_INFO));
     }
-
 
     @DisplayName("getRequestInfo includes the request info string in the exception message when an exception in thrown")
     @Test

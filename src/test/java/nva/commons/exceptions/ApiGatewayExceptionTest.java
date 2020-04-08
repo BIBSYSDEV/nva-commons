@@ -9,13 +9,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 public class ApiGatewayExceptionTest {
 
     private static final String MESSAGE = "someMessage";
-    public static final String STATUS_CODE_METHOD = "statusCode";
+    public static final String STATUS_CODE_METHOD_NAME = "statusCode";
     public static final String INT_PRIMITIVE_TYPE = "int";
 
     @Test
@@ -55,9 +56,18 @@ public class ApiGatewayExceptionTest {
     @Test
     @DisplayName("statusCode returns Integer and not int")
     public void statusCodeReturnsIntegerAndNotInt() throws NoSuchMethodException {
-        Method statusCodeMethod = ApiGatewayException.class.getDeclaredMethod(STATUS_CODE_METHOD);
+        Method statusCodeMethod = ApiGatewayException.class.getDeclaredMethod(STATUS_CODE_METHOD_NAME);
         String typeName = statusCodeMethod.getGenericReturnType().getTypeName();
         assertThat(typeName, is(not(INT_PRIMITIVE_TYPE)));
+    }
+
+    @Test
+    @DisplayName("getStatusCode returns the status code provided in the constructor when such code is provided")
+    public void getStatusCodeReturnsTheStatusCodeProvidedInTheConstructorWhenSuchStatusCodeisProvided() {
+        IOException ioException = new IOException();
+        Integer overideDefaultStatusCode = HttpStatus.SC_SEE_OTHER;
+        TestException exception = new TestException(ioException, overideDefaultStatusCode);
+        assertThat(exception.getStatusCode(), is(equalTo(overideDefaultStatusCode)));
     }
 
     private static class TestException extends ApiGatewayException {
@@ -68,6 +78,10 @@ public class ApiGatewayExceptionTest {
 
         public TestException(Exception e) {
             super(e);
+        }
+
+        public TestException(Exception e, Integer statusCode) {
+            super(e, statusCode);
         }
 
         @Override
