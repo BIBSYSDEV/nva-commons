@@ -183,7 +183,7 @@ public class ApiGatewayHandlerTest {
     public void getFailureStatusCodeSetsTheStatusCodeToTheApiGatewayResponse() throws IOException {
         Handler handler = handlerThatOverridesGetFailureStatusCode();
         ByteArrayOutputStream outputStream = outputStream();
-        handler.handleRequest(requestWithHeadersAndPath(), outputStream, context);
+        handler.handleRequest(anyRequest(), outputStream, context);
         GatewayResponse<Problem> response = getApiGatewayResponse(outputStream);
         assertThat(response.getStatusCode(), is(equalTo(OVERRIDEN_STATUS_CODE)));
         assertThat(response.getBody().getStatus().getStatusCode(), is(equalTo(OVERRIDEN_STATUS_CODE)));
@@ -194,7 +194,7 @@ public class ApiGatewayHandlerTest {
     public void getFailureStatusCodeReturnsByDefaultTheStatusCodeOfTheApiGatewayException() throws IOException {
         Handler handler = handlerThatThrowsExceptions();
         ByteArrayOutputStream outputStream = outputStream();
-        handler.handleRequest(requestWithHeadersAndPath(), outputStream, context);
+        handler.handleRequest(anyRequest(), outputStream, context);
         GatewayResponse<Problem> response = getApiGatewayResponse(outputStream);
         assertThat(response.getStatusCode(), is(equalTo(TestException.ERROR_STATUS_CODE)));
         assertThat(response.getBody().getStatus().getStatusCode(), is(equalTo(TestException.ERROR_STATUS_CODE)));
@@ -266,6 +266,10 @@ public class ApiGatewayHandlerTest {
                 throw new TestException(ex, TOP_EXCEPTION_MESSAGE);
             }
         }
+    }
+
+    private InputStream anyRequest() throws JsonProcessingException {
+        return requestWithHeaders();
     }
 
     private InputStream requestWithHeadersAndPath() throws JsonProcessingException {
