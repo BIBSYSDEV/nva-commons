@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 class TestLoggerTest {
 
-    private final static String MESSAGE = "Some log message";
+    private static final String MESSAGE = "Some log message";
 
     @Test
     @DisplayName("log appends string to the buffer")
