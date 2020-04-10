@@ -67,7 +67,7 @@ public class FailureTest {
 
         Executable action =
             () -> Try.of(sample)
-                     .map((Integer i) -> illegalAction(i, NESTED_EXCEPTION_MESSAGE))
+                     .map(i -> illegalAction(i, NESTED_EXCEPTION_MESSAGE))
                      .orElse(f -> anotherIllegalAction(EXPECTED_EXCEPTION_MESSAGE));
 
         TestException exception = assertThrows(TestException.class, action);
@@ -80,7 +80,7 @@ public class FailureTest {
 
         Executable action =
             () -> Try.of(sample)
-                     .map((Integer i) -> illegalAction(i, NESTED_EXCEPTION_MESSAGE))
+                     .map(i -> illegalAction(i, NESTED_EXCEPTION_MESSAGE))
                      .orElse(null);
 
         assertThrows(IllegalStateException.class, action);
