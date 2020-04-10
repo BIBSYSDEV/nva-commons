@@ -51,8 +51,10 @@ public class RequestInfo {
     @JacocoGenerated
     @JsonProperty("pathParameters")
     public void unnestProxy(Map<String, Object> pathParameters) {
-        String proxy = (String) pathParameters.get(PROXY_TAG);
-        setProxy(proxy);
+        if (pathParameters != null) {
+            String proxy = (String) pathParameters.get(PROXY_TAG);
+            setProxy(proxy);
+        }
     }
 }
 

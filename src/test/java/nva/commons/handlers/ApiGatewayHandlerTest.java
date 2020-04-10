@@ -4,8 +4,10 @@ import static nva.commons.hanlders.ApiGatewayHandler.REQUEST_ID;
 import static nva.commons.utils.JsonUtils.jsonParser;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -21,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.management.modelmbean.XMLParseException;
@@ -169,7 +172,7 @@ public class ApiGatewayHandlerTest {
         ByteArrayOutputStream outputStream = outputStream();
         handler.handleRequest(requestWithHeadersAndPath(), outputStream, context);
 
-        GatewayResponse<Problem> responseParsing = getApiGatewayResponse(outputStream);
+        GatewayResponse<Problem> responseParsing = getApiGatewayProblemResponse(outputStream);
         Problem problem = responseParsing.getBody();
         assertThat(problem.getDetail(), containsString(TOP_EXCEPTION_MESSAGE));
         assertThat(problem.getTitle(), containsString(Status.NOT_FOUND.getReasonPhrase()));
@@ -184,7 +187,7 @@ public class ApiGatewayHandlerTest {
         Handler handler = handlerThatOverridesGetFailureStatusCode();
         ByteArrayOutputStream outputStream = outputStream();
         handler.handleRequest(anyRequest(), outputStream, context);
-        GatewayResponse<Problem> response = getApiGatewayResponse(outputStream);
+        GatewayResponse<Problem> response = getApiGatewayProblemResponse(outputStream);
         assertThat(response.getStatusCode(), is(equalTo(OVERRIDEN_STATUS_CODE)));
         assertThat(response.getBody().getStatus().getStatusCode(), is(equalTo(OVERRIDEN_STATUS_CODE)));
     }
@@ -195,14 +198,32 @@ public class ApiGatewayHandlerTest {
         Handler handler = handlerThatThrowsExceptions();
         ByteArrayOutputStream outputStream = outputStream();
         handler.handleRequest(anyRequest(), outputStream, context);
-        GatewayResponse<Problem> response = getApiGatewayResponse(outputStream);
+        GatewayResponse<Problem> response = getApiGatewayProblemResponse(outputStream);
         assertThat(response.getStatusCode(), is(equalTo(TestException.ERROR_STATUS_CODE)));
         assertThat(response.getBody().getStatus().getStatusCode(), is(equalTo(TestException.ERROR_STATUS_CODE)));
     }
 
-    private GatewayResponse<Problem> getApiGatewayResponse(ByteArrayOutputStream outputStream)
+    @Test
+    @DisplayName("RequestInfo parses sam-local request")
+    public void requestInfoParsesSamLocalRequest() throws IOException {
+        String json = IoUtils.stringFromResources(Path.of("apiGatewayMessages", "event-without-path-parameters.json"));
+        Handler hanlder = new Handler(environment);
+        InputStream input = IoUtils.stringToStream(json);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        hanlder.handleRequest(input, output, context);
+        GatewayResponse<String> gatewayResponse = getApiGatewayResponse(output);
+        assertThat(gatewayResponse.getBody(), is(not(emptyString())));
+    }
+
+    private GatewayResponse<Problem> getApiGatewayProblemResponse(ByteArrayOutputStream outputStream)
         throws JsonProcessingException {
         TypeReference<GatewayResponse<Problem>> tr = new TypeReference<>() {};
+        return jsonParser.readValue(outputStream.toString(StandardCharsets.UTF_8), tr);
+    }
+
+    private <T> GatewayResponse<T> getApiGatewayResponse(ByteArrayOutputStream outputStream)
+        throws JsonProcessingException {
+        TypeReference<GatewayResponse<T>> tr = new TypeReference<>() {};
         return jsonParser.readValue(outputStream.toString(StandardCharsets.UTF_8), tr);
     }
 
