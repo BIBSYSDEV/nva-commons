@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 public class TryTest {
@@ -111,11 +113,27 @@ public class TryTest {
         assertThat(exception.getMessage(), is(equalTo(EXCEPTION_MESSAGE)));
     }
 
+    @Test
+    @DisplayName("flatMap returns a failure with the first Exception")
+    public void flatMapPropagatesTheFirstException() {
+        Integer someInt = 2;
+        Try<String> actual = Try.of(someInt)
+                                .map(Object::toString)
+                                .flatMap(this::throwCheckedExceptionForFlatMap);
+
+        assertTrue(actual.isFailure());
+        assertThat(actual.getException().getMessage(), is(IsEqual.equalTo(EXCEPTION_MESSAGE)));
+    }
+
     private int divide(int x, int y) throws IllegalArgumentException {
         return x / y;
     }
 
     private String throwCheckedException(String input) throws IOException {
+        throw new IOException(EXCEPTION_MESSAGE);
+    }
+
+    private Try<String> throwCheckedExceptionForFlatMap(String input) throws IOException {
         throw new IOException(EXCEPTION_MESSAGE);
     }
 
