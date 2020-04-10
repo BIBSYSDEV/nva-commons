@@ -18,7 +18,7 @@ import nva.commons.utils.JsonUtils;
  */
 public class ApiMessageParser<T> {
 
-    public static final String COULD_NOT_PARSE_REQUEST_INFO = "Could not parse RequestInfo";
+    public static final String COULD_NOT_PARSE_REQUEST_INFO = "Could not parse RequestInfo: ";
     private final transient ObjectMapper mapper;
 
     @JacocoGenerated
@@ -42,7 +42,7 @@ public class ApiMessageParser<T> {
             RequestInfo requestInfo = mapper.readValue(inputString, RequestInfo.class);
             return requestInfo;
         } catch (JsonProcessingException e) {
-            throw new ApiIoException(e, COULD_NOT_PARSE_REQUEST_INFO);
+            throw new ApiIoException(e, COULD_NOT_PARSE_REQUEST_INFO + inputString);
         }
     }
 
