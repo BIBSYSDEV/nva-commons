@@ -1,7 +1,5 @@
 package nva.commons.hanlders;
 
-import static java.util.Objects.nonNull;
-
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
@@ -24,6 +22,7 @@ import java.util.stream.Stream;
 import nva.commons.exceptions.ApiGatewayException;
 import nva.commons.utils.Environment;
 import nva.commons.utils.IoUtils;
+import nva.commons.utils.JacocoGenerated;
 import nva.commons.utils.JsonUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
@@ -61,7 +60,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
 
     protected final Environment environment;
 
-    protected final transient String allowedOrigin;
+    protected transient String allowedOrigin;
 
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
 
@@ -72,6 +71,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      *
      * @param iclass The class object of the input class.
      */
+    @JacocoGenerated
     public ApiGatewayHandler(Class<I> iclass) {
         this(iclass, new Environment());
     }
@@ -85,13 +85,13 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
     public ApiGatewayHandler(Class<I> iclass, Environment environment) {
         this.iclass = iclass;
         this.environment = environment;
-        this.allowedOrigin = environment.readEnv(ALLOWED_ORIGIN_ENV);
-        this.additionalSuccessHeadersSupplier = () -> Collections.emptyMap();
+        this.additionalSuccessHeadersSupplier = Collections::emptyMap;
     }
 
     private void init(OutputStream outputStream, Context context) {
         this.outputStream = outputStream;
         this.logger = context.getLogger();
+        this.allowedOrigin = environment.readEnv(ALLOWED_ORIGIN_ENV);
     }
 
     /**
@@ -124,7 +124,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
     }
 
     /**
-     * Define the response headers in case of failure.
+     * Define the response statusCode in case of failure.
      *
      * @param input The request input.
      * @param error The exception that caused the failure.
@@ -230,7 +230,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @throws IOException when serializing fails
      */
     protected void writeExpectedFailure(I input, ApiGatewayException exception, String requestId) throws IOException {
-        writeFailure(exception, exception.getStatusCode(), requestId, null);
+        writeFailure(exception, getFailureStatusCode(input, exception), requestId);
     }
 
     /**
@@ -238,16 +238,14 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * general case. It returns to the API-client a specified status code, the message of the exception and optionally
      * another additional message.
      *
-     * @param exception         the thrown Exception.
-     * @param statusCode        the statusCode that should be returned to the API-client
-     * @param additionalMessage any additional message that is necessary to send. Set to null for no additional message
+     * @param exception  the thrown Exception.
+     * @param statusCode the statusCode that should be returned to the API-client
      * @throws IOException when the writer throws an IOException.
      */
-    protected void writeFailure(Exception exception, Integer statusCode, String requestId, String additionalMessage)
+    protected void writeFailure(Exception exception, Integer statusCode, String requestId)
         throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
             String errorMessage = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
-            errorMessage = addAdditionalMessage(additionalMessage, errorMessage);
             Status status = Status.valueOf(statusCode);
 
             ThrowableProblem problem = Problem.builder().withStatus(status)
@@ -263,24 +261,17 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
         }
     }
 
-    private String addAdditionalMessage(String additionalMessage, String outputString) {
-        if (nonNull(additionalMessage)) {
-            return outputString + System.lineSeparator() + additionalMessage;
-        }
-        return outputString;
-    }
-
     /**
      * Sends a message to ApiGateway and to the API-client  in case of failure caused by an Exception that is not
      * ApiGatewayException (unpredicted exception). This method can be overriden for richer status codes, but in the
-     * general case it should not be neccessary/
+     * general case it should not be necessary.
      *
      * @param input     the input object of class I
      * @param exception the exception
      * @throws IOException when serializing fails
      */
     protected void writeUnexpectedFailure(I input, Exception exception, String requestId) throws IOException {
-        writeFailure(exception, HttpStatus.SC_INTERNAL_SERVER_ERROR, requestId, null);
+        writeFailure(exception, HttpStatus.SC_INTERNAL_SERVER_ERROR, requestId);
     }
 
     protected Map<String, String> defaultHeaders() {
