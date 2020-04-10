@@ -50,7 +50,8 @@ public class Success<T> extends Try<T> {
     }
 
     @Override
-    public <E extends Exception> T orElseThrow(Function<Try<T>, E> action) throws E {
+
+    public <E extends Exception> T orElseThrow(Function<Failure<T>, E> action) throws E {
         if (action == null) {
             throw new IllegalStateException(NULL_ACTION_MESSAGE);
         }
@@ -58,7 +59,8 @@ public class Success<T> extends Try<T> {
     }
 
     @Override
-    public <E extends Exception> T orElse(FunctionWithException<Try<T>, T, E> action) throws E {
+
+    public <E extends Exception> T orElse(FunctionWithException<Failure<T>, T, E> action) throws E {
         if (action == null) {
             throw new IllegalStateException(NULL_ACTION_MESSAGE);
         }
