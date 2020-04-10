@@ -43,7 +43,7 @@ public class FailureTest {
     public void orElseThrowsTheSpecifiedException() {
         Executable action =
             () -> Try.of(sample)
-                     .map((Integer i) -> illegalAction(i, NESTED_EXCEPTION_MESSAGE))
+                     .map(i -> illegalAction(i, NESTED_EXCEPTION_MESSAGE))
                      .orElseThrow(f -> new TestException(f.getException(), EXPECTED_EXCEPTION_MESSAGE));
 
         TestException exception = assertThrows(TestException.class, action);
@@ -55,7 +55,7 @@ public class FailureTest {
     public void orElseReturnsTheSpecifiedValue() {
 
         Integer actual = Try.of(sample)
-                            .map((Integer i) -> illegalAction(i, NESTED_EXCEPTION_MESSAGE))
+                            .map(i -> illegalAction(i, NESTED_EXCEPTION_MESSAGE))
                             .orElse(f -> DEFAULT_VALUE);
 
         assertThat(actual, is(equalTo(DEFAULT_VALUE)));
