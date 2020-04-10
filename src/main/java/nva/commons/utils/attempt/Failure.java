@@ -39,7 +39,7 @@ public class Failure<T> extends Try<T> {
 
     @Override
     public <S, E extends Exception> Try<S> flatMap(FunctionWithException<T, Try<S>, E> action) {
-        return null;
+        return new Failure<>(exception);
     }
 
     @Override
@@ -47,7 +47,16 @@ public class Failure<T> extends Try<T> {
         if (action != null) {
             throw action.apply(this);
         } else {
-            throw new IllegalStateException("Action cannot be null");
+            throw new IllegalStateException(NULL_ACTION_MESSAGE);
+        }
+    }
+
+    @Override
+    public <E extends Exception> T orElse(FunctionWithException<Try<T>, T, E> action) throws E {
+        if (action != null) {
+            return action.apply(this);
+        } else {
+            throw new IllegalStateException(NULL_ACTION_MESSAGE);
         }
     }
 }
