@@ -48,6 +48,11 @@ public class RequestInfo {
         this.proxy = proxy;
     }
 
+    /**
+     * Method for extracting the "proxy" value.
+     *
+     * @param pathParameters the pathParameters object in the json representation of the ApiGateway  input.
+     */
     @JacocoGenerated
     @JsonProperty("pathParameters")
     public void unnestProxy(Map<String, Object> pathParameters) {

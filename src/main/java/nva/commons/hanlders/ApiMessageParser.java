@@ -54,6 +54,7 @@ public class ApiMessageParser<T> {
      * @return An instance of the input class.
      * @throws IOException when reading fails or the JSON parser throws an Exception.
      */
+    @SuppressWarnings("uncheckd")
     public T getBodyElementFromJson(String inputString, Class<T> tclass) throws IOException {
 
         Optional<JsonNode> tree = Optional.ofNullable(mapper.readTree(new StringReader(inputString)));
