@@ -89,9 +89,11 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
     }
 
     private void init(OutputStream outputStream, Context context) {
+        context.getLogger().log("Initializing....");
         this.outputStream = outputStream;
         this.logger = context.getLogger();
         this.allowedOrigin = environment.readEnv(ALLOWED_ORIGIN_ENV);
+        context.getLogger().log("Initialized...");
     }
 
     /**
@@ -213,9 +215,12 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
     protected void writeOutput(I input, O output)
         throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
+            logger.log("Creating new GatewayResponse");
             GatewayResponse<O> gatewayResponse =
                 new GatewayResponse<>(output, getSuccessHeaders(), getSuccessStatusCode(input, output));
+            logger.log("Created new GatewayResponse");
             String responseJson = objectMapper.writeValueAsString(gatewayResponse);
+            logger.log("Serialized new GatewayResponse:" + responseJson);
             writer.write(responseJson);
         }
     }
@@ -283,13 +288,18 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
 
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
+        context.getLogger().log("Trying to initialize");
         init(output, context);
+        logger.log("Assigned logger works");
         I inputObject = null;
         String inputString = IoUtils.streamToString(input);
+        logger.log("Managed to put inputStream to String:" + inputString);
         try {
             inputObject = parseInput(inputString);
+            logger.log("input Object:" + inputObject.toString());
             O response;
             response = processInput(inputObject, inputString, context);
+            logger.log("Writing response...");
             writeOutput(inputObject, response);
         } catch (ApiGatewayException e) {
             logger.log(e.getMessage());
