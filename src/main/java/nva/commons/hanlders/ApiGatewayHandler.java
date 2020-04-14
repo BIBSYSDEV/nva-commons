@@ -54,7 +54,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
     public static final String REQUEST_ID_LOGGING_TEMPLATE = "%s:%s";
 
     private final transient Class<I> iclass;
-    private transient LambdaLogger logger;
+    protected transient LambdaLogger logger;
     protected transient OutputStream outputStream;
     public static final String ALLOWED_ORIGIN_ENV = "ALLOWED_ORIGIN";
 
