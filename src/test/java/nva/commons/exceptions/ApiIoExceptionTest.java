@@ -8,7 +8,7 @@ import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class ApiIoExceptionTest {
+public class ApiIoExceptionTest {
 
     @Test
     @DisplayName("statusCode returns Internal server error")
