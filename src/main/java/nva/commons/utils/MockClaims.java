@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class MockClaims {
+public final class MockClaims {
 
     public static final String CUSTOM_FEIDE_ID = "custom:feideId";
     public static final String CUSTOM_ORG_NUMBER = "custom:orgNumber";
@@ -13,6 +13,9 @@ public class MockClaims {
     public static final String CLAIMS_NODE = "claims";
     public static final String MOCK_FEIDE_ID = "none@unit.no";
     public static final String UNIT_ORG_NUMBER = "NO919477822";
+
+    private MockClaims() {
+    }
 
     /**
      * Mocks the user claims. For usage when we running it a lambda locally through SAM.
