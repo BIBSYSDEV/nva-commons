@@ -58,9 +58,9 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
     protected transient OutputStream outputStream;
     public static final String ALLOWED_ORIGIN_ENV = "ALLOWED_ORIGIN";
 
-    protected final Environment environment;
-
     protected transient String allowedOrigin;
+
+    protected final Environment environment;
 
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
 
