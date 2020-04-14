@@ -7,8 +7,6 @@ import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.hamcrest.text.IsEmptyString.emptyOrNullString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.spy;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -89,8 +87,7 @@ public class IoUtilsTest {
     @Test
     @DisplayName("streamToString throws UncheckedIOException when there is an error reading from a stream")
     public void streamToStringThrowsUncheckedIoExceptionWhenThereIsAnErrorReadingFromAStream() throws IOException {
-        InputStream errorWhenClosingStream = spy(IoUtils.inputStreamFromResources(RESOURCE));
-        doThrow(new IOException(SOME_EXCEPTION_MESSAGE)).when(errorWhenClosingStream).close();
+        InputStream errorWhenClosingStream = streamThrowingIoException();
         Exception e = assertThrows(UncheckedIOException.class, () -> IoUtils.streamToString(errorWhenClosingStream));
         assertThat(e.getMessage(), is(not(emptyOrNullString())));
     }
@@ -98,8 +95,7 @@ public class IoUtilsTest {
     @Test
     @DisplayName("streamToString throws UncheckedIOException when there is an error closing the stream")
     public void streamToStringThrowsUncheckedIoExceptionWhenThereIsAnErrorClosingTheStream() throws IOException {
-        InputStream unavailableStream = IoUtils.inputStreamFromResources(RESOURCE);
-        unavailableStream.close();
+        InputStream unavailableStream = streamThrowingIoException();
         Exception e = assertThrows(UncheckedIOException.class, () -> IoUtils.streamToString(unavailableStream));
         assertThat(e.getMessage(), is(not(emptyOrNullString())));
     }
@@ -110,5 +106,11 @@ public class IoUtilsTest {
         List<String> lines = IoUtils.linesfromResource(RESOURCE);
         int linesOfResourceFile = 3;
         assertThat(lines.size(), is(equalTo(linesOfResourceFile)));
+    }
+
+    private InputStream streamThrowingIoException() throws IOException {
+        InputStream stream = InputStream.nullInputStream();
+        stream.close();
+        return stream;
     }
 }
