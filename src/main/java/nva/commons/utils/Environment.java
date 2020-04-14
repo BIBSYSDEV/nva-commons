@@ -14,6 +14,7 @@ public class Environment {
      * @param variableName the Env variable name.
      * @return the value of the variable or an empty Optional if the variable does not exists.
      */
+    @JacocoGenerated
     public Optional<String> readEnvOpt(String variableName) {
         return Optional.ofNullable(System.getenv().get(variableName)).filter(value -> !value.isEmpty());
     }
