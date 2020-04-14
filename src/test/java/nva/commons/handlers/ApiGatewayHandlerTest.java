@@ -171,7 +171,7 @@ public class ApiGatewayHandlerTest {
 
         GatewayResponse<Problem> responseParsing = getApiGatewayResponse(outputStream);
 
-        Problem problem = responseParsing.getBody();
+        Problem problem = responseParsing.getBodyObject(Problem.class);
         assertThat(problem.getDetail(), containsString(TOP_EXCEPTION_MESSAGE));
         assertThat(problem.getTitle(), containsString(Status.NOT_FOUND.getReasonPhrase()));
 
@@ -187,7 +187,8 @@ public class ApiGatewayHandlerTest {
         handler.handleRequest(anyRequest(), outputStream, context);
         GatewayResponse<Problem> response = getApiGatewayResponse(outputStream);
         assertThat(response.getStatusCode(), is(equalTo(OVERRIDEN_STATUS_CODE)));
-        assertThat(response.getBody().getStatus().getStatusCode(), is(equalTo(OVERRIDEN_STATUS_CODE)));
+        assertThat(response.getBodyObject(Problem.class).getStatus().getStatusCode(),
+            is(equalTo(OVERRIDEN_STATUS_CODE)));
     }
 
     @Test
@@ -198,7 +199,8 @@ public class ApiGatewayHandlerTest {
         handler.handleRequest(anyRequest(), outputStream, context);
         GatewayResponse<Problem> response = getApiGatewayResponse(outputStream);
         assertThat(response.getStatusCode(), is(equalTo(TestException.ERROR_STATUS_CODE)));
-        assertThat(response.getBody().getStatus().getStatusCode(), is(equalTo(TestException.ERROR_STATUS_CODE)));
+        assertThat(response.getBodyObject(Problem.class).getStatus().getStatusCode(),
+            is(equalTo(TestException.ERROR_STATUS_CODE)));
     }
 
     private GatewayResponse<Problem> getApiGatewayResponse(ByteArrayOutputStream outputStream)

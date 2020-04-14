@@ -43,9 +43,6 @@ public class ApiMessageParser<T> {
             return mapper.readValue(inputString, RequestInfo.class);
         } catch (JsonProcessingException e) {
             throw new ApiIoException(e, COULD_NOT_PARSE_REQUEST_INFO + inputString);
-        } catch (Exception e) {
-            logger.log(e.getMessage());
-            throw new ApiIoException(new IOException(e.getMessage()), COULD_NOT_PARSE_REQUEST_INFO + inputString);
         }
     }
 

@@ -2,15 +2,35 @@ package nva.commons.hanlders;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
+import nva.commons.exceptions.GatewayResponseSerializingException;
+import nva.commons.utils.JsonUtils;
 
 public class GatewayResponse<T> implements Serializable {
 
-    private final T body;
+    private final String body;
     private final Map<String, String> headers;
     private final int statusCode;
+
+    /**
+     * Constructor for JSON deserializing.
+     *
+     * @param body       the body as JSON string
+     * @param headers    the headers map.
+     * @param statusCode the status code.
+     */
+    @JsonCreator
+    public GatewayResponse(
+        @JsonProperty("body") final String body,
+        @JsonProperty("headers") final Map<String, String> headers,
+        @JsonProperty("statusCode") final int statusCode) {
+        this.body = body;
+        this.headers = headers;
+        this.statusCode = statusCode;
+    }
 
     /**
      * Constructor for GatewayResponse.
@@ -18,19 +38,25 @@ public class GatewayResponse<T> implements Serializable {
      * @param body       body of response
      * @param headers    http headers for response
      * @param statusCode status code for response
+     * @throws GatewayResponseSerializingException when serializing fails
      */
-    @JsonCreator
-    public GatewayResponse(
-        @JsonProperty("body") final T body,
-        @JsonProperty("headers") final Map<String, String> headers,
-        @JsonProperty("statusCode") final int statusCode) {
-        this.statusCode = statusCode;
-        this.body = body;
-        this.headers = Collections.unmodifiableMap(Map.copyOf(headers));
+    public GatewayResponse(T body, Map<String, String> headers, int statusCode)
+        throws GatewayResponseSerializingException {
+        try {
+            this.statusCode = statusCode;
+            this.body = JsonUtils.jsonParser.writeValueAsString(body);
+            this.headers = Collections.unmodifiableMap(Map.copyOf(headers));
+        } catch (JsonProcessingException e) {
+            throw new GatewayResponseSerializingException(e);
+        }
     }
 
-    public T getBody() {
+    public String getBody() {
         return body;
+    }
+
+    public T getBodyObject(Class<T> clazz) throws JsonProcessingException {
+        return JsonUtils.jsonParser.readValue(body, clazz);
     }
 
     public Map<String, String> getHeaders() {
