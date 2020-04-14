@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,7 +19,6 @@ import java.nio.file.Path;
 import nva.commons.RequestBody;
 import nva.commons.exceptions.ApiIoException;
 import nva.commons.hanlders.ApiMessageParser;
-import nva.commons.hanlders.RequestInfo;
 import nva.commons.utils.IoUtils;
 import nva.commons.utils.TestLogger;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +30,6 @@ public class ApiMessageParserTest {
     public static final String SOME_EXCEPTION_MESSAGE = "Some error message";
     private static final Path MISSING_BODY = Path.of(API_GATEWAY_MESSAGES_FOLDER, "missingBody.json");
     private static final Path BODY_NON_JSON_STRING = Path.of(API_GATEWAY_MESSAGES_FOLDER, "bodyIsNonJsonString.json");
-    private static final Path PROBLEM_JSON = Path.of(API_GATEWAY_MESSAGES_FOLDER, "problem.json");
     public static final String NON_JSON_STRING_BODY = "Hello world";
     private static final Path BODY_JSON_STRING = Path.of(API_GATEWAY_MESSAGES_FOLDER, "bodyIsAJsonString.json");
     private static final Path BODY_JSON_ELEMENT = Path.of(API_GATEWAY_MESSAGES_FOLDER, "bodyIsAJsonElement.json");
@@ -41,15 +38,6 @@ public class ApiMessageParserTest {
 
     private <T> ApiMessageParser<T> messageParser(ObjectMapper mapper) {
         return new ApiMessageParser<>(mapper);
-    }
-
-    @DisplayName("getRequestInfo can parse this")
-    @Test
-    public void getRequestInfoCanParseThis() throws ApiIoException {
-        ApiMessageParser<String> parser = new ApiMessageParser<>();
-        String jsonString = IoUtils.stringFromResources(PROBLEM_JSON);
-        RequestInfo requestInfo = parser.getRequestInfo(jsonString, logger);
-        assertThat(requestInfo, is(notNullValue()));
     }
 
     @DisplayName("getRequestInfo throws ApiIoException when parser throws an exception")
