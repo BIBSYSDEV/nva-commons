@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * Mocks the user claims. For usage when we are running a lambda locally through SAM. In the current version, the method
  * has to be called by the locally run handler, in the {@code handleRequest) method or the {@code processInput method}.
  * <p>
- * <p>
  * Example for the processInputMethod.
  *
  * <pre>
@@ -31,6 +30,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  *     }
  * }
  * </pre>
+ *
  */
 public final class MockClaims {
 
