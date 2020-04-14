@@ -170,6 +170,7 @@ public class ApiGatewayHandlerTest {
         handler.handleRequest(requestWithHeadersAndPath(), outputStream, context);
 
         GatewayResponse<Problem> responseParsing = getApiGatewayResponse(outputStream);
+
         Problem problem = responseParsing.getBody();
         assertThat(problem.getDetail(), containsString(TOP_EXCEPTION_MESSAGE));
         assertThat(problem.getTitle(), containsString(Status.NOT_FOUND.getReasonPhrase()));
@@ -209,8 +210,7 @@ public class ApiGatewayHandlerTest {
     private Handler handlerThatThrowsUncheckedExceptions() {
         return new Handler(environment) {
             @Override
-            protected String processInput(RequestBody input, RequestInfo requestInfo, Context context)
-                throws ApiGatewayException {
+            protected String processInput(RequestBody input, RequestInfo requestInfo, Context context) {
                 throwUncheckedExceptions();
                 return null;
             }

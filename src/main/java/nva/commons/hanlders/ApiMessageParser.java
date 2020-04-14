@@ -39,8 +39,7 @@ public class ApiMessageParser<T> {
      */
     public RequestInfo getRequestInfo(String inputString) throws ApiIoException {
         try {
-            RequestInfo requestInfo = mapper.readValue(inputString, RequestInfo.class);
-            return requestInfo;
+            return mapper.readValue(inputString, RequestInfo.class);
         } catch (JsonProcessingException e) {
             throw new ApiIoException(e, COULD_NOT_PARSE_REQUEST_INFO + inputString);
         }
@@ -54,6 +53,7 @@ public class ApiMessageParser<T> {
      * @return An instance of the input class.
      * @throws IOException when reading fails or the JSON parser throws an Exception.
      */
+    @SuppressWarnings("unchecked")
     public T getBodyElementFromJson(String inputString, Class<T> tclass) throws IOException {
 
         Optional<JsonNode> tree = Optional.ofNullable(mapper.readTree(new StringReader(inputString)));
