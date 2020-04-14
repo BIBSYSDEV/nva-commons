@@ -12,6 +12,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 public class MockClaimsTest {
@@ -19,6 +20,7 @@ public class MockClaimsTest {
     public static final String PATH_TEMPLATE = "/%s/%s/%s/%s";
 
     @Test
+    @DisplayName("mockClaims contains custom feideId")
     public void mockClaimsContainsCustomFeideId() {
         ObjectNode root = mockContext();
         JsonNode mockEvent = MockClaims.apiGatewayEvent(root, jsonParser);
@@ -31,6 +33,20 @@ public class MockClaimsTest {
     }
 
     @Test
+    @DisplayName("mockClaims creates request context node if it does not exist")
+    public void mockClaimsCreatesRequestContextNodeIfItDoesNotExist() {
+        ObjectNode root = jsonParser.createObjectNode();
+        JsonNode mockEvent = MockClaims.apiGatewayEvent(root, jsonParser);
+        String fieldIdClaimPath = String.format(PATH_TEMPLATE, REQUEST_CONTEXT_NODE,
+            AUTHORIZER_NODE,
+            CLAIMS_NODE,
+            CUSTOM_ORG_NUMBER);
+        String actualFeideId = mockEvent.at(fieldIdClaimPath).textValue();
+        assertThat(actualFeideId, is(equalTo(MockClaims.UNIT_ORG_NUMBER)));
+    }
+
+    @Test
+    @DisplayName("mockClaims contains custom org number")
     public void mockClaimsContainsCustomOrgNumber() {
         ObjectNode root = mockContext();
         JsonNode mockEvent = MockClaims.apiGatewayEvent(root, jsonParser);
