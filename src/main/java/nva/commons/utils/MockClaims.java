@@ -18,7 +18,7 @@ public final class MockClaims {
     }
 
     /**
-     * Mocks the user claims. For usage when we running it a lambda locally through SAM.
+     * Mocks the user claims. For usage when we are running a lambda locally through SAM.
      *
      * @param event      the ApiGateway event
      * @param jsonParser a jsonParser
