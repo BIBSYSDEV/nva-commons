@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * Example for the processInputMethod.
  *
  * <pre>
- *  public class MyHandler extends ApiGatewayHandler<RequestBody,String>{
+ *  public class MyHandler extends ApiGatewayHandler&lt;RequestBody,String&gt;{
  *
  *     &#64;Override
  *     protected String processInput(RequestBody input, RequestInfo requestInfo, Context context)
