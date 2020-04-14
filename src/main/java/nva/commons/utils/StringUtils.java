@@ -5,6 +5,9 @@ public final class StringUtils {
     public static final String DOUBLE_WHITESPACE = "\\s\\s";
     public static final String SPACE = " ";
 
+    private StringUtils() {
+    }
+
     /**
      * Replaces multiple consecutive whitespaces with a single whitespace.
      *

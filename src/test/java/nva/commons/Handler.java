@@ -2,7 +2,6 @@ package nva.commons;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import nva.commons.exceptions.ApiGatewayException;
 import nva.commons.hanlders.ApiGatewayHandler;
@@ -18,8 +17,6 @@ public class Handler extends ApiGatewayHandler<RequestBody, String> {
     private String path;
     private RequestBody body;
 
-    private Map<String, Integer> exceptionToStatus;
-
     /**
      * Constructor with environment.
      *
@@ -27,8 +24,6 @@ public class Handler extends ApiGatewayHandler<RequestBody, String> {
      */
     public Handler(Environment environment) {
         super(RequestBody.class, environment);
-        exceptionToStatus = new HashMap<>();
-        exceptionToStatus.put(IllegalStateException.class.getName(), HttpStatus.SC_INTERNAL_SERVER_ERROR);
     }
 
     @Override
@@ -44,11 +39,6 @@ public class Handler extends ApiGatewayHandler<RequestBody, String> {
 
     private Map<String, String> additionalHeaders(RequestBody input) {
         return Collections.singletonMap(HttpHeaders.WARNING, body.getField1());
-    }
-
-    @Override
-    protected int getFailureStatusCode(RequestBody input, ApiGatewayException error) {
-        return error.getStatusCode();
     }
 
     @Override
