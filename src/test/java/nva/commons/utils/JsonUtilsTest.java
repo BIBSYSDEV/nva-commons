@@ -17,15 +17,17 @@ public class JsonUtilsTest {
     @DisplayName("jsonParser serializes empty string as null")
     @Test
     public void jsonParserSerializedEmptyStringsAsNull() throws JsonProcessingException {
-        String json = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, "emptyStringValues.json"));
-        RequestBody requestBody = JsonUtils.jsonParser.readValue(json, RequestBody.class);
-        assertThat(requestBody.getField2(), is(nullValue()));
+        readFieldFromJson("emptyStringValues.json");
     }
 
-    @DisplayName("jsonParser serializes empty string as null")
+    @DisplayName("jsonParser serializes missing string as null")
     @Test
     public void jsonParserSerializedMissingValuesAsNull() throws JsonProcessingException {
-        String json = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, "missingStringValues.json"));
+        readFieldFromJson("missingStringValues.json");
+    }
+
+    private void readFieldFromJson(String fileName) throws JsonProcessingException {
+        String json = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, fileName));
         RequestBody requestBody = JsonUtils.jsonParser.readValue(json, RequestBody.class);
         assertThat(requestBody.getField2(), is(nullValue()));
     }

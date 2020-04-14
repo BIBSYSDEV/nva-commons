@@ -34,9 +34,9 @@ public abstract class Try<T> {
 
     public abstract <S, E extends Exception> Try<S> flatMap(FunctionWithException<T, Try<S>, E> action);
 
-    public abstract <E extends Exception> T orElseThrow(Function<Try<T>, E> action) throws E;
+    public abstract <E extends Exception> T orElseThrow(Function<Failure<T>, E> action) throws E;
 
-    public abstract <E extends Exception> T orElse(FunctionWithException<Try<T>, T, E> action) throws E;
+    public abstract <E extends Exception> T orElse(FunctionWithException<Failure<T>, T, E> action) throws E;
 
     /**
      * A wrapper for actions that throw checked Exceptions. See {@see https://www.oreilly.com/content/handling
