@@ -1,6 +1,6 @@
 package nva.commons.handlers;
 
-import static nva.commons.hanlders.ApiGatewayHandler.REQUEST_ID;
+import static nva.commons.handlers.ApiGatewayHandler.REQUEST_ID;
 import static nva.commons.utils.JsonUtils.jsonParser;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -28,9 +28,6 @@ import nva.commons.Handler;
 import nva.commons.RequestBody;
 import nva.commons.exceptions.ApiGatewayException;
 import nva.commons.exceptions.TestException;
-import nva.commons.hanlders.ApiGatewayHandler;
-import nva.commons.hanlders.GatewayResponse;
-import nva.commons.hanlders.RequestInfo;
 import nva.commons.utils.Environment;
 import nva.commons.utils.IoUtils;
 import nva.commons.utils.TestLogger;
