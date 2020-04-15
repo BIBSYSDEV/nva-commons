@@ -45,8 +45,8 @@ public class ApiGatewayHandlerTest {
     public static final String SOME_ENV_VALUE = "SomeEnvValue";
     private static final String PATH = "path1/path2/path3";
     public static final String TOP_EXCEPTION_MESSAGE = "TOP Exception";
-    public static final String MIDDLE_EXCEPTION_MESSAGE = "Second Exception";
-    public static final String BOTTOM_EXCEPTION_MESSAGE = "First Exception";
+    public static final String MIDDLE_EXCEPTION_MESSAGE = "MIDDLE Exception";
+    public static final String BOTTOM_EXCEPTION_MESSAGE = "BOTTOM Exception";
     public static final String SOME_REQUEST_ID = "RequestID:123456";
     public static final int OVERRIDEN_STATUS_CODE = 418;  //I'm a teapot
     public Environment environment;
