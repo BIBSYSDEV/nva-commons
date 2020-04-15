@@ -20,6 +20,7 @@ import nva.commons.RequestBody;
 import nva.commons.exceptions.ApiIoException;
 import nva.commons.hanlders.ApiMessageParser;
 import nva.commons.utils.IoUtils;
+import nva.commons.utils.TestLogger;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -33,6 +34,8 @@ public class ApiMessageParserTest {
     private static final Path BODY_JSON_STRING = Path.of(API_GATEWAY_MESSAGES_FOLDER, "bodyIsAJsonString.json");
     private static final Path BODY_JSON_ELEMENT = Path.of(API_GATEWAY_MESSAGES_FOLDER, "bodyIsAJsonElement.json");
 
+    private final TestLogger logger = new TestLogger();
+
     private <T> ApiMessageParser<T> messageParser(ObjectMapper mapper) {
         return new ApiMessageParser<>(mapper);
     }
@@ -43,7 +46,8 @@ public class ApiMessageParserTest {
         throws JsonProcessingException {
         String notImportantInput = "{}";
         ApiMessageParser<String> parser = parserWithMapperThatThrowsIoException();
-        ApiIoException exception = assertThrows(ApiIoException.class, () -> parser.getRequestInfo(notImportantInput));
+        ApiIoException exception = assertThrows(ApiIoException.class,
+            () -> parser.getRequestInfo(notImportantInput, logger));
         assertThat(exception.getMessage(), containsString(ApiMessageParser.COULD_NOT_PARSE_REQUEST_INFO));
     }
 
@@ -53,7 +57,8 @@ public class ApiMessageParserTest {
         throws JsonProcessingException {
         String notJsonString = "some value";
         ApiMessageParser<String> parser = new ApiMessageParser<>();
-        ApiIoException exception = assertThrows(ApiIoException.class, () -> parser.getRequestInfo(notJsonString));
+        ApiIoException exception = assertThrows(ApiIoException.class,
+            () -> parser.getRequestInfo(notJsonString, logger));
         assertThat(exception.getMessage(), containsString(ApiMessageParser.COULD_NOT_PARSE_REQUEST_INFO));
     }
 
@@ -63,7 +68,8 @@ public class ApiMessageParserTest {
         throws JsonProcessingException {
         String notImportantInput = "JSON or not JSON, is not important";
         ApiMessageParser<String> parser = parserWithMapperThatThrowsIoException();
-        ApiIoException exception = assertThrows(ApiIoException.class, () -> parser.getRequestInfo(notImportantInput));
+        ApiIoException exception = assertThrows(ApiIoException.class,
+            () -> parser.getRequestInfo(notImportantInput, logger));
         assertThat(exception.getMessage(), containsString(notImportantInput));
     }
 

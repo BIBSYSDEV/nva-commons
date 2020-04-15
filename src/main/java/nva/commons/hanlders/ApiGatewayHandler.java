@@ -20,6 +20,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nva.commons.exceptions.ApiGatewayException;
+import nva.commons.exceptions.ApiGatewayUncheckedException;
+import nva.commons.exceptions.GatewayResponseSerializingException;
 import nva.commons.utils.Environment;
 import nva.commons.utils.IoUtils;
 import nva.commons.utils.JacocoGenerated;
@@ -58,9 +60,9 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
     protected transient OutputStream outputStream;
     public static final String ALLOWED_ORIGIN_ENV = "ALLOWED_ORIGIN";
 
-    protected final Environment environment;
-
     protected transient String allowedOrigin;
+
+    protected final Environment environment;
 
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
 
@@ -119,7 +121,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @throws URISyntaxException when processing fails
      */
     protected final O processInput(I input, String apiGatewayInputString, Context context) throws ApiGatewayException {
-        RequestInfo requestInfo = inputParser.getRequestInfo(apiGatewayInputString);
+        RequestInfo requestInfo = inputParser.getRequestInfo(apiGatewayInputString, logger);
         return processInput(input, requestInfo, context);
     }
 
@@ -211,11 +213,12 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @throws IOException when serializing fails
      */
     protected void writeOutput(I input, O output)
-        throws IOException {
+        throws IOException, GatewayResponseSerializingException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
-            GatewayResponse<O> gatewayResponse =
-                new GatewayResponse<>(output, getSuccessHeaders(), getSuccessStatusCode(input, output));
+            GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, getSuccessHeaders(),
+                getSuccessStatusCode(input, output));
             String responseJson = objectMapper.writeValueAsString(gatewayResponse);
+            logger.log("Serialized output:" + responseJson);
             writer.write(responseJson);
         }
     }
@@ -230,7 +233,11 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @throws IOException when serializing fails
      */
     protected void writeExpectedFailure(I input, ApiGatewayException exception, String requestId) throws IOException {
-        writeFailure(exception, getFailureStatusCode(input, exception), requestId);
+        try {
+            writeFailure(exception, getFailureStatusCode(input, exception), requestId);
+        } catch (GatewayResponseSerializingException e) {
+            throw new ApiGatewayUncheckedException(e);
+        }
     }
 
     /**
@@ -243,7 +250,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @throws IOException when the writer throws an IOException.
      */
     protected void writeFailure(Exception exception, Integer statusCode, String requestId)
-        throws IOException {
+        throws IOException, GatewayResponseSerializingException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
             String errorMessage = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
             Status status = Status.valueOf(statusCode);
@@ -270,8 +277,13 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @param exception the exception
      * @throws IOException when serializing fails
      */
-    protected void writeUnexpectedFailure(I input, Exception exception, String requestId) throws IOException {
-        writeFailure(exception, HttpStatus.SC_INTERNAL_SERVER_ERROR, requestId);
+    protected void writeUnexpectedFailure(I input, Exception exception, String requestId)
+        throws IOException {
+        try {
+            writeFailure(exception, HttpStatus.SC_INTERNAL_SERVER_ERROR, requestId);
+        } catch (GatewayResponseSerializingException e) {
+            throw new ApiGatewayUncheckedException(e);
+        }
     }
 
     protected Map<String, String> defaultHeaders() {
@@ -283,13 +295,17 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
 
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
+        context.getLogger().log("Trying to initialize");
         init(output, context);
         I inputObject = null;
         String inputString = IoUtils.streamToString(input);
+        logger.log("input:" + inputString);
         try {
             inputObject = parseInput(inputString);
+
             O response;
             response = processInput(inputObject, inputString, context);
+            logger.log("Writing response...");
             writeOutput(inputObject, response);
         } catch (ApiGatewayException e) {
             logger.log(e.getMessage());

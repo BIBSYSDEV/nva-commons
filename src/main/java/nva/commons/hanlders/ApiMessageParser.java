@@ -1,5 +1,6 @@
 package nva.commons.hanlders;
 
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,7 +38,7 @@ public class ApiMessageParser<T> {
      * @return a {@link RequestInfo} object
      * @throws ApiIoException when an {@link IOException} happens
      */
-    public RequestInfo getRequestInfo(String inputString) throws ApiIoException {
+    public RequestInfo getRequestInfo(String inputString, LambdaLogger logger) throws ApiIoException {
         try {
             return mapper.readValue(inputString, RequestInfo.class);
         } catch (JsonProcessingException e) {
