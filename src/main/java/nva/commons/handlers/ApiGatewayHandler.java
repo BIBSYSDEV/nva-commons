@@ -218,7 +218,6 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
             GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, getSuccessHeaders(),
                 getSuccessStatusCode(input, output));
             String responseJson = objectMapper.writeValueAsString(gatewayResponse);
-            logger.log("Serialized output:" + responseJson);
             writer.write(responseJson);
         }
     }
@@ -295,17 +294,15 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
 
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
-        context.getLogger().log("Trying to initialize");
         init(output, context);
         I inputObject = null;
         String inputString = IoUtils.streamToString(input);
-        logger.log("input:" + inputString);
         try {
             inputObject = parseInput(inputString);
 
             O response;
             response = processInput(inputObject, inputString, context);
-            logger.log("Writing response...");
+
             writeOutput(inputObject, response);
         } catch (ApiGatewayException e) {
             logger.log(e.getMessage());
@@ -319,6 +316,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
     }
 
     private String getStackTraceString(Exception e, String requestId) {
+        e.printStackTrace();
         String requestIdString = String.format(REQUEST_ID_LOGGING_TEMPLATE, REQUEST_ID, requestId);
         String causeQueue = CAUSE_PREFIX + createCauseString(e);
         String stackTrace = STACK_TRACE_PREFIX + arrayToStream(e.getStackTrace());
