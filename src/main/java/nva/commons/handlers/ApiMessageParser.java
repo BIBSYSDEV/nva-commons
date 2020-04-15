@@ -1,4 +1,4 @@
-package nva.commons.hanlders;
+package nva.commons.handlers;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.fasterxml.jackson.core.JsonProcessingException;

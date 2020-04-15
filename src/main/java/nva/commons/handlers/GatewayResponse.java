@@ -1,4 +1,4 @@
-package nva.commons.hanlders;
+package nva.commons.handlers;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
