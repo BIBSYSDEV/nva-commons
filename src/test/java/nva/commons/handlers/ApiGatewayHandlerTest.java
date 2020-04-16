@@ -24,13 +24,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.management.modelmbean.XMLParseException;
+import no.unit.nva.testutils.TestLogger;
 import nva.commons.Handler;
 import nva.commons.RequestBody;
 import nva.commons.exceptions.ApiGatewayException;
 import nva.commons.exceptions.TestException;
 import nva.commons.utils.Environment;
 import nva.commons.utils.IoUtils;
-import nva.commons.utils.TestLogger;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
@@ -46,7 +46,7 @@ public class ApiGatewayHandlerTest {
     private static final String PATH = "path1/path2/path3";
     public static final String TOP_EXCEPTION_MESSAGE = "TOP Exception";
     public static final String MIDDLE_EXCEPTION_MESSAGE = "MIDDLE Exception";
-    public static final String BOTTOM_EXCEPTION_MESSAGE = "BOTTOM Exception";
+    public static final String BOTTOM_EXCEPTION_MESSAGE = "BOTTOM9 Exception";
     public static final String SOME_REQUEST_ID = "RequestID:123456";
     public static final int OVERRIDEN_STATUS_CODE = 418;  //I'm a teapot
     public Environment environment;
