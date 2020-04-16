@@ -16,10 +16,10 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Path;
+import no.unit.nva.testutils.TestLogger;
 import nva.commons.RequestBody;
 import nva.commons.exceptions.ApiIoException;
 import nva.commons.utils.IoUtils;
-import nva.commons.utils.TestLogger;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

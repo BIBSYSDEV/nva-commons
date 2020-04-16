@@ -1,7 +1,6 @@
 package nva.commons.handlers;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashMap;
 import java.util.Map;
 import nva.commons.utils.JacocoGenerated;
@@ -12,10 +11,11 @@ public class RequestInfo {
     public static final String PROXY_TAG = "proxy";
     private Map<String, String> headers;
     private String path;
-    private String proxy;
+    private Map<String,String> pathParameters;
 
     public RequestInfo() {
         this.headers = new HashMap<>();
+        this.pathParameters = new HashMap<>();
     }
 
     @JacocoGenerated
@@ -39,27 +39,14 @@ public class RequestInfo {
     }
 
     @JacocoGenerated
-    public String getProxy() {
-        return proxy;
+    public Map<String,String> getPathParameters() {
+        return pathParameters;
     }
 
     @JacocoGenerated
-    public void setProxy(String proxy) {
-        this.proxy = proxy;
+    public void setPathParameters(Map<String,String> pathParameters) {
+        this.pathParameters = pathParameters;
     }
 
-    /**
-     * Method for extracting the "proxy" value.
-     *
-     * @param pathParameters the pathParameters object in the json representation of the ApiGateway  input.
-     */
-    @JacocoGenerated
-    @JsonProperty("pathParameters")
-    public void unnestProxy(Map<String, Object> pathParameters) {
-        if (pathParameters != null) {
-            String proxy = (String) pathParameters.get(PROXY_TAG);
-            setProxy(proxy);
-        }
-    }
 }
 
