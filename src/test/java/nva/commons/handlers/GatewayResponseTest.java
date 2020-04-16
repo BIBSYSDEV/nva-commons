@@ -34,7 +34,7 @@ public class GatewayResponseTest {
         GatewayResponse<RequestBody> leftResponse = sampleGatewayResponse();
         GatewayResponse<RequestBody> rightResponse = sampleGatewayResponse();
 
-        assertThat(leftResponse.hashCode(), is(equalTo(rightResponse.hashCode())));
+        assertThat(leftResponse, is(equalTo(rightResponse)));
     }
 
     private GatewayResponse<RequestBody> sampleGatewayResponse()

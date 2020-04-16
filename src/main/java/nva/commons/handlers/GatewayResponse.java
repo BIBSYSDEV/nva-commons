@@ -77,9 +77,9 @@ public class GatewayResponse<T> implements Serializable {
             return false;
         }
         GatewayResponse<?> that = (GatewayResponse<?>) o;
-        return statusCode == that.statusCode &&
-            Objects.equals(body, that.body) &&
-            Objects.equals(headers, that.headers);
+        return statusCode == that.statusCode
+            && Objects.equals(body, that.body)
+            && Objects.equals(headers, that.headers);
     }
 
     @Override
