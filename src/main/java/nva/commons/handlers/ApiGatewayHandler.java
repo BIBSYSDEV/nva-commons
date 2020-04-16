@@ -45,6 +45,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
 
     public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
     public static final String CONTENT_TYPE = "Content-Type";
+    public static final String APPLICATION_PROBLEM_JSON = "application/problem+json";
 
     private static final ObjectMapper objectMapper = JsonUtils.jsonParser;
     public static final String DEFAULT_ERROR_MESSAGE = "Unknown error in handler";
@@ -190,7 +191,9 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @return a map with the response headers in case of failure.
      */
     protected Map<String, String> getFailureHeaders() {
-        return defaultHeaders();
+        Map<String, String> headers = defaultHeaders();
+        headers.put(CONTENT_TYPE, APPLICATION_PROBLEM_JSON);
+        return headers;
     }
 
     /**

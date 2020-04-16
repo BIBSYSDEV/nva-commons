@@ -1,5 +1,7 @@
 package nva.commons.handlers;
 
+import static nva.commons.handlers.ApiGatewayHandler.APPLICATION_PROBLEM_JSON;
+import static nva.commons.handlers.ApiGatewayHandler.CONTENT_TYPE;
 import static nva.commons.handlers.ApiGatewayHandler.REQUEST_ID;
 import static nva.commons.utils.JsonUtils.jsonParser;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -8,6 +10,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -174,6 +177,19 @@ public class ApiGatewayHandlerTest {
 
         assertThat(problem.getParameters().get(REQUEST_ID), is(equalTo(SOME_REQUEST_ID)));
         assertThat(problem.getStatus(), is(Status.NOT_FOUND));
+    }
+
+    @Test
+    @DisplayName("Failure message contains application/problem+json ContentType when an Exception is thrown")
+    public void failureMessageContainsApplicationProblemJsonContentTypeWhenExceptionIsThrown()
+            throws IOException {
+        Handler handler = handlerThatThrowsExceptions();
+        ByteArrayOutputStream outputStream = outputStream();
+        handler.handleRequest(requestWithHeadersAndPath(), outputStream, context);
+
+        GatewayResponse<Problem> responseParsing = getApiGatewayResponse(outputStream);
+
+        assertThat(responseParsing.getHeaders().get(CONTENT_TYPE), is(equalTo(APPLICATION_PROBLEM_JSON)));
     }
 
     @Test
