@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import nva.commons.exceptions.GatewayResponseSerializingException;
 import nva.commons.utils.JsonUtils;
 
@@ -65,6 +66,25 @@ public class GatewayResponse<T> implements Serializable {
 
     public int getStatusCode() {
         return statusCode;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        GatewayResponse<?> that = (GatewayResponse<?>) o;
+        return statusCode == that.statusCode
+            && Objects.equals(body, that.body)
+            && Objects.equals(headers, that.headers);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(body, headers, statusCode);
     }
 }
 
