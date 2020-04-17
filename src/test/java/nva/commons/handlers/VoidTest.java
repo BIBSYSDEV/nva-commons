@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class VoidTest {
+public class VoidTest {
 
     public static final String APIGATEWAY_MESSAGES_FOLDER = "apiGatewayMessages";
     public static final String MISSING_BODY_REQUEST = "missingBody.json";
