@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import nva.commons.exceptions.GatewayResponseSerializingException;
+import nva.commons.utils.JacocoGenerated;
 import nva.commons.utils.JsonUtils;
 
 public class GatewayResponse<T> implements Serializable {
@@ -69,6 +70,7 @@ public class GatewayResponse<T> implements Serializable {
     }
 
     @Override
+    @JacocoGenerated
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -83,6 +85,7 @@ public class GatewayResponse<T> implements Serializable {
     }
 
     @Override
+    @JacocoGenerated
     public int hashCode() {
         return Objects.hash(body, headers, statusCode);
     }

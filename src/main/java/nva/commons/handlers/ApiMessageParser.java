@@ -52,7 +52,7 @@ public class ApiMessageParser<T> {
      * @param inputString the JSON string of the Rest-API request.
      * @param tclass      the class to map the the JSON object to.
      * @return An instance of the input class.
-     * @throws IOException when reading fails or the JSON parser throws an Exception.
+     * @throws IOException when reading fails, or the JSON parser throws an Exception.
      */
     @SuppressWarnings("unchecked")
     public T getBodyElementFromJson(String inputString, Class<T> tclass) throws IOException {

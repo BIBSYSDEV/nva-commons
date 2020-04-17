@@ -50,9 +50,17 @@ dependencies {
 }
 
 test {
-    useJUnitPlatform()
+    useJUnitPlatform{
+    }
     failFast = true
     finalizedBy jacocoTestReport
+    testLogging{
+        events 'failed', 'passed', 'skipped'
+    }
+    Map<String,String> envVariables= new HashMap<>();
+    envVariables.put("EXISTING_NON_EMPTY_VARIABLE","SomeContent")
+    envVariables.put("EXISTING_EMPTY_VARIABLE","  ")
+    environment(envVariables)
 }
 
 jacocoTestReport {
