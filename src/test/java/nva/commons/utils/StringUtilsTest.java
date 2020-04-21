@@ -34,7 +34,16 @@ public class StringUtilsTest {
     public void removeMultipleWhitespacesRemovesCombinationOfSpaces() {
         String combinationOfSpaces = "The \n quick\n brown\n fox  jumps over the lazy dog";
         String output = StringUtils.removeMultipleWhiteSpaces(combinationOfSpaces);
-        ;
+
         assertThat(output, is(equalTo(EXPECTED_OUTPUT)));
+    }
+
+    @Test
+    @DisplayName("removeWhitespaces removes whitespaces")
+    public void removeWhiteSpacesRemovesWhiteSpaces() {
+        String combinationOfSpaces = "The \n quick\n brown\n fox  jumps over the lazy dog";
+        String expected = "Thequickbrownfoxjumpsoverthelazydog";
+        String output = StringUtils.removeWhiteSpaces(combinationOfSpaces);
+        assertThat(output, is(equalTo(expected)));
     }
 }
