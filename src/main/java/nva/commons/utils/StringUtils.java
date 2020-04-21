@@ -34,11 +34,6 @@ public final class StringUtils {
      */
     public static String removeWhiteSpaces(String input) {
         String buffer = input.trim();
-        String result = buffer.replaceAll(WHITESPACE, EMPTY_STRING);
-        while (!result.equals(buffer)) {
-            buffer = result;
-            result = buffer.replaceAll(WHITESPACE, EMPTY_STRING);
-        }
-        return result;
+        return buffer.replaceAll(WHITESPACE, EMPTY_STRING);
     }
 }
