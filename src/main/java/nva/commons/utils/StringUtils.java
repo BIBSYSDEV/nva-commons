@@ -3,7 +3,7 @@ package nva.commons.utils;
 public final class StringUtils {
 
     public static final String DOUBLE_WHITESPACE = "\\s\\s";
-    public static final String WHITESPACE = "\\s+";
+    public static final String WHITESPACES = "\\s+";
     public static final String SPACE = " ";
     public static final String EMPTY_STRING = "";
 
@@ -33,6 +33,6 @@ public final class StringUtils {
      * @return a string without spaces.
      */
     public static String removeWhiteSpaces(String input) {
-        return input.replaceAll(WHITESPACE, EMPTY_STRING);
+        return input.replaceAll(WHITESPACES, EMPTY_STRING);
     }
 }
