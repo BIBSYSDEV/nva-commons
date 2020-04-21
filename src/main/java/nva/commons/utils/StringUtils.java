@@ -33,7 +33,6 @@ public final class StringUtils {
      * @return a string without spaces.
      */
     public static String removeWhiteSpaces(String input) {
-        String buffer = input.trim();
-        return buffer.replaceAll(WHITESPACE, EMPTY_STRING);
+        return input.replaceAll(WHITESPACE, EMPTY_STRING);
     }
 }
