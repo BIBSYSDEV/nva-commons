@@ -3,7 +3,7 @@ package nva.commons.utils;
 public final class StringUtils {
 
     public static final String DOUBLE_WHITESPACE = "\\s\\s";
-    public static final String WHITESPACE = "\\s";
+    public static final String WHITESPACE = "\\s+";
     public static final String SPACE = " ";
     public static final String EMPTY_STRING = "";
 
