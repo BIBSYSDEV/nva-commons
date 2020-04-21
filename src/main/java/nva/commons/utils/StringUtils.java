@@ -27,7 +27,7 @@ public final class StringUtils {
     }
 
     /**
-     * Remove all whitespaces
+     * Remove all whitespaces.
      *
      * @param input A string with or without multiple consecutive whitespaces.
      * @return A string without multiple consecutive whitespaces where are whitespaces have been replaced by a space.
