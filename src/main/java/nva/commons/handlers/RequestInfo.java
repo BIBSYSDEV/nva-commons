@@ -19,6 +19,7 @@ public class RequestInfo {
     public RequestInfo() {
         this.headers = new HashMap<>();
         this.pathParameters = new HashMap<>();
+        this.queryParameters = new HashMap<>();
     }
 
     @JacocoGenerated
