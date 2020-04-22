@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class RequestInfoTest {
 
@@ -40,13 +40,9 @@ public class RequestInfoTest {
 
         JsonPointer jsonPointer = JsonPointer.compile(JSON_POINTER);
         JsonNode jsonNode = requestInfo.getRequestContext().at(jsonPointer);
-        if (!jsonNode.isMissingNode()) {
-            assertEquals(VALUE, jsonNode.textValue());
-        } else {
-            fail();
-        }
 
-
+        assertFalse(jsonNode.isMissingNode());
+        assertEquals(VALUE, jsonNode.textValue());
     }
 
 }
