@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import nva.commons.utils.JacocoGenerated;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -15,7 +17,7 @@ public class RequestInfo {
     private Map<String, String> pathParameters;
     @JsonProperty("queryStringParameters")
     private Map<String, String> queryParameters;
-    private Map<String, Object> requestContext;
+    private JsonNode requestContext;
 
     public RequestInfo() {
         this.headers = new HashMap<>();
@@ -64,12 +66,12 @@ public class RequestInfo {
     }
 
     @JacocoGenerated
-    public Map<String, Object> getRequestContext() {
+    public JsonNode getRequestContext() {
         return requestContext;
     }
 
     @JacocoGenerated
-    public void setRequestContext(Map<String, Object> requestContext) {
+    public void setRequestContext(JsonNode requestContext) {
         this.requestContext = requestContext;
     }
 }
