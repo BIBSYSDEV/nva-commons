@@ -15,6 +15,7 @@ public class RequestInfo {
     private Map<String, String> pathParameters;
     @JsonProperty("queryStringParameters")
     private Map<String, String> queryParameters;
+    private Map<String, Object> requestContext;
 
     public RequestInfo() {
         this.headers = new HashMap<>();
@@ -60,6 +61,16 @@ public class RequestInfo {
     @JacocoGenerated
     public void setQueryParameters(Map<String, String> queryParameters) {
         this.queryParameters = queryParameters;
+    }
+
+    @JacocoGenerated
+    public Map<String, Object> getRequestContext() {
+        return requestContext;
+    }
+
+    @JacocoGenerated
+    public void setRequestContext(Map<String, Object> requestContext) {
+        this.requestContext = requestContext;
     }
 }
 
