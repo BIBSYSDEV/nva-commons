@@ -1,5 +1,7 @@
 package nva.commons.handlers;
 
+import static java.util.Objects.isNull;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -30,7 +32,7 @@ public class RequestInfo {
     }
 
     /**
-     * headers.
+     * Get the headers map.
      *
      * @return headers.
      */
@@ -44,7 +46,7 @@ public class RequestInfo {
      * @param headers the headers.
      */
     public void setHeaders(Map<String, String> headers) {
-        if (headers == null) {
+        if (isNull(headers)) {
             this.headers = new HashMap<>();
         } else {
             this.headers = headers;
@@ -63,7 +65,7 @@ public class RequestInfo {
     /**
      * Set path.
      *
-     * @param path path
+     * @param path path.
      */
     public void setPath(String path) {
         this.path = path;
@@ -84,7 +86,7 @@ public class RequestInfo {
      * @param pathParameters the pathParameters map.
      */
     public void setPathParameters(Map<String, String> pathParameters) {
-        if (pathParameters == null) {
+        if (isNull(pathParameters)) {
             this.pathParameters = new HashMap<>();
         } else {
             this.pathParameters = pathParameters;
@@ -106,7 +108,7 @@ public class RequestInfo {
      * @param queryParameters the query parameters.
      */
     public void setQueryParameters(Map<String, String> queryParameters) {
-        if (queryParameters == null) {
+        if (isNull(queryParameters)) {
             this.queryParameters = new HashMap<>();
         } else {
             this.queryParameters = queryParameters;
@@ -120,7 +122,7 @@ public class RequestInfo {
 
     @JacocoGenerated
     public void setRequestContext(JsonNode requestContext) {
-        if (requestContext == null) {
+        if (isNull(requestContext)) {
             this.requestContext = JsonUtils.jsonParser.createObjectNode();
         } else {
             this.requestContext = requestContext;
