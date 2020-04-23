@@ -1,12 +1,14 @@
 package nva.commons.handlers;
 
+import static java.util.Objects.isNull;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.fasterxml.jackson.databind.JsonNode;
 import nva.commons.utils.JacocoGenerated;
+import nva.commons.utils.JsonUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RequestInfo {
@@ -19,50 +21,98 @@ public class RequestInfo {
     private Map<String, String> queryParameters;
     private JsonNode requestContext;
 
+    /**
+     * Default constructor.
+     */
     public RequestInfo() {
         this.headers = new HashMap<>();
         this.pathParameters = new HashMap<>();
         this.queryParameters = new HashMap<>();
+        this.requestContext = JsonUtils.jsonParser.createObjectNode();
     }
 
-    @JacocoGenerated
+    /**
+     * Get the headers map.
+     *
+     * @return headers.
+     */
     public Map<String, String> getHeaders() {
         return headers;
     }
 
-    @JacocoGenerated
+    /**
+     * Set headers. Null input results to an empty map.
+     *
+     * @param headers the headers.
+     */
     public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
+        if (isNull(headers)) {
+            this.headers = new HashMap<>();
+        } else {
+            this.headers = headers;
+        }
     }
 
-    @JacocoGenerated
+    /**
+     * Get path.
+     *
+     * @return path.
+     */
     public String getPath() {
         return path;
     }
 
-    @JacocoGenerated
+    /**
+     * Set path.
+     *
+     * @param path path.
+     */
     public void setPath(String path) {
         this.path = path;
     }
 
-    @JacocoGenerated
+    /**
+     * Get pathParameters map.
+     *
+     * @return the pathParameters map
+     */
     public Map<String, String> getPathParameters() {
         return pathParameters;
     }
 
-    @JacocoGenerated
+    /**
+     * Set the pathParameters map. Null input results to an empty map.
+     *
+     * @param pathParameters the pathParameters map.
+     */
     public void setPathParameters(Map<String, String> pathParameters) {
-        this.pathParameters = pathParameters;
+        if (isNull(pathParameters)) {
+            this.pathParameters = new HashMap<>();
+        } else {
+            this.pathParameters = pathParameters;
+        }
     }
 
-    @JacocoGenerated
+    /**
+     * Get the queryParameters map.
+     *
+     * @return the queryParameters map.
+     */
     public Map<String, String> getQueryParameters() {
         return queryParameters;
     }
 
-    @JacocoGenerated
+    /**
+     * Set the queryParameters map. Null input results to an empty map.
+     *
+     * @param queryParameters the query parameters.
+     */
     public void setQueryParameters(Map<String, String> queryParameters) {
-        this.queryParameters = queryParameters;
+        if (isNull(queryParameters)) {
+            this.queryParameters = new HashMap<>();
+        } else {
+            this.queryParameters = queryParameters;
+        }
     }
 
     @JacocoGenerated
@@ -72,7 +122,11 @@ public class RequestInfo {
 
     @JacocoGenerated
     public void setRequestContext(JsonNode requestContext) {
-        this.requestContext = requestContext;
+        if (isNull(requestContext)) {
+            this.requestContext = JsonUtils.jsonParser.createObjectNode();
+        } else {
+            this.requestContext = requestContext;
+        }
     }
 }
 
