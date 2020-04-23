@@ -2,8 +2,11 @@ package nva.commons.handlers;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
 import java.util.Map;
+import nva.commons.utils.JacocoGenerated;
+import nva.commons.utils.JsonUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RequestInfo {
@@ -14,6 +17,7 @@ public class RequestInfo {
     private Map<String, String> pathParameters;
     @JsonProperty("queryStringParameters")
     private Map<String, String> queryParameters;
+    private JsonNode requestContext;
 
     /**
      * Default constructor.
@@ -105,6 +109,20 @@ public class RequestInfo {
             this.queryParameters = new HashMap<>();
         } else {
             this.queryParameters = queryParameters;
+        }
+    }
+
+    @JacocoGenerated
+    public JsonNode getRequestContext() {
+        return requestContext;
+    }
+
+    @JacocoGenerated
+    public void setRequestContext(JsonNode requestContext) {
+        if (requestContext == null) {
+            this.requestContext = JsonUtils.jsonParser.createObjectNode();
+        } else {
+            this.requestContext = requestContext;
         }
     }
 }
