@@ -24,7 +24,7 @@ public class ApiMessageParser<T> {
 
     @JacocoGenerated
     public ApiMessageParser() {
-        this.mapper = JsonUtils.jsonParser;
+        this.mapper = JsonUtils.objectMapper;
     }
 
     public ApiMessageParser(ObjectMapper mapper) {

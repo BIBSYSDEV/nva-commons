@@ -46,7 +46,7 @@ public class GatewayResponse<T> implements Serializable {
         throws GatewayResponseSerializingException {
         try {
             this.statusCode = statusCode;
-            this.body = JsonUtils.jsonParser.writeValueAsString(body);
+            this.body = JsonUtils.objectMapper.writeValueAsString(body);
             this.headers = Collections.unmodifiableMap(Map.copyOf(headers));
         } catch (JsonProcessingException e) {
             throw new GatewayResponseSerializingException(e);
@@ -58,7 +58,7 @@ public class GatewayResponse<T> implements Serializable {
     }
 
     public T getBodyObject(Class<T> clazz) throws JsonProcessingException {
-        return JsonUtils.jsonParser.readValue(body, clazz);
+        return JsonUtils.objectMapper.readValue(body, clazz);
     }
 
     public Map<String, String> getHeaders() {

@@ -3,7 +3,7 @@ package nva.commons.handlers;
 import static nva.commons.handlers.ApiGatewayHandler.APPLICATION_PROBLEM_JSON;
 import static nva.commons.handlers.ApiGatewayHandler.CONTENT_TYPE;
 import static nva.commons.handlers.ApiGatewayHandler.REQUEST_ID;
-import static nva.commons.utils.JsonUtils.jsonParser;
+import static nva.commons.utils.JsonUtils.objectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.Is.is;
@@ -123,7 +123,7 @@ public class ApiGatewayHandlerTest {
         ByteArrayOutputStream outputStream = outputStream();
         handler.handleRequest(input, outputStream, context);
         String outputString = outputStream.toString(StandardCharsets.UTF_8);
-        GatewayResponse<String> response = jsonParser.readValue(outputString, GatewayResponse.class);
+        GatewayResponse<String> response = objectMapper.readValue(outputString, GatewayResponse.class);
         assertTrue(response.getHeaders().containsKey(HttpHeaders.WARNING));
     }
 
@@ -218,7 +218,7 @@ public class ApiGatewayHandlerTest {
     private GatewayResponse<Problem> getApiGatewayResponse(ByteArrayOutputStream outputStream)
         throws JsonProcessingException {
         TypeReference<GatewayResponse<Problem>> tr = new TypeReference<>() {};
-        return jsonParser.readValue(outputStream.toString(StandardCharsets.UTF_8), tr);
+        return objectMapper.readValue(outputStream.toString(StandardCharsets.UTF_8), tr);
     }
 
     private Handler handlerThatThrowsUncheckedExceptions() {
@@ -287,7 +287,7 @@ public class ApiGatewayHandlerTest {
     }
 
     private InputStream requestWithHeadersAndPath() throws JsonProcessingException {
-        ObjectNode request = jsonParser.createObjectNode();
+        ObjectNode request = objectMapper.createObjectNode();
         ObjectNode node = createBody();
         request.set("body", node);
         request.set("headers", createHeaders());
@@ -296,12 +296,12 @@ public class ApiGatewayHandlerTest {
     }
 
     private InputStream jsonNodeToInputStream(JsonNode request) throws JsonProcessingException {
-        String requestString = jsonParser.writeValueAsString(request);
+        String requestString = objectMapper.writeValueAsString(request);
         return IoUtils.stringToStream(requestString);
     }
 
     private InputStream requestWithHeaders() throws JsonProcessingException {
-        ObjectNode request = jsonParser.createObjectNode();
+        ObjectNode request = objectMapper.createObjectNode();
         ObjectNode node = createBody();
         request.set("body", node);
         request.set("headers", createHeaders());
@@ -312,14 +312,14 @@ public class ApiGatewayHandlerTest {
         Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
         headers.put(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
-        return jsonParser.convertValue(headers, JsonNode.class);
+        return objectMapper.convertValue(headers, JsonNode.class);
     }
 
     private ObjectNode createBody() {
         RequestBody requestBody = new RequestBody();
         requestBody.setField1("value1");
         requestBody.setField2("value2");
-        return jsonParser.convertValue(requestBody, ObjectNode.class);
+        return objectMapper.convertValue(requestBody, ObjectNode.class);
     }
 
     private ByteArrayOutputStream outputStream() {
