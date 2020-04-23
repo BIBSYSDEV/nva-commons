@@ -40,6 +40,7 @@ dependencies {
     implementation group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.23.0'
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-api-gateway', version: awsSdkVersion
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonVersion
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
     implementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: jacksonVersion
 
