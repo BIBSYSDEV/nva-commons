@@ -26,6 +26,7 @@ public class RequestInfo {
         this.headers = new HashMap<>();
         this.pathParameters = new HashMap<>();
         this.queryParameters = new HashMap<>();
+        this.requestContext = JsonUtils.jsonParser.createObjectNode();
     }
 
     /**
