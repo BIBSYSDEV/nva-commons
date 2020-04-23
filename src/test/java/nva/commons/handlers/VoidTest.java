@@ -51,7 +51,7 @@ public class VoidTest {
         ByteArrayOutputStream outputStream = responseFromVoidHandler(MISSING_BODY_REQUEST);
 
         TypeReference<GatewayResponse<String>> tr = new TypeReference<>() {};
-        GatewayResponse<String> output = JsonUtils.jsonParser.readValue(outputStream.toString(), tr);
+        GatewayResponse<String> output = JsonUtils.objectMapper.readValue(outputStream.toString(), tr);
         assertThat(output.getStatusCode(), is(equalTo(HttpStatus.SC_OK)));
     }
 
@@ -63,7 +63,7 @@ public class VoidTest {
         ByteArrayOutputStream outputStream = responseFromVoidHandler(EMPT_BODY_REQUEST);
 
         TypeReference<GatewayResponse<String>> tr = new TypeReference<>() {};
-        GatewayResponse<String> output = JsonUtils.jsonParser.readValue(outputStream.toString(), tr);
+        GatewayResponse<String> output = JsonUtils.objectMapper.readValue(outputStream.toString(), tr);
         assertThat(output.getStatusCode(), is(equalTo(HttpStatus.SC_OK)));
     }
 

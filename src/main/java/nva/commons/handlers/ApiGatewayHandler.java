@@ -47,7 +47,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String APPLICATION_PROBLEM_JSON = "application/problem+json";
 
-    private static final ObjectMapper objectMapper = JsonUtils.jsonParser;
+    private static final ObjectMapper objectMapper = JsonUtils.objectMapper;
     public static final String DEFAULT_ERROR_MESSAGE = "Unknown error in handler";
     public static final String STACK_TRACE_DELIMITER = ":";
     private static final String CAUSE_PREFIX = "EXCEPTION_CAUSE:";

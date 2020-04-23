@@ -1,6 +1,6 @@
 package nva.commons.utils;
 
-import static nva.commons.utils.JsonUtils.jsonParser;
+import static nva.commons.utils.JsonUtils.objectMapper;
 import static nva.commons.utils.MockClaims.AUTHORIZER_NODE;
 import static nva.commons.utils.MockClaims.CLAIMS_NODE;
 import static nva.commons.utils.MockClaims.CUSTOM_FEIDE_ID;
@@ -23,7 +23,7 @@ public class MockClaimsTest {
     @DisplayName("mockClaims contains custom feideId")
     public void mockClaimsContainsCustomFeideId() {
         ObjectNode root = mockContext();
-        JsonNode mockEvent = MockClaims.apiGatewayEvent(root, jsonParser);
+        JsonNode mockEvent = MockClaims.apiGatewayEvent(root, objectMapper);
         String fieldIdClaimPath = String.format(PATH_TEMPLATE, REQUEST_CONTEXT_NODE,
             AUTHORIZER_NODE,
             CLAIMS_NODE,
@@ -35,8 +35,8 @@ public class MockClaimsTest {
     @Test
     @DisplayName("mockClaims creates request context node if it does not exist")
     public void mockClaimsCreatesRequestContextNodeIfItDoesNotExist() {
-        ObjectNode root = jsonParser.createObjectNode();
-        JsonNode mockEvent = MockClaims.apiGatewayEvent(root, jsonParser);
+        ObjectNode root = objectMapper.createObjectNode();
+        JsonNode mockEvent = MockClaims.apiGatewayEvent(root, objectMapper);
         String fieldIdClaimPath = String.format(PATH_TEMPLATE, REQUEST_CONTEXT_NODE,
             AUTHORIZER_NODE,
             CLAIMS_NODE,
@@ -49,7 +49,7 @@ public class MockClaimsTest {
     @DisplayName("mockClaims contains custom org number")
     public void mockClaimsContainsCustomOrgNumber() {
         ObjectNode root = mockContext();
-        JsonNode mockEvent = MockClaims.apiGatewayEvent(root, jsonParser);
+        JsonNode mockEvent = MockClaims.apiGatewayEvent(root, objectMapper);
         String fieldIdClaimPath = String.format(PATH_TEMPLATE, REQUEST_CONTEXT_NODE,
             AUTHORIZER_NODE,
             CLAIMS_NODE,
@@ -59,8 +59,8 @@ public class MockClaimsTest {
     }
 
     private ObjectNode mockContext() {
-        ObjectNode root = jsonParser.createObjectNode();
-        root.set(REQUEST_CONTEXT_NODE, jsonParser.createObjectNode());
+        ObjectNode root = objectMapper.createObjectNode();
+        root.set(REQUEST_CONTEXT_NODE, objectMapper.createObjectNode());
         return root;
     }
 }

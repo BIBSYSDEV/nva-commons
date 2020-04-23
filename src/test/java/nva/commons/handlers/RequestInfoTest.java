@@ -1,6 +1,6 @@
 package nva.commons.handlers;
 
-import static nva.commons.utils.JsonUtils.jsonParser;
+import static nva.commons.utils.JsonUtils.objectMapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -103,7 +103,7 @@ public class RequestInfoTest {
             )
         );
 
-        RequestInfo requestInfo = jsonParser.readValue(jsonParser.writeValueAsString(map), RequestInfo.class);
+        RequestInfo requestInfo = objectMapper.readValue(objectMapper.writeValueAsString(map), RequestInfo.class);
 
         JsonPointer jsonPointer = JsonPointer.compile(JSON_POINTER);
         JsonNode jsonNode = requestInfo.getRequestContext().at(jsonPointer);
@@ -115,7 +115,7 @@ public class RequestInfoTest {
     private void checkForNonNullMap(Path resourceFile, Function<RequestInfo, Object> getObject)
         throws JsonProcessingException {
         String apiGatewayEvent = IoUtils.stringFromResources(resourceFile);
-        RequestInfo requestInfo = jsonParser.readValue(apiGatewayEvent, RequestInfo.class);
+        RequestInfo requestInfo = objectMapper.readValue(apiGatewayEvent, RequestInfo.class);
         assertNotNull(getObject.apply(requestInfo));
     }
 }

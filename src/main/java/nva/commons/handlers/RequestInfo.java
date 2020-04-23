@@ -28,7 +28,7 @@ public class RequestInfo {
         this.headers = new HashMap<>();
         this.pathParameters = new HashMap<>();
         this.queryParameters = new HashMap<>();
-        this.requestContext = JsonUtils.jsonParser.createObjectNode();
+        this.requestContext = JsonUtils.objectMapper.createObjectNode();
     }
 
     /**
@@ -123,7 +123,7 @@ public class RequestInfo {
     @JacocoGenerated
     public void setRequestContext(JsonNode requestContext) {
         if (isNull(requestContext)) {
-            this.requestContext = JsonUtils.jsonParser.createObjectNode();
+            this.requestContext = JsonUtils.objectMapper.createObjectNode();
         } else {
             this.requestContext = requestContext;
         }

@@ -16,7 +16,7 @@ import org.zalando.problem.ProblemModule;
 
 public final class JsonUtils {
 
-    public static final ObjectMapper jsonParser = createJsonParser();
+    public static final ObjectMapper objectMapper = createJsonParser();
 
     private JsonUtils() {
     }
