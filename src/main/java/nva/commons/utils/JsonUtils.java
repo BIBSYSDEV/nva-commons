@@ -29,6 +29,7 @@ public final class JsonUtils {
 
         return new ObjectMapper(jsonFactory)
             .registerModule(new ProblemModule())
+            //TODO: JavaTimeModule belongs to an obsolete library, find alternative
             .registerModule(new JavaTimeModule())
             .registerModule(emptyStringAsNullModule())
             .enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
