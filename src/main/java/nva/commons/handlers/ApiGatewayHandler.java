@@ -1,7 +1,6 @@
 package nva.commons.handlers;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedWriter;
@@ -28,6 +27,7 @@ import nva.commons.utils.JacocoGenerated;
 import nva.commons.utils.JsonUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
+import org.slf4j.Logger;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 import org.zalando.problem.ThrowableProblem;
@@ -39,7 +39,7 @@ import org.zalando.problem.ThrowableProblem;
  * @param <I> Class of the object in the body field of the ApiGateway message.
  * @param <O> Class of the response object.
  * @see <a href="https://github.com/awslabs/aws-serverless-java-container">aws-serverless-container</a> for
- *     alternative solutions.
+ *         alternative solutions.
  */
 public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
 
@@ -55,19 +55,21 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
     private static final String SUPPRESSED_PREFIX = "SUPPRESSED_STACK:";
     public static final String REQUEST_ID = "requestId";
     public static final String REQUEST_ID_LOGGING_TEMPLATE = "%s:%s";
-
-    private final transient Class<I> iclass;
-    protected transient LambdaLogger logger;
-    protected transient OutputStream outputStream;
     public static final String ALLOWED_ORIGIN_ENV = "ALLOWED_ORIGIN";
 
-    protected transient String allowedOrigin;
+    protected static Logger logger;
 
+
+    private final transient Class<I> iclass;
     protected final Environment environment;
+
+    protected transient OutputStream outputStream;
+    protected transient String allowedOrigin;
 
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
 
     private final transient ApiMessageParser<I> inputParser = new ApiMessageParser<>();
+
 
     /**
      * The input class should be set explicitly by the inherting class.
@@ -93,7 +95,6 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
 
     private void init(OutputStream outputStream, Context context) {
         this.outputStream = outputStream;
-        this.logger = context.getLogger();
         this.allowedOrigin = environment.readEnv(ALLOWED_ORIGIN_ENV);
     }
 
@@ -122,7 +123,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @throws URISyntaxException when processing fails
      */
     protected final O processInput(I input, String apiGatewayInputString, Context context) throws ApiGatewayException {
-        RequestInfo requestInfo = inputParser.getRequestInfo(apiGatewayInputString, logger);
+        RequestInfo requestInfo = inputParser.getRequestInfo(apiGatewayInputString);
         return processInput(input, requestInfo, context);
     }
 
@@ -131,7 +132,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      *
      * @param input The request input.
      * @param error The exception that caused the failure.
-     * @return
+     * @return the failure status code.
      */
     protected int getFailureStatusCode(I input, ApiGatewayException error) {
         return error.getStatusCode();
@@ -216,10 +217,10 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @throws IOException when serializing fails
      */
     protected void writeOutput(I input, O output)
-        throws IOException, GatewayResponseSerializingException {
+            throws IOException, GatewayResponseSerializingException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
             GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, getSuccessHeaders(),
-                getSuccessStatusCode(input, output));
+                    getSuccessStatusCode(input, output));
             String responseJson = objectMapper.writeValueAsString(gatewayResponse);
             writer.write(responseJson);
         }
@@ -252,19 +253,19 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @throws IOException when the writer throws an IOException.
      */
     protected void writeFailure(Exception exception, Integer statusCode, String requestId)
-        throws IOException, GatewayResponseSerializingException {
+            throws IOException, GatewayResponseSerializingException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
             String errorMessage = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
             Status status = Status.valueOf(statusCode);
 
             ThrowableProblem problem = Problem.builder().withStatus(status)
-                                              .withTitle(status.getReasonPhrase())
-                                              .withDetail(errorMessage)
-                                              .with(REQUEST_ID, requestId)
-                                              .build();
+                    .withTitle(status.getReasonPhrase())
+                    .withDetail(errorMessage)
+                    .with(REQUEST_ID, requestId)
+                    .build();
 
             GatewayResponse<ThrowableProblem> gatewayResponse =
-                new GatewayResponse<>(problem, getFailureHeaders(), statusCode);
+                    new GatewayResponse<>(problem, getFailureHeaders(), statusCode);
             String gateWayResponseJson = objectMapper.writeValueAsString(gatewayResponse);
             writer.write(gateWayResponseJson);
         }
@@ -280,7 +281,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @throws IOException when serializing fails
      */
     protected void writeUnexpectedFailure(I input, Exception exception, String requestId)
-        throws IOException {
+            throws IOException {
         try {
             writeFailure(exception, HttpStatus.SC_INTERNAL_SERVER_ERROR, requestId);
         } catch (GatewayResponseSerializingException e) {
@@ -308,12 +309,12 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
 
             writeOutput(inputObject, response);
         } catch (ApiGatewayException e) {
-            logger.log(e.getMessage());
-            logger.log(getStackTraceString(e, context.getAwsRequestId()));
+            logger.warn(e.getMessage());
+            logger.warn(getStackTraceString(e, context.getAwsRequestId()));
             writeExpectedFailure(inputObject, e, context.getAwsRequestId());
         } catch (Exception e) {
-            logger.log(e.getMessage());
-            logger.log(getStackTraceString(e, context.getAwsRequestId()));
+            logger.warn(e.getMessage());
+            logger.warn(getStackTraceString(e, context.getAwsRequestId()));
             writeUnexpectedFailure(inputObject, e, context.getAwsRequestId());
         }
     }
@@ -324,8 +325,8 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
         String causeQueue = CAUSE_PREFIX + createCauseString(e);
         String stackTrace = STACK_TRACE_PREFIX + arrayToStream(e.getStackTrace());
         String suppressed = Optional.ofNullable(arrayToStream(e.getSuppressed()))
-                                    .map(m -> SUPPRESSED_PREFIX + m)
-                                    .orElse("");
+                .map(m -> SUPPRESSED_PREFIX + m)
+                .orElse("");
         return String.join(STACK_TRACE_DELIMITER, requestIdString, causeQueue, stackTrace, suppressed);
     }
 
@@ -346,8 +347,8 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
 
     private static <T> String arrayToStream(T[] suppressed) {
         return Stream.of(suppressed)
-                     .map(Object::toString)
-                     .collect(Collectors.joining(STACK_TRACE_DELIMITER));
+                .map(Object::toString)
+                .collect(Collectors.joining(STACK_TRACE_DELIMITER));
     }
 
     private Class<I> getIClass() {
