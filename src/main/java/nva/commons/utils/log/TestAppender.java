@@ -25,7 +25,7 @@ public class TestAppender extends AbstractAppender {
     /**
      * Builder class that follows log4j2 plugin convention.
      *
-     * @param <B> Generic Builder class
+     * @param <B> Generic Builder class.
      */
     public static class Builder<B extends Builder<B>> extends AbstractAppender.Builder<B>
         implements org.apache.logging.log4j.core.util.Builder<TestAppender> {
@@ -78,7 +78,7 @@ public class TestAppender extends AbstractAppender {
     }
 
     /**
-     * Get the log messages
+     * Get the log messages.
      *
      * @return the messages.
      */
