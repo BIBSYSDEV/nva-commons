@@ -21,6 +21,7 @@ import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 
 public class VoidTest {
 
@@ -81,6 +82,7 @@ public class VoidTest {
 
         public VoidHandler(Environment environment) {
             super(Void.class, environment);
+            logger = LoggerFactory.getLogger(VoidHandler.class);
         }
 
         @Override

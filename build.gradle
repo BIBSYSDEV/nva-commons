@@ -51,6 +51,7 @@ dependencies {
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
 
+    // If one is using nva-commons, api allows the re-usage of these packages.
     api group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.0'
     api group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
     api group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
@@ -89,20 +90,13 @@ checkstyle {
     showViolations = true
 }
 
-
-//
-//jar {
-//    enabled = false
-//}
-//
+//For usage in a shadow jar.
 //shadowJar {
-//    archiveBaseName = 'nva-commons'
-//    archiveClassifier = ''
-//    transform(com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer)
+//transform(com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer)
 //}
-
-
-build.dependsOn(shadowJar)
+//
+//
+//build.dependsOn(shadowJar)
 
 
 tasks.withType(Checkstyle) {
