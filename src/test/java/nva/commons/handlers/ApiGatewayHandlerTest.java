@@ -41,6 +41,8 @@ import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
@@ -71,7 +73,8 @@ public class ApiGatewayHandlerTest {
     @Test
     @DisplayName("ApiGatewayHandler has a constructor with input class as only parameter")
     public void apiGatewayHandlerHasACostructorWithInputClassAsOnlyParameter() {
-        ApiGatewayHandler<String, String> handler = new ApiGatewayHandler<>(String.class) {
+        Logger logger = LoggerFactory.getLogger(ApiGatewayHandler.class);
+        ApiGatewayHandler<String, String> handler = new ApiGatewayHandler<>(String.class, logger) {
             @Override
             protected String processInput(String input, RequestInfo requestInfo, Context context)
                 throws ApiGatewayException {

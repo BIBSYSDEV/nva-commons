@@ -80,8 +80,8 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @param iclass The class object of the input class.
      */
     @JacocoGenerated
-    public ApiGatewayHandler(Class<I> iclass) {
-        this(iclass, new Environment());
+    public ApiGatewayHandler(Class<I> iclass, Logger logger) {
+        this(iclass, new Environment(), logger);
     }
 
     /**
@@ -90,10 +90,11 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @param iclass      The class object of the input class.
      * @param environment the Environment from where the handler will read ENV variables.
      */
-    public ApiGatewayHandler(Class<I> iclass, Environment environment) {
+    public ApiGatewayHandler(Class<I> iclass, Environment environment, Logger logger) {
         this.iclass = iclass;
         this.environment = environment;
         this.additionalSuccessHeadersSupplier = Collections::emptyMap;
+        this.logger = logger;
     }
 
     protected void init(OutputStream outputStream, Context context) throws LoggerNotSetException {

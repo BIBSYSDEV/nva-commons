@@ -11,14 +11,17 @@ import nva.commons.handlers.RequestInfo;
 import nva.commons.utils.Environment;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Handler extends ApiGatewayHandler<RequestBody, String> {
 
+    private static Logger LOGGER = LoggerFactory.getLogger(Handler.class);
     private Map<String, String> headers;
     private String proxy;
     private String path;
     private RequestBody body;
+
 
     /**
      * Constructor with environment.
@@ -26,7 +29,7 @@ public class Handler extends ApiGatewayHandler<RequestBody, String> {
      * @param environment the environment.
      */
     public Handler(Environment environment) {
-        super(RequestBody.class, environment);
+        super(RequestBody.class, environment, LOGGER);
         logger = LoggerFactory.getLogger(Handler.class);
     }
 

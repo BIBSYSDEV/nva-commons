@@ -81,8 +81,7 @@ public class VoidTest {
         public static final String SAMPLE_STRING = "sampleString";
 
         public VoidHandler(Environment environment) {
-            super(Void.class, environment);
-            logger = LoggerFactory.getLogger(VoidHandler.class);
+            super(Void.class, environment, LoggerFactory.getLogger(VoidHandler.class));
         }
 
         @Override
