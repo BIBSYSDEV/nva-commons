@@ -32,6 +32,7 @@ public final class LogUtils {
 
     /**
      * This method should ALWAYS be called before the creation of the object you want to test.
+     *
      * <p>
      * The method was created based on the patterns for programmatically configuring Log4j
      * (https://logging.apache.org/log4j/2.x/manual/customconfig.html)
