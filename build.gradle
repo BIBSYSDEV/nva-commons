@@ -90,13 +90,11 @@ checkstyle {
     showViolations = true
 }
 
-//For usage in a shadow jar.
-//shadowJar {
-//transform(com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer)
-//}
-//
-//
-//build.dependsOn(shadowJar)
+shadowJar {
+// Transformation for merging Log4j2Plugins.dat files.
+transform(com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer)
+}
+
 
 
 tasks.withType(Checkstyle) {
