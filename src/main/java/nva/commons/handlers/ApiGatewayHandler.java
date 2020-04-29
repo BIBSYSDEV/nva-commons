@@ -322,8 +322,8 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
             logger.warn(getStackTraceString(e, context.getAwsRequestId()));
             writeExpectedFailure(inputObject, e, context.getAwsRequestId());
         } catch (Exception e) {
-            logger.warn(e.getMessage());
-            logger.warn(getStackTraceString(e, context.getAwsRequestId()));
+            logger.error(e.getMessage());
+            logger.error(getStackTraceString(e, context.getAwsRequestId()));
             writeUnexpectedFailure(inputObject, e, context.getAwsRequestId());
         }
     }
@@ -333,10 +333,14 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
         String requestIdString = String.format(REQUEST_ID_LOGGING_TEMPLATE, REQUEST_ID, requestId);
         String causeQueue = CAUSE_PREFIX + createCauseString(e);
         String stackTrace = STACK_TRACE_PREFIX + arrayToStream(e.getStackTrace());
-        String suppressed = Optional.ofNullable(arrayToStream(e.getSuppressed()))
+        String suppressed = getSuppressedMessagesIfExist(e);
+        return String.join(STACK_TRACE_DELIMITER, requestIdString, causeQueue, stackTrace, suppressed);
+    }
+
+    private String getSuppressedMessagesIfExist(Exception e) {
+        return Optional.ofNullable(arrayToStream(e.getSuppressed()))
             .map(m -> SUPPRESSED_PREFIX + m)
             .orElse("");
-        return String.join(STACK_TRACE_DELIMITER, requestIdString, causeQueue, stackTrace, suppressed);
     }
 
     private String createCauseString(Exception e) {
