@@ -32,6 +32,9 @@ public final class LogUtils {
 
     /**
      * This method should ALWAYS be called before the creation of the object you want to test.
+     * <p>
+     * The method was created based on the patterns for programmatically configuring Log4j
+     * (https://logging.apache.org/log4j/2.x/manual/customconfig.html)
      *
      * @param clazz The class of the object under test.
      * @param <T>   The class of the object under test
@@ -48,9 +51,18 @@ public final class LogUtils {
         silenceRoot(builder);
         addLoggerForTheInputClass(clazz, builder);
 
-        Configurator.reconfigure(builder.build());
+        reconfigureBuilder(builder);
 
         return (TestAppender) createReferenceToTheAppenderInstanceForTestingAssertions(context);
+    }
+
+    /**
+     * Reconfigure and not initialize because initialize seems not to be working.
+     *
+     * @param builder ConfigurationBuilder.
+     */
+    private static void reconfigureBuilder(ConfigurationBuilder<BuiltConfiguration> builder) {
+        Configurator.reconfigure(builder.build());
     }
 
     private static Appender createReferenceToTheAppenderInstanceForTestingAssertions(LoggerContext context) {
