@@ -25,12 +25,13 @@ public final class LogUtils {
     public static final String PATTERN_ATTRIBUTE_NAME = "pattern";
     public static final String LOG_CLASS_NAME_AND_MESSAGE = "%c{1.}:  %msg";
     public static final String ROOT_NULL_APPENDER = "NullAppender";
+    public static final String PACKAGES_WITH_HANDLERS = "nva.commons.utils.log";
 
     private LogUtils() {
     }
 
     /**
-     * This method sholuld ALWAYS be called before the creation of the object you want to test.
+     * This method should ALWAYS be called before the creation of the object you want to test.
      *
      * @param clazz The class of the object under test.
      * @param <T>   The class of the object under test
@@ -46,6 +47,7 @@ public final class LogUtils {
         addTestAppenderToConfig(builder);
         silenceRoot(builder);
         addLoggerForTheInputClass(clazz, builder);
+
         Configurator.reconfigure(builder.build());
 
         return (TestAppender) createReferenceToTheAppenderInstanceForTestingAssertions(context);
@@ -81,7 +83,7 @@ public final class LogUtils {
     }
 
     private static void enableLog4jToFindOurAppender(ConfigurationBuilder<BuiltConfiguration> builder) {
-        builder.setPackages("nva.commons.utils.log, nva.commons.handlers");
+        builder.setPackages(PACKAGES_WITH_HANDLERS);
     }
 
     private static ConfigurationBuilder<BuiltConfiguration> avoidStatusMessagesWhileSettingUpConfiguration(
