@@ -1,24 +1,27 @@
 package nva.commons;
 
+import static nva.commons.handlers.RequestInfo.PROXY_TAG;
+
 import com.amazonaws.services.lambda.runtime.Context;
+import java.util.Collections;
+import java.util.Map;
 import nva.commons.exceptions.ApiGatewayException;
 import nva.commons.handlers.ApiGatewayHandler;
 import nva.commons.handlers.RequestInfo;
 import nva.commons.utils.Environment;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
-
-import java.util.Collections;
-import java.util.Map;
-
-import static nva.commons.handlers.RequestInfo.PROXY_TAG;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Handler extends ApiGatewayHandler<RequestBody, String> {
 
+    private static Logger LOGGER = LoggerFactory.getLogger(Handler.class);
     private Map<String, String> headers;
     private String proxy;
     private String path;
     private RequestBody body;
+
 
     /**
      * Constructor with environment.
@@ -26,7 +29,8 @@ public class Handler extends ApiGatewayHandler<RequestBody, String> {
      * @param environment the environment.
      */
     public Handler(Environment environment) {
-        super(RequestBody.class, environment);
+        super(RequestBody.class, environment, LOGGER);
+        logger = LoggerFactory.getLogger(Handler.class);
     }
 
     @Override

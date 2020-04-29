@@ -120,6 +120,11 @@ public class RequestInfo {
         return requestContext;
     }
 
+    /**
+     * Set the requestContext.
+     *
+     * @param requestContext requestContext.
+     */
     @JacocoGenerated
     public void setRequestContext(JsonNode requestContext) {
         if (isNull(requestContext)) {

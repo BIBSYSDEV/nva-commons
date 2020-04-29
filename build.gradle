@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id 'java-library'
     id 'com.github.johnrengelman.shadow' version '5.2.0'
     id 'jacoco'
     id 'checkstyle'
@@ -25,8 +25,10 @@ repositories {
 def jacksonVersion = "2.10.3"
 def awsSdkVersion = "1.11.739"
 def jupiterVersion = "5.6.1"
+def log4jVersion = "2.13.2"
 
-apply plugin: 'java'
+
+apply plugin: 'java-library'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'jacoco'
 apply plugin: 'checkstyle'
@@ -48,6 +50,13 @@ dependencies {
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
+
+    // If one is using nva-commons, api allows the re-usage of these packages.
+    api group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.0'
+    api group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
+    api group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
+    api group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: log4jVersion
+
 }
 
 test {
@@ -80,6 +89,12 @@ checkstyle {
     configFile = rootProject.resources.text.fromFile('config/checkstyle/checkstyle.xml').asFile()
     showViolations = true
 }
+
+shadowJar {
+// Transformation for merging Log4j2Plugins.dat files.
+transform(com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer)
+}
+
 
 
 tasks.withType(Checkstyle) {

@@ -21,24 +21,28 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.management.modelmbean.XMLParseException;
-import no.unit.nva.testutils.TestLogger;
 import nva.commons.Handler;
 import nva.commons.RequestBody;
 import nva.commons.exceptions.ApiGatewayException;
 import nva.commons.exceptions.TestException;
 import nva.commons.utils.Environment;
 import nva.commons.utils.IoUtils;
+import nva.commons.utils.log.LogUtils;
+import nva.commons.utils.log.TestAppender;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
@@ -53,7 +57,7 @@ public class ApiGatewayHandlerTest {
     public static final int OVERRIDEN_STATUS_CODE = 418;  //I'm a teapot
     public Environment environment;
     private Context context;
-    private TestLogger logger = new TestLogger();
+
 
     /**
      * Setup.
@@ -63,14 +67,14 @@ public class ApiGatewayHandlerTest {
         environment = mock(Environment.class);
         when(environment.readEnv(anyString())).thenReturn(SOME_ENV_VALUE);
         context = mock(Context.class);
-        when(context.getLogger()).thenReturn(logger);
         when(context.getAwsRequestId()).thenReturn(SOME_REQUEST_ID);
     }
 
     @Test
     @DisplayName("ApiGatewayHandler has a constructor with input class as only parameter")
     public void apiGatewayHandlerHasACostructorWithInputClassAsOnlyParameter() {
-        ApiGatewayHandler<String, String> handler = new ApiGatewayHandler<>(String.class) {
+        Logger logger = LoggerFactory.getLogger(ApiGatewayHandler.class);
+        ApiGatewayHandler<String, String> handler = new ApiGatewayHandler<>(String.class, logger) {
             @Override
             protected String processInput(String input, RequestInfo requestInfo, Context context)
                 throws ApiGatewayException {
@@ -95,9 +99,8 @@ public class ApiGatewayHandlerTest {
 
         Map<String, String> headers = handler.getHeaders();
         JsonNode expectedHeaders = createHeaders();
-        expectedHeaders.fieldNames().forEachRemaining(expectedHeader -> {
-            assertThat(headers.get(expectedHeader), is(equalTo(expectedHeaders.get(expectedHeader).textValue())));
-        });
+        expectedHeaders.fieldNames().forEachRemaining(expectedHeader ->
+            assertThat(headers.get(expectedHeader), is(equalTo(expectedHeaders.get(expectedHeader).textValue()))));
     }
 
     @Test
@@ -110,9 +113,7 @@ public class ApiGatewayHandlerTest {
 
         String actualPath = handler.getPath();
         JsonNode expectedHeaders = createHeaders();
-        expectedHeaders.fieldNames().forEachRemaining(expectedHeader -> {
-            assertThat(actualPath, is(equalTo(PATH)));
-        });
+        expectedHeaders.fieldNames().forEachRemaining(expectedHeader -> assertThat(actualPath, is(equalTo(PATH))));
     }
 
     @Test
@@ -128,13 +129,13 @@ public class ApiGatewayHandlerTest {
     }
 
     @Test
-    @DisplayName("Logger logs the whole exception stacktrace when an exception has occurred")
+    @DisplayName("Logger logs the whole exception stacktrace when an exception has occurred 2")
     public void loggerLogsTheWholeExceptionStackTraceWhenAnExceptionHasOccurred() throws IOException {
+        TestAppender appender = LogUtils.getTestingAppender(Handler.class);
         Handler handler = handlerThatThrowsExceptions();
-
         handler.handleRequest(requestWithHeadersAndPath(), outputStream(), context);
-        TestLogger logger = (TestLogger) context.getLogger();
-        String logs = logger.getLogs();
+
+        String logs = appender.getMessages();
 
         assertThat(logs, containsString(URISyntaxException.class.getName()));
         assertThat(logs, containsString(XMLParseException.class.getName()));
@@ -148,11 +149,12 @@ public class ApiGatewayHandlerTest {
     @Test
     @DisplayName("Logger logs the whole exception stacktrace when an exception has occurred")
     public void loggerLogsTheWholeExceptionStackTraceWhenAnUncheckedExceptionHasOccurred() throws IOException {
+        TestAppender appender = LogUtils.getTestingAppender(Handler.class);
         Handler handler = handlerThatThrowsUncheckedExceptions();
 
         handler.handleRequest(requestWithHeadersAndPath(), outputStream(), context);
-        TestLogger logger = (TestLogger) context.getLogger();
-        String logs = logger.getLogs();
+
+        String logs = appender.getMessages();
 
         assertThat(logs, containsString(IllegalStateException.class.getName()));
         assertThat(logs, containsString(IllegalArgumentException.class.getName()));
@@ -181,7 +183,7 @@ public class ApiGatewayHandlerTest {
     @Test
     @DisplayName("Failure message contains application/problem+json ContentType when an Exception is thrown")
     public void failureMessageContainsApplicationProblemJsonContentTypeWhenExceptionIsThrown()
-            throws IOException {
+        throws IOException {
         Handler handler = handlerThatThrowsExceptions();
         ByteArrayOutputStream outputStream = outputStream();
         handler.handleRequest(requestWithHeadersAndPath(), outputStream, context);
@@ -215,6 +217,29 @@ public class ApiGatewayHandlerTest {
             is(equalTo(TestException.ERROR_STATUS_CODE)));
     }
 
+    @Test
+    public void handlerReturnsInternalServerErrorWhenLoggerHasNotBeenExplicitlySet() throws IOException {
+        Handler handler = handlerThatHasNotSetLogger();
+        ByteArrayOutputStream outputStream = outputStream();
+        handler.handleRequest(anyRequest(), outputStream, context);
+
+        GatewayResponse<Problem> response = getApiGatewayResponse(outputStream);
+        assertThat(response.getStatusCode(), is(equalTo(HttpStatus.SC_INTERNAL_SERVER_ERROR)));
+        assertThat(response.getBodyObject(Problem.class).getDetail(), containsString(handler.getClass().getName()));
+    }
+
+    private Handler handlerThatHasNotSetLogger() {
+        return new Handler(environment) {
+
+            @Override
+            public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context)
+                throws IOException {
+                logger = null;
+                super.handleRequest(inputStream, outputStream, context);
+            }
+        };
+    }
+
     private GatewayResponse<Problem> getApiGatewayResponse(ByteArrayOutputStream outputStream)
         throws JsonProcessingException {
         TypeReference<GatewayResponse<Problem>> tr = new TypeReference<>() {};
@@ -226,17 +251,6 @@ public class ApiGatewayHandlerTest {
             @Override
             protected String processInput(RequestBody input, RequestInfo requestInfo, Context context) {
                 throwUncheckedExceptions();
-                return null;
-            }
-        };
-    }
-
-    private Handler handlerThatThrowsExceptions() {
-        return new Handler(environment) {
-            @Override
-            protected String processInput(RequestBody input, RequestInfo requestInfo, Context context)
-                throws ApiGatewayException {
-                throwExceptions();
                 return null;
             }
         };
@@ -324,5 +338,16 @@ public class ApiGatewayHandlerTest {
 
     private ByteArrayOutputStream outputStream() {
         return new ByteArrayOutputStream();
+    }
+
+    private Handler handlerThatThrowsExceptions() {
+        return new Handler(environment) {
+            @Override
+            protected String processInput(RequestBody input, RequestInfo requestInfo, Context context)
+                throws ApiGatewayException {
+                throwExceptions();
+                return null;
+            }
+        };
     }
 }

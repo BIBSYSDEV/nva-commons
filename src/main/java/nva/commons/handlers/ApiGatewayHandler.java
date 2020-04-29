@@ -1,7 +1,8 @@
 package nva.commons.handlers;
 
+import static java.util.Objects.isNull;
+
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedWriter;
@@ -22,12 +23,16 @@ import java.util.stream.Stream;
 import nva.commons.exceptions.ApiGatewayException;
 import nva.commons.exceptions.ApiGatewayUncheckedException;
 import nva.commons.exceptions.GatewayResponseSerializingException;
+import nva.commons.exceptions.LoggerNotSetException;
 import nva.commons.utils.Environment;
 import nva.commons.utils.IoUtils;
 import nva.commons.utils.JacocoGenerated;
 import nva.commons.utils.JsonUtils;
+import nva.commons.utils.log.LogUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 import org.zalando.problem.ThrowableProblem;
@@ -55,28 +60,28 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
     private static final String SUPPRESSED_PREFIX = "SUPPRESSED_STACK:";
     public static final String REQUEST_ID = "requestId";
     public static final String REQUEST_ID_LOGGING_TEMPLATE = "%s:%s";
-
-    private final transient Class<I> iclass;
-    protected transient LambdaLogger logger;
-    protected transient OutputStream outputStream;
     public static final String ALLOWED_ORIGIN_ENV = "ALLOWED_ORIGIN";
 
-    protected transient String allowedOrigin;
+    protected Logger logger;
 
+    private final transient Class<I> iclass;
     protected final Environment environment;
+
+    protected transient OutputStream outputStream;
+    protected transient String allowedOrigin;
 
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
 
     private final transient ApiMessageParser<I> inputParser = new ApiMessageParser<>();
 
     /**
-     * The input class should be set explicitly by the inherting class.
+     * The input class should be set explicitly by the inheriting class.
      *
      * @param iclass The class object of the input class.
      */
     @JacocoGenerated
-    public ApiGatewayHandler(Class<I> iclass) {
-        this(iclass, new Environment());
+    public ApiGatewayHandler(Class<I> iclass, Logger logger) {
+        this(iclass, new Environment(), logger);
     }
 
     /**
@@ -85,16 +90,20 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @param iclass      The class object of the input class.
      * @param environment the Environment from where the handler will read ENV variables.
      */
-    public ApiGatewayHandler(Class<I> iclass, Environment environment) {
+    public ApiGatewayHandler(Class<I> iclass, Environment environment, Logger logger) {
         this.iclass = iclass;
         this.environment = environment;
         this.additionalSuccessHeadersSupplier = Collections::emptyMap;
+        this.logger = logger;
     }
 
-    private void init(OutputStream outputStream, Context context) {
+    protected void init(OutputStream outputStream, Context context) throws LoggerNotSetException {
         this.outputStream = outputStream;
-        this.logger = context.getLogger();
         this.allowedOrigin = environment.readEnv(ALLOWED_ORIGIN_ENV);
+        if (isNull(logger)) {
+            logger = LoggerFactory.getLogger(ApiGatewayHandler.class);
+            throw new LoggerNotSetException(LogUtils.toLoggerName(this.getClass()));
+        }
     }
 
     /**
@@ -122,7 +131,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @throws URISyntaxException when processing fails
      */
     protected final O processInput(I input, String apiGatewayInputString, Context context) throws ApiGatewayException {
-        RequestInfo requestInfo = inputParser.getRequestInfo(apiGatewayInputString, logger);
+        RequestInfo requestInfo = inputParser.getRequestInfo(apiGatewayInputString);
         return processInput(input, requestInfo, context);
     }
 
@@ -131,7 +140,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      *
      * @param input The request input.
      * @param error The exception that caused the failure.
-     * @return
+     * @return the failure status code.
      */
     protected int getFailureStatusCode(I input, ApiGatewayException error) {
         return error.getStatusCode();
@@ -258,10 +267,10 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
             Status status = Status.valueOf(statusCode);
 
             ThrowableProblem problem = Problem.builder().withStatus(status)
-                                              .withTitle(status.getReasonPhrase())
-                                              .withDetail(errorMessage)
-                                              .with(REQUEST_ID, requestId)
-                                              .build();
+                .withTitle(status.getReasonPhrase())
+                .withDetail(errorMessage)
+                .with(REQUEST_ID, requestId)
+                .build();
 
             GatewayResponse<ThrowableProblem> gatewayResponse =
                 new GatewayResponse<>(problem, getFailureHeaders(), statusCode);
@@ -297,10 +306,11 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
 
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
-        init(output, context);
         I inputObject = null;
-        String inputString = IoUtils.streamToString(input);
         try {
+
+            init(output, context);
+            String inputString = IoUtils.streamToString(input);
             inputObject = parseInput(inputString);
 
             O response;
@@ -308,12 +318,12 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
 
             writeOutput(inputObject, response);
         } catch (ApiGatewayException e) {
-            logger.log(e.getMessage());
-            logger.log(getStackTraceString(e, context.getAwsRequestId()));
+            logger.warn(e.getMessage());
+            logger.warn(getStackTraceString(e, context.getAwsRequestId()));
             writeExpectedFailure(inputObject, e, context.getAwsRequestId());
         } catch (Exception e) {
-            logger.log(e.getMessage());
-            logger.log(getStackTraceString(e, context.getAwsRequestId()));
+            logger.error(e.getMessage());
+            logger.error(getStackTraceString(e, context.getAwsRequestId()));
             writeUnexpectedFailure(inputObject, e, context.getAwsRequestId());
         }
     }
@@ -323,10 +333,14 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
         String requestIdString = String.format(REQUEST_ID_LOGGING_TEMPLATE, REQUEST_ID, requestId);
         String causeQueue = CAUSE_PREFIX + createCauseString(e);
         String stackTrace = STACK_TRACE_PREFIX + arrayToStream(e.getStackTrace());
-        String suppressed = Optional.ofNullable(arrayToStream(e.getSuppressed()))
-                                    .map(m -> SUPPRESSED_PREFIX + m)
-                                    .orElse("");
+        String suppressed = getSuppressedMessagesIfExist(e);
         return String.join(STACK_TRACE_DELIMITER, requestIdString, causeQueue, stackTrace, suppressed);
+    }
+
+    private String getSuppressedMessagesIfExist(Exception e) {
+        return Optional.ofNullable(arrayToStream(e.getSuppressed()))
+            .map(m -> SUPPRESSED_PREFIX + m)
+            .orElse("");
     }
 
     private String createCauseString(Exception e) {
@@ -346,8 +360,8 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
 
     private static <T> String arrayToStream(T[] suppressed) {
         return Stream.of(suppressed)
-                     .map(Object::toString)
-                     .collect(Collectors.joining(STACK_TRACE_DELIMITER));
+            .map(Object::toString)
+            .collect(Collectors.joining(STACK_TRACE_DELIMITER));
     }
 
     private Class<I> getIClass() {
