@@ -35,6 +35,9 @@ apply plugin: 'checkstyle'
 apply plugin: 'pmd'
 
 dependencies {
+    api platform('software.amazon.awssdk:bom:2.13.8')
+    implementation 'software.amazon.awssdk:lambda'
+
     implementation 'com.amazonaws:aws-lambda-java-core:1.2.0'
     implementation 'com.amazonaws:aws-lambda-java-events:2.2.7'
     implementation 'com.amazonaws:aws-java-sdk-lambda:1.11.749'
@@ -46,16 +49,17 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
     implementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: jacksonVersion
 
-    testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.4'
+    testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.6'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
 
     // If one is using nva-commons, api allows the re-usage of these packages.
-    api group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.0'
+
     api group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
     api group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
-    api group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: log4jVersion
+    runtimeOnly group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.0'
+    runtimeOnly group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: log4jVersion
 
 }
 
