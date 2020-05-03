@@ -35,7 +35,7 @@ apply plugin: 'checkstyle'
 apply plugin: 'pmd'
 
 dependencies {
-    implementation platform('software.amazon.awssdk:bom:2.13.8')
+//    implementation platform('software.amazon.awssdk:bom:2.13.8')
     api 'software.amazon.awssdk:lambda:2.13.8'
 
     implementation 'com.amazonaws:aws-lambda-java-core:1.2.0'
