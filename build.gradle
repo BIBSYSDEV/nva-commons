@@ -36,7 +36,7 @@ apply plugin: 'pmd'
 
 dependencies {
     implementation 'com.amazonaws:aws-lambda-java-core:1.2.0'
-    implementation 'com.amazonaws:aws-lambda-java-events:2.2.7'
+    implementation 'com.amazonaws:aws-lambda-java-events:2.2.8'
     implementation 'com.amazonaws:aws-java-sdk-lambda:1.11.749'
     implementation group: 'org.zalando', name: 'problem', version: '0.23.0'
     implementation group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.23.0'
