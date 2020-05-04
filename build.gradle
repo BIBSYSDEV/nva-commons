@@ -23,7 +23,7 @@ repositories {
 
 
 def jacksonVersion = "2.10.3"
-def awsSdkVersion = "1.11.739"
+def awsSdkVersion = "1.11.774"
 def jupiterVersion = "5.6.1"
 def log4jVersion = "2.13.2"
 
@@ -35,11 +35,11 @@ apply plugin: 'checkstyle'
 apply plugin: 'pmd'
 
 dependencies {
-    implementation 'com.amazonaws:aws-lambda-java-core:1.2.0'
-    implementation 'com.amazonaws:aws-lambda-java-events:2.2.7'
-    implementation 'com.amazonaws:aws-java-sdk-lambda:1.11.749'
-    implementation group: 'org.zalando', name: 'problem', version: '0.23.0'
-    implementation group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.23.0'
+    implementation group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
+    implementation group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '2.2.8'
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-lambda', version: awsSdkVersion
+    implementation group: 'org.zalando', name: 'problem', version: '0.24.0'
+    implementation group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.24.0'
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-api-gateway', version: awsSdkVersion
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonVersion
@@ -52,7 +52,7 @@ dependencies {
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
 
     // If one is using nva-commons, api allows the re-usage of these packages.
-    api group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.0'
+    api group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.1'
     api group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
     api group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
     api group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: log4jVersion
