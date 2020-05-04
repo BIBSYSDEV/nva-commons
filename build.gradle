@@ -36,8 +36,6 @@ apply plugin: 'pmd'
 
 dependencies {
 
-    implementation platform('software.amazon.awssdk:bom:2.13.8')
-    api 'software.amazon.awssdk:lambda'
 
     implementation 'com.amazonaws:aws-lambda-java-core:1.2.0'
     implementation 'com.amazonaws:aws-lambda-java-events:2.2.7'
@@ -54,6 +52,9 @@ dependencies {
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
+
+    //access to the lambda client
+    api 'software.amazon.awssdk:lambda:2.13.8'
 
     // If one is using nva-commons, api allows the re-usage of these packages.
     api group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
