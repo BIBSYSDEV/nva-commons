@@ -1,9 +1,12 @@
-package nva.commons.utils;
+package nva.commons.utils.doi;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import org.junit.jupiter.api.Test;
 
 public class DoiValidatorTest {
@@ -55,5 +58,11 @@ public class DoiValidatorTest {
     public void validateReturnsFalseForInvalidDoiPrefix() {
         String input = INVALID_PREFIX + DOI;
         assertThat(DoiValidator.validate(input), is((equalTo(false))));
+    }
+
+    @Test
+    public void validateReturnsTrueForValidURL() throws MalformedURLException {
+        URL input = URI.create(HTTP_DOI + DOI).toURL();
+        assertThat(DoiValidator.validate(input), is((equalTo(true))));
     }
 }
