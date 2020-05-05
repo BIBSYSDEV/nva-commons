@@ -2,7 +2,7 @@ package nva.commons.utils.doi;
 
 import java.net.URI;
 
-public interface DoiConverterInterface {
+public abstract class DoiConverterInterface {
 
-    URI toUri(String doi);
+    abstract public URI toUri(String doi);
 }
