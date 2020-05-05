@@ -12,12 +12,12 @@ import nva.commons.utils.log.TestAppender;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class DoiConverterImplTest {
+public class DoiConverterTest {
 
     private static final String DOI = "10.1000/182";
     private static final String EXPECTED = "https://doi.org/" + DOI;
 
-    DoiConverterImpl doiConverter = new DoiConverterImpl();
+    DoiConverter doiConverter = new DoiConverter();
 
     @DisplayName("toUri returns a URI if input is a valid DOI URI")
     @Test
@@ -45,7 +45,7 @@ public class DoiConverterImplTest {
     @Test
     @DisplayName("toUri throws Exception when input is not a valid URI")
     public void toUriThrowsAnExceptionWhenInputIsNotValidUri() {
-        TestAppender appender = LogUtils.getTestingAppender(DoiConverterImpl.class);
+        TestAppender appender = LogUtils.getTestingAppender(DoiConverter.class);
         String input = "http://somethingelse.org/" + DOI;
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> doiConverter.toUri(input));
         assertThat(exception.getMessage(), containsString(input));
@@ -63,7 +63,7 @@ public class DoiConverterImplTest {
     @Test
     @DisplayName("toURI throws Exception when input is an invalid DOI string")
     public void toUriThrowsExceptionWhenInputIsAnInvalidDoiString() {
-        TestAppender appender = LogUtils.getTestingAppender(DoiConverterImpl.class);
+        TestAppender appender = LogUtils.getTestingAppender(DoiConverter.class);
         String input = "213456";
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> doiConverter.toUri(input));
         assertThat(exception.getMessage(), containsString(input));
