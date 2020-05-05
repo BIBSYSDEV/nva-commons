@@ -26,7 +26,7 @@ public class DoiConverterImpl implements DoiConverterInterface {
     private static Logger logger = LoggerFactory.getLogger(DoiConverterImpl.class);
 
     public DoiConverterImpl() {
-        super();
+       // super();
     }
 
     @Override
