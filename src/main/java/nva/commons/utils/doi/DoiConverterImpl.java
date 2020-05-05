@@ -10,7 +10,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DoiConverter {
+public class DoiConverterImpl implements DoiConverterInterface {
 
     public static final String DOI_HOST = "doi.org";
     public static final String HTTPS = "https";
@@ -23,8 +23,9 @@ public class DoiConverter {
     public static final String ERROR_WHEN_CREATING_URI = "Unexpected error while creating URI for doi:";
     private static final String ERROR_WHEN_SETTING_DOI_HOST = "Unexpected error while setting host for DOI URI:";
 
-    private static Logger logger = LoggerFactory.getLogger(DoiConverter.class);
+    private static Logger logger = LoggerFactory.getLogger(DoiConverterImpl.class);
 
+    @Override
     public URI toUri(String doi) {
         if (Objects.nonNull(doi)) {
             Set<URI> result = Stream.of(doi)
