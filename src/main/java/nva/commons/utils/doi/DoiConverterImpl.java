@@ -25,6 +25,10 @@ public class DoiConverterImpl extends DoiConverterInterface {
 
     private static Logger logger = LoggerFactory.getLogger(DoiConverterImpl.class);
 
+    public DoiConverterImpl() {
+        super();
+    }
+
     @Override
     public URI toUri(String doi) {
         if (Objects.nonNull(doi)) {
