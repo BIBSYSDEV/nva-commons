@@ -10,7 +10,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DoiConverterImpl implements DoiConverterInterface {
+public class DoiConverterImpl implements DoiConverter {
 
     public static final String DOI_HOST = "doi.org";
     public static final String HTTPS = "https";
@@ -26,7 +26,6 @@ public class DoiConverterImpl implements DoiConverterInterface {
     private static Logger logger = LoggerFactory.getLogger(DoiConverterImpl.class);
 
     public DoiConverterImpl() {
-       // super();
     }
 
     @Override

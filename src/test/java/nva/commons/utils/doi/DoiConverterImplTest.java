@@ -17,7 +17,7 @@ public class DoiConverterImplTest {
     private static final String DOI = "10.1000/182";
     private static final String EXPECTED = "https://doi.org/" + DOI;
 
-    DoiConverterInterface doiConverterImpl = new DoiConverterImpl();
+    DoiConverter doiConverterImpl = new DoiConverterImpl();
 
     @DisplayName("toUri returns a URI if input is a valid DOI URI")
     @Test
