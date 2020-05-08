@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
+
 plugins {
     id 'java-library'
     id 'com.github.johnrengelman.shadow' version '5.2.0'
@@ -50,6 +52,8 @@ dependencies {
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
+    testCompileOnly group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.0'
+
 
     // If one is using nva-commons, api allows the re-usage of these packages.
     api group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.1'
@@ -67,7 +71,7 @@ test {
     testLogging {
         events 'failed', 'passed', 'skipped'
     }
-    Map<String, String> envVariables = new HashMap<>();
+    Map<String, String> envVariables = new HashMap<>()
     envVariables.put("EXISTING_NON_EMPTY_VARIABLE", "SomeContent")
     envVariables.put("EXISTING_EMPTY_VARIABLE", "  ")
     environment(envVariables)
@@ -92,7 +96,7 @@ checkstyle {
 
 shadowJar {
 // Transformation for merging Log4j2Plugins.dat files.
-transform(com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer)
+transform(Log4j2PluginsCacheFileTransformer)
 }
 
 
