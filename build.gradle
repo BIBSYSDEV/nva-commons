@@ -26,7 +26,7 @@ repositories {
 
 def jacksonVersion = "2.10.3"
 def awsSdkVersion = "1.11.774"
-def jupiterVersion = "5.6.1"
+def jupiterVersion = "5.6.2"
 def log4jVersion = "2.13.2"
 
 
