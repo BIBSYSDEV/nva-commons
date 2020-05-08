@@ -4,13 +4,17 @@ import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-public class SingletonCollector {
+public final class SingletonCollector {
 
     public static final int SINGLETON = 1;
     public static final int ONLY_ELEMENT = 0;
     public static final String SINGLETON_EXPECTED_ERROR_TEMPLATE = "Expected a single value, but %d were found";
     public static final String SINGLETON_OR_NULL_EXPECTED_ERROR_TEMPLATE
             = "Expected zero or a single value, but %d were found";
+
+    private SingletonCollector() {
+
+    }
 
     /**
      * A utility to collect and return singletons from lists.
