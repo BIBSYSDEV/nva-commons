@@ -13,7 +13,6 @@ public final class SingletonCollector {
             = "Expected zero or a single value, but %d were found";
 
     private SingletonCollector() {
-
     }
 
     /**
