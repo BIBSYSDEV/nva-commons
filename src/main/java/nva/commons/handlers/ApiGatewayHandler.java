@@ -130,7 +130,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
      * @throws IOException        when processing fails
      * @throws URISyntaxException when processing fails
      */
-    protected final O processInput(I input, String apiGatewayInputString, Context context) throws ApiGatewayException {
+    protected O processInput(I input, String apiGatewayInputString, Context context) throws ApiGatewayException {
         RequestInfo requestInfo = inputParser.getRequestInfo(apiGatewayInputString);
         return processInput(input, requestInfo, context);
     }
