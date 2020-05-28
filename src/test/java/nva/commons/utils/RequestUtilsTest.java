@@ -66,7 +66,7 @@ public class RequestUtilsTest {
         when(requestInfo.getPathParameters()).thenReturn(Map.of());
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
             () -> RequestUtils.getPathParameter(requestInfo, KEY));
-        assertEquals(RequestUtils.MISSING_FROM_PATH_PARAMETERS + KEY, exception.getMessage());
+        assertEquals(RequestUtils.MISSING_FROM_PATH_PARAMETERS   + KEY, exception.getMessage());
     }
 
     @Test
