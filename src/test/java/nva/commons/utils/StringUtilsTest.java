@@ -46,4 +46,35 @@ public class StringUtilsTest {
         String output = StringUtils.removeWhiteSpaces(combinationOfSpaces);
         assertThat(output, is(equalTo(expected)));
     }
+
+    @Test
+    @DisplayName("StringUtils should have a method for checking if a string is empty (null or blank)")
+    public void stringUtilsHasAMethodForCheckingIfAStringIsEmpty() {
+        boolean result = StringUtils.isEmpty(null);
+    }
+
+    @Test
+    @DisplayName("isEmpty should return false for a non empty string")
+    public void isEmptyReturnsFalseForANonEmptyString() {
+        String nonEmptyString = "abc";
+        assertThat(StringUtils.isEmpty(nonEmptyString), is(equalTo(false)));
+    }
+
+    @Test
+    @DisplayName("isEmpty should return true for null string")
+    public void stringUtilReturnsTrueForANullString() {
+        assertThat(StringUtils.isEmpty(null), is(equalTo(true)));
+    }
+
+    @Test
+    @DisplayName("isEmpty should return true for string of zero length")
+    public void isEmptyReturnsTrueForStringOfZeroLength() {
+        assertThat(StringUtils.isEmpty(""), is(true));
+    }
+
+    @Test
+    @DisplayName("isEmpty should return true for string containing only whitespaces")
+    public void isEmptyReturnsTrueForStringContainingOnlyWhitespaces() {
+        assertThat(StringUtils.isEmpty(""), is(true));
+    }
 }
