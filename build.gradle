@@ -64,14 +64,14 @@ dependencies {
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.9'
 
     testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.4'
-    testRuntimeOnly(group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion) {
+
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion) {
         dependencies {
             implementation(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
                 because 'Scope provided in junit-jupiter'
             }
         }
     }
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jupiterVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
 

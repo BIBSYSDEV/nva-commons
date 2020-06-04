@@ -1,5 +1,7 @@
 package nva.commons.utils;
 
+import static java.util.Objects.isNull;
+
 public final class StringUtils {
 
     public static final String DOUBLE_WHITESPACE = "\\s\\s";
@@ -34,5 +36,9 @@ public final class StringUtils {
      */
     public static String removeWhiteSpaces(String input) {
         return input.replaceAll(WHITESPACES, EMPTY_STRING);
+    }
+
+    public static boolean isEmpty(String input) {
+        return isNull(input) || input.isBlank();
     }
 }

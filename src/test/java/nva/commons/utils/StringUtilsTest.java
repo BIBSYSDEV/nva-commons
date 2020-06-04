@@ -6,6 +6,9 @@ import static org.hamcrest.core.IsEqual.equalTo;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class StringUtilsTest {
 
@@ -45,5 +48,26 @@ public class StringUtilsTest {
         String expected = "Thequickbrownfoxjumpsoverthelazydog";
         String output = StringUtils.removeWhiteSpaces(combinationOfSpaces);
         assertThat(output, is(equalTo(expected)));
+    }
+
+    @Test
+    @DisplayName("StringUtils should have a method for checking if a string is empty (null or blank)")
+    public void stringUtilsHasAMethodForCheckingIfAStringIsEmpty() {
+        boolean result = StringUtils.isEmpty(null);
+    }
+
+    @Test
+    @DisplayName("isEmpty should return false for a non empty string")
+    public void isEmptyReturnsFalseForANonEmptyString() {
+        String nonEmptyString = "abc";
+        assertThat(StringUtils.isEmpty(nonEmptyString), is(equalTo(false)));
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {"  ", "\t", "\n"})
+    @DisplayName("isEmpty should return true for empty string")
+    public void stringUtilReturnsTrueForANullString(String input) {
+        assertThat(StringUtils.isEmpty(null), is(equalTo(true)));
     }
 }
