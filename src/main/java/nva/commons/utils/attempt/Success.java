@@ -71,7 +71,6 @@ public class Success<T> extends Try<T> {
      * -checked-exceptions-in-java-streams/} Try to perform the action. Any exception will be enclosed in a Failure.
      *
      * @param action a {@link Consumer} action that throws or does not throw a checked Exception
-     * @param <T>    the type of the argument of the consumer.
      * @param <E>    the type of the thrown Exception
      * @return a new {@link Try} instance
      */
