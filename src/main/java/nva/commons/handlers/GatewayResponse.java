@@ -3,7 +3,10 @@ package nva.commons.handlers;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
@@ -57,6 +60,13 @@ public class GatewayResponse<T> implements Serializable {
         return body;
     }
 
+    /**
+     * Parses the JSON body to an object.
+     *
+     * @param clazz the class of the body object
+     * @return the body object.
+     * @throws JsonProcessingException when JSON processing fails
+     */
     public T getBodyObject(Class<T> clazz) throws JsonProcessingException {
         return JsonUtils.objectMapper.readValue(body, clazz);
     }
@@ -89,5 +99,14 @@ public class GatewayResponse<T> implements Serializable {
     public int hashCode() {
         return Objects.hash(body, headers, statusCode);
     }
+
+    public static <T> GatewayResponse<T> fromOutputStream(ByteArrayOutputStream outputStream)
+        throws JsonProcessingException {
+        String json = outputStream.toString(StandardCharsets.UTF_8);
+        TypeReference<GatewayResponse<T>> typeref = new TypeReference<>() {};
+        return JsonUtils.objectMapper.readValue(json, typeref);
+    }
+
+
 }
 

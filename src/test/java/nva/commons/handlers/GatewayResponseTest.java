@@ -3,11 +3,17 @@ package nva.commons.handlers;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import nva.commons.RequestBody;
 import nva.commons.exceptions.GatewayResponseSerializingException;
+import nva.commons.utils.IoUtils;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +41,18 @@ public class GatewayResponseTest {
         GatewayResponse<RequestBody> rightResponse = sampleGatewayResponse();
 
         assertThat(leftResponse, is(equalTo(rightResponse)));
+    }
+
+    @Test
+    @DisplayName("fromOutputStream returns a GatewayResponse object for a valid json input")
+    public void fromOutputStreamReturnsGatewayResponseWhenInputIsValidJson() throws IOException {
+        String sampleResponse = IoUtils.stringFromResources(Path.of("apiGatewayResponses", "sampleResponse.json"));
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(
+            sampleResponse.getBytes(StandardCharsets.UTF_8).length);
+        outputStream.write(sampleResponse.getBytes(StandardCharsets.UTF_8));
+        GatewayResponse<Map> response = GatewayResponse.fromOutputStream(outputStream);
+        Map<String, String> body = response.getBodyObject(Map.class);
+        assertFalse(body.isEmpty());
     }
 
     private GatewayResponse<RequestBody> sampleGatewayResponse()
