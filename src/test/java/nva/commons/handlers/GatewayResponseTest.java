@@ -24,6 +24,8 @@ public class GatewayResponseTest {
     public static final String SOME_OTHER_VALUE = "Some other value";
     public static final String SOME_KEY = "key1";
     public static final String SOME_OTHER_KEY = "key2";
+    public static final String API_GATEWAY_RESOURCES = "apiGatewayResponses";
+    public static final String SAMPLE_RESPONSE_JSON = "sampleResponse.json";
 
     @Test
     @DisplayName("hashCode is the same for equivalent GatewayResponses")
@@ -45,12 +47,21 @@ public class GatewayResponseTest {
 
     @Test
     @DisplayName("fromOutputStream returns a GatewayResponse object for a valid json input")
-    public void fromOutputStreamReturnsGatewayResponseWhenInputIsValidJson() throws IOException {
-        String sampleResponse = IoUtils.stringFromResources(Path.of("apiGatewayResponses", "sampleResponse.json"));
+    public void fromOutputStreamReturnsGatewayResponseWhenInputIsOutputStreamContainingValidJson() throws IOException {
+        String sampleResponse = IoUtils.stringFromResources(Path.of(API_GATEWAY_RESOURCES, SAMPLE_RESPONSE_JSON));
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream(
             sampleResponse.getBytes(StandardCharsets.UTF_8).length);
         outputStream.write(sampleResponse.getBytes(StandardCharsets.UTF_8));
         GatewayResponse<Map> response = GatewayResponse.fromOutputStream(outputStream);
+        Map<String, String> body = response.getBodyObject(Map.class);
+        assertFalse(body.isEmpty());
+    }
+
+    @Test
+    @DisplayName("fromOutputStream returns a GatewayResponse object for a valid json input")
+    public void fromOutputStreamReturnsGatewayResponseWhenInputIsValidJsonString() throws IOException {
+        String sampleResponse = IoUtils.stringFromResources(Path.of(API_GATEWAY_RESOURCES, SAMPLE_RESPONSE_JSON));
+        GatewayResponse<Map> response = GatewayResponse.fromString(sampleResponse);
         Map<String, String> body = response.getBodyObject(Map.class);
         assertFalse(body.isEmpty());
     }

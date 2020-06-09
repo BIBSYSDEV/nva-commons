@@ -112,8 +112,22 @@ public class GatewayResponse<T> implements Serializable {
     public static <T> GatewayResponse<T> fromOutputStream(ByteArrayOutputStream outputStream)
         throws JsonProcessingException {
         String json = outputStream.toString(StandardCharsets.UTF_8);
+        return fromString(json);
+    }
+
+    /**
+     * Create GatewayResponse object from a String. Used when we call the method {@code handleRequest()} of a Handler
+     * directly and we want to read the output. Usually the String is the output of an OutputStream.
+     *
+     * @param responseString a String containing the serialized GatwayResponse
+     * @param <T>            the class of the body
+     * @return the GatewayResponse containing the output of the handler
+     * @throws JsonProcessingException when the OutputStream cannot be parsed to a JSON object.
+     */
+    public static <T> GatewayResponse<T> fromString(String responseString)
+        throws JsonProcessingException {
         TypeReference<GatewayResponse<T>> typeref = new TypeReference<>() {};
-        return JsonUtils.objectMapper.readValue(json, typeref);
+        return JsonUtils.objectMapper.readValue(responseString, typeref);
     }
 }
 
