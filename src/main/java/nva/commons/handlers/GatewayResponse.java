@@ -101,7 +101,7 @@ public class GatewayResponse<T> implements Serializable {
     }
 
     /**
-     * Create GatewayResponse object from an output stream. Used when we call the method {@code handleRequest()) of a
+     * Create GatewayResponse object from an output stream. Used when we call the method {@code handleRequest()} of a
      * Handler directly and we want to read the output.
      *
      * @param outputStream the outputStream updated by the lambda handler
