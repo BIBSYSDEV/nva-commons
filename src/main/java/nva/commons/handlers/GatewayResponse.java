@@ -100,13 +100,20 @@ public class GatewayResponse<T> implements Serializable {
         return Objects.hash(body, headers, statusCode);
     }
 
+    /**
+     * Create GatewayResponse object from an output stream. Used when we call the method {@code handleRequest()) of a
+     * Handler directly and we want to read the output.
+     *
+     * @param outputStream the outputStream updated by the lambda handler
+     * @param <T>          the class of the body
+     * @return the GatewayResponse containing the output of the handler
+     * @throws JsonProcessingException when the OutputStream cannot be parsed to a JSON object.
+     */
     public static <T> GatewayResponse<T> fromOutputStream(ByteArrayOutputStream outputStream)
         throws JsonProcessingException {
         String json = outputStream.toString(StandardCharsets.UTF_8);
         TypeReference<GatewayResponse<T>> typeref = new TypeReference<>() {};
         return JsonUtils.objectMapper.readValue(json, typeref);
     }
-
-
 }
 
