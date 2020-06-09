@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,6 +24,7 @@ public class FailureTest {
     public static final String NESTED_EXCEPTION_MESSAGE = "Nested exception message";
     public static final String NOT_EXPECTED_MESSAGE = "NotExpectedMessage";
     private static final Integer DEFAULT_VALUE = 100;
+    public static final String UNEXPECTED_MESSAGE = "Should not happen";
 
     private final Integer sample = 1;
 
@@ -32,8 +34,8 @@ public class FailureTest {
 
         Executable action =
             () -> Try.of(sample)
-                     .map(i -> illegalAction(i, NOT_EXPECTED_MESSAGE))
-                     .orElseThrow(null);
+                .map(i -> illegalAction(i, NOT_EXPECTED_MESSAGE))
+                .orElseThrow(null);
         IllegalStateException exception = assertThrows(IllegalStateException.class, action);
         assertThat(exception.getMessage(), is(equalTo(Failure.NULL_ACTION_MESSAGE)));
     }
@@ -43,8 +45,8 @@ public class FailureTest {
     public void orElseThrowsTheSpecifiedException() {
         Executable action =
             () -> Try.of(sample)
-                     .map(i -> illegalAction(i, NESTED_EXCEPTION_MESSAGE))
-                     .orElseThrow(f -> new TestException(f.getException(), EXPECTED_EXCEPTION_MESSAGE));
+                .map(i -> illegalAction(i, NESTED_EXCEPTION_MESSAGE))
+                .orElseThrow(f -> new TestException(f.getException(), EXPECTED_EXCEPTION_MESSAGE));
 
         TestException exception = assertThrows(TestException.class, action);
         assertThat(exception.getMessage(), is(equalTo(EXPECTED_EXCEPTION_MESSAGE)));
@@ -55,8 +57,8 @@ public class FailureTest {
     public void orElseReturnsTheSpecifiedValue() {
 
         Integer actual = Try.of(sample)
-                            .map(i -> illegalAction(i, NESTED_EXCEPTION_MESSAGE))
-                            .orElse(f -> DEFAULT_VALUE);
+            .map(i -> illegalAction(i, NESTED_EXCEPTION_MESSAGE))
+            .orElse(f -> DEFAULT_VALUE);
 
         assertThat(actual, is(equalTo(DEFAULT_VALUE)));
     }
@@ -67,8 +69,8 @@ public class FailureTest {
 
         Executable action =
             () -> Try.of(sample)
-                     .map(i -> illegalAction(i, NESTED_EXCEPTION_MESSAGE))
-                     .orElse(f -> anotherIllegalAction(EXPECTED_EXCEPTION_MESSAGE));
+                .map(i -> illegalAction(i, NESTED_EXCEPTION_MESSAGE))
+                .orElse(f -> anotherIllegalAction(EXPECTED_EXCEPTION_MESSAGE));
 
         TestException exception = assertThrows(TestException.class, action);
         assertThat(exception.getMessage(), is(equalTo(EXPECTED_EXCEPTION_MESSAGE)));
@@ -80,8 +82,8 @@ public class FailureTest {
 
         Executable action =
             () -> Try.of(sample)
-                     .map(i -> illegalAction(i, NESTED_EXCEPTION_MESSAGE))
-                     .orElse(null);
+                .map(i -> illegalAction(i, NESTED_EXCEPTION_MESSAGE))
+                .orElse(null);
 
         assertThrows(IllegalStateException.class, action);
     }
@@ -90,8 +92,8 @@ public class FailureTest {
     @DisplayName("flatMap returns a failure with the first Exception")
     public void flatMapReturnsAFailureWithTheFirstException() {
         Try<Integer> actual = Try.of(sample)
-                                 .map(i -> illegalAction(i, EXPECTED_EXCEPTION_MESSAGE))
-                                 .flatMap(this::anotherTry);
+            .map(i -> illegalAction(i, EXPECTED_EXCEPTION_MESSAGE))
+            .flatMap(this::anotherTry);
 
         assertTrue(actual.isFailure());
         assertThat(actual.getException().getMessage(), is(equalTo(EXPECTED_EXCEPTION_MESSAGE)));
@@ -108,7 +110,7 @@ public class FailureTest {
     @DisplayName("stream returns an emptyStream")
     public void streamReturnsAnEmptyStream() {
         List<Integer> list = Try.of(sample).map(i -> illegalAction(i, NOT_EXPECTED_MESSAGE))
-                                .stream().collect(Collectors.toList());
+            .stream().collect(Collectors.toList());
         assertThat(list, is(empty()));
     }
 
@@ -124,6 +126,23 @@ public class FailureTest {
     public void isFailureReturnsTrue() {
         boolean actual = Try.of(sample).map(i -> illegalAction(i, NOT_EXPECTED_MESSAGE)).isFailure();
         assertTrue(actual);
+    }
+
+    @Test
+    public void forEachDoesNotExecuteTheFunction() {
+        Try<Integer> failure = Try.of(sample).map(i -> illegalAction(i, EXPECTED_EXCEPTION_MESSAGE));
+        assertDoesNotThrow(() -> failure.forEach(this::consumeWithException));
+    }
+
+    @Test
+    public void forEachReturnsFailure() {
+        Try<Integer> failure = Try.of(sample).map(i -> illegalAction(i, EXPECTED_EXCEPTION_MESSAGE));
+        Try<Void> actual = failure.forEach(this::consumeWithException);
+        assertTrue(actual.isFailure());
+    }
+
+    private void consumeWithException(int input) throws RuntimeException {
+        throw new RuntimeException(NOT_EXPECTED_MESSAGE);
     }
 
     private Try<Integer> anotherTry(Integer i) {

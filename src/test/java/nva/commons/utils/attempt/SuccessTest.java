@@ -36,7 +36,7 @@ public class SuccessTest {
     @DisplayName("orElseThrow returns the calculated value and does not throw an exception")
     public void orElseThrowsReturnsTheCalculatedValueAndDoesNotThrowAnException() throws TestException {
         Integer actual = Try.of(sample)
-                            .orElseThrow(f -> new TestException(f.getException(), NOT_EXPECTED_MESSAGE));
+            .orElseThrow(f -> new TestException(f.getException(), NOT_EXPECTED_MESSAGE));
 
         assertThat(actual, is(equalTo(sample)));
     }
@@ -48,8 +48,8 @@ public class SuccessTest {
         int expectedValue = 10;
         int unexpectedValue = 20;
         Integer actual = Try.of(expectedValue)
-                            .map(this::identity)
-                            .orElse(f -> unexpectedValue);
+            .map(this::identity)
+            .orElse(f -> unexpectedValue);
 
         assertThat(actual, is(equalTo(expectedValue)));
     }
@@ -58,7 +58,7 @@ public class SuccessTest {
     @DisplayName("orElse returns the calculated value and does not perform the defined action")
     public void orElseThrowsReturnsTheCalculatedValueAndDoesNotPerformTheDefinedAction() throws TestException {
         Integer actual = Try.of(sample)
-                            .orElse(f -> anotherIllegalAction(NOT_EXPECTED_MESSAGE));
+            .orElse(f -> anotherIllegalAction(NOT_EXPECTED_MESSAGE));
 
         assertThat(actual, is(equalTo(sample)));
     }
@@ -69,7 +69,7 @@ public class SuccessTest {
 
         Executable action =
             () -> Try.of(sample)
-                     .orElse(null);
+                .orElse(null);
 
         assertThrows(IllegalStateException.class, action);
     }
@@ -78,8 +78,8 @@ public class SuccessTest {
     @DisplayName("flatMap returns the value of the nested Try")
     public void flatMapReturnsAFailureWithTheFirstException() {
         Try<Integer> actual = Try.of(sample)
-                                 .map(this::identity)
-                                 .flatMap(this::tryIdentity);
+            .map(this::identity)
+            .flatMap(this::tryIdentity);
 
         assertTrue(actual.isSuccess());
         assertThat(actual.get(), is(equalTo(sample)));
@@ -96,24 +96,44 @@ public class SuccessTest {
     @DisplayName("stream returns an emptyStream")
     public void streamReturnsAStreamWithTheValue() {
         List<Integer> list = Try.of(sample).stream()
-                                .collect(Collectors.toList());
+            .collect(Collectors.toList());
         Integer actual = list.stream().findFirst().get();
         assertThat(list, is(not(empty())));
         assertThat(actual, is(sample));
     }
 
     @Test
-    @DisplayName("isSuccess returns treus")
-    public void isSuccessReturnsFalse() {
+    @DisplayName("isSuccess returns true")
+    public void isSuccessReturnsTrue() {
         boolean actual = Try.of(sample).isSuccess();
         assertTrue(actual);
     }
 
     @Test
     @DisplayName("isFailure returns false")
-    public void isFailureReturnsTrue() {
+    public void isFailureReturnsFalse() {
         boolean actual = Try.of(sample).isFailure();
         assertFalse(actual);
+    }
+
+    @Test
+    public void forEachReturnSuccessWhenExecutionIsSuccessful() {
+        Try<Void> result = Try.of(sample).forEach(this::consume);
+        assertTrue(result.isSuccess());
+    }
+
+    @Test
+    public void forEachReturnFailureWhenExecutionThrowsException() {
+        Try<Void> result = Try.of(sample).forEach(this::throwException);
+        assertTrue(result.isFailure());
+    }
+
+    private void consume(int value) {
+
+    }
+
+    private void throwException(int value) {
+        throw new IllegalArgumentException(Integer.toString(value));
     }
 
     private Integer identity(Integer input) {

@@ -34,6 +34,8 @@ public abstract class Try<T> {
 
     public abstract <S, E extends Exception> Try<S> flatMap(FunctionWithException<T, Try<S>, E> action);
 
+    public abstract <E extends Exception> Try<Void> forEach(ConsumerWithException<T, E> consumer);
+
     public abstract <E extends Exception> T orElseThrow(Function<Failure<T>, E> action) throws E;
 
     public abstract <E extends Exception> T orElse(FunctionWithException<Failure<T>, T, E> action) throws E;
