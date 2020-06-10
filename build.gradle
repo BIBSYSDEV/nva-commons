@@ -83,6 +83,9 @@ dependencies {
         api group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
         api group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
         api group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: log4jVersion
+        api(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
+            because "Because we use the library directly to define loggers in our code"
+        }
     }
 }
 

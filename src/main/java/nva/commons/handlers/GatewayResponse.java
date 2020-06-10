@@ -130,4 +130,3 @@ public class GatewayResponse<T> implements Serializable {
         return JsonUtils.objectMapper.readValue(responseString, typeref);
     }
 }
-
