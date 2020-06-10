@@ -52,7 +52,7 @@ public abstract class Try<T> {
         try {
             return new Success<>(action.call());
         } catch (Exception e) {
-            return new Failure<S>(e);
+            return new Failure<>(e);
         }
     }
 
@@ -69,9 +69,9 @@ public abstract class Try<T> {
     public static <T, R, E extends Exception> Function<T, Try<R>> attempt(FunctionWithException<T, R, E> fe) {
         return arg -> {
             try {
-                return new Success<R>(fe.apply(arg));
+                return new Success<>(fe.apply(arg));
             } catch (Exception e) {
-                return new Failure<R>(e);
+                return new Failure<>(e);
             }
         };
     }

@@ -67,7 +67,7 @@ public class Success<T> extends Try<T> {
     }
 
     /**
-     * A wrapper for actions that throw checked Exceptions. See {@see https://www.oreilly.com/content/handling
+     * A wrapper for consumers that throw checked Exceptions. See {@see https://www.oreilly.com/content/handling
      * -checked-exceptions-in-java-streams/} Try to perform the action. Any exception will be enclosed in a Failure.
      *
      * @param action a {@link Consumer} action that throws or does not throw a checked Exception
@@ -78,9 +78,9 @@ public class Success<T> extends Try<T> {
     public <E extends Exception> Try<Void> forEach(ConsumerWithException<T, E> action) {
         try {
             action.consume(value);
-            return new Success<Void>(null);
+            return new Success<>(null);
         } catch (Exception e) {
-            return new Failure<Void>(e);
+            return new Failure<>(e);
         }
     }
 
