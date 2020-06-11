@@ -128,13 +128,7 @@ public class SuccessTest {
         assertTrue(result.isFailure());
     }
 
-    @Test
-    public void test() {
-        Try.of(1).map(i -> i + 1).orElseThrow(null);
-    }
-
     private void consume(int value) {
-
     }
 
     private void throwException(int value) {
