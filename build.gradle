@@ -1,19 +1,21 @@
+import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
 
 plugins {
     id 'java-library'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
     id 'jacoco'
     id 'checkstyle'
     id 'pmd'
-    //id 'nebula.lint' version '16.8.0'
+    id 'nebula.lint' version '16.8.0'
 }
 
 
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
-//gradleLint {
-//    rules = ['unused-dependency']
-//}
+gradleLint {
+    rules = ['unused-dependency']
+}
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
@@ -34,6 +36,7 @@ def log4jVersion = "2.13.2"
 
 
 apply plugin: 'java-library'
+apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'jacoco'
 apply plugin: 'checkstyle'
 apply plugin: 'pmd'
@@ -59,23 +62,25 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
     implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.11'
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.9'
-    implementation(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
-        because 'Scope provided in junit-jupiter'
-    }
+//    implementation(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
+//        because 'Scope provided in junit-jupiter'
+//    }
 
     testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.4'
 
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jupiterVersion
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: jupiterVersion
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jupiterVersion
-
-
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion) {
+        dependencies {
+            implementation(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
+                because 'Scope provided in junit-jupiter'
+            }
+        }
+    }
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
 
     // If one is using nva-commons, api allows the re-usage of these packages.
 
-    //gradleLint.ignore ('unused-dependency') {
+    gradleLint.ignore ('unused-dependency') {
         api group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.1'
         api group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
         api group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
@@ -83,7 +88,7 @@ dependencies {
         api(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
             because "Because we use the library directly to define loggers in our code"
         }
-    //}
+    }
 }
 
 test {
@@ -117,10 +122,10 @@ checkstyle {
     showViolations = true
 }
 
-//shadowJar {
-//// Transformation for merging Log4j2Plugins.dat files.
-//  //  transform(Log4j2PluginsCacheFileTransformer)
-//}
+shadowJar {
+// Transformation for merging Log4j2Plugins.dat files.
+    transform(Log4j2PluginsCacheFileTransformer)
+}
 
 
 tasks.withType(Checkstyle) {
