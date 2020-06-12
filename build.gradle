@@ -60,7 +60,7 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
     runtimeOnly group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: jacksonVersion
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
-    implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.11'
+    implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.13'
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.9'
 
     testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.4'
