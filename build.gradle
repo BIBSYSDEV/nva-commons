@@ -80,7 +80,7 @@ dependencies {
     // If one is using nva-commons, api allows the re-usage of these packages.
 
     gradleLint.ignore ('unused-dependency') {
-        api group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.1'
+        api group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.2.0'
         api group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
         api group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
         api group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: log4jVersion
