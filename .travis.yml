@@ -12,7 +12,7 @@ before_install:
   - sudo apt-get install -y jq
   - LATEST_CODACY_VERSION="$(curl -Ls https://api.bintray.com/packages/codacy/Binaries/codacy-coverage-reporter/versions/_latest | jq -r .name)"
 script:
-  - ./gradlew build
+  - ./gradlew build jacocoTestReport
 after_script:
   - curl -Ls -o codacy-coverage-reporter "https://dl.bintray.com/codacy/Binaries/${LATEST_CODACY_VERSION}/codacy-coverage-reporter-linux"
   - chmod +x codacy-coverage-reporter
