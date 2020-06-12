@@ -1,8 +1,6 @@
-import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
 
 plugins {
     id 'java-library'
-    id 'com.github.johnrengelman.shadow' version '5.2.0'
     id 'jacoco'
     id 'checkstyle'
     id 'pmd'
@@ -120,10 +118,10 @@ checkstyle {
     showViolations = true
 }
 
-shadowJar {
-// Transformation for merging Log4j2Plugins.dat files.
-  //  transform(Log4j2PluginsCacheFileTransformer)
-}
+//shadowJar {
+//// Transformation for merging Log4j2Plugins.dat files.
+//  //  transform(Log4j2PluginsCacheFileTransformer)
+//}
 
 
 tasks.withType(Checkstyle) {
