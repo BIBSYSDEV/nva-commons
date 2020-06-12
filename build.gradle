@@ -19,7 +19,7 @@ gradleLint {
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
-    gradleVersion = "6.2.2"
+    gradleVersion = "6.5"
 }
 
 
@@ -122,7 +122,7 @@ checkstyle {
 
 shadowJar {
 // Transformation for merging Log4j2Plugins.dat files.
-    transform(Log4j2PluginsCacheFileTransformer)
+  //  transform(Log4j2PluginsCacheFileTransformer)
 }
 
 
