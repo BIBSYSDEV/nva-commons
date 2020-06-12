@@ -4,16 +4,16 @@ plugins {
     id 'jacoco'
     id 'checkstyle'
     id 'pmd'
-    id 'nebula.lint' version '16.8.0'
+    //id 'nebula.lint' version '16.8.0'
 }
 
 
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
-gradleLint {
-    rules = ['unused-dependency']
-}
+//gradleLint {
+//    rules = ['unused-dependency']
+//}
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
