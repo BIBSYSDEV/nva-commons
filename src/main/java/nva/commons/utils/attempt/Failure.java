@@ -34,12 +34,12 @@ public class Failure<T> extends Try<T> {
 
     @Override
     public <S, E extends Exception> Try<S> map(FunctionWithException<T, S, E> action) {
-        return new Failure<>(exception);
+        return new Failure<S>(exception);
     }
 
     @Override
     public <S, E extends Exception> Try<S> flatMap(FunctionWithException<T, Try<S>, E> action) {
-        return new Failure<>(exception);
+        return new Failure<S>(exception);
     }
 
     @Override
@@ -58,5 +58,10 @@ public class Failure<T> extends Try<T> {
         } else {
             throw new IllegalStateException(NULL_ACTION_MESSAGE);
         }
+    }
+
+    @Override
+    public <E extends Exception> Try<Void> forEach(ConsumerWithException<T, E> consumer) {
+        return new Failure<Void>(exception);
     }
 }

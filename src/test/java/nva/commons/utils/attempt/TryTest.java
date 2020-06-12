@@ -80,9 +80,9 @@ public class TryTest {
     @Test
     public void attemptReturnsFailureWhenCheckedExceptionIsThrown() {
         Optional<Exception> exception = Stream.of(SOME_STRING).map(attempt(this::throwCheckedException))
-                                              .filter(Try::isFailure)
-                                              .map(Try::getException)
-                                              .findFirst();
+            .filter(Try::isFailure)
+            .map(Try::getException)
+            .findFirst();
         assertThat(exception.isPresent(), is(true));
         assertThat(exception.get().getClass(), is(equalTo(IOException.class)));
     }
@@ -90,9 +90,9 @@ public class TryTest {
     @Test
     public void attemptReturnsFailureWhenNonCheckedExceptionIsThrown() {
         Optional<Exception> exception = Stream.of(SOME_STRING).map(attempt(this::throwUnCheckedException))
-                                              .filter(Try::isFailure)
-                                              .map(Try::getException)
-                                              .findFirst();
+            .filter(Try::isFailure)
+            .map(Try::getException)
+            .findFirst();
         assertThat(exception.isPresent(), is(true));
         assertThat(exception.get().getClass(), is(equalTo(RuntimeException.class)));
     }
@@ -101,13 +101,13 @@ public class TryTest {
     public void failurePropagatesErrorThroughTheWholeChain() {
         int someInt = 2;
         Try<String> results = Stream.of(someInt)
-                                    .map(i -> numbers.get(i))
-                                    .map(String::toUpperCase)
-                                    .map(attempt(this::throwCheckedException))
-                                    .map(att -> att.map(s -> s.replaceAll("o", "cc")))
-                                    .map(att -> att.map(String::trim))
-                                    .filter(Try::isFailure)
-                                    .findFirst().orElse(null);
+            .map(i -> numbers.get(i))
+            .map(String::toUpperCase)
+            .map(attempt(this::throwCheckedException))
+            .map(att -> att.map(s -> s.replaceAll("o", "cc")))
+            .map(att -> att.map(String::trim))
+            .filter(Try::isFailure)
+            .findFirst().orElse(null);
         Exception exception = results.getException();
         assertThat(exception.getClass(), is(equalTo(IOException.class)));
         assertThat(exception.getMessage(), is(equalTo(EXCEPTION_MESSAGE)));
@@ -118,8 +118,8 @@ public class TryTest {
     public void flatMapPropagatesTheFirstException() {
         Integer someInt = 2;
         Try<String> actual = Try.of(someInt)
-                                .map(Object::toString)
-                                .flatMap(this::throwCheckedExceptionForFlatMap);
+            .map(Object::toString)
+            .flatMap(this::throwCheckedExceptionForFlatMap);
 
         assertTrue(actual.isFailure());
         assertThat(actual.getException().getMessage(), is(IsEqual.equalTo(EXCEPTION_MESSAGE)));

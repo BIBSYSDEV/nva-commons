@@ -10,7 +10,7 @@ public final class SingletonCollector {
     public static final int ONLY_ELEMENT = 0;
     public static final String SINGLETON_EXPECTED_ERROR_TEMPLATE = "Expected a single value, but %d were found";
     public static final String SINGLETON_OR_NULL_EXPECTED_ERROR_TEMPLATE
-            = "Expected zero or a single value, but %d were found";
+        = "Expected zero or a single value, but %d were found";
 
     private SingletonCollector() {
     }
@@ -33,7 +33,7 @@ public final class SingletonCollector {
     }
 
     public static <T> Collector<T, ?, T> collectOrElse(T alternative) {
-        return Collectors.collectingAndThen(Collectors.toList(),  list -> orElse(list, alternative));
+        return Collectors.collectingAndThen(Collectors.toList(), list -> orElse(list, alternative));
     }
 
     private static <T> T orElse(List<T> list, T alternative) {

@@ -58,7 +58,6 @@ public class ApiGatewayHandlerTest {
     public Environment environment;
     private Context context;
 
-
     /**
      * Setup.
      */

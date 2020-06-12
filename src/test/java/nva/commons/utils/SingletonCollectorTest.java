@@ -1,14 +1,12 @@
 package nva.commons.utils;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Stream;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.List;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 class SingletonCollectorTest {
 
@@ -51,7 +49,6 @@ class SingletonCollectorTest {
     @DisplayName("SingletonCollector::collectOrElse returns alternative when input list is empty")
     @Test
     void collectOrElseReturnsAlternativeWhenInputListContainsZeroElements() {
-        List<String> input = Collections.emptyList();
         String expected = "Something";
         assertEquals(expected, Stream.empty().collect(SingletonCollector.collectOrElse(expected)));
     }
