@@ -78,9 +78,9 @@ public class Success<T> extends Try<T> {
     public <E extends Exception> Try<Void> forEach(ConsumerWithException<T, E> action) {
         try {
             action.consume(value);
-            return new Success<>(null);
+            return new Success<Void>(null);
         } catch (Exception e) {
-            return new Failure<>(e);
+            return new Failure<Void>(e);
         }
     }
 

@@ -15,7 +15,7 @@ public abstract class Try<T> {
 
     @SuppressWarnings("PMD.ShortMethodName")
     public static <T> Try<T> of(T input) {
-        return new Success<>(input);
+        return new Success<T>(input);
     }
 
     public abstract Stream<T> stream();
@@ -50,9 +50,9 @@ public abstract class Try<T> {
      */
     public static <S> Try<S> attempt(Callable<S> action) {
         try {
-            return new Success<>(action.call());
+            return new Success<S>(action.call());
         } catch (Exception e) {
-            return new Failure<>(e);
+            return new Failure<S>(e);
         }
     }
 
@@ -69,9 +69,9 @@ public abstract class Try<T> {
     public static <T, R, E extends Exception> Function<T, Try<R>> attempt(FunctionWithException<T, R, E> fe) {
         return arg -> {
             try {
-                return new Success<>(fe.apply(arg));
+                return new Success<R>(fe.apply(arg));
             } catch (Exception e) {
-                return new Failure<>(e);
+                return new Failure<R>(e);
             }
         };
     }
