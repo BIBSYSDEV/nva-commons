@@ -143,7 +143,6 @@ public class ApiGatewayHandlerTest {
         assertThat(logs, containsString(BOTTOM_EXCEPTION_MESSAGE));
         assertThat(logs, containsString(MIDDLE_EXCEPTION_MESSAGE));
         assertThat(logs, containsString(TOP_EXCEPTION_MESSAGE));
-        assertThat(logs, containsString(context.getAwsRequestId()));
     }
 
     @Test
