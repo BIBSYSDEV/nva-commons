@@ -10,15 +10,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nva.commons.exceptions.ApiGatewayException;
 import nva.commons.exceptions.ApiGatewayUncheckedException;
@@ -28,6 +27,8 @@ import nva.commons.utils.Environment;
 import nva.commons.utils.IoUtils;
 import nva.commons.utils.JacocoGenerated;
 import nva.commons.utils.JsonUtils;
+import nva.commons.utils.SingletonCollector;
+import nva.commons.utils.StringUtils;
 import nva.commons.utils.log.LogUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
@@ -54,12 +55,7 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
 
     private static final ObjectMapper objectMapper = JsonUtils.objectMapper;
     public static final String DEFAULT_ERROR_MESSAGE = "Unknown error in handler";
-    public static final String STACK_TRACE_DELIMITER = ":";
-    private static final String CAUSE_PREFIX = "EXCEPTION_CAUSE:";
-    private static final String STACK_TRACE_PREFIX = "STACK_TRACE:";
-    private static final String SUPPRESSED_PREFIX = "SUPPRESSED_STACK:";
     public static final String REQUEST_ID = "requestId";
-    public static final String REQUEST_ID_LOGGING_TEMPLATE = "%s:%s";
     public static final String ALLOWED_ORIGIN_ENV = "ALLOWED_ORIGIN";
 
     protected Logger logger;
@@ -319,49 +315,24 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
             writeOutput(inputObject, response);
         } catch (ApiGatewayException e) {
             logger.warn(e.getMessage());
-            logger.warn(getStackTraceString(e, context.getAwsRequestId()));
+            logger.warn(getStackTraceString(e));
             writeExpectedFailure(inputObject, e, context.getAwsRequestId());
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.error(getStackTraceString(e, context.getAwsRequestId()));
+            logger.error(getStackTraceString(e));
             writeUnexpectedFailure(inputObject, e, context.getAwsRequestId());
         }
     }
 
-    private String getStackTraceString(Exception e, String requestId) {
-        e.printStackTrace();
-        String requestIdString = String.format(REQUEST_ID_LOGGING_TEMPLATE, REQUEST_ID, requestId);
-        String causeQueue = CAUSE_PREFIX + createCauseString(e);
-        String stackTrace = STACK_TRACE_PREFIX + arrayToStream(e.getStackTrace());
-        String suppressed = getSuppressedMessagesIfExist(e);
-        return String.join(STACK_TRACE_DELIMITER, requestIdString, causeQueue, stackTrace, suppressed);
-    }
-
-    private String getSuppressedMessagesIfExist(Exception e) {
-        return Optional.ofNullable(arrayToStream(e.getSuppressed()))
-            .map(m -> SUPPRESSED_PREFIX + m)
-            .orElse("");
-    }
-
-    private String createCauseString(Exception e) {
-        List<Throwable> causeQueue = populateQueue(e);
-        return causeQueue.stream().map(Throwable::toString).collect(Collectors.joining(STACK_TRACE_DELIMITER));
-    }
-
-    private List<Throwable> populateQueue(Exception e) {
-        List<Throwable> causeQueue = new ArrayList<>();
-        Throwable currentException = e;
-        while (currentException != null) {
-            causeQueue.add(currentException);
-            currentException = currentException.getCause();
-        }
-        return causeQueue;
-    }
-
-    private static <T> String arrayToStream(T[] suppressed) {
-        return Stream.of(suppressed)
-            .map(Object::toString)
-            .collect(Collectors.joining(STACK_TRACE_DELIMITER));
+    private String getStackTraceString(Exception e) {
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        String exceptionString = sw.toString();
+        String exceptionStringNoNewLines = Stream.of(exceptionString)
+            .map(StringUtils::removeMultipleWhiteSpaces)
+            .map(StringUtils::replaceWhiteSpacesWithSpace)
+            .collect(SingletonCollector.collect());
+        return exceptionStringNoNewLines;
     }
 
     private Class<I> getIClass() {

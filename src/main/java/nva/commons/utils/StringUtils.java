@@ -41,4 +41,14 @@ public final class StringUtils {
     public static boolean isEmpty(String input) {
         return isNull(input) || input.isBlank();
     }
+
+    /**
+     * Replaces  whitespaces with space.
+     *
+     * @param str input string.
+     * @return string with all whitespaces replaced by spaces
+     */
+    public static String replaceWhiteSpacesWithSpace(String str) {
+        return str.replaceAll("\\s", " ");
+    }
 }
