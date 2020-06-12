@@ -34,7 +34,6 @@ def log4jVersion = "2.13.2"
 
 
 apply plugin: 'java-library'
-apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'jacoco'
 apply plugin: 'checkstyle'
 apply plugin: 'pmd'
