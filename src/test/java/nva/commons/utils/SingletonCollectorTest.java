@@ -1,5 +1,8 @@
 package nva.commons.utils;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -9,6 +12,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
 
 class SingletonCollectorTest {
 
@@ -84,7 +88,7 @@ class SingletonCollectorTest {
     @Test
     void collectOrElseThrowThrowsExceptionWhenInputIsEmpty() {
         Executable executable = () -> Stream.empty()
-                .collect(SingletonCollector.collectOrElseThrow(RuntimeException::new));
+            .collect(SingletonCollector.collectOrElseThrow(RuntimeException::new));
         assertThrows(RuntimeException.class, executable);
     }
 
@@ -92,8 +96,19 @@ class SingletonCollectorTest {
     @DisplayName("SingletonCollector::orElseThrow throws supplied exception when input list is not singleton")
     @Test
     void collectOrElseThrowThrowsExceptionWhenInputIsNotSingleton() {
-        Executable executable = () -> TWO_ELEMENT_LIST.stream()
-                .collect(SingletonCollector.collectOrElseThrow(RuntimeException::new));
-        assertThrows(RuntimeException.class, executable);
+        try {
+            TWO_ELEMENT_LIST.stream()
+                .collect(SingletonCollector.collectOrElseThrow(() -> new MyException()));
+        }
+        catch(Exception e) {
+            assertThat(e.getClass(),is(equalTo(MyException.class)));
+        }
+    }
+
+    private static class MyException extends Exception {
+
+        public MyException() {
+            super();
+        }
     }
 }

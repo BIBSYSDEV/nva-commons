@@ -28,6 +28,7 @@ public class Success<T> extends Try<T> {
 
     @Override
     public T get() {
+        System.out.println("Success.get()");
         return value;
     }
 

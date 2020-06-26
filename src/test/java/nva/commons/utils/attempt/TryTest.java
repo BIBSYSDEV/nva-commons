@@ -4,6 +4,7 @@ import static nva.commons.utils.attempt.Try.attempt;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -15,11 +16,13 @@ import java.util.stream.Stream;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 public class TryTest {
 
     private static final String SOME_STRING = "SomeString";
     private static final String EXCEPTION_MESSAGE = "ExceptionMessage";
+    private static final ArithmeticException SAMPLE_UNCHECKED_EXCEPTION = new ArithmeticException(EXCEPTION_MESSAGE);
     private static Map<Integer, String> numbers;
 
     static {
@@ -89,12 +92,26 @@ public class TryTest {
 
     @Test
     public void attemptReturnsFailureWhenNonCheckedExceptionIsThrown() {
+        Try<String> effort = attempt(() -> throwUnCheckedException("someInput"));
+        assertThat(effort.isFailure(), is(true));
+        assertThat(effort.getException().getClass(), is(equalTo(SAMPLE_UNCHECKED_EXCEPTION.getClass())));
+    }
+
+    @Test
+    public void attemptReturnsFailureAtTheEndOfStreamProcessingWhenUncheckedExceptionIsThrown() {
         Optional<Exception> exception = Stream.of(SOME_STRING).map(attempt(this::throwUnCheckedException))
             .filter(Try::isFailure)
             .map(Try::getException)
             .findFirst();
         assertThat(exception.isPresent(), is(true));
-        assertThat(exception.get().getClass(), is(equalTo(RuntimeException.class)));
+        assertThat(exception.get().getClass(), is(equalTo(SAMPLE_UNCHECKED_EXCEPTION.getClass())));
+    }
+
+    @Test
+    public void orElseThrowsSpecifiedExceptionWhenUncheckedExceptionIsThrown() throws TestException {
+        Executable action = () ->
+            attempt(() -> throwUnCheckedException("Some message")).orElseThrow(fail -> new TestException());
+        assertThrows(TestException.class,action);
     }
 
     @Test
@@ -138,6 +155,13 @@ public class TryTest {
     }
 
     private String throwUnCheckedException(String input) {
-        throw new RuntimeException(EXCEPTION_MESSAGE);
+        throw SAMPLE_UNCHECKED_EXCEPTION;
+    }
+
+    private class TestException extends Exception {
+
+        public TestException() {
+            super();
+        }
     }
 }

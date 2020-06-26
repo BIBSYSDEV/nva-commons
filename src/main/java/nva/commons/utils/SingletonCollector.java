@@ -1,6 +1,6 @@
 package nva.commons.utils;
 
-import nva.commons.utils.attempt.Try;
+import static nva.commons.utils.attempt.Try.attempt;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -25,14 +25,20 @@ public final class SingletonCollector {
      * @return a singleton of type T.
      */
     public static <T> Collector<T, ?, T> collect() {
-        return Collectors.collectingAndThen(Collectors.toList(), SingletonCollector::get);
+        System.out.println("SingletonCollector.collect()");
+        return Collectors.collectingAndThen(Collectors.toList(), list -> get(list,defaultExceptionSupplier(list)));
     }
 
-    private static <T> T get(List<T> list) {
+    private static <T,E extends Exception> T get(List<T> list, Supplier<E> exceptionSupplier) throws E {
+        System.out.println("SingletonCollector.get(list)");
         if (list.size() != SINGLETON) {
-            throw new IllegalStateException(String.format(SINGLETON_EXPECTED_ERROR_TEMPLATE, list.size()));
+            throw exceptionSupplier.get();
         }
         return list.get(ONLY_ELEMENT);
+    }
+
+    private static <T> Supplier<IllegalStateException> defaultExceptionSupplier(List<T> list) {
+        return ()-> new IllegalStateException(String.format(SINGLETON_EXPECTED_ERROR_TEMPLATE, list.size()));
     }
 
     public static <T> Collector<T, ?, T> collectOrElse(T alternative) {
@@ -54,16 +60,12 @@ public final class SingletonCollector {
      * exception if the list is empty or does not contain one element.
      * @param exceptionSupplier The exception to be thrown.
      * @param <T> The type of input elements to the reduction operation.
-     * @param <X> The type of the exception to be thrown.
+     * @param <E> The type of the exception to be thrown.
      * @return A type of the singleton.
-     * @throws X If the input list is empty or contains more than one element.
+     * @throws E If the input list is empty or contains more than one element.
      */
-    public static <T, X extends Throwable> Collector<T, ?, T>
-        collectOrElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
-        Try<Collector<T, ?, T>> attempt = Try.of(collect());
-        if (attempt.isFailure()) {
-            throw exceptionSupplier.get();
-        }
-        return attempt.get();
+    public static <T, E extends Exception> Collector<T, ?, T>
+        collectOrElseThrow(Supplier<? extends E> exceptionSupplier) {
+        return Collectors.collectingAndThen(Collectors.toList(), list -> get(list,exceptionSupplier));
     }
 }
