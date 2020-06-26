@@ -1,5 +1,6 @@
 package nva.commons.utils.attempt;
 
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -39,6 +40,8 @@ public abstract class Try<T> {
     public abstract <E extends Exception> T orElseThrow(Function<Failure<T>, E> action) throws E;
 
     public abstract <E extends Exception> T orElse(FunctionWithException<Failure<T>, T, E> action) throws E;
+
+    public abstract Optional<T> toOptional();
 
     /**
      * A wrapper for actions that throw checked Exceptions. See {@see https://www.oreilly.com/content/handling

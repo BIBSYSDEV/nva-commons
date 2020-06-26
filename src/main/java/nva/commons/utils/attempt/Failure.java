@@ -1,5 +1,6 @@
 package nva.commons.utils.attempt;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -58,6 +59,11 @@ public class Failure<T> extends Try<T> {
         } else {
             throw new IllegalStateException(NULL_ACTION_MESSAGE);
         }
+    }
+
+    @Override
+    public Optional<T> toOptional() {
+        return Optional.empty();
     }
 
     @Override

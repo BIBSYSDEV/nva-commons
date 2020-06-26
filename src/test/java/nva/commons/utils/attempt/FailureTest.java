@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import nva.commons.exceptions.TestException;
 import org.junit.jupiter.api.DisplayName;
@@ -137,6 +138,15 @@ public class FailureTest {
         Try<Integer> failure = Try.of(sample).map(i -> illegalAction(EXPECTED_EXCEPTION_MESSAGE));
         Try<Void> actual = failure.forEach(this::consumeWithException);
         assertTrue(actual.isFailure());
+    }
+
+    @Test
+    public void toOptionalReturnsEmptyOptional() {
+        Try<Integer> failure = Try.of(sample).map(i -> illegalAction(EXPECTED_EXCEPTION_MESSAGE));
+
+        assertThat(failure.isFailure(), is(true));
+        Optional<Integer> value = failure.toOptional();
+        assertThat(value.isEmpty(), is(true));
     }
 
     private void consumeWithException(int input) throws RuntimeException {
