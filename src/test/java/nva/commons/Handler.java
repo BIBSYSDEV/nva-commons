@@ -22,7 +22,6 @@ public class Handler extends ApiGatewayHandler<RequestBody, String> {
     private String path;
     private RequestBody body;
 
-
     /**
      * Constructor with environment.
      *

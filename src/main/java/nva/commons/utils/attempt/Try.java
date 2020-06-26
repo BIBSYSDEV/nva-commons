@@ -1,5 +1,6 @@
 package nva.commons.utils.attempt;
 
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -15,7 +16,7 @@ public abstract class Try<T> {
 
     @SuppressWarnings("PMD.ShortMethodName")
     public static <T> Try<T> of(T input) {
-        return new Success<>(input);
+        return new Success<T>(input);
     }
 
     public abstract Stream<T> stream();
@@ -34,9 +35,13 @@ public abstract class Try<T> {
 
     public abstract <S, E extends Exception> Try<S> flatMap(FunctionWithException<T, Try<S>, E> action);
 
+    public abstract <E extends Exception> Try<Void> forEach(ConsumerWithException<T, E> consumer);
+
     public abstract <E extends Exception> T orElseThrow(Function<Failure<T>, E> action) throws E;
 
     public abstract <E extends Exception> T orElse(FunctionWithException<Failure<T>, T, E> action) throws E;
+
+    public abstract <E extends Exception> Optional<T> toOptional(ConsumerWithException<Failure<T>, E> action) throws E;
 
     /**
      * A wrapper for actions that throw checked Exceptions. See {@see https://www.oreilly.com/content/handling
@@ -48,7 +53,7 @@ public abstract class Try<T> {
      */
     public static <S> Try<S> attempt(Callable<S> action) {
         try {
-            return new Success<>(action.call());
+            return new Success<S>(action.call());
         } catch (Exception e) {
             return new Failure<S>(e);
         }

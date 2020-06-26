@@ -1,6 +1,8 @@
 package nva.commons.utils.attempt;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import nva.commons.utils.JacocoGenerated;
@@ -63,6 +65,29 @@ public class Success<T> extends Try<T> {
             throw new IllegalStateException(NULL_ACTION_MESSAGE);
         }
         return get();
+    }
+
+    @Override
+    public <E extends Exception> Optional<T> toOptional(ConsumerWithException<Failure<T>, E> action) throws E {
+        return Optional.of(value);
+    }
+
+    /**
+     * A wrapper for consumers that throw checked Exceptions. See {@see https://www.oreilly.com/content/handling
+     * -checked-exceptions-in-java-streams/} Try to perform the action. Any exception will be enclosed in a Failure.
+     *
+     * @param action a {@link Consumer} action that throws or does not throw a checked Exception
+     * @param <E>    the type of the thrown Exception
+     * @return a new {@link Try} instance
+     */
+    @Override
+    public <E extends Exception> Try<Void> forEach(ConsumerWithException<T, E> action) {
+        try {
+            action.consume(value);
+            return new Success<Void>(null);
+        } catch (Exception e) {
+            return new Failure<Void>(e);
+        }
     }
 
     @Override

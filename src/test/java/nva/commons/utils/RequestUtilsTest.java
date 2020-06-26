@@ -11,6 +11,7 @@ import nva.commons.handlers.RequestInfo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.Mockito;
 
 public class RequestUtilsTest {
@@ -34,9 +35,10 @@ public class RequestUtilsTest {
     @Test
     public void getHeaderThrowsExceptionOnMissingKey() {
         when(requestInfo.getHeaders()).thenReturn(Map.of());
-        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
-            () -> RequestUtils.getHeader(requestInfo, KEY));
-        assertEquals(RequestUtils.MISSING_FROM_HEADERS + KEY, exception.getMessage());
+        Executable action = () -> RequestUtils.getHeader(requestInfo, KEY);
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, action);
+        String expected = RequestUtils.MISSING_FROM_HEADERS + KEY;
+        assertEquals(expected, exception.getMessage());
     }
 
     @Test
@@ -49,9 +51,10 @@ public class RequestUtilsTest {
     @Test
     public void getQueryParameterThrowsExceptionOnMissingKey() {
         when(requestInfo.getQueryParameters()).thenReturn(Map.of());
-        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
-            () -> RequestUtils.getQueryParameter(requestInfo, KEY));
-        assertEquals(RequestUtils.MISSING_FROM_QUERY_PARAMETERS + KEY, exception.getMessage());
+        Executable action = () -> RequestUtils.getQueryParameter(requestInfo, KEY);
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, action);
+        String expected = RequestUtils.MISSING_FROM_QUERY_PARAMETERS + KEY;
+        assertEquals(expected, exception.getMessage());
     }
 
     @Test
@@ -64,28 +67,30 @@ public class RequestUtilsTest {
     @Test
     public void getPathParametersThrowsExceptionOnMissingKey() {
         when(requestInfo.getPathParameters()).thenReturn(Map.of());
+        Executable action = () -> RequestUtils.getPathParameter(requestInfo, KEY);
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
-            () -> RequestUtils.getPathParameter(requestInfo, KEY));
-        assertEquals(RequestUtils.MISSING_FROM_PATH_PARAMETERS   + KEY, exception.getMessage());
+            action);
+        String expected = RequestUtils.MISSING_FROM_PATH_PARAMETERS + KEY;
+        assertEquals(expected, exception.getMessage());
     }
 
     @Test
     public void getRequestContextParameterReturnsValueOnValidJsonPointer() {
-        when(requestInfo.getRequestContext()).thenReturn(
-            objectMapper.convertValue(Map.of(KEY, VALUE), JsonNode.class));
+        when(requestInfo.getRequestContext())
+            .thenReturn(objectMapper.convertValue(Map.of(KEY, VALUE), JsonNode.class));
         String value = RequestUtils.getRequestContextParameter(requestInfo, JsonPointer.compile("/" + KEY));
         assertEquals(VALUE, value);
     }
 
     @Test
     public void getRequestContextParameterThrowsExceptionOnInvalidJsonPointer() {
-        when(requestInfo.getRequestContext()).thenReturn(
-            objectMapper.createObjectNode());
+        when(requestInfo.getRequestContext())
+            .thenReturn(objectMapper.createObjectNode());
         JsonPointer jsonPointer = JsonPointer.compile("/" + KEY);
-        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
-            () -> RequestUtils.getRequestContextParameter(requestInfo, jsonPointer)
-        );
-        assertEquals(RequestUtils.MISSING_FROM_REQUEST_CONTEXT + jsonPointer, exception.getMessage());
-    }
 
+        Executable action = () -> RequestUtils.getRequestContextParameter(requestInfo, jsonPointer);
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, action);
+        String expected = RequestUtils.MISSING_FROM_REQUEST_CONTEXT + jsonPointer;
+        assertEquals(expected, exception.getMessage());
+    }
 }

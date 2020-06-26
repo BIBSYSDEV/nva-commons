@@ -18,9 +18,9 @@ public final class RequestUtils {
     /**
      * Get header from request info.
      *
-     * @param requestInfo   request info
-     * @param header    header name
-     * @return  header value
+     * @param requestInfo request info
+     * @param header      header name
+     * @return header value
      */
     public static String getHeader(RequestInfo requestInfo, String header) {
         return Optional.ofNullable(requestInfo.getHeaders().get(header))
@@ -30,9 +30,9 @@ public final class RequestUtils {
     /**
      * Get query parameter from request info.
      *
-     * @param requestInfo   request info
-     * @param parameter parameter name
-     * @return  parameter value
+     * @param requestInfo request info
+     * @param parameter   parameter name
+     * @return parameter value
      */
     public static String getQueryParameter(RequestInfo requestInfo, String parameter) {
         return Optional.ofNullable(requestInfo.getQueryParameters().get(parameter))
@@ -42,9 +42,9 @@ public final class RequestUtils {
     /**
      * Get path parameter from request info.
      *
-     * @param requestInfo   request info
-     * @param parameter parameter name
-     * @return  parameter value
+     * @param requestInfo request info
+     * @param parameter   parameter name
+     * @return parameter value
      */
     public static String getPathParameter(RequestInfo requestInfo, String parameter) {
         return Optional.ofNullable(requestInfo.getPathParameters().get(parameter))
@@ -54,15 +54,15 @@ public final class RequestUtils {
     /**
      * Get parameter from request context baed on json pointer.
      *
-     * @param requestInfo   request info
-     * @param jsonPointer   json pointer to parameter
-     * @return  parameter value
+     * @param requestInfo request info
+     * @param jsonPointer json pointer to parameter
+     * @return parameter value
      */
     public static String getRequestContextParameter(RequestInfo requestInfo, JsonPointer jsonPointer) {
         JsonNode jsonNode = requestInfo.getRequestContext().at(jsonPointer);
         if (jsonNode.isMissingNode()) {
             throw new IllegalArgumentException(MISSING_FROM_REQUEST_CONTEXT + jsonPointer.toString());
         }
-        return  jsonNode.textValue();
+        return jsonNode.textValue();
     }
 }

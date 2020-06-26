@@ -63,6 +63,15 @@ public class StringUtilsTest {
         assertThat(StringUtils.isEmpty(nonEmptyString), is(equalTo(false)));
     }
 
+    @Test
+    @DisplayName("replaceWhitespacesWithSpace replaces all white spaces with space.")
+    public void replaceWhiteSpacesWithSpaceReturnsStringWithspaces() {
+        String inputString = "This is a\ntest\tfor\n\rwhitespaces";
+        String expectedString = "This is a test for  whitespaces";
+        String actual = StringUtils.replaceWhiteSpacesWithSpace(inputString);
+        assertThat(actual, is(equalTo(expectedString)));
+    }
+
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {"  ", "\t", "\n"})
