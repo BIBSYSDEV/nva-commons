@@ -41,7 +41,7 @@ public abstract class Try<T> {
 
     public abstract <E extends Exception> T orElse(FunctionWithException<Failure<T>, T, E> action) throws E;
 
-    public abstract Optional<T> toOptional();
+    public abstract <E extends Exception> Optional<T> toOptional(ConsumerWithException<Failure<T>, E> action) throws E;
 
     /**
      * A wrapper for actions that throw checked Exceptions. See {@see https://www.oreilly.com/content/handling

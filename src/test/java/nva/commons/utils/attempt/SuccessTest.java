@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import nva.commons.exceptions.TestException;
 import org.junit.jupiter.api.DisplayName;
@@ -50,7 +51,7 @@ public class SuccessTest {
         int unexpectedValue = 20;
         Integer actual = Try.of(expectedValue)
             .map(this::identity)
-            .orElse(f -> unexpectedValue);
+            .orElse(failure -> unexpectedValue);
 
         assertThat(actual, is(equalTo(expectedValue)));
     }
@@ -133,9 +134,19 @@ public class SuccessTest {
     public void toOptionalReturnsPresentOptional() {
         Try<Integer> success = Try.of(sample);
         assertThat(success.isSuccess(), is(true));
-        Optional<Integer> value = success.toOptional();
+        Optional<Integer> value = success.toOptional(fail -> doNothing());
         assertThat(value.isPresent(), is(true));
         assertThat(value.get(), is(equalTo(sample)));
+    }
+
+    @Test
+    public void toOptionalDoesNotRunActionForFailure() {
+        Try<Integer> success = Try.of(sample);
+        AtomicBoolean actionAfterFailureRun = new AtomicBoolean(false);
+        success.toOptional(fail -> actionAfterFailureRun.set(true));
+
+        assertThat(success.isSuccess(), is(true));
+        assertThat(actionAfterFailureRun.get(), is(equalTo(false)));
     }
 
     private void consume(int value) {
@@ -155,5 +166,9 @@ public class SuccessTest {
 
     private int anotherIllegalAction(String message) throws TestException {
         throw new TestException(message);
+    }
+
+    private void doNothing() {
+        ;
     }
 }

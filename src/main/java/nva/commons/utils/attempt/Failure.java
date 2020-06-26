@@ -62,7 +62,8 @@ public class Failure<T> extends Try<T> {
     }
 
     @Override
-    public Optional<T> toOptional() {
+    public <E extends Exception> Optional<T> toOptional(ConsumerWithException<Failure<T>, E> action) throws E {
+        action.consume(this);
         return Optional.empty();
     }
 
