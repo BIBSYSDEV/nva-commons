@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import nva.commons.exceptions.TestException;
 import org.junit.jupiter.api.DisplayName;
@@ -145,8 +146,18 @@ public class FailureTest {
         Try<Integer> failure = Try.of(sample).map(i -> illegalAction(EXPECTED_EXCEPTION_MESSAGE));
 
         assertThat(failure.isFailure(), is(true));
-        Optional<Integer> value = failure.toOptional();
+        Optional<Integer> value = failure.toOptional(fail -> doNothing());
         assertThat(value.isEmpty(), is(true));
+    }
+
+    @Test
+    public void toOptionalRunsActionOnFailure() {
+        Try<Integer> failure = Try.of(sample).map(i -> illegalAction(EXPECTED_EXCEPTION_MESSAGE));
+        AtomicBoolean actionAfterFailureRun = new AtomicBoolean(false);
+        failure.toOptional(fail -> actionAfterFailureRun.set(true));
+
+        assertThat(failure.isFailure(), is(true));
+        assertThat(actionAfterFailureRun.get(), is(true));
     }
 
     private void consumeWithException(int input) throws RuntimeException {
@@ -163,5 +174,9 @@ public class FailureTest {
 
     private int anotherIllegalAction(String message) throws TestException {
         throw new TestException(message);
+    }
+
+    private void doNothing() {
+        ;
     }
 }
