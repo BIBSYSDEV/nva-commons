@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import nva.commons.exceptions.TestException;
 import org.junit.jupiter.api.DisplayName;
@@ -126,6 +127,15 @@ public class SuccessTest {
     public void forEachReturnFailureWhenExecutionThrowsException() {
         Try<Void> result = Try.of(sample).forEach(this::throwException);
         assertTrue(result.isFailure());
+    }
+
+    @Test
+    public void toOptionalReturnsPresentOptional() {
+        Try<Integer> success = Try.of(sample);
+        assertThat(success.isSuccess(), is(true));
+        Optional<Integer> value = success.toOptional();
+        assertThat(value.isPresent(), is(true));
+        assertThat(value.get(), is(equalTo(sample)));
     }
 
     private void consume(int value) {

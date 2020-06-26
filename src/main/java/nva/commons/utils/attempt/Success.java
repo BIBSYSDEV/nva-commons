@@ -1,6 +1,7 @@
 package nva.commons.utils.attempt;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -64,6 +65,11 @@ public class Success<T> extends Try<T> {
             throw new IllegalStateException(NULL_ACTION_MESSAGE);
         }
         return get();
+    }
+
+    @Override
+    public Optional<T> toOptional() {
+        return Optional.of(value);
     }
 
     /**
