@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import nva.commons.utils.attempt.Try;
 
 public final class SingletonCollector {
 
@@ -58,14 +59,15 @@ public final class SingletonCollector {
     /**
      * A utility to return a singleton from a list that is expected to contain one and only one item, throwing supplied
      * exception if the list is empty or does not contain one element.
+     *
+     * @param <T>               The type of input elements to the reduction operation.
+     * @param <E>               The type of the exception to be thrown.
      * @param exceptionSupplier The exception to be thrown.
-     * @param <T> The type of input elements to the reduction operation.
-     * @param <E> The type of the exception to be thrown.
      * @return A type of the singleton.
      * @throws E If the input list is empty or contains more than one element.
      */
-    public static <T, E extends Exception> Collector<T, ?, T>
-        collectOrElseThrow(Supplier<? extends E> exceptionSupplier) {
-        return Collectors.collectingAndThen(Collectors.toList(), list -> get(list,exceptionSupplier));
+    public static <T, E extends Exception> Collector<T, ?, Try<T>>
+    toTry(Supplier<? extends E> exceptionSupplier) {
+        return Collectors.collectingAndThen(Collectors.toList(), list -> attempt(() -> get(list, exceptionSupplier)));
     }
 }

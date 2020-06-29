@@ -1,18 +1,16 @@
 package nva.commons.utils;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
+import nva.commons.utils.attempt.Failure;
+import nva.commons.utils.attempt.Try;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
-import org.junit.jupiter.params.ParameterizedTest;
 
 class SingletonCollectorTest {
 
@@ -76,10 +74,12 @@ class SingletonCollectorTest {
 
     @DisplayName("SingletonCollector::orElseThrow returns one element when input list contains one element")
     @Test
-    void collectOrElseThrowReturnsSingletonWhenInputListContainsOneElement() {
+    void collectOrElseThrowReturnsSingletonWhenInputListContainsOneElement() throws Exception {
         String expected = "something";
         List<String> input = Collections.singletonList(expected);
-        String actual = input.stream().collect(SingletonCollector.collectOrElseThrow(RuntimeException::new));
+        String actual = input.stream()
+            .collect(SingletonCollector.toTry(MyException::new))
+            .orElseThrow(Failure::getException);
         assertEquals(expected, actual);
     }
 
@@ -88,21 +88,16 @@ class SingletonCollectorTest {
     @Test
     void collectOrElseThrowThrowsExceptionWhenInputIsEmpty() {
         Executable executable = () -> Stream.empty()
-            .collect(SingletonCollector.collectOrElseThrow(RuntimeException::new));
+            .collect(SingletonCollector.toTry(RuntimeException::new));
         assertThrows(RuntimeException.class, executable);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @DisplayName("SingletonCollector::orElseThrow throws supplied exception when input list is not singleton")
     @Test
-    void collectOrElseThrowThrowsExceptionWhenInputIsNotSingleton() {
-        try {
-            TWO_ELEMENT_LIST.stream()
-                .collect(SingletonCollector.collectOrElseThrow(() -> new MyException()));
-        }
-        catch(Exception e) {
-            assertThat(e.getClass(),is(equalTo(MyException.class)));
-        }
+    void collectOrElseThrowThrowsExceptionWhenInputIsNotSingleton() throws Exception {
+        Try<String> reductionResult = TWO_ELEMENT_LIST.stream()
+            .collect(SingletonCollector.toTry(MyException::new));
     }
 
     private static class MyException extends Exception {
