@@ -70,7 +70,12 @@ public class Success<T> extends Try<T> {
 
     @Override
     public <E extends Exception> Optional<T> toOptional(ConsumerWithException<Failure<T>, E> action) throws E {
-        return Optional.of(value);
+        return Optional.ofNullable(value);
+    }
+
+    @Override
+    public Optional<T> toOptional() {
+        return Optional.ofNullable(value);
     }
 
     /**
