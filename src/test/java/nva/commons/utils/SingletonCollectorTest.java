@@ -1,5 +1,9 @@
 package nva.commons.utils;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -7,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import nva.commons.utils.attempt.Failure;
+import nva.commons.utils.attempt.Success;
 import nva.commons.utils.attempt.Try;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -72,38 +77,41 @@ class SingletonCollectorTest {
         assertEquals(expected, exception.getMessage());
     }
 
-    @DisplayName("SingletonCollector::orElseThrow returns one element when input list contains one element")
+    @DisplayName("SingletonCollector:tryCollect returns Success when input list contains one element")
     @Test
-    void collectOrElseThrowReturnsSingletonWhenInputListContainsOneElement() throws Exception {
+    void tryCollectReturnsSingletonWhenInputListContainsOneElement() {
         String expected = "something";
         List<String> input = Collections.singletonList(expected);
-        String actual = input.stream()
-            .collect(SingletonCollector.toTry(MyException::new))
-            .orElseThrow(Failure::getException);
-        assertEquals(expected, actual);
+        Try<String> actual = input.stream().collect(SingletonCollector.tryCollect());
+
+        assertThat(actual, is(instanceOf(Success.class)));
+        String actualValue = actual.get();
+        assertThat(actualValue, is(equalTo(expected)));
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    @DisplayName("SingletonCollector::orElseThrow throws supplied exception when input list is empty")
+    @DisplayName("SingletonCollector:tryCollect contains the value when input list contains one element")
     @Test
-    void collectOrElseThrowThrowsExceptionWhenInputIsEmpty() {
-        Executable executable = () -> Stream.empty()
-            .collect(SingletonCollector.toTry(RuntimeException::new));
-        assertThrows(RuntimeException.class, executable);
+    void tryCollectContainsTheValueWhenInputListContainsOneElement() {
+        String expected = "something";
+        List<String> input = Collections.singletonList(expected);
+        Try<String> actual = input.stream().collect(SingletonCollector.tryCollect());
+
+        String actualValue = actual.get();
+        assertThat(actualValue, is(equalTo(expected)));
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    @DisplayName("SingletonCollector::orElseThrow throws supplied exception when input list is not singleton")
+    @DisplayName("SingletonCollector::tryCollect returns Failure when input is empty")
     @Test
-    void collectOrElseThrowThrowsExceptionWhenInputIsNotSingleton() throws Exception {
+    void tryCollectReturnsFailureWhenInputIsEmpty() {
+        Try<Object> actual = Stream.empty().collect(SingletonCollector.tryCollect());
+        assertThat(actual, is(instanceOf(Failure.class)));
+    }
+
+    @DisplayName("SingletonCollector::tryCollect returns Failure when input has more than one items")
+    @Test
+    void collectOrElseThrowThrowsExceptionWhenInputIsNotSingleton() {
         Try<String> reductionResult = TWO_ELEMENT_LIST.stream()
-            .collect(SingletonCollector.toTry(MyException::new));
-    }
-
-    private static class MyException extends Exception {
-
-        public MyException() {
-            super();
-        }
+            .collect(SingletonCollector.tryCollect());
+        assertThat(reductionResult, is(instanceOf(Failure.class)));
     }
 }

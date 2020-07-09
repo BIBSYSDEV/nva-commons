@@ -3,7 +3,6 @@ package nva.commons.utils;
 import static nva.commons.utils.attempt.Try.attempt;
 
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import nva.commons.utils.attempt.Try;
@@ -26,24 +25,35 @@ public final class SingletonCollector {
      * @return a singleton of type T.
      */
     public static <T> Collector<T, ?, T> collect() {
-        System.out.println("SingletonCollector.collect()");
-        return Collectors.collectingAndThen(Collectors.toList(), list -> get(list,defaultExceptionSupplier(list)));
-    }
-
-    private static <T,E extends Exception> T get(List<T> list, Supplier<E> exceptionSupplier) throws E {
-        System.out.println("SingletonCollector.get(list)");
-        if (list.size() != SINGLETON) {
-            throw exceptionSupplier.get();
-        }
-        return list.get(ONLY_ELEMENT);
-    }
-
-    private static <T> Supplier<IllegalStateException> defaultExceptionSupplier(List<T> list) {
-        return ()-> new IllegalStateException(String.format(SINGLETON_EXPECTED_ERROR_TEMPLATE, list.size()));
+        return Collectors.collectingAndThen(Collectors.toList(), SingletonCollector::get);
     }
 
     public static <T> Collector<T, ?, T> collectOrElse(T alternative) {
         return Collectors.collectingAndThen(Collectors.toList(), list -> orElse(list, alternative));
+    }
+
+    /**
+     * A utility to return a singleton from a list that is expected to contain one and only one item, throwing supplied
+     * exception if the list is empty or does not contain one element.
+     *
+     * @param <T> The type of input elements to the reduction operation.
+     * @param <E> The type of the exception to be thrown.
+     * @return A type of the singleton.
+     * @throws E If the input list is empty or contains more than one element.
+     */
+    public static <T, E extends Exception> Collector<T, ?, Try<T>> tryCollect() {
+        return Collectors.collectingAndThen(Collectors.toList(), list -> attempt(() -> get(list)));
+    }
+
+    private static <T, E extends Exception> T get(List<T> list) {
+        if (list.size() != SINGLETON) {
+            throw defaultException(list);
+        }
+        return list.get(ONLY_ELEMENT);
+    }
+
+    private static <T> IllegalStateException defaultException(List<T> list) {
+        return new IllegalStateException(String.format(SINGLETON_EXPECTED_ERROR_TEMPLATE, list.size()));
     }
 
     private static <T> T orElse(List<T> list, T alternative) {
@@ -53,21 +63,5 @@ public final class SingletonCollector {
             throw new IllegalStateException(String.format(SINGLETON_OR_NULL_EXPECTED_ERROR_TEMPLATE, list.size()));
         }
         return list.get(ONLY_ELEMENT);
-
-    }
-
-    /**
-     * A utility to return a singleton from a list that is expected to contain one and only one item, throwing supplied
-     * exception if the list is empty or does not contain one element.
-     *
-     * @param <T>               The type of input elements to the reduction operation.
-     * @param <E>               The type of the exception to be thrown.
-     * @param exceptionSupplier The exception to be thrown.
-     * @return A type of the singleton.
-     * @throws E If the input list is empty or contains more than one element.
-     */
-    public static <T, E extends Exception> Collector<T, ?, Try<T>>
-    toTry(Supplier<? extends E> exceptionSupplier) {
-        return Collectors.collectingAndThen(Collectors.toList(), list -> attempt(() -> get(list, exceptionSupplier)));
     }
 }
