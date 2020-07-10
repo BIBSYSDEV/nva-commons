@@ -155,7 +155,7 @@ public class FailureTest {
     }
 
     @Test
-    public void toOptionalReturnsEmptyOptional() {
+    public void toOptionalWithFunctionReturnsEmptyOptional() {
         Try<Integer> failure = Try.of(sample).map(i -> throwCheckedException(EXPECTED_EXCEPTION_MESSAGE));
 
         assertThat(failure.isFailure(), is(true));
@@ -164,7 +164,16 @@ public class FailureTest {
     }
 
     @Test
-    public void toOptionalRunsActionOnFailure() {
+    public void toOptionalReturnsEmptyOptional() {
+        Try<Integer> failure = Try.of(sample).map(i -> throwCheckedException(EXPECTED_EXCEPTION_MESSAGE));
+
+        assertThat(failure.isFailure(), is(true));
+        Optional<Integer> value = failure.toOptional();
+        assertThat(value.isEmpty(), is(true));
+    }
+
+    @Test
+    public void toOptionalWithFunctionRunsFunctionOnFailure() {
         Try<Integer> failure = Try.of(sample).map(i -> throwCheckedException(EXPECTED_EXCEPTION_MESSAGE));
         AtomicBoolean actionAfterFailureRun = new AtomicBoolean(false);
         failure.toOptional(fail -> actionAfterFailureRun.set(true));

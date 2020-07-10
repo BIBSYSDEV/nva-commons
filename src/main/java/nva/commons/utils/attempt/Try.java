@@ -19,30 +19,6 @@ public abstract class Try<T> {
         return new Success<T>(input);
     }
 
-    public abstract Stream<T> stream();
-
-    public abstract boolean isSuccess();
-
-    public abstract T get();
-
-    public abstract Exception getException();
-
-    public final boolean isFailure() {
-        return !isSuccess();
-    }
-
-    public abstract <S, E extends Exception> Try<S> map(FunctionWithException<T, S, E> action);
-
-    public abstract <S, E extends Exception> Try<S> flatMap(FunctionWithException<T, Try<S>, E> action);
-
-    public abstract <E extends Exception> Try<Void> forEach(ConsumerWithException<T, E> consumer);
-
-    public abstract <E extends Exception> T orElseThrow(Function<Failure<T>, E> action) throws E;
-
-    public abstract <E extends Exception> T orElse(FunctionWithException<Failure<T>, T, E> action) throws E;
-
-    public abstract <E extends Exception> Optional<T> toOptional(ConsumerWithException<Failure<T>, E> action) throws E;
-
     /**
      * A wrapper for actions that throw checked Exceptions. See {@see https://www.oreilly.com/content/handling
      * -checked-exceptions-in-java-streams/} Try to perform the action. Any exception will be enclosed in a Failure.
@@ -78,4 +54,30 @@ public abstract class Try<T> {
             }
         };
     }
+
+    public abstract Stream<T> stream();
+
+    public abstract boolean isSuccess();
+
+    public abstract T get();
+
+    public abstract Exception getException();
+
+    public final boolean isFailure() {
+        return !isSuccess();
+    }
+
+    public abstract <S, E extends Exception> Try<S> map(FunctionWithException<T, S, E> action);
+
+    public abstract <S, E extends Exception> Try<S> flatMap(FunctionWithException<T, Try<S>, E> action);
+
+    public abstract <E extends Exception> Try<Void> forEach(ConsumerWithException<T, E> consumer);
+
+    public abstract <E extends Exception> T orElseThrow(Function<Failure<T>, E> action) throws E;
+
+    public abstract <E extends Exception> T orElse(FunctionWithException<Failure<T>, T, E> action) throws E;
+
+    public abstract <E extends Exception> Optional<T> toOptional(ConsumerWithException<Failure<T>, E> action) throws E;
+
+    public abstract Optional<T> toOptional();
 }

@@ -52,23 +52,20 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
     public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String APPLICATION_PROBLEM_JSON = "application/problem+json";
-
-    private static final ObjectMapper objectMapper = JsonUtils.objectMapper;
+    public static final String MESSAGE_FOR_RUNTIME_EXCEPTIONS_HIDING_IMPLEMENTATION_DETAILS_TO_API_CLIENTS =
+        "Internal server error."
+            + " Contact application administrator.";
     public static final String DEFAULT_ERROR_MESSAGE = "Unknown error in handler";
     public static final String REQUEST_ID = "requestId";
     public static final String ALLOWED_ORIGIN_ENV = "ALLOWED_ORIGIN";
-
-    protected Logger logger;
-
-    private final transient Class<I> iclass;
+    private static final ObjectMapper objectMapper = JsonUtils.objectMapper;
     protected final Environment environment;
-
+    private final transient Class<I> iclass;
+    private final transient ApiMessageParser<I> inputParser = new ApiMessageParser<>();
+    protected Logger logger;
     protected transient OutputStream outputStream;
     protected transient String allowedOrigin;
-
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
-
-    private final transient ApiMessageParser<I> inputParser = new ApiMessageParser<>();
 
     /**
      * The input class should be set explicitly by the inheriting class.
@@ -91,6 +88,30 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
         this.environment = environment;
         this.additionalSuccessHeadersSupplier = Collections::emptyMap;
         this.logger = logger;
+    }
+
+    @Override
+    public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
+        I inputObject = null;
+        try {
+
+            init(output, context);
+            String inputString = IoUtils.streamToString(input);
+            inputObject = parseInput(inputString);
+
+            O response;
+            response = processInput(inputObject, inputString, context);
+
+            writeOutput(inputObject, response);
+        } catch (ApiGatewayException e) {
+            logger.warn(e.getMessage());
+            logger.warn(getStackTraceString(e));
+            writeExpectedFailure(inputObject, e, context.getAwsRequestId());
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.error(getStackTraceString(e));
+            writeUnexpectedFailure(inputObject, e, context.getAwsRequestId());
+        }
     }
 
     protected void init(OutputStream outputStream, Context context) throws LoggerNotSetException {
@@ -287,7 +308,9 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
     protected void writeUnexpectedFailure(I input, Exception exception, String requestId)
         throws IOException {
         try {
-            writeFailure(exception, HttpStatus.SC_INTERNAL_SERVER_ERROR, requestId);
+            RuntimeException runtimeException =
+                new RuntimeException(MESSAGE_FOR_RUNTIME_EXCEPTIONS_HIDING_IMPLEMENTATION_DETAILS_TO_API_CLIENTS);
+            writeFailure(runtimeException, HttpStatus.SC_INTERNAL_SERVER_ERROR, requestId);
         } catch (GatewayResponseSerializingException e) {
             throw new ApiGatewayUncheckedException(e);
         }
@@ -298,30 +321,6 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
         headers.put(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
         headers.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         return headers;
-    }
-
-    @Override
-    public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
-        I inputObject = null;
-        try {
-
-            init(output, context);
-            String inputString = IoUtils.streamToString(input);
-            inputObject = parseInput(inputString);
-
-            O response;
-            response = processInput(inputObject, inputString, context);
-
-            writeOutput(inputObject, response);
-        } catch (ApiGatewayException e) {
-            logger.warn(e.getMessage());
-            logger.warn(getStackTraceString(e));
-            writeExpectedFailure(inputObject, e, context.getAwsRequestId());
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            logger.error(getStackTraceString(e));
-            writeUnexpectedFailure(inputObject, e, context.getAwsRequestId());
-        }
     }
 
     private String getStackTraceString(Exception e) {
