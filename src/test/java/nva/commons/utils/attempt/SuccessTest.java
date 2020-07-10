@@ -131,7 +131,7 @@ public class SuccessTest {
     }
 
     @Test
-    public void toOptionalReturnsPresentOptional() {
+    public void toOptionalWithFunctionReturnsPresentOptional() {
         Try<Integer> success = Try.of(sample);
         assertThat(success.isSuccess(), is(true));
         Optional<Integer> value = success.toOptional(fail -> doNothing());
@@ -140,7 +140,16 @@ public class SuccessTest {
     }
 
     @Test
-    public void toOptionalDoesNotRunActionForFailure() {
+    public void toOptionalReturnsPresentOptionalWithTheContainedValue() {
+        Try<Integer> success = Try.of(sample);
+        assertThat(success.isSuccess(), is(true));
+        Optional<Integer> value = success.toOptional();
+        assertThat(value.isPresent(), is(true));
+        assertThat(value.get(), is(equalTo(sample)));
+    }
+
+    @Test
+    public void toOptionalWithFunctionDoesNotRunFunctionForFailure() {
         Try<Integer> success = Try.of(sample);
         AtomicBoolean actionAfterFailureRun = new AtomicBoolean(false);
         success.toOptional(fail -> actionAfterFailureRun.set(true));

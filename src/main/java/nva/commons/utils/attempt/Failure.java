@@ -68,6 +68,11 @@ public class Failure<T> extends Try<T> {
     }
 
     @Override
+    public Optional<T> toOptional() {
+        return Optional.empty();
+    }
+
+    @Override
     public <E extends Exception> Try<Void> forEach(ConsumerWithException<T, E> consumer) {
         return new Failure<Void>(exception);
     }

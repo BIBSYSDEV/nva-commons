@@ -1,8 +1,11 @@
 package nva.commons.utils;
 
+import static nva.commons.utils.attempt.Try.attempt;
+
 import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import nva.commons.utils.attempt.Try;
 
 public final class SingletonCollector {
 
@@ -25,15 +28,32 @@ public final class SingletonCollector {
         return Collectors.collectingAndThen(Collectors.toList(), SingletonCollector::get);
     }
 
-    private static <T> T get(List<T> list) {
+    public static <T> Collector<T, ?, T> collectOrElse(T alternative) {
+        return Collectors.collectingAndThen(Collectors.toList(), list -> orElse(list, alternative));
+    }
+
+    /**
+     * A utility to return a singleton from a list that is expected to contain one and only one item, throwing supplied
+     * exception if the list is empty or does not contain one element.
+     *
+     * @param <T> The type of input elements to the reduction operation.
+     * @param <E> The type of the exception to be thrown.
+     * @return A type of the singleton.
+     * @throws E If the input list is empty or contains more than one element.
+     */
+    public static <T, E extends Exception> Collector<T, ?, Try<T>> tryCollect() {
+        return Collectors.collectingAndThen(Collectors.toList(), list -> attempt(() -> get(list)));
+    }
+
+    private static <T, E extends Exception> T get(List<T> list) {
         if (list.size() != SINGLETON) {
-            throw new IllegalStateException(String.format(SINGLETON_EXPECTED_ERROR_TEMPLATE, list.size()));
+            throw defaultException(list);
         }
         return list.get(ONLY_ELEMENT);
     }
 
-    public static <T> Collector<T, ?, T> collectOrElse(T alternative) {
-        return Collectors.collectingAndThen(Collectors.toList(), list -> orElse(list, alternative));
+    private static <T> IllegalStateException defaultException(List<T> list) {
+        return new IllegalStateException(String.format(SINGLETON_EXPECTED_ERROR_TEMPLATE, list.size()));
     }
 
     private static <T> T orElse(List<T> list, T alternative) {
