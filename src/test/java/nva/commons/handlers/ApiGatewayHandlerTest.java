@@ -8,6 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -16,6 +17,7 @@ import static org.mockito.Mockito.when;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.ByteArrayOutputStream;
@@ -49,12 +51,12 @@ import org.zalando.problem.Status;
 public class ApiGatewayHandlerTest {
 
     public static final String SOME_ENV_VALUE = "SomeEnvValue";
-    private static final String PATH = "path1/path2/path3";
     public static final String TOP_EXCEPTION_MESSAGE = "TOP Exception";
     public static final String MIDDLE_EXCEPTION_MESSAGE = "MIDDLE Exception";
     public static final String BOTTOM_EXCEPTION_MESSAGE = "BOTTOM Exception";
     public static final String SOME_REQUEST_ID = "RequestID:123456";
     public static final int OVERRIDEN_STATUS_CODE = 418;  //I'm a teapot
+    private static final String PATH = "path1/path2/path3";
     public Environment environment;
     private Context context;
 
@@ -161,6 +163,21 @@ public class ApiGatewayHandlerTest {
     }
 
     @Test
+    @DisplayName("Handler does not reveal information for runtime exceptions")
+    public void handlerDoesnRevealInformationForRuntimeExceptions() throws IOException {
+        Handler handler = handlerThatThrowsUncheckedExceptions();
+        ByteArrayOutputStream outputStream = outputStream();
+        handler.handleRequest(requestWithHeaders(), outputStream, context);
+        Problem problem = getProblemFromFailureResponse(outputStream);
+        String details = problem.getDetail();
+        assertThat(details, not(containsString(BOTTOM_EXCEPTION_MESSAGE)));
+        assertThat(details, not(containsString(MIDDLE_EXCEPTION_MESSAGE)));
+        assertThat(details, not(containsString(TOP_EXCEPTION_MESSAGE)));
+        assertThat(details, containsString(
+            ApiGatewayHandler.MESSAGE_FOR_RUNTIME_EXCEPTIONS_HIDING_IMPLEMENTATION_DETAILS_TO_API_CLIENTS));
+    }
+
+    @Test
     @DisplayName("Failure message contains exception message and status code when an Exception is thrown")
     public void failureMessageContainsExceptionMessageAndStatusCodeWhenAnExceptionIsThrown()
         throws IOException {
@@ -226,6 +243,12 @@ public class ApiGatewayHandlerTest {
         assertThat(response.getBodyObject(Problem.class).getDetail(), containsString(handler.getClass().getName()));
     }
 
+    private Problem getProblemFromFailureResponse(ByteArrayOutputStream outputStream) throws JsonProcessingException {
+        JavaType javaType = objectMapper.getTypeFactory().constructParametricType(GatewayResponse.class, Problem.class);
+        GatewayResponse<Problem> response = objectMapper.readValue(outputStream.toString(), javaType);
+        return response.getBodyObject(Problem.class);
+    }
+
     private Handler handlerThatHasNotSetLogger() {
         return new Handler(environment) {
 
@@ -257,15 +280,15 @@ public class ApiGatewayHandlerTest {
     private Handler handlerThatOverridesGetFailureStatusCode() {
         return new Handler(environment) {
             @Override
+            public int getFailureStatusCode(RequestBody input, ApiGatewayException exception) {
+                return OVERRIDEN_STATUS_CODE;
+            }
+
+            @Override
             protected String processInput(RequestBody input, RequestInfo requestInfo, Context context)
                 throws ApiGatewayException {
                 throwExceptions();
                 return null;
-            }
-
-            @Override
-            public int getFailureStatusCode(RequestBody input, ApiGatewayException exception) {
-                return OVERRIDEN_STATUS_CODE;
             }
         };
     }
