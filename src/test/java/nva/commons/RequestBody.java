@@ -1,9 +1,14 @@
 package nva.commons;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import java.util.Objects;
 
+@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = RequestBody.TYPE_ATTRIBUTE)
 public class RequestBody {
 
+    public static final String TYPE_ATTRIBUTE = "type";
     String field1;
     String field2;
 

@@ -16,7 +16,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Path;
-import no.unit.nva.testutils.TestLogger;
 import nva.commons.RequestBody;
 import nva.commons.exceptions.ApiIoException;
 import nva.commons.utils.IoUtils;
@@ -27,17 +26,11 @@ public class ApiMessageParserTest {
 
     public static final String API_GATEWAY_MESSAGES_FOLDER = "apiGatewayMessages";
     public static final String SOME_EXCEPTION_MESSAGE = "Some error message";
+    public static final String NON_JSON_STRING_BODY = "Hello world";
     private static final Path MISSING_BODY = Path.of(API_GATEWAY_MESSAGES_FOLDER, "missingBody.json");
     private static final Path BODY_NON_JSON_STRING = Path.of(API_GATEWAY_MESSAGES_FOLDER, "bodyIsNonJsonString.json");
-    public static final String NON_JSON_STRING_BODY = "Hello world";
     private static final Path BODY_JSON_STRING = Path.of(API_GATEWAY_MESSAGES_FOLDER, "bodyIsAJsonString.json");
     private static final Path BODY_JSON_ELEMENT = Path.of(API_GATEWAY_MESSAGES_FOLDER, "bodyIsAJsonElement.json");
-
-    private final TestLogger logger = new TestLogger();
-
-    private <T> ApiMessageParser<T> messageParser(ObjectMapper mapper) {
-        return new ApiMessageParser<>(mapper);
-    }
 
     @DisplayName("getRequestInfo throws ApiIoException when parser throws an exception")
     @Test
@@ -109,6 +102,10 @@ public class ApiMessageParserTest {
         RequestBody body = parser.getBodyElementFromJson(json, RequestBody.class);
         RequestBody expected = new RequestBody("value1", "value2");
         assertThat(body, is(equalTo(expected)));
+    }
+
+    private <T> ApiMessageParser<T> messageParser(ObjectMapper mapper) {
+        return new ApiMessageParser<>(mapper);
     }
 
     private ApiMessageParser<String> parserWithMapperThatThrowsIoException()
