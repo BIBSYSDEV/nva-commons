@@ -5,6 +5,7 @@ import static java.util.Objects.isNull;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
 import nva.commons.exceptions.ApiGatewayException;
 import nva.commons.exceptions.ApiGatewayUncheckedException;
 import nva.commons.exceptions.GatewayResponseSerializingException;
+import nva.commons.exceptions.InvalidOrMissingTypeException;
 import nva.commons.exceptions.LoggerNotSetException;
 import nva.commons.utils.Environment;
 import nva.commons.utils.IoUtils;
@@ -107,6 +109,11 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
             logger.warn(e.getMessage());
             logger.warn(getStackTraceString(e));
             writeExpectedFailure(inputObject, e, context.getAwsRequestId());
+        } catch (InvalidTypeIdException e) {
+            logger.warn(e.getMessage());
+            logger.warn(getStackTraceString(e));
+            InvalidOrMissingTypeException apiGatewayInvalidTypeException = transformExceptionToApiGatewayException(e);
+            writeExpectedFailure(inputObject, apiGatewayInvalidTypeException, context.getAwsRequestId());
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.error(getStackTraceString(e));
@@ -321,6 +328,10 @@ public abstract class ApiGatewayHandler<I, O> implements RequestStreamHandler {
         headers.put(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
         headers.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         return headers;
+    }
+
+    private InvalidOrMissingTypeException transformExceptionToApiGatewayException(InvalidTypeIdException e) {
+        return new InvalidOrMissingTypeException(e);
     }
 
     private String getStackTraceString(Exception e) {

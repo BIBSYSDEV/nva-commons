@@ -29,9 +29,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.management.modelmbean.XMLParseException;
+import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.Handler;
 import nva.commons.RequestBody;
 import nva.commons.exceptions.ApiGatewayException;
+import nva.commons.exceptions.InvalidOrMissingTypeException;
 import nva.commons.exceptions.TestException;
 import nva.commons.utils.Environment;
 import nva.commons.utils.IoUtils;
@@ -241,6 +243,33 @@ public class ApiGatewayHandlerTest {
         GatewayResponse<Problem> response = getApiGatewayResponse(outputStream);
         assertThat(response.getStatusCode(), is(equalTo(HttpStatus.SC_INTERNAL_SERVER_ERROR)));
         assertThat(response.getBodyObject(Problem.class).getDetail(), containsString(handler.getClass().getName()));
+    }
+
+    @Test
+    public void handlerReturnsBadRequestForJsonInvalidTypeError() throws IOException {
+        Handler handler = new Handler(environment);
+
+        InputStream inputStream = requestWithBodyWithoutType();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        handler.handleRequest(inputStream, outputStream, context);
+
+        GatewayResponse<Problem> response = GatewayResponse.fromOutputStream(outputStream);
+        assertThat(response.getStatusCode(), is(equalTo(HttpStatus.SC_BAD_REQUEST)));
+
+        Problem details = response.getBodyObject(Problem.class);
+        assertThat(details.getDetail(), containsString(InvalidOrMissingTypeException.MESSAGE));
+    }
+
+    private InputStream requestWithBodyWithoutType() throws JsonProcessingException {
+        RequestBody requestBody = new RequestBody();
+        requestBody.setField1("Some value");
+        requestBody.setField2("Some value");
+        ObjectNode objectWithoutType = objectMapper.convertValue(requestBody, ObjectNode.class);
+        objectWithoutType.remove(RequestBody.TYPE_ATTRIBUTE);
+
+        return new HandlerRequestBuilder<ObjectNode>(objectMapper)
+            .withBody(objectWithoutType)
+            .build();
     }
 
     private Problem getProblemFromFailureResponse(ByteArrayOutputStream outputStream) throws JsonProcessingException {
