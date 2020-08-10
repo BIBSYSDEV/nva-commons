@@ -1,8 +1,8 @@
 package nva.commons.handlers;
 
-import static nva.commons.handlers.ApiGatewayHandler.APPLICATION_PROBLEM_JSON;
-import static nva.commons.handlers.ApiGatewayHandler.CONTENT_TYPE;
-import static nva.commons.handlers.ApiGatewayHandler.REQUEST_ID;
+import static nva.commons.handlers.RestRequestHandler.APPLICATION_PROBLEM_JSON;
+import static nva.commons.handlers.RestRequestHandler.CONTENT_TYPE;
+import static nva.commons.handlers.RestRequestHandler.REQUEST_ID;
 import static nva.commons.utils.JsonUtils.objectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -76,11 +76,10 @@ public class ApiGatewayHandlerTest {
     @Test
     @DisplayName("ApiGatewayHandler has a constructor with input class as only parameter")
     public void apiGatewayHandlerHasACostructorWithInputClassAsOnlyParameter() {
-        Logger logger = LoggerFactory.getLogger(ApiGatewayHandler.class);
-        ApiGatewayHandler<String, String> handler = new ApiGatewayHandler<>(String.class, logger) {
+        Logger logger = LoggerFactory.getLogger(RestRequestHandler.class);
+        RestRequestHandler<String, String> handler = new ApiGatewayHandler<>(String.class, logger) {
             @Override
-            protected String processInput(String input, RequestInfo requestInfo, Context context)
-                throws ApiGatewayException {
+            protected String processInput(String input, RequestInfo requestInfo, Context context) {
                 return null;
             }
 
@@ -176,7 +175,7 @@ public class ApiGatewayHandlerTest {
         assertThat(details, not(containsString(MIDDLE_EXCEPTION_MESSAGE)));
         assertThat(details, not(containsString(TOP_EXCEPTION_MESSAGE)));
         assertThat(details, containsString(
-            ApiGatewayHandler.MESSAGE_FOR_RUNTIME_EXCEPTIONS_HIDING_IMPLEMENTATION_DETAILS_TO_API_CLIENTS));
+            RestRequestHandler.MESSAGE_FOR_RUNTIME_EXCEPTIONS_HIDING_IMPLEMENTATION_DETAILS_TO_API_CLIENTS));
     }
 
     @Test

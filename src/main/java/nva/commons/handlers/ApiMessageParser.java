@@ -12,7 +12,7 @@ import nva.commons.utils.JacocoGenerated;
 import nva.commons.utils.JsonUtils;
 
 /**
- * Not intended for use outside the {@link ApiGatewayHandler}. Class for parsing a message from ApiGateway.
+ * Not intended for use outside the {@link RestRequestHandler}. Class for parsing a message from ApiGateway.
  *
  * @param <T> Class of the object we want to extract from the API message
  */
