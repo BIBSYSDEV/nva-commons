@@ -2,6 +2,8 @@ package nva.commons.handlers;
 
 import static java.util.Objects.isNull;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -14,12 +16,18 @@ import nva.commons.utils.JsonUtils;
 public class RequestInfo {
 
     public static final String PROXY_TAG = "proxy";
+    @JsonProperty("headers")
     private Map<String, String> headers;
+    @JsonProperty("path")
     private String path;
+    @JsonProperty("pathParameters")
     private Map<String, String> pathParameters;
     @JsonProperty("queryStringParameters")
     private Map<String, String> queryParameters;
+    @JsonProperty("requestContext")
     private JsonNode requestContext;
+    @JsonAnySetter
+    private Map<String, Object> otherProperties;
 
     /**
      * Default constructor.
@@ -29,6 +37,15 @@ public class RequestInfo {
         this.pathParameters = new HashMap<>();
         this.queryParameters = new HashMap<>();
         this.requestContext = JsonUtils.objectMapper.createObjectNode();
+    }
+
+    @JsonAnyGetter
+    public Map<String, Object> getOtherProperties() {
+        return otherProperties;
+    }
+
+    public void setOtherProperties(Map<String, Object> otherProperties) {
+        this.otherProperties = otherProperties;
     }
 
     /**
