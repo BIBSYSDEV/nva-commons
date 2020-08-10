@@ -27,6 +27,8 @@ public class RequestInfo {
     private Map<String, String> queryParameters;
     @JsonProperty("requestContext")
     private JsonNode requestContext;
+    @JsonProperty("methodArn")
+    private String methodArn;
     @JsonAnySetter
     private Map<String, Object> otherProperties;
 
@@ -39,6 +41,16 @@ public class RequestInfo {
         this.queryParameters = new HashMap<>();
         this.otherProperties = new ConcurrentHashMap<>();
         this.requestContext = JsonUtils.objectMapper.createObjectNode();
+    }
+
+    @JacocoGenerated
+    public String getMethodArn() {
+        return methodArn;
+    }
+
+    @JacocoGenerated
+    public void setMethodArn(String methodArn) {
+        this.methodArn = methodArn;
     }
 
     @JacocoGenerated
