@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import nva.commons.utils.JacocoGenerated;
 import nva.commons.utils.JsonUtils;
 
@@ -36,14 +37,17 @@ public class RequestInfo {
         this.headers = new HashMap<>();
         this.pathParameters = new HashMap<>();
         this.queryParameters = new HashMap<>();
+        this.otherProperties = new ConcurrentHashMap<>();
         this.requestContext = JsonUtils.objectMapper.createObjectNode();
     }
 
+    @JacocoGenerated
     @JsonAnyGetter
     public Map<String, Object> getOtherProperties() {
         return otherProperties;
     }
 
+    @JacocoGenerated
     public void setOtherProperties(Map<String, Object> otherProperties) {
         this.otherProperties = otherProperties;
     }
