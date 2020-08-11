@@ -37,7 +37,7 @@ public class RequestInfo {
         this.headers = new HashMap<>();
         this.pathParameters = new HashMap<>();
         this.queryParameters = new HashMap<>();
-        this.otherProperties = new LinkedHashMap<>();
+        this.otherProperties = new LinkedHashMap<>(); // ordinary HashMap and ConcurrentHashMap fail.
         this.requestContext = JsonUtils.objectMapper.createObjectNode();
     }
 

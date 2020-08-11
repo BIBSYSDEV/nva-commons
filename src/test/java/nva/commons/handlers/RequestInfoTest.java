@@ -2,9 +2,7 @@ package nva.commons.handlers;
 
 import static nva.commons.utils.JsonUtils.objectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
-import static org.hamcrest.core.IsNull.nullValue;
+import static org.hamcrest.Matchers.hasKey;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,13 +32,15 @@ public class RequestInfoTest {
         "mapParametersAreNull.json");
     private static final Path MISSING_MAP_VALUES = Path.of(API_GATEWAY_MESSAGES_FOLDER,
         "missingRequestInfo.json");
+    public static final String UNDEFINED_REQUEST_INFO_PROPERTY = "body";
 
     @Test
     @DisplayName("RequestInfo can accept unknown fields")
     public void requestInfoAcceptsUnknownsFields() throws JsonProcessingException {
         String requestInfoString = IoUtils.stringFromResources(EVENT_WITH_UNKNOWN_REQUEST_INFO);
         RequestInfo requestInfo = objectMapper.readValue(requestInfoString, RequestInfo.class);
-        assertThat(requestInfo, is(not(nullValue())));
+
+        assertThat(requestInfo.getOtherProperties(), hasKey(UNDEFINED_REQUEST_INFO_PROPERTY));
     }
 
     @Test
