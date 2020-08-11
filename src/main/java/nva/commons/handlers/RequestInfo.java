@@ -2,7 +2,8 @@ package nva.commons.handlers;
 
 import static java.util.Objects.isNull;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
@@ -10,7 +11,7 @@ import java.util.Map;
 import nva.commons.utils.JacocoGenerated;
 import nva.commons.utils.JsonUtils;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+//@JsonIgnoreProperties(ignoreUnknown = true)
 public class RequestInfo {
 
     public static final String PROXY_TAG = "proxy";
@@ -26,8 +27,8 @@ public class RequestInfo {
     private JsonNode requestContext;
     @JsonProperty("methodArn")
     private String methodArn;
-    //    @JsonAnySetter
-    //    private Map<String, Object> otherProperties;
+    @JsonAnySetter
+    private Map<String, Object> otherProperties;
 
     /**
      * Default constructor.
@@ -50,16 +51,16 @@ public class RequestInfo {
         this.methodArn = methodArn;
     }
 
-    //    @JacocoGenerated
-    //    @JsonAnyGetter
-    //    public Map<String, Object> getOtherProperties() {
-    //        return otherProperties;
-    //    }
-    //
-    //    @JacocoGenerated
-    //    public void setOtherProperties(Map<String, Object> otherProperties) {
-    //        this.otherProperties = otherProperties;
-    //    }
+    @JacocoGenerated
+    @JsonAnyGetter
+    public Map<String, Object> getOtherProperties() {
+        return otherProperties;
+    }
+
+    @JacocoGenerated
+    public void setOtherProperties(Map<String, Object> otherProperties) {
+        this.otherProperties = otherProperties;
+    }
 
     /**
      * Get the headers map.
