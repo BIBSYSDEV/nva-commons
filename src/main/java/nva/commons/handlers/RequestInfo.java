@@ -7,11 +7,11 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import nva.commons.utils.JacocoGenerated;
 import nva.commons.utils.JsonUtils;
 
-//@JsonIgnoreProperties(ignoreUnknown = true)
 public class RequestInfo {
 
     public static final String PROXY_TAG = "proxy";
@@ -37,7 +37,7 @@ public class RequestInfo {
         this.headers = new HashMap<>();
         this.pathParameters = new HashMap<>();
         this.queryParameters = new HashMap<>();
-        //        this.otherProperties = new ConcurrentHashMap<>();
+        this.otherProperties = new LinkedHashMap<>();
         this.requestContext = JsonUtils.objectMapper.createObjectNode();
     }
 
