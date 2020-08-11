@@ -15,18 +15,25 @@ import nva.commons.utils.JsonUtils;
 public class RequestInfo {
 
     public static final String PROXY_TAG = "proxy";
+
     @JsonProperty("headers")
     private Map<String, String> headers;
+
     @JsonProperty("path")
     private String path;
+
     @JsonProperty("pathParameters")
     private Map<String, String> pathParameters;
+
     @JsonProperty("queryStringParameters")
     private Map<String, String> queryParameters;
+
     @JsonProperty("requestContext")
     private JsonNode requestContext;
+
     @JsonProperty("methodArn")
     private String methodArn;
+
     @JsonAnySetter
     private Map<String, Object> otherProperties;
 
