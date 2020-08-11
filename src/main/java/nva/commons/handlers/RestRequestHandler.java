@@ -105,6 +105,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
             writeOutput(inputObject, response);
         } catch (ApiGatewayException e) {
             logger.warn(e.getMessage());
+            String s = getStackTraceString(e);
             logger.warn(getStackTraceString(e));
             writeExpectedFailure(inputObject, e, context.getAwsRequestId());
         } catch (InvalidTypeIdException e) {

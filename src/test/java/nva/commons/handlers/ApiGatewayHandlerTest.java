@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.management.modelmbean.XMLParseException;
@@ -58,8 +59,10 @@ public class ApiGatewayHandlerTest {
     public static final String BOTTOM_EXCEPTION_MESSAGE = "BOTTOM Exception";
     public static final String SOME_REQUEST_ID = "RequestID:123456";
     public static final int OVERRIDEN_STATUS_CODE = 418;  //I'm a teapot
-    private static final String PATH = "path1/path2/path3";
+    public static final Path EVENT_WITH_UNKNOWN_REQUEST_INFO = Path.of("apiGatewayMessages",
+        "eventWithUnknownRequestInfo.json");
     public Environment environment;
+    private static final String PATH = "path1/path2/path3";
     private Context context;
 
     /**
@@ -125,9 +128,24 @@ public class ApiGatewayHandlerTest {
         InputStream input = requestWithHeadersAndPath();
         ByteArrayOutputStream outputStream = outputStream();
         handler.handleRequest(input, outputStream, context);
-        String outputString = outputStream.toString(StandardCharsets.UTF_8);
-        GatewayResponse<String> response = objectMapper.readValue(outputString, GatewayResponse.class);
+        GatewayResponse<String> response = GatewayResponse.fromOutputStream(outputStream);
         assertTrue(response.getHeaders().containsKey(HttpHeaders.WARNING));
+    }
+
+    @Test
+    public void handleRequestDoesNotThrowExceptionOnUnknownFieldsInRequestInfo() throws IOException {
+        Handler handler = new Handler(environment);
+        InputStream input = IoUtils.inputStreamFromResources(EVENT_WITH_UNKNOWN_REQUEST_INFO);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        handler.handleRequest(input, output, context);
+
+        GatewayResponse<String> response = GatewayResponse.fromOutputStream(output);
+        String body = response.getBodyObject(String.class);
+
+        String expectedValueForField1 = "value1";
+        String expectedValueForField2 = "value2";
+        assertThat(body, containsString(expectedValueForField1));
+        assertThat(body, containsString(expectedValueForField2));
     }
 
     @Test
