@@ -1,6 +1,8 @@
 package nva.commons.handlers.authentication;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Objects;
+import nva.commons.utils.JacocoGenerated;
 
 public class StatementElement {
 
@@ -10,6 +12,9 @@ public class StatementElement {
     private String action;
     @JsonProperty("Resource")
     private String resource;
+
+    public StatementElement() {
+    }
 
     private StatementElement(Builder builder) {
         setEffect(builder.effect);
@@ -43,6 +48,27 @@ public class StatementElement {
 
     public void setResource(String resource) {
         this.resource = resource;
+    }
+
+    @Override
+    @JacocoGenerated
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        StatementElement that = (StatementElement) o;
+        return Objects.equals(getEffect(), that.getEffect())
+            && Objects.equals(getAction(), that.getAction())
+            && Objects.equals(getResource(), that.getResource());
+    }
+
+    @Override
+    @JacocoGenerated
+    public int hashCode() {
+        return Objects.hash(getEffect(), getAction(), getResource());
     }
 
     public static final class Builder {

@@ -1,7 +1,10 @@
 package nva.commons.handlers.authentication;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import nva.commons.utils.JacocoGenerated;
 
 public class AuthPolicy {
 
@@ -16,7 +19,7 @@ public class AuthPolicy {
     }
 
     private AuthPolicy(Builder builder) {
-        setVersion(builder.version);
+        setVersion(VERSION);
         setStatement(builder.statement);
     }
 
@@ -40,18 +43,41 @@ public class AuthPolicy {
         this.statement = statement;
     }
 
+    @Override
+    @JacocoGenerated
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AuthPolicy that = (AuthPolicy) o;
+        return equalVersions(that)
+            && equalStatements(that.getStatement());
+    }
+
+    @Override
+    @JacocoGenerated
+    public int hashCode() {
+        return Objects.hash(getVersion(), getStatement());
+    }
+
+    private boolean equalStatements(List<StatementElement> otherStatement) {
+        boolean leftContainsRight = new HashSet<>(statement).containsAll(otherStatement);
+        boolean rightContainsLeft = new HashSet<>(otherStatement).containsAll(statement);
+        return leftContainsRight && rightContainsLeft;
+    }
+
+    private boolean equalVersions(AuthPolicy that) {
+        return Objects.equals(getVersion(), that.getVersion());
+    }
+
     public static final class Builder {
 
-        private String version;
         private List<StatementElement> statement;
 
         private Builder() {
-            version = VERSION;
-        }
-
-        public Builder withVersion(String val) {
-            version = val;
-            return this;
         }
 
         public Builder withStatement(List<StatementElement> val) {

@@ -1,8 +1,12 @@
 package nva.commons.handlers.authentication;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
+import nva.commons.utils.JsonUtils;
 
-public class RequestAuthorizerResponse {
+public class AuthorizerResponse {
 
     @JsonProperty("principalId")
     private String principalId;
@@ -10,12 +14,18 @@ public class RequestAuthorizerResponse {
     @JsonProperty("policyDocument")
     private AuthPolicy policyDocument;
 
-    public RequestAuthorizerResponse() {
+    public AuthorizerResponse() {
     }
 
-    private RequestAuthorizerResponse(Builder builder) {
+    private AuthorizerResponse(Builder builder) {
         setPrincipalId(builder.principalId);
         setPolicyDocument(builder.policyDocument);
+    }
+
+    public static AuthorizerResponse fromOutputStream(ByteArrayOutputStream outputStream)
+        throws JsonProcessingException {
+        String content = outputStream.toString(StandardCharsets.UTF_8);
+        return JsonUtils.objectMapper.readValue(content, AuthorizerResponse.class);
     }
 
     public static Builder newBuilder() {
@@ -56,8 +66,8 @@ public class RequestAuthorizerResponse {
             return this;
         }
 
-        public RequestAuthorizerResponse build() {
-            return new RequestAuthorizerResponse(this);
+        public AuthorizerResponse build() {
+            return new AuthorizerResponse(this);
         }
     }
 }
