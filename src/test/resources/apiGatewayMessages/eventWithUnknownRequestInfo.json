@@ -1,0 +1,97 @@
+{
+  "resource": "/roles",
+  "path": "/roles",
+  "httpMethod": "POST",
+  "headers": {
+    "Accept": "*/*",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Authorization": "lskjflskfkddd",
+    "Cache-Control": "no-cache",
+    "Content-Type": "application/json",
+    "Host": "2lcqynkwke.execute-api.eu-west-1.amazonaws.com",
+    "Postman-Token": "8d3e623b-5a90-468d-bcc7-cfc1745c0da1",
+    "User-Agent": "PostmanRuntime/7.26.2",
+    "X-Amzn-Trace-Id": "Root=1-5f314391-f8f41d2563012085b5539e55",
+    "X-Forwarded-For": "84.52.239.232",
+    "X-Forwarded-Port": "443",
+    "X-Forwarded-Proto": "https"
+  },
+  "multiValueHeaders": {
+    "Accept": [
+      "*/*"
+    ],
+    "Accept-Encoding": [
+      "gzip, deflate, br"
+    ],
+    "Authorization": [
+      "lskjflskfkddd"
+    ],
+    "Cache-Control": [
+      "no-cache"
+    ],
+    "Content-Type": [
+      "application/json"
+    ],
+    "Host": [
+      "2lcqynkwke.execute-api.eu-west-1.amazonaws.com"
+    ],
+    "Postman-Token": [
+      "8d3e623b-5a90-468d-bcc7-cfc1745c0da1"
+    ],
+    "User-Agent": [
+      "PostmanRuntime/7.26.2"
+    ],
+    "X-Amzn-Trace-Id": [
+      "Root=1-5f314391-f8f41d2563012085b5539e55"
+    ],
+    "X-Forwarded-For": [
+      "84.52.239.232"
+    ],
+    "X-Forwarded-Port": [
+      "443"
+    ],
+    "X-Forwarded-Proto": [
+      "https"
+    ]
+  },
+  "queryStringParameters": null,
+  "multiValueQueryStringParameters": null,
+  "pathParameters": null,
+  "stageVariables": null,
+  "requestContext": {
+    "resourceId": "7oivoa",
+    "authorizer": {
+      "principalId": "SomeUser",
+      "integrationLatency": 2603
+    },
+    "resourcePath": "/roles",
+    "httpMethod": "POST",
+    "extendedRequestId": "RDd-vESHjoEFZPg=",
+    "requestTime": "10/Aug/2020:12:54:41 +0000",
+    "path": "/Prod/roles",
+    "accountId": "884807050265",
+    "protocol": "HTTP/1.1",
+    "stage": "Prod",
+    "domainPrefix": "2lcqynkwke",
+    "requestTimeEpoch": 1597064081410,
+    "requestId": "cb32ad30-ecb2-4fa6-8bd6-10c96cad2ec2",
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "accountId": null,
+      "cognitoIdentityId": null,
+      "caller": null,
+      "sourceIp": "84.52.239.232",
+      "principalOrgId": null,
+      "accessKey": null,
+      "cognitoAuthenticationType": null,
+      "cognitoAuthenticationProvider": null,
+      "userArn": null,
+      "userAgent": "PostmanRuntime/7.26.2",
+      "user": null
+    },
+    "domainName": "2lcqynkwke.execute-api.eu-west-1.amazonaws.com",
+    "apiId": "2lcqynkwke"
+  },
+  "body": "{\"field1\": \"value1\", \"field2\": \"value2\", \"type\": \"RequestBody\"}",
+  "isBase64Encoded": false
+}
