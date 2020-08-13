@@ -32,6 +32,14 @@ public class SecretsReader {
         this.awsSecretsManager = awsSecretsManager;
     }
 
+    /**
+     * Fetches a secret String from AWS Secrets Manager.
+     *
+     * @param secretName the user-friendly id of the secret or the secret ARN
+     * @param secretKey  the key in the encrypted key-value map.
+     * @return the value for the specified key
+     * @throws ForbiddenException when any error occurs.
+     */
     public String fetchSecret(String secretName, String secretKey) throws ForbiddenException {
 
         return attempt(() -> fetchSecretFromAws(secretName))
