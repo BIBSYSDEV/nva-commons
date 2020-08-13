@@ -11,9 +11,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.Optional;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.exceptions.ForbiddenException;
 import nva.commons.handlers.RequestInfo;
+import nva.commons.utils.Environment;
 import nva.commons.utils.JsonUtils;
 import nva.commons.utils.log.LogUtils;
 import nva.commons.utils.log.TestAppender;
@@ -28,9 +30,11 @@ public class ServiceAuthorizerHandlerTest {
     public static final String DEFAULT_METHOD_ARN = "SomeMethodArn";
     public static final String METHOD_ARN_FIELD = "methodArn";
     public static final String UNEXPECTED_EXCEPTION_MESSAGE = "UnexpectedExceptionMessage";
+    public static final String DEFAULT_ENV_VALUE = "*";
     private static final String WRONG_KEY = "WrongKey";
     private final Context context = mock(Context.class);
     private final ServiceAuthorizerHandler handler = sampleHandler();
+
 
     @Test
     public void authorizerReturnsOkHeaderInSuccess() {
@@ -79,7 +83,7 @@ public class ServiceAuthorizerHandlerTest {
         final TestAppender appender = LogUtils.getTestingAppender(ServiceAuthorizerHandler.class);
 
         ServiceAuthorizerHandler handler = handlerThrowingUnexpectedException();
-        AuthorizerResponse response = processRequestWithHanlderThrowingException(handler);
+        AuthorizerResponse response = processRequestWithHandlerThrowingException(handler);
 
         AuthPolicy expectedPolicy = ServiceAuthorizerHandler.createDenyAuthPolicy();
         assertThat(response.getPolicyDocument(), is(equalTo(expectedPolicy)));
@@ -92,7 +96,7 @@ public class ServiceAuthorizerHandlerTest {
         final TestAppender appender = LogUtils.getTestingAppender(ServiceAuthorizerHandler.class);
 
         ServiceAuthorizerHandler handler = handlerThrowingExceptionWhenFetchingSecret();
-        AuthorizerResponse response = processRequestWithHanlderThrowingException(handler);
+        AuthorizerResponse response = processRequestWithHandlerThrowingException(handler);
 
         AuthPolicy expectedPolicy = ServiceAuthorizerHandler.createDenyAuthPolicy();
         assertThat(response.getPolicyDocument(), is(equalTo(expectedPolicy)));
@@ -100,7 +104,7 @@ public class ServiceAuthorizerHandlerTest {
         assertThat(appender.getMessages(), containsString(UNEXPECTED_EXCEPTION_MESSAGE));
     }
 
-    private AuthorizerResponse processRequestWithHanlderThrowingException(ServiceAuthorizerHandler handler)
+    private AuthorizerResponse processRequestWithHandlerThrowingException(ServiceAuthorizerHandler handler)
         throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         InputStream request = requestWithValidApiKey();
@@ -152,7 +156,7 @@ public class ServiceAuthorizerHandlerTest {
     }
 
     private ServiceAuthorizerHandler sampleHandler() {
-        return new ServiceAuthorizerHandler() {
+        return new ServiceAuthorizerHandler(mockEnvironment()) {
             @Override
             protected String principalId() {
                 return SOME_PRINCIPAL_ID;
@@ -166,7 +170,7 @@ public class ServiceAuthorizerHandlerTest {
     }
 
     private ServiceAuthorizerHandler handlerThrowingUnexpectedException() {
-        return new ServiceAuthorizerHandler() {
+        return new ServiceAuthorizerHandler(mockEnvironment()) {
             @Override
             public AuthorizerResponse processInput(Void input, RequestInfo requestInfo, Context context) {
                 throw new RuntimeException(UNEXPECTED_EXCEPTION_MESSAGE);
@@ -185,7 +189,7 @@ public class ServiceAuthorizerHandlerTest {
     }
 
     private ServiceAuthorizerHandler handlerThrowingExceptionWhenFetchingSecret() {
-        return new ServiceAuthorizerHandler() {
+        return new ServiceAuthorizerHandler(mockEnvironment()) {
 
             @Override
             protected String principalId() {
@@ -195,6 +199,20 @@ public class ServiceAuthorizerHandlerTest {
             @Override
             protected String fetchSecret() {
                 throw new RuntimeException(UNEXPECTED_EXCEPTION_MESSAGE);
+            }
+        };
+    }
+
+    private Environment mockEnvironment() {
+        return new Environment() {
+            @Override
+            public Optional<String> readEnvOpt(String envVariable) {
+                return Optional.ofNullable(readEnv(envVariable));
+            }
+
+            @Override
+            public String readEnv(String envVariable) {
+                return DEFAULT_ENV_VALUE;
             }
         };
     }

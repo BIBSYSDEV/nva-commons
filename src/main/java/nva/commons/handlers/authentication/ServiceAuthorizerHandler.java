@@ -13,6 +13,7 @@ import nva.commons.exceptions.ApiGatewayException;
 import nva.commons.exceptions.ForbiddenException;
 import nva.commons.handlers.RequestInfo;
 import nva.commons.handlers.RestRequestHandler;
+import nva.commons.utils.Environment;
 import nva.commons.utils.JsonUtils;
 import nva.commons.utils.attempt.Failure;
 import org.apache.http.HttpHeaders;
@@ -26,8 +27,8 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
     public static final String ANY_RESOURCE = "*";
     private static final String DENY_EFFECT = "Deny";
 
-    public ServiceAuthorizerHandler() {
-        super(Void.class, LoggerFactory.getLogger(ServiceAuthorizerHandler.class));
+    public ServiceAuthorizerHandler(Environment environment) {
+        super(Void.class, environment, LoggerFactory.getLogger(ServiceAuthorizerHandler.class));
     }
 
     @Override
