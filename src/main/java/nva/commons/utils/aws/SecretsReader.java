@@ -32,7 +32,7 @@ public class SecretsReader {
         this.awsSecretsManager = awsSecretsManager;
     }
 
-    protected String fetchSecret(String secretName, String secretKey) throws ForbiddenException {
+    public String fetchSecret(String secretName, String secretKey) throws ForbiddenException {
 
         return attempt(() -> fetchSecretFromAws(secretName))
             .map(fetchResult -> extractApiKey(fetchResult, secretKey, secretName))
