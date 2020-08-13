@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 import com.amazonaws.services.lambda.runtime.Context;
@@ -22,6 +23,7 @@ import nva.commons.utils.log.TestAppender;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 public class ServiceAuthorizerHandlerTest {
 
@@ -34,7 +36,6 @@ public class ServiceAuthorizerHandlerTest {
     private static final String WRONG_KEY = "WrongKey";
     private final Context context = mock(Context.class);
     private final ServiceAuthorizerHandler handler = sampleHandler();
-
 
     @Test
     public void authorizerReturnsOkHeaderInSuccess() {
@@ -100,6 +101,20 @@ public class ServiceAuthorizerHandlerTest {
 
         AuthPolicy expectedPolicy = ServiceAuthorizerHandler.createDenyAuthPolicy();
         assertThat(response.getPolicyDocument(), is(equalTo(expectedPolicy)));
+
+        assertThat(appender.getMessages(), containsString(UNEXPECTED_EXCEPTION_MESSAGE));
+    }
+
+    @Test
+    public void authorizerThrowsExceptionWhenFetchingPrincipalExceptionThrowsExceptionInFailureResponse()
+        throws IOException {
+        final TestAppender appender = LogUtils.getTestingAppender(ServiceAuthorizerHandler.class);
+
+        ServiceAuthorizerHandler handler = handlerThrowingExceptionWhenFetchingPrincipalId();
+        Executable action = () -> processRequestWithHandlerThrowingException(handler);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, action);
+        assertThat(exception.getMessage(), containsString(UNEXPECTED_EXCEPTION_MESSAGE));
 
         assertThat(appender.getMessages(), containsString(UNEXPECTED_EXCEPTION_MESSAGE));
     }
@@ -199,6 +214,21 @@ public class ServiceAuthorizerHandlerTest {
             @Override
             protected String fetchSecret() {
                 throw new RuntimeException(UNEXPECTED_EXCEPTION_MESSAGE);
+            }
+        };
+    }
+
+    private ServiceAuthorizerHandler handlerThrowingExceptionWhenFetchingPrincipalId() {
+        return new ServiceAuthorizerHandler(mockEnvironment()) {
+
+            @Override
+            protected String principalId() {
+                throw new RuntimeException(UNEXPECTED_EXCEPTION_MESSAGE);
+            }
+
+            @Override
+            protected String fetchSecret() {
+                return WRONG_KEY;
             }
         };
     }

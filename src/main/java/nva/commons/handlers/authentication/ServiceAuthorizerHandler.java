@@ -69,7 +69,7 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
         if (requestInfo.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
             String clientSecret = requestInfo.getHeaders().get(HttpHeaders.AUTHORIZATION);
             String correctSecret = attempt(this::fetchSecret)
-                .orElseThrow(this::throwExceptionLoggingTheError);
+                .orElseThrow(this::logErrorAndThrowException);
             if (nonNull(clientSecret) && clientSecret.equals(correctSecret)) {
                 return;
             }
@@ -105,8 +105,7 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
 
     private void writeFailure() throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
-            String principalId = attempt(this::principalId)
-                .orElseThrow(fail -> new RuntimeException(fail.getException()));
+            String principalId = attempt(this::principalId).orElseThrow(this::logErrorAndThrowException);
             AuthorizerResponse denyResponse = AuthorizerResponse
                 .newBuilder()
                 .withPrincipalId(principalId)
@@ -124,8 +123,8 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
             .build();
     }
 
-    private RuntimeException throwExceptionLoggingTheError(Failure<String> failure) {
-        // error logged by RequestHandler.
+    private RuntimeException logErrorAndThrowException(Failure<String> failure) {
+        logger.error(failure.getException().getMessage(), failure.getException());
         return new RuntimeException(failure.getException());
     }
 }
