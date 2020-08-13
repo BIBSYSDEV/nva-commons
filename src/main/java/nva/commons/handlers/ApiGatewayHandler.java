@@ -70,7 +70,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
      *         setAdditionalHeadersSupplier(
      *                  () -> Collections.singletonMap(HttpHeaders.CONTENT_MD5, new String(md5))
      *          );
-     *         String output =input;
+     *         String output = input;
      *         return output;
      *     }
      * }
