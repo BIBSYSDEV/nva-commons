@@ -61,9 +61,9 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
         return AuthPolicy.newBuilder().withStatement(Collections.singletonList(statement)).build();
     }
 
-    protected abstract String principalId();
+    protected abstract String principalId() throws ForbiddenException;
 
-    protected abstract String fetchSecret();
+    protected abstract String fetchSecret() throws ForbiddenException;
 
     protected void secretCheck(RequestInfo requestInfo) throws ForbiddenException {
         if (requestInfo.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
@@ -105,9 +105,11 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
 
     private void writeFailure() throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
+            String principalId = attempt(this::principalId)
+                .orElseThrow(fail -> new RuntimeException(fail.getException()));
             AuthorizerResponse denyResponse = AuthorizerResponse
                 .newBuilder()
-                .withPrincipalId(principalId())
+                .withPrincipalId(principalId)
                 .withPolicyDocument(createDenyAuthPolicy())
                 .build();
             String response = objectMapper.writeValueAsString(denyResponse);
@@ -115,7 +117,7 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
         }
     }
 
-    private AuthorizerResponse createResponse(AuthPolicy authPolicy) {
+    private AuthorizerResponse createResponse(AuthPolicy authPolicy) throws ForbiddenException {
         return AuthorizerResponse.newBuilder()
             .withPrincipalId(principalId())
             .withPolicyDocument(authPolicy)
