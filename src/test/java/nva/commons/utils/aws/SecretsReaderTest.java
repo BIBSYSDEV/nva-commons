@@ -81,7 +81,7 @@ public class SecretsReaderTest {
         String providedSecretName = getSecretNameFromRequest(invocation);
         if (providedSecretName.equals(SECRET_NAME)) {
             String secretString = createSecretJsonObject();
-            return provideGetSecretValueResult(secretString);
+            return createGetSecretValueResult(secretString);
         } else {
             throw new ResourceNotFoundException(ERROR_MESSAGE_FROM_AWS_SECRET_MANAGER);
         }
@@ -92,7 +92,7 @@ public class SecretsReaderTest {
         return request.getSecretId();
     }
 
-    private GetSecretValueResult provideGetSecretValueResult(String secretString) {
+    private GetSecretValueResult createGetSecretValueResult(String secretString) {
         return new GetSecretValueResult()
             .withSecretString(secretString)
             .withName(SECRET_NAME);
