@@ -38,6 +38,8 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Event,
         logger.info("Service requests access: " + principalId());
         String event = serializeEvent(input);
         logger.info(event);
+        String requestInfoStr = getRequestInfoStr(requestInfo);
+        logger.info(requestInfoStr);
         secretCheck(requestInfo);
 
         String methodArn = requestInfo.getMethodArn();
@@ -46,11 +48,21 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Event,
         return createResponse(authPolicy);
     }
 
+    private String getRequestInfoStr(RequestInfo requestInfo) {
+        try {
+            return objectMapper.writeValueAsString(requestInfo);
+        } catch (JsonProcessingException e) {
+            logger.error("Could not serialize requestInfo");
+        }
+        return null;
+    }
+
     private String serializeEvent(Event input) {
         String event;
         try {
             event = objectMapper.writeValueAsString(input);
         } catch (JsonProcessingException e) {
+            logger.error("Could not serialize input");
             throw new RuntimeException("Event serializing failed");
         }
         return event;
