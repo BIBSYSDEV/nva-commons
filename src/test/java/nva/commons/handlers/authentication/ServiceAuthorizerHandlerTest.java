@@ -43,63 +43,65 @@ public class ServiceAuthorizerHandlerTest {
     }
 
     @Test
-    public void authorizerReturnsAuthPolicyWhenApiKeyIsValid() throws IOException {
+    public void authorizerReturnsAuthPolicyWhenApiKeyIsValid() throws IOException, ForbiddenException {
 
         InputStream input = requestWithValidApiKey();
         AuthorizerResponse response = sendRequestToHandler(input);
 
-        AuthPolicy expectedPolicy = ServiceAuthorizerHandler.createAllowAuthPolicy(DEFAULT_METHOD_ARN);
+        AuthPolicy expectedPolicy = handler.createAllowAuthPolicy(DEFAULT_METHOD_ARN);
 
         assertThat(response.getPolicyDocument(), is(equalTo(expectedPolicy)));
     }
 
     @Test
-    public void authorizerReturnsForbiddenWhenApiKeyIsInvalid() throws IOException {
+    public void authorizerReturnsForbiddenWhenApiKeyIsInvalid() throws IOException, ForbiddenException {
         final TestAppender appender = LogUtils.getTestingAppender(ServiceAuthorizerHandler.class);
         InputStream input = requestWithInvalidApiKey();
 
         AuthorizerResponse response = sendRequestToHandler(input);
 
-        AuthPolicy expectedPolicy = ServiceAuthorizerHandler.createDenyAuthPolicy();
+        AuthPolicy expectedPolicy = handler.createDenyAuthPolicy();
         assertThat(response.getPolicyDocument(), is(equalTo(expectedPolicy)));
 
         assertThat(appender.getMessages(), containsString(ForbiddenException.DEFAULT_MESSAGE));
     }
 
     @Test
-    public void authorizerReturnsForbiddenWhenApiKeyIsMissing() throws IOException {
+    public void authorizerReturnsForbiddenWhenApiKeyIsMissing() throws IOException, ForbiddenException {
         final TestAppender appender = LogUtils.getTestingAppender(ServiceAuthorizerHandler.class);
 
         InputStream input = requestWithoutApiKey();
 
         AuthorizerResponse response = sendRequestToHandler(input);
-        AuthPolicy expectedPolicy = ServiceAuthorizerHandler.createDenyAuthPolicy();
+        AuthPolicy expectedPolicy = handler.createDenyAuthPolicy();
         assertThat(response.getPolicyDocument(), is(equalTo(expectedPolicy)));
 
         assertThat(appender.getMessages(), containsString(ForbiddenException.DEFAULT_MESSAGE));
     }
 
     @Test
-    public void authorizerReturnsForbiddenForUnexpectedExceptionAndLogsMessage() throws IOException {
+    public void authorizerReturnsForbiddenForUnexpectedExceptionAndLogsMessage() throws IOException,
+                                                                                        ForbiddenException {
         final TestAppender appender = LogUtils.getTestingAppender(ServiceAuthorizerHandler.class);
 
         ServiceAuthorizerHandler handler = handlerThrowingUnexpectedException();
         AuthorizerResponse response = processRequestWithHandlerThrowingException(handler);
 
-        AuthPolicy expectedPolicy = ServiceAuthorizerHandler.createDenyAuthPolicy();
+        AuthPolicy expectedPolicy = handler.createDenyAuthPolicy();
         assertThat(response.getPolicyDocument(), is(equalTo(expectedPolicy)));
 
         assertThat(appender.getMessages(), containsString(UNEXPECTED_EXCEPTION_MESSAGE));
     }
 
     @Test
-    public void authorizerReturnsForbiddenWhenFetchingSecretThrowsExceptionAndLogsMessage() throws IOException {
+    public void authorizerReturnsForbiddenWhenFetchingSecretThrowsExceptionAndLogsMessage()
+        throws IOException, ForbiddenException {
         final TestAppender appender = LogUtils.getTestingAppender(ServiceAuthorizerHandler.class);
 
         ServiceAuthorizerHandler handler = handlerThrowingExceptionWhenFetchingSecret();
         AuthorizerResponse response = processRequestWithHandlerThrowingException(handler);
 
-        AuthPolicy expectedPolicy = ServiceAuthorizerHandler.createDenyAuthPolicy();
+        AuthPolicy expectedPolicy = handler.createDenyAuthPolicy();
         assertThat(response.getPolicyDocument(), is(equalTo(expectedPolicy)));
 
         assertThat(appender.getMessages(), containsString(UNEXPECTED_EXCEPTION_MESSAGE));

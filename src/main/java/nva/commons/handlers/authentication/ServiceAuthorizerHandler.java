@@ -34,7 +34,7 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
     @Override
     protected AuthorizerResponse processInput(Void input, RequestInfo requestInfo, Context context)
         throws ApiGatewayException {
-
+        logger.info("Service requests access: " + principalId());
         secretCheck(requestInfo);
 
         String methodArn = requestInfo.getMethodArn();
@@ -43,7 +43,8 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
         return createResponse(authPolicy);
     }
 
-    protected static AuthPolicy createAllowAuthPolicy(String methodArn) {
+    protected AuthPolicy createAllowAuthPolicy(String methodArn) throws ForbiddenException {
+        logger.info("Allowed to access: " + principalId());
         StatementElement statement = StatementElement.newBuilder()
             .withResource(methodArn)
             .withAction(EXECUTE_API_ACTION)
@@ -52,7 +53,8 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
         return AuthPolicy.newBuilder().withStatement(Collections.singletonList(statement)).build();
     }
 
-    protected static AuthPolicy createDenyAuthPolicy() {
+    protected AuthPolicy createDenyAuthPolicy() throws ForbiddenException {
+        logger.info("Denied access: " + principalId());
         StatementElement statement = StatementElement.newBuilder()
             .withResource(ANY_RESOURCE)
             .withAction(EXECUTE_API_ACTION)
@@ -68,8 +70,10 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
     protected void secretCheck(RequestInfo requestInfo) throws ForbiddenException {
         if (requestInfo.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
             String clientSecret = requestInfo.getHeaders().get(HttpHeaders.AUTHORIZATION);
+            logger.info("Client secret: " + clientSecret);
             String correctSecret = attempt(this::fetchSecret)
                 .orElseThrow(this::logErrorAndThrowException);
+            logger.info("Correct secret: " + correctSecret);
             if (nonNull(clientSecret) && clientSecret.equals(correctSecret)) {
                 return;
             }
@@ -90,12 +94,21 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
     @Override
     protected void writeExpectedFailure(Void input, ApiGatewayException exception, String requestId)
         throws IOException {
-        writeFailure();
+        try {
+            writeFailure();
+        } catch (ForbiddenException e) {
+            throw new IOException(e);
+        }
     }
 
     @Override
-    protected void writeUnexpectedFailure(Void input, Exception exception, String requestId) throws IOException {
-        writeFailure();
+    protected void writeUnexpectedFailure(Void input, Exception exception, String requestId)
+        throws IOException {
+        try {
+            writeFailure();
+        } catch (ForbiddenException e) {
+            throw new IOException(e);
+        }
     }
 
     @Override
@@ -103,7 +116,7 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
         return HttpStatus.SC_OK;
     }
 
-    private void writeFailure() throws IOException {
+    private void writeFailure() throws IOException, ForbiddenException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
             String principalId = attempt(this::principalId).orElseThrow(this::logErrorAndThrowException);
             AuthorizerResponse denyResponse = AuthorizerResponse
