@@ -29,7 +29,9 @@ public class ServiceAuthorizerHandlerTest {
 
     public static final String SOME_PRINCIPAL_ID = "somePrincipalId";
     public static final String CORRECT_KEY = "SOME_KEY";
-    public static final String DEFAULT_METHOD_ARN = "SomeMethodArn";
+    public static final String DEFAULT_METHOD_ARN = "arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod/GET"
+        + "/service/users/orestis@unit.no";
+    public static final String EXPECTED_RESOURCE = "arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod/*/*";
     public static final String METHOD_ARN_FIELD = "methodArn";
     public static final String UNEXPECTED_EXCEPTION_MESSAGE = "UnexpectedExceptionMessage";
     public static final String DEFAULT_ENV_VALUE = "*";
@@ -48,7 +50,7 @@ public class ServiceAuthorizerHandlerTest {
         InputStream input = requestWithValidApiKey();
         AuthorizerResponse response = sendRequestToHandler(input);
 
-        AuthPolicy expectedPolicy = handler.createAllowAuthPolicy(DEFAULT_METHOD_ARN);
+        AuthPolicy expectedPolicy = handler.createAllowAuthPolicy(EXPECTED_RESOURCE);
 
         assertThat(response.getPolicyDocument(), is(equalTo(expectedPolicy)));
     }

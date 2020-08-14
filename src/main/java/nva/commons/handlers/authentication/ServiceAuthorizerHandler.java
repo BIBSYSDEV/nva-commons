@@ -26,6 +26,10 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Event,
     public static final String EXECUTE_API_ACTION = "execute-api:Invoke";
     public static final String ALLOW_EFFECT = "Allow";
     public static final String ANY_RESOURCE = "*";
+    public static final String WILDCARD = ANY_RESOURCE;
+    public static final String PATH_DELIMITER = "/";
+    public static final int API_GATEWAY_IDENTIFIER_INDEX = 0;
+    public static final int STAGE_INDEX = 1;
     private static final String DENY_EFFECT = "Deny";
 
     public ServiceAuthorizerHandler(Environment environment) {
@@ -42,30 +46,33 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Event,
         logger.info(requestInfoStr);
         secretCheck(requestInfo);
 
-        String methodArn = requestInfo.getMethodArn();
-        AuthPolicy authPolicy = createAllowAuthPolicy(methodArn);
+        String resource = formatResource(requestInfo.getMethodArn());
+
+        AuthPolicy authPolicy = createAllowAuthPolicy(resource);
 
         return createResponse(authPolicy);
     }
 
-    private String getRequestInfoStr(RequestInfo requestInfo) {
-        try {
-            return objectMapper.writeValueAsString(requestInfo);
-        } catch (JsonProcessingException e) {
-            logger.error("Could not serialize requestInfo");
-        }
-        return null;
-    }
-
-    private String serializeEvent(Event input) {
-        String event;
-        try {
-            event = objectMapper.writeValueAsString(input);
-        } catch (JsonProcessingException e) {
-            logger.error("Could not serialize input");
-            throw new RuntimeException("Event serializing failed");
-        }
-        return event;
+    /**
+     * The resource that access will be allowed to. It can contain wildcards.
+     * <p>
+     * Example methodARN: arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod/GET/service/users/orestis@unit.no
+     * Example output: arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod\/*\/*
+     * <p>
+     * Another possible output is: "*"
+     *
+     * @param methodArn the method ARN as provided by the API gateway
+     * @return a resource for the policy
+     */
+    protected String formatResource(String methodArn) {
+        //Example
+        //"",
+        String[] resource2 = methodArn.split(PATH_DELIMITER);
+        String apiGateway = resource2[API_GATEWAY_IDENTIFIER_INDEX];
+        String stage = resource2[STAGE_INDEX];
+        String method = WILDCARD;
+        String functionPath = WILDCARD;
+        return String.join(PATH_DELIMITER, apiGateway, stage, method, functionPath);
     }
 
     protected AuthPolicy createAllowAuthPolicy(String methodArn) throws ForbiddenException {
@@ -139,6 +146,26 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Event,
     @Override
     protected Integer getSuccessStatusCode(Event input, AuthorizerResponse output) {
         return HttpStatus.SC_OK;
+    }
+
+    private String getRequestInfoStr(RequestInfo requestInfo) {
+        try {
+            return objectMapper.writeValueAsString(requestInfo);
+        } catch (JsonProcessingException e) {
+            logger.error("Could not serialize requestInfo");
+        }
+        return null;
+    }
+
+    private String serializeEvent(Event input) {
+        String event;
+        try {
+            event = objectMapper.writeValueAsString(input);
+        } catch (JsonProcessingException e) {
+            logger.error("Could not serialize input");
+            throw new RuntimeException("Event serializing failed");
+        }
+        return event;
     }
 
     private void writeFailure() throws IOException, ForbiddenException {
