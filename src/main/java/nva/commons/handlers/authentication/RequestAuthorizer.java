@@ -20,7 +20,7 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.slf4j.LoggerFactory;
 
-public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, AuthorizerResponse> {
+public abstract class RequestAuthorizer extends RestRequestHandler<Void, AuthorizerResponse> {
 
     public static final String EXECUTE_API_ACTION = "execute-api:Invoke";
     public static final String ALLOW_EFFECT = "Allow";
@@ -31,8 +31,8 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
     public static final int STAGE_INDEX = 1;
     private static final String DENY_EFFECT = "Deny";
 
-    public ServiceAuthorizerHandler(Environment environment) {
-        super(Void.class, environment, LoggerFactory.getLogger(ServiceAuthorizerHandler.class));
+    public RequestAuthorizer(Environment environment) {
+        super(Void.class, environment, LoggerFactory.getLogger(RequestAuthorizer.class));
     }
 
     @Override

@@ -25,7 +25,7 @@ import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-public class ServiceAuthorizerHandlerTest {
+public class RequestAuthorizerTest {
 
     public static final String SOME_PRINCIPAL_ID = "somePrincipalId";
     public static final String CORRECT_KEY = "SOME_KEY";
@@ -37,7 +37,7 @@ public class ServiceAuthorizerHandlerTest {
     public static final String DEFAULT_ENV_VALUE = "*";
     private static final String WRONG_KEY = "WrongKey";
     private final Context context = mock(Context.class);
-    private final ServiceAuthorizerHandler handler = sampleHandler();
+    private final RequestAuthorizer handler = sampleHandler();
 
     @Test
     public void authorizerReturnsOkHeaderInSuccess() {
@@ -57,7 +57,7 @@ public class ServiceAuthorizerHandlerTest {
 
     @Test
     public void authorizerReturnsForbiddenWhenApiKeyIsInvalid() throws IOException, ForbiddenException {
-        final TestAppender appender = LogUtils.getTestingAppender(ServiceAuthorizerHandler.class);
+        final TestAppender appender = LogUtils.getTestingAppender(RequestAuthorizer.class);
         InputStream input = requestWithInvalidApiKey();
 
         AuthorizerResponse response = sendRequestToHandler(input);
@@ -70,7 +70,7 @@ public class ServiceAuthorizerHandlerTest {
 
     @Test
     public void authorizerReturnsForbiddenWhenApiKeyIsMissing() throws IOException, ForbiddenException {
-        final TestAppender appender = LogUtils.getTestingAppender(ServiceAuthorizerHandler.class);
+        final TestAppender appender = LogUtils.getTestingAppender(RequestAuthorizer.class);
 
         InputStream input = requestWithoutApiKey();
 
@@ -84,9 +84,9 @@ public class ServiceAuthorizerHandlerTest {
     @Test
     public void authorizerReturnsForbiddenForUnexpectedExceptionAndLogsMessage() throws IOException,
                                                                                         ForbiddenException {
-        final TestAppender appender = LogUtils.getTestingAppender(ServiceAuthorizerHandler.class);
+        final TestAppender appender = LogUtils.getTestingAppender(RequestAuthorizer.class);
 
-        ServiceAuthorizerHandler handler = handlerThrowingUnexpectedException();
+        RequestAuthorizer handler = handlerThrowingUnexpectedException();
         AuthorizerResponse response = processRequestWithHandlerThrowingException(handler);
 
         AuthPolicy expectedPolicy = handler.createDenyAuthPolicy();
@@ -98,9 +98,9 @@ public class ServiceAuthorizerHandlerTest {
     @Test
     public void authorizerReturnsForbiddenWhenFetchingSecretThrowsExceptionAndLogsMessage()
         throws IOException, ForbiddenException {
-        final TestAppender appender = LogUtils.getTestingAppender(ServiceAuthorizerHandler.class);
+        final TestAppender appender = LogUtils.getTestingAppender(RequestAuthorizer.class);
 
-        ServiceAuthorizerHandler handler = handlerThrowingExceptionWhenFetchingSecret();
+        RequestAuthorizer handler = handlerThrowingExceptionWhenFetchingSecret();
         AuthorizerResponse response = processRequestWithHandlerThrowingException(handler);
 
         AuthPolicy expectedPolicy = handler.createDenyAuthPolicy();
@@ -112,9 +112,9 @@ public class ServiceAuthorizerHandlerTest {
     @Test
     public void authorizerThrowsExceptionWhenFetchingPrincipalExceptionThrowsExceptionInFailureResponse()
         throws IOException {
-        final TestAppender appender = LogUtils.getTestingAppender(ServiceAuthorizerHandler.class);
+        final TestAppender appender = LogUtils.getTestingAppender(RequestAuthorizer.class);
 
-        ServiceAuthorizerHandler handler = handlerThrowingExceptionWhenFetchingPrincipalId();
+        RequestAuthorizer handler = handlerThrowingExceptionWhenFetchingPrincipalId();
         Executable action = () -> processRequestWithHandlerThrowingException(handler);
 
         RuntimeException exception = assertThrows(RuntimeException.class, action);
@@ -123,7 +123,7 @@ public class ServiceAuthorizerHandlerTest {
         assertThat(appender.getMessages(), containsString(UNEXPECTED_EXCEPTION_MESSAGE));
     }
 
-    private AuthorizerResponse processRequestWithHandlerThrowingException(ServiceAuthorizerHandler handler)
+    private AuthorizerResponse processRequestWithHandlerThrowingException(RequestAuthorizer handler)
         throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         InputStream request = requestWithValidApiKey();
@@ -174,8 +174,8 @@ public class ServiceAuthorizerHandlerTest {
         return Map.of(HttpHeaders.AUTHORIZATION, apiKey);
     }
 
-    private ServiceAuthorizerHandler sampleHandler() {
-        return new ServiceAuthorizerHandler(mockEnvironment()) {
+    private RequestAuthorizer sampleHandler() {
+        return new RequestAuthorizer(mockEnvironment()) {
             @Override
             protected String principalId() {
                 return SOME_PRINCIPAL_ID;
@@ -188,8 +188,8 @@ public class ServiceAuthorizerHandlerTest {
         };
     }
 
-    private ServiceAuthorizerHandler handlerThrowingUnexpectedException() {
-        return new ServiceAuthorizerHandler(mockEnvironment()) {
+    private RequestAuthorizer handlerThrowingUnexpectedException() {
+        return new RequestAuthorizer(mockEnvironment()) {
             @Override
             public AuthorizerResponse processInput(Void input, RequestInfo requestInfo, Context context) {
                 throw new RuntimeException(UNEXPECTED_EXCEPTION_MESSAGE);
@@ -207,8 +207,8 @@ public class ServiceAuthorizerHandlerTest {
         };
     }
 
-    private ServiceAuthorizerHandler handlerThrowingExceptionWhenFetchingSecret() {
-        return new ServiceAuthorizerHandler(mockEnvironment()) {
+    private RequestAuthorizer handlerThrowingExceptionWhenFetchingSecret() {
+        return new RequestAuthorizer(mockEnvironment()) {
 
             @Override
             protected String principalId() {
@@ -222,8 +222,8 @@ public class ServiceAuthorizerHandlerTest {
         };
     }
 
-    private ServiceAuthorizerHandler handlerThrowingExceptionWhenFetchingPrincipalId() {
-        return new ServiceAuthorizerHandler(mockEnvironment()) {
+    private RequestAuthorizer handlerThrowingExceptionWhenFetchingPrincipalId() {
+        return new RequestAuthorizer(mockEnvironment()) {
 
             @Override
             protected String principalId() {
