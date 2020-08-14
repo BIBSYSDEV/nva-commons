@@ -55,18 +55,15 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Event,
 
     /**
      * The resource that access will be allowed to. It can contain wildcards.
-     * <p>
-     * Example methodARN: arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod/GET/service/users/orestis@unit.no
-     * Example output: arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod\/*\/*
-     * <p>
-     * Another possible output is: "*"
+     *
+     * <p>Example methodARN:
+     * arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod/GET/service/users/orestis@unit.no Example output:
+     * arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod\/*\/* <br/> Another possible output is: "*"
      *
      * @param methodArn the method ARN as provided by the API gateway
      * @return a resource for the policy
      */
     protected String formatResource(String methodArn) {
-        //Example
-        //"",
         String[] resource2 = methodArn.split(PATH_DELIMITER);
         String apiGateway = resource2[API_GATEWAY_IDENTIFIER_INDEX];
         String stage = resource2[STAGE_INDEX];
