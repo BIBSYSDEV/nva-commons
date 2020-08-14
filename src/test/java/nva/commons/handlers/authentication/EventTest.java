@@ -16,15 +16,15 @@ import org.junit.jupiter.api.Test;
 
 class EventTest {
 
-    private final String KEY1 = "key1";
-    private final String COMPOSITE_OBJECT_KEY = "key2";
-    private final String KEY3 = "key3";
-    private final String KEY4 = "key4";
-    private final String ARRAY_OBJECT_KEY = "key5";
+    private static final String KEY1 = "key1";
+    private static final String COMPOSITE_OBJECT_KEY = "key2";
+    private static final String KEY3 = "key3";
+    private static final String KEY4 = "key4";
+    private static final String ARRAY_OBJECT_KEY = "key5";
 
-    private final String VALUE1 = "VALUE1";
-    private final String VALUE3 = "VALUE3";
-    private final String VALUE4 = "VALUE4";
+    private static final String VALUE1 = "VALUE1";
+    private static final String VALUE3 = "VALUE3";
+    private static final String VALUE4 = "VALUE4";
 
     Map<String, String> compositeObject;
     List<Map<String, String>> arrayObject;
