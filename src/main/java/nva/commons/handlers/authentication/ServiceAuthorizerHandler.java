@@ -5,7 +5,6 @@ import static nva.commons.utils.JsonUtils.objectMapper;
 import static nva.commons.utils.attempt.Try.attempt;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -21,7 +20,7 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.slf4j.LoggerFactory;
 
-public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Event, AuthorizerResponse> {
+public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, AuthorizerResponse> {
 
     public static final String EXECUTE_API_ACTION = "execute-api:Invoke";
     public static final String ALLOW_EFFECT = "Allow";
@@ -33,19 +32,15 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Event,
     private static final String DENY_EFFECT = "Deny";
 
     public ServiceAuthorizerHandler(Environment environment) {
-        super(Event.class, environment, LoggerFactory.getLogger(ServiceAuthorizerHandler.class));
+        super(Void.class, environment, LoggerFactory.getLogger(ServiceAuthorizerHandler.class));
     }
 
     @Override
-    protected AuthorizerResponse processInput(Event input, RequestInfo requestInfo, Context context)
+    protected AuthorizerResponse processInput(Void input, RequestInfo requestInfo, Context context)
         throws ApiGatewayException {
-        logger.info("Service requests access: " + principalId());
-        String event = serializeEvent(input);
-        logger.info(event);
-        String requestInfoStr = getRequestInfoStr(requestInfo);
-        logger.info(requestInfoStr);
-        secretCheck(requestInfo);
 
+        logger.debug("Reqeusting quthorizing: " + principalId());
+        secretCheck(requestInfo);
         String resource = formatResource(requestInfo.getMethodArn());
 
         AuthPolicy authPolicy = createAllowAuthPolicy(resource);
@@ -54,7 +49,8 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Event,
     }
 
     /**
-     * The resource that access will be allowed to. It can contain wildcards.
+     * This method can be overridden to change the template of the accessed resource. The resource that access will be
+     * allowed to. It can contain wildcards.
      *
      * <p>Example methodARN:
      * arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod/GET/service/users/orestis@unit.no Example output:
@@ -99,10 +95,8 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Event,
     protected void secretCheck(RequestInfo requestInfo) throws ForbiddenException {
         if (requestInfo.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
             String clientSecret = requestInfo.getHeaders().get(HttpHeaders.AUTHORIZATION);
-            logger.info("Client secret: " + clientSecret);
             String correctSecret = attempt(this::fetchSecret)
                 .orElseThrow(this::logErrorAndThrowException);
-            logger.info("Correct secret: " + correctSecret);
             if (nonNull(clientSecret) && clientSecret.equals(correctSecret)) {
                 return;
             }
@@ -112,7 +106,7 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Event,
     }
 
     @Override
-    protected void writeOutput(Event input, AuthorizerResponse output)
+    protected void writeOutput(Void input, AuthorizerResponse output)
         throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
             String responseJson = JsonUtils.objectMapper.writeValueAsString(output);
@@ -121,7 +115,7 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Event,
     }
 
     @Override
-    protected void writeExpectedFailure(Event input, ApiGatewayException exception, String requestId)
+    protected void writeExpectedFailure(Void input, ApiGatewayException exception, String requestId)
         throws IOException {
         try {
             writeFailure();
@@ -131,7 +125,7 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Event,
     }
 
     @Override
-    protected void writeUnexpectedFailure(Event input, Exception exception, String requestId)
+    protected void writeUnexpectedFailure(Void input, Exception exception, String requestId)
         throws IOException {
         try {
             writeFailure();
@@ -141,28 +135,8 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Event,
     }
 
     @Override
-    protected Integer getSuccessStatusCode(Event input, AuthorizerResponse output) {
+    protected Integer getSuccessStatusCode(Void input, AuthorizerResponse output) {
         return HttpStatus.SC_OK;
-    }
-
-    private String getRequestInfoStr(RequestInfo requestInfo) {
-        try {
-            return objectMapper.writeValueAsString(requestInfo);
-        } catch (JsonProcessingException e) {
-            logger.error("Could not serialize requestInfo");
-        }
-        return null;
-    }
-
-    private String serializeEvent(Event input) {
-        String event;
-        try {
-            event = objectMapper.writeValueAsString(input);
-        } catch (JsonProcessingException e) {
-            logger.error("Could not serialize input");
-            throw new RuntimeException("Event serializing failed");
-        }
-        return event;
     }
 
     private void writeFailure() throws IOException, ForbiddenException {

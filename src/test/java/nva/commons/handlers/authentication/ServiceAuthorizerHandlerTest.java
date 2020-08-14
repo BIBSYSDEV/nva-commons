@@ -191,7 +191,7 @@ public class ServiceAuthorizerHandlerTest {
     private ServiceAuthorizerHandler handlerThrowingUnexpectedException() {
         return new ServiceAuthorizerHandler(mockEnvironment()) {
             @Override
-            public AuthorizerResponse processInput(Event input, RequestInfo requestInfo, Context context) {
+            public AuthorizerResponse processInput(Void input, RequestInfo requestInfo, Context context) {
                 throw new RuntimeException(UNEXPECTED_EXCEPTION_MESSAGE);
             }
 
