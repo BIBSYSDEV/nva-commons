@@ -34,7 +34,7 @@ public class SecretsReaderTest {
     private final SecretsReader secretsReader;
 
     public SecretsReaderTest() throws JsonProcessingException {
-        secretsReader = createSecretsReader();
+        secretsReader = createSecretsReaderMock();
     }
 
     @Test
@@ -69,37 +69,37 @@ public class SecretsReaderTest {
         assertThat(value, is(equalTo(SECRET_VALUE)));
     }
 
-    private SecretsReader createSecretsReader() {
+    private SecretsReader createSecretsReaderMock() {
         AWSSecretsManager secretsManager = mock(AWSSecretsManager.class);
-        when(secretsManager.getSecretValue(any(GetSecretValueRequest.class))).thenAnswer(this::provideSecret);
+        when(secretsManager.getSecretValue(any(GetSecretValueRequest.class)))
+            .thenAnswer(this::provideGetSecretValueResult);
         return new SecretsReader(secretsManager);
     }
 
-    private GetSecretValueResult provideSecret(InvocationOnMock invocation) throws JsonProcessingException {
-        String providedSecretName = parseRequest(invocation);
+    private GetSecretValueResult provideGetSecretValueResult(InvocationOnMock invocation)
+        throws JsonProcessingException {
+        String providedSecretName = getSecretNameFromRequest(invocation);
         if (providedSecretName.equals(SECRET_NAME)) {
-            String secretString = createSecretObject();
-            return createGetSecretValueResult(secretString);
+            String secretString = createSecretJsonObject();
+            return provideGetSecretValueResult(secretString);
         } else {
             throw new ResourceNotFoundException(ERROR_MESSAGE_FROM_AWS_SECRET_MANAGER);
         }
     }
 
-    private String parseRequest(InvocationOnMock invocation) {
+    private String getSecretNameFromRequest(InvocationOnMock invocation) {
         GetSecretValueRequest request = invocation.getArgument(0);
-        String providedSecretName = request.getSecretId();
-        return providedSecretName;
+        return request.getSecretId();
     }
 
-    private GetSecretValueResult createGetSecretValueResult(String secretString) {
+    private GetSecretValueResult provideGetSecretValueResult(String secretString) {
         return new GetSecretValueResult()
             .withSecretString(secretString)
             .withName(SECRET_NAME);
     }
 
-    private String createSecretObject() throws JsonProcessingException {
+    private String createSecretJsonObject() throws JsonProcessingException {
         Map<String, String> secret = Map.of(SECRET_KEY, SECRET_VALUE);
-        String secretString = JsonUtils.objectMapper.writeValueAsString(secret);
-        return secretString;
+        return JsonUtils.objectMapper.writeValueAsString(secret);
     }
 }

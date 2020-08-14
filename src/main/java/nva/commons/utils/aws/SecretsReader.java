@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 public class SecretsReader {
 
     private static final Logger logger = LoggerFactory.getLogger(SecretsReader.class);
-    public static final String COULD_NOT_READ_SECRET_ERROR = "Could not read secret:";
+    public static final String COULD_NOT_READ_SECRET_ERROR = "Could not read secret: ";
 
     private final AWSSecretsManager awsSecretsManager;
 
