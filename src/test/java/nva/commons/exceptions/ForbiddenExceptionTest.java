@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 public class ForbiddenExceptionTest {
 
     @Test
-    public void exceptionReturnsForbiddenStatusCode() {
+    public void forbiddenExceptionReturnsForbiddenStatusCode() {
         ForbiddenException exception = new ForbiddenException();
         assertThat(exception.getStatusCode(), is(equalTo(HttpStatus.SC_FORBIDDEN)));
     }

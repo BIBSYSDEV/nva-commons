@@ -43,6 +43,7 @@ apply plugin: 'pmd'
 
 dependencies {
     implementation group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-secretsmanager', version: awsSdkVersion
     runtimeOnly group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '2.2.8'
     runtimeOnly group: 'com.amazonaws', name: 'aws-java-sdk-lambda', version: awsSdkVersion
     implementation('org.zalando:problem:0.24.0') {
@@ -79,7 +80,7 @@ dependencies {
 
     // If one is using nva-commons, api allows the re-usage of these packages.
 
-    gradleLint.ignore ('unused-dependency') {
+    gradleLint.ignore('unused-dependency') {
         api group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.1'
         api group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
         api group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
