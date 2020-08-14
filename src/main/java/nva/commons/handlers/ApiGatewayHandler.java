@@ -41,8 +41,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
 
     public ApiGatewayHandler(Class<I> iclass, Logger logger) {
-        super(iclass, logger);
-        this.additionalSuccessHeadersSupplier = Collections::emptyMap;
+        this(iclass, new Environment(), logger);
     }
 
     public ApiGatewayHandler(Class<I> iclass, Environment environment, Logger logger) {
