@@ -18,7 +18,6 @@ import nva.commons.exceptions.InvalidOrMissingTypeException;
 import nva.commons.exceptions.LoggerNotSetException;
 import nva.commons.utils.Environment;
 import nva.commons.utils.IoUtils;
-import nva.commons.utils.JacocoGenerated;
 import nva.commons.utils.SingletonCollector;
 import nva.commons.utils.StringUtils;
 import nva.commons.utils.log.LogUtils;
@@ -43,15 +42,6 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     protected transient OutputStream outputStream;
     protected transient String allowedOrigin;
 
-    /**
-     * The input class should be set explicitly by the inheriting class.
-     *
-     * @param iclass The class object of the input class.
-     */
-    @JacocoGenerated
-    public RestRequestHandler(Class<I> iclass, Logger logger) {
-        this(iclass, new Environment(), logger);
-    }
 
     /**
      * The input class should be set explicitly by the inherting class.
