@@ -39,7 +39,7 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
     protected AuthorizerResponse processInput(Void input, RequestInfo requestInfo, Context context)
         throws ApiGatewayException {
 
-        logger.debug("Reqeusting quthorizing: " + principalId());
+        logger.debug("Requesting authorizing: " + principalId());
         secretCheck(requestInfo);
         String resource = formatResource(requestInfo.getMethodArn());
 
