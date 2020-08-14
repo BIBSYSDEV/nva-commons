@@ -5,6 +5,7 @@ import static nva.commons.utils.JsonUtils.objectMapper;
 import static nva.commons.utils.attempt.Try.attempt;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -20,7 +21,7 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.slf4j.LoggerFactory;
 
-public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, AuthorizerResponse> {
+public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Event, AuthorizerResponse> {
 
     public static final String EXECUTE_API_ACTION = "execute-api:Invoke";
     public static final String ALLOW_EFFECT = "Allow";
@@ -28,19 +29,31 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
     private static final String DENY_EFFECT = "Deny";
 
     public ServiceAuthorizerHandler(Environment environment) {
-        super(Void.class, environment, LoggerFactory.getLogger(ServiceAuthorizerHandler.class));
+        super(Event.class, environment, LoggerFactory.getLogger(ServiceAuthorizerHandler.class));
     }
 
     @Override
-    protected AuthorizerResponse processInput(Void input, RequestInfo requestInfo, Context context)
+    protected AuthorizerResponse processInput(Event input, RequestInfo requestInfo, Context context)
         throws ApiGatewayException {
         logger.info("Service requests access: " + principalId());
+        String event = serializeEvent(input);
+        logger.info(event);
         secretCheck(requestInfo);
 
         String methodArn = requestInfo.getMethodArn();
         AuthPolicy authPolicy = createAllowAuthPolicy(methodArn);
 
         return createResponse(authPolicy);
+    }
+
+    private String serializeEvent(Event input) {
+        String event;
+        try {
+            event = objectMapper.writeValueAsString(input);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Event serializing failed");
+        }
+        return event;
     }
 
     protected AuthPolicy createAllowAuthPolicy(String methodArn) throws ForbiddenException {
@@ -83,7 +96,7 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
     }
 
     @Override
-    protected void writeOutput(Void input, AuthorizerResponse output)
+    protected void writeOutput(Event input, AuthorizerResponse output)
         throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
             String responseJson = JsonUtils.objectMapper.writeValueAsString(output);
@@ -92,7 +105,7 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
     }
 
     @Override
-    protected void writeExpectedFailure(Void input, ApiGatewayException exception, String requestId)
+    protected void writeExpectedFailure(Event input, ApiGatewayException exception, String requestId)
         throws IOException {
         try {
             writeFailure();
@@ -102,7 +115,7 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
     }
 
     @Override
-    protected void writeUnexpectedFailure(Void input, Exception exception, String requestId)
+    protected void writeUnexpectedFailure(Event input, Exception exception, String requestId)
         throws IOException {
         try {
             writeFailure();
@@ -112,7 +125,7 @@ public abstract class ServiceAuthorizerHandler extends RestRequestHandler<Void, 
     }
 
     @Override
-    protected Integer getSuccessStatusCode(Void input, AuthorizerResponse output) {
+    protected Integer getSuccessStatusCode(Event input, AuthorizerResponse output) {
         return HttpStatus.SC_OK;
     }
 
