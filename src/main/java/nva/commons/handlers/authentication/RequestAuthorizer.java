@@ -42,7 +42,7 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
 
         logger.debug("Requesting authorizing: " + principalId());
         secretCheck(requestInfo);
-        String resource = formatPolicyResourceToAllowAccessToAllAvailablePaths(requestInfo.getMethodArn());
+        String resource = formatPolicyResource(requestInfo.getMethodArn());
 
         AuthPolicy authPolicy = createAllowAuthPolicy(resource);
 
@@ -60,7 +60,7 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
      * @param methodArn the method ARN as provided by the API gateway
      * @return a resource for the policy
      */
-    protected String formatPolicyResourceToAllowAccessToAllAvailablePaths(String methodArn) {
+    protected String formatPolicyResource(String methodArn) {
         String[] resourcePathComponents = methodArn.split(PATH_DELIMITER);
         String apiGateway = resourcePathComponents[API_GATEWAY_IDENTIFIER_INDEX];
         String stage = resourcePathComponents[STAGE_INDEX];
