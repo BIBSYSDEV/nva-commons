@@ -25,7 +25,8 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
     public static final String EXECUTE_API_ACTION = "execute-api:Invoke";
     public static final String ALLOW_EFFECT = "Allow";
     public static final String ANY_RESOURCE = "*";
-    public static final String WILDCARD = ANY_RESOURCE;
+    public static final String ANY_HTTP_METHOD = ANY_RESOURCE;
+    public static final String ALL_PATHS = ANY_RESOURCE;
     public static final String PATH_DELIMITER = "/";
     public static final int API_GATEWAY_IDENTIFIER_INDEX = 0;
     public static final int STAGE_INDEX = 1;
@@ -63,9 +64,7 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
         String[] resourcePathComponents = methodArn.split(PATH_DELIMITER);
         String apiGateway = resourcePathComponents[API_GATEWAY_IDENTIFIER_INDEX];
         String stage = resourcePathComponents[STAGE_INDEX];
-        String method = WILDCARD;
-        String functionPath = WILDCARD;
-        return String.join(PATH_DELIMITER, apiGateway, stage, method, functionPath);
+        return String.join(PATH_DELIMITER, apiGateway, stage, ANY_HTTP_METHOD, ALL_PATHS);
     }
 
     protected AuthPolicy createAllowAuthPolicy(String methodArn) throws ForbiddenException {
