@@ -110,8 +110,7 @@ public class RequestAuthorizerTest {
     }
 
     @Test
-    public void authorizerThrowsExceptionWhenFetchingPrincipalExceptionThrowsExceptionInFailureResponse()
-        throws IOException {
+    public void authorizerThrowsExceptionWhenFetchingPrincipalExceptionThrowsExceptionInFailureResponse() {
         final TestAppender appender = LogUtils.getTestingAppender(RequestAuthorizer.class);
 
         RequestAuthorizer handler = handlerThrowingExceptionWhenFetchingPrincipalId();
@@ -130,8 +129,7 @@ public class RequestAuthorizerTest {
 
         handler.handleRequest(request, outputStream, context);
 
-        AuthorizerResponse response = AuthorizerResponse.fromOutputStream(outputStream);
-        return response;
+        return AuthorizerResponse.fromOutputStream(outputStream);
     }
 
     private AuthorizerResponse sendRequestToHandler(InputStream input) throws IOException {

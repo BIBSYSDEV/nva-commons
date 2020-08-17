@@ -64,6 +64,7 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
         String[] resourcePathComponents = methodArn.split(PATH_DELIMITER);
         String apiGateway = resourcePathComponents[API_GATEWAY_IDENTIFIER_INDEX];
         String stage = resourcePathComponents[STAGE_INDEX];
+
         return String.join(PATH_DELIMITER, apiGateway, stage, ANY_HTTP_METHOD, ALL_PATHS);
     }
 
