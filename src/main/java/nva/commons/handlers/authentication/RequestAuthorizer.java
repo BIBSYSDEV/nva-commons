@@ -1,6 +1,5 @@
 package nva.commons.handlers.authentication;
 
-import static java.util.Objects.nonNull;
 import static nva.commons.utils.JsonUtils.objectMapper;
 import static nva.commons.utils.attempt.Try.attempt;
 
@@ -9,6 +8,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Collections;
+import java.util.Optional;
 import nva.commons.exceptions.ApiGatewayException;
 import nva.commons.exceptions.ForbiddenException;
 import nva.commons.handlers.RequestInfo;
@@ -41,7 +41,7 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
 
         logger.debug("Requesting authorizing: " + principalId());
         secretCheck(requestInfo);
-        String resource = formatResource(requestInfo.getMethodArn());
+        String resource = formatPolicyResourceToAllowAccessToAllAvailablePaths(requestInfo.getMethodArn());
 
         AuthPolicy authPolicy = createAllowAuthPolicy(resource);
 
@@ -53,16 +53,16 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
      * allowed to. It can contain wildcards.
      *
      * <p>Example methodARN:
-     * arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod/GET/service/users/orestis@unit.no Example output:
+     * arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod/GET/some/path/to/resource Example output:
      * arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod\/*\/* <br/> Another possible output is: "*"
      *
      * @param methodArn the method ARN as provided by the API gateway
      * @return a resource for the policy
      */
-    protected String formatResource(String methodArn) {
-        String[] resource2 = methodArn.split(PATH_DELIMITER);
-        String apiGateway = resource2[API_GATEWAY_IDENTIFIER_INDEX];
-        String stage = resource2[STAGE_INDEX];
+    protected String formatPolicyResourceToAllowAccessToAllAvailablePaths(String methodArn) {
+        String[] resourcePathComponents = methodArn.split(PATH_DELIMITER);
+        String apiGateway = resourcePathComponents[API_GATEWAY_IDENTIFIER_INDEX];
+        String stage = resourcePathComponents[STAGE_INDEX];
         String method = WILDCARD;
         String functionPath = WILDCARD;
         return String.join(PATH_DELIMITER, apiGateway, stage, method, functionPath);
@@ -93,16 +93,10 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
     protected abstract String fetchSecret() throws ForbiddenException;
 
     protected void secretCheck(RequestInfo requestInfo) throws ForbiddenException {
-        if (requestInfo.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
-            String clientSecret = requestInfo.getHeaders().get(HttpHeaders.AUTHORIZATION);
-            String correctSecret = attempt(this::fetchSecret)
-                .orElseThrow(this::logErrorAndThrowException);
-            if (nonNull(clientSecret) && clientSecret.equals(correctSecret)) {
-                return;
-            }
-        }
-
-        throw new ForbiddenException();
+        Optional.ofNullable(requestInfo.getHeaders().get(HttpHeaders.AUTHORIZATION))
+            .map(this::validateSecret)
+            .filter(this::validationSucceeded)
+            .orElseThrow(ForbiddenException::new);
     }
 
     @Override
@@ -137,6 +131,15 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
     @Override
     protected Integer getSuccessStatusCode(Void input, AuthorizerResponse output) {
         return HttpStatus.SC_OK;
+    }
+
+    private Boolean validationSucceeded(Boolean check) {
+        return check;
+    }
+
+    private boolean validateSecret(String clientSecret) {
+        String correctSecret = attempt(this::fetchSecret).orElseThrow(this::logErrorAndThrowException);
+        return clientSecret.equals(correctSecret);
     }
 
     private void writeFailure() throws IOException, ForbiddenException {
