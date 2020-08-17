@@ -26,7 +26,7 @@ public class Environment {
         return readEnvOpt(variableName).orElseThrow(() -> variableNotSetException(variableName));
     }
 
-    protected IllegalStateException variableNotSetException(String variableName) {
+    private IllegalStateException variableNotSetException(String variableName) {
         return new IllegalStateException(ENVIRONMENT_VARIABLE_NOT_SET + variableName);
     }
 }
