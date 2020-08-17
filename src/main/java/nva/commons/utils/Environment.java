@@ -1,7 +1,5 @@
 package nva.commons.utils;
 
-import static java.util.Objects.isNull;
-
 import java.util.Optional;
 
 public class Environment {
@@ -25,11 +23,11 @@ public class Environment {
      * @return the value of the variable or throw {@IllegalStateException} if the variable does not exists.
      */
     public String readEnv(String variableName) {
-        String value = System.getenv().get(variableName);
-        if (isNull(value) || value.isBlank()) {
-            throw new IllegalStateException(ENVIRONMENT_VARIABLE_NOT_SET + variableName);
-        }
-        return value;
+        return readEnvOpt(variableName).orElseThrow(() -> variableNotSetException(variableName));
+    }
+
+    protected IllegalStateException variableNotSetException(String variableName) {
+        return new IllegalStateException(ENVIRONMENT_VARIABLE_NOT_SET + variableName);
     }
 }
 
