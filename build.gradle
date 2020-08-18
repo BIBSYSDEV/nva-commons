@@ -6,7 +6,7 @@ plugins {
     id 'jacoco'
     id 'checkstyle'
     id 'pmd'
-    id 'nebula.lint' version '16.8.0'
+    id 'nebula.lint' version '16.9.1'
 }
 
 
@@ -44,7 +44,7 @@ apply plugin: 'pmd'
 dependencies {
     implementation group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-secretsmanager', version: awsSdkVersion
-    runtimeOnly group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '2.2.8'
+    runtimeOnly group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '3.2.0'
     runtimeOnly group: 'com.amazonaws', name: 'aws-java-sdk-lambda', version: awsSdkVersion
     implementation('org.zalando:problem:0.24.0') {
         dependencies {
@@ -75,7 +75,7 @@ dependencies {
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jupiterVersion
 
 
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.5.0'
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
 
     // If one is using nva-commons, api allows the re-usage of these packages.
