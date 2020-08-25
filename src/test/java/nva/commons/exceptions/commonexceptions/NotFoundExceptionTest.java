@@ -1,4 +1,4 @@
-package nva.commons.exceptions;
+package nva.commons.exceptions.commonexceptions;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;

@@ -1,5 +1,6 @@
-package nva.commons.exceptions;
+package nva.commons.exceptions.commonexceptions;
 
+import nva.commons.exceptions.ApiGatewayException;
 import org.apache.http.HttpStatus;
 
 public class NotFoundException extends ApiGatewayException {
