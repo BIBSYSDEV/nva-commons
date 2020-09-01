@@ -61,6 +61,7 @@ public class RequestInfo {
      * @param header header name
      * @return header value
      */
+    @JsonIgnore
     public String getHeader(String header) {
         return Optional.ofNullable(getHeaders().get(header))
             .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_HEADERS + header));
