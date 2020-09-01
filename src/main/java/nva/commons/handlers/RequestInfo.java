@@ -4,6 +4,7 @@ import static java.util.Objects.isNull;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -71,7 +72,8 @@ public class RequestInfo {
      * @param parameter parameter name
      * @return parameter value
      */
-    public String queryParameter(String parameter) {
+    @JsonIgnore
+    public String getQueryParameter(String parameter) {
         return Optional.ofNullable(getQueryParameters().get(parameter))
             .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_QUERY_PARAMETERS + parameter));
     }
@@ -82,7 +84,8 @@ public class RequestInfo {
      * @param parameter parameter name
      * @return parameter value
      */
-    public String pathParameter(String parameter) {
+    @JsonIgnore
+    public String getPathParameter(String parameter) {
         return Optional.ofNullable(getPathParameters().get(parameter))
             .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_PATH_PARAMETERS + parameter));
     }
@@ -93,7 +96,8 @@ public class RequestInfo {
      * @param jsonPointer json pointer to parameter
      * @return parameter value
      */
-    public String requestContextParameter(JsonPointer jsonPointer) {
+    @JsonIgnore
+    public String getRequestContextParameter(JsonPointer jsonPointer) {
         JsonNode jsonNode = getRequestContext().at(jsonPointer);
         if (jsonNode.isMissingNode()) {
             throw new IllegalArgumentException(MISSING_FROM_REQUEST_CONTEXT + jsonPointer.toString());
