@@ -45,14 +45,14 @@ public class RequestInfoUtilityFunctionsTest {
     @Test
     public void getQueryParameterReturnsValueOnValidKey() {
         when(requestInfo.getQueryParameters()).thenReturn(Map.of(KEY, VALUE));
-        String value = requestInfo.getQueryParameter(KEY);
+        String value = requestInfo.queryParameter(KEY);
         assertEquals(VALUE, value);
     }
 
     @Test
     public void getQueryParameterThrowsExceptionOnMissingKey() {
         when(requestInfo.getQueryParameters()).thenReturn(Map.of());
-        Executable action = () -> requestInfo.getQueryParameter(KEY);
+        Executable action = () -> requestInfo.queryParameter(KEY);
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, action);
         String expected = RequestInfo.MISSING_FROM_QUERY_PARAMETERS + KEY;
         assertEquals(expected, exception.getMessage());
@@ -61,14 +61,14 @@ public class RequestInfoUtilityFunctionsTest {
     @Test
     public void getPathParameterReturnsValueOnValidKey() {
         when(requestInfo.getPathParameters()).thenReturn(Map.of(KEY, VALUE));
-        String value = requestInfo.getPathParameter(KEY);
+        String value = requestInfo.pathParameter(KEY);
         assertEquals(VALUE, value);
     }
 
     @Test
     public void getPathParametersThrowsExceptionOnMissingKey() {
         when(requestInfo.getPathParameters()).thenReturn(Map.of());
-        Executable action = () -> requestInfo.getPathParameter(KEY);
+        Executable action = () -> requestInfo.pathParameter(KEY);
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
             action);
         String expected = RequestInfo.MISSING_FROM_PATH_PARAMETERS + KEY;
@@ -79,7 +79,7 @@ public class RequestInfoUtilityFunctionsTest {
     public void getRequestContextParameterReturnsValueOnValidJsonPointer() {
         when(requestInfo.getRequestContext())
             .thenReturn(objectMapper.convertValue(Map.of(KEY, VALUE), JsonNode.class));
-        String value = requestInfo.getRequestContextParameter(JsonPointer.compile("/" + KEY));
+        String value = requestInfo.requestContextParameter(JsonPointer.compile("/" + KEY));
         assertEquals(VALUE, value);
     }
 
@@ -89,7 +89,7 @@ public class RequestInfoUtilityFunctionsTest {
             .thenReturn(objectMapper.createObjectNode());
         JsonPointer jsonPointer = JsonPointer.compile("/" + KEY);
 
-        Executable action = () -> requestInfo.getRequestContextParameter(jsonPointer);
+        Executable action = () -> requestInfo.requestContextParameter(jsonPointer);
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, action);
         String expected = RequestInfo.MISSING_FROM_REQUEST_CONTEXT + jsonPointer;
         assertEquals(expected, exception.getMessage());
