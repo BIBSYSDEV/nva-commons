@@ -53,7 +53,9 @@ dependencies {
             }
         }
     }
-    implementation group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.24.0'
+    api group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.24.0' {
+        because 'Consumers of nva-commons need to know about this dependency'
+    }
     runtimeOnly group: 'com.amazonaws', name: 'aws-java-sdk-api-gateway', version: awsSdkVersion
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
     runtimeOnly group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion
@@ -86,7 +88,7 @@ dependencies {
         api group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
         api group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: log4jVersion
         api(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
-            because "Because we use the library directly to define loggers in our code"
+            because 'Because we use the library directly to define loggers in our code'
         }
     }
 }
