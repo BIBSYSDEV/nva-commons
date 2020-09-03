@@ -4,17 +4,24 @@ import static java.util.Objects.isNull;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import nva.commons.utils.JacocoGenerated;
 import nva.commons.utils.JsonUtils;
 
 public class RequestInfo {
 
     public static final String PROXY_TAG = "proxy";
+    public static final String MISSING_FROM_HEADERS = "Missing from headers: ";
+    public static final String MISSING_FROM_QUERY_PARAMETERS = "Missing from query parameters: ";
+    public static final String MISSING_FROM_PATH_PARAMETERS = "Missing from pathParameters: ";
+    public static final String MISSING_FROM_REQUEST_CONTEXT = "Missing from requestContext: ";
 
     @JsonProperty("headers")
     private Map<String, String> headers;
@@ -46,6 +53,57 @@ public class RequestInfo {
         this.queryParameters = new HashMap<>();
         this.otherProperties = new LinkedHashMap<>(); // ordinary HashMap and ConcurrentHashMap fail.
         this.requestContext = JsonUtils.objectMapper.createObjectNode();
+    }
+
+    /**
+     * Get header from request info.
+     *
+     * @param header header name
+     * @return header value
+     */
+    @JsonIgnore
+    public String getHeader(String header) {
+        return Optional.ofNullable(getHeaders().get(header))
+            .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_HEADERS + header));
+    }
+
+    /**
+     * Get query parameter from request info.
+     *
+     * @param parameter parameter name
+     * @return parameter value
+     */
+    @JsonIgnore
+    public String getQueryParameter(String parameter) {
+        return Optional.ofNullable(getQueryParameters().get(parameter))
+            .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_QUERY_PARAMETERS + parameter));
+    }
+
+    /**
+     * Get path parameter from request info.
+     *
+     * @param parameter parameter name
+     * @return parameter value
+     */
+    @JsonIgnore
+    public String getPathParameter(String parameter) {
+        return Optional.ofNullable(getPathParameters().get(parameter))
+            .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_PATH_PARAMETERS + parameter));
+    }
+
+    /**
+     * Get parameter from request context baed on json pointer.
+     *
+     * @param jsonPointer json pointer to parameter
+     * @return parameter value
+     */
+    @JsonIgnore
+    public String getRequestContextParameter(JsonPointer jsonPointer) {
+        JsonNode jsonNode = getRequestContext().at(jsonPointer);
+        if (jsonNode.isMissingNode()) {
+            throw new IllegalArgumentException(MISSING_FROM_REQUEST_CONTEXT + jsonPointer.toString());
+        }
+        return jsonNode.textValue();
     }
 
     @JacocoGenerated
