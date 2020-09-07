@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StringDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import org.zalando.problem.ProblemModule;
@@ -30,6 +31,7 @@ public final class JsonUtils {
             .registerModule(new ProblemModule())
             //TODO: JavaTimeModule belongs to an obsolete library, find alternative
             .registerModule(new JavaTimeModule())
+            .registerModule(new Jdk8Module())
             .registerModule(emptyStringAsNullModule())
             .enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
             .enable(SerializationFeature.INDENT_OUTPUT)

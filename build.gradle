@@ -56,7 +56,7 @@ dependencies {
     api group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.24.0'
     runtimeOnly group: 'com.amazonaws', name: 'aws-java-sdk-api-gateway', version: awsSdkVersion
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
-    runtimeOnly group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonVersion
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
     runtimeOnly group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: jacksonVersion
@@ -77,7 +77,7 @@ dependencies {
 
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.5.0'
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
-
+    testImplementation group: 'com.github.npathai', name: 'hamcrest-optional', version: '2.0.0'
     // If one is using nva-commons, api allows the re-usage of these packages.
 
     gradleLint.ignore('unused-dependency') {
