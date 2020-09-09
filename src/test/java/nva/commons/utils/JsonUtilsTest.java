@@ -95,7 +95,7 @@ public class JsonUtilsTest {
     }
 
     private static JsonNode sampleJsonObjectWithoutValue() {
-        return JsonUtils.objectMapper.createObjectNode().set(JSON_KEY, EMPTY_VALUE);
+        return JsonUtils.objectMapper.createObjectNode();
     }
 
     private static class TestObjectForOptionals {
