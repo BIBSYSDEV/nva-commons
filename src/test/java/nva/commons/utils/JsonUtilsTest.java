@@ -24,7 +24,6 @@ public class JsonUtilsTest {
 
     public static final String JSON_UTILS_RESOURCES = "jsonutils";
 
-    public static final JsonNode EMPTY_VALUE = null;
     public static final String SAMPLE_VALUE = "foo";
     public static final String JSON_KEY = "keyInsideObject";
     public static final JsonNode JSON_OBJECT_WITH_VALUE = sampleJsonObjectWithSomeValue();
