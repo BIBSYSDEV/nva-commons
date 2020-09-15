@@ -55,12 +55,14 @@ dependencies {
     }
     api group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.24.0'
     runtimeOnly group: 'com.amazonaws', name: 'aws-java-sdk-api-gateway', version: awsSdkVersion
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
-    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion
-    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonVersion
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
-    runtimeOnly group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: jacksonVersion
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
+    gradleLint.ignore('unused-dependency') {
+        api group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
+        api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion
+        api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonVersion
+        api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
+        runtimeOnly group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: jacksonVersion
+        api group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
+    }
     implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.11'
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.9'
 
