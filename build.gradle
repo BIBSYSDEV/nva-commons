@@ -77,7 +77,7 @@ dependencies {
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jupiterVersion
 
 
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.5.0'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.5.10'
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
     testImplementation group: 'com.github.npathai', name: 'hamcrest-optional', version: '2.0.0'
     // If one is using nva-commons, api allows the re-usage of these packages.
