@@ -58,6 +58,7 @@ dependencies {
     gradleLint.ignore('unused-dependency') {
         api group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
         api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion
+        api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonVersion
         api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
         runtimeOnly group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: jacksonVersion
         api group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
