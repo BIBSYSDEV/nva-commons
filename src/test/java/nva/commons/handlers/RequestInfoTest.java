@@ -173,8 +173,8 @@ public class RequestInfoTest {
     private ObjectNode createNestedNodesFromJsonPointer(JsonPointer jsonPointer, String value) {
         List<SimpleEntry<String, ObjectNode>> nodeList = createNodesForEachPathElement(jsonPointer);
         nestNodes(nodeList);
-        SimpleEntry<String, ObjectNode> lastEntry = nodeList.get(lastItem(nodeList));
-        insertValueToLeafNode(value, lastEntry);
+        SimpleEntry<String, ObjectNode> lastEntry = nodeList.get(lastIndex(nodeList));
+        insertTextValueToLeafNode(value, lastEntry);
 
         return nodeList.get(FIRST_NODE).getValue();
     }
@@ -186,14 +186,14 @@ public class RequestInfoTest {
     }
 
     private void nestNodes(List<SimpleEntry<String, ObjectNode>> nodes) {
-        for (int i = 0; i < lastItem(nodes); i++) {
+        for (int i = 0; i < lastIndex(nodes); i++) {
             SimpleEntry<String, ObjectNode> currentEntry = nodes.get(i);
             SimpleEntry<String, ObjectNode> nextEntry = nodes.get(i + 1);
             addNextEntryAsChildToCurrentEntry(currentEntry, nextEntry);
         }
     }
 
-    private void insertValueToLeafNode(String value, SimpleEntry<String, ObjectNode> lastEntry) {
+    private void insertTextValueToLeafNode(String value, SimpleEntry<String, ObjectNode> lastEntry) {
         lastEntry.getValue().put(lastEntry.getKey(), value);
     }
 
@@ -210,7 +210,7 @@ public class RequestInfoTest {
             .collect(Collectors.toList());
     }
 
-    private int lastItem(List<SimpleEntry<String, ObjectNode>> nodes) {
+    private int lastIndex(List<SimpleEntry<String, ObjectNode>> nodes) {
         return nodes.size() - 1;
     }
 
