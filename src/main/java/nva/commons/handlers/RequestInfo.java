@@ -87,7 +87,6 @@ public class RequestInfo {
     }
 
     @JsonIgnore
-    @Deprecated
     public String getRequestContextParameter(JsonPointer jsonPointer) {
         return getRequestContextParameterOpt(jsonPointer)
             .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_REQUEST_CONTEXT + jsonPointer.toString()));
