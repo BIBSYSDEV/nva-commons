@@ -34,15 +34,13 @@ public class RequestInfoTest {
         "eventWithUnknownRequestInfo.json");
     public static final String UNDEFINED_REQUEST_INFO_PROPERTY = "body";
     public static final String PATH_DELIMITER = "/";
-    public static final int AVOID_ROOT_NODE = 1;
-    public static final int AVOID_LAST_NODE = 1;
-    public static final int UNECESSARY_ROOT_NODE = 0;
+    public static final int UNNECESSARY_ROOT_NODE = 0;
+    public static final int FIRST_NODE = 0;
     private static final String API_GATEWAY_MESSAGES_FOLDER = "apiGatewayMessages";
     private static final Path NULL_VALUES_FOR_MAPS = Path.of(API_GATEWAY_MESSAGES_FOLDER,
         "mapParametersAreNull.json");
     private static final Path MISSING_MAP_VALUES = Path.of(API_GATEWAY_MESSAGES_FOLDER,
         "missingRequestInfo.json");
-    public static final int FIRST_NODE = 0;
 
     @Test
     @DisplayName("RequestInfo can accept unknown fields")
@@ -173,24 +171,24 @@ public class RequestInfoTest {
     }
 
     private ObjectNode createNestedNodesFromJsonPointer(JsonPointer jsonPointer, String value) {
-        var nodeList = createNodesForEachPathElement(jsonPointer);
+        List<SimpleEntry<String, ObjectNode>> nodeList = createNodesForEachPathElement(jsonPointer);
         nestNodes(nodeList);
-        var lastEntry = nodeList.get(lastItem(nodeList));
+        SimpleEntry<String, ObjectNode> lastEntry = nodeList.get(lastItem(nodeList));
         insertValueToLeafNode(value, lastEntry);
 
         return nodeList.get(FIRST_NODE).getValue();
     }
 
     private List<SimpleEntry<String, ObjectNode>> createNodesForEachPathElement(JsonPointer jsonPointer) {
-        var nodes = createListWithEmptyObjectNodes(jsonPointer);
-        nodes.remove(UNECESSARY_ROOT_NODE);
+        List<SimpleEntry<String, ObjectNode>> nodes = createListWithEmptyObjectNodes(jsonPointer);
+        nodes.remove(UNNECESSARY_ROOT_NODE);
         return nodes;
     }
 
     private void nestNodes(List<SimpleEntry<String, ObjectNode>> nodes) {
         for (int i = 0; i < lastItem(nodes); i++) {
-            var currentEntry = nodes.get(i);
-            var nextEntry = nodes.get(i + 1);
+            SimpleEntry<String, ObjectNode> currentEntry = nodes.get(i);
+            SimpleEntry<String, ObjectNode> nextEntry = nodes.get(i + 1);
             addNextEntryAsChildToCurrentEntry(currentEntry, nextEntry);
         }
     }
