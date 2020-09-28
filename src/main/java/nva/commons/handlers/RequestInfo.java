@@ -92,6 +92,16 @@ public class RequestInfo {
             .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_REQUEST_CONTEXT + jsonPointer.toString()));
     }
 
+    /**
+     * Get request context parameter. The root node is the {@link RequestInfo#REQUEST_CONTEXT_FIELD} node of the {@link
+     * RequestInfo} class.
+     * <p>Example: {@code JsonPointer.compile("/authorizer/claims/custom:feideId");  }
+     * </p>
+     *
+     * @param jsonPointer A {@link JsonPointer}
+     * @return a present {@link Optional} if there is a non empty value for the parameter, an empty {@link Optional}
+     *     otherwise.
+     */
     public Optional<String> getRequestContextParameterOpt(JsonPointer jsonPointer) {
         return Optional.ofNullable(getRequestContext())
             .map(requestContext -> requestContext.at(jsonPointer))
@@ -125,11 +135,7 @@ public class RequestInfo {
     }
 
     public void setHeaders(Map<String, String> headers) {
-        if (isNull(headers)) {
-            this.headers = new HashMap<>();
-        } else {
-            this.headers = headers;
-        }
+        this.headers = nonNullMap(headers);
     }
 
     public String getPath() {
@@ -145,11 +151,7 @@ public class RequestInfo {
     }
 
     public void setPathParameters(Map<String, String> pathParameters) {
-        if (isNull(pathParameters)) {
-            this.pathParameters = new HashMap<>();
-        } else {
-            this.pathParameters = pathParameters;
-        }
+        this.pathParameters = nonNullMap(pathParameters);
     }
 
     public Map<String, String> getQueryParameters() {
@@ -157,11 +159,7 @@ public class RequestInfo {
     }
 
     public void setQueryParameters(Map<String, String> queryParameters) {
-        if (isNull(queryParameters)) {
-            this.queryParameters = new HashMap<>();
-        } else {
-            this.queryParameters = queryParameters;
-        }
+        this.queryParameters = nonNullMap(queryParameters);
     }
 
     @JacocoGenerated
@@ -171,11 +169,7 @@ public class RequestInfo {
 
     @JacocoGenerated
     public void setRequestContext(JsonNode requestContext) {
-        if (isNull(requestContext)) {
-            this.requestContext = JsonUtils.objectMapper.createObjectNode();
-        } else {
-            this.requestContext = requestContext;
-        }
+        this.requestContext = Optional.ofNullable(requestContext).orElse(JsonUtils.objectMapper.createObjectNode());
     }
 
     public Optional<String> getUsername() {
@@ -188,6 +182,13 @@ public class RequestInfo {
 
     public Optional<String> getAssignedRoles() {
         return getRequestContextParameterOpt(APPLICATION_ROLES);
+    }
+
+    private <K, V> Map<K, V> nonNullMap(Map<K, V> map) {
+        if (isNull(map)) {
+            return new HashMap<>();
+        }
+        return map;
     }
 }
 
