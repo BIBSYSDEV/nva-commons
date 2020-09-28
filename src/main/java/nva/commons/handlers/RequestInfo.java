@@ -169,7 +169,11 @@ public class RequestInfo {
 
     @JacocoGenerated
     public void setRequestContext(JsonNode requestContext) {
-        this.requestContext = Optional.ofNullable(requestContext).orElse(JsonUtils.objectMapper.createObjectNode());
+        if (isNull(requestContext)) {
+            this.requestContext = JsonUtils.objectMapper.createObjectNode();
+        } else {
+            this.requestContext = requestContext;
+        }
     }
 
     public Optional<String> getUsername() {
