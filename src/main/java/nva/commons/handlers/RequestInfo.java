@@ -176,7 +176,7 @@ public class RequestInfo {
         }
     }
 
-    public Optional<String> getUsername() {
+    public Optional<String> getFeideId() {
         return this.getRequestContextParameterOpt(FEIDE_ID);
     }
 

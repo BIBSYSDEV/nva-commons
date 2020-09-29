@@ -121,7 +121,7 @@ public class RequestInfoTest {
         String expectedUsername = "orestis";
         requestInfo.setRequestContext(createNestedNodesFromJsonPointer(FEIDE_ID, expectedUsername));
 
-        String actual = requestInfo.getUsername().orElseThrow();
+        String actual = requestInfo.getFeideId().orElseThrow();
         assertEquals(actual, expectedUsername);
     }
 
