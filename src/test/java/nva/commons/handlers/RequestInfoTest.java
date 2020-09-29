@@ -1,5 +1,8 @@
 package nva.commons.handlers;
 
+import static nva.commons.handlers.RequestInfo.APPLICATION_ROLES;
+import static nva.commons.handlers.RequestInfo.CUSTOMER_ID;
+import static nva.commons.handlers.RequestInfo.FEIDE_ID;
 import static nva.commons.handlers.RequestInfo.REQUEST_CONTEXT_FIELD;
 import static nva.commons.utils.JsonUtils.objectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -116,7 +119,8 @@ public class RequestInfoTest {
         RequestInfo requestInfo = new RequestInfo();
 
         String expectedUsername = "orestis";
-        updateRequestContext(requestInfo, expectedUsername, RequestInfo.FEIDE_ID);
+        requestInfo.setRequestContext(createNestedNodesFromJsonPointer(FEIDE_ID, expectedUsername));
+
         String actual = requestInfo.getUsername().orElseThrow();
         assertEquals(actual, expectedUsername);
     }
@@ -126,7 +130,7 @@ public class RequestInfoTest {
         RequestInfo requestInfo = new RequestInfo();
 
         String expectedCustomerId = "customerId";
-        updateRequestContext(requestInfo, expectedCustomerId, RequestInfo.CUSTOMER_ID);
+        requestInfo.setRequestContext(createNestedNodesFromJsonPointer(CUSTOMER_ID, expectedCustomerId));
 
         String actual = requestInfo.getCustomerId().orElseThrow();
         assertEquals(actual, expectedCustomerId);
@@ -137,7 +141,7 @@ public class RequestInfoTest {
         RequestInfo requestInfo = new RequestInfo();
 
         String expectedRoles = "role1,role2";
-        updateRequestContext(requestInfo, expectedRoles, RequestInfo.APPLICATION_ROLES);
+        requestInfo.setRequestContext(createNestedNodesFromJsonPointer(APPLICATION_ROLES, expectedRoles));
 
         String actual = requestInfo.getAssignedRoles().orElseThrow();
         assertEquals(actual, expectedRoles);
@@ -163,11 +167,6 @@ public class RequestInfoTest {
 
         assertFalse(jsonNode.isMissingNode());
         assertEquals(VALUE, jsonNode.textValue());
-    }
-
-    private void updateRequestContext(RequestInfo requestInfo, String expectedCustomerId, JsonPointer customerId) {
-        ObjectNode requestContext = createNestedNodesFromJsonPointer(customerId, expectedCustomerId);
-        requestInfo.setRequestContext(requestContext);
     }
 
     private ObjectNode createNestedNodesFromJsonPointer(JsonPointer jsonPointer, String value) {
