@@ -176,14 +176,17 @@ public class RequestInfo {
         }
     }
 
-    public Optional<String> getUsername() {
+    @JsonIgnore
+    public Optional<String> getFeideId() {
         return this.getRequestContextParameterOpt(FEIDE_ID);
     }
 
+    @JsonIgnore
     public Optional<String> getCustomerId() {
         return getRequestContextParameterOpt(CUSTOMER_ID);
     }
 
+    @JsonIgnore
     public Optional<String> getAssignedRoles() {
         return getRequestContextParameterOpt(APPLICATION_ROLES);
     }
