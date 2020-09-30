@@ -167,7 +167,11 @@ public class RequestInfo {
         return requestContext;
     }
 
-    @SuppressWarnings("MissingJavadocMethod")
+    /**
+     * Sets the request context.
+     *
+     * @param requestContext the request context.
+     */
     @JacocoGenerated
     public void setRequestContext(JsonNode requestContext) {
         if (isNull(requestContext)) {
