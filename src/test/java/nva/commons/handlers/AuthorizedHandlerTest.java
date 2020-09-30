@@ -156,7 +156,7 @@ public class AuthorizedHandlerTest {
 
             @Override
             protected List<Tag> sessionTags(RequestInfo requestInfo) {
-                String feideId = requestInfo.getUsername().orElseThrow();
+                String feideId = requestInfo.getFeideId().orElseThrow();
                 String customerId = requestInfo.getCustomerId().orElseThrow();
                 return createTags(feideId, customerId);
             }

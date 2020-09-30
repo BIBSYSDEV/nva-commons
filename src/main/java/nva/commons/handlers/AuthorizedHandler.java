@@ -33,14 +33,6 @@ public abstract class AuthorizedHandler<I, O> extends ApiGatewayHandler<I, O> {
         }
     }
 
-    private STSAssumeRoleSessionCredentialsProvider credentialsProvider(RequestInfo requestInfo, Context context)
-        throws ApiGatewayException {
-        return new STSAssumeRoleSessionCredentialsProvider.Builder(assumedRoleArn(), session(context))
-            .withSessionTags(sessionTags(requestInfo))
-            .withRoleSessionDurationSeconds(MIN_SESSION_DURATION_SECONDS)
-            .withStsClient(stsClient).build();
-    }
-
     protected abstract O processInput(I input,
                                       RequestInfo requestInfo,
                                       STSAssumeRoleSessionCredentialsProvider credentialsProvider,
@@ -50,6 +42,14 @@ public abstract class AuthorizedHandler<I, O> extends ApiGatewayHandler<I, O> {
 
     protected String assumedRoleArn() {
         return environment.readEnv(ASSUMED_ROLE_ARN_ENV_VAR);
+    }
+
+    private STSAssumeRoleSessionCredentialsProvider credentialsProvider(RequestInfo requestInfo, Context context)
+        throws ApiGatewayException {
+        return new STSAssumeRoleSessionCredentialsProvider.Builder(assumedRoleArn(), session(context))
+            .withSessionTags(sessionTags(requestInfo))
+            .withRoleSessionDurationSeconds(MIN_SESSION_DURATION_SECONDS)
+            .withStsClient(stsClient).build();
     }
 
     private String session(Context context) {
