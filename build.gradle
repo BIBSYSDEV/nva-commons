@@ -30,7 +30,7 @@ repositories {
 
 
 def jacksonVersion = "2.10.3"
-def awsSdkVersion = "1.11.774"
+def awsSdkVersion = "1.11.871"
 def jupiterVersion = "5.6.2"
 def log4jVersion = "2.13.2"
 
@@ -43,6 +43,8 @@ apply plugin: 'pmd'
 
 dependencies {
     implementation group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
+
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: awsSdkVersion
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-secretsmanager', version: awsSdkVersion
     runtimeOnly group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '3.2.0'
     runtimeOnly group: 'com.amazonaws', name: 'aws-java-sdk-lambda', version: awsSdkVersion
@@ -66,7 +68,7 @@ dependencies {
     implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.11'
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.9'
 
-    testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.13'
+    testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: 'db959439b7d354b'
 
     testImplementation(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
         because 'Scope provided in junit-jupiter'
