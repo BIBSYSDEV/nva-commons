@@ -20,9 +20,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import no.unit.nva.mocks.MockStsClient;
+import no.unit.nva.stubs.FakeContext;
+import no.unit.nva.stubs.FakeStsClient;
 import no.unit.nva.testutils.HandlerRequestBuilder;
-import no.unit.nva.testutils.MockContext;
 import nva.commons.utils.Environment;
 import nva.commons.utils.JsonUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,9 +48,9 @@ public class AuthorizedHandlerTest {
 
     public AuthorizedHandlerTest() {
         this.environment = setupEnvironment();
-        this.mockStsClient = new MockStsClient();
+        this.mockStsClient = new FakeStsClient();
 
-        context = new MockContext();
+        context = new FakeContext();
     }
 
     @BeforeEach
