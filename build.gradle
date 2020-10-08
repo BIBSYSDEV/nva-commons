@@ -46,7 +46,7 @@ dependencies {
 
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: awsSdkVersion
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-secretsmanager', version: awsSdkVersion
-    runtimeOnly group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '3.3.1'
+    runtimeOnly group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '3.4.0'
     runtimeOnly group: 'com.amazonaws', name: 'aws-java-sdk-lambda', version: awsSdkVersion
     implementation('org.zalando:problem:0.24.0') {
         dependencies {
