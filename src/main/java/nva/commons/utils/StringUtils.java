@@ -56,6 +56,12 @@ public final class StringUtils {
         return str.replaceAll("\\s", " ");
     }
 
+    /**
+     * Returns the stacktrace in one line. It replaces all whitespaces with space and removes multiple whitespaces.
+     *
+     * @param e the Exception
+     * @return the Stacktrace String.
+     */
     public static String stackTraceInSingleLine(Exception e) {
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
