@@ -2,6 +2,10 @@ package nva.commons.utils;
 
 import static java.util.Objects.isNull;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.stream.Stream;
+
 public final class StringUtils {
 
     public static final String DOUBLE_WHITESPACE = "\\s\\s";
@@ -50,5 +54,15 @@ public final class StringUtils {
      */
     public static String replaceWhiteSpacesWithSpace(String str) {
         return str.replaceAll("\\s", " ");
+    }
+
+    public static String stackTraceInSingleLine(Exception e) {
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        String exceptionString = sw.toString();
+        return Stream.of(exceptionString)
+            .map(StringUtils::removeMultipleWhiteSpaces)
+            .map(StringUtils::replaceWhiteSpacesWithSpace)
+            .collect(SingletonCollector.collect());
     }
 }
