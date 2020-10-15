@@ -1,6 +1,7 @@
 package nva.commons.handlers;
 
 import static java.util.Objects.isNull;
+import static nva.commons.utils.ExceptionUtils.stackTraceInSingleLine;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
@@ -8,18 +9,13 @@ import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.URISyntaxException;
-import java.util.stream.Stream;
 import nva.commons.exceptions.ApiGatewayException;
 import nva.commons.exceptions.GatewayResponseSerializingException;
 import nva.commons.exceptions.InvalidOrMissingTypeException;
 import nva.commons.exceptions.LoggerNotSetException;
 import nva.commons.utils.Environment;
 import nva.commons.utils.IoUtils;
-import nva.commons.utils.SingletonCollector;
-import nva.commons.utils.StringUtils;
 import nva.commons.utils.log.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,20 +75,20 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     protected void handleUnexpectedException(Context context, I inputObject, Exception e) throws IOException {
         logger.error(e.getMessage());
-        logger.error(getStackTraceString(e));
+        logger.error(stackTraceInSingleLine(e));
         writeUnexpectedFailure(inputObject, e, context.getAwsRequestId());
     }
 
     protected void handleTypeIdException(Context context, I inputObject, InvalidTypeIdException e) throws IOException {
         logger.warn(e.getMessage());
-        logger.warn(getStackTraceString(e));
+        logger.warn(stackTraceInSingleLine(e));
         InvalidOrMissingTypeException apiGatewayInvalidTypeException = transformExceptionToApiGatewayException(e);
         writeExpectedFailure(inputObject, apiGatewayInvalidTypeException, context.getAwsRequestId());
     }
 
     protected void handleExpectedException(Context context, I inputObject, ApiGatewayException e) throws IOException {
         logger.warn(e.getMessage());
-        logger.warn(getStackTraceString(e));
+        logger.warn(stackTraceInSingleLine(e));
         writeExpectedFailure(inputObject, e, context.getAwsRequestId());
     }
 
@@ -170,17 +166,6 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
         throws IOException;
 
     protected abstract void writeUnexpectedFailure(I input, Exception exception, String requestId) throws IOException;
-
-    private String getStackTraceString(Exception e) {
-        StringWriter sw = new StringWriter();
-        e.printStackTrace(new PrintWriter(sw));
-        String exceptionString = sw.toString();
-        String exceptionStringNoNewLines = Stream.of(exceptionString)
-            .map(StringUtils::removeMultipleWhiteSpaces)
-            .map(StringUtils::replaceWhiteSpacesWithSpace)
-            .collect(SingletonCollector.collect());
-        return exceptionStringNoNewLines;
-    }
 
     private Class<I> getIClass() {
         return iclass;
