@@ -79,8 +79,4 @@ public class StringUtilsTest {
     public void stringUtilReturnsTrueForANullString(String input) {
         assertThat(StringUtils.isEmpty(null), is(equalTo(true)));
     }
-
-
-
-
 }
