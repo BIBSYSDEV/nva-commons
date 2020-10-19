@@ -63,7 +63,7 @@ public final class StringUtils {
     }
 
     /**
-     * Checks if string is null or empty
+     * Checks if string is null or empty.
      * @param string string to check
      * @return <code>true</code> if string is null or empty.
      */
