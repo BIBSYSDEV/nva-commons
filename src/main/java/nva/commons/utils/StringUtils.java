@@ -1,6 +1,7 @@
 package nva.commons.utils;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 public final class StringUtils {
 
@@ -50,5 +51,14 @@ public final class StringUtils {
      */
     public static String replaceWhiteSpacesWithSpace(String str) {
         return str.replaceAll("\\s", " ");
+    }
+
+    /**
+     * Checks if string is neither null or empty.
+     * @param string string to check
+     * @return <code>true</code> if string is neither null or empty.
+     */
+    public static boolean isNotNullOrEmpty(String string) {
+        return nonNull(string) && !string.isEmpty();
     }
 }
