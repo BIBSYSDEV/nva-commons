@@ -86,4 +86,11 @@ public class StringUtilsTest {
     public void stringUtilIsNotNullOrEmpty(String input) {
         assertThat(StringUtils.isNotNullOrEmpty(input), is(equalTo(true)));
     }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @DisplayName("isNullOrEmpty should return true where string is null or empty.")
+    public void stringUtilIsNullOrEmpty(String input) {
+        assertThat(StringUtils.isNullOrEmpty(input), is(equalTo(true)));
+    }
 }

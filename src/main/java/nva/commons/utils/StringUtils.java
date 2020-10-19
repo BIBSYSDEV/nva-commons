@@ -61,4 +61,13 @@ public final class StringUtils {
     public static boolean isNotNullOrEmpty(String string) {
         return nonNull(string) && !string.isEmpty();
     }
+
+    /**
+     * Checks if string is null or empty
+     * @param string string to check
+     * @return <code>true</code> if string is null or empty.
+     */
+    public static boolean isNullOrEmpty(String string) {
+        return isNull(string) || string.isEmpty();
+    }
 }
