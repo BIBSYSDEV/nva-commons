@@ -1,7 +1,6 @@
 package nva.commons.utils;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 public final class StringUtils {
 
