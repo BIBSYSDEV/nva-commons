@@ -59,7 +59,7 @@ public final class StringUtils {
      * @return <code>true</code> if string is neither null or empty.
      */
     public static boolean isNotNullOrEmpty(String string) {
-        return nonNull(string) && !string.isEmpty();
+        return !isNullOrEmpty(string);
     }
 
     /**
