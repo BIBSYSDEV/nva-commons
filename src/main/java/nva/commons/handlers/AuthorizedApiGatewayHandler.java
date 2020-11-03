@@ -10,17 +10,17 @@ import nva.commons.exceptions.ApiGatewayException;
 import nva.commons.utils.Environment;
 import org.slf4j.Logger;
 
-public abstract class AuthorizedHandler<I, O> extends ApiGatewayHandler<I, O> {
+public abstract class AuthorizedApiGatewayHandler<I, O> extends ApiGatewayHandler<I, O> {
 
     public static final String ASSUMED_ROLE_ARN_ENV_VAR = "ASSUMED_ROLE_ARN";
     public static final String UNIDENTIFIED_SESSION = "Unidentified session";
     private static final int MIN_SESSION_DURATION_SECONDS = 900;
     private final AWSSecurityTokenService stsClient;
 
-    protected AuthorizedHandler(Class<I> iclass,
-                                Environment environment,
-                                AWSSecurityTokenService stsClient,
-                                Logger logger
+    protected AuthorizedApiGatewayHandler(Class<I> iclass,
+                                          Environment environment,
+                                          AWSSecurityTokenService stsClient,
+                                          Logger logger
     ) {
         super(iclass, environment, logger);
         this.stsClient = stsClient;
