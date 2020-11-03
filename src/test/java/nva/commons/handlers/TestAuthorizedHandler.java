@@ -5,7 +5,7 @@ import nva.commons.utils.Environment;
 import org.apache.http.HttpStatus;
 import org.slf4j.LoggerFactory;
 
-public abstract class TestAuthorizedHandler extends AuthorizedHandler<Void, String> {
+public abstract class TestAuthorizedHandler extends AuthorizedApiGatewayHandler<Void, String> {
 
     public TestAuthorizedHandler(Environment environment,
                                  AWSSecurityTokenService stsClient) {
