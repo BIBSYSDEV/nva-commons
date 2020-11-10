@@ -22,7 +22,7 @@ public class TryTest {
     private static final String SOME_STRING = "SomeString";
     private static final String EXCEPTION_MESSAGE = "ExceptionMessage";
     private static final ArithmeticException SAMPLE_UNCHECKED_EXCEPTION = new ArithmeticException(EXCEPTION_MESSAGE);
-    private static Map<Integer, String> numbers;
+    private static final Map<Integer, String> numbers;
 
     static {
         numbers = new HashMap<>();
