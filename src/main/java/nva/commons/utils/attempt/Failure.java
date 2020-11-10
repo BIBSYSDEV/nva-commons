@@ -53,6 +53,11 @@ public class Failure<T> extends Try<T> {
     }
 
     @Override
+    public T orElseThrow() {
+        throw new RuntimeException(this.getException());
+    }
+
+    @Override
     public <E extends Exception> T orElse(FunctionWithException<Failure<T>, T, E> action) throws E {
         if (action != null) {
             return action.apply(this);

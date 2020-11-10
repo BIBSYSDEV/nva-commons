@@ -7,7 +7,6 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
@@ -28,7 +27,7 @@ import nva.commons.utils.JsonUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class AuthorizedHandlerTest {
+public class AuthorizedApiGatewayHandlerTest {
 
     public static final String SAMPLE_FEIDE_ID = "sampleFeideId";
     public static final String EMPTY_STRING = "";
@@ -46,7 +45,7 @@ public class AuthorizedHandlerTest {
     private final Context context;
     private ByteArrayOutputStream outputStream;
 
-    public AuthorizedHandlerTest() {
+    public AuthorizedApiGatewayHandlerTest() {
         this.environment = setupEnvironment();
         this.mockStsClient = new FakeStsClient();
 
@@ -171,7 +170,7 @@ public class AuthorizedHandlerTest {
 
     private Environment setupEnvironment() {
         var environment = mock(Environment.class);
-        when(environment.readEnv(AuthorizedHandler.ASSUMED_ROLE_ARN_ENV_VAR)).thenReturn(SAMPLE_ROLE_ARN);
+        when(environment.readEnv(AuthorizedApiGatewayHandler.ASSUMED_ROLE_ARN_ENV_VAR)).thenReturn(SAMPLE_ROLE_ARN);
         when(environment.readEnv(ApiGatewayHandler.ALLOWED_ORIGIN_ENV)).thenReturn(NECESSARY_ALLOWED_ORIGIN);
         return environment;
     }

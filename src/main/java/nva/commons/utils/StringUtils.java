@@ -51,4 +51,22 @@ public final class StringUtils {
     public static String replaceWhiteSpacesWithSpace(String str) {
         return str.replaceAll("\\s", " ");
     }
+
+    /**
+     * Checks if string is neither null or empty.
+     * @param string string to check
+     * @return <code>true</code> if string is neither null or empty.
+     */
+    public static boolean isNotNullOrEmpty(String string) {
+        return !isNullOrEmpty(string);
+    }
+
+    /**
+     * Checks if string is null or empty.
+     * @param string string to check
+     * @return <code>true</code> if string is null or empty.
+     */
+    public static boolean isNullOrEmpty(String string) {
+        return isNull(string) || string.isEmpty();
+    }
 }

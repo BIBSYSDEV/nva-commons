@@ -9,7 +9,6 @@ import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -156,6 +155,15 @@ public class SuccessTest {
 
         assertThat(success.isSuccess(), is(true));
         assertThat(actionAfterFailureRun.get(), is(equalTo(false)));
+    }
+
+    @Test
+    public void orElseThrowThrowsRuntimeExceptionWhenTryisSuccess() {
+        int expectedValue = 2;
+        int actualValue = Try.of(expectedValue)
+            .map(this::identity)
+            .orElseThrow();
+        assertThat(actualValue, is(equalTo(expectedValue)));
     }
 
     private void consume(int value) {

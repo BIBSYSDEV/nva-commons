@@ -60,6 +60,11 @@ public class Success<T> extends Try<T> {
     }
 
     @Override
+    public T orElseThrow() {
+        return get();
+    }
+
+    @Override
     public <E extends Exception> T orElse(FunctionWithException<Failure<T>, T, E> action) throws E {
         if (action == null) {
             throw new IllegalStateException(NULL_ACTION_MESSAGE);
