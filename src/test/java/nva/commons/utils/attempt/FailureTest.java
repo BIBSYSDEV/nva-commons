@@ -9,13 +9,13 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import nva.commons.exceptions.TestException;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -52,13 +52,12 @@ public class FailureTest {
         assertThat(exception.getMessage(), is(equalTo(EXPECTED_EXCEPTION_MESSAGE)));
     }
 
-
     @Test
     @DisplayName("orElseThrow throws the specified exception when unchecked exception is thrown")
     public void orElseThrowsTheSpecifiedExceptionWhenUncheckedExceptionIsThrown() {
         Executable action =
             () -> Try.of(sample)
-                .map(i -> throwUnCheckedException(NESTED_EXCEPTION_MESSAGE))
+                .map(i -> throwUnCheckedException())
                 .orElseThrow(f -> new TestException(f.getException(), EXPECTED_EXCEPTION_MESSAGE));
 
         TestException exception = assertThrows(TestException.class, action);
@@ -83,7 +82,7 @@ public class FailureTest {
         Executable action =
             () -> Try.of(sample)
                 .map(i -> throwCheckedException(NESTED_EXCEPTION_MESSAGE))
-                .orElse(f -> throwAnotherCheckedException(EXPECTED_EXCEPTION_MESSAGE));
+                .orElse(f -> throwAnotherCheckedException());
 
         TestException exception = assertThrows(TestException.class, action);
         assertThat(exception.getMessage(), is(equalTo(EXPECTED_EXCEPTION_MESSAGE)));
@@ -182,6 +181,17 @@ public class FailureTest {
         assertThat(actionAfterFailureRun.get(), is(true));
     }
 
+    @Test
+    public void orElseThrowThrowsRuntimeExceptionWhenTryisFailrure() {
+        String someString = "hello";
+        Executable action = () -> Try.of(someString)
+            .map(str -> throwCheckedException(EXPECTED_EXCEPTION_MESSAGE))
+            .orElseThrow();
+
+        RuntimeException exception = assertThrows(RuntimeException.class, action);
+        assertThat(exception.getCause().getMessage(), is(Matchers.equalTo(EXPECTED_EXCEPTION_MESSAGE)));
+    }
+
     private void consumeWithException(int input) throws RuntimeException {
         throw new RuntimeException(NOT_EXPECTED_MESSAGE);
     }
@@ -194,12 +204,12 @@ public class FailureTest {
         throw new IOException(exceptionMessage);
     }
 
-    private int throwUnCheckedException(String exceptionMessage) {
-        throw new RuntimeException(exceptionMessage);
+    private int throwUnCheckedException() {
+        throw new RuntimeException(FailureTest.NESTED_EXCEPTION_MESSAGE);
     }
 
-    private int throwAnotherCheckedException(String message) throws TestException {
-        throw new TestException(message);
+    private int throwAnotherCheckedException() throws TestException {
+        throw new TestException(FailureTest.EXPECTED_EXCEPTION_MESSAGE);
     }
 
     private void doNothing() {

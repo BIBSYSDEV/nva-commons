@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +22,7 @@ public class TryTest {
     private static final String SOME_STRING = "SomeString";
     private static final String EXCEPTION_MESSAGE = "ExceptionMessage";
     private static final ArithmeticException SAMPLE_UNCHECKED_EXCEPTION = new ArithmeticException(EXCEPTION_MESSAGE);
-    private static Map<Integer, String> numbers;
+    private static final Map<Integer, String> numbers;
 
     static {
         numbers = new HashMap<>();
@@ -111,7 +110,7 @@ public class TryTest {
     public void orElseThrowsSpecifiedExceptionWhenUncheckedExceptionIsThrown() throws TestException {
         Executable action = () ->
             attempt(() -> throwUnCheckedException("Some message")).orElseThrow(fail -> new TestException());
-        assertThrows(TestException.class,action);
+        assertThrows(TestException.class, action);
     }
 
     @Test
