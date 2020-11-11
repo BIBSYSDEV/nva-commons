@@ -111,6 +111,7 @@ public class RequestInfo {
         return Optional.ofNullable(getRequestContext())
             .map(requestContext -> requestContext.at(jsonPointer))
             .filter(not(JsonNode::isMissingNode))
+            .filter(not(JsonNode::isNull))
             .map(JsonNode::asText);
     }
 
@@ -203,8 +204,12 @@ public class RequestInfo {
 
     @JsonIgnore
     public Set<String> getAccessRights() {
-        String accessRightsString = getRequestContextParameter(ACCESS_RIGHTS);
-        return Arrays.stream(accessRightsString.split(COMMA_DELIMITER)).collect(Collectors.toSet());
+        return getRequestContextParameterOpt(ACCESS_RIGHTS)
+            .stream()
+            .filter(not(String::isBlank))
+            .map(accessRightsStr -> accessRightsStr.split(COMMA_DELIMITER))
+            .flatMap(Arrays::stream)
+            .collect(Collectors.toSet());
     }
 
     private <K, V> Map<K, V> nonNullMap(Map<K, V> map) {

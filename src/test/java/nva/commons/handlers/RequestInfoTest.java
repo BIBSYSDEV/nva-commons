@@ -6,6 +6,7 @@ import static nva.commons.handlers.RequestInfo.FEIDE_ID;
 import static nva.commons.handlers.RequestInfo.REQUEST_CONTEXT_FIELD;
 import static nva.commons.utils.JsonUtils.objectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -48,6 +49,12 @@ public class RequestInfoTest {
     private static final String API_GATEWAY_MESSAGES_FOLDER = "apiGatewayMessages";
     public static final Path EVENT_WITH_ACCESS_RIGHTS = Path.of(API_GATEWAY_MESSAGES_FOLDER,
         "event_with_access_rights_claim.json");
+    public static final Path EVENT_WITHOUT_ACCESS_RIGHTS = Path.of(API_GATEWAY_MESSAGES_FOLDER,
+        "event_without_access_rights_claim.json");
+    public static final Path EVENT_WITH_EMPTY_ACCESS_RIGHTS = Path.of(API_GATEWAY_MESSAGES_FOLDER,
+        "event_with_empty_access_rights_claim.json");
+    public static final Path EVENT_WITH_NULL_ACCESS_RIGHTS = Path.of(API_GATEWAY_MESSAGES_FOLDER,
+        "event_with_null_access_rights_claim.json");
     private static final Path NULL_VALUES_FOR_MAPS = Path.of(API_GATEWAY_MESSAGES_FOLDER,
         "mapParametersAreNull.json");
     private static final Path MISSING_MAP_VALUES = Path.of(API_GATEWAY_MESSAGES_FOLDER,
@@ -156,7 +163,7 @@ public class RequestInfoTest {
     }
 
     @Test
-    @DisplayName("getAccessRights retuns as list the values in the claim custom:accessRights")
+    @DisplayName("getAccessRights returns as list the values in the claim custom:accessRights")
     public void getAccessRightsReturnsAsListTheValuesInClaimCustomAccessRights() throws ApiIoException {
         String event = IoUtils.stringFromResources(EVENT_WITH_ACCESS_RIGHTS);
         ApiMessageParser<String> apiMessageParser = new ApiMessageParser<String>();
@@ -164,6 +171,21 @@ public class RequestInfoTest {
         Set<String> actualAccessRights = requestInfo.getAccessRights();
         Set<String> expectedAccessRights = Set.of(ACCESS_RIGHT_SAMPLE_1, ACCESS_RIGHT_SAMPLE_2);
         assertThat(actualAccessRights, is(equalTo(expectedAccessRights)));
+    }
+
+    @Test
+    public void getAccessRightsReturnsEmptySetOfAccessRightsWhenAccessRightsClaimIsMissing() throws ApiIoException {
+        getAccessRightsReturnsEmptySet(EVENT_WITHOUT_ACCESS_RIGHTS);
+    }
+
+    @Test
+    public void getAccessRightsReturnsEmptySetOfAccessRightsWhenAccessRightsClaimIsEmpty() throws ApiIoException {
+        getAccessRightsReturnsEmptySet(EVENT_WITH_EMPTY_ACCESS_RIGHTS);
+    }
+
+    @Test
+    public void getAccessRightsReturnsEmptySetOfAccessRightsWhenAccessRightsClaimIsNull() throws ApiIoException {
+        getAccessRightsReturnsEmptySet(EVENT_WITH_NULL_ACCESS_RIGHTS);
     }
 
     @Test
@@ -186,6 +208,14 @@ public class RequestInfoTest {
 
         assertFalse(jsonNode.isMissingNode());
         assertEquals(VALUE, jsonNode.textValue());
+    }
+
+    private void getAccessRightsReturnsEmptySet(Path resource) throws ApiIoException {
+        String event = IoUtils.stringFromResources(resource);
+        ApiMessageParser<String> apiMessageParser = new ApiMessageParser<>();
+        RequestInfo requestInfo = apiMessageParser.getRequestInfo(event);
+        Set<String> actualAccessRights = requestInfo.getAccessRights();
+        assertThat(actualAccessRights, is(empty()));
     }
 
     private ObjectNode createNestedNodesFromJsonPointer(JsonPointer jsonPointer, String value) {
