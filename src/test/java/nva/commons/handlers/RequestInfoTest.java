@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.file.Path;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,6 +49,8 @@ public class RequestInfoTest {
     private static final String API_GATEWAY_MESSAGES_FOLDER = "apiGatewayMessages";
     public static final Path EVENT_WITH_ACCESS_RIGHTS = Path.of(API_GATEWAY_MESSAGES_FOLDER,
         "event_with_access_rights_claim.json");
+    public static final Path EVENT_WITHOUT_ACCESS_RIGHTS = Path.of(API_GATEWAY_MESSAGES_FOLDER,
+        "event_without_access_rights_claim.json");
     private static final Path NULL_VALUES_FOR_MAPS = Path.of(API_GATEWAY_MESSAGES_FOLDER,
         "mapParametersAreNull.json");
     private static final Path MISSING_MAP_VALUES = Path.of(API_GATEWAY_MESSAGES_FOLDER,
@@ -156,13 +159,23 @@ public class RequestInfoTest {
     }
 
     @Test
-    @DisplayName("getAccessRights retuns as list the values in the claim custom:accessRights")
+    @DisplayName("getAccessRights returns as list the values in the claim custom:accessRights")
     public void getAccessRightsReturnsAsListTheValuesInClaimCustomAccessRights() throws ApiIoException {
         String event = IoUtils.stringFromResources(EVENT_WITH_ACCESS_RIGHTS);
         ApiMessageParser<String> apiMessageParser = new ApiMessageParser<String>();
         RequestInfo requestInfo = apiMessageParser.getRequestInfo(event);
         Set<String> actualAccessRights = requestInfo.getAccessRights();
         Set<String> expectedAccessRights = Set.of(ACCESS_RIGHT_SAMPLE_1, ACCESS_RIGHT_SAMPLE_2);
+        assertThat(actualAccessRights, is(equalTo(expectedAccessRights)));
+    }
+
+    @Test
+    public void getAccessRightsReturnsEmptySetOfAccessRightsWhenAccessRightsClaimIsMissing() throws ApiIoException {
+        String event = IoUtils.stringFromResources(EVENT_WITHOUT_ACCESS_RIGHTS);
+        ApiMessageParser<String> apiMessageParser = new ApiMessageParser<String>();
+        RequestInfo requestInfo = apiMessageParser.getRequestInfo(event);
+        Set<String> actualAccessRights = requestInfo.getAccessRights();
+        Set<String> expectedAccessRights = Collections.emptySet();
         assertThat(actualAccessRights, is(equalTo(expectedAccessRights)));
     }
 
