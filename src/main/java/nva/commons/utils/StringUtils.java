@@ -38,8 +38,23 @@ public final class StringUtils {
         return input.replaceAll(WHITESPACES, EMPTY_STRING);
     }
 
-    public static boolean isEmpty(String input) {
+    /**
+     * Checks if string input is blank or null.
+     * @param input input string
+     * @return <code>true</code> if blank.
+     */
+    public static boolean isBlank(String input) {
         return isNull(input) || input.isBlank();
+    }
+
+    /**
+     * Checks if string input is empty or null.
+     *
+     * @param input input string
+     * @return <code>true</code> if empty.
+     */
+    public static boolean isEmpty(String input) {
+        return isNull(input) || input.isEmpty();
     }
 
     /**
@@ -54,19 +69,69 @@ public final class StringUtils {
 
     /**
      * Checks if string is neither null or empty.
+     *
+     * @param string string to check
+     * @return <code>true</code> if string is neither null or empty.
+     * @see #isNotEmpty(String)
+     */
+    @Deprecated(forRemoval = true)
+    public static boolean isNotNullOrEmpty(String string) {
+        return isNotEmpty(string);
+    }
+
+    /**
+     * Checks if string is neither null or empty.
+     *
      * @param string string to check
      * @return <code>true</code> if string is neither null or empty.
      */
-    public static boolean isNotNullOrEmpty(String string) {
-        return !isNullOrEmpty(string);
+    public static boolean isNotEmpty(String string) {
+        return !isEmpty(string);
+    }
+
+    /**
+     * Checks if string is neither null or blank.
+     *
+     * @param string string to check
+     * @return <code>true</code> if string is neither null or empty.
+     * @see #isNotBlank(String)
+     */
+    @Deprecated(forRemoval = true)
+    public static boolean isNotNullOrBlank(String string) {
+        return isNotBlank(string);
+    }
+
+    /**
+     * Checks if string is neither null or blank.
+     *
+     * @param string string to check
+     * @return <code>true</code> if string is neither null or empty.
+     */
+    public static boolean isNotBlank(String string) {
+        return !isBlank(string);
     }
 
     /**
      * Checks if string is null or empty.
+     *
      * @param string string to check
      * @return <code>true</code> if string is null or empty.
+     * @see #isEmpty(String)
      */
+    @Deprecated(forRemoval = true)
     public static boolean isNullOrEmpty(String string) {
-        return isNull(string) || string.isEmpty();
+        return isEmpty(string);
+    }
+
+    /**
+     * Checks if string is null or blank.
+     *
+     * @param string string to check
+     * @return <code>true</code> if string is null or empty.
+     * @see #isBlank(String)
+     */
+    @Deprecated(forRemoval = true)
+    public static boolean isNullOrBlank(String string) {
+        return isBlank(string);
     }
 }
