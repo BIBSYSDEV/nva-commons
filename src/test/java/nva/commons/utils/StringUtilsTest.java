@@ -16,7 +16,7 @@ public class StringUtilsTest {
 
     @Test
     @DisplayName("removeMultipleWhitespaces preserves single whitespaces")
-    void removeMulitpleWhitespacesPreserversSingleWhitespacess() {
+    public void removeMulitpleWhitespacesPreserversSingleWhitespacess() {
         String input = EXPECTED_OUTPUT;
         String output = StringUtils.removeMultipleWhiteSpaces(input);
         ;
@@ -25,7 +25,7 @@ public class StringUtilsTest {
 
     @Test
     @DisplayName("removeMultipleWhitespaces removes double spaces")
-    void removeMultipleWhitespacesRemovesDoubleSpaces() {
+    public void removeMultipleWhitespacesRemovesDoubleSpaces() {
         String doubleSpaces = "The  quick  brown  fox  jumps over the lazy dog";
         String output = StringUtils.removeMultipleWhiteSpaces(doubleSpaces);
         ;
@@ -34,7 +34,7 @@ public class StringUtilsTest {
 
     @Test
     @DisplayName("removeMultipleWhitespaces removes double spaces")
-    void removeMultipleWhitespacesRemovesCombinationOfSpaces() {
+    public void removeMultipleWhitespacesRemovesCombinationOfSpaces() {
         String combinationOfSpaces = "The \n quick\n brown\n fox  jumps over the lazy dog";
         String output = StringUtils.removeMultipleWhiteSpaces(combinationOfSpaces);
 
@@ -43,7 +43,7 @@ public class StringUtilsTest {
 
     @Test
     @DisplayName("removeWhitespaces removes whitespaces")
-    void removeWhiteSpacesRemovesWhiteSpaces() {
+    public void removeWhiteSpacesRemovesWhiteSpaces() {
         String combinationOfSpaces = "The \n quick\n brown\n fox  jumps over the lazy dog";
         String expected = "Thequickbrownfoxjumpsoverthelazydog";
         String output = StringUtils.removeWhiteSpaces(combinationOfSpaces);
@@ -52,7 +52,7 @@ public class StringUtilsTest {
 
     @Test
     @DisplayName("StringUtils should have a method for checking if a string is empty (null or blank)")
-    void stringUtilsHasAMethodForCheckingIfAStringIsEmpty() {
+    public void stringUtilsHasAMethodForCheckingIfAStringIsEmpty() {
         boolean result = StringUtils.isEmpty(null);
     }
 
