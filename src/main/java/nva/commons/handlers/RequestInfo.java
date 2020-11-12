@@ -2,17 +2,19 @@ package nva.commons.handlers;
 
 import static java.util.Objects.isNull;
 import static java.util.function.Predicate.not;
-
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import nva.commons.utils.JacocoGenerated;
 import nva.commons.utils.JsonUtils;
 
@@ -35,6 +37,9 @@ public class RequestInfo {
     public static final JsonPointer CUSTOMER_ID = JsonPointer.compile("/authorizer/claims/custom:customerId");
     public static final JsonPointer APPLICATION_ROLES = JsonPointer.compile(
         "/authorizer/claims/custom:applicationRoles");
+    public static final JsonPointer ACCESS_RIGHTS = JsonPointer.compile(
+        "/authorizer/claims/custom:accessRights");
+    public static final String COMMA_DELIMITER = ",";
 
     @JsonProperty(HEADERS_FIELD)
     private Map<String, String> headers;
@@ -106,6 +111,7 @@ public class RequestInfo {
         return Optional.ofNullable(getRequestContext())
             .map(requestContext -> requestContext.at(jsonPointer))
             .filter(not(JsonNode::isMissingNode))
+            .filter(not(JsonNode::isNull))
             .map(JsonNode::asText);
     }
 
@@ -194,6 +200,16 @@ public class RequestInfo {
     @JsonIgnore
     public Optional<String> getAssignedRoles() {
         return getRequestContextParameterOpt(APPLICATION_ROLES);
+    }
+
+    @JsonIgnore
+    public Set<String> getAccessRights() {
+        return getRequestContextParameterOpt(ACCESS_RIGHTS)
+            .stream()
+            .filter(not(String::isBlank))
+            .map(accessRightsStr -> accessRightsStr.split(COMMA_DELIMITER))
+            .flatMap(Arrays::stream)
+            .collect(Collectors.toSet());
     }
 
     private <K, V> Map<K, V> nonNullMap(Map<K, V> map) {

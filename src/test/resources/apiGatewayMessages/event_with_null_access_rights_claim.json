@@ -1,0 +1,163 @@
+{
+  "headers": {
+    "Accept": "*/*",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Authorization": "Bearer lskjflskjfd",
+    "Cache-Control": "no-cache",
+    "CloudFront-Forwarded-Proto": "https",
+    "CloudFront-Is-Desktop-Viewer": "true",
+    "CloudFront-Is-Mobile-Viewer": "false",
+    "CloudFront-Is-SmartTV-Viewer": "false",
+    "CloudFront-Is-Tablet-Viewer": "false",
+    "CloudFront-Viewer-Country": "NO",
+    "Host": "api.dev.nva.aws.unit.no",
+    "Postman-Token": "b563026a-0262-4c49-bb83-263cf294ff44",
+    "User-Agent": "PostmanRuntime/7.26.8",
+    "Via": "1.1 d4fd24ae65d4d2b97cfdea8d2f0c21a6.cloudfront.net (CloudFront)",
+    "X-Amz-Cf-Id": "86TD9M28sySy5nTFahL6tVUf14XWOuCVJ5XFtfTJnxgBeU5VNO_1hw==",
+    "X-Amzn-Trace-Id": "Root=1-5faaa0ba-6429d54a431451c07edfccb5",
+    "X-Forwarded-For": "84.52.239.232, 70.132.12.91",
+    "X-Forwarded-Port": "443",
+    "X-Forwarded-Proto": "https"
+  },
+  "path": "/orestis-doi-request/",
+  "pathParameters": {},
+  "queryStringParameters": {
+    "role": "CURATOR"
+  },
+  "requestContext": {
+    "resourceId": "otl84ok08k",
+    "authorizer": {
+      "claims": {
+        "at_hash": "ppXcpJw_9Ak7UpAmb27opw",
+        "custom:feideTargetedId": "13375c598a0f23791bdc6d7b8e1951c2364ec8da",
+        "sub": "01d3a3ac-6262-4e02-ba3e-e592d06e3ee6",
+        "custom:orgLegalName": "Unit",
+        "cognito:groups": "eu-west-1_ZgmwmNtMp_FeideIdentityProvider",
+        "custom:yearOfBirth": "1984",
+        "custom:orgName": "UNIT",
+        "iss": "https://cognito-idp.eu-west-1.amazonaws.com/eu-west-1_ZgmwmNtMp",
+        "custom:orgNumber": "NO919477822",
+        "custom:application": "NVA",
+        "custom:applicationRoles": "CURATOR,Curator,Creator",
+        "identities": "{\"dateCreated\":\"1605017657967\",\"userId\":\"fd42d7f46888c456162728642d6b2fd14bc0917f\",\"providerName\":\"FeideIdentityProvider\",\"providerType\":\"SAML\",\"issuer\":\"https:\\/\\/idp-test.feide.no\",\"primary\":\"true\"}",
+        "auth_time": "1605017713",
+        "exp": "Tue Nov 10 15:15:13 UTC 2020",
+        "custom:accessRights": null,
+        "custom:feideId": "og@unit.no",
+        "iat": "Tue Nov 10 14:15:13 UTC 2020",
+        "email": "orestis.gkorgkas@unit.no",
+        "custom:identifiers": "feide:og@unit.no",
+        "email_verified": "false",
+        "custom:cristinId": "https://api.cristin.no/v2/institutions/20202",
+        "custom:schoolList": "NO919477822",
+        "cognito:username": "FeideIdentityProvider_fd42d7f46888c456162728642d6b2fd14bc0917f",
+        "custom:orgEmail": "noreply@unit.no",
+        "given_name": "Orestis Stylianos",
+        "aud": "5lvkqvapt1bbbnalce5qu3agbi",
+        "custom:customerId": "https://api.dev.nva.aws.unit.no/customer/f54c8aa9-073a-46a1-8f7c-dde66c853934",
+        "token_use": "id",
+        "name": "Orestis Stylianos Gkorgkas",
+        "custom:commonName": "Orestis Stylianos Gkorgkas",
+        "family_name": "Gkorgkas",
+        "custom:affiliation": "[member, employee, staff]"
+      }
+    },
+    "resourcePath": "/",
+    "httpMethod": "GET",
+    "extendedRequestId": "Vy4NNHE7DoEF2bg=",
+    "requestTime": "10/Nov/2020:14:16:26 +0000",
+    "path": "/orestis-doi-request/",
+    "accountId": "884807050265",
+    "protocol": "HTTP/1.1",
+    "stage": "Prod",
+    "domainPrefix": "api",
+    "requestTimeEpoch": 1605017786881,
+    "requestId": "bdd5a322-0fee-48ba-bac2-eea8b2089376",
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "accountId": null,
+      "cognitoIdentityId": null,
+      "caller": null,
+      "sourceIp": "84.52.239.232",
+      "principalOrgId": null,
+      "accessKey": null,
+      "cognitoAuthenticationType": null,
+      "cognitoAuthenticationProvider": null,
+      "userArn": null,
+      "userAgent": "PostmanRuntime/7.26.8",
+      "user": null
+    },
+    "domainName": "api.dev.nva.aws.unit.no",
+    "apiId": "ngjdx59zya"
+  },
+  "resource": "/",
+  "httpMethod": "GET",
+  "multiValueHeaders": {
+    "Accept": [
+      "*/*"
+    ],
+    "Accept-Encoding": [
+      "gzip, deflate, br"
+    ],
+    "Authorization": [
+      "Bearer lsdkflskdjflksd"
+    ],
+    "Cache-Control": [
+      "no-cache"
+    ],
+    "CloudFront-Forwarded-Proto": [
+      "https"
+    ],
+    "CloudFront-Is-Desktop-Viewer": [
+      "true"
+    ],
+    "CloudFront-Is-Mobile-Viewer": [
+      "false"
+    ],
+    "CloudFront-Is-SmartTV-Viewer": [
+      "false"
+    ],
+    "CloudFront-Is-Tablet-Viewer": [
+      "false"
+    ],
+    "CloudFront-Viewer-Country": [
+      "NO"
+    ],
+    "Host": [
+      "api.dev.nva.aws.unit.no"
+    ],
+    "Postman-Token": [
+      "b563026a-0262-4c49-bb83-263cf294ff44"
+    ],
+    "User-Agent": [
+      "PostmanRuntime/7.26.8"
+    ],
+    "Via": [
+      "1.1 d4fd24ae65d4d2b97cfdea8d2f0c21a6.cloudfront.net (CloudFront)"
+    ],
+    "X-Amz-Cf-Id": [
+      "86TD9M28sySy5nTFahL6tVUf14XWOuCVJ5XFtfTJnxgBeU5VNO_1hw=="
+    ],
+    "X-Amzn-Trace-Id": [
+      "Root=1-5faaa0ba-6429d54a431451c07edfccb5"
+    ],
+    "X-Forwarded-For": [
+      "84.52.239.232, 70.132.12.91"
+    ],
+    "X-Forwarded-Port": [
+      "443"
+    ],
+    "X-Forwarded-Proto": [
+      "https"
+    ]
+  },
+  "multiValueQueryStringParameters": {
+    "role": [
+      "CURATOR"
+    ]
+  },
+  "stageVariables": null,
+  "body": null,
+  "isBase64Encoded": false
+}

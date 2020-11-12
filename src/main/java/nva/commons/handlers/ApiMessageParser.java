@@ -64,7 +64,7 @@ public class ApiMessageParser<T> {
         if (tclass.equals(String.class)) {
             return (T) body.asText();
         } else {
-            T request = null;
+            T request;
             // body should always be a string for a lambda function connected to the API
             if (body.isValueNode()) {
                 request = parseBody(mapper, body.asText(), tclass);
