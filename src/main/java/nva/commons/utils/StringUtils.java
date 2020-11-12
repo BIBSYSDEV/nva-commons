@@ -94,6 +94,7 @@ public final class StringUtils {
      *
      * @param string string to check
      * @return <code>true</code> if string is neither null or empty.
+     * @see #isNotBlank(String)
      */
     @Deprecated(forRemoval = true)
     public static boolean isNotNullOrBlank(String string) {
