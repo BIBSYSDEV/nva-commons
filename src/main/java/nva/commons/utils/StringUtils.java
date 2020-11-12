@@ -39,7 +39,7 @@ public final class StringUtils {
     }
 
     /**
-     * Checks if string input is blank.
+     * Checks if string input is blank or null.
      * @param input input string
      * @return <code>true</code> if blank.
      */
@@ -48,7 +48,8 @@ public final class StringUtils {
     }
 
     /**
-     * Checks if string input is empty.
+     * Checks if string input is empty or null.
+     *
      * @param input input string
      * @return <code>true</code> if empty.
      */
