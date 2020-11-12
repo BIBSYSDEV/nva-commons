@@ -38,8 +38,12 @@ public final class StringUtils {
         return input.replaceAll(WHITESPACES, EMPTY_STRING);
     }
 
-    public static boolean isEmpty(String input) {
+    public static boolean isBlank(String input) {
         return isNull(input) || input.isBlank();
+    }
+
+    public static boolean isEmpty(String input) {
+        return isNull(input) || input.isEmpty();
     }
 
     /**
@@ -54,6 +58,7 @@ public final class StringUtils {
 
     /**
      * Checks if string is neither null or empty.
+     *
      * @param string string to check
      * @return <code>true</code> if string is neither null or empty.
      */
@@ -62,11 +67,32 @@ public final class StringUtils {
     }
 
     /**
+     * Checks if string is neither null or blank.
+     *
+     * @param string string to check
+     * @return <code>true</code> if string is neither null or empty.
+     */
+    public static boolean isNotNullOrBlank(String string) {
+        return !isNullOrBlank(string);
+    }
+
+    /**
      * Checks if string is null or empty.
+     *
      * @param string string to check
      * @return <code>true</code> if string is null or empty.
      */
     public static boolean isNullOrEmpty(String string) {
         return isNull(string) || string.isEmpty();
+    }
+
+    /**
+     * Checks if string is null or blank.
+     *
+     * @param string string to check
+     * @return <code>true</code> if string is null or empty.
+     */
+    public static boolean isNullOrBlank(String string) {
+        return isNull(string) || string.isBlank();
     }
 }
