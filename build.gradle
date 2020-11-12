@@ -55,7 +55,7 @@ dependencies {
             }
         }
     }
-    api group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.24.0'
+    api group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.25.0'
     runtimeOnly group: 'com.amazonaws', name: 'aws-java-sdk-api-gateway', version: awsSdkVersion
     gradleLint.ignore('unused-dependency') {
         api group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
