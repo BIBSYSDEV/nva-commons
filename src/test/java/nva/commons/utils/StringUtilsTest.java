@@ -1,5 +1,6 @@
 package nva.commons.utils;
 
+import static java.util.Objects.isNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.internal.util.StringUtil;
 
 public class StringUtilsTest {
 
@@ -69,6 +71,13 @@ public class StringUtilsTest {
         assertThat(StringUtils.isBlank(input), is(equalTo(false)));
     }
 
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
+    @ValueSource(strings = {"abc", " a", "a "})
+    @DisplayName("isNotBlank should return true where string is neither null or blank.")
+    public void stringUtilIsNotBlank(String input) {
+        assertThat(StringUtils.isNotBlank(input), is(equalTo(true)));
+    }
+
     @Test
     @DisplayName("replaceWhitespacesWithSpace replaces all white spaces with space")
     public void replaceWhiteSpacesWithSpaceReturnsStringWithspaces() {
@@ -88,27 +97,46 @@ public class StringUtilsTest {
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
     @ValueSource(strings = {" ", "\t", "\n", "a"})
     @DisplayName("isNotNullOrEmpty should return true where string is neither null or empty")
+    @Deprecated(forRemoval = true)
     public void stringUtilIsNotNullOrEmpty(String input) {
         assertThat(StringUtils.isNotNullOrEmpty(input), is(equalTo(true)));
     }
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
+    @ValueSource(strings = {" ", "\t", "\n", "a"})
+    @DisplayName("isNotEmpty should return true where string is neither null or empty")
+    public void stringUtilIsNotEmpty(String input) {
+        assertThat(StringUtils.isNotEmpty(input), is(equalTo(true)));
+    }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
     @NullAndEmptySource
     @DisplayName("isNullOrEmpty should return true where string is null or empty.")
+    @Deprecated(forRemoval = true)
     public void stringUtilIsNullOrEmpty(String input) {
         assertThat(StringUtils.isNullOrEmpty(input), is(equalTo(true)));
     }
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
+    @NullAndEmptySource
+    @DisplayName("isEmpty should return true where string is null or empty.")
+    public void stringUtilIsEmpty(String input) {
+        assertThat(StringUtils.isEmpty(input), is(equalTo(true)));
+    }
+
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
     @ValueSource(strings = {"a", " a", "a "})
     @DisplayName("isNotNullOrBlank should return true where string is neither null or blank.")
+    @Deprecated(forRemoval = true)
     public void stringUtilIsNotNullOrBlank(String input) {
         assertThat(StringUtils.isNotNullOrBlank(input), is(equalTo(true)));
     }
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
+    @ValueSource(strings = {" ", "\t", "\n", ""})
     @NullAndEmptySource
-    @DisplayName("isNullOrEmpty should return true where string is null or empty.")
+    @DisplayName("isNullOrBlank should return true where string is null or blank.")
+    @Deprecated(forRemoval = true)
     public void stringUtilIsNullOrBlank(String input) {
         assertThat(StringUtils.isNullOrBlank(input), is(equalTo(true)));
     }
