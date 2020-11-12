@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 public class StringUtilsTest {
 
     private static final String EXPECTED_OUTPUT = "The quick brown fox jumps over the lazy dog";
+    private static final String PARAMETERIZED_TEST_NAME_FORMAT = "[{index}]  {displayName} with input: \"{0}\"";
 
     @Test
     @DisplayName("removeMultipleWhitespaces preserves single whitespaces")
@@ -56,13 +57,13 @@ public class StringUtilsTest {
         boolean result = StringUtils.isEmpty(null);
     }
 
-    @ParameterizedTest(name = "[{index}]  {displayName} with input: \"{0}\"")
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
     @ValueSource(strings = {"abc", "\t", "\n", " "})
     public void isEmptyReturnsFalseForANonEmptyString(String input) {
         assertThat(StringUtils.isEmpty(input), is(equalTo(false)));
     }
 
-    @ParameterizedTest(name = "[{index}]  {displayName} with input: \"{0}\"")
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
     @ValueSource(strings = {"abc", " a", "a "})
     public void isBlankReturnsFalseForANonBlankString(String input) {
         assertThat(StringUtils.isBlank(input), is(equalTo(false)));
@@ -77,35 +78,35 @@ public class StringUtilsTest {
         assertThat(actual, is(equalTo(expectedString)));
     }
 
-    @ParameterizedTest(name = "[{index}]  {displayName} with input: \"{0}\"")
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
     @NullAndEmptySource
     @DisplayName("isEmpty should return true for empty string")
     public void stringUtilReturnsTrueForANullString(String input) {
         assertThat(StringUtils.isEmpty(input), is(equalTo(true)));
     }
 
-    @ParameterizedTest(name = "[{index}]  {displayName} with input: \"{0}\"")
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
     @ValueSource(strings = {" ", "\t", "\n", "a"})
     @DisplayName("isNotNullOrEmpty should return true where string is neither null or empty")
     public void stringUtilIsNotNullOrEmpty(String input) {
         assertThat(StringUtils.isNotNullOrEmpty(input), is(equalTo(true)));
     }
 
-    @ParameterizedTest(name = "[{index}]  {displayName} with input: \"{0}\"")
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
     @NullAndEmptySource
     @DisplayName("isNullOrEmpty should return true where string is null or empty.")
     public void stringUtilIsNullOrEmpty(String input) {
         assertThat(StringUtils.isNullOrEmpty(input), is(equalTo(true)));
     }
 
-    @ParameterizedTest(name = "[{index}]  {displayName} with input: \"{0}\"")
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
     @ValueSource(strings = {"a", " a", "a "})
     @DisplayName("isNotNullOrBlank should return true where string is neither null or blank.")
     public void stringUtilIsNotNullOrBlank(String input) {
         assertThat(StringUtils.isNotNullOrBlank(input), is(equalTo(true)));
     }
 
-    @ParameterizedTest(name = "[{index}]  {displayName} with input: \"{0}\"")
+    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
     @NullAndEmptySource
     @DisplayName("isNullOrEmpty should return true where string is null or empty.")
     public void stringUtilIsNullOrBlank(String input) {
