@@ -33,32 +33,29 @@ public class RequestInfo {
     public static final String MISSING_FROM_PATH_PARAMETERS = "Missing from pathParameters: ";
     public static final String MISSING_FROM_REQUEST_CONTEXT = "Missing from requestContext: ";
 
-    public static final JsonPointer FEIDE_ID = JsonPointer.compile("/authorizer/claims/custom:feideId");
-    public static final JsonPointer CUSTOMER_ID = JsonPointer.compile("/authorizer/claims/custom:customerId");
-    public static final JsonPointer APPLICATION_ROLES = JsonPointer.compile(
-        "/authorizer/claims/custom:applicationRoles");
-    public static final JsonPointer ACCESS_RIGHTS = JsonPointer.compile(
-        "/authorizer/claims/custom:accessRights");
+    public static final String FEIDE_ID_CLAIM = "custom:feideId";
+    public static final String CUSTOMER_ID_CLAIM = "custom:customerId";
+    public static final String APPLICATION_ROLES_CLAIM = "custom:applicationRoles";
+    public static final String ACCESS_RIGHTS_CLAIM = "custom:accessRights";
     public static final String COMMA_DELIMITER = ",";
+    private static final String CLAIMS_PATH = "/authorizer/claims/";
+    public static final JsonPointer FEIDE_ID = claimToJsonPointer(FEIDE_ID_CLAIM);
+    public static final JsonPointer CUSTOMER_ID = claimToJsonPointer(CUSTOMER_ID_CLAIM);
+    public static final JsonPointer APPLICATION_ROLES = claimToJsonPointer(APPLICATION_ROLES_CLAIM);
+    public static final JsonPointer ACCESS_RIGHTS = claimToJsonPointer(ACCESS_RIGHTS_CLAIM);
 
     @JsonProperty(HEADERS_FIELD)
     private Map<String, String> headers;
-
     @JsonProperty(PATH_FIELD)
     private String path;
-
     @JsonProperty(PATH_PARAMETERS_FIELD)
     private Map<String, String> pathParameters;
-
     @JsonProperty(QUERY_STRING_PARAMETERS_FIELD)
     private Map<String, String> queryParameters;
-
     @JsonProperty(REQUEST_CONTEXT_FIELD)
     private JsonNode requestContext;
-
     @JsonProperty(METHOD_ARN_FIELD)
     private String methodArn;
-
     @JsonAnySetter
     private Map<String, Object> otherProperties;
 
@@ -210,6 +207,10 @@ public class RequestInfo {
             .map(accessRightsStr -> accessRightsStr.split(COMMA_DELIMITER))
             .flatMap(Arrays::stream)
             .collect(Collectors.toSet());
+    }
+
+    private static JsonPointer claimToJsonPointer(String claim) {
+        return JsonPointer.compile(CLAIMS_PATH + claim);
     }
 
     private <K, V> Map<K, V> nonNullMap(Map<K, V> map) {
