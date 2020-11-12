@@ -1,21 +1,28 @@
 package nva.commons.utils;
 
-import static java.util.Objects.isNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 
+import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.internal.util.StringUtil;
 
 public class StringUtilsTest {
 
     private static final String EXPECTED_OUTPUT = "The quick brown fox jumps over the lazy dog";
     private static final String PARAMETERIZED_TEST_NAME_FORMAT = "[{index}]  {displayName} with input: \"{0}\"";
+    public static final String EMPTY_STRING = "";
+    public static final String BLANK_STRING = " ";
+    public static final String TAB_STRING = "\t";
+    public static final String LINE_FEED = "\n";
+    public static final String END_OF_LINE = "\r\n";
+    public static final String NULL = null;
+    public static final String CARRIAGE_RETURN = "\r";
 
     @Test
     @DisplayName("removeMultipleWhitespaces preserves single whitespaces")
@@ -133,11 +140,20 @@ public class StringUtilsTest {
     }
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
-    @ValueSource(strings = {" ", "\t", "\n", ""})
-    @NullAndEmptySource
+    @MethodSource("blankStrings")
     @DisplayName("isNullOrBlank should return true where string is null or blank.")
     @Deprecated(forRemoval = true)
     public void stringUtilIsNullOrBlank(String input) {
         assertThat(StringUtils.isNullOrBlank(input), is(equalTo(true)));
+    }
+
+    static Stream<String> blankStrings() {
+        return Stream.of(EMPTY_STRING,
+            BLANK_STRING,
+            TAB_STRING,
+            CARRIAGE_RETURN,
+            LINE_FEED,
+            END_OF_LINE,
+            NULL);
     }
 }
