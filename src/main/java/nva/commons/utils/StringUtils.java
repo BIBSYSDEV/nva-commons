@@ -38,12 +38,26 @@ public final class StringUtils {
         return input.replaceAll(WHITESPACES, EMPTY_STRING);
     }
 
+    /**
+     * Checks if string input is blank.
+     * @param input input string
+     * @return <code>true</code> if blank.
+     * @see #isNullOrBlank(String) 
+     */
+    @Deprecated(forRemoval = true)
     public static boolean isBlank(String input) {
-        return isNull(input) || input.isBlank();
+        return isNullOrBlank(input);
     }
 
+    /**
+     * Checks if string input is empty.
+     * @param input input string
+     * @return <code>true</code> if empty.
+     * @see #isNullOrEmpty(String)
+     */
+    @Deprecated(forRemoval = true)
     public static boolean isEmpty(String input) {
-        return isNull(input) || input.isEmpty();
+        return isNullOrEmpty(input);
     }
 
     /**
