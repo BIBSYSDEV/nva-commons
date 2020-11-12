@@ -56,7 +56,7 @@ public class StringUtilsTest {
         boolean result = StringUtils.isEmpty(null);
     }
 
-    @ParameterizedTest(name = "[{index}] isEmpty should return false for a non empty string: \"{0}\"")
+    @ParameterizedTest(name = "[{index}]  {displayName} with input: \"{0}\"")
     @ValueSource(strings = {"abc", "\t", "\n", " "})
     public void isEmptyReturnsFalseForANonEmptyString(String input) {
         assertThat(StringUtils.isEmpty(input), is(equalTo(false)));
