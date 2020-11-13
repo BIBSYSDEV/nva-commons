@@ -1,8 +1,5 @@
-import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
-
 plugins {
     id 'java-library'
-    id 'com.github.johnrengelman.shadow' version '5.2.0'
     id 'jacoco'
     id 'checkstyle'
     id 'pmd'
@@ -36,7 +33,6 @@ def log4jVersion = "2.13.2"
 
 
 apply plugin: 'java-library'
-apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'jacoco'
 apply plugin: 'checkstyle'
 apply plugin: 'pmd'
@@ -125,12 +121,6 @@ checkstyle {
     configFile = rootProject.resources.text.fromFile('config/checkstyle/checkstyle.xml').asFile()
     showViolations = true
 }
-
-shadowJar {
-// Transformation for merging Log4j2Plugins.dat files.
-    transform(Log4j2PluginsCacheFileTransformer)
-}
-
 
 tasks.withType(Checkstyle) {
     reports {
