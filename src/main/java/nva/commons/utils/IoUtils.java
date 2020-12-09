@@ -18,6 +18,8 @@ import nva.commons.exceptions.ResourceNotFoundException;
 public final class IoUtils {
 
     public static final String LINE_SEPARATOR = System.lineSeparator();
+    public static final String REGEX = "\\\\";
+    public static final String REPLACEMENT = "/";
 
     private IoUtils() {
     }
@@ -29,10 +31,22 @@ public final class IoUtils {
      * @param path the Path to the resource.
      * @return an InputStream with the data.
      */
+    @Deprecated
     public static InputStream inputStreamFromResources(Path path) {
+        String pathString = path.toString().replaceAll(REGEX, REPLACEMENT);
+        return inputStreamFromResources(pathString);
+    }
+
+    /**
+     * Read resource file as an {@link InputStream}. The root folder for the resources is considered to be the folders
+     * src/main/resources and src/test/resources/, or any other standard reosources folder.
+     *
+     * @param path the path to the resource.
+     * @return an InputStream with the data.
+     */
+    public static InputStream inputStreamFromResources(String path) {
         try {
-            String pathString = path.toString();
-            InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(pathString);
+            InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
             requireResourceExists(stream);
             return stream;
         } catch (Exception e) {
