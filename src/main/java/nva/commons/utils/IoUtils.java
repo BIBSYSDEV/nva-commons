@@ -18,8 +18,8 @@ import nva.commons.exceptions.ResourceNotFoundException;
 public final class IoUtils {
 
     public static final String LINE_SEPARATOR = System.lineSeparator();
-    public static final String REGEX = "\\\\";
-    public static final String REPLACEMENT = "/";
+    public static final String WIN_PATH_SEPARATOR_REGEX = "\\\\";
+    public static final String PATH_SEPARATOR_FOR_RESOURCES = "/";
 
     private IoUtils() {
     }
@@ -33,7 +33,7 @@ public final class IoUtils {
      */
     @Deprecated
     public static InputStream inputStreamFromResources(Path path) {
-        String pathString = path.toString().replaceAll(REGEX, REPLACEMENT);
+        String pathString = replaceWinPathSeparatorsWithUniversalPathSeparators(path.toString());
         return inputStreamFromResources(pathString);
     }
 
@@ -52,6 +52,10 @@ public final class IoUtils {
         } catch (Exception e) {
             throw new ResourceNotFoundException(path, e);
         }
+    }
+
+    private static String replaceWinPathSeparatorsWithUniversalPathSeparators(String path) {
+        return path.replaceAll(WIN_PATH_SEPARATOR_REGEX, PATH_SEPARATOR_FOR_RESOURCES);
     }
 
     private static void requireResourceExists(InputStream stream) {
