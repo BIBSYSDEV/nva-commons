@@ -4,7 +4,7 @@ plugins {
     id 'base'
     id 'checkstyle'
     id 'pmd'
-    id 'nebula.lint' version '16.15.9'
+    id 'nebula.lint' version '16.16.0'
 }
 
 
