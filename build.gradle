@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'jacoco'
+    id 'base'
     id 'checkstyle'
     id 'pmd'
     id 'nebula.lint' version '16.15.9'
@@ -34,6 +35,7 @@ def log4jVersion = "2.13.2"
 
 apply plugin: 'java-library'
 apply plugin: 'jacoco'
+apply plugin: 'base'
 apply plugin: 'checkstyle'
 apply plugin: 'pmd'
 
@@ -157,4 +159,70 @@ jacocoTestCoverageVerification {
             }
         }
     }
+}
+
+
+def getProjectList() {
+    // These projects are considered. Replace with a different list as needed.
+    subprojects + project
+}
+
+task jacocoMerge(type: JacocoMerge) {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = 'Merge the JaCoCo data files from all subprojects into one'
+    project.afterEvaluate {  // do it at the end of the config phase to be sure all information is present
+        FileCollection execFiles = project.objects.fileCollection()   // an empty FileCollection
+        getProjectList().each { Project subproject ->
+            if (subproject.pluginManager.hasPlugin('jacoco')) {
+                def testTasks = subproject.tasks.withType(Test)
+                dependsOn(testTasks)   // ensure that .exec files are actually present
+
+                testTasks.each { Test task ->
+                    // The JacocoTaskExtension is the source of truth for the location of the .exec file.
+                    JacocoTaskExtension extension = task.getExtensions().findByType(JacocoTaskExtension.class)
+                    if (extension != null) {
+                        execFiles.from extension.getDestinationFile()
+                    }
+                }
+            }
+        }
+        executionData = execFiles
+    }
+    doFirst {
+        // .exec files might be missing if a project has no tests. Filter in execution phase.
+        executionData = executionData.filter { it.canRead() }
+    }
+}
+
+def getReportTasks(JacocoReport pRootTask) {
+    getProjectList().collect {
+        it.tasks.withType(JacocoReport).findAll { it != pRootTask }
+    }.flatten()
+}
+
+task jacocoRootReport(type: JacocoReport, dependsOn: tasks.jacocoMerge) {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = 'Generates an aggregate report from all subprojects'
+
+    logger.lifecycle 'Using aggregated file: ' + tasks.jacocoMerge.destinationFile
+    executionData.from tasks.jacocoMerge.destinationFile
+
+    project.afterEvaluate {
+        // The JacocoReport tasks are the source of truth for class files and sources.
+        def reportTasks = getReportTasks(tasks.jacocoRootReport)
+        classDirectories.from project.files({
+            reportTasks.collect {it.classDirectories}.findAll {it != null}
+        })
+        sourceDirectories.from project.files({
+            reportTasks.collect {it.sourceDirectories}.findAll {it != null}
+        })
+    }
+
+    reports {
+        xml.enabled true
+    }
+}
+
+build {
+    dependsOn jacocoRootReport
 }
