@@ -28,6 +28,8 @@ public class JsonUtilsTest {
     public static final String JSON_KEY = "keyInsideObject";
     public static final JsonNode JSON_OBJECT_WITH_VALUE = sampleJsonObjectWithSomeValue();
     public static final JsonNode JSON_OBJECT_WITHOUT_VALUE = sampleJsonObjectWithoutValue();
+    public static final String UPPER_CASE_ENUM_JSON = "\"ANOTHER_ENUM\"";
+    public static final String MIXED_CASE_ENUM_JSON = "\"SomE_enUm\"";
 
     @DisplayName("jsonParser serializes empty string as null")
     @Test
@@ -72,6 +74,18 @@ public class JsonUtilsTest {
         assertThat(sut.getTest(), isPresentAnd(containsString(SAMPLE_VALUE)));
     }
 
+    @Test
+    public void canParseEnumIgnoringCase() throws JsonProcessingException {
+        TestEnum testEnum = JsonUtils.objectMapper.readValue(MIXED_CASE_ENUM_JSON, TestEnum.class);
+        assertThat(testEnum, is(equalTo(TestEnum.SOME_ENUM)));
+    }
+
+    @Test
+    public void writeEnumAsUpperCaseJsonString() throws JsonProcessingException {
+        String json = JsonUtils.objectMapper.writeValueAsString(TestEnum.ANOTHER_ENUM);
+        assertThat(json, is(equalTo(UPPER_CASE_ENUM_JSON)));
+    }
+
     private TestObjectForOptionals objectWithoutValue() {
         return new TestObjectForOptionals(null);
     }
@@ -95,6 +109,11 @@ public class JsonUtilsTest {
 
     private static JsonNode sampleJsonObjectWithoutValue() {
         return JsonUtils.objectMapper.createObjectNode();
+    }
+
+    private  enum TestEnum {
+        SOME_ENUM,
+        ANOTHER_ENUM;
     }
 
     private static class TestObjectForOptionals {
