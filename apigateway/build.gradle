@@ -1,0 +1,11 @@
+dependencies{
+    compileOnly project(":commons")
+    testImplementation project(":commons")
+
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
+    runtimeOnly group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: project.ext.jacksonVersion
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
+}
