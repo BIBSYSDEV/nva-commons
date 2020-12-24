@@ -11,7 +11,6 @@ import nva.commons.apigateway.exceptions.ApiIoException;
 import nva.commons.commons.JacocoGenerated;
 import nva.commons.commons.JsonUtils;
 
-
 /**
  * Not intended for use outside the {@link RestRequestHandler}. Class for parsing a message from ApiGateway.
  *

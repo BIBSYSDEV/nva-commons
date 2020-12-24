@@ -24,7 +24,7 @@ public final class LogUtils {
     public static final String PATTERN_ATTRIBUTE_NAME = "pattern";
     public static final String LOG_CLASS_NAME_AND_MESSAGE = "%c{1.}:  %msg";
     public static final String ROOT_NULL_APPENDER = "NullAppender";
-    public static final String PACKAGES_WITH_HANDLERS = "nva.commons.utils.log";
+    public static final String PACKAGES_WITH_APPENDERS = "nva.commons.commons";
 
     private LogUtils() {
     }
@@ -94,7 +94,7 @@ public final class LogUtils {
     }
 
     private static void enableLog4jToFindOurAppender(ConfigurationBuilder<BuiltConfiguration> builder) {
-        builder.setPackages(PACKAGES_WITH_HANDLERS);
+        builder.setPackages(PACKAGES_WITH_APPENDERS);
     }
 
     private static ConfigurationBuilder<BuiltConfiguration> avoidStatusMessagesWhileSettingUpConfiguration(

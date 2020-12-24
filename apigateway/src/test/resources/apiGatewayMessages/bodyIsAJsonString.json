@@ -1,0 +1,4 @@
+{
+  "httpMethod": "GET",
+  "body": "{\"field1\": \"value1\", \"field2\": \"value2\", \"type\": \"RequestBody\"}"
+}

@@ -4,6 +4,7 @@ import static java.util.Objects.isNull;
 import static nva.commons.commons.ExceptionUtils.stackTraceInSingleLine;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * @see <a href="https://github.com/awslabs/aws-serverless-java-container">aws-serverless-container</a> for
  *     alternative solutions.
  */
-public abstract class RestRequestHandler<I, O>  {
+public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     protected final Environment environment;
     private final transient Class<I> iclass;
@@ -50,6 +51,7 @@ public abstract class RestRequestHandler<I, O>  {
         this.logger = logger;
     }
 
+    @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
         I inputObject = null;
         try {
@@ -121,6 +123,7 @@ public abstract class RestRequestHandler<I, O>  {
      * @return an output object of class O
      * @throws IOException        when processing fails
      * @throws URISyntaxException when processing fails
+     * @throws ApiGatewayException when some predictable error happens.
      */
     protected O processInput(I input, String apiGatewayInputString, Context context) throws ApiGatewayException {
         RequestInfo requestInfo = inputParser.getRequestInfo(apiGatewayInputString);
