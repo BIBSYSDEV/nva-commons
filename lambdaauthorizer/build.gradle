@@ -1,0 +1,14 @@
+dependencies {
+    compileOnly project(":commons")
+    compileOnly project(":apigateway")
+
+    testImplementation project(":commons")
+    testImplementation project(":apigateway")
+
+    compileOnly(group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion) {
+        because "PMD needs it"
+    }
+    compileOnly(group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion) {
+        because "PMD needs it"
+    }
+}
