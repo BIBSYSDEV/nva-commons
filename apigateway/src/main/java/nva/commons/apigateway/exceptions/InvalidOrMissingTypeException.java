@@ -1,7 +1,7 @@
 package nva.commons.apigateway.exceptions;
 
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
-import org.apache.http.HttpStatus;
+import java.net.HttpURLConnection;
 
 public class InvalidOrMissingTypeException extends ApiGatewayException {
 
@@ -13,6 +13,6 @@ public class InvalidOrMissingTypeException extends ApiGatewayException {
 
     @Override
     protected Integer statusCode() {
-        return HttpStatus.SC_BAD_REQUEST;
+        return HttpURLConnection.HTTP_BAD_REQUEST;
     }
 }

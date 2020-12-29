@@ -1,10 +1,10 @@
 package nva.commons.apigateway.exceptions;
 
-import org.apache.http.HttpStatus;
+import java.net.HttpURLConnection;
 
 public class TestException extends ApiGatewayException {
 
-    public static final Integer ERROR_STATUS_CODE = HttpStatus.SC_NOT_FOUND;
+    public static final Integer ERROR_STATUS_CODE = HttpURLConnection.HTTP_NOT_FOUND;
 
     public TestException(String message) {
         super(message);

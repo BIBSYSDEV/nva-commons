@@ -6,6 +6,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -68,7 +69,7 @@ public class GatewayResponseTest {
 
     private GatewayResponse<RequestBody> sampleGatewayResponse()
         throws GatewayResponseSerializingException {
-        return new GatewayResponse<>(sampleRequestBody(), sampleHeaders(), HttpStatus.SC_OK);
+        return new GatewayResponse<>(sampleRequestBody(), sampleHeaders(), HttpURLConnection.HTTP_OK);
     }
 
     private Map<String, String> sampleHeaders() {

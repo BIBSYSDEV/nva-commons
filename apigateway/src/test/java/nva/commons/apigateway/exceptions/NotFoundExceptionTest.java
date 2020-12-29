@@ -6,6 +6,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +44,7 @@ public class NotFoundExceptionTest {
     @Test
     public void notFoundExceptionReturnsNotFoundStatusCode() {
         NotFoundException exception = new NotFoundException(SOME_MESSAGE);
-        assertThat(exception.getStatusCode(), is(equalTo(HttpStatus.SC_NOT_FOUND)));
+        assertThat(exception.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_NOT_FOUND)));
     }
 
     private ByteArrayOutputStream getStackTraceMessage(NotFoundException exception) {

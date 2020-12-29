@@ -3,3 +3,5 @@ include 'apigateway'
 include 'commons'
 include 'secrets'
 include 'doi'
+include 'lambdaauthorizer'
+
