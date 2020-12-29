@@ -1,6 +1,6 @@
 package nva.commons.apigateway.exceptions;
 
-import org.apache.http.HttpStatus;
+import java.net.HttpURLConnection;
 
 public class LoggerNotSetException extends ApiGatewayException {
 
@@ -17,6 +17,6 @@ public class LoggerNotSetException extends ApiGatewayException {
 
     @Override
     protected Integer statusCode() {
-        return HttpStatus.SC_INTERNAL_SERVER_ERROR;
+        return HttpURLConnection.HTTP_INTERNAL_ERROR;
     }
 }

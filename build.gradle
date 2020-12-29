@@ -24,7 +24,6 @@ project.ext {
     log4jVersion = "2.13.2"
 }
 
-
 allprojects {
     apply plugin: 'java-library'
     apply plugin: 'jacoco'
@@ -47,60 +46,6 @@ allprojects {
         awsSdkVersion = "1.11.871"
         jupiterVersion = "5.7.0"
         log4jVersion = "2.13.2"
-    }
-
-    dependencies {
-        implementation group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
-
-        implementation group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: project.ext.awsSdkVersion
-        implementation group: 'com.amazonaws', name: 'aws-java-sdk-secretsmanager', version: project.ext.awsSdkVersion
-        runtimeOnly group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '3.6.0'
-        runtimeOnly group: 'com.amazonaws', name: 'aws-java-sdk-lambda', version: project.ext.awsSdkVersion
-        implementation('org.zalando:problem:0.25.0') {
-            dependencies {
-                compileOnly(group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.0') {
-                    because 'Dependency has maven scope provided'
-                }
-            }
-        }
-        api group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.25.0'
-        runtimeOnly group: 'com.amazonaws', name: 'aws-java-sdk-api-gateway', version: project.ext.awsSdkVersion
-        gradleLint.ignore('unused-dependency') {
-            api group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
-            api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
-            api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion
-            api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
-            runtimeOnly group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: project.ext.jacksonVersion
-            api group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
-        }
-        implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.11'
-        implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
-
-        testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.14'
-
-        testImplementation(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
-            because 'Scope provided in junit-jupiter'
-        }
-
-        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: project.ext.jupiterVersion
-        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: project.ext.jupiterVersion
-        testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: project.ext.jupiterVersion
-
-
-        testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.6.0'
-        testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
-        testImplementation group: 'com.github.npathai', name: 'hamcrest-optional', version: '2.0.0'
-        // If one is using nva-commons, api allows the re-usage of these packages.
-
-        gradleLint.ignore('unused-dependency') {
-            api group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.1'
-            api group: 'org.apache.logging.log4j', name: 'log4j-core', version: project.ext.log4jVersion
-            api group: 'org.apache.logging.log4j', name: 'log4j-api', version: project.ext.log4jVersion
-            api group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: project.ext.log4jVersion
-            api(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
-                because 'Because we use the library directly to define loggers in our code'
-            }
-        }
     }
 
     test {
@@ -165,6 +110,74 @@ allprojects {
             }
         }
     }
+
+
+    dependencies {
+        // This method contains the logger class for AWS Lambda functions.
+        api group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.1'
+
+        implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: project.ext.log4jVersion
+        implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: project.ext.log4jVersion
+        implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: project.ext.log4jVersion
+        implementation(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
+            because 'Because we use the library directly to define loggers in our code'
+        }
+
+        implementation group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.25.0'
+
+
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: project.ext.jupiterVersion
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: project.ext.jupiterVersion
+        testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: project.ext.jupiterVersion
+
+        testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.6.0'
+        testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
+        testImplementation group: 'com.github.npathai', name: 'hamcrest-optional', version: '2.0.0'
+
+        testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.14'
+
+        testImplementation(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
+            because 'Scope provided in junit-jupiter'
+        }
+
+    }
+}
+
+
+dependencies {
+
+    implementation group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: project.ext.awsSdkVersion
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-secretsmanager', version: project.ext.awsSdkVersion
+    runtimeOnly group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '3.6.0'
+    runtimeOnly group: 'com.amazonaws', name: 'aws-java-sdk-lambda', version: project.ext.awsSdkVersion
+    implementation('org.zalando:problem:0.25.0') {
+        dependencies {
+            compileOnly(group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.0') {
+                because 'Dependency has maven scope provided'
+            }
+        }
+    }
+    api group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.25.0'
+    runtimeOnly group: 'com.amazonaws', name: 'aws-java-sdk-api-gateway', version: project.ext.awsSdkVersion
+    gradleLint.ignore('unused-dependency') {
+        api group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
+        api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
+        api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion
+        api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
+        runtimeOnly group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: project.ext.jacksonVersion
+        api group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
+    }
+    implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.11'
+    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
+
+    testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.14'
+
+    testImplementation(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
+        because 'Scope provided in junit-jupiter'
+    }
+
+
 }
 
 

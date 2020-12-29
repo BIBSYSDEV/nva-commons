@@ -1,6 +1,6 @@
 package nva.commons.apigateway.exceptions;
 
-import org.apache.http.HttpStatus;
+import java.net.HttpURLConnection;
 
 public class NotFoundException extends ApiGatewayException {
 
@@ -18,6 +18,6 @@ public class NotFoundException extends ApiGatewayException {
 
     @Override
     protected Integer statusCode() {
-        return HttpStatus.SC_NOT_FOUND;
+        return HttpURLConnection.HTTP_NOT_FOUND;
     }
 }

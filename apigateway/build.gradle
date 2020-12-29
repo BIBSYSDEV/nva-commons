@@ -2,6 +2,11 @@ dependencies{
     compileOnly project(":commons")
     testImplementation project(":commons")
 
+    compileOnly group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: project.ext.awsSdkVersion
+    testImplementation group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: project.ext.awsSdkVersion
+
+
+
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion

@@ -1,6 +1,6 @@
 package nva.commons.apigateway.exceptions;
 
-import org.apache.http.HttpStatus;
+import java.net.HttpURLConnection;
 
 public class ConflictException extends ApiGatewayException {
 
@@ -18,6 +18,6 @@ public class ConflictException extends ApiGatewayException {
 
     @Override
     protected Integer statusCode() {
-        return HttpStatus.SC_CONFLICT;
+        return HttpURLConnection.HTTP_CONFLICT;
     }
 }

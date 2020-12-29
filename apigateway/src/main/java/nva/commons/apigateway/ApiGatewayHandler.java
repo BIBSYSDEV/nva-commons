@@ -1,12 +1,14 @@
 package nva.commons.apigateway;
 
 
+import static nva.commons.apigateway.ContentTypes.APPLICATION_JSON;
 import static nva.commons.commons.JsonUtils.objectMapper;
 import com.amazonaws.services.lambda.runtime.Context;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -19,8 +21,8 @@ import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
 import nva.commons.apigateway.exceptions.LoggerNotSetException;
 import nva.commons.commons.Environment;
 import nva.commons.commons.JsonUtils;
-import org.apache.http.HttpStatus;
-import org.apache.http.entity.ContentType;
+
+
 import org.slf4j.Logger;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
@@ -38,6 +40,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
 
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String APPLICATION_PROBLEM_JSON = "application/problem+json";
+
 
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
 
@@ -128,7 +131,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         try {
             RuntimeException runtimeException =
                 new RuntimeException(MESSAGE_FOR_RUNTIME_EXCEPTIONS_HIDING_IMPLEMENTATION_DETAILS_TO_API_CLIENTS);
-            writeFailure(runtimeException, HttpStatus.SC_INTERNAL_SERVER_ERROR, requestId);
+            writeFailure(runtimeException, HttpURLConnection.HTTP_INTERNAL_ERROR, requestId);
         } catch (GatewayResponseSerializingException e) {
             throw new ApiGatewayUncheckedException(e);
         }
@@ -177,7 +180,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     protected Map<String, String> defaultHeaders() {
         Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
-        headers.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+        headers.put(CONTENT_TYPE, APPLICATION_JSON);
         return headers;
     }
 

@@ -1,6 +1,6 @@
 package nva.commons.apigateway.exceptions;
 
-import org.apache.http.HttpStatus;
+import java.net.HttpURLConnection;
 
 public class ForbiddenException extends ApiGatewayException {
 
@@ -12,6 +12,6 @@ public class ForbiddenException extends ApiGatewayException {
 
     @Override
     protected Integer statusCode() {
-        return HttpStatus.SC_FORBIDDEN;
+        return HttpURLConnection.HTTP_FORBIDDEN;
     }
 }

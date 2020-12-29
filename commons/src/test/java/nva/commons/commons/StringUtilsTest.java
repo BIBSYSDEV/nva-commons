@@ -150,15 +150,13 @@ public class StringUtilsTest {
         assertThat(StringUtils.isNullOrBlank(input), is(equalTo(true)));
     }
 
-
     @Test
     public void stringToStreamReturnsAnInputStreamWithTheStringContents() throws IOException {
         String sample = "sample string";
         InputStream inputStream = IoUtils.stringToStream(sample);
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        String actualContent =reader.readLine();
-        assertThat(actualContent,is(equalTo(sample)));
-
+        String actualContent = reader.readLine();
+        assertThat(actualContent, is(equalTo(sample)));
     }
 
     static Stream<String> blankStrings() {
