@@ -37,7 +37,7 @@ import nva.commons.apigateway.testutils.Handler;
 import nva.commons.apigateway.testutils.RequestBody;
 import nva.commons.commons.Environment;
 import nva.commons.commons.IoUtils;
-import nva.commons.commons.LogUtils;
+import nva.commons.commons.logutils.LogUtils;
 import nva.commons.commons.TestAppender;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;

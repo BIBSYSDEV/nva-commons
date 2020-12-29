@@ -16,7 +16,7 @@ import nva.commons.apigateway.exceptions.InvalidOrMissingTypeException;
 import nva.commons.apigateway.exceptions.LoggerNotSetException;
 import nva.commons.commons.Environment;
 import nva.commons.commons.IoUtils;
-import nva.commons.commons.LogUtils;
+import nva.commons.commons.logutils.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

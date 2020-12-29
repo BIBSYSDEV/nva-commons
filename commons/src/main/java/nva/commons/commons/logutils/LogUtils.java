@@ -1,6 +1,7 @@
-package nva.commons.commons;
+package nva.commons.commons.logutils;
 
 import static java.util.Objects.nonNull;
+import nva.commons.commons.TestAppender;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Appender;
