@@ -2,9 +2,11 @@ package nva.commons.commons;
 
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isPresentAnd;
+import static nva.commons.commons.JsonUtils.objectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -12,9 +14,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.nio.file.Path;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.Date;
 import java.util.Optional;
-import nva.commons.commons.IoUtils;
-import nva.commons.commons.JsonUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +46,7 @@ public class JsonUtilsTest {
 
     private void readFieldFromJson(String fileName) throws JsonProcessingException {
         String json = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, fileName));
-        SamplePojo samplePojo = JsonUtils.objectMapper.readValue(json, SamplePojo.class);
+        SamplePojo samplePojo = objectMapper.readValue(json, SamplePojo.class);
         assertThat(samplePojo.getField2(), is(nullValue()));
     }
 
@@ -74,14 +77,26 @@ public class JsonUtilsTest {
 
     @Test
     public void canParseEnumIgnoringCase() throws JsonProcessingException {
-        TestEnum testEnum = JsonUtils.objectMapper.readValue(MIXED_CASE_ENUM_JSON, TestEnum.class);
+        TestEnum testEnum = objectMapper.readValue(MIXED_CASE_ENUM_JSON, TestEnum.class);
         assertThat(testEnum, is(equalTo(TestEnum.SOME_ENUM)));
     }
 
     @Test
     public void writeEnumAsUpperCaseJsonString() throws JsonProcessingException {
-        String json = JsonUtils.objectMapper.writeValueAsString(TestEnum.ANOTHER_ENUM);
+        String json = objectMapper.writeValueAsString(TestEnum.ANOTHER_ENUM);
         assertThat(json, is(equalTo(UPPER_CASE_ENUM_JSON)));
+    }
+
+    @Test
+    public void objectMapperSerializesInstantAsIsoStrings() throws JsonProcessingException {
+
+        String instantString = "2020-12-29T19:23:09.357248Z";
+
+        Instant timestamp = Instant.parse(instantString);
+        String jsonNow = objectMapper.writeValueAsString(timestamp);
+
+        String expectedString = "\"" + instantString + "\"";
+        assertThat(jsonNow, is(equalTo(expectedString)));
     }
 
     private TestObjectForOptionals objectWithoutValue() {
@@ -89,7 +104,7 @@ public class JsonUtilsTest {
     }
 
     private TestObjectForOptionals deserialize(JsonNode jsonObjectWithoutValue) {
-        return JsonUtils.objectMapper.convertValue(jsonObjectWithoutValue,
+        return objectMapper.convertValue(jsonObjectWithoutValue,
             TestObjectForOptionals.class);
     }
 
@@ -98,18 +113,18 @@ public class JsonUtilsTest {
     }
 
     private <T> JsonNode serialize(T objectWithNullValue) {
-        return JsonUtils.objectMapper.convertValue(objectWithNullValue, JsonNode.class);
+        return objectMapper.convertValue(objectWithNullValue, JsonNode.class);
     }
 
     private static JsonNode sampleJsonObjectWithSomeValue() {
-        return JsonUtils.objectMapper.createObjectNode().put(JSON_KEY, SAMPLE_VALUE);
+        return objectMapper.createObjectNode().put(JSON_KEY, SAMPLE_VALUE);
     }
 
     private static JsonNode sampleJsonObjectWithoutValue() {
-        return JsonUtils.objectMapper.createObjectNode();
+        return objectMapper.createObjectNode();
     }
 
-    private  enum TestEnum {
+    private enum TestEnum {
         SOME_ENUM,
         ANOTHER_ENUM;
     }

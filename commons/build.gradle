@@ -1,18 +1,19 @@
 dependencies {
 
+    // all dependencies are "implementation" because these packages are used by every lambda function.
 
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: project.ext.log4jVersion
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: project.ext.log4jVersion
     implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: project.ext.log4jVersion
+
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
         because 'Because we use the library directly to define loggers in our code'
     }
 
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
-    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
-    runtimeOnly group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: project.ext.jacksonVersion
+    implementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: project.ext.jacksonVersion
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
 
 
