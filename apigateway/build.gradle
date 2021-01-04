@@ -2,6 +2,14 @@ dependencies{
     compileOnly project(":commons")
     testImplementation project(":commons")
 
+    api (group: 'com.amazonaws',name: 'aws-lambda-java-core', version:'1.2.1'){
+        exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
+        exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
+        exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
+        exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jsr310"
+        exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jdk8"
+    }
+
     compileOnly (group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: project.ext.awsSdkVersion){
         exclude  group:"com.fasterxml.jackson.core", module: "jackson-databind"
         exclude  group:"com.fasterxml.jackson.dataformat", module: "jackson-dataformat-cbor"
@@ -9,17 +17,5 @@ dependencies{
     }
     testImplementation (group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: project.ext.awsSdkVersion)
 
-    compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
-    compileOnly group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
-    compileOnly group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion
-    compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
-    compileOnly group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: project.ext.jacksonVersion
-    compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
 
-    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
-    testImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
-    testImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion
-    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
-    testImplementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: project.ext.jacksonVersion
-    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
 }

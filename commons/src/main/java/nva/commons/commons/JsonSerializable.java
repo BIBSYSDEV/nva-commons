@@ -1,6 +1,4 @@
-package nva.commons.json;
-
-import nva.commons.utils.JsonUtils;
+package nva.commons.commons;
 
 public interface JsonSerializable {
 
