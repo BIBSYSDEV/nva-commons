@@ -1,4 +1,4 @@
-qinclude 'apigateway'
+include 'apigateway'
 include 'commons'
 include 'secrets'
 include 'doi'
