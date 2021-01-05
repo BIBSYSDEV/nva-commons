@@ -8,6 +8,7 @@ dependencies{
         exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
         exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jsr310"
         exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jdk8"
+        exclude group: "org.apache.logging.log4j", module: "log4j-core:2.8.2"
     }
 
     compileOnly (group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: project.ext.awsSdkVersion){
