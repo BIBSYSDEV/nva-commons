@@ -5,11 +5,8 @@ plugins {
     id 'checkstyle'
     id 'pmd'
     id 'nebula.lint' version '16.15.9'
+    id 'maven'
 }
-
-
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
 
 
 wrapper {
@@ -25,6 +22,10 @@ allprojects {
     apply plugin: 'base'
     apply plugin: 'checkstyle'
     apply plugin: 'pmd'
+    apply plugin: 'maven'
+
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 
     repositories {
         jcenter()
@@ -34,6 +35,7 @@ allprojects {
     gradleLint {
         rules = ['unused-dependency']
     }
+
     project.ext {
         jacksonVersion = "2.12.0"
         awsSdkVersion = "1.11.931"
@@ -54,9 +56,7 @@ allprojects {
         envVariables.put("EXISTING_EMPTY_VARIABLE", "  ")
         environment(envVariables)
     }
-}
 
-subprojects {
 
     pmd {
         ruleSetConfig = rootProject.resources.text.fromFile('config/pmd/ruleset.xml')
@@ -154,47 +154,25 @@ subprojects {
         testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
         testImplementation group: 'com.github.npathai', name: 'hamcrest-optional', version: '2.0.0'
         testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.14'
+    }
 
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        archiveClassifier = 'sources'
+        from sourceSets.main.allSource
+    }
 
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        archiveClassifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    artifacts {
+        archives sourcesJar
+        archives javadocJar
     }
 }
 
 
-//dependencies {
-//
-//    implementation group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
-//    implementation group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: project.ext.awsSdkVersion
-//    implementation group: 'com.amazonaws', name: 'aws-java-sdk-secretsmanager', version: project.ext.awsSdkVersion
-//    runtimeOnly group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '3.6.0'
-//    runtimeOnly group: 'com.amazonaws', name: 'aws-java-sdk-lambda', version: project.ext.awsSdkVersion
-//    implementation('org.zalando:problem:0.25.0') {
-//        dependencies {
-//            compileOnly(group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.0') {
-//                because 'Dependency has maven scope provided'
-//            }
-//        }
-//    }
-//    api group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.25.0'
-//    runtimeOnly group: 'com.amazonaws', name: 'aws-java-sdk-api-gateway', version: project.ext.awsSdkVersion
-//    gradleLint.ignore('unused-dependency') {
-//        api group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
-//        api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
-//        api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion
-//        api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
-//        runtimeOnly group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: project.ext.jacksonVersion
-//        api group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
-//    }
-//    implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.11'
-//    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
-//
-//    testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.14'
-//
-//    testImplementation(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
-//        because 'Scope provided in junit-jupiter'
-//    }
-//
-//
-//}
 
 
 def getProjectList() {
