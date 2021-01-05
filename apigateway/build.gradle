@@ -2,7 +2,7 @@ dependencies{
     compileOnly project(":commons")
     testImplementation project(":commons")
 
-    implementation (group: 'com.amazonaws',name: 'aws-lambda-java-core', version:'1.2.1'){
+    api (group: 'com.amazonaws',name: 'aws-lambda-java-core', version:'1.2.1'){
         exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
         exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
         exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"

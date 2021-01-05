@@ -17,7 +17,7 @@ wrapper {
 
 
 allprojects {
-    apply plugin: 'java'
+    apply plugin: 'java-library'
     apply plugin: 'jacoco'
     apply plugin: 'base'
     apply plugin: 'checkstyle'
@@ -105,6 +105,7 @@ subprojects{
 
     apply plugin: 'maven'
     dependencies {
+
         // This method contains the logger class for AWS Lambda functions.
         implementation (group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.1'){
             exclude group: "org.apache.logging.log4j", module: "log4j-core:2.8.2"
