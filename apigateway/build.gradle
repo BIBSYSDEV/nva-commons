@@ -2,14 +2,16 @@ dependencies{
     compileOnly project(":commons")
     testImplementation project(":commons")
 
-    api (group: 'com.amazonaws',name: 'aws-lambda-java-core', version:'1.2.1'){
-        exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
-        exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
-        exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
-        exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jsr310"
-        exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jdk8"
-        exclude group: "org.apache.logging.log4j", module: "log4j-core:2.8.2"
+
+
+    api group: 'org.apache.logging.log4j', name: 'log4j-core', version: project.ext.log4jVersion
+    api group: 'org.apache.logging.log4j', name: 'log4j-api', version: project.ext.log4jVersion
+    api group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: project.ext.log4jVersion
+    api(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
+        because 'Because we use the library directly to define loggers in our code'
     }
+
+
 
     compileOnly (group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: project.ext.awsSdkVersion){
         exclude  group:"com.fasterxml.jackson.core", module: "jackson-databind"
