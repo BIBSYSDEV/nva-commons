@@ -1,5 +1,4 @@
-rootProject.name = 'nva-commons'
-include 'apigateway'
+qinclude 'apigateway'
 include 'commons'
 include 'secrets'
 include 'doi'
