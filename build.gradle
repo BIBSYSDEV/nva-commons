@@ -37,7 +37,7 @@ allprojects {
     }
 
     project.ext {
-        jacksonVersion = "2.12.0"
+        jacksonVersion = "2.10.3"
         awsSdkVersion = "1.11.931"
         jupiterVersion = "5.7.0"
         log4jVersion = "2.13.2"
@@ -128,7 +128,6 @@ subprojects{
             exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
             exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jsr310"
             exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jdk8"
-
         }
 
         api group: 'org.apache.logging.log4j', name: 'log4j-core', version: project.ext.log4jVersion
