@@ -18,7 +18,6 @@ import nva.commons.commons.Environment;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * Abstract class for implementing a Request Authorizer.
  * Implementation is based on the AWS examples found in the following page :
  * {@see <a href=https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html>}.
