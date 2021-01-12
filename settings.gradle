@@ -1,6 +1,6 @@
 rootProject.name = 'nva-commons'
 include 'apigateway'
-include 'essentials'
+include 'core'
 include 'secrets'
 include 'doi'
 include 'lambdaauthorizer'

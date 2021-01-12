@@ -1,4 +1,4 @@
 dependencies {
-    compileOnly project(":essentials")
-    testImplementation project(":essentials")
+    compileOnly project(":core")
+    testImplementation project(":core")
 }

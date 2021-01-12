@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
-import nva.commons.essentials.JsonUtils;
+import nva.commons.commons.JsonUtils;
 
 public class AuthorizerResponse {
 

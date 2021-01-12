@@ -2,7 +2,7 @@ package no.unit.commons.apigateway.authentication;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
-import nva.commons.essentials.JacocoGenerated;
+import nva.commons.commons.JacocoGenerated;
 
 public class StatementElement {
 

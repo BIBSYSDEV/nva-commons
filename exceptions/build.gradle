@@ -2,8 +2,8 @@ dependencies {
     compileOnly project (":singletoncollector")
     testImplementation project (":singletoncollector")
 
-    compileOnly project (":essentials")
-    testImplementation project (":essentials")
+    compileOnly project (":core")
+    testImplementation project (":core")
 
     //because "PMD needs it"
     compileOnly project (":attempt")

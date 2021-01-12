@@ -1,4 +1,4 @@
-package nva.commons.essentials;
+package nva.commons.commons;
 
 import static java.util.Objects.isNull;
 

@@ -1,8 +1,8 @@
-package nva.commons.essentials;
+package nva.commons.commons;
 
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isPresentAnd;
-import static nva.commons.essentials.JsonUtils.objectMapper;
+import static nva.commons.commons.JsonUtils.objectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;

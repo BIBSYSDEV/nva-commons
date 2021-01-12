@@ -18,8 +18,8 @@ import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.apigateway.HttpHeaders;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ForbiddenException;
-import nva.commons.essentials.Environment;
-import nva.commons.essentials.JsonUtils;
+import nva.commons.commons.Environment;
+import nva.commons.commons.JsonUtils;
 
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;

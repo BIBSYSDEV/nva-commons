@@ -1,4 +1,4 @@
-package nva.commons.essentials;
+package nva.commons.commons;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;

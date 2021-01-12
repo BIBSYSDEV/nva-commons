@@ -1,4 +1,4 @@
-package nva.commons.essentials;
+package nva.commons.commons;
 
 import java.util.Optional;
 

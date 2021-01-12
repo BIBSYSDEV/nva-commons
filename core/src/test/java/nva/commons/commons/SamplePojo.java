@@ -1,4 +1,4 @@
-package nva.commons.essentials;
+package nva.commons.commons;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
