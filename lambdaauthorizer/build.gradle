@@ -1,5 +1,5 @@
 dependencies {
-    compileOnly project(":commons")
+    compileOnly project(":essentials")
     compileOnly project(":apigateway")
     compileOnly project(":attempt")
     compileOnly project(":logutils")
@@ -7,7 +7,7 @@ dependencies {
     compileOnly project(":exceptions")
     compileOnly project(":singletoncollector")
 
-    testImplementation project(":commons")
+    testImplementation project(":essentials")
     testImplementation project(":apigateway")
     testImplementation  project(":attempt")
     testImplementation project(":logutils")

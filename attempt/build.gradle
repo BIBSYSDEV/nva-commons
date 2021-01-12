@@ -1,4 +1,4 @@
 dependencies {
-    compileOnly project(":commons")
-    testImplementation project(":commons")
+    compileOnly project(":essentials")
+    testImplementation project(":essentials")
 }

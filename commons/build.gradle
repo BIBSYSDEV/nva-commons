@@ -1,4 +1,0 @@
-dependencies {
-    compileOnly project(":ioutils")
-    testImplementation project(":ioutils")
-}
