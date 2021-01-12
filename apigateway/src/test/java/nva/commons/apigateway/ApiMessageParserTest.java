@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import nva.commons.apigateway.exceptions.ApiIoException;
 import nva.commons.apigateway.testutils.RequestBody;
-import nva.commons.commons.IoUtils;
+import nva.commons.ioutils.IoUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

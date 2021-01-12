@@ -1,16 +1,17 @@
 package nva.commons.secrets;
 
-import static nva.commons.commons.attempt.Try.attempt;
+import static nva.commons.attempt.Try.attempt;
 import com.amazonaws.services.secretsmanager.AWSSecretsManager;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import nva.commons.attempt.Failure;
+import nva.commons.attempt.Try;
 import nva.commons.commons.JacocoGenerated;
 import nva.commons.commons.JsonUtils;
-import nva.commons.commons.attempt.Failure;
-import nva.commons.commons.attempt.Try;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

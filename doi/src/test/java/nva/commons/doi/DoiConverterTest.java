@@ -7,8 +7,8 @@ import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.net.URI;
 
-import nva.commons.commons.TestAppender;
-import nva.commons.commons.logutils.LogUtils;
+import nva.commons.logutils.LogUtils;
+import nva.commons.logutils.TestAppender;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

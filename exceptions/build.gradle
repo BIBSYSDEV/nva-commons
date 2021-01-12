@@ -1,0 +1,12 @@
+dependencies {
+    compileOnly project (":singletoncollector")
+    testImplementation project (":singletoncollector")
+
+    compileOnly project (":commons")
+    testImplementation project (":commons")
+
+    //because "PMD needs it"
+    compileOnly project (":attempt")
+
+
+}

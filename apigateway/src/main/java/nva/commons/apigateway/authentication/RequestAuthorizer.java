@@ -1,7 +1,8 @@
 package nva.commons.apigateway.authentication;
 
+import static nva.commons.attempt.Try.attempt;
 import static nva.commons.commons.JsonUtils.objectMapper;
-import static nva.commons.commons.attempt.Try.attempt;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -14,14 +15,13 @@ import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.RestRequestHandler;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.ForbiddenException;
+import nva.commons.attempt.Failure;
 import nva.commons.commons.Environment;
-import nva.commons.commons.attempt.Failure;
-
 import org.slf4j.LoggerFactory;
 
 /**
- * Abstract class for implementing a Request Authorizer as described in the following page:
- * {@see <a href=https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html>}
+ * Abstract class for implementing a Request Authorizer as described in the following page: {@see <a
+ * href=https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html>}
  */
 
 public abstract class RequestAuthorizer extends RestRequestHandler<Void, AuthorizerResponse> {
@@ -51,6 +51,40 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
         AuthPolicy authPolicy = createAllowAuthPolicy(resource);
 
         return createResponse(authPolicy);
+    }
+
+    @Override
+    protected Integer getSuccessStatusCode(Void input, AuthorizerResponse output) {
+        return HttpURLConnection.HTTP_OK;
+    }
+
+    @Override
+    protected void writeOutput(Void input, AuthorizerResponse output)
+        throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
+            String responseJson = objectMapper.writeValueAsString(output);
+            writer.write(responseJson);
+        }
+    }
+
+    @Override
+    protected void writeExpectedFailure(Void input, ApiGatewayException exception, String requestId)
+        throws IOException {
+        try {
+            writeFailure();
+        } catch (ForbiddenException e) {
+            throw new IOException(e);
+        }
+    }
+
+    @Override
+    protected void writeUnexpectedFailure(Void input, Exception exception, String requestId)
+        throws IOException {
+        try {
+            writeFailure();
+        } catch (ForbiddenException e) {
+            throw new IOException(e);
+        }
     }
 
     /**
@@ -101,40 +135,6 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
             .map(this::validateSecret)
             .filter(this::validationSucceeded)
             .orElseThrow(ForbiddenException::new);
-    }
-
-    @Override
-    protected void writeOutput(Void input, AuthorizerResponse output)
-        throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
-            String responseJson = objectMapper.writeValueAsString(output);
-            writer.write(responseJson);
-        }
-    }
-
-    @Override
-    protected void writeExpectedFailure(Void input, ApiGatewayException exception, String requestId)
-        throws IOException {
-        try {
-            writeFailure();
-        } catch (ForbiddenException e) {
-            throw new IOException(e);
-        }
-    }
-
-    @Override
-    protected void writeUnexpectedFailure(Void input, Exception exception, String requestId)
-        throws IOException {
-        try {
-            writeFailure();
-        } catch (ForbiddenException e) {
-            throw new IOException(e);
-        }
-    }
-
-    @Override
-    protected Integer getSuccessStatusCode(Void input, AuthorizerResponse output) {
-        return HttpURLConnection.HTTP_OK;
     }
 
     private Boolean validationSucceeded(Boolean check) {

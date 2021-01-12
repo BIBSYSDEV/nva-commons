@@ -1,4 +1,7 @@
 dependencies{
     compileOnly project (":commons")
     testImplementation project (":commons")
+
+    compileOnly project (":logutils")
+    testImplementation project (":logutils")
 }

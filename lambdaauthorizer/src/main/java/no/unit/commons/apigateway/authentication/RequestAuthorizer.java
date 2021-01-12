@@ -1,7 +1,7 @@
 package no.unit.commons.apigateway.authentication;
 
+import static nva.commons.attempt.Try.attempt;
 import static nva.commons.commons.JsonUtils.objectMapper;
-import static nva.commons.commons.attempt.Try.attempt;
 import com.amazonaws.services.lambda.runtime.Context;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -13,8 +13,8 @@ import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.RestRequestHandler;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.ForbiddenException;
+import nva.commons.attempt.Failure;
 import nva.commons.commons.Environment;
-import nva.commons.commons.attempt.Failure;
 import org.slf4j.LoggerFactory;
 
 /**

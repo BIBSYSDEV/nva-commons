@@ -1,7 +1,20 @@
 dependencies{
     compileOnly project(":commons")
     testImplementation project(":commons")
+    compileOnly project(":attempt")
+    testImplementation project(":attempt")
 
+    compileOnly project(":ioutils")
+    testImplementation project(":ioutils")
+
+    compileOnly project(":logutils")
+    testImplementation project(":logutils")
+
+    compileOnly project(":exceptions")
+    testImplementation project(":exceptions")
+
+    compileOnly project(":singletoncollector")
+    testImplementation project(":singletoncollector")
 
     compileOnly (group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: project.ext.awsSdkVersion){
         exclude  group:"com.fasterxml.jackson.core", module: "jackson-databind"

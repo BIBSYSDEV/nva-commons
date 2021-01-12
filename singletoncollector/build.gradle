@@ -1,0 +1,5 @@
+
+dependencies{
+    compileOnly project(":attempt")
+    testImplementation project(":attempt")
+}

@@ -1,5 +1,7 @@
 package nva.commons.commons;
 
+import static nva.commons.commons.JsonUtils.objectMapper;
+
 public interface JsonSerializable {
 
     /**
@@ -9,7 +11,7 @@ public interface JsonSerializable {
      */
     default String toJsonString() {
         try {
-            return JsonUtils.objectMapper.writeValueAsString(this);
+            return objectMapper.writeValueAsString(this);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
