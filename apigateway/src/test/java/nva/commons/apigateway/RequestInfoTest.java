@@ -5,7 +5,7 @@ import static nva.commons.apigateway.RequestInfo.APPLICATION_ROLES;
 import static nva.commons.apigateway.RequestInfo.CUSTOMER_ID;
 import static nva.commons.apigateway.RequestInfo.FEIDE_ID;
 import static nva.commons.apigateway.RequestInfo.REQUEST_CONTEXT_FIELD;
-import static nva.commons.commons.JsonUtils.objectMapper;
+import static nva.commons.essentials.JsonUtils.objectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasKey;

@@ -9,8 +9,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import nva.commons.attempt.Failure;
 import nva.commons.attempt.Try;
-import nva.commons.commons.JacocoGenerated;
-import nva.commons.commons.JsonUtils;
+import nva.commons.essentials.JacocoGenerated;
+import nva.commons.essentials.JsonUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

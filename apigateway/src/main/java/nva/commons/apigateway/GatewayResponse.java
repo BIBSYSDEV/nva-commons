@@ -11,8 +11,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
-import nva.commons.commons.JacocoGenerated;
-import nva.commons.commons.JsonUtils;
+import nva.commons.essentials.JacocoGenerated;
+import nva.commons.essentials.JsonUtils;
 
 public class GatewayResponse<T> implements Serializable {
 

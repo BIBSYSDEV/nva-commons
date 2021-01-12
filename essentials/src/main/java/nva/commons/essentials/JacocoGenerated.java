@@ -1,4 +1,4 @@
-package nva.commons.commons;
+package nva.commons.essentials;
 
 public @interface JacocoGenerated {
 }

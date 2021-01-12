@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Optional;
 import nva.commons.apigateway.exceptions.ApiIoException;
-import nva.commons.commons.JacocoGenerated;
-import nva.commons.commons.JsonUtils;
+import nva.commons.essentials.JacocoGenerated;
+import nva.commons.essentials.JsonUtils;
 
 /**
  * Not intended for use outside the {@link RestRequestHandler}. Class for parsing a message from ApiGateway.

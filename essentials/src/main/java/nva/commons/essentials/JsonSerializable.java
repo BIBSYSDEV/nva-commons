@@ -1,6 +1,6 @@
-package nva.commons.commons;
+package nva.commons.essentials;
 
-import static nva.commons.commons.JsonUtils.objectMapper;
+import static nva.commons.essentials.JsonUtils.objectMapper;
 
 public interface JsonSerializable {
 

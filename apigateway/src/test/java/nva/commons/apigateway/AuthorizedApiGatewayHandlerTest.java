@@ -22,8 +22,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import no.unit.nva.stubs.FakeContext;
 import no.unit.nva.stubs.FakeStsClient;
 import no.unit.nva.testutils.HandlerRequestBuilder;
-import nva.commons.commons.Environment;
-import nva.commons.commons.JsonUtils;
+import nva.commons.essentials.Environment;
+import nva.commons.essentials.JsonUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

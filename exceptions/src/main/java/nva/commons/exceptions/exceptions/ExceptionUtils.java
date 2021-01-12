@@ -3,7 +3,7 @@ package nva.commons.exceptions.exceptions;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.stream.Stream;
-import nva.commons.commons.StringUtils;
+import nva.commons.essentials.StringUtils;
 import nva.commons.singletoncollector.SingletonCollector;
 
 public final class ExceptionUtils {

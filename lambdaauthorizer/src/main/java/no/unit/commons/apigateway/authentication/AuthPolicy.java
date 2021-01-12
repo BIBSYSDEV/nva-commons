@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import nva.commons.commons.JacocoGenerated;
+import nva.commons.essentials.JacocoGenerated;
 
 public class AuthPolicy {
 

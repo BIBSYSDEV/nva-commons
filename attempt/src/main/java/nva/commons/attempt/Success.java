@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import nva.commons.commons.JacocoGenerated;
+import nva.commons.essentials.JacocoGenerated;
 
 public class Success<T> extends Try<T> {
 

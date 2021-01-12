@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <Configuration strict="true"
-  packages="com.amazonaws.services.lambda.runtime.log4j2,nva.commons.commons">
+  packages="com.amazonaws.services.lambda.runtime.log4j2,nva.commons.essentials">
   <Appenders>
     <Appender type="Lambda" name="Lambda">
       <PatternLayout>

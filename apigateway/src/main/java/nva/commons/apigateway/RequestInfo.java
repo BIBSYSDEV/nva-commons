@@ -15,8 +15,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import nva.commons.commons.JacocoGenerated;
-import nva.commons.commons.JsonUtils;
+import nva.commons.essentials.JacocoGenerated;
+import nva.commons.essentials.JsonUtils;
 
 public class RequestInfo {
 
