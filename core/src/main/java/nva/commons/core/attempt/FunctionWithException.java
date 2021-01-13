@@ -1,4 +1,4 @@
-package nva.commons.attempt;
+package nva.commons.core.attempt;
 
 @FunctionalInterface
 public interface FunctionWithException<T, R, E extends Exception> {

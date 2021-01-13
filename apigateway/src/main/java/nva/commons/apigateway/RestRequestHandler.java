@@ -14,7 +14,7 @@ import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
 import nva.commons.apigateway.exceptions.InvalidOrMissingTypeException;
 import nva.commons.apigateway.exceptions.LoggerNotSetException;
-import nva.commons.commons.Environment;
+import nva.commons.core.Environment;
 import nva.commons.ioutils.IoUtils;
 import nva.commons.logutils.LogUtils;
 import org.slf4j.Logger;

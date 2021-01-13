@@ -1,10 +1,10 @@
 package nva.commons.singletoncollector;
 
-import static nva.commons.attempt.Try.attempt;
+import static nva.commons.core.attempt.Try.attempt;
 import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import nva.commons.attempt.Try;
+import nva.commons.core.attempt.Try;
 
 public final class SingletonCollector {
 

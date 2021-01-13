@@ -1,5 +1,5 @@
 
 dependencies{
-    compileOnly project(":attempt")
-    testImplementation project(":attempt")
+    compileOnly project(":core")
+    testImplementation project(":core")
 }

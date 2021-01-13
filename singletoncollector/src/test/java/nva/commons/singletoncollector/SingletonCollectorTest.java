@@ -11,9 +11,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import nva.commons.attempt.Failure;
-import nva.commons.attempt.Success;
-import nva.commons.attempt.Try;
+import nva.commons.core.attempt.Failure;
+import nva.commons.core.attempt.Success;
+import nva.commons.core.attempt.Try;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;

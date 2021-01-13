@@ -1,7 +1,6 @@
 dependencies {
     compileOnly project(":core")
     compileOnly project(":apigateway")
-    compileOnly project(":attempt")
     compileOnly project(":logutils")
     compileOnly project(":ioutils")
     compileOnly project(":exceptions")
@@ -9,7 +8,6 @@ dependencies {
 
     testImplementation project(":core")
     testImplementation project(":apigateway")
-    testImplementation  project(":attempt")
     testImplementation project(":logutils")
     testImplementation project(":ioutils")
     testImplementation project(":exceptions")

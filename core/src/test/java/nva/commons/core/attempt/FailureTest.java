@@ -1,6 +1,6 @@
-package nva.commons.attempt;
+package nva.commons.core.attempt;
 
-import static nva.commons.attempt.Try.attempt;
+import static nva.commons.core.attempt.Try.attempt;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.core.Is.is;

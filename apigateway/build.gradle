@@ -1,8 +1,6 @@
 dependencies{
     compileOnly project(":core")
     testImplementation project(":core")
-    compileOnly project(":attempt")
-    testImplementation project(":attempt")
 
     compileOnly project(":ioutils")
     testImplementation project(":ioutils")

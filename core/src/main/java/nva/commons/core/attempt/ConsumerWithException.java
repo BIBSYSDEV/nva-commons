@@ -1,4 +1,4 @@
-package nva.commons.attempt;
+package nva.commons.core.attempt;
 
 @FunctionalInterface
 public interface ConsumerWithException<T, E extends Exception> {

@@ -1,4 +1,4 @@
-package nva.commons.attempt;
+package nva.commons.core.attempt;
 
 import java.util.Optional;
 import java.util.function.Function;

@@ -1,4 +1,4 @@
-package nva.commons.attempt;
+package nva.commons.core.attempt;
 
 public class TestException extends Exception {
 

@@ -16,7 +16,7 @@ import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Map;
 
-import nva.commons.commons.JsonUtils;
+import nva.commons.core.JsonUtils;
 
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;

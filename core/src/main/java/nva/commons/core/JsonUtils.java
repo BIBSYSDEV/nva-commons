@@ -1,4 +1,4 @@
-package nva.commons.commons;
+package nva.commons.core;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonFactory;

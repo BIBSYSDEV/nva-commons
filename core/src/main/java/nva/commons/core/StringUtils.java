@@ -1,4 +1,4 @@
-package nva.commons.commons;
+package nva.commons.core;
 
 import static java.util.Objects.isNull;
 
