@@ -47,7 +47,7 @@ public final class JsonUtils {
 
     private static SimpleModule emptyStringAsNullModule() {
         SimpleModule module = new SimpleModule();
-        module.addDeserializer(String.class, new StdDeserializer<>(String.class) {
+        module.addDeserializer(String.class, new StdDeserializer<String>(String.class) {
 
             @Override
             public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
