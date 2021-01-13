@@ -14,7 +14,8 @@ import java.util.Map;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
 
 import nva.commons.apigateway.testutils.RequestBody;
-import nva.commons.ioutils.IoUtils;
+
+import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

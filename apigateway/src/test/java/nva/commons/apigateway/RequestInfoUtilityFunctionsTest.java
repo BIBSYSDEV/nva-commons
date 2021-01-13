@@ -1,13 +1,12 @@
 package nva.commons.apigateway;
 
-import static nva.commons.commons.JsonUtils.objectMapper;
+import static nva.commons.core.JsonUtils.objectMapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Map;
-import nva.commons.commons.JsonUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

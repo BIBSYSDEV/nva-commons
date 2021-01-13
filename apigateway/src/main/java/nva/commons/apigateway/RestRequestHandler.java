@@ -1,7 +1,7 @@
 package nva.commons.apigateway;
 
 import static java.util.Objects.isNull;
-import static nva.commons.exceptions.exceptions.ExceptionUtils.stackTraceInSingleLine;
+import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
@@ -14,8 +14,8 @@ import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
 import nva.commons.apigateway.exceptions.InvalidOrMissingTypeException;
 import nva.commons.apigateway.exceptions.LoggerNotSetException;
-import nva.commons.commons.Environment;
-import nva.commons.ioutils.IoUtils;
+import nva.commons.core.Environment;
+import nva.commons.core.ioutils.IoUtils;
 import nva.commons.logutils.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

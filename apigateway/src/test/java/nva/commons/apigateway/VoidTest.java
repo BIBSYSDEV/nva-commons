@@ -13,10 +13,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
-import nva.commons.commons.Environment;
+import nva.commons.core.Environment;
 
-import nva.commons.commons.JsonUtils;
-import nva.commons.ioutils.IoUtils;
+import nva.commons.core.JsonUtils;
+import nva.commons.core.ioutils.IoUtils;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

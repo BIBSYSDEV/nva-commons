@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 import nva.commons.apigateway.exceptions.ApiGatewayException;
-import nva.commons.commons.Environment;
+import nva.commons.core.Environment;
 import org.slf4j.Logger;
 
 public abstract class AuthorizedApiGatewayHandler<I, O> extends ApiGatewayHandler<I, O> {
