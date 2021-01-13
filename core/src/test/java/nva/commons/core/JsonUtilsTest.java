@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,6 @@ public class JsonUtilsTest {
     public static final JsonNode JSON_OBJECT_WITHOUT_VALUE = sampleJsonObjectWithoutValue();
     public static final String UPPER_CASE_ENUM_JSON = "\"ANOTHER_ENUM\"";
     public static final String MIXED_CASE_ENUM_JSON = "\"SomE_enUm\"";
-    public static final String EMPTY_MAP_JSON = "{ }";
 
     @DisplayName("jsonParser serializes empty string as null")
     @Test
@@ -107,8 +107,10 @@ public class JsonUtilsTest {
         Map<String,Object> mapToSerialize = new HashMap<>();
         mapToSerialize.put("emptyString", "");
         mapToSerialize.put("nullValue", null);
-        String json = objectMapper.writeValueAsString(mapToSerialize);
-        assertThat(json, is(equalTo(EMPTY_MAP_JSON)));
+        String actualJson = objectMapper.writeValueAsString(mapToSerialize);
+        ObjectNode sampleJsonObjectWithoutValue = objectMapper.createObjectNode();
+        String expectedJson = objectMapper.writeValueAsString(sampleJsonObjectWithoutValue);
+        assertThat(actualJson, is(equalTo(expectedJson)));
     }
 
     private TestObjectForOptionals objectWithoutValue() {
