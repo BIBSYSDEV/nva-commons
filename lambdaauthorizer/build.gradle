@@ -1,0 +1,36 @@
+dependencies {
+    compileOnly project(":core")
+    compileOnly project(":apigateway")
+    compileOnly project(":attempt")
+    compileOnly project(":logutils")
+    compileOnly project(":ioutils")
+    compileOnly project(":exceptions")
+    compileOnly project(":singletoncollector")
+
+    testImplementation project(":core")
+    testImplementation project(":apigateway")
+    testImplementation  project(":attempt")
+    testImplementation project(":logutils")
+    testImplementation project(":ioutils")
+    testImplementation project(":exceptions")
+    testImplementation project(":singletoncollector")
+
+    compileOnly (group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.1'){
+        because "gradle complains"
+    }
+
+
+    compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
+    compileOnly group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
+    compileOnly group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion
+    compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
+    compileOnly group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: project.ext.jacksonVersion
+    compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
+
+    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
+    testImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
+    testImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion
+    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
+    testImplementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: project.ext.jacksonVersion
+    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
+}

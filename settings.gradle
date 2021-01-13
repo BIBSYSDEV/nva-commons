@@ -1,1 +1,12 @@
 rootProject.name = 'nva-commons'
+include 'apigateway'
+include 'core'
+include 'secrets'
+include 'doi'
+include 'lambdaauthorizer'
+include 'attempt'
+include 'singletoncollector'
+include 'logutils'
+include 'exceptions'
+include 'ioutils'
+

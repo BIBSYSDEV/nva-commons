@@ -5,15 +5,9 @@ plugins {
     id 'checkstyle'
     id 'pmd'
     id 'nebula.lint' version '16.15.9'
+    id 'maven'
 }
 
-
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
-
-gradleLint {
-    rules = ['unused-dependency']
-}
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
@@ -21,145 +15,169 @@ wrapper {
 }
 
 
-repositories {
-    jcenter()
-    maven { url 'https://jitpack.io' }
-}
+
+allprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'jacoco'
+    apply plugin: 'base'
+    apply plugin: 'checkstyle'
+    apply plugin: 'pmd'
 
 
-def jacksonVersion = "2.10.3"
-def awsSdkVersion = "1.11.871"
-def jupiterVersion = "5.7.0"
-def log4jVersion = "2.13.2"
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+
+    repositories {
+        jcenter()
+        maven { url 'https://jitpack.io' }
+    }
+
+    gradleLint {
+        rules = ['unused-dependency']
+    }
+
+    project.ext {
+        jacksonVersion = "2.12.0"
+        awsSdkVersion = "1.11.931"
+        jupiterVersion = "5.7.0"
+        log4jVersion = "2.13.2"
+    }
+
+    test {
+        useJUnitPlatform {
+        }
+        failFast = true
+        finalizedBy jacocoTestReport
+        testLogging {
+            events 'failed', 'passed', 'skipped'
+        }
+        Map<String, String> envVariables = new HashMap<>()
+        envVariables.put("EXISTING_NON_EMPTY_VARIABLE", "SomeContent")
+        envVariables.put("EXISTING_EMPTY_VARIABLE", "  ")
+        environment(envVariables)
+    }
 
 
-apply plugin: 'java-library'
-apply plugin: 'jacoco'
-apply plugin: 'base'
-apply plugin: 'checkstyle'
-apply plugin: 'pmd'
+    pmd {
+        ruleSetConfig = rootProject.resources.text.fromFile('config/pmd/ruleset.xml')
+        ruleSets = []
+        ignoreFailures = false
+    }
 
-dependencies {
-    implementation group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
+    checkstyle {
+        configFile = rootProject.resources.text.fromFile('config/checkstyle/checkstyle.xml').asFile()
+        showViolations = true
+    }
 
-    implementation group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: awsSdkVersion
-    implementation group: 'com.amazonaws', name: 'aws-java-sdk-secretsmanager', version: awsSdkVersion
-    runtimeOnly group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '3.6.0'
-    runtimeOnly group: 'com.amazonaws', name: 'aws-java-sdk-lambda', version: awsSdkVersion
-    implementation('org.zalando:problem:0.25.0') {
-        dependencies {
-            compileOnly(group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.0') {
-                because 'Dependency has maven scope provided'
+    tasks.withType(Checkstyle) {
+        reports {
+            xml.enabled false
+            html.enabled true
+            html.stylesheet rootProject.resources.text.fromFile('config/checkstyle/checkstyle-simple.xsl')
+        }
+    }
+
+
+    check.dependsOn jacocoTestCoverageVerification
+    jacocoTestCoverageVerification.dependsOn(jacocoTestReport)
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                limit {
+                    counter = 'METHOD'
+                    value = 'COVEREDRATIO'
+                    minimum = 1.000
+                }
+            }
+
+            rule {
+                limit {
+                    counter = 'CLASS'
+                    value = 'COVEREDRATIO'
+                    minimum = 1.000
+                }
             }
         }
     }
-    api group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.25.0'
-    runtimeOnly group: 'com.amazonaws', name: 'aws-java-sdk-api-gateway', version: awsSdkVersion
-    gradleLint.ignore('unused-dependency') {
-        api group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
-        api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion
-        api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonVersion
-        api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
-        runtimeOnly group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: jacksonVersion
-        api group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
-    }
-    implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.11'
-    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
+}
+subprojects{
 
-    testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.14'
+    apply plugin: 'maven'
+    dependencies {
 
-    testImplementation(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
-        because 'Scope provided in junit-jupiter'
-    }
+        // This method contains the logger class for AWS Lambda functions.
+        api (group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.1'){
+            exclude group: "org.apache.logging.log4j", module: "log4j-core:2.8.2"
+            exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
+            exclude group:"com.amazonaws", module:"aws-lambda-java-core"
+            exclude group:'org.apache.logging.log4j', module:'log4j-core'
+        }
 
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jupiterVersion
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: jupiterVersion
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jupiterVersion
+        api (group: 'com.amazonaws',name: 'aws-lambda-java-core', version:'1.2.1'){
+            exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
+            exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
+            exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
+            exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jsr310"
+            exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jdk8"
+            exclude group: "org.apache.logging.log4j", module: "log4j-core:2.8.2"
+        }
+        api(group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.25.0') {
+            exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
+            exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
+            exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
+            exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jsr310"
+            exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jdk8"
+        }
 
-
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.6.0'
-    testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
-    testImplementation group: 'com.github.npathai', name: 'hamcrest-optional', version: '2.0.0'
-    // If one is using nva-commons, api allows the re-usage of these packages.
-
-    gradleLint.ignore('unused-dependency') {
-        api group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.1'
-        api group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
-        api group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
-        api group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: log4jVersion
+        api group: 'org.apache.logging.log4j', name: 'log4j-core', version: project.ext.log4jVersion
+        api group: 'org.apache.logging.log4j', name: 'log4j-api', version: project.ext.log4jVersion
+        api group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: project.ext.log4jVersion
         api(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
             because 'Because we use the library directly to define loggers in our code'
         }
+
+        compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
+        testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
+
+        compileOnly group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
+        testImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
+
+        compileOnly group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion
+        testImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion
+
+        compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
+        testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
+
+        compileOnly group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: project.ext.jacksonVersion
+        testImplementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: project.ext.jacksonVersion
+
+        compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
+        testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
+
+
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: project.ext.jupiterVersion
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: project.ext.jupiterVersion
+        testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: project.ext.jupiterVersion
+
+        testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.6.0'
+        testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
+        testImplementation group: 'com.github.npathai', name: 'hamcrest-optional', version: '2.0.0'
+        testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.14'
+    }
+
+    // publish submodules
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        archiveClassifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    artifacts {
+        archives sourcesJar
     }
 }
 
-test {
-    useJUnitPlatform {
-    }
-    failFast = true
-    finalizedBy jacocoTestReport
-    testLogging {
-        events 'failed', 'passed', 'skipped'
-    }
-    Map<String, String> envVariables = new HashMap<>()
-    envVariables.put("EXISTING_NON_EMPTY_VARIABLE", "SomeContent")
-    envVariables.put("EXISTING_EMPTY_VARIABLE", "  ")
-    environment(envVariables)
-}
 
-jacocoTestReport {
-    reports {
-        xml.enabled true
-    }
-}
-
-pmd {
-    ruleSetConfig = rootProject.resources.text.fromFile('config/pmd/ruleset.xml')
-    ruleSets = []
-    ignoreFailures = false
-}
-
-checkstyle {
-    configFile = rootProject.resources.text.fromFile('config/checkstyle/checkstyle.xml').asFile()
-    showViolations = true
-}
-
-tasks.withType(Checkstyle) {
-    reports {
-        xml.enabled false
-        html.enabled true
-        html.stylesheet rootProject.resources.text.fromFile('config/checkstyle/checkstyle-simple.xsl')
-    }
-}
-
-jacocoTestReport {
-    reports {
-        xml.enabled true
-    }
-}
-
-check.dependsOn jacocoTestCoverageVerification
-jacocoTestCoverageVerification.dependsOn(jacocoTestReport)
-
-jacocoTestCoverageVerification {
-    violationRules {
-        rule {
-            limit {
-                counter = 'METHOD'
-                value = 'COVEREDRATIO'
-                minimum = 1.000
-            }
-        }
-
-        rule {
-            limit {
-                counter = 'CLASS'
-                value = 'COVEREDRATIO'
-                minimum = 1.000
-            }
-        }
-    }
-}
 
 
 def getProjectList() {
@@ -170,7 +188,8 @@ def getProjectList() {
 task jacocoMerge(type: JacocoMerge) {
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     description = 'Merge the JaCoCo data files from all subprojects into one'
-    project.afterEvaluate {  // do it at the end of the config phase to be sure all information is present
+    project.afterEvaluate {
+        // do it at the end of the config phase to be sure all information is present
         FileCollection execFiles = project.objects.fileCollection()   // an empty FileCollection
         getProjectList().each { Project subproject ->
             if (subproject.pluginManager.hasPlugin('jacoco')) {
@@ -211,10 +230,10 @@ task jacocoRootReport(type: JacocoReport, dependsOn: tasks.jacocoMerge) {
         // The JacocoReport tasks are the source of truth for class files and sources.
         def reportTasks = getReportTasks(tasks.jacocoRootReport)
         classDirectories.from project.files({
-            reportTasks.collect {it.classDirectories}.findAll {it != null}
+            reportTasks.collect { it.classDirectories }.findAll { it != null }
         })
         sourceDirectories.from project.files({
-            reportTasks.collect {it.sourceDirectories}.findAll {it != null}
+            reportTasks.collect { it.sourceDirectories }.findAll { it != null }
         })
     }
 
