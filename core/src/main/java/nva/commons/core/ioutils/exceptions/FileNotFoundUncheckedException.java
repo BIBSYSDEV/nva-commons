@@ -1,4 +1,4 @@
-package nva.commons.ioutils.exceptions;
+package nva.commons.core.ioutils.exceptions;
 
 import java.nio.file.Path;
 

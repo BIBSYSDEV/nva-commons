@@ -27,7 +27,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import nva.commons.apigateway.exceptions.ApiIoException;
-import nva.commons.ioutils.IoUtils;
+
+import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

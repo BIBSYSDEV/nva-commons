@@ -1,4 +1,4 @@
-package nva.commons.ioutils;
+package nva.commons.core.ioutils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -12,8 +12,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import nva.commons.ioutils.exceptions.FileNotFoundUncheckedException;
-import nva.commons.ioutils.exceptions.ResourceNotFoundException;
+import nva.commons.core.ioutils.exceptions.FileNotFoundUncheckedException;
+import nva.commons.core.ioutils.exceptions.ResourceNotFoundException;
 
 public final class IoUtils {
 

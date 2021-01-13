@@ -1,4 +1,4 @@
-package nva.commons.singletoncollector;
+package nva.commons.core;
 
 import static nva.commons.core.attempt.Try.attempt;
 import java.util.List;

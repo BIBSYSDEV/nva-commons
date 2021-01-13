@@ -1,10 +1,10 @@
-package nva.commons.exceptions.exceptions;
+package nva.commons.core.exceptions;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.stream.Stream;
 import nva.commons.core.StringUtils;
-import nva.commons.singletoncollector.SingletonCollector;
+import nva.commons.core.SingletonCollector;
 
 public final class ExceptionUtils {
 

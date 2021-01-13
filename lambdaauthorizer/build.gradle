@@ -3,15 +3,12 @@ dependencies {
     compileOnly project(":apigateway")
     compileOnly project(":logutils")
     compileOnly project(":ioutils")
-    compileOnly project(":exceptions")
-    compileOnly project(":singletoncollector")
 
     testImplementation project(":core")
     testImplementation project(":apigateway")
     testImplementation project(":logutils")
     testImplementation project(":ioutils")
-    testImplementation project(":exceptions")
-    testImplementation project(":singletoncollector")
+
 
     compileOnly (group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.1'){
         because "gradle complains"

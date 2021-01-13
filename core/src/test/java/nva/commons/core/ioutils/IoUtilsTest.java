@@ -1,4 +1,4 @@
-package nva.commons.ioutils;
+package nva.commons.core.ioutils;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -8,19 +8,18 @@ import static org.hamcrest.core.StringContains.containsString;
 import static org.hamcrest.text.IsEmptyString.emptyOrNullString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
-import nva.commons.ioutils.exceptions.FileNotFoundUncheckedException;
-import nva.commons.ioutils.exceptions.ResourceNotFoundException;
+import nva.commons.core.ioutils.exceptions.FileNotFoundUncheckedException;
+import nva.commons.core.ioutils.IoUtils;
+import nva.commons.core.ioutils.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -66,7 +65,7 @@ public class IoUtilsTest {
 
     @Test
     @DisplayName("stringFromFile return file contents a string")
-    public void fileAsStringReturnsFileContentsAsString() throws URISyntaxException, FileNotFoundException {
+    public void fileAsStringReturnsFileContentsAsString() throws URISyntaxException {
         URL file = Thread.currentThread().getContextClassLoader().getResource(RESOURCE.toString());
         Path filePath = Path.of(file.toURI());
         String actual = IoUtils.stringFromFile(filePath);
@@ -117,12 +116,9 @@ public class IoUtilsTest {
     }
 
     private String createSampleString() {
-        StringBuilder sampleBuilder = new StringBuilder();
-        sampleBuilder.append("First line");
-        sampleBuilder.append(System.lineSeparator());
-        sampleBuilder.append("Second line");
-        String sample = sampleBuilder.toString();
-        return sample;
+        return "First line"
+            + System.lineSeparator()
+            + "Second line";
     }
 
     private InputStream streamThrowingIoException() throws IOException {
