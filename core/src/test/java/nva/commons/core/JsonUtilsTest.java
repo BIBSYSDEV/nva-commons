@@ -1,28 +1,27 @@
 package nva.commons.core;
 
-import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
-import static com.github.npathai.hamcrestopt.OptionalMatchers.isPresentAnd;
-import static nva.commons.core.JsonUtils.objectMapper;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.in;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNull.nullValue;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import nva.commons.core.ioutils.IoUtils;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import nva.commons.core.ioutils.IoUtils;
-import org.hamcrest.MatcherAssert;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
+import static com.github.npathai.hamcrestopt.OptionalMatchers.isPresentAnd;
+import static nva.commons.core.JsonUtils.objectMapper;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.nullValue;
 
 public class JsonUtilsTest {
 
@@ -109,7 +108,7 @@ public class JsonUtilsTest {
         mapToSerialize.put("emptyString", "");
         mapToSerialize.put("nullValue", null);
         String json = objectMapper.writeValueAsString(mapToSerialize);
-        MatcherAssert.assertThat(json, is(equalTo(EMPTY_MAP_JSON)));
+        assertThat(json, is(equalTo(EMPTY_MAP_JSON)));
     }
 
     private TestObjectForOptionals objectWithoutValue() {
