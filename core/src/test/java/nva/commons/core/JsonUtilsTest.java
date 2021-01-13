@@ -15,9 +15,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import nva.commons.core.ioutils.IoUtils;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +34,7 @@ public class JsonUtilsTest {
     public static final JsonNode JSON_OBJECT_WITHOUT_VALUE = sampleJsonObjectWithoutValue();
     public static final String UPPER_CASE_ENUM_JSON = "\"ANOTHER_ENUM\"";
     public static final String MIXED_CASE_ENUM_JSON = "\"SomE_enUm\"";
+    public static final String EMPTY_MAP_JSON = "{ }";
 
     @DisplayName("jsonParser serializes empty string as null")
     @Test
@@ -97,6 +101,15 @@ public class JsonUtilsTest {
 
         String expectedString = "\"" + instantString + "\"";
         assertThat(jsonNow, is(equalTo(expectedString)));
+    }
+
+    @Test
+    public void objectMapperSerializesEmptyStringAsNull() throws JsonProcessingException {
+        Map<String,Object> mapToSerialize = new HashMap<>();
+        mapToSerialize.put("emptyString", "");
+        mapToSerialize.put("nullValue", null);
+        String json = objectMapper.writeValueAsString(mapToSerialize);
+        MatcherAssert.assertThat(json, is(equalTo(EMPTY_MAP_JSON)));
     }
 
     private TestObjectForOptionals objectWithoutValue() {
