@@ -14,8 +14,9 @@ import com.fasterxml.jackson.databind.deser.std.StringDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.io.IOException;
 import org.zalando.problem.ProblemModule;
+
+import java.io.IOException;
 
 public final class JsonUtils {
 
@@ -40,13 +41,13 @@ public final class JsonUtils {
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             // We want date-time format, not unix timestamps
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            // Ignore null fields
-            .setSerializationInclusion(Include.NON_ABSENT);
+            // Ignore null and empty fields
+            .setSerializationInclusion(Include.NON_EMPTY);
     }
 
     private static SimpleModule emptyStringAsNullModule() {
         SimpleModule module = new SimpleModule();
-        module.addDeserializer(String.class, new StdDeserializer<String>(String.class) {
+        module.addDeserializer(String.class, new StdDeserializer<>(String.class) {
 
             @Override
             public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
