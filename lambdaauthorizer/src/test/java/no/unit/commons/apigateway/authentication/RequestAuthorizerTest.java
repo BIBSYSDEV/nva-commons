@@ -18,11 +18,11 @@ import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.apigateway.HttpHeaders;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ForbiddenException;
-import nva.commons.commons.Environment;
-import nva.commons.commons.JsonUtils;
-import nva.commons.commons.TestAppender;
-import nva.commons.commons.logutils.LogUtils;
+import nva.commons.core.Environment;
+import nva.commons.core.JsonUtils;
 
+import nva.commons.logutils.LogUtils;
+import nva.commons.logutils.TestAppender;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 

@@ -16,9 +16,10 @@ import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Map;
 
-import nva.commons.commons.JsonUtils;
-import nva.commons.commons.TestAppender;
-import nva.commons.commons.logutils.LogUtils;
+import nva.commons.core.JsonUtils;
+
+import nva.commons.logutils.LogUtils;
+import nva.commons.logutils.TestAppender;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.invocation.InvocationOnMock;
@@ -60,8 +61,8 @@ public class SecretsReaderTest {
         Executable action = () -> secretsReader.fetchSecret(SECRET_NAME, WRONG_SECRET_KEY);
         ErrorReadingSecretException exception = assertThrows(ErrorReadingSecretException.class, action);
 
-        assertThat(exception.getMessage(),not(containsString(SECRET_NAME)));
-        assertThat(exception.getMessage(),not(containsString(SECRET_KEY)));
+        assertThat(exception.getMessage(), not(containsString(SECRET_NAME)));
+        assertThat(exception.getMessage(), not(containsString(SECRET_KEY)));
     }
 
     @Test

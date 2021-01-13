@@ -1,29 +1,19 @@
 dependencies {
-    compileOnly project(":commons")
+    compileOnly project(":core")
     compileOnly project(":apigateway")
+    compileOnly project(":logutils")
+    compileOnly project(":ioutils")
 
-    testImplementation project(":commons")
+    testImplementation project(":core")
     testImplementation project(":apigateway")
+    testImplementation project(":logutils")
+    testImplementation project(":ioutils")
 
-    implementation (group: 'com.amazonaws',name: 'aws-lambda-java-core', version:'1.2.1'){
-        exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
-        exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
-        exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
-        exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jsr310"
-        exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jdk8"
-        exclude group: "org.apache.logging.log4j", module: "log4j-core:2.8.2"
-    }
 
     compileOnly (group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.1'){
         because "gradle complains"
     }
 
-    compileOnly(group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion) {
-        because "PMD needs it"
-    }
-    compileOnly(group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion) {
-        because "PMD needs it"
-    }
 
     compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
     compileOnly group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion

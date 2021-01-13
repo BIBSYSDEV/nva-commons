@@ -1,7 +1,7 @@
 package no.unit.commons.apigateway.authentication;
 
-import static nva.commons.commons.JsonUtils.objectMapper;
-import static nva.commons.commons.attempt.Try.attempt;
+import static nva.commons.core.attempt.Try.attempt;
+import static nva.commons.core.JsonUtils.objectMapper;
 import com.amazonaws.services.lambda.runtime.Context;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -13,12 +13,13 @@ import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.RestRequestHandler;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.ForbiddenException;
-import nva.commons.commons.Environment;
-import nva.commons.commons.attempt.Failure;
+import nva.commons.core.attempt.Failure;
+import nva.commons.core.Environment;
 import org.slf4j.LoggerFactory;
 
 /**
- * Abstract class for implementing a Request Authorizer as described in the following page:
+ * Abstract class for implementing a Request Authorizer.
+ * Implementation is based on the AWS examples found in the following page :
  * {@see <a href=https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html>}.
  */
 

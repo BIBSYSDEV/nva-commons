@@ -17,7 +17,7 @@ wrapper {
 
 
 allprojects {
-    apply plugin: 'java'
+    apply plugin: 'java-library'
     apply plugin: 'jacoco'
     apply plugin: 'base'
     apply plugin: 'checkstyle'
@@ -105,28 +105,36 @@ subprojects{
 
     apply plugin: 'maven'
     dependencies {
+
         // This method contains the logger class for AWS Lambda functions.
-        implementation (group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.1'){
+        api (group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.1'){
             exclude group: "org.apache.logging.log4j", module: "log4j-core:2.8.2"
             exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
             exclude group:"com.amazonaws", module:"aws-lambda-java-core"
             exclude group:'org.apache.logging.log4j', module:'log4j-core'
         }
 
-        implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: project.ext.log4jVersion
-        implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: project.ext.log4jVersion
-        implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: project.ext.log4jVersion
-        implementation(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
-            because 'Because we use the library directly to define loggers in our code'
-        }
-
-        implementation(group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.25.0') {
+        api (group: 'com.amazonaws',name: 'aws-lambda-java-core', version:'1.2.1'){
             exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
             exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
             exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
             exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jsr310"
             exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jdk8"
+            exclude group: "org.apache.logging.log4j", module: "log4j-core:2.8.2"
+        }
+        api(group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.25.0') {
+            exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
+            exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
+            exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
+            exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jsr310"
+            exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jdk8"
+        }
 
+        api group: 'org.apache.logging.log4j', name: 'log4j-core', version: project.ext.log4jVersion
+        api group: 'org.apache.logging.log4j', name: 'log4j-api', version: project.ext.log4jVersion
+        api group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl', version: project.ext.log4jVersion
+        api(group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4') {
+            because 'Because we use the library directly to define loggers in our code'
         }
 
 

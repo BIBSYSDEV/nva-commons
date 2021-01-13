@@ -8,7 +8,7 @@ import java.util.Map;
 import nva.commons.apigateway.ApiGatewayHandler;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
-import nva.commons.commons.Environment;
+import nva.commons.core.Environment;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
