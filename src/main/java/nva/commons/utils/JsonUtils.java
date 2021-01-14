@@ -41,7 +41,7 @@ public final class JsonUtils {
             // We want date-time format, not unix timestamps
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             // Ignore null fields
-            .setSerializationInclusion(Include.NON_ABSENT);
+            .setSerializationInclusion(Include.NON_EMPTY);
     }
 
     private static SimpleModule emptyStringAsNullModule() {
