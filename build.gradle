@@ -149,9 +149,6 @@ subprojects{
         compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
         testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
 
-        compileOnly group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: project.ext.jacksonVersion
-        testImplementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: project.ext.jacksonVersion
-
         compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
         testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
 
@@ -160,15 +157,17 @@ subprojects{
         testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: project.ext.jupiterVersion
         testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: project.ext.jupiterVersion
 
+        compileOnly (group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.1'){
+            because ("junit.jupiter version 5 depends on it and testImplementation seems not enough")
+        }
+
         testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.6.0'
         testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
         testImplementation group: 'com.github.npathai', name: 'hamcrest-optional', version: '2.0.0'
         testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.14'
 
 
-        compileOnly (group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.1'){
-            because "gradle complains"
-        }
+
     }
 
     // publish submodules

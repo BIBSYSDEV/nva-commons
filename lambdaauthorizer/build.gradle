@@ -2,12 +2,12 @@ dependencies {
     compileOnly project(":core")
     compileOnly project(":apigateway")
     compileOnly project(":logutils")
-    compileOnly project(":ioutils")
+
 
     testImplementation project(":core")
     testImplementation project(":apigateway")
     testImplementation project(":logutils")
-    testImplementation project(":ioutils")
+
 
     compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
     compileOnly group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
