@@ -45,10 +45,6 @@ public class EventHandlerTest {
         assertThat(actualEvent, is(equalTo(expectedEvent)));
     }
 
-    private InputStream sampleInputStream() {
-        return IoUtils.stringToStream(AWS_EVENT_BRIDGE_EVENT);
-    }
-
     @Test
     public void handleRequestLogsErrorWhenExceptionIsThrown() {
         TestAppender appender = LogUtils.getTestingAppender(EventHandler.class);
@@ -64,6 +60,10 @@ public class EventHandlerTest {
         Executable action = () -> handler.handleRequest(sampleInputStream(), outputStream, context);
         RuntimeException exception = assertThrows(RuntimeException.class, action);
         assertThat(exception.getMessage(), is(equalTo(EXCEPTION_MESSAGE)));
+    }
+
+    private InputStream sampleInputStream() {
+        return IoUtils.stringToStream(AWS_EVENT_BRIDGE_EVENT);
     }
 
     private AwsEventBridgeEvent<SampleEventDetail> parseEventFromSampleEventString() throws JsonProcessingException {

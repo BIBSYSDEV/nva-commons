@@ -71,6 +71,11 @@ public class EventMessageParserTest {
         }
 
         @Override
+        public int hashCode() {
+            return Objects.hash(getFieldA());
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) {
                 return true;
@@ -80,11 +85,6 @@ public class EventMessageParserTest {
             }
             OuterClass<?> outerClass = (OuterClass<?>) o;
             return Objects.equals(getFieldA(), outerClass.getFieldA());
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(getFieldA());
         }
     }
 
@@ -101,6 +101,11 @@ public class EventMessageParserTest {
         }
 
         @Override
+        public int hashCode() {
+            return Objects.hash(getFieldB());
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) {
                 return true;
@@ -110,11 +115,6 @@ public class EventMessageParserTest {
             }
             MiddleClass<?> middleClass = (MiddleClass<?>) o;
             return Objects.equals(getFieldB(), middleClass.getFieldB());
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(getFieldB());
         }
     }
 
@@ -131,6 +131,11 @@ public class EventMessageParserTest {
         }
 
         @Override
+        public int hashCode() {
+            return Objects.hash(getFieldC());
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) {
                 return true;
@@ -140,11 +145,6 @@ public class EventMessageParserTest {
             }
             InnerClass<?> innerClass = (InnerClass<?>) o;
             return Objects.equals(getFieldC(), innerClass.getFieldC());
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(getFieldC());
         }
     }
 }

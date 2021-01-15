@@ -21,13 +21,13 @@ public abstract class DestinationsEventBridgeEventHandler<InputType, OutputType>
         return processInputPayload(input.getResponsePayload(), event, context);
     }
 
-    protected abstract OutputType processInputPayload(InputType input,
-                                                      AwsEventBridgeEvent<AwsEventBridgeDetail<InputType>> event,
-                                                      Context context);
-
     @SuppressWarnings("unchecked")
     @Override
     protected AwsEventBridgeEvent<AwsEventBridgeDetail<InputType>> parseEvent(String input) {
         return new EventParser<AwsEventBridgeDetail<InputType>>(input).parse(AwsEventBridgeDetail.class, iclass);
     }
+
+    protected abstract OutputType processInputPayload(InputType input,
+                                                      AwsEventBridgeEvent<AwsEventBridgeDetail<InputType>> event,
+                                                      Context context);
 }

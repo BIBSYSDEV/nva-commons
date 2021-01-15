@@ -33,6 +33,11 @@ public class SampleEventDetail implements WithType {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(getName(), getMessage(), getIdentifier());
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -42,12 +47,7 @@ public class SampleEventDetail implements WithType {
         }
         SampleEventDetail that = (SampleEventDetail) o;
         return Objects.equals(getName(), that.getName())
-            && Objects.equals(getMessage(), that.getMessage())
-            && Objects.equals(getIdentifier(), that.getIdentifier());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getName(), getMessage(), getIdentifier());
+               && Objects.equals(getMessage(), that.getMessage())
+               && Objects.equals(getIdentifier(), that.getIdentifier());
     }
 }

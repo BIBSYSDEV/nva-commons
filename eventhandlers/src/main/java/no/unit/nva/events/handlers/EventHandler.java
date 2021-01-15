@@ -1,6 +1,5 @@
 package no.unit.nva.events.handlers;
 
-
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
@@ -24,8 +23,8 @@ public abstract class EventHandler<InputType, OutputType> implements RequestStre
 
     public static final String HANDLER_INPUT = "Handler input:\n";
     public static final String ERROR_WRITING_TO_OUTPUT_STREAM = "Error writing output to output stream. Output is: ";
-    private final Class<InputType> iclass;
     private static final Logger logger = LoggerFactory.getLogger(EventHandler.class);
+    private final Class<InputType> iclass;
 
     /*
       Raw class usage in order to support parameterized types when EventHandler is extended by another class.

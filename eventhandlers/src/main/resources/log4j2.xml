@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<Configuration strict="true"
-  packages="com.amazonaws.services.lambda.runtime.log4j2,nva.commons.utils.log">
+<Configuration packages="com.amazonaws.services.lambda.runtime.log4j2,nva.commons.utils.log"
+  strict="true">
   <Appenders>
-    <Appender type="Lambda" name="Lambda">
+    <Appender name="Lambda" type="Lambda">
       <PatternLayout>
         <pattern>%d{ISO8601_OFFSET_DATE_TIME_HHCMM} %X{AWSRequestId} %-5p %c{1.}:%L - %m%n</pattern>
       </PatternLayout>

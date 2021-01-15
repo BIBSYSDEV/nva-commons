@@ -30,6 +30,12 @@ public class AwsEventBridgeResponseContext {
 
     @Override
     @JacocoGenerated
+    public int hashCode() {
+        return Objects.hash(getStatusCode(), getExecutedVersion());
+    }
+
+    @Override
+    @JacocoGenerated
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -39,12 +45,6 @@ public class AwsEventBridgeResponseContext {
         }
         AwsEventBridgeResponseContext that = (AwsEventBridgeResponseContext) o;
         return Objects.equals(getStatusCode(), that.getStatusCode())
-            && Objects.equals(getExecutedVersion(), that.getExecutedVersion());
-    }
-
-    @Override
-    @JacocoGenerated
-    public int hashCode() {
-        return Objects.hash(getStatusCode(), getExecutedVersion());
+               && Objects.equals(getExecutedVersion(), that.getExecutedVersion());
     }
 }

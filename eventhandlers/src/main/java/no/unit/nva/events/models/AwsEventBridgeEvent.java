@@ -132,9 +132,11 @@ public class AwsEventBridgeEvent<I> implements JsonSerializable {
         this.detail = detail;
     }
 
+    @JacocoGenerated
     @Override
-    public String toString() {
-        return toJsonString();
+    public int hashCode() {
+        return Objects.hash(getVersion(), getId(), getDetailType(), getSource(), getAccount(), getTime(), getRegion(),
+            getResources(), getDetail());
     }
 
     @Override
@@ -147,20 +149,18 @@ public class AwsEventBridgeEvent<I> implements JsonSerializable {
         }
         AwsEventBridgeEvent<?> that = (AwsEventBridgeEvent<?>) o;
         return Objects.equals(getVersion(), that.getVersion())
-            && Objects.equals(getId(), that.getId())
-            && Objects.equals(getDetailType(), that.getDetailType())
-            && Objects.equals(getSource(), that.getSource())
-            && Objects.equals(getAccount(), that.getAccount())
-            && Objects.equals(getTime(), that.getTime())
-            && getRegion() == that.getRegion()
-            && Objects.equals(getResources(), that.getResources())
-            && Objects.equals(getDetail(), that.getDetail());
+               && Objects.equals(getId(), that.getId())
+               && Objects.equals(getDetailType(), that.getDetailType())
+               && Objects.equals(getSource(), that.getSource())
+               && Objects.equals(getAccount(), that.getAccount())
+               && Objects.equals(getTime(), that.getTime())
+               && getRegion() == that.getRegion()
+               && Objects.equals(getResources(), that.getResources())
+               && Objects.equals(getDetail(), that.getDetail());
     }
 
-    @JacocoGenerated
     @Override
-    public int hashCode() {
-        return Objects.hash(getVersion(), getId(), getDetailType(), getSource(), getAccount(), getTime(), getRegion(),
-            getResources(), getDetail());
+    public String toString() {
+        return toJsonString();
     }
 }

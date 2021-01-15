@@ -14,8 +14,8 @@ public class EventParser<InputType> {
 
     public static final String ERROR_PARSING_INPUT = "Could not parse input: ";
     public static final int SKIP_BOTTOM_TYPE = 2;
-    private static final Logger logger = LoggerFactory.getLogger(EventParser.class);
     public static final String RAWTYPES = "rawtypes";
+    private static final Logger logger = LoggerFactory.getLogger(EventParser.class);
     private final String input;
 
     public EventParser(String input) {

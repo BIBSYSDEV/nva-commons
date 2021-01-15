@@ -43,6 +43,13 @@ public class AwsEventBridgeDetail<I> {
             .withResponsePayload(this.getResponsePayload());
     }
 
+    @JacocoGenerated
+    @Override
+    public int hashCode() {
+        return Objects.hash(getVersion(), getTimestamp(), getRequestPayload(), getResponseContext(),
+            getResponsePayload());
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -53,17 +60,10 @@ public class AwsEventBridgeDetail<I> {
         }
         AwsEventBridgeDetail<?> that = (AwsEventBridgeDetail<?>) o;
         return Objects.equals(getVersion(), that.getVersion())
-            && Objects.equals(getTimestamp(), that.getTimestamp())
-            && Objects.equals(getRequestPayload(), that.getRequestPayload())
-            && Objects.equals(getResponseContext(), that.getResponseContext())
-            && Objects.equals(getResponsePayload(), that.getResponsePayload());
-    }
-
-    @JacocoGenerated
-    @Override
-    public int hashCode() {
-        return Objects.hash(getVersion(), getTimestamp(), getRequestPayload(), getResponseContext(),
-            getResponsePayload());
+               && Objects.equals(getTimestamp(), that.getTimestamp())
+               && Objects.equals(getRequestPayload(), that.getRequestPayload())
+               && Objects.equals(getResponseContext(), that.getResponseContext())
+               && Objects.equals(getResponsePayload(), that.getResponsePayload());
     }
 
     public String getVersion() {
