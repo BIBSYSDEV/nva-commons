@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Collections;
+import java.util.List;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,7 @@ import java.util.Optional;
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isPresentAnd;
 import static nva.commons.core.JsonUtils.objectMapper;
+import static nva.commons.core.JsonUtils.objectMapperWithEmpty;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -34,6 +37,14 @@ public class JsonUtilsTest {
     public static final JsonNode JSON_OBJECT_WITHOUT_VALUE = sampleJsonObjectWithoutValue();
     public static final String UPPER_CASE_ENUM_JSON = "\"ANOTHER_ENUM\"";
     public static final String MIXED_CASE_ENUM_JSON = "\"SomE_enUm\"";
+
+    public static final String EMPTY_STRING = "emptyString";
+    public static final String NON_EMPTY_STRING = "nonEmptyString";
+    public static final String NULL_LIST = "nullList";
+    public static final String EMPTY_LIST = "emptyList";
+    public static final String NULL_MAP = "nullMap";
+    public static final String EMPTY_MAP = "emptyMap";
+    public static final String NULL_STRING = "nullString";
 
     @DisplayName("jsonParser serializes empty string as null")
     @Test
@@ -113,6 +124,23 @@ public class JsonUtilsTest {
         assertThat(actualJson, is(equalTo(expectedJson)));
     }
 
+    @Test
+    public void objectMapperWithEmptySerializesAllEmptyFields() throws JsonProcessingException {
+        TestForEmptyFields testObj=  new TestForEmptyFields();
+        String json = objectMapperWithEmpty.writeValueAsString(testObj);
+        JsonNode node = objectMapperWithEmpty.readTree(json);
+
+        assertThat(node.has(EMPTY_STRING),is(true));
+        assertThat(node.has(NULL_STRING),is(true));
+
+        assertThat(node.has(EMPTY_LIST),is(true));
+        assertThat(node.has(NULL_LIST),is(true));
+
+        assertThat(node.has(EMPTY_MAP),is(true));
+        assertThat(node.has(NULL_MAP),is(true));
+
+    }
+
     private TestObjectForOptionals objectWithoutValue() {
         return new TestObjectForOptionals(null);
     }
@@ -155,6 +183,46 @@ public class JsonUtilsTest {
         @JsonProperty(JSON_KEY)
         public Optional<String> getTest() {
             return Optional.ofNullable(test);
+        }
+    }
+
+    private static class TestForEmptyFields{
+
+
+        @JsonProperty(EMPTY_STRING)
+        private final String emptyString = "";
+
+        @JsonProperty(NULL_STRING)
+        private final String nullString = null;
+
+        @JsonProperty(NON_EMPTY_STRING)
+        private final String nonEmptyString= "nonEmptyString";
+
+        @JsonProperty(NULL_LIST)
+        private final List<String> nullList= null;
+
+        @JsonProperty(EMPTY_LIST)
+        private final List<String> emptyList= Collections.emptyList();
+
+        @JsonProperty(NULL_MAP)
+        private final Map<String,Object> nullMap= null;
+        @JsonProperty(EMPTY_MAP)
+        private final Map<String,Object> emptyMap= Collections.emptyMap();
+
+        public String getNullString() {
+            return nullString;
+        }
+
+        public String getNonEmptyString() {
+            return nonEmptyString;
+        }
+
+        public List<String> getNullList() {
+            return nullList;
+        }
+
+        public List<String> getEmptyList() {
+            return emptyList;
         }
     }
 }
