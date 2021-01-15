@@ -66,7 +66,7 @@ public class EventParser<InputType> {
      */
     @SuppressWarnings(RAWTYPES)
     private JavaType nestedGenericTypesToJavaType(Class[] classes) {
-
+        //Variables not inlined for readability purposes.
         JavaType bottomType = constructNonParametricType(classes[classes.length - 1]);
         JavaType mostRecentType = bottomType;
         for (int index = classes.length - SKIP_BOTTOM_TYPE; index >= 0; index--) {
