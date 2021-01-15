@@ -115,7 +115,7 @@ public class JsonUtilsTest {
 
     @Test
     public void objectMapperSerializesEmptyStringAsNull() throws JsonProcessingException {
-        Map<String,Object> mapToSerialize = new HashMap<>();
+        Map<String, Object> mapToSerialize = new HashMap<>();
         mapToSerialize.put("emptyString", "");
         mapToSerialize.put("nullValue", null);
         String actualJson = objectMapper.writeValueAsString(mapToSerialize);
@@ -126,19 +126,18 @@ public class JsonUtilsTest {
 
     @Test
     public void objectMapperWithEmptySerializesAllEmptyFields() throws JsonProcessingException {
-        TestForEmptyFields testObj=  new TestForEmptyFields();
+        TestForEmptyFields testObj = new TestForEmptyFields();
         String json = objectMapperWithEmpty.writeValueAsString(testObj);
         JsonNode node = objectMapperWithEmpty.readTree(json);
 
-        assertThat(node.has(EMPTY_STRING),is(true));
-        assertThat(node.has(NULL_STRING),is(true));
+        assertThat(node.has(EMPTY_STRING), is(true));
+        assertThat(node.has(NULL_STRING), is(true));
 
-        assertThat(node.has(EMPTY_LIST),is(true));
-        assertThat(node.has(NULL_LIST),is(true));
+        assertThat(node.has(EMPTY_LIST), is(true));
+        assertThat(node.has(NULL_LIST), is(true));
 
-        assertThat(node.has(EMPTY_MAP),is(true));
-        assertThat(node.has(NULL_MAP),is(true));
-
+        assertThat(node.has(EMPTY_MAP), is(true));
+        assertThat(node.has(NULL_MAP), is(true));
     }
 
     private TestObjectForOptionals objectWithoutValue() {
@@ -186,8 +185,7 @@ public class JsonUtilsTest {
         }
     }
 
-    private static class TestForEmptyFields{
-
+    private static class TestForEmptyFields {
 
         @JsonProperty(EMPTY_STRING)
         private final String emptyString = "";
@@ -196,18 +194,18 @@ public class JsonUtilsTest {
         private final String nullString = null;
 
         @JsonProperty(NON_EMPTY_STRING)
-        private final String nonEmptyString= "nonEmptyString";
+        private final String nonEmptyString = "nonEmptyString";
 
         @JsonProperty(NULL_LIST)
-        private final List<String> nullList= null;
+        private final List<String> nullList = null;
 
         @JsonProperty(EMPTY_LIST)
-        private final List<String> emptyList= Collections.emptyList();
+        private final List<String> emptyList = Collections.emptyList();
 
         @JsonProperty(NULL_MAP)
-        private final Map<String,Object> nullMap= null;
+        private final Map<String, Object> nullMap = null;
         @JsonProperty(EMPTY_MAP)
-        private final Map<String,Object> emptyMap= Collections.emptyMap();
+        private final Map<String, Object> emptyMap = Collections.emptyMap();
 
         public String getNullString() {
             return nullString;

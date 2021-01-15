@@ -13,21 +13,17 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StringDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.std.StringSerializer;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.io.IOException;
 import org.zalando.problem.ProblemModule;
 
-import java.io.IOException;
-
 public final class JsonUtils {
-
 
     public static final ObjectMapper objectMapperNoEmpty = createJsonParser(Include.NON_EMPTY);
     public static final ObjectMapper objectMapperWithEmpty = createJsonParser(Include.ALWAYS);
 
     public static final ObjectMapper objectMapper = objectMapperNoEmpty;
-
 
     private JsonUtils() {
     }
@@ -52,7 +48,6 @@ public final class JsonUtils {
             .setSerializationInclusion(includeEmptyValuesOption);
     }
 
-
     private static SimpleModule emptyStringAsNullModule() {
         SimpleModule module = new SimpleModule();
         //Do not optimize the line under. It can fail due to a Oracle JDK bug.
@@ -70,6 +65,4 @@ public final class JsonUtils {
 
         return module;
     }
-
-
 }
