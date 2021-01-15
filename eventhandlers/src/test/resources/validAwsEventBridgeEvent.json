@@ -1,0 +1,37 @@
+{
+  "version": "0",
+  "id": "c2c057c1-67fe-1208-fc21-0401596631ba",
+  "detail-type": "Lambda Function Invocation Result - Success",
+  "source": "lambda",
+  "account": "884807050265",
+  "time": "2020-10-09T09:34:33Z",
+  "region": "eu-west-1",
+  "resources": [
+    "arn:aws:events:eu-west-1:884807050265:event-bus/orestis-event-bus",
+    "arn:aws:lambda:eu-west-1:884807050265:function:orestis-stack-nva-datacite-mds-EventProducer-8IAE7WYCNTPX:$LATEST"
+  ],
+  "detail": {
+    "version": "1.0",
+    "timestamp": "2020-10-09T09:34:33.727Z",
+    "requestContext": {
+      "requestId": "e3f0079c-da29-4e50-92ef-0b699d415e95",
+      "functionArn": "arn:aws:lambda:eu-west-1:884807050265:function:orestis-stack-nva-datacite-mds-EventProducer-8IAE7WYCNTPX:$LATEST",
+      "condition": "Success",
+      "approximateInvokeCount": 1
+    },
+    "requestPayload": {
+      "myRequest": "ListenToMe",
+      "type": "ArbitraryPayload"
+    },
+    "responseContext": {
+      "statusCode": 200,
+      "executedVersion": "$LATEST"
+    },
+    "responsePayload": {
+      "name": "Orestis",
+      "message": "The message",
+      "identifier": 1,
+      "type": "SampleHandlerInput"
+    }
+  }
+}

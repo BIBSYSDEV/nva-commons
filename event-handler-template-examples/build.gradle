@@ -1,0 +1,11 @@
+
+dependencies {
+    implementation project (":event-handler-template")
+    implementation group: 'com.github.BIBSYSDEV', name: 'nva-commons', version: project.ext.nvaCommonsVersion
+    implementation group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
+    runtimeOnly group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '3.2.0'
+    implementation group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '3.1.0'
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-eventbridge', version: project.ext.awsSdkVersion
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: project.ext.awsSdkVersion
+    testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: project.ext.nvaTestUtilsVersion
+}
