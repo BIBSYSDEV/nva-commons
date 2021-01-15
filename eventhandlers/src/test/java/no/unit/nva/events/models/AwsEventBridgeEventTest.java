@@ -6,12 +6,10 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.nio.file.Path;
 import no.unit.nva.events.handlers.SampleEventDetail;
-
 import nva.commons.core.JsonUtils;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.Test;

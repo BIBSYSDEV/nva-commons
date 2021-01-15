@@ -14,7 +14,6 @@ import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
 import no.unit.nva.events.models.AwsEventBridgeEvent;
 import no.unit.nva.stubs.FakeContext;
-
 import nva.commons.core.JsonUtils;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.logutils.LogUtils;

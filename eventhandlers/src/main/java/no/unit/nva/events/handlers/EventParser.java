@@ -1,13 +1,11 @@
 package no.unit.nva.events.handlers;
 
-
 import static nva.commons.core.JsonUtils.objectMapper;
 import static nva.commons.core.attempt.Try.attempt;
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import no.unit.nva.events.models.AwsEventBridgeEvent;
-
 import nva.commons.core.attempt.Failure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,6 +1,6 @@
 package no.unit.nva.events.models;
 
-import  com.amazonaws.regions.Regions;
+import com.amazonaws.regions.Regions;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.Collection;
