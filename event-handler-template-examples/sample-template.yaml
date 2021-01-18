@@ -1,0 +1,145 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Sample template for demonstrating EventHandlers.
+
+  ATTENTION. This template is not being currently deployed. It serves only as a working example of
+  a template that creates the event handlers.
+
+
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: NvaDataciteMds
+    Description: Backend for communicating with the DataCite MDS API
+    Author: Unit
+    SemanticVersion: 1.0.0
+    SpdxLicenseId: MIT
+    LicenseUrl: LICENSE
+
+Globals:
+  Function:
+    Timeout: 20
+
+
+Parameters:
+  EventBusName:
+    Type: String
+    Default: delete-me-event-bus
+  FailureQueueName:
+    Type: String
+    Default: delete-me-fail-queue
+
+Resources:
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: LambdaDefaults
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - sts:AssumeRole
+                  - sts:TagSession
+                Resource: "*"
+        - PolicyName: Events
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - events:*
+                  - sqs:SendMessage
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:*
+                  - lambda:InvokeFunction
+                Resource: "*"
+
+  DestinationsEventConsumer:
+    DependsOn:
+      - EventBus
+      - FailQueue
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: no.unit.nva.events.examples.DestinationsEventConsumer::handleRequest
+      Runtime: java11
+      MemorySize: 1400
+      Role: !GetAtt LambdaRole.Arn
+      Environment:
+        Variables:
+          EVENT_BUS: !GetAtt EventBus.Name
+          AWC_ACCOUNT_ID: !Ref AWS::AccountId
+      Events:
+        EventBridgeEvent:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName: !GetAtt EventBus.Name
+            Pattern: { "detail-type": [ { "prefix": "Lambda Function Invocation Result" } ] }
+  EventConducer:
+    DependsOn:
+      - EventBus
+      - FailQueue
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: no.unit.nva.events.examples.EventConducer::handleRequest
+      Runtime: java11
+      MemorySize: 1400
+      Role: !GetAtt LambdaRole.Arn
+      Environment:
+        Variables:
+          EVENT_BUS: !GetAtt EventBus.Name
+          AWC_ACCOUNT_ID: !Ref AWS::AccountId
+      Events:
+        EventBridgeEvent:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName: !GetAtt EventBus.Name
+            Pattern: { "detail-type": [ "MyType" ] }
+      EventInvokeConfig:
+        DestinationConfig:
+          OnSuccess:
+            Type: EventBridge
+            Destination: !GetAtt EventBus.Arn
+          OnFailure:
+            Type: SQS
+            Destination: !GetAtt FailQueue.Arn
+  EventProducer:
+    DependsOn:
+      - EventBus
+      - FailQueue
+      - DestinationsEventConsumer
+      - EventConducer
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: no.unit.nva.events.examples.EventProducer::handleRequest
+      Runtime: java11
+      MemorySize: 1400
+      Role: !GetAtt LambdaRole.Arn
+      Environment:
+        Variables:
+          EVENT_BUS: !GetAtt EventBus.Name
+  EventBus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: !Ref EventBusName
+  FailQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      MaximumMessageSize: 262144
+      QueueName: !Ref FailureQueueName

@@ -1,0 +1,24 @@
+{
+  "version": "1.0",
+  "timestamp": "2020-10-09T09:34:33.727Z",
+  "requestContext": {
+    "requestId": "e3f0079c-da29-4e50-92ef-0b699d415e95",
+    "functionArn": "arn:aws:lambda:eu-west-1:884807050265:function:orestis-stack-nva-datacite-mds-EventProducer-8IAE7WYCNTPX:$LATEST",
+    "condition": "Success",
+    "approximateInvokeCount": 1
+  },
+  "requestPayload": {
+    "myRequest": "ListenToMe",
+    "type": "ArbitraryPayload"
+  },
+  "responseContext": {
+    "statusCode": 200,
+    "executedVersion": "$LATEST"
+  },
+  "responsePayload": {
+    "publicationId": "https://somepublication.com",
+    "existingDoi": "http://somedoi.org",
+    "someData": "someData",
+    "type": "MyType"
+  }
+}
