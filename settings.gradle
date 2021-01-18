@@ -6,4 +6,5 @@ include 'doi'
 include 'lambdaauthorizer'
 include 'logutils'
 include 'eventhandlers'
+include 'identifiers'
 
