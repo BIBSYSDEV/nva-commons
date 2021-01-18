@@ -41,6 +41,7 @@ allprojects {
         awsSdkVersion = "1.11.931"
         jupiterVersion = "5.7.0"
         log4jVersion = "2.13.2"
+        nvaTestUtilsVersion = "0.1.16"
     }
 
     test {
