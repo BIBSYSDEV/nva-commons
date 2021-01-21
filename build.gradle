@@ -6,6 +6,7 @@ plugins {
     id 'pmd'
     id 'nebula.lint' version '16.15.9'
     id 'maven'
+    id 'com.jfrog.bintray' version '1.7'
 }
 
 
@@ -14,15 +15,16 @@ wrapper {
     gradleVersion = "6.7"
 }
 
-
-
 allprojects {
+    group = 'no.unit.nva'
+    version = '1.0.0'
+
     apply plugin: 'java-library'
     apply plugin: 'jacoco'
     apply plugin: 'base'
     apply plugin: 'checkstyle'
     apply plugin: 'pmd'
-
+    apply plugin: 'com.jfrog.bintray'
 
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
@@ -102,7 +104,7 @@ allprojects {
         }
     }
 }
-subprojects{
+subprojects {
 
     apply plugin: 'maven'
     dependencies {
@@ -167,8 +169,6 @@ subprojects{
         testImplementation group: 'com.github.npathai', name: 'hamcrest-optional', version: '2.0.0'
         testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.14'
 
-
-
     }
 
     // publish submodules
@@ -179,6 +179,21 @@ subprojects{
 
     artifacts {
         archives sourcesJar
+    }
+
+    bintray {
+        user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+        key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
+        configurations = ['archives']
+        pkg {
+            repo = 'nva-commons'
+            name = name
+            licenses = ['MIT']
+            vcsUrl = 'https://github.com/BIBSYSDEV/nva-commons.git'
+            version {
+                name = version
+            }
+        }
     }
 }
 
@@ -245,6 +260,17 @@ task jacocoRootReport(type: JacocoReport, dependsOn: tasks.jacocoMerge) {
     reports {
         xml.enabled true
     }
+}
+
+task bintray {
+    dependsOn ':apigateway:bintrayUpload'
+    dependsOn ':core:bintrayUpload'
+    dependsOn ':doi:bintrayUpload'
+    dependsOn ':eventhandlers:bintrayUpload'
+    dependsOn ':identifiers:bintrayUpload'
+    dependsOn ':lambdaauthorizer:bintrayUpload'
+    dependsOn ':logutils:bintrayUpload'
+    dependsOn ':secrets:bintrayUpload'
 }
 
 build {
