@@ -187,7 +187,7 @@ subprojects {
         configurations = ['archives']
         pkg {
             repo = 'nva-commons'
-            name = name
+            name = project.name
             licenses = ['MIT']
             vcsUrl = 'https://github.com/BIBSYSDEV/nva-commons.git'
             version {
@@ -262,7 +262,8 @@ task jacocoRootReport(type: JacocoReport, dependsOn: tasks.jacocoMerge) {
     }
 }
 
-task bintray {
+task bintraySubprojects {
+    // define which subprojects to publish to bintray
     dependsOn ':apigateway:bintrayUpload'
     dependsOn ':core:bintrayUpload'
     dependsOn ':doi:bintrayUpload'
