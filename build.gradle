@@ -271,20 +271,21 @@ def gitBranch() {
 }
 
 task bintraySubprojects {
-    doLast {
-        def branch = gitBranch()
-        if (!(branch == "master" || branch == "main")) throw new Exception("Can only publish to Bintray from master or main branch")
-
-        // define which subprojects to publish to bintray
-        dependsOn ':apigateway:bintrayUpload'
-        dependsOn ':core:bintrayUpload'
-        dependsOn ':doi:bintrayUpload'
-        dependsOn ':eventhandlers:bintrayUpload'
-        dependsOn ':identifiers:bintrayUpload'
-        dependsOn ':lambdaauthorizer:bintrayUpload'
-        dependsOn ':logutils:bintrayUpload'
-        dependsOn ':secrets:bintrayUpload'
+    def branch = gitBranch()
+    if (!(branch == "master" || branch == "main")) {
+        logger.warn("Warning: Can only publish to Bintray from master or main branch")
+        return
     }
+
+    // define which subprojects to publish to bintray
+    dependsOn ':apigateway:bintrayUpload'
+    dependsOn ':core:bintrayUpload'
+    dependsOn ':doi:bintrayUpload'
+    dependsOn ':eventhandlers:bintrayUpload'
+    dependsOn ':identifiers:bintrayUpload'
+    dependsOn ':lambdaauthorizer:bintrayUpload'
+    dependsOn ':logutils:bintrayUpload'
+    dependsOn ':secrets:bintrayUpload'
 }
 
 build {
