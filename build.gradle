@@ -182,6 +182,7 @@ subprojects {
     }
 
     bintray {
+        dryRun = project.hasProperty('bintrayDryRun') ? project.property('bintrayDryRun') : false
         user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
         key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
         configurations = ['archives']
@@ -196,8 +197,6 @@ subprojects {
         }
     }
 }
-
-
 
 
 def getProjectList() {
@@ -262,7 +261,19 @@ task jacocoRootReport(type: JacocoReport, dependsOn: tasks.jacocoMerge) {
     }
 }
 
+def gitBranch() {
+    def branch = ""
+    def proc = "git rev-parse --abbrev-ref HEAD".execute()
+    proc.in.eachLine { line -> branch = line }
+    proc.err.eachLine { line -> println line }
+    proc.waitFor()
+    branch
+}
+
 task bintraySubprojects {
+    def branch = gitBranch()
+    if (!(branch == "master" || branch == "main")) throw new Exception("Can only publish to Bintray from master or main branch")
+
     // define which subprojects to publish to bintray
     dependsOn ':apigateway:bintrayUpload'
     dependsOn ':core:bintrayUpload'
