@@ -198,7 +198,6 @@ subprojects {
     }
 }
 
-
 def getProjectList() {
     // These projects are considered. Replace with a different list as needed.
     subprojects + project
