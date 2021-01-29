@@ -189,6 +189,7 @@ subprojects {
         pkg {
             repo = 'nva-commons'
             name = project.name
+            userOrg = 'unit-nva'
             licenses = ['MIT']
             vcsUrl = 'https://github.com/BIBSYSDEV/nva-commons.git'
             version {
