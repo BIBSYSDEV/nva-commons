@@ -1,6 +1,5 @@
 package nva.commons.apigateway;
 
-
 import static nva.commons.apigateway.ContentTypes.APPLICATION_JSON;
 import static nva.commons.core.JsonUtils.objectMapper;
 import com.amazonaws.services.lambda.runtime.Context;
@@ -14,7 +13,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
-
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.ApiGatewayUncheckedException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
@@ -22,8 +20,6 @@ import nva.commons.apigateway.exceptions.LoggerNotSetException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.JsonUtils;
-
-
 import org.slf4j.Logger;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
@@ -35,13 +31,12 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     public static final String ALLOWED_ORIGIN_ENV = "ALLOWED_ORIGIN";
     public static final String MESSAGE_FOR_RUNTIME_EXCEPTIONS_HIDING_IMPLEMENTATION_DETAILS_TO_API_CLIENTS =
         "Internal server error."
-            + " Contact application administrator.";
+        + " Contact application administrator.";
     public static final String DEFAULT_ERROR_MESSAGE = "Unknown error in handler";
     public static final String REQUEST_ID = "requestId";
 
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String APPLICATION_PROBLEM_JSON = "application/problem+json";
-
 
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
 
@@ -148,11 +143,12 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
 
     /**
      * Use {@link ApiGatewayHandler#addAdditionalHeaders}.
+     *
      * @param additionalHeaders a Map of additional success headers.
      */
     @Deprecated
     @JacocoGenerated
-    protected void setAdditionalHeadersSupplier(Supplier<Map<String, String>> additionalHeaders){
+    protected void setAdditionalHeadersSupplier(Supplier<Map<String, String>> additionalHeaders) {
         addAdditionalHeaders(additionalHeaders);
     }
 
