@@ -20,6 +20,7 @@ import nva.commons.apigateway.exceptions.ApiGatewayUncheckedException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
 import nva.commons.apigateway.exceptions.LoggerNotSetException;
 import nva.commons.core.Environment;
+import nva.commons.core.JacocoGenerated;
 import nva.commons.core.JsonUtils;
 
 
@@ -60,42 +61,22 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     }
 
     /**
-     * Add a function that adds headers to the response.
-     * <p>
-     * Example:
-     * <pre>
-     *  {@code
+     * This is the message for the success case. Sends a JSON string containing the response that APIGateway will send
+     * to the user.
      *
-     * @Override
-     *     protected String processInput(String input, RequestInfo requestInfo, Context context) throws Exception {
-     *
-     *         byte[] md5 = DigestUtils.md5(input);
-     *         setAdditionalHeadersSupplier(
-     *                  () -> Collections.singletonMap(HttpHeaders.CONTENT_MD5, new String(md5))
-     *          );
-     *         String output = input;
-     *         return output;
-     *     }
-     * }
-     * </pre>
-     * </p>
-     *
-     * @param additionalHeadersSupplier A supplier.
+     * @param input  the input object of class I
+     * @param output the output object of class O
+     * @throws IOException when serializing fails
      */
-
-    protected void setAdditionalHeadersSupplier(Supplier<Map<String, String>> additionalHeadersSupplier) {
-        this.additionalSuccessHeadersSupplier = additionalHeadersSupplier;
-    }
-
-    /**
-     * If you want to override this method, maybe better to override the {@link ApiGatewayHandler#defaultHeaders()}.
-     *
-     * @return a map with the response headers in case of success.
-     */
-    protected Map<String, String> getSuccessHeaders() {
-        Map<String, String> headers = defaultHeaders();
-        headers.putAll(additionalSuccessHeadersSupplier.get());
-        return headers;
+    @Override
+    protected void writeOutput(I input, O output)
+        throws IOException, GatewayResponseSerializingException {
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
+            GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, getSuccessHeaders(),
+                getSuccessStatusCode(input, output));
+            String responseJson = JsonUtils.objectMapper.writeValueAsString(gatewayResponse);
+            writer.write(responseJson);
+        }
     }
 
     /**
@@ -135,6 +116,55 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         } catch (GatewayResponseSerializingException e) {
             throw new ApiGatewayUncheckedException(e);
         }
+    }
+
+    /**
+     * Add a function that adds headers to the response.
+     * <p>
+     * Example:
+     * <pre>
+     *  {@code
+     *
+     * @Override
+     *     protected String processInput(String input, RequestInfo requestInfo, Context context) throws Exception {
+     *
+     *         byte[] md5 = DigestUtils.md5(input);
+     *         addAdditionalHeaders(
+     *                  () -> Collections.singletonMap(HttpHeaders.CONTENT_MD5, new String(md5))
+     *          );
+     *         String output = input;
+     *         return output;
+     *     }
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param additionalHeaders A supplier.
+     */
+
+    protected void addAdditionalHeaders(Supplier<Map<String, String>> additionalHeaders) {
+        this.additionalSuccessHeadersSupplier = additionalHeaders;
+    }
+
+    /**
+     * Use {@link ApiGatewayHandler#addAdditionalHeaders}.
+     * @param additionalHeaders a Map of additional success headers.
+     */
+    @Deprecated
+    @JacocoGenerated
+    protected void setAdditionalHeadersSupplier(Supplier<Map<String, String>> additionalHeaders){
+        addAdditionalHeaders(additionalHeaders);
+    }
+
+    /**
+     * If you want to override this method, maybe better to override the {@link ApiGatewayHandler#defaultHeaders()}.
+     *
+     * @return a map with the response headers in case of success.
+     */
+    protected Map<String, String> getSuccessHeaders() {
+        Map<String, String> headers = defaultHeaders();
+        headers.putAll(additionalSuccessHeadersSupplier.get());
+        return headers;
     }
 
     /**
@@ -182,25 +212,6 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         headers.put(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
         headers.put(CONTENT_TYPE, APPLICATION_JSON);
         return headers;
-    }
-
-    /**
-     * This is the message for the success case. Sends a JSON string containing the response that APIGateway will send
-     * to the user.
-     *
-     * @param input  the input object of class I
-     * @param output the output object of class O
-     * @throws IOException when serializing fails
-     */
-    @Override
-    protected void writeOutput(I input, O output)
-        throws IOException, GatewayResponseSerializingException {
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
-            GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, getSuccessHeaders(),
-                getSuccessStatusCode(input, output));
-            String responseJson = JsonUtils.objectMapper.writeValueAsString(gatewayResponse);
-            writer.write(responseJson);
-        }
     }
 
     private String defaultErrorMessage() {
