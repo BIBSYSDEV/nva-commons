@@ -1,0 +1,30 @@
+dependencies {
+    api project (":core")
+
+    api(group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: project.ext.awsSdkVersion) {
+
+    }
+    api(group: 'software.amazon.awssdk', name: 'dynamodb', version: project.ext.awsSdk2Version) {
+        exclude(group:'software.amazon.awssdk', module: 'aws-json-protocol')
+        exclude(group:'software.amazon.awssdk', module: 'protocol-core')
+        //exclude(group:'software.amazon.awssdk', module: 'sdk-core')
+        exclude(group:'software.amazon.awssdk', module: 'auth')
+        exclude(group:'software.amazon.awssdk', module: 'http-client-spi')
+        exclude(group:'software.amazon.awssdk', module: 'regions')
+        exclude(group:'software.amazon.awssdk', module: 'annotations')
+        //exclude(group:'software.amazon.awssdk', module: 'utils')
+        exclude(group:'software.amazon.awssdk', module: 'aws-core')
+        exclude(group:'software.amazon.awssdk', module: 'metrics-spi')
+        exclude(group:'software.amazon.awssdk', module: 'apache-client')
+        exclude(group:'software.amazon.awssdk', module: 'netty-nio-client')
+    }
+    api(group:'software.amazon.awssdk', name: 'dynamodb-enhanced', version: project.ext.awsSdk2Version) {
+        exclude(group:'software.amazon.awssdk', module: 'http-client-spi')
+        //exclude(group:'software.amazon.awssdk', module: 'sdk-core')
+        exclude(group:'software.amazon.awssdk', module: 'auth')
+        exclude(group:'software.amazon.awssdk', module: 'regions')
+        exclude(group:'software.amazon.awssdk', module: 'dynamodb')
+        exclude(group:'software.amazon.awssdk', module: 'annotations')
+        //exclude(group:'software.amazon.awssdk', module: 'utils')
+    }
+}
