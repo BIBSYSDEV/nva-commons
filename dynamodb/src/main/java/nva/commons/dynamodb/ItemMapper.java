@@ -7,7 +7,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nva.commons.core.JacocoGenerated;
-import nva.commons.core.JsonUtils;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
@@ -22,29 +21,29 @@ import static com.amazonaws.util.BinaryUtils.copyAllBytesFrom;
 
 public final class ItemMapper {
 
-    private static final ObjectMapper objectMapper = JsonUtils.objectMapper;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private ItemMapper() {
     }
 
     @JacocoGenerated
-    public static String toJsonV2(
-            Map<String, software.amazon.awssdk.services.dynamodb.model.AttributeValue> attributeValueMapV2)
+    public static String toJsonFromEvent(
+            Map<String, com.amazonaws.services.lambda.runtime.events.models.dynamodb.AttributeValue> eventAttributeValueMap)
             throws JsonProcessingException {
-        return objectMapper.writeValueAsString(toJsonNodeV2(attributeValueMapV2));
+        return objectMapper.writeValueAsString(toJsonNodeFromEvent(eventAttributeValueMap));
     }
 
+    @JacocoGenerated
     public static String toJson(
             Map<String, AttributeValue> attributeValueMap)
             throws JsonProcessingException {
         return objectMapper.writeValueAsString(toJsonNode(attributeValueMap));
     }
 
-    @JacocoGenerated
-    public static JsonNode toJsonNodeV2(
-            Map<String, software.amazon.awssdk.services.dynamodb.model.AttributeValue> attributeValueMapV2)
+    public static JsonNode toJsonNodeFromEvent(
+            Map<String, com.amazonaws.services.lambda.runtime.events.models.dynamodb.AttributeValue> eventAttributeValueMap)
             throws JsonProcessingException {
-        Map<String, AttributeValue> attributeValueMap = fromV2toV1(attributeValueMapV2);
+        var attributeValueMap = fromEvent(eventAttributeValueMap);
         return toJsonNode(attributeValueMap);
     }
 
@@ -60,9 +59,8 @@ public final class ItemMapper {
         return toSimpleMapValue(attributeMap);
     }
 
-    @JacocoGenerated
-    private static Map<String, AttributeValue> fromV2toV1(
-            Map<String, software.amazon.awssdk.services.dynamodb.model.AttributeValue> map)
+    private static Map<String, AttributeValue> fromEvent(
+            Map<String, com.amazonaws.services.lambda.runtime.events.models.dynamodb.AttributeValue> map)
             throws JsonProcessingException {
         var jsonString = objectMapper.writeValueAsString(map);
         var javaType = objectMapper.getTypeFactory().constructParametricType(Map.class, String.class,

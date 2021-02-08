@@ -1,3 +1,5 @@
 {
-  "string": "value"
+  "string": "value",
+  "emptyString": "",
+  "nullString": null
 }

@@ -18,6 +18,7 @@ public class ItemMapperTest {
 
     public static final String EXPECTED_JSON = "src/test/resources/expected.json";
 
+
     @Test
     public void toJsonNodeReturnsJsonOnAttributeValueMap() throws IOException {
         Map<String, AttributeValue> attributeValueMap = new HashMap<>();
@@ -28,19 +29,24 @@ public class ItemMapperTest {
         JsonNode actual = ItemMapper.toJsonNode(attributeValueMap);
 
         var expected = objectMapper.readTree(new File(EXPECTED_JSON));
-        assertThat(actual,is(equalTo(expected)));
+        assertThat(actual, is(equalTo(expected)));
     }
 
     @Test
-    public void toJsonNodeV2ReturnsJsonOnAttributeValueMap() throws IOException {
-        Map<String, software.amazon.awssdk.services.dynamodb.model.AttributeValue> attributeValueMap = new HashMap<>();
-        attributeValueMap.put("string", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s("value").build());
-        attributeValueMap.put("emptyString", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s("").build());
-        attributeValueMap.put("nullString", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(null).build());
+    public void toJsonNodeFromEventReturnsJsonOnEventAttributeValueMap() throws IOException {
+        Map<String, com.amazonaws.services.lambda.runtime.events.models.dynamodb.AttributeValue> attributeValueMap
+                = new HashMap<>();
+        attributeValueMap.put("string",
+                new com.amazonaws.services.lambda.runtime.events.models.dynamodb.AttributeValue().withS("value"));
+        attributeValueMap.put("emptyString",
+                new com.amazonaws.services.lambda.runtime.events.models.dynamodb.AttributeValue().withS(""));
+        attributeValueMap.put("nullString",
+                new com.amazonaws.services.lambda.runtime.events.models.dynamodb.AttributeValue().withS(null));
 
-        JsonNode actual = ItemMapper.toJsonNodeV2(attributeValueMap);
+
+        JsonNode actual = ItemMapper.toJsonNodeFromEvent(attributeValueMap);
 
         var expected = objectMapper.readTree(new File(EXPECTED_JSON));
-        assertThat(actual,is(equalTo(expected)));
+        assertThat(actual, is(equalTo(expected)));
     }
 }
