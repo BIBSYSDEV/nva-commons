@@ -48,10 +48,10 @@ public final class ItemMapper {
         return toJsonNode(attributeValueMap);
     }
 
-    public static JsonNode toJsonNode(Map<String, AttributeValue> attributeValueMap) {
+    public static JsonNode toJsonNode(Map<String, AttributeValue> attributeValueMap) throws JsonProcessingException {
         var object = toObject(attributeValueMap);
         Item item = Item.fromMap(object);
-        var jsonNode = objectMapper.convertValue(item.toJSON(), JsonNode.class);
+        var jsonNode = objectMapper.readTree(item.toJSON());
 
         return jsonNode;
     }
@@ -72,13 +72,14 @@ public final class ItemMapper {
 
     @JacocoGenerated
     private static <T> Map<String, T> toSimpleMapValue(
-            Map<String,AttributeValue> values) {
+            Map<String, com.amazonaws.services.dynamodbv2.model.AttributeValue> values) {
         if (values == null) {
             return null;
         }
+
         @SuppressWarnings("PMD.UseConcurrentHashMap")
         Map<String, T> result = new LinkedHashMap<>(values.size());
-        for (Map.Entry<String, AttributeValue> entry : values.entrySet()) {
+        for (Map.Entry<String, com.amazonaws.services.dynamodbv2.model.AttributeValue> entry : values.entrySet()) {
             T t = toSimpleValue(entry.getValue());
             result.put(entry.getKey(), t);
         }
@@ -86,7 +87,7 @@ public final class ItemMapper {
     }
 
     @SuppressWarnings("unchecked")
-    private  static <T> T toSimpleValue(AttributeValue value) {
+    private  static <T> T toSimpleValue(com.amazonaws.services.dynamodbv2.model.AttributeValue value) {
         if (value == null) {
             return null;
         }
@@ -136,12 +137,12 @@ public final class ItemMapper {
         }
     }
 
-    private static List<Object> toSimpleList(List<AttributeValue> attrValues) {
+    private static List<Object> toSimpleList(List<com.amazonaws.services.dynamodbv2.model.AttributeValue> attrValues) {
         if (attrValues == null) {
             return null;
         }
         List<Object> result = new ArrayList<>(attrValues.size());
-        for (AttributeValue attrValue : attrValues) {
+        for (com.amazonaws.services.dynamodbv2.model.AttributeValue attrValue : attrValues) {
             Object value = toSimpleValue(attrValue);
             result.add(value);
         }
