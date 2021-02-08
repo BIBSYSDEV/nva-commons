@@ -19,6 +19,7 @@ public final class SortableIdentifier implements Comparable<SortableIdentifier> 
     public static final int EXTRA_DASH = 1;
     public static final int SORTABLE_ID_LENGTH = UUID_LENGTH + TIMESTAMP_LENGTH + EXTRA_DASH;
     private static final String IDENTIFIER_FORMATTING = "%0" + TIMESTAMP_LENGTH + "x-%s";
+    public static final String INVALID_SORTABLE_IDENTIFIER_ERROR = "Invalid sortable identifier";
 
     private final String identifier;
 
@@ -66,7 +67,7 @@ public final class SortableIdentifier implements Comparable<SortableIdentifier> 
         if (identifier.length() == UUID_LENGTH || identifier.length() == SORTABLE_ID_LENGTH) {
             return;
         } else {
-            throw new IllegalArgumentException("Invalid sortable identifier");
+            throw new IllegalArgumentException(INVALID_SORTABLE_IDENTIFIER_ERROR);
         }
     }
 }
