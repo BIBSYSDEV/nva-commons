@@ -22,6 +22,7 @@ public class ItemMapperTest {
     @Test
     public void toJsonNodeReturnsJsonOnAttributeValueMap() throws IOException {
         Map<String, AttributeValue> attributeValueMap = new HashMap<>();
+        attributeValueMap.put("list", new AttributeValue().withL());
         attributeValueMap.put("string", new AttributeValue().withS("value"));
         attributeValueMap.put("emptyString", new AttributeValue().withS(""));
         attributeValueMap.put("nullString", new AttributeValue().withS(null));
@@ -36,6 +37,9 @@ public class ItemMapperTest {
     public void toJsonNodeFromEventReturnsJsonOnEventAttributeValueMap() throws IOException {
         Map<String, com.amazonaws.services.lambda.runtime.events.models.dynamodb.AttributeValue> attributeValueMap
                 = new HashMap<>();
+        attributeValueMap.put("list",
+                new com.amazonaws.services.lambda.runtime.events.models.dynamodb.AttributeValue().withL());
+
         attributeValueMap.put("string",
                 new com.amazonaws.services.lambda.runtime.events.models.dynamodb.AttributeValue().withS("value"));
         attributeValueMap.put("emptyString",

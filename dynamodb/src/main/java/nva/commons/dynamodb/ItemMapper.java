@@ -28,7 +28,8 @@ public final class ItemMapper {
 
     @JacocoGenerated
     public static String toJsonFromEvent(
-            Map<String, com.amazonaws.services.lambda.runtime.events.models.dynamodb.AttributeValue> eventAttributeValueMap)
+            Map<String, com.amazonaws.services.lambda.runtime.events.models.dynamodb.AttributeValue>
+                    eventAttributeValueMap)
             throws JsonProcessingException {
         return objectMapper.writeValueAsString(toJsonNodeFromEvent(eventAttributeValueMap));
     }
@@ -41,7 +42,8 @@ public final class ItemMapper {
     }
 
     public static JsonNode toJsonNodeFromEvent(
-            Map<String, com.amazonaws.services.lambda.runtime.events.models.dynamodb.AttributeValue> eventAttributeValueMap)
+            Map<String, com.amazonaws.services.lambda.runtime.events.models.dynamodb.AttributeValue>
+                    eventAttributeValueMap)
             throws JsonProcessingException {
         var attributeValueMap = fromEvent(eventAttributeValueMap);
         return toJsonNode(attributeValueMap);
@@ -70,14 +72,14 @@ public final class ItemMapper {
 
     @JacocoGenerated
     private static <T> Map<String, T> toSimpleMapValue(
-            Map<String, com.amazonaws.services.dynamodbv2.model.AttributeValue> values) {
+            Map<String, AttributeValue> values) {
         if (values == null) {
             return null;
         }
 
         @SuppressWarnings("PMD.UseConcurrentHashMap")
         Map<String, T> result = new LinkedHashMap<>(values.size());
-        for (Map.Entry<String, com.amazonaws.services.dynamodbv2.model.AttributeValue> entry : values.entrySet()) {
+        for (Map.Entry<String, AttributeValue> entry : values.entrySet()) {
             T t = toSimpleValue(entry.getValue());
             result.put(entry.getKey(), t);
         }
@@ -85,7 +87,7 @@ public final class ItemMapper {
     }
 
     @SuppressWarnings("unchecked")
-    private  static <T> T toSimpleValue(com.amazonaws.services.dynamodbv2.model.AttributeValue value) {
+    private  static <T> T toSimpleValue(AttributeValue value) {
         if (value == null) {
             return null;
         }
@@ -135,12 +137,12 @@ public final class ItemMapper {
         }
     }
 
-    private static List<Object> toSimpleList(List<com.amazonaws.services.dynamodbv2.model.AttributeValue> attrValues) {
+    private static List<Object> toSimpleList(List<AttributeValue> attrValues) {
         if (attrValues == null) {
             return null;
         }
         List<Object> result = new ArrayList<>(attrValues.size());
-        for (com.amazonaws.services.dynamodbv2.model.AttributeValue attrValue : attrValues) {
+        for (AttributeValue attrValue : attrValues) {
             Object value = toSimpleValue(attrValue);
             result.add(value);
         }
