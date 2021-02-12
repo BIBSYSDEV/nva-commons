@@ -1,6 +1,5 @@
 package nva.commons.apigateway;
 
-
 import static nva.commons.apigateway.RequestInfo.APPLICATION_ROLES;
 import static nva.commons.apigateway.RequestInfo.CUSTOMER_ID;
 import static nva.commons.apigateway.RequestInfo.FEIDE_ID;
@@ -27,13 +26,12 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import nva.commons.apigateway.exceptions.ApiIoException;
-
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 public class RequestInfoTest {
-
+    
     public static final String AUTHORIZER = "authorizer";
     public static final String CLAIMS = "claims";
     public static final String KEY = "key";
@@ -61,109 +59,109 @@ public class RequestInfoTest {
         "mapParametersAreNull.json");
     private static final Path MISSING_MAP_VALUES = Path.of(API_GATEWAY_MESSAGES_FOLDER,
         "missingRequestInfo.json");
-
+    
     @Test
     @DisplayName("RequestInfo can accept unknown fields")
     public void requestInfoAcceptsUnknownsFields() throws JsonProcessingException {
         String requestInfoString = IoUtils.stringFromResources(EVENT_WITH_UNKNOWN_REQUEST_INFO);
         RequestInfo requestInfo = objectMapper.readValue(requestInfoString, RequestInfo.class);
-
+        
         assertThat(requestInfo.getOtherProperties(), hasKey(UNDEFINED_REQUEST_INFO_PROPERTY));
     }
-
+    
     @Test
     @DisplayName("RequestInfo initializes queryParameters to empty map when JSON object sets "
-        + "queryStringParameters to null")
+                 + "queryStringParameters to null")
     public void requestInfoInitializesQueryParametesToEmptyMapWhenJsonObjectsSetsQueryStringParametersToNull()
         throws JsonProcessingException {
         checkForNonNullMap(NULL_VALUES_FOR_MAPS, RequestInfo::getQueryParameters);
     }
-
+    
     @Test
     @DisplayName("RequestInfo initializes headers to empty map when JSON object sets "
-        + "Headers to null")
+                 + "Headers to null")
     public void requestInfoInitializesHeadersToEmptyMapWhenJsonObjectsSetsQueryStringParametersToNull()
         throws JsonProcessingException {
         checkForNonNullMap(NULL_VALUES_FOR_MAPS, RequestInfo::getHeaders);
     }
-
+    
     @Test
     @DisplayName("RequestInfo initializes pathParameters to empty map when JSON object sets "
-        + "pathParameters to null")
+                 + "pathParameters to null")
     public void requestInfoInitializesPathParametersToEmptyMapWhenJsonObjectsSetsQueryStringParametersToNull()
         throws JsonProcessingException {
         checkForNonNullMap(NULL_VALUES_FOR_MAPS, RequestInfo::getPathParameters);
     }
-
+    
     @Test
     @DisplayName("RequestInfo initializes requestContext to empty JsonNode when JSON object sets "
-        + "requestContext to null")
+                 + "requestContext to null")
     public void requestInfoInitializesRequestContextToEmptyJsonNodeWhenJsonObjectsSetsRequestContextToNull()
         throws JsonProcessingException {
         checkForNonNullMap(NULL_VALUES_FOR_MAPS, RequestInfo::getRequestContext);
     }
-
+    
     @Test
     @DisplayName("RequestInfo initializes queryParameters to empty map queryStringParameters is missing")
     public void requestInfoInitializesQueryParametesToEmptyMapWhenQueryStringParametersIsMissing()
         throws JsonProcessingException {
         checkForNonNullMap(MISSING_MAP_VALUES, RequestInfo::getQueryParameters);
     }
-
+    
     @Test
     @DisplayName("RequestInfo initializes headers to empty map when header parameter is missing")
     public void requestInfoInitializesHeadersToEmptyMapWhenHeadersParameterIsMissing()
         throws JsonProcessingException {
         checkForNonNullMap(MISSING_MAP_VALUES, RequestInfo::getHeaders);
     }
-
+    
     @Test
     @DisplayName("RequestInfo initializes headers to empty map when header parameter is missing")
     public void requestInfoInitializesHeadersToEmptyMapWhenPathPrametersParameterIsMissing()
         throws JsonProcessingException {
         checkForNonNullMap(MISSING_MAP_VALUES, RequestInfo::getPathParameters);
     }
-
+    
     @Test
     @DisplayName("RequestInfo initializes requestContext to empty JsonNode requestContext is missing")
     public void requestInfoInitializesRequestContextToEmptyJsonNodeWhenRequestContextIsMissing()
         throws JsonProcessingException {
         checkForNonNullMap(MISSING_MAP_VALUES, RequestInfo::getRequestContext);
     }
-
+    
     @Test
     public void requestInfoReturnsUsernameForRequestContextWithCredentials() {
         RequestInfo requestInfo = new RequestInfo();
-
+        
         String expectedUsername = "orestis";
         requestInfo.setRequestContext(createNestedNodesFromJsonPointer(FEIDE_ID, expectedUsername));
-
+        
         String actual = requestInfo.getFeideId().orElseThrow();
         assertEquals(actual, expectedUsername);
     }
-
+    
     @Test
     public void requestInfoReturnsCustomerIdForRequestContextWithCredentials() {
         RequestInfo requestInfo = new RequestInfo();
-
+        
         String expectedCustomerId = "customerId";
         requestInfo.setRequestContext(createNestedNodesFromJsonPointer(CUSTOMER_ID, expectedCustomerId));
-
+        
         String actual = requestInfo.getCustomerId().orElseThrow();
         assertEquals(actual, expectedCustomerId);
     }
-
+    
     @Test
     public void requestInfoReturnsAssignedRolesForRequestContextWithCredentials() {
         RequestInfo requestInfo = new RequestInfo();
-
+        
         String expectedRoles = "role1,role2";
         requestInfo.setRequestContext(createNestedNodesFromJsonPointer(APPLICATION_ROLES, expectedRoles));
-
+        
         String actual = requestInfo.getAssignedRoles().orElseThrow();
         assertEquals(actual, expectedRoles);
     }
-
+    
     @Test
     @DisplayName("getAccessRights returns as list the values in the claim custom:accessRights")
     public void getAccessRightsReturnsAsListTheValuesInClaimCustomAccessRights() throws ApiIoException {
@@ -172,25 +170,25 @@ public class RequestInfoTest {
         Set<String> expectedAccessRights = Set.of(ACCESS_RIGHT_SAMPLE_1, ACCESS_RIGHT_SAMPLE_2);
         assertThat(actualAccessRights, is(equalTo(expectedAccessRights)));
     }
-
+    
     @Test
     public void getAccessRightsReturnsEmptySetOfAccessRightsWhenAccessRightsClaimIsMissing() throws ApiIoException {
         getAccessRightsReturnsEmptySet(EVENT_WITHOUT_ACCESS_RIGHTS);
     }
-
+    
     @Test
     public void getAccessRightsReturnsEmptySetOfAccessRightsWhenAccessRightsClaimIsEmpty() throws ApiIoException {
         getAccessRightsReturnsEmptySet(EVENT_WITH_EMPTY_ACCESS_RIGHTS);
     }
-
+    
     @Test
     public void getAccessRightsReturnsEmptySetOfAccessRightsWhenAccessRightsClaimIsNull() throws ApiIoException {
         getAccessRightsReturnsEmptySet(EVENT_WITH_NULL_ACCESS_RIGHTS);
     }
-
+    
     @Test
     public void canGetValueFromRequestContext() throws JsonProcessingException {
-
+        
         Map<String, Map<String, Map<String, Map<String, String>>>> map = Map.of(
             REQUEST_CONTEXT_FIELD, Map.of(
                 AUTHORIZER, Map.of(
@@ -200,32 +198,31 @@ public class RequestInfoTest {
                 )
             )
         );
-
+        
         RequestInfo requestInfo = objectMapper.readValue(objectMapper.writeValueAsString(map), RequestInfo.class);
-
+        
         JsonPointer jsonPointer = JsonPointer.compile(JSON_POINTER);
         JsonNode jsonNode = requestInfo.getRequestContext().at(jsonPointer);
-
+        
         assertFalse(jsonNode.isMissingNode());
         assertEquals(VALUE, jsonNode.textValue());
     }
     
-    
     @Test
     public void userHasAccessRightsReturnsTrueWhenRequestInfoContainsSpecifiedAccessRight() throws ApiIoException {
-        String accessRightContainedInResourceFile= "APPROVE_DOI_REQUEST";
+        String accessRightContainedInResourceFile = "APPROVE_DOI_REQUEST";
         RequestInfo requestInfo = extractRequestInfoFromApiGatewayEvent(EVENT_WITH_ACCESS_RIGHTS);
-    
-        assertThat(requestInfo.userHasAccessRight(accessRightContainedInResourceFile),is(true));
+        assertThat(requestInfo.userHasAccessRight(accessRightContainedInResourceFile), is(true));
     }
     
     @Test
-    public void userHasAccessRightsReturnsFalseWhenRequestInfoDoesNotContainSpecifiedAccessRight() throws ApiIoException {
-        String unexpectedAccessRight= "SOME_OTHER_RIGHT";
-    
+    public void userHasAccessRightsReturnsFalseWhenRequestInfoDoesNotContainSpecifiedAccessRight()
+        throws ApiIoException {
+        String unexpectedAccessRight = "SOME_OTHER_RIGHT";
+        
         RequestInfo requestInfo = extractRequestInfoFromApiGatewayEvent(EVENT_WITH_ACCESS_RIGHTS);
         
-        assertThat(requestInfo.userHasAccessRight(unexpectedAccessRight),is(false));
+        assertThat(requestInfo.userHasAccessRight(unexpectedAccessRight), is(false));
     }
     
     private RequestInfo extractRequestInfoFromApiGatewayEvent(Path eventWithAccessRights)
@@ -240,22 +237,22 @@ public class RequestInfoTest {
         Set<String> actualAccessRights = requestInfo.getAccessRights();
         assertThat(actualAccessRights, is(empty()));
     }
-
+    
     private ObjectNode createNestedNodesFromJsonPointer(JsonPointer jsonPointer, String value) {
         List<SimpleEntry<String, ObjectNode>> nodeList = createNodesForEachPathElement(jsonPointer);
         nestNodes(nodeList);
         SimpleEntry<String, ObjectNode> lastEntry = nodeList.get(lastIndex(nodeList));
         insertTextValueToLeafNode(value, lastEntry);
-
+        
         return nodeList.get(FIRST_NODE).getValue();
     }
-
+    
     private List<SimpleEntry<String, ObjectNode>> createNodesForEachPathElement(JsonPointer jsonPointer) {
         List<SimpleEntry<String, ObjectNode>> nodes = createListWithEmptyObjectNodes(jsonPointer);
         nodes.remove(UNNECESSARY_ROOT_NODE);
         return nodes;
     }
-
+    
     private void nestNodes(List<SimpleEntry<String, ObjectNode>> nodes) {
         for (int i = 0; i < lastIndex(nodes); i++) {
             SimpleEntry<String, ObjectNode> currentEntry = nodes.get(i);
@@ -263,28 +260,28 @@ public class RequestInfoTest {
             addNextEntryAsChildToCurrentEntry(currentEntry, nextEntry);
         }
     }
-
+    
     private void insertTextValueToLeafNode(String value, SimpleEntry<String, ObjectNode> lastEntry) {
         lastEntry.getValue().put(lastEntry.getKey(), value);
     }
-
+    
     private void addNextEntryAsChildToCurrentEntry(SimpleEntry<String, ObjectNode> currentEntry,
                                                    SimpleEntry<String, ObjectNode> nextEntry) {
         ObjectNode currentNode = currentEntry.getValue();
         currentNode.set(currentEntry.getKey(), nextEntry.getValue());
     }
-
+    
     private List<SimpleEntry<String, ObjectNode>> createListWithEmptyObjectNodes(JsonPointer jsonPointer) {
         return Arrays.stream(jsonPointer.toString()
-            .split(PATH_DELIMITER))
-            .map(nodeName -> new SimpleEntry<>(nodeName, objectMapper.createObjectNode()))
-            .collect(Collectors.toList());
+                                 .split(PATH_DELIMITER))
+                   .map(nodeName -> new SimpleEntry<>(nodeName, objectMapper.createObjectNode()))
+                   .collect(Collectors.toList());
     }
-
+    
     private int lastIndex(List<SimpleEntry<String, ObjectNode>> nodes) {
         return nodes.size() - 1;
     }
-
+    
     private void checkForNonNullMap(Path resourceFile, Function<RequestInfo, Object> getObject)
         throws JsonProcessingException {
         String apiGatewayEvent = IoUtils.stringFromResources(resourceFile);
