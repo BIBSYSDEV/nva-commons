@@ -1,6 +1,7 @@
 package nva.commons.apigateway;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.function.Predicate.not;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -207,6 +208,10 @@ public class RequestInfo {
             .map(accessRightsStr -> accessRightsStr.split(COMMA_DELIMITER))
             .flatMap(Arrays::stream)
             .collect(Collectors.toSet());
+    }
+    
+    public boolean userHasAccessRight(String accessRight){
+        return nonNull(getAccessRights()) && this.getAccessRights().contains(accessRight);
     }
 
     private static JsonPointer claimToJsonPointer(String claim) {

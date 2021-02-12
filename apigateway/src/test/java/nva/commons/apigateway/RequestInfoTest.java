@@ -167,9 +167,7 @@ public class RequestInfoTest {
     @Test
     @DisplayName("getAccessRights returns as list the values in the claim custom:accessRights")
     public void getAccessRightsReturnsAsListTheValuesInClaimCustomAccessRights() throws ApiIoException {
-        String event = IoUtils.stringFromResources(EVENT_WITH_ACCESS_RIGHTS);
-        ApiMessageParser<String> apiMessageParser = new ApiMessageParser<String>();
-        RequestInfo requestInfo = apiMessageParser.getRequestInfo(event);
+        RequestInfo requestInfo = extractRequestInfoFromApiGatewayEvent(EVENT_WITH_ACCESS_RIGHTS);
         Set<String> actualAccessRights = requestInfo.getAccessRights();
         Set<String> expectedAccessRights = Set.of(ACCESS_RIGHT_SAMPLE_1, ACCESS_RIGHT_SAMPLE_2);
         assertThat(actualAccessRights, is(equalTo(expectedAccessRights)));
@@ -211,11 +209,34 @@ public class RequestInfoTest {
         assertFalse(jsonNode.isMissingNode());
         assertEquals(VALUE, jsonNode.textValue());
     }
-
-    private void getAccessRightsReturnsEmptySet(Path resource) throws ApiIoException {
-        String event = IoUtils.stringFromResources(resource);
+    
+    
+    @Test
+    public void userHasAccessRightsReturnsTrueWhenRequestInfoContainsSpecifiedAccessRight() throws ApiIoException {
+        String accessRightContainedInResourceFile= "APPROVE_DOI_REQUEST";
+        RequestInfo requestInfo = extractRequestInfoFromApiGatewayEvent(EVENT_WITH_ACCESS_RIGHTS);
+    
+        assertThat(requestInfo.userHasAccessRight(accessRightContainedInResourceFile),is(true));
+    }
+    
+    @Test
+    public void userHasAccessRightsReturnsFalseWhenRequestInfoDoesNotContainSpecifiedAccessRight() throws ApiIoException {
+        String unexpectedAccessRight= "SOME_OTHER_RIGHT";
+    
+        RequestInfo requestInfo = extractRequestInfoFromApiGatewayEvent(EVENT_WITH_ACCESS_RIGHTS);
+        
+        assertThat(requestInfo.userHasAccessRight(unexpectedAccessRight),is(false));
+    }
+    
+    private RequestInfo extractRequestInfoFromApiGatewayEvent(Path eventWithAccessRights)
+        throws ApiIoException {
+        String event = IoUtils.stringFromResources(eventWithAccessRights);
         ApiMessageParser<String> apiMessageParser = new ApiMessageParser<>();
-        RequestInfo requestInfo = apiMessageParser.getRequestInfo(event);
+        return apiMessageParser.getRequestInfo(event);
+    }
+    
+    private void getAccessRightsReturnsEmptySet(Path resource) throws ApiIoException {
+        RequestInfo requestInfo = extractRequestInfoFromApiGatewayEvent(resource);
         Set<String> actualAccessRights = requestInfo.getAccessRights();
         assertThat(actualAccessRights, is(empty()));
     }
