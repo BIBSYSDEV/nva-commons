@@ -7,4 +7,4 @@ include 'lambdaauthorizer'
 include 'logutils'
 include 'eventhandlers'
 include 'identifiers'
-
+include 'dynamodb'
