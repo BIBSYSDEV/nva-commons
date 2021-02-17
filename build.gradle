@@ -6,7 +6,7 @@ plugins {
     id 'pmd'
     id 'nebula.lint' version '16.15.9'
     id 'maven'
-    id 'com.jfrog.bintray' version '1.7'
+    id 'com.jfrog.bintray' version '1.8.5'
 }
 
 
@@ -17,7 +17,7 @@ wrapper {
 
 allprojects {
     group = 'no.unit.nva'
-    version = '1.0.4'
+    version = '1.0.5'
 
     apply plugin: 'java-library'
     apply plugin: 'jacoco'
@@ -31,6 +31,7 @@ allprojects {
 
     repositories {
         jcenter()
+        maven {   url  "https://dl.bintray.com/unit-nva/nva-commons"}
         maven { url 'https://jitpack.io' }
     }
 
@@ -165,7 +166,7 @@ subprojects {
             because ("junit.jupiter version 5 depends on it and testImplementation seems not enough")
         }
 
-        testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.6.0'
+        testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.7.7'
         testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
         testImplementation group: 'com.github.npathai', name: 'hamcrest-optional', version: '2.0.0'
         testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.14'
