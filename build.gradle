@@ -5,10 +5,9 @@ plugins {
     id 'checkstyle'
     id 'pmd'
     id 'nebula.lint' version '16.17.0'
-    id 'maven'
-    id 'com.jfrog.bintray' version '1.8.5'
+    id 'maven-publish'
+    id 'signing'
 }
-
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
@@ -24,14 +23,12 @@ allprojects {
     apply plugin: 'base'
     apply plugin: 'checkstyle'
     apply plugin: 'pmd'
-    apply plugin: 'com.jfrog.bintray'
 
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
 
     repositories {
-        jcenter()
-        maven {   url  "https://dl.bintray.com/unit-nva/nva-commons"}
+        mavenCentral()
         maven { url 'https://jitpack.io' }
     }
 
@@ -107,8 +104,14 @@ allprojects {
     }
 }
 subprojects {
+    apply plugin: 'maven-publish'
+    apply plugin: 'signing'
 
-    apply plugin: 'maven'
+    java {
+        withJavadocJar()
+        withSourcesJar()
+    }
+
     dependencies {
 
         // This method contains the logger class for AWS Lambda functions.
@@ -173,31 +176,61 @@ subprojects {
 
     }
 
-    // publish submodules
-    task sourcesJar(type: Jar, dependsOn: classes) {
-        archiveClassifier = 'sources'
-        from sourceSets.main.allSource
-    }
-
-    artifacts {
-        archives sourcesJar
-    }
-
-    bintray {
-        dryRun = project.hasProperty('bintrayDryRun') ? project.property('bintrayDryRun') : false
-        user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
-        key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
-        configurations = ['archives']
-        pkg {
-            repo = 'nva-commons'
-            name = project.name
-            userOrg = 'unit-nva'
-            licenses = ['MIT']
-            vcsUrl = 'https://github.com/BIBSYSDEV/nva-commons.git'
-            version {
-                name = version
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                pom {
+                    name = project.name
+                    description = 'A commons library for the NVA project'
+                    url = 'https://github.com/BIBSYSDEV/nva-commons'
+                    licenses {
+                        license {
+                            name = 'MIT License'
+                            url = 'http://www.opensource.org/licenses/mit-license.php'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'exampleId'
+                            name = 'exampleName'
+                            email = 'exampleEmail'
+                            organization = 'UNIT'
+                            organizationUrl = 'https://www.unit.no/'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:git://github.com/BIBSYSDEV/nva-commons.git'
+                        developerConnection = 'scm:git:ssh://github.com/BIBSYSDEV/nva-commons.git'
+                        url = 'https://github.com/BIBSYSDEV/nva-commons/tree/main'
+                    }
+                }
             }
         }
+        repositories {
+            // We can probably remove this if there won't be any need to preview artifacts.
+            // That would allow us to use the shorter 'publish' task in mavenCentralSubprojects.
+            maven {
+                name = 'Local'
+                url = uri('$buildDir/repos/nva-commons')
+            }
+
+            maven {
+                name = 'SonatypeOSSR'
+                credentials {
+                    username = project.hasProperty('mavenCentralUser') ? project.property('mavenCentralUser') : System.getenv('MAVEN_CENTRAL_USER')
+                    password = project.hasProperty('mavenCentralApiKey') ? project.property('mavenCentralApiKey') : System.getenv('MAVEN_CENTRAL_API_KEY')
+                }
+
+                // We probably only publish releases though?
+                def releasesRepoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+                def snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
+                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            }
+        }
+    }
+
+    signing {
+        sign publishing.publications.mavenJava
     }
 }
 
@@ -272,22 +305,22 @@ def gitBranch() {
     branch
 }
 
-task bintraySubprojects {
+task mavenCentralSubprojects {
     def branch = gitBranch()
     if (!(branch == "master" || branch == "main")) {
-        logger.warn("Warning: Can only publish to Bintray from master or main branch")
+        logger.warn("Warning: Can only publish to Maven Central from master or main branch")
         return
     }
 
     // define which subprojects to publish to bintray
-    dependsOn ':apigateway:bintrayUpload'
-    dependsOn ':core:bintrayUpload'
-    dependsOn ':doi:bintrayUpload'
-    dependsOn ':eventhandlers:bintrayUpload'
-    dependsOn ':identifiers:bintrayUpload'
-    dependsOn ':lambdaauthorizer:bintrayUpload'
-    dependsOn ':logutils:bintrayUpload'
-    dependsOn ':secrets:bintrayUpload'
+    dependsOn ':apigateway:publishMavenJavaPublicationToSonatypeOSSRRepository '
+    dependsOn ':core:publishMavenJavaPublicationToSonatypeOSSRRepository'
+    dependsOn ':doi:publishMavenJavaPublicationToSonatypeOSSRRepository'
+    dependsOn ':eventhandlers:publishMavenJavaPublicationToSonatypeOSSRRepository'
+    dependsOn ':identifiers:publishMavenJavaPublicationToSonatypeOSSRRepository'
+    dependsOn ':lambdaauthorizer:publishMavenJavaPublicationToSonatypeOSSRRepository'
+    dependsOn ':logutils:publishMavenJavaPublicationToSonatypeOSSRRepository'
+    dependsOn ':secrets:publishMavenJavaPublicationToSonatypeOSSRRepository'
 }
 
 build {
