@@ -1,4 +1,4 @@
-name: Publish to Bintray
+name: Publish to Maven Central
 
 on:
   push:
@@ -28,6 +28,6 @@ jobs:
 
       - name: Build with Gradle
         env:
-          BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
-          BINTRAY_API_KEY: ${{ secrets.BINTRAY_API_KEY }}
-        run: ./gradlew build bintraySubprojects
+          MAVEN_CENTRAL_USER: ${{ secrets.MAVEN_CENTRAL_USER }}
+          MAVEN_CENTRAL_API_KEY: ${{ secrets.MAVEN_CENTRAL_API_KEY }}
+        run: ./gradlew build mavenCentralSubprojects
