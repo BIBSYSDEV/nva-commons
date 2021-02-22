@@ -1,8 +1,6 @@
 package nva.commons.apigateway;
 
-import static java.util.Objects.isNull;
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
-
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
@@ -13,10 +11,8 @@ import java.net.URISyntaxException;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
 import nva.commons.apigateway.exceptions.InvalidOrMissingTypeException;
-import nva.commons.apigateway.exceptions.LoggerNotSetException;
 import nva.commons.core.Environment;
 import nva.commons.core.ioutils.IoUtils;
-import nva.commons.logutils.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,13 +27,13 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(RestRequestHandler.class);
     protected final Environment environment;
     private final transient Class<I> iclass;
     private final transient ApiMessageParser<I> inputParser = new ApiMessageParser<>();
-    protected Logger logger;
+
     protected transient OutputStream outputStream;
     protected transient String allowedOrigin;
-
 
     /**
      * The input class should be set explicitly by the inherting class.
@@ -45,10 +41,9 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
      * @param iclass      The class object of the input class.
      * @param environment the Environment from where the handler will read ENV variables.
      */
-    public RestRequestHandler(Class<I> iclass, Environment environment, Logger logger) {
+    public RestRequestHandler(Class<I> iclass, Environment environment) {
         this.iclass = iclass;
         this.environment = environment;
-        this.logger = logger;
     }
 
     @Override
@@ -92,12 +87,8 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
         writeExpectedFailure(inputObject, e, context.getAwsRequestId());
     }
 
-    protected void init(OutputStream outputStream, Context context) throws LoggerNotSetException {
+    protected void init(OutputStream outputStream, Context context) {
         this.outputStream = outputStream;
-        if (isNull(logger)) {
-            logger = LoggerFactory.getLogger(RestRequestHandler.class);
-            throw new LoggerNotSetException(LogUtils.toLoggerName(this.getClass()));
-        }
     }
 
     /**
@@ -121,8 +112,8 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
      *                              fields during the processing
      * @param context               the Context
      * @return an output object of class O
-     * @throws IOException        when processing fails
-     * @throws URISyntaxException when processing fails
+     * @throws IOException         when processing fails
+     * @throws URISyntaxException  when processing fails
      * @throws ApiGatewayException when some predictable error happens.
      */
     protected O processInput(I input, String apiGatewayInputString, Context context) throws ApiGatewayException {

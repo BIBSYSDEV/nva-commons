@@ -1,6 +1,5 @@
 package nva.commons.apigateway.testutils;
 
-
 import static nva.commons.apigateway.RequestInfo.PROXY_TAG;
 import com.amazonaws.services.lambda.runtime.Context;
 import java.util.Collections;
@@ -11,12 +10,9 @@ import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.core.Environment;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Handler extends ApiGatewayHandler<RequestBody, String> {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(Handler.class);
     private Map<String, String> headers;
     private String proxy;
     private String path;
@@ -28,8 +24,7 @@ public class Handler extends ApiGatewayHandler<RequestBody, String> {
      * @param environment the environment.
      */
     public Handler(Environment environment) {
-        super(RequestBody.class, environment, LOGGER);
-        logger = LOGGER;
+        super(RequestBody.class, environment);
     }
 
     @Override

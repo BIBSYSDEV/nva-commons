@@ -3,13 +3,12 @@ package nva.commons.apigateway;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import java.net.HttpURLConnection;
 import nva.commons.core.Environment;
-import org.slf4j.LoggerFactory;
 
 public abstract class TestAuthorizedHandler extends AuthorizedApiGatewayHandler<Void, String> {
 
     public TestAuthorizedHandler(Environment environment,
                                  AWSSecurityTokenService stsClient) {
-        super(Void.class, environment, stsClient, LoggerFactory.getLogger(TestAuthorizedHandler.class));
+        super(Void.class, environment, stsClient);
     }
 
     @Override
