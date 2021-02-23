@@ -37,8 +37,7 @@ public final class SortableIdentifier implements Comparable<SortableIdentifier> 
     public static SortableIdentifier fromUri(URI uri) {
         try {
             String path = uri.getPath();
-            String[] pathElements = path.split(PATH_DELIMITER);
-            return new SortableIdentifier(pathElements[pathElements.length - 1]);
+            return new SortableIdentifier(path.substring(path.lastIndexOf(PATH_DELIMITER) + 1));
         } catch (Exception exception) {
             throw invalidUriError(uri);
         }
