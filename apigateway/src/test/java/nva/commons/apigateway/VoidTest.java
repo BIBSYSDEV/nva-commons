@@ -12,16 +12,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.core.Environment;
-
 import nva.commons.core.JsonUtils;
 import nva.commons.core.ioutils.IoUtils;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
 
 
 public class VoidTest {
@@ -82,11 +79,11 @@ public class VoidTest {
         public static final String SAMPLE_STRING = "sampleString";
 
         public VoidHandler(Environment environment) {
-            super(Void.class, environment, LoggerFactory.getLogger(VoidHandler.class));
+            super(Void.class, environment);
         }
 
         @Override
-        protected String processInput(Void input, RequestInfo requestInfo, Context context) throws ApiGatewayException {
+        protected String processInput(Void input, RequestInfo requestInfo, Context context) {
             return SAMPLE_STRING;
         }
 
