@@ -11,6 +11,8 @@ import static org.mockito.Mockito.mock;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,6 +33,9 @@ public class SortableIdentifierTest {
     public static final String SAMPLE_CLASS_ID_FIELD = String.format("\"id\" : \"%s\"",
         SAMPLE_IDENTIFIER.toString());
     public static final String SAMPLE_EXAMPLE_CLASS_JSON = "{" + SAMPLE_CLASS_ID_FIELD + "}";
+    public static final String EXAMPLE_HOST = "www.example.org";
+    public static final String EXAMPLE_SCHEME = "https";
+    public static final String EMPTY_FRAGMENT = null;
 
     @Test
     public void sortableIdentifierStringContainsSixParts() {
@@ -94,6 +99,36 @@ public class SortableIdentifierTest {
         assertThat(actualException.getMessage(),
             containsString(SortableIdentifierSerializer.SERIALIZATION_EXCEPTION_ERROR));
         assertThat(cause, is(equalTo(exceptionCause)));
+    }
+
+    @Test
+    public void fromUriReturnsSortableIdentifierWhenUriContainsSortableIdentifierAsLastPartOfItsPath()
+        throws URISyntaxException {
+        SortableIdentifier identifier = SortableIdentifier.next();
+        String path = "/this/is/a/path/after/the/host/" + identifier.toString();
+        var sampleUri = new URI(EXAMPLE_SCHEME, EXAMPLE_HOST, path, EMPTY_FRAGMENT);
+        SortableIdentifier actualIdentifier = SortableIdentifier.fromUri(sampleUri);
+        assertThat(actualIdentifier, is(equalTo(identifier)));
+    }
+
+    @Test
+    public void fromUriThrowsIllegalArgumentExceptionContainingTheInvalidUriWhenPathDoesNotContainSortableIdentifier()
+        throws URISyntaxException {
+        String path = "/this/is/a/path/after/the/host";
+        var sampleUri = new URI(EXAMPLE_SCHEME, EXAMPLE_HOST, path, EMPTY_FRAGMENT);
+        Executable action = () -> SortableIdentifier.fromUri(sampleUri);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, action);
+        assertThat(exception.getMessage(), containsString(sampleUri.toString()));
+    }
+
+    @Test
+    public void fromUriThrowsIllegalArgumentExceptionContainingTheInvalidUriWhenThereIsNoPath()
+        throws URISyntaxException {
+        String path = null;
+        var sampleUri = new URI(EXAMPLE_SCHEME, EXAMPLE_HOST, path, EMPTY_FRAGMENT);
+        Executable action = () -> SortableIdentifier.fromUri(sampleUri);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, action);
+        assertThat(exception.getMessage(), containsString(sampleUri.toString()));
     }
 
     private void shuffle(List<SortableIdentifier> idStrings) {

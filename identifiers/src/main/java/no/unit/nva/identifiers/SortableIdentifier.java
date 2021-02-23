@@ -2,6 +2,7 @@ package no.unit.nva.identifiers;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import java.net.URI;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -18,9 +19,10 @@ public final class SortableIdentifier implements Comparable<SortableIdentifier> 
     public static final int TIMESTAMP_LENGTH = 12;
     public static final int EXTRA_DASH = 1;
     public static final int SORTABLE_ID_LENGTH = UUID_LENGTH + TIMESTAMP_LENGTH + EXTRA_DASH;
-    private static final String IDENTIFIER_FORMATTING = "%0" + TIMESTAMP_LENGTH + "x-%s";
     public static final String INVALID_SORTABLE_IDENTIFIER_ERROR = "Invalid sortable identifier";
-
+    public static final String PATH_DELIMITER = "/";
+    public static final String INVALID_URI_ERROR_MESSAGE = "The URI %s does not contain a valid Sortable identifier:";
+    private static final String IDENTIFIER_FORMATTING = "%0" + TIMESTAMP_LENGTH + "x-%s";
     private final String identifier;
 
     public SortableIdentifier(String identifier) {
@@ -30,6 +32,16 @@ public final class SortableIdentifier implements Comparable<SortableIdentifier> 
 
     public static SortableIdentifier next() {
         return new SortableIdentifier(newIdentifierString());
+    }
+
+    public static SortableIdentifier fromUri(URI uri) {
+        try {
+            String path = uri.getPath();
+            String[] pathElements = path.split(PATH_DELIMITER);
+            return new SortableIdentifier(pathElements[pathElements.length - 1]);
+        } catch (Exception exception) {
+            throw invalidUriError(uri);
+        }
     }
 
     @Override
@@ -57,6 +69,10 @@ public final class SortableIdentifier implements Comparable<SortableIdentifier> 
     @Override
     public int compareTo(SortableIdentifier o) {
         return this.toString().compareTo(o.toString());
+    }
+
+    private static IllegalArgumentException invalidUriError(URI uri) {
+        return new IllegalArgumentException(String.format(INVALID_URI_ERROR_MESSAGE, uri.toString()));
     }
 
     private static String newIdentifierString() {
