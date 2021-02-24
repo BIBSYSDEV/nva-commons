@@ -14,13 +14,11 @@ import java.net.HttpURLConnection;
 import java.util.Map;
 import java.util.Optional;
 import no.unit.nva.testutils.HandlerRequestBuilder;
-
 import nva.commons.apigateway.HttpHeaders;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ForbiddenException;
 import nva.commons.core.Environment;
 import nva.commons.core.JsonUtils;
-
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
 import org.junit.jupiter.api.Test;
@@ -58,7 +56,7 @@ public class RequestAuthorizerTest {
 
     @Test
     public void authorizerReturnsForbiddenWhenApiKeyIsInvalid() throws IOException, ForbiddenException {
-        final TestAppender appender = LogUtils.getTestingAppender(RequestAuthorizer.class);
+        final TestAppender appender = LogUtils.getTestingAppenderForRootLogger();
         InputStream input = requestWithInvalidApiKey();
 
         AuthorizerResponse response = sendRequestToHandler(input);
@@ -71,7 +69,7 @@ public class RequestAuthorizerTest {
 
     @Test
     public void authorizerReturnsForbiddenWhenApiKeyIsMissing() throws IOException, ForbiddenException {
-        final TestAppender appender = LogUtils.getTestingAppender(RequestAuthorizer.class);
+        final TestAppender appender = LogUtils.getTestingAppenderForRootLogger();
 
         InputStream input = requestWithoutApiKey();
 
@@ -85,7 +83,7 @@ public class RequestAuthorizerTest {
     @Test
     public void authorizerReturnsForbiddenForUnexpectedExceptionAndLogsMessage() throws IOException,
                                                                                         ForbiddenException {
-        final TestAppender appender = LogUtils.getTestingAppender(RequestAuthorizer.class);
+        final TestAppender appender = LogUtils.getTestingAppenderForRootLogger();
 
         RequestAuthorizer handler = handlerThrowingUnexpectedException();
         AuthorizerResponse response = processRequestWithHandlerThrowingException(handler);

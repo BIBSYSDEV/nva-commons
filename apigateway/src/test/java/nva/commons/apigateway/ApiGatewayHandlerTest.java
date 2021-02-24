@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -36,7 +35,6 @@ import nva.commons.apigateway.exceptions.TestException;
 import nva.commons.apigateway.testutils.Handler;
 import nva.commons.apigateway.testutils.RequestBody;
 import nva.commons.core.Environment;
-
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
@@ -46,8 +44,6 @@ import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
@@ -79,8 +75,7 @@ public class ApiGatewayHandlerTest {
     @Test
     @DisplayName("ApiGatewayHandler has a constructor with input class as only parameter")
     public void apiGatewayHandlerHasACostructorWithInputClassAsOnlyParameter() {
-        Logger logger = LoggerFactory.getLogger(RestRequestHandler.class);
-        RestRequestHandler<String, String> handler = new ApiGatewayHandler<>(String.class, logger) {
+        RestRequestHandler<String, String> handler = new ApiGatewayHandler<>(String.class) {
             @Override
             protected String processInput(String input, RequestInfo requestInfo, Context context) {
                 return null;
@@ -151,7 +146,7 @@ public class ApiGatewayHandlerTest {
     @Test
     @DisplayName("Logger logs the whole exception stacktrace when an exception has occurred 2")
     public void loggerLogsTheWholeExceptionStackTraceWhenAnExceptionHasOccurred() throws IOException {
-        TestAppender appender = LogUtils.getTestingAppender(Handler.class);
+        TestAppender appender = LogUtils.getTestingAppenderForRootLogger();
         Handler handler = handlerThatThrowsExceptions();
         handler.handleRequest(requestWithHeadersAndPath(), outputStream(), context);
 
@@ -168,7 +163,7 @@ public class ApiGatewayHandlerTest {
     @Test
     @DisplayName("Logger logs the whole exception stacktrace when an exception has occurred")
     public void loggerLogsTheWholeExceptionStackTraceWhenAnUncheckedExceptionHasOccurred() throws IOException {
-        TestAppender appender = LogUtils.getTestingAppender(Handler.class);
+        TestAppender appender = LogUtils.getTestingAppenderForRootLogger();
         Handler handler = handlerThatThrowsUncheckedExceptions();
 
         handler.handleRequest(requestWithHeadersAndPath(), outputStream(), context);
@@ -251,16 +246,6 @@ public class ApiGatewayHandlerTest {
             is(equalTo(TestException.ERROR_STATUS_CODE)));
     }
 
-    @Test
-    public void handlerReturnsInternalServerErrorWhenLoggerHasNotBeenExplicitlySet() throws IOException {
-        Handler handler = handlerThatHasNotSetLogger();
-        ByteArrayOutputStream outputStream = outputStream();
-        handler.handleRequest(anyRequest(), outputStream, context);
-
-        GatewayResponse<Problem> response = getApiGatewayResponse(outputStream);
-        assertThat(response.getStatusCode(), is(equalTo(HttpStatus.SC_INTERNAL_SERVER_ERROR)));
-        assertThat(response.getBodyObject(Problem.class).getDetail(), containsString(handler.getClass().getName()));
-    }
 
     @Test
     public void handlerReturnsBadRequestForJsonInvalidTypeError() throws IOException {
@@ -293,18 +278,6 @@ public class ApiGatewayHandlerTest {
         JavaType javaType = objectMapper.getTypeFactory().constructParametricType(GatewayResponse.class, Problem.class);
         GatewayResponse<Problem> response = objectMapper.readValue(outputStream.toString(), javaType);
         return response.getBodyObject(Problem.class);
-    }
-
-    private Handler handlerThatHasNotSetLogger() {
-        return new Handler(environment) {
-
-            @Override
-            public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context)
-                throws IOException {
-                logger = null;
-                super.handleRequest(inputStream, outputStream, context);
-            }
-        };
     }
 
     private GatewayResponse<Problem> getApiGatewayResponse(ByteArrayOutputStream outputStream)

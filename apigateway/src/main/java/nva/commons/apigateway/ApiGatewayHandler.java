@@ -16,11 +16,9 @@ import java.util.function.Supplier;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.ApiGatewayUncheckedException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
-import nva.commons.apigateway.exceptions.LoggerNotSetException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.JsonUtils;
-import org.slf4j.Logger;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 import org.zalando.problem.ThrowableProblem;
@@ -40,17 +38,17 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
 
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
 
-    public ApiGatewayHandler(Class<I> iclass, Logger logger) {
-        this(iclass, new Environment(), logger);
+    public ApiGatewayHandler(Class<I> iclass) {
+        this(iclass, new Environment());
     }
 
-    public ApiGatewayHandler(Class<I> iclass, Environment environment, Logger logger) {
-        super(iclass, environment, logger);
+    public ApiGatewayHandler(Class<I> iclass, Environment environment) {
+        super(iclass, environment);
         this.additionalSuccessHeadersSupplier = Collections::emptyMap;
     }
 
     @Override
-    public void init(OutputStream outputStream, Context context) throws LoggerNotSetException {
+    public void init(OutputStream outputStream, Context context) {
         this.allowedOrigin = environment.readEnv(ALLOWED_ORIGIN_ENV);
         super.init(outputStream, context);
     }
@@ -180,10 +178,10 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
             Status status = Status.valueOf(statusCode);
 
             ThrowableProblem problem = Problem.builder().withStatus(status)
-                .withTitle(status.getReasonPhrase())
-                .withDetail(errorMessage)
-                .with(REQUEST_ID, requestId)
-                .build();
+                                           .withTitle(status.getReasonPhrase())
+                                           .withDetail(errorMessage)
+                                           .with(REQUEST_ID, requestId)
+                                           .build();
 
             GatewayResponse<ThrowableProblem> gatewayResponse =
                 new GatewayResponse<>(problem, getFailureHeaders(), statusCode);
