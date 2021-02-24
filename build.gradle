@@ -15,7 +15,7 @@ wrapper {
 }
 
 allprojects {
-    group = 'no.unit.nva'
+    group = 'com.github.bibsysdev'
     version = '1.0.5'
 
     apply plugin: 'java-library'
@@ -26,6 +26,11 @@ allprojects {
 
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
+
+    // Needed because our javadoc contains a bunch of errors. TODO: Fix these errors.
+    tasks.withType(Javadoc) {
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
 
     repositories {
         mavenCentral()
@@ -179,6 +184,7 @@ subprojects {
     publishing {
         publications {
             mavenJava(MavenPublication) {
+                from components.java
                 pom {
                     name = project.name
                     description = 'A commons library for the NVA project'
@@ -191,9 +197,8 @@ subprojects {
                     }
                     developers {
                         developer {
-                            id = 'exampleId'
-                            name = 'exampleName'
-                            email = 'exampleEmail'
+                            name = 'Mattias Håheim Johnsen'
+                            email = 'mattias.haheim.johnsen@unit.no'
                             organization = 'UNIT'
                             organizationUrl = 'https://www.unit.no/'
                         }
@@ -207,29 +212,21 @@ subprojects {
             }
         }
         repositories {
-            // We can probably remove this if there won't be any need to preview artifacts.
-            // That would allow us to use the shorter 'publish' task in mavenCentralSubprojects.
             maven {
-                name = 'Local'
-                url = uri('$buildDir/repos/nva-commons')
-            }
-
-            maven {
-                name = 'SonatypeOSSR'
                 credentials {
-                    username = project.hasProperty('mavenCentralUser') ? project.property('mavenCentralUser') : System.getenv('MAVEN_CENTRAL_USER')
-                    password = project.hasProperty('mavenCentralApiKey') ? project.property('mavenCentralApiKey') : System.getenv('MAVEN_CENTRAL_API_KEY')
+                    username = findProperty('ossrhUsername') ?: System.getenv('OSSRH_USERNAME')
+                    password = findProperty('ossrhPassword') ?: System.getenv('OSSRH_PASSWORD')
                 }
 
-                // We probably only publish releases though?
-                def releasesRepoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
-                def snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
-                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+                url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
             }
         }
     }
 
     signing {
+        def signingKey = findProperty('signingKey') ?: System.getenv('SIGNING_KEY')
+        def signingPassword = findProperty('signingPassword') ?: System.getenv('SIGNING_PASSWORD')
+        useInMemoryPgpKeys(signingKey, signingPassword)
         sign publishing.publications.mavenJava
     }
 }
@@ -313,14 +310,14 @@ task mavenCentralSubprojects {
     }
 
     // define which subprojects to publish to bintray
-    dependsOn ':apigateway:publishMavenJavaPublicationToSonatypeOSSRRepository '
-    dependsOn ':core:publishMavenJavaPublicationToSonatypeOSSRRepository'
-    dependsOn ':doi:publishMavenJavaPublicationToSonatypeOSSRRepository'
-    dependsOn ':eventhandlers:publishMavenJavaPublicationToSonatypeOSSRRepository'
-    dependsOn ':identifiers:publishMavenJavaPublicationToSonatypeOSSRRepository'
-    dependsOn ':lambdaauthorizer:publishMavenJavaPublicationToSonatypeOSSRRepository'
-    dependsOn ':logutils:publishMavenJavaPublicationToSonatypeOSSRRepository'
-    dependsOn ':secrets:publishMavenJavaPublicationToSonatypeOSSRRepository'
+    dependsOn ':apigateway:publish'
+    dependsOn ':core:publish'
+    dependsOn ':doi:publish'
+    dependsOn ':eventhandlers:publish'
+    dependsOn ':identifiers:publish'
+    dependsOn ':lambdaauthorizer:publish'
+    dependsOn ':logutils:publish'
+    dependsOn ':secrets:publish'
 }
 
 build {
