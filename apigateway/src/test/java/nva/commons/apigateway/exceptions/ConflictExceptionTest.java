@@ -6,7 +6,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
-import org.apache.http.HttpStatus;
+import java.net.HttpURLConnection;
 import org.junit.jupiter.api.Test;
 
 public class ConflictExceptionTest {
@@ -30,7 +30,7 @@ public class ConflictExceptionTest {
     }
 
     @Test
-    public void conflictExceptionShowsSuppliedMessageAndSuppliecCause() {
+    public void conflictExceptionShowsSuppliedMessageAndSuppliedCause() {
         Exception cause = new Exception(CAUSE_MESSAGE);
         ConflictException exception = new ConflictException(cause, SOME_MESSAGE);
         ByteArrayOutputStream stackTraceOutput = getStackTraceMessage(exception);
@@ -43,7 +43,7 @@ public class ConflictExceptionTest {
     @Test
     public void conflictExceptionReturnsNotFoundStatusCode() {
         ConflictException exception = new ConflictException(SOME_MESSAGE);
-        assertThat(exception.getStatusCode(), is(equalTo(HttpStatus.SC_CONFLICT)));
+        assertThat(exception.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_CONFLICT)));
     }
 
     private ByteArrayOutputStream getStackTraceMessage(ConflictException exception) {

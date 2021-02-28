@@ -2,14 +2,14 @@ package nva.commons.apigateway.testutils;
 
 import static nva.commons.apigateway.RequestInfo.PROXY_TAG;
 import com.amazonaws.services.lambda.runtime.Context;
+import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.Map;
 import nva.commons.apigateway.ApiGatewayHandler;
+import nva.commons.apigateway.HttpHeaders;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.core.Environment;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
 
 public class Handler extends ApiGatewayHandler<RequestBody, String> {
 
@@ -44,7 +44,7 @@ public class Handler extends ApiGatewayHandler<RequestBody, String> {
 
     @Override
     protected Integer getSuccessStatusCode(RequestBody input, String output) {
-        return HttpStatus.SC_OK;
+        return HttpURLConnection.HTTP_OK;
     }
 
     public Map<String, String> getHeaders() {
