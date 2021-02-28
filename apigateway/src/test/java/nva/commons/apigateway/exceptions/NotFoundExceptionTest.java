@@ -30,7 +30,7 @@ public class NotFoundExceptionTest {
     }
 
     @Test
-    public void notFoundExceptionShowsSuppliedMessageAndSupplierCause() {
+    public void notFoundExceptionShowsSuppliedMessageAndSuppliedCause() {
         Exception cause = new Exception(CAUSE_MESSAGE);
         NotFoundException exception = new NotFoundException(cause, SOME_MESSAGE);
         ByteArrayOutputStream stackTraceOutput = getStackTraceMessage(exception);
