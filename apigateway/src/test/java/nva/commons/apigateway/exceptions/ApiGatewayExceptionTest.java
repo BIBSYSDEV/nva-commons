@@ -8,7 +8,7 @@ import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import org.apache.http.HttpStatus;
+import java.net.HttpURLConnection;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -64,7 +64,7 @@ public class ApiGatewayExceptionTest {
     @DisplayName("getStatusCode returns the status code provided in the constructor when such code is provided")
     public void getStatusCodeReturnsTheStatusCodeProvidedInTheConstructorWhenSuchStatusCodeisProvided() {
         IOException ioException = new IOException();
-        Integer overideDefaultStatusCode = HttpStatus.SC_SEE_OTHER;
+        Integer overideDefaultStatusCode = HttpURLConnection.HTTP_SEE_OTHER;
         TestException exception = new TestException(ioException, overideDefaultStatusCode);
         assertThat(exception.getStatusCode(), is(equalTo(overideDefaultStatusCode)));
     }

@@ -11,11 +11,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.nio.file.Path;
 import nva.commons.core.Environment;
 import nva.commons.core.JsonUtils;
 import nva.commons.core.ioutils.IoUtils;
-import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ public class VoidTest {
 
         TypeReference<GatewayResponse<String>> tr = new TypeReference<>() {};
         GatewayResponse<String> output = JsonUtils.objectMapper.readValue(outputStream.toString(), tr);
-        assertThat(output.getStatusCode(), is(equalTo(HttpStatus.SC_OK)));
+        assertThat(output.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
     }
 
     @DisplayName("handleRequest return success when input class is Void and body field is an empty object in "
@@ -63,7 +63,7 @@ public class VoidTest {
 
         TypeReference<GatewayResponse<String>> tr = new TypeReference<>() {};
         GatewayResponse<String> output = JsonUtils.objectMapper.readValue(outputStream.toString(), tr);
-        assertThat(output.getStatusCode(), is(equalTo(HttpStatus.SC_OK)));
+        assertThat(output.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
     }
 
     private ByteArrayOutputStream responseFromVoidHandler(String missingBodyRequest) throws IOException {
@@ -89,7 +89,7 @@ public class VoidTest {
 
         @Override
         protected Integer getSuccessStatusCode(Void input, String output) {
-            return HttpStatus.SC_OK;
+            return HttpURLConnection.HTTP_OK;
         }
     }
 }

@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -38,9 +39,6 @@ import nva.commons.core.Environment;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -83,7 +81,7 @@ public class ApiGatewayHandlerTest {
 
             @Override
             protected Integer getSuccessStatusCode(String input, String output) {
-                return HttpStatus.SC_OK;
+                return HttpURLConnection.HTTP_OK;
             }
         };
     }
@@ -256,7 +254,7 @@ public class ApiGatewayHandlerTest {
         handler.handleRequest(inputStream, outputStream, context);
 
         GatewayResponse<Problem> response = GatewayResponse.fromOutputStream(outputStream);
-        assertThat(response.getStatusCode(), is(equalTo(HttpStatus.SC_BAD_REQUEST)));
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_BAD_REQUEST)));
 
         Problem details = response.getBodyObject(Problem.class);
         assertThat(details.getDetail(), containsString(InvalidOrMissingTypeException.MESSAGE));
@@ -364,8 +362,8 @@ public class ApiGatewayHandlerTest {
 
     private JsonNode createHeaders() {
         Map<String, String> headers = new ConcurrentHashMap<>();
-        headers.put(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
-        headers.put(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+        headers.put(HttpHeaders.ACCEPT, ContentTypes.APPLICATION_JSON);
+        headers.put(HttpHeaders.CONTENT_TYPE, ContentTypes.APPLICATION_JSON);
         return objectMapper.convertValue(headers, JsonNode.class);
     }
 
