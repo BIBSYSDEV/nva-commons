@@ -24,7 +24,7 @@ nexusStaging {
 
 allprojects {
     group = 'com.github.bibsysdev'
-    version = '1.2.0'
+    version = '1.2.1'
 
     apply plugin: 'java-library'
     apply plugin: 'jacoco'
