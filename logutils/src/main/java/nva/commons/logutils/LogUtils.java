@@ -56,6 +56,40 @@ public final class LogUtils {
     }
 
     /**
+     * This method should ALWAYS be called before the creation of the object you want to test.
+     *
+     * <p>The method was created based on the patterns for programmatically configuring Log4j
+     * (https://logging.apache.org/log4j/2.x/manual/customconfig.html)
+     *
+     * @param <T> The class of the object under test
+     * @return a {@link TestAppender}
+     */
+    @SuppressWarnings("PMD.CloseResource")
+    public static <T> TestAppender getTestingAppenderForRootLogger() {
+        final LoggerContext context = (LoggerContext) LogManager.getContext(false);
+
+        ConfigurationBuilder<BuiltConfiguration> builder = ConfigurationBuilderFactory.newConfigurationBuilder();
+        avoidStatusMessagesWhileSettingUpConfiguration(builder);
+        enableLog4jToFindOurAppender(builder);
+        addTestAppenderToConfig(builder);
+        addRootLogger(builder);
+        reconfigureBuilder(builder);
+
+        return (TestAppender) createReferenceToTheAppenderInstanceForTestingAssertions(context);
+    }
+
+    /**
+     * From LogManager.getLogger()
+     *
+     * @param cls the class
+     * @return the logger name
+     */
+    public static String toLoggerName(final Class<?> cls) {
+        final String canonicalName = cls.getCanonicalName();
+        return nonNull(canonicalName) ? canonicalName : cls.getName();
+    }
+
+    /**
      * Reconfigure and not initialize because initialize seems not to be working.
      *
      * @param builder ConfigurationBuilder.
@@ -66,6 +100,13 @@ public final class LogUtils {
 
     private static Appender createReferenceToTheAppenderInstanceForTestingAssertions(LoggerContext context) {
         return context.getConfiguration().getAppender(TestAppender.APPENDER_NAME);
+    }
+
+    private static <T> void addRootLogger(ConfigurationBuilder<BuiltConfiguration> builder) {
+        RootLoggerComponentBuilder loggerBuilder = builder.newRootLogger(Level.DEBUG);
+        loggerBuilder.addAttribute("additivity", false);
+        loggerBuilder.add(builder.newAppenderRef(TestAppender.APPENDER_NAME));
+        builder.add(loggerBuilder);
     }
 
     private static <T> void addLoggerForTheInputClass(Class<T> clazz,
@@ -100,16 +141,5 @@ public final class LogUtils {
     private static ConfigurationBuilder<BuiltConfiguration> avoidStatusMessagesWhileSettingUpConfiguration(
         ConfigurationBuilder<BuiltConfiguration> builder) {
         return builder.setStatusLevel(Level.DEBUG);
-    }
-
-    /**
-     * From LogManager.getLogger()
-     *
-     * @param cls the class
-     * @return the logger name
-     */
-    public static String toLoggerName(final Class<?> cls) {
-        final String canonicalName = cls.getCanonicalName();
-        return nonNull(canonicalName) ? canonicalName : cls.getName();
     }
 }

@@ -4,33 +4,44 @@ plugins {
     id 'base'
     id 'checkstyle'
     id 'pmd'
-    id 'nebula.lint' version '16.15.9'
-    id 'maven'
-    id 'com.jfrog.bintray' version '1.7'
+    id 'nebula.lint' version '16.17.0'
+    id 'maven-publish'
+    id 'signing'
+    id "io.codearte.nexus-staging" version "0.22.0"
 }
-
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
     gradleVersion = "6.7"
 }
 
+nexusStaging {
+    packageGroup = "com.github.bibsysdev"
+    stagingProfileId = "5ba11e4895739"
+    username = findProperty('ossrhUsername') ?: System.getenv('OSSRH_USERNAME')
+    password = findProperty('ossrhPassword') ?: System.getenv('OSSRH_PASSWORD')
+}
+
 allprojects {
-    group = 'no.unit.nva'
-    version = '1.0.0'
+    group = 'com.github.bibsysdev'
+    version = '1.2.0'
 
     apply plugin: 'java-library'
     apply plugin: 'jacoco'
     apply plugin: 'base'
     apply plugin: 'checkstyle'
     apply plugin: 'pmd'
-    apply plugin: 'com.jfrog.bintray'
 
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
 
+    // Needed because our javadoc contains a bunch of errors. TODO: Fix these errors.
+    tasks.withType(Javadoc) {
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+
     repositories {
-        jcenter()
+        mavenCentral()
         maven { url 'https://jitpack.io' }
     }
 
@@ -41,6 +52,7 @@ allprojects {
     project.ext {
         jacksonVersion = "2.12.0"
         awsSdkVersion = "1.11.931"
+        awsSdk2Version = '2.15.74'
         jupiterVersion = "5.7.0"
         log4jVersion = "2.13.2"
         nvaTestUtilsVersion = "0.1.16"
@@ -107,8 +119,14 @@ allprojects {
     }
 }
 subprojects {
+    apply plugin: 'maven-publish'
+    apply plugin: 'signing'
 
-    apply plugin: 'maven'
+    java {
+        withJavadocJar()
+        withSourcesJar()
+    }
+
     dependencies {
 
         // This method contains the logger class for AWS Lambda functions.
@@ -142,20 +160,11 @@ subprojects {
             because 'Because we use the library directly to define loggers in our code'
         }
 
-        compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
-        testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
-
-        compileOnly group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
-        testImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
-
-        compileOnly group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion
-        testImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion
-
-        compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
-        testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
-
-        compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
-        testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
+        api group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
+        api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
+        api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion
+        api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
+        api group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
 
 
         testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: project.ext.jupiterVersion
@@ -166,38 +175,60 @@ subprojects {
             because ("junit.jupiter version 5 depends on it and testImplementation seems not enough")
         }
 
-        testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.6.0'
+        testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.7.7'
         testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
         testImplementation group: 'com.github.npathai', name: 'hamcrest-optional', version: '2.0.0'
         testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.14'
 
     }
 
-    // publish submodules
-    task sourcesJar(type: Jar, dependsOn: classes) {
-        archiveClassifier = 'sources'
-        from sourceSets.main.allSource
-    }
-
-    artifacts {
-        archives sourcesJar
-    }
-
-    bintray {
-        dryRun = project.hasProperty('bintrayDryRun') ? project.property('bintrayDryRun') : false
-        user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
-        key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
-        configurations = ['archives']
-        pkg {
-            repo = 'nva-commons'
-            name = project.name
-            userOrg = 'unit-nva'
-            licenses = ['MIT']
-            vcsUrl = 'https://github.com/BIBSYSDEV/nva-commons.git'
-            version {
-                name = version
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+                pom {
+                    name = project.name
+                    description = 'A commons library for the NVA project'
+                    url = 'https://github.com/BIBSYSDEV/nva-commons'
+                    licenses {
+                        license {
+                            name = 'MIT License'
+                            url = 'http://www.opensource.org/licenses/mit-license.php'
+                        }
+                    }
+                    developers {
+                        developer {
+                            name = 'Mattias Håheim Johnsen'
+                            email = 'mattias.haheim.johnsen@unit.no'
+                            organization = 'UNIT'
+                            organizationUrl = 'https://www.unit.no/'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:git://github.com/BIBSYSDEV/nva-commons.git'
+                        developerConnection = 'scm:git:ssh://github.com/BIBSYSDEV/nva-commons.git'
+                        url = 'https://github.com/BIBSYSDEV/nva-commons/tree/main'
+                    }
+                }
             }
         }
+        repositories {
+            maven {
+                credentials {
+                    username = findProperty('ossrhUsername') ?: System.getenv('OSSRH_USERNAME')
+                    password = findProperty('ossrhPassword') ?: System.getenv('OSSRH_PASSWORD')
+                }
+
+                url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+            }
+        }
+    }
+
+    signing {
+        def signingKey = findProperty('signingKey') ?: System.getenv('SIGNING_KEY')
+        def signingPassword = findProperty('signingPassword') ?: System.getenv('SIGNING_PASSWORD')
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign publishing.publications.mavenJava
     }
 }
 
@@ -272,22 +303,23 @@ def gitBranch() {
     branch
 }
 
-task bintraySubprojects {
+task mavenCentralSubprojects {
     def branch = gitBranch()
     if (!(branch == "master" || branch == "main")) {
-        logger.warn("Warning: Can only publish to Bintray from master or main branch")
+        logger.warn("Warning: Can only publish to Maven Central from master or main branch")
         return
     }
 
-    // define which subprojects to publish to bintray
-    dependsOn ':apigateway:bintrayUpload'
-    dependsOn ':core:bintrayUpload'
-    dependsOn ':doi:bintrayUpload'
-    dependsOn ':eventhandlers:bintrayUpload'
-    dependsOn ':identifiers:bintrayUpload'
-    dependsOn ':lambdaauthorizer:bintrayUpload'
-    dependsOn ':logutils:bintrayUpload'
-    dependsOn ':secrets:bintrayUpload'
+    // define which subprojects to publish to Maven Central
+    dependsOn ':apigateway:publish'
+    dependsOn ':core:publish'
+    dependsOn ':doi:publish'
+    dependsOn ':eventhandlers:publish'
+    dependsOn ':identifiers:publish'
+    dependsOn ':lambdaauthorizer:publish'
+    dependsOn ':logutils:publish'
+    dependsOn ':secrets:publish'
+    finalizedBy ':closeAndReleaseRepository'
 }
 
 build {

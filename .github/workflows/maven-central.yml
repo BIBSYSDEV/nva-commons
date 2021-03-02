@@ -1,4 +1,4 @@
-name: Publish to Bintray
+name: Publish to Maven Central
 
 on:
   push:
@@ -28,6 +28,8 @@ jobs:
 
       - name: Build with Gradle
         env:
-          BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
-          BINTRAY_API_KEY: ${{ secrets.BINTRAY_API_KEY }}
-        run: ./gradlew build bintraySubprojects -PbintrayDryRun=true
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: ./gradlew build mavenCentralSubprojects

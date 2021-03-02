@@ -18,8 +18,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 public class StringUtilsTest {
 
-    private static final String EXPECTED_OUTPUT = "The quick brown fox jumps over the lazy dog";
-    private static final String PARAMETERIZED_TEST_NAME_FORMAT = "[{index}]  {displayName} with input: \"{0}\"";
     public static final String EMPTY_STRING = "";
     public static final String BLANK_STRING = " ";
     public static final String TAB_STRING = "\t";
@@ -27,6 +25,8 @@ public class StringUtilsTest {
     public static final String END_OF_LINE = "\r\n";
     public static final String NULL = null;
     public static final String CARRIAGE_RETURN = "\r";
+    private static final String EXPECTED_OUTPUT = "The quick brown fox jumps over the lazy dog";
+    private static final String PARAMETERIZED_TEST_NAME_FORMAT = "[{index}]  {displayName} with input: \"{0}\"";
 
     @Test
     @DisplayName("removeMultipleWhitespaces preserves single whitespaces")
