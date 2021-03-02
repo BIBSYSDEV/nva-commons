@@ -36,8 +36,8 @@ public class S3Driver {
         this.bucketName = bucketName;
     }
 
-    public void insertFile(Path filename, String content) {
-        PutObjectRequest putObjectRequest = newPutObjectRequest(filename);
+    public void insertFile(Path fullPath, String content) {
+        PutObjectRequest putObjectRequest = newPutObjectRequest(fullPath);
 
         client.putObject(putObjectRequest, RequestBody.fromBytes(content.getBytes(StandardCharsets.UTF_8)));
     }
@@ -136,10 +136,10 @@ public class S3Driver {
                    .build();
     }
 
-    private PutObjectRequest newPutObjectRequest(Path filename) {
+    private PutObjectRequest newPutObjectRequest(Path fullPath) {
         return PutObjectRequest.builder()
                    .bucket(bucketName)
-                   .key(pathToString(filename))
+                   .key(pathToString(fullPath))
                    .build();
     }
 }
