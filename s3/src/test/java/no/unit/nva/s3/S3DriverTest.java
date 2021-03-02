@@ -1,7 +1,6 @@
 package no.unit.nva.s3;
 
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static nva.commons.core.ioutils.IoUtils.pathToString;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -24,6 +23,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -44,19 +45,18 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 
 class S3DriverTest {
 
-    public static final Faker FAKER = Faker.instance();
-    public static final String SAMPLE_BUCKET = "sampleBucket";
-    public static final boolean NOT_LAST_OBJECT = false;
-    public static final boolean LAST_OBJECT = true;
-    public static final String REMOTELY_EXISTING_BUCKET = "orestis-export";
-    public static final int REQUEST_BODY_ARG_INDEX = 1;
-    public static final String SOME_PATH = "somePath";
+    private static final Faker FAKER = Faker.instance();
+    private static final String SAMPLE_BUCKET = "sampleBucket";
+    private static final boolean NOT_LAST_OBJECT = false;
+    private static final boolean LAST_OBJECT = true;
+    private static final String REMOTELY_EXISTING_BUCKET = "orestis-export";
+    private static final int REQUEST_BODY_ARG_INDEX = 1;
+    private static final String SOME_PATH = "somePath";
     private static final String FIRST_EXPECTED_OBJECT_KEY = randomFileName();
     private static final String SECOND_EXPECTED_OBJECT_KEY = randomFileName();
     private static final String EXPECTED_NON_COMPRESSED_CONTENT = randomString();
     private static final String LINE_SEPARATOR = System.lineSeparator();
-    private static final String PUT_ITEM_EXPECTED_PATH =
-        constructPath("some", "nested", "path", randomFileName());
+    private static final String PUT_ITEM_EXPECTED_PATH = pathToString(constructNestedPath());
     private static final int PUT_OBJECT_REQUEST_ARG_INDEX = 0;
     private static final String EXPECTED_COMPRESSED_CONTENT = randomString();
     private static final Integer NUMBER_OF_LISTED_ITEMS_IN_MOCKED_LISTING = 2;
@@ -90,8 +90,8 @@ class S3DriverTest {
         Path parentFolder = Path.of(expectedFilename).getParent();
         String content = randomString();
         s3Driver.insertFile(Path.of(expectedFilename), content);
-        List<String> files = s3Driver.listFiles(Path.of(S3Driver.pathToString(parentFolder)));
-        assertThat(files, hasItem(expectedFilename));
+        List<String> files = s3Driver.listFiles(Path.of(pathToString(parentFolder)));
+        MatcherAssert.assertThat(files, CoreMatchers.hasItem(expectedFilename));
     }
 
     @Test
@@ -102,7 +102,7 @@ class S3DriverTest {
         Path expectedFilePath = constructNestedPath();
         s3Driver.insertFile(expectedFilePath, expectedContent);
         String actualContent = s3Driver.getFile(expectedFilePath).orElseThrow();
-        assertThat(actualContent, is(equalTo(expectedContent)));
+        MatcherAssert.assertThat(actualContent, is(equalTo(expectedContent)));
     }
 
     @Test
@@ -114,35 +114,35 @@ class S3DriverTest {
         s3Driver.insertFile(expectedFilePath, expectedContent);
         List<String> actualContent = s3Driver.getFiles(expectedFilePath);
 
-        assertThat(actualContent.size(), is(equalTo(1)));
-        assertThat(actualContent, hasItem(expectedContent));
+        MatcherAssert.assertThat(actualContent.size(), is(equalTo(1)));
+        MatcherAssert.assertThat(actualContent, CoreMatchers.hasItem(expectedContent));
     }
 
     @Test
     public void listFilesReturnsListWithAllFilesInS3Folder() {
         List<String> files = s3Driver.listFiles(Path.of(SOME_PATH));
-        assertThat(files, contains(FIRST_EXPECTED_OBJECT_KEY, SECOND_EXPECTED_OBJECT_KEY));
+        MatcherAssert.assertThat(files, contains(FIRST_EXPECTED_OBJECT_KEY, SECOND_EXPECTED_OBJECT_KEY));
     }
 
     @Test
     public void getFileReturnsFileWhenFileExists() {
         Path somePath = Path.of(SOME_PATH);
         String actualContent = s3Driver.getFile(somePath).orElseThrow();
-        assertThat(actualContent, is(equalTo(EXPECTED_NON_COMPRESSED_CONTENT)));
+        MatcherAssert.assertThat(actualContent, is(equalTo(EXPECTED_NON_COMPRESSED_CONTENT)));
     }
 
     @Test
     public void insertFileInsertsObjectEncodedInUtf8() {
         s3Driver.insertFile(Path.of(PUT_ITEM_EXPECTED_PATH), EXPECTED_NON_COMPRESSED_CONTENT);
-        assertThat(actualPutObjectContent, is(equalTo(EXPECTED_NON_COMPRESSED_CONTENT)));
-        assertThat(actualPutObjectKey, is(equalTo(PUT_ITEM_EXPECTED_PATH)));
+        MatcherAssert.assertThat(actualPutObjectContent, is(equalTo(EXPECTED_NON_COMPRESSED_CONTENT)));
+        MatcherAssert.assertThat(actualPutObjectKey, is(equalTo(PUT_ITEM_EXPECTED_PATH)));
     }
 
     @Test
     public void getCompressedFileReturnsContentsWhenInputIsCompressed() throws IOException {
         String compressedFilename = "compressed.gz";
         String result = s3Driver.getCompressedFile(Path.of(compressedFilename));
-        assertThat(result, is(equalTo(EXPECTED_COMPRESSED_CONTENT)));
+        MatcherAssert.assertThat(result, is(equalTo(EXPECTED_COMPRESSED_CONTENT)));
     }
 
     @Test
@@ -156,12 +156,8 @@ class S3DriverTest {
         s3Driver.insertFile(expectedFilePath, expectedContent);
         List<String> actualContent = s3Driver.getFiles(expectedFilePath);
 
-        assertThat(actualContent.size(), is(equalTo(NUMBER_OF_LISTED_ITEMS_IN_MOCKED_LISTING)));
-        assertThat(actualContent, contains(EXPECTED_NON_COMPRESSED_CONTENT, EXPECTED_COMPRESSED_CONTENT));
-    }
-
-    private static String constructPath(String first, String... more) {
-        return S3Driver.pathToString(Path.of(first, more));
+        MatcherAssert.assertThat(actualContent.size(), is(equalTo(NUMBER_OF_LISTED_ITEMS_IN_MOCKED_LISTING)));
+        MatcherAssert.assertThat(actualContent, contains(EXPECTED_NON_COMPRESSED_CONTENT, EXPECTED_COMPRESSED_CONTENT));
     }
 
     private static String randomFileName() {
@@ -181,7 +177,7 @@ class S3DriverTest {
         return streamToString(contentSteam);
     }
 
-    private Path constructNestedPath() {
+    private static Path constructNestedPath() {
         String expectedFileName = randomFileName();
         Path parentFolder = Path.of("some", "nested", "path");
         return parentFolder.resolve(Path.of(expectedFileName));
@@ -209,6 +205,7 @@ class S3DriverTest {
         setupGetCompressObject(s3Client);
     }
 
+    @SuppressWarnings("unchecked")
     private void setupGetUncompressedObject(S3Client s3Client) {
         when(s3Client.getObject(any(GetObjectRequest.class), any(ResponseTransformer.class)))
             .thenAnswer(invocation -> returnPredefinedContent());
@@ -221,7 +218,7 @@ class S3DriverTest {
 
     private ResponseInputStream<GetObjectResponse> s3InputStreamWithCompressedContents() throws IOException {
         return new ResponseInputStream<>(GetObjectResponse.builder().build(),
-            AbortableInputStream.create(zippedStream(EXPECTED_COMPRESSED_CONTENT)));
+            AbortableInputStream.create(zippedStream()));
     }
 
     private ResponseBytes<GetObjectResponse> returnPredefinedContent() {
@@ -248,10 +245,10 @@ class S3DriverTest {
         return S3Object.builder().key(firstExpectedObjectKey).build();
     }
 
-    private InputStream zippedStream(String inputString) throws IOException {
+    private InputStream zippedStream() throws IOException {
 
         File tempFile = createTempFile();
-        writeStringToCompressedFile(inputString, tempFile);
+        writeStringToCompressedFile(tempFile);
         return inputStreamToCompressedFile(tempFile);
     }
 
@@ -259,14 +256,15 @@ class S3DriverTest {
         return new FileInputStream(tempFile);
     }
 
-    private void writeStringToCompressedFile(String inputString, File tempFile) throws IOException {
-        OutputStreamWriter outputStreamWriter =
-            new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(tempFile)));
-        outputStreamWriter.write(inputString);
-        outputStreamWriter.flush();
-        outputStreamWriter.close();
+    private static void writeStringToCompressedFile(File tempFile) throws IOException {
+        try (final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
+            new GZIPOutputStream(new FileOutputStream(tempFile)), StandardCharsets.UTF_8)) {
+            outputStreamWriter.write(EXPECTED_COMPRESSED_CONTENT);
+            outputStreamWriter.flush();
+        }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private File createTempFile() {
         File tempFile = new File("compressedFile.gz");
         if (tempFile.exists()) {

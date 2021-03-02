@@ -1,8 +1,8 @@
 package no.unit.nva.s3;
 
 import static nva.commons.core.attempt.Try.attempt;
+import static nva.commons.core.ioutils.IoUtils.pathToString;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -26,8 +26,6 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 
 public class S3Driver {
 
-    public static final String OS_PATH_DELIMITER = File.separator;
-    public static final String UNIX_PATH_DELIMITER = "/";
     public static final String GZIP_ENDING = ".gz";
     private static final String LINE_SEPARATOR = System.lineSeparator();
     private final S3Client client;
@@ -36,13 +34,6 @@ public class S3Driver {
     public S3Driver(S3Client s3Client, String bucketName) {
         this.client = s3Client;
         this.bucketName = bucketName;
-    }
-
-    public static String pathToString(Path filename) {
-        if (!OS_PATH_DELIMITER.equals(UNIX_PATH_DELIMITER)) {
-            return filename.toString().replaceAll(OS_PATH_DELIMITER, UNIX_PATH_DELIMITER);
-        }
-        return filename.toString();
     }
 
     public void insertFile(Path filename, String content) {
