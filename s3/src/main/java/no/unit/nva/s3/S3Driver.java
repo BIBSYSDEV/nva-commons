@@ -1,12 +1,19 @@
 package no.unit.nva.s3;
 
+import static nva.commons.core.attempt.Try.attempt;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -21,6 +28,8 @@ public class S3Driver {
 
     public static final String OS_PATH_DELIMITER = File.separator;
     public static final String UNIX_PATH_DELIMITER = "/";
+    public static final String GZIP_ENDING = ".gz";
+    private static final String LINE_SEPARATOR = System.lineSeparator();
     private final S3Client client;
     private final String bucketName;
 
@@ -45,7 +54,7 @@ public class S3Driver {
     public List<String> getFiles(Path folder) {
         List<String> filenames = listFiles(folder);
         return filenames.stream()
-                   .map(filename -> getFile(Path.of(filename)))
+                   .map(this::readFileContent)
                    .collect(Collectors.toList());
     }
 
@@ -64,10 +73,41 @@ public class S3Driver {
         return resultBuffer;
     }
 
-    public String getFile(Path file) {
+    public Optional<String> getFile(Path file) {
         GetObjectRequest getObjectRequest = createGetObjectRequest(file);
         ResponseBytes<GetObjectResponse> response = client.getObject(getObjectRequest, ResponseTransformer.toBytes());
-        return response.asUtf8String();
+        return attempt(response::asUtf8String).toOptional();
+    }
+
+    public String getCompressedFile(Path file) throws IOException {
+        GetObjectRequest getObjectRequest = createGetObjectRequest(file);
+        try (ResponseInputStream<GetObjectResponse> response = client.getObject(getObjectRequest)) {
+            return decompressInputToString(response);
+        }
+    }
+
+    private String decompressInputToString(ResponseInputStream<GetObjectResponse> response) throws IOException {
+        try (GZIPInputStream gzipInputStream = new GZIPInputStream(response)) {
+            return readCompressedStream(gzipInputStream);
+        }
+    }
+
+    private String readCompressedStream(GZIPInputStream gzipInputStream) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(gzipInputStream))) {
+            return reader.lines().collect(Collectors.joining(LINE_SEPARATOR));
+        }
+    }
+
+    private String readFileContent(String filename) {
+        if (isCompressed(filename)) {
+            return attempt(() -> getCompressedFile(Path.of(filename))).orElseThrow();
+        } else {
+            return getFile(Path.of(filename)).orElseThrow();
+        }
+    }
+
+    private boolean isCompressed(String filename) {
+        return filename.endsWith(GZIP_ENDING);
     }
 
     private String extractNextMarkerFromResultSet(ListObjectsResponse resultSet) {
@@ -94,7 +134,6 @@ public class S3Driver {
     }
 
     private List<String> extractResultsFromResponse(ListObjectsResponse result) {
-        var contents = result.contents();
         return result.contents().stream().map(S3Object::key).collect(Collectors.toList());
     }
 
