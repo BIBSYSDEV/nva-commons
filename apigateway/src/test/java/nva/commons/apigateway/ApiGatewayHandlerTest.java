@@ -9,16 +9,20 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -264,12 +268,12 @@ public class ApiGatewayHandlerTest {
 
     @Test
     void handlerSerializesBodyWithNonDefaultSerializationWhenDefaultSerializerIsOverridden() throws IOException {
-        var handler = new Handler(environment, JsonUtils.objectMapperWithEmpty);
+        ObjectMapper spiedMapper = spy(JsonUtils.objectMapperWithEmpty);
+        var handler = new Handler(environment, spiedMapper);
         var inputStream = requestWithHeaders();
         var outputStream = outputStream();
         handler.handleRequest(inputStream, outputStream, context);
-        var body = handler.getBody();
-        assertNotNull(body);
+        verify(spiedMapper, atLeast(1)).writeValueAsString(any());
     }
 
     private InputStream requestWithBodyWithoutType() throws JsonProcessingException {
