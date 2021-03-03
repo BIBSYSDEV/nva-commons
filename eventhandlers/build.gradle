@@ -1,22 +1,11 @@
 dependencies {
-    compileOnly project(":core")
-    testImplementation project(":core")
+    implementation project(":core")
+
+    implementation group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
+    implementation group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '3.2.0'
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-eventbridge', version: project.ext.awsSdkVersion
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: project.ext.awsSdkVersion
 
     testImplementation project(":logutils")
-
-    compileOnly group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
-    testImplementation group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
-
-    runtimeOnly group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '3.2.0'
-    compileOnly group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '3.1.0'
-    testImplementation group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '3.1.0'
-
-    compileOnly group: 'com.amazonaws', name: 'aws-java-sdk-eventbridge', version: project.ext.awsSdkVersion
-    testImplementation group: 'com.amazonaws', name: 'aws-java-sdk-eventbridge', version: project.ext.awsSdkVersion
-
-    compileOnly group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: project.ext.awsSdkVersion
-    testImplementation group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: project.ext.awsSdkVersion
-
-
     testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: project.ext.nvaTestUtilsVersion
 }

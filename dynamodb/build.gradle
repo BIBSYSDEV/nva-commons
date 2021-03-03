@@ -1,5 +1,5 @@
 dependencies {
-    api project (":core")
+    implementation project (":core")
 
     api(group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: project.ext.awsSdkVersion) {
         exclude(group:'com.amazonaws', module: 'aws-java-sdk-s3')
