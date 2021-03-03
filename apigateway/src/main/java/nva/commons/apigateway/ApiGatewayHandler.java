@@ -13,12 +13,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.ApiGatewayUncheckedException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
-import nva.commons.core.JsonUtils;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 import org.zalando.problem.ThrowableProblem;
@@ -35,6 +36,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
 
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String APPLICATION_PROBLEM_JSON = "application/problem+json";
+    private final ObjectMapper mapper;
 
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
 
@@ -43,7 +45,13 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     }
 
     public ApiGatewayHandler(Class<I> iclass, Environment environment) {
+        this(iclass, environment, objectMapper);
+        this.additionalSuccessHeadersSupplier = Collections::emptyMap;
+    }
+
+    public ApiGatewayHandler(Class<I> iclass, Environment environment, ObjectMapper mapper) {
         super(iclass, environment);
+        this.mapper = mapper;
         this.additionalSuccessHeadersSupplier = Collections::emptyMap;
     }
 
@@ -67,7 +75,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
             GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, getSuccessHeaders(),
                 getSuccessStatusCode(input, output));
-            String responseJson = JsonUtils.objectMapper.writeValueAsString(gatewayResponse);
+            String responseJson = mapper.writeValueAsString(gatewayResponse);
             writer.write(responseJson);
         }
     }

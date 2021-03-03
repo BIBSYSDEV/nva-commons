@@ -9,6 +9,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -36,6 +37,7 @@ import nva.commons.apigateway.exceptions.TestException;
 import nva.commons.apigateway.testutils.Handler;
 import nva.commons.apigateway.testutils.RequestBody;
 import nva.commons.core.Environment;
+import nva.commons.core.JsonUtils;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
@@ -258,6 +260,16 @@ public class ApiGatewayHandlerTest {
 
         Problem details = response.getBodyObject(Problem.class);
         assertThat(details.getDetail(), containsString(InvalidOrMissingTypeException.MESSAGE));
+    }
+
+    @Test
+    void handlerSerializesBodyWithNonDefaultSerializationWhenDefaultSerializerIsOverridden() throws IOException {
+        var handler = new Handler(environment, JsonUtils.objectMapperWithEmpty);
+        var inputStream = requestWithHeaders();
+        var outputStream = outputStream();
+        handler.handleRequest(inputStream, outputStream, context);
+        var body = handler.getBody();
+        assertNotNull(body);
     }
 
     private InputStream requestWithBodyWithoutType() throws JsonProcessingException {
