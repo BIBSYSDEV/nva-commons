@@ -38,8 +38,7 @@ public class S3Driver {
 
     public void insertFile(Path fullPath, String content) {
         PutObjectRequest putObjectRequest = newPutObjectRequest(fullPath);
-
-        client.putObject(putObjectRequest, RequestBody.fromBytes(content.getBytes(StandardCharsets.UTF_8)));
+        client.putObject(putObjectRequest, createRequestBody(content));
     }
 
     public List<String> getFiles(Path folder) {
@@ -51,22 +50,25 @@ public class S3Driver {
 
     public List<String> listFiles(Path folder) {
         List<String> resultBuffer = new ArrayList<>();
-        ListObjectsResponse result = null;
-        String nextMarker = null;
-        boolean isFirstLoop = true;
-        while (isFirstLoop || result.isTruncated()) {
-            var request = listFilesRequest(folder, nextMarker);
-            result = client.listObjects(request);
-            addResultsToBuffer(resultBuffer, result);
-            nextMarker = extractNextMarkerFromResultSet(result);
-            isFirstLoop = false;
-        }
+        ListObjectsResponse partialResult;
+        String listingStartingPoint = null;
+        do {
+            partialResult = fetchNewResultsBatch(folder, listingStartingPoint);
+            addResultsToBuffer(resultBuffer, partialResult);
+            listingStartingPoint = extractNextListingStartingPoint(partialResult);
+        } while (partialResult.isTruncated());
+
         return resultBuffer;
+    }
+
+    private ListObjectsResponse fetchNewResultsBatch(Path folder, String listingStartingPoint) {
+        ListObjectsRequest request = requestForListingFiles(folder, listingStartingPoint);
+        return client.listObjects(request);
     }
 
     public Optional<String> getFile(Path file) {
         GetObjectRequest getObjectRequest = createGetObjectRequest(file);
-        ResponseBytes<GetObjectResponse> response = client.getObject(getObjectRequest, ResponseTransformer.toBytes());
+        ResponseBytes<GetObjectResponse> response = fetchObject(getObjectRequest);
         return attempt(response::asUtf8String).toOptional();
     }
 
@@ -75,6 +77,14 @@ public class S3Driver {
         try (ResponseInputStream<GetObjectResponse> response = client.getObject(getObjectRequest)) {
             return decompressInputToString(response);
         }
+    }
+
+    private RequestBody createRequestBody(String content) {
+        return RequestBody.fromBytes(content.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private ResponseBytes<GetObjectResponse> fetchObject(GetObjectRequest getObjectRequest) {
+        return client.getObject(getObjectRequest, ResponseTransformer.toBytes());
     }
 
     private String decompressInputToString(ResponseInputStream<GetObjectResponse> response) throws IOException {
@@ -101,7 +111,7 @@ public class S3Driver {
         return filename.endsWith(GZIP_ENDING);
     }
 
-    private String extractNextMarkerFromResultSet(ListObjectsResponse resultSet) {
+    private String extractNextListingStartingPoint(ListObjectsResponse resultSet) {
         if (!resultSet.contents().isEmpty()) {
             return lastObjectKeyInReturnedResults(resultSet);
         }
@@ -128,11 +138,11 @@ public class S3Driver {
         return result.contents().stream().map(S3Object::key).collect(Collectors.toList());
     }
 
-    private ListObjectsRequest listFilesRequest(Path folder, String marker) {
+    private ListObjectsRequest requestForListingFiles(Path folder, String startingPoint) {
         return ListObjectsRequest.builder()
                    .bucket(bucketName)
                    .prefix(pathToString(folder))
-                   .marker(marker)
+                   .marker(startingPoint)
                    .build();
     }
 
