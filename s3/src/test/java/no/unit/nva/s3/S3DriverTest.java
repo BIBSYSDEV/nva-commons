@@ -84,7 +84,7 @@ class S3DriverTest {
 
     @Test
     @Tag("RemoteTest")
-    public void listFilesReturnsListWithAllFilesInRemoteS3Folder() {
+    public void listFilesReturnsListWithAllFilenamesInRemoteS3Folder() {
         S3Driver s3Driver = new S3Driver(S3Client.create(), REMOTELY_EXISTING_BUCKET);
         String expectedFilename = constructNestedPath().toString();
         Path parentFolder = Path.of(expectedFilename).getParent();
@@ -119,7 +119,7 @@ class S3DriverTest {
     }
 
     @Test
-    public void listFilesReturnsListWithAllFilesInS3Folder() {
+    public void listFilesReturnsListWithAllFilenamesInS3Folder() {
         List<String> files = s3Driver.listFiles(Path.of(SOME_PATH));
         MatcherAssert.assertThat(files, contains(FIRST_EXPECTED_OBJECT_KEY, SECOND_EXPECTED_OBJECT_KEY));
     }
