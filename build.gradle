@@ -24,7 +24,7 @@ nexusStaging {
 
 allprojects {
     group = 'com.github.bibsysdev'
-    version = '1.2.0'
+    version = '1.2.1'
 
     apply plugin: 'java-library'
     apply plugin: 'jacoco'
@@ -60,12 +60,14 @@ allprojects {
 
     test {
         useJUnitPlatform {
+            excludeTags("RemoteTest")
         }
         failFast = true
         finalizedBy jacocoTestReport
         testLogging {
             events 'failed', 'passed', 'skipped'
         }
+
         Map<String, String> envVariables = new HashMap<>()
         envVariables.put("EXISTING_NON_EMPTY_VARIABLE", "SomeContent")
         envVariables.put("EXISTING_EMPTY_VARIABLE", "  ")
