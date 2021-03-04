@@ -183,6 +183,14 @@ class S3DriverTest {
         return parentFolder.resolve(Path.of(expectedFileName));
     }
 
+    private static void writeStringToCompressedFile(File tempFile) throws IOException {
+        try (final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
+            new GZIPOutputStream(new FileOutputStream(tempFile)), StandardCharsets.UTF_8)) {
+            outputStreamWriter.write(EXPECTED_COMPRESSED_CONTENT);
+            outputStreamWriter.flush();
+        }
+    }
+
     private S3Client mockS3Client() throws IOException {
         S3Client s3Client = mock(S3Client.class);
         setupObjectListing(s3Client);
@@ -256,15 +264,6 @@ class S3DriverTest {
         return new FileInputStream(tempFile);
     }
 
-    private static void writeStringToCompressedFile(File tempFile) throws IOException {
-        try (final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
-            new GZIPOutputStream(new FileOutputStream(tempFile)), StandardCharsets.UTF_8)) {
-            outputStreamWriter.write(EXPECTED_COMPRESSED_CONTENT);
-            outputStreamWriter.flush();
-        }
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private File createTempFile() {
         File tempFile = new File("compressedFile.gz");
         if (tempFile.exists()) {
