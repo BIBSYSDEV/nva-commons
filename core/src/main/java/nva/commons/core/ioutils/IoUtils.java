@@ -33,8 +33,12 @@ public final class IoUtils {
      */
     @Deprecated
     public static InputStream inputStreamFromResources(Path path) {
-        String pathString = replaceWinPathSeparatorsWithUniversalPathSeparators(path.toString());
+        String pathString = pathToString(path);
         return inputStreamFromResources(pathString);
+    }
+
+    public static String pathToString(Path path) {
+        return replaceWinPathSeparatorsWithUniversalPathSeparators(path.toString());
     }
 
     /**
@@ -54,14 +58,6 @@ public final class IoUtils {
         }
     }
 
-    private static String replaceWinPathSeparatorsWithUniversalPathSeparators(String path) {
-        return path.replaceAll(WIN_PATH_SEPARATOR_REGEX, PATH_SEPARATOR_FOR_RESOURCES);
-    }
-
-    private static void requireResourceExists(InputStream stream) {
-        Objects.requireNonNull(stream);
-    }
-
     /**
      * Return a String the stream data encoded in UTF-8.
      *
@@ -74,10 +70,6 @@ public final class IoUtils {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-    }
-
-    private static InputStreamReader newInputStreamReader(InputStream stream) {
-        return new InputStreamReader(stream, StandardCharsets.UTF_8);
     }
 
     /**
@@ -131,5 +123,17 @@ public final class IoUtils {
      */
     public static InputStream stringToStream(String input) {
         return new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static String replaceWinPathSeparatorsWithUniversalPathSeparators(String path) {
+        return path.replaceAll(WIN_PATH_SEPARATOR_REGEX, PATH_SEPARATOR_FOR_RESOURCES);
+    }
+
+    private static void requireResourceExists(InputStream stream) {
+        Objects.requireNonNull(stream);
+    }
+
+    private static InputStreamReader newInputStreamReader(InputStream stream) {
+        return new InputStreamReader(stream, StandardCharsets.UTF_8);
     }
 }

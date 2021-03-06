@@ -8,3 +8,7 @@ include 'logutils'
 include 'eventhandlers'
 include 'identifiers'
 include 'dynamodb'
+include 's3'
+
+
+
