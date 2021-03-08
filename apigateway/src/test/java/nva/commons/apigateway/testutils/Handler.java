@@ -5,6 +5,8 @@ import com.amazonaws.services.lambda.runtime.Context;
 import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import nva.commons.apigateway.ApiGatewayHandler;
 import nva.commons.apigateway.HttpHeaders;
 import nva.commons.apigateway.RequestInfo;
@@ -25,6 +27,15 @@ public class Handler extends ApiGatewayHandler<RequestBody, String> {
      */
     public Handler(Environment environment) {
         super(RequestBody.class, environment);
+    }
+
+    /**
+     * Constructor that overrides default serialization.
+     * @param environment the environment
+     * @param mapper      Object Mapper
+     */
+    public Handler(Environment environment, ObjectMapper mapper) {
+        super(RequestBody.class, environment, mapper);
     }
 
     @Override
