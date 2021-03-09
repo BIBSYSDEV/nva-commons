@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
+    public static final String REQUEST_ID = "RequestId:";
     private static final Logger logger = LoggerFactory.getLogger(RestRequestHandler.class);
     protected final Environment environment;
     private final transient Class<I> iclass;
@@ -48,6 +49,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
+        logger.info(REQUEST_ID + context.getAwsRequestId());
         I inputObject = null;
         try {
 
