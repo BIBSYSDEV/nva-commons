@@ -319,6 +319,7 @@ task mavenCentralSubprojects {
     dependsOn ':lambdaauthorizer:publish'
     dependsOn ':logutils:publish'
     dependsOn ':secrets:publish'
+    dependsOn ':s3:publish'
     finalizedBy ':closeAndReleaseRepository'
 }
 
