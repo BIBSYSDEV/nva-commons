@@ -281,34 +281,6 @@ task jacocoRootReport(type: JacocoReport, dependsOn: tasks.jacocoMerge) {
     }
 }
 
-static def gitBranch() {
-    def branch = ""
-    def proc = "git rev-parse --abbrev-ref HEAD".execute()
-    proc.in.eachLine { line -> branch = line }
-    proc.err.eachLine { line -> println line }
-    proc.waitFor()
-    branch
-}
-
-task mavenCentralSubprojects {
-    def branch = gitBranch()
-    if (!(branch == "master" || branch == "main")) {
-        logger.warn("Warning: Can only publish to Maven Central from master or main branch")
-        return
-    }
-
-    // define which subprojects to publish to Maven Central
-    dependsOn ':apigateway:publishToSonatype'
-    dependsOn ':core:publishToSonatype'
-    dependsOn ':doi:publishToSonatype'
-    dependsOn ':eventhandlers:publishToSonatype'
-    dependsOn ':identifiers:publishToSonatype'
-    dependsOn ':lambdaauthorizer:publishToSonatype'
-    dependsOn ':logutils:publishToSonatype'
-    dependsOn ':secrets:publishToSonatype'
-    finalizedBy ':closeAndReleaseSonatypeStagingRepository'
-}
-
 build {
     dependsOn jacocoRootReport
 }
