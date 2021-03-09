@@ -31,6 +31,8 @@ allprojects {
     apply plugin: 'base'
     apply plugin: 'checkstyle'
     apply plugin: 'pmd'
+    apply plugin: 'maven-publish'
+
 
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
