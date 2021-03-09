@@ -83,8 +83,9 @@ public class Success<T> extends Try<T> {
     }
 
     /**
-     * A wrapper for consumers that throw checked Exceptions. See {@see https://www.oreilly.com/content/handling
-     * -checked-exceptions-in-java-streams/} Try to perform the action. Any exception will be enclosed in a Failure.
+     * A wrapper for consumers that throw checked Exceptions.
+     * See "https://www.oreilly.com/content/handling-checked-exceptions-in-java-streams/"
+     * Try to perform the action. Any exception will be enclosed in a Failure.
      *
      * @param action a {@link Consumer} action that throws or does not throw a checked Exception
      * @param <E>    the type of the thrown Exception

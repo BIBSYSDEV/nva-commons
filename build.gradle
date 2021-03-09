@@ -36,11 +36,6 @@ allprojects {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
 
-    // Needed because our javadoc contains a bunch of errors. TODO: Fix these errors.
-    tasks.withType(Javadoc) {
-        options.addStringOption('Xdoclint:none', '-quiet')
-    }
-
     repositories {
         mavenCentral()
         maven { url 'https://jitpack.io' }

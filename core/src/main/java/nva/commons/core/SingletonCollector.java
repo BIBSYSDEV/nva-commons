@@ -38,7 +38,6 @@ public final class SingletonCollector {
      * @param <T> The type of input elements to the reduction operation.
      * @param <E> The type of the exception to be thrown.
      * @return A type of the singleton.
-     * @throws E If the input list is empty or contains more than one element.
      */
     public static <T, E extends Exception> Collector<T, ?, Try<T>> tryCollect() {
         return Collectors.collectingAndThen(Collectors.toList(), list -> attempt(() -> get(list)));
