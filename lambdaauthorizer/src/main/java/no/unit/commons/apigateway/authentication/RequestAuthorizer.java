@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.RestRequestHandler;
@@ -165,6 +166,8 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
         return AuthorizerResponse.newBuilder()
                    .withPrincipalId(principalId())
                    .withPolicyDocument(authPolicy)
+                   .withContext(Map.of("pleaseIgnore", "just testing context"))
+                   .withUsageIdentifierKey(null)
                    .build();
     }
 

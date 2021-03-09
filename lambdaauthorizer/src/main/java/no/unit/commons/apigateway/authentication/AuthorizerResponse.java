@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+
 import nva.commons.core.JsonUtils;
 
 public class AuthorizerResponse {
@@ -14,12 +16,20 @@ public class AuthorizerResponse {
     @JsonProperty("policyDocument")
     private AuthPolicy policyDocument;
 
+    @JsonProperty("context")
+    private Map<String,Object> context;
+
+    @JsonProperty("usageIdentifierKey")
+    private String usageIdentifierKey;
+
     public AuthorizerResponse() {
     }
 
     private AuthorizerResponse(Builder builder) {
         setPrincipalId(builder.principalId);
         setPolicyDocument(builder.policyDocument);
+        setContext(builder.context);
+        setUsageIdentifierKey(builder.usageIdentifierKey);
     }
 
     public static AuthorizerResponse fromOutputStream(ByteArrayOutputStream outputStream)
@@ -48,10 +58,28 @@ public class AuthorizerResponse {
         this.policyDocument = policyDocument;
     }
 
+    public Map<String, Object> getContext() {
+        return context;
+    }
+
+    public void setContext(Map<String, Object> context) {
+        this.context = context;
+    }
+
+    public String getUsageIdentifierKey() {
+        return usageIdentifierKey;
+    }
+
+    public void setUsageIdentifierKey(String usageIdentifierKey) {
+        this.usageIdentifierKey = usageIdentifierKey;
+    }
+
     public static final class Builder {
 
         private String principalId;
         private AuthPolicy policyDocument;
+        private Map<String,Object> context;
+        private String usageIdentifierKey;
 
         private Builder() {
         }
@@ -63,6 +91,16 @@ public class AuthorizerResponse {
 
         public Builder withPolicyDocument(AuthPolicy val) {
             policyDocument = val;
+            return this;
+        }
+
+        public Builder withContext(Map<String,Object> val) {
+            context = val;
+            return this;
+        }
+
+        public Builder withUsageIdentifierKey(String val) {
+            usageIdentifierKey = val;
             return this;
         }
 
