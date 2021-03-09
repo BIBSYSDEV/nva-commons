@@ -20,7 +20,7 @@ public class Environment {
      * Read an Environment variable.
      *
      * @param variableName the Env variable name.
-     * @return the value of the variable or throw {@IllegalStateException} if the variable does not exists.
+     * @return the value of the variable or throw IllegalStateException if the variable does not exists.
      */
     public String readEnv(String variableName) {
         return readEnvOpt(variableName).orElseThrow(() -> variableNotSetException(variableName));

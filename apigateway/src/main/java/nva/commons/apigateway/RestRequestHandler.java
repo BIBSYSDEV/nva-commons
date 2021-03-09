@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URISyntaxException;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
 import nva.commons.apigateway.exceptions.InvalidOrMissingTypeException;
@@ -114,8 +113,6 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
      *                              fields during the processing
      * @param context               the Context
      * @return an output object of class O
-     * @throws IOException         when processing fails
-     * @throws URISyntaxException  when processing fails
      * @throws ApiGatewayException when some predictable error happens.
      */
     protected O processInput(I input, String apiGatewayInputString, Context context) throws ApiGatewayException {
