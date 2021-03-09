@@ -5,9 +5,10 @@ plugins {
     id 'checkstyle'
     id 'pmd'
     id 'nebula.lint' version '16.17.0'
-    id 'maven-publish'
+//    id 'maven-publish'
     id 'signing'
     id "io.codearte.nexus-staging" version "0.22.0"
+    id 'maven'
 }
 
 wrapper {
@@ -31,7 +32,7 @@ allprojects {
     apply plugin: 'base'
     apply plugin: 'checkstyle'
     apply plugin: 'pmd'
-    apply plugin: 'maven-publish'
+    apply plugin: 'maven'
 
 
     sourceCompatibility = JavaVersion.VERSION_11
