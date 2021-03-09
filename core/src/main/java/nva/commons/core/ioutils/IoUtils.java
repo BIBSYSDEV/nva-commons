@@ -37,10 +37,6 @@ public final class IoUtils {
         return inputStreamFromResources(pathString);
     }
 
-    public static String pathToString(Path path) {
-        return replaceWinPathSeparatorsWithUniversalPathSeparators(path.toString());
-    }
-
     /**
      * Read resource file as an {@link InputStream}. The root folder for the resources is considered to be the folders
      * src/main/resources and src/test/resources/, or any other standard reosources folder.
@@ -56,6 +52,10 @@ public final class IoUtils {
         } catch (Exception e) {
             throw new ResourceNotFoundException(path, e);
         }
+    }
+
+    public static String pathToString(Path path) {
+        return replaceWinPathSeparatorsWithUniversalPathSeparators(path.toString());
     }
 
     /**

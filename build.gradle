@@ -25,13 +25,14 @@ wrapper {
 
 allprojects {
     group = 'com.github.bibsysdev'
-    version = '1.2.5'
+    version = '1.2.6'
 
     apply plugin: 'java-library'
     apply plugin: 'jacoco'
     apply plugin: 'base'
     apply plugin: 'checkstyle'
     apply plugin: 'pmd'
+    apply plugin: 'nebula.lint'
 
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
@@ -48,7 +49,7 @@ allprojects {
     project.ext {
         jacksonVersion = "2.12.0"
         awsSdkVersion = "1.11.931"
-        awsSdk2Version = '2.15.74'
+        awsSkd2Version = '2.16.8'
         jupiterVersion = "5.7.0"
         log4jVersion = "2.13.2"
         nvaTestUtilsVersion = "0.1.16"
@@ -161,6 +162,9 @@ subprojects {
         api group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
 
 
+
+
+
         testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: project.ext.jupiterVersion
         testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: project.ext.jupiterVersion
         testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: project.ext.jupiterVersion
@@ -171,6 +175,7 @@ subprojects {
 
         testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.8.0'
         testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
+        testImplementation group: 'org.hamcrest', name: 'hamcrest-core', version: '2.2'
         testImplementation group: 'com.github.npathai', name: 'hamcrest-optional', version: '2.0.0'
         testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.14'
 
