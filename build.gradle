@@ -7,7 +7,15 @@ plugins {
     id 'nebula.lint' version '16.17.0'
     id 'maven-publish'
     id 'signing'
-    id "io.codearte.nexus-staging" version "0.22.0"
+    id 'io.github.gradle-nexus.publish-plugin' version '1.0.0'
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            stagingProfileId = "5ba11e4895739"
+        }
+    }
 }
 
 wrapper {
@@ -15,16 +23,9 @@ wrapper {
     gradleVersion = "6.7"
 }
 
-nexusStaging {
-    packageGroup = "com.github.bibsysdev"
-    stagingProfileId = "5ba11e4895739"
-    username = findProperty('ossrhUsername') ?: System.getenv('OSSRH_USERNAME')
-    password = findProperty('ossrhPassword') ?: System.getenv('OSSRH_PASSWORD')
-}
-
 allprojects {
     group = 'com.github.bibsysdev'
-    version = '1.2.3'
+    version = '1.2.4'
 
     apply plugin: 'java-library'
     apply plugin: 'jacoco'
@@ -74,7 +75,6 @@ allprojects {
         environment(envVariables)
     }
 
-
     pmd {
         ruleSetConfig = rootProject.resources.text.fromFile('config/pmd/ruleset.xml')
         ruleSets = []
@@ -93,7 +93,6 @@ allprojects {
             html.stylesheet rootProject.resources.text.fromFile('config/checkstyle/checkstyle-simple.xsl')
         }
     }
-
 
     check.dependsOn jacocoTestCoverageVerification
     jacocoTestCoverageVerification.dependsOn(jacocoTestReport)
@@ -118,6 +117,7 @@ allprojects {
         }
     }
 }
+
 subprojects {
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
@@ -128,16 +128,15 @@ subprojects {
     }
 
     dependencies {
-
         // This method contains the logger class for AWS Lambda functions.
-        api (group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.1'){
+        api(group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.1') {
             exclude group: "org.apache.logging.log4j", module: "log4j-core:2.8.2"
             exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
-            exclude group:"com.amazonaws", module:"aws-lambda-java-core"
-            exclude group:'org.apache.logging.log4j', module:'log4j-core'
+            exclude group: "com.amazonaws", module: "aws-lambda-java-core"
+            exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
         }
 
-        api (group: 'com.amazonaws',name: 'aws-lambda-java-core', version:'1.2.1'){
+        api(group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1') {
             exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
             exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
             exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
@@ -171,8 +170,8 @@ subprojects {
         testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: project.ext.jupiterVersion
         testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: project.ext.jupiterVersion
 
-        compileOnly (group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.1'){
-            because ("junit.jupiter version 5 depends on it and testImplementation seems not enough")
+        compileOnly(group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.1') {
+            because("junit.jupiter version 5 depends on it and testImplementation seems not enough")
         }
 
         testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.8.0'
@@ -212,22 +211,10 @@ subprojects {
                 }
             }
         }
-        repositories {
-            maven {
-                credentials {
-                    username = findProperty('ossrhUsername') ?: System.getenv('OSSRH_USERNAME')
-                    password = findProperty('ossrhPassword') ?: System.getenv('OSSRH_PASSWORD')
-                }
-
-                url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
-            }
-        }
     }
 
     signing {
-        def signingKey = findProperty('signingKey') ?: System.getenv('SIGNING_KEY')
-        def signingPassword = findProperty('signingPassword') ?: System.getenv('SIGNING_PASSWORD')
-        useInMemoryPgpKeys(signingKey, signingPassword)
+        useInMemoryPgpKeys(findProperty("signingKey"), findProperty("signingPassword"))
         sign publishing.publications.mavenJava
     }
 }
@@ -294,7 +281,7 @@ task jacocoRootReport(type: JacocoReport, dependsOn: tasks.jacocoMerge) {
     }
 }
 
-def gitBranch() {
+static def gitBranch() {
     def branch = ""
     def proc = "git rev-parse --abbrev-ref HEAD".execute()
     proc.in.eachLine { line -> branch = line }
@@ -311,15 +298,15 @@ task mavenCentralSubprojects {
     }
 
     // define which subprojects to publish to Maven Central
-    dependsOn ':apigateway:publish'
-    dependsOn ':core:publish'
-    dependsOn ':doi:publish'
-    dependsOn ':eventhandlers:publish'
-    dependsOn ':identifiers:publish'
-    dependsOn ':lambdaauthorizer:publish'
-    dependsOn ':logutils:publish'
-    dependsOn ':secrets:publish'
-    finalizedBy ':closeAndReleaseRepository'
+    dependsOn ':apigateway:publishToSonatype'
+    dependsOn ':core:publishToSonatype'
+    dependsOn ':doi:publishToSonatype'
+    dependsOn ':eventhandlers:publishToSonatype'
+    dependsOn ':identifiers:publishToSonatype'
+    dependsOn ':lambdaauthorizer:publishToSonatype'
+    dependsOn ':logutils:publishToSonatype'
+    dependsOn ':secrets:publishToSonatype'
+    finalizedBy ':closeAndReleaseSonatypeStagingRepository'
 }
 
 build {
