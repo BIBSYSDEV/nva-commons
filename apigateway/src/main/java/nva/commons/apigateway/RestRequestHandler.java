@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URISyntaxException;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
 import nva.commons.apigateway.exceptions.InvalidOrMissingTypeException;
@@ -27,6 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
+    public static final String REQUEST_ID = "RequestId:";
     private static final Logger logger = LoggerFactory.getLogger(RestRequestHandler.class);
     protected final Environment environment;
     private final transient Class<I> iclass;
@@ -48,6 +48,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
+        logger.info(REQUEST_ID + context.getAwsRequestId());
         I inputObject = null;
         try {
 
@@ -112,8 +113,6 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
      *                              fields during the processing
      * @param context               the Context
      * @return an output object of class O
-     * @throws IOException         when processing fails
-     * @throws URISyntaxException  when processing fails
      * @throws ApiGatewayException when some predictable error happens.
      */
     protected O processInput(I input, String apiGatewayInputString, Context context) throws ApiGatewayException {

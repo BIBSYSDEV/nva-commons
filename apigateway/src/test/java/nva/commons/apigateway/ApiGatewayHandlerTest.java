@@ -34,6 +34,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.management.modelmbean.XMLParseException;
+import no.unit.nva.stubs.FakeContext;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.InvalidOrMissingTypeException;
@@ -60,7 +61,7 @@ public class ApiGatewayHandlerTest {
     public static final String SOME_REQUEST_ID = "RequestID:123456";
     public static final int OVERRIDEN_STATUS_CODE = 418;  //I'm a teapot
     public static final Path EVENT_WITH_UNKNOWN_REQUEST_INFO = Path.of("apiGatewayMessages",
-        "eventWithUnknownRequestInfo.json");
+                                                                       "eventWithUnknownRequestInfo.json");
     public Environment environment;
     private static final String PATH = "path1/path2/path3";
     private Context context;
@@ -104,7 +105,8 @@ public class ApiGatewayHandlerTest {
         Map<String, String> headers = handler.getHeaders();
         JsonNode expectedHeaders = createHeaders();
         expectedHeaders.fieldNames().forEachRemaining(expectedHeader ->
-            assertThat(headers.get(expectedHeader), is(equalTo(expectedHeaders.get(expectedHeader).textValue()))));
+                                                          assertThat(headers.get(expectedHeader), is(equalTo(
+                                                              expectedHeaders.get(expectedHeader).textValue()))));
     }
 
     @Test
@@ -235,7 +237,7 @@ public class ApiGatewayHandlerTest {
         GatewayResponse<Problem> response = getApiGatewayResponse(outputStream);
         assertThat(response.getStatusCode(), is(equalTo(OVERRIDEN_STATUS_CODE)));
         assertThat(response.getBodyObject(Problem.class).getStatus().getStatusCode(),
-            is(equalTo(OVERRIDEN_STATUS_CODE)));
+                   is(equalTo(OVERRIDEN_STATUS_CODE)));
     }
 
     @Test
@@ -247,9 +249,8 @@ public class ApiGatewayHandlerTest {
         GatewayResponse<Problem> response = getApiGatewayResponse(outputStream);
         assertThat(response.getStatusCode(), is(equalTo(TestException.ERROR_STATUS_CODE)));
         assertThat(response.getBodyObject(Problem.class).getStatus().getStatusCode(),
-            is(equalTo(TestException.ERROR_STATUS_CODE)));
+                   is(equalTo(TestException.ERROR_STATUS_CODE)));
     }
-
 
     @Test
     public void handlerReturnsBadRequestForJsonInvalidTypeError() throws IOException {
@@ -276,6 +277,17 @@ public class ApiGatewayHandlerTest {
         verify(spiedMapper, atLeast(1)).writeValueAsString(any());
     }
 
+    @Test
+    public void handlerLogsRequestIdForEveryRequest() throws IOException {
+        var appender = LogUtils.getTestingAppender(RestRequestHandler.class);
+        var handler = new Handler(environment);
+        var output = outputStream();
+        var contextWithRequestId = new FakeContext();
+        var expectedRequestId = contextWithRequestId.getAwsRequestId();
+        handler.handleRequest(requestWithHeadersAndPath(), output, contextWithRequestId);
+        assertThat(appender.getMessages(), containsString(expectedRequestId));
+    }
+
     private InputStream requestWithBodyWithoutType() throws JsonProcessingException {
         RequestBody requestBody = new RequestBody();
         requestBody.setField1("Some value");
@@ -284,8 +296,8 @@ public class ApiGatewayHandlerTest {
         objectWithoutType.remove(RequestBody.TYPE_ATTRIBUTE);
 
         return new HandlerRequestBuilder<ObjectNode>(objectMapper)
-            .withBody(objectWithoutType)
-            .build();
+                   .withBody(objectWithoutType)
+                   .build();
     }
 
     private Problem getProblemFromFailureResponse(ByteArrayOutputStream outputStream) throws JsonProcessingException {
@@ -296,7 +308,8 @@ public class ApiGatewayHandlerTest {
 
     private GatewayResponse<Problem> getApiGatewayResponse(ByteArrayOutputStream outputStream)
         throws JsonProcessingException {
-        TypeReference<GatewayResponse<Problem>> tr = new TypeReference<>() {};
+        TypeReference<GatewayResponse<Problem>> tr = new TypeReference<>() {
+        };
         return objectMapper.readValue(outputStream.toString(StandardCharsets.UTF_8), tr);
     }
 

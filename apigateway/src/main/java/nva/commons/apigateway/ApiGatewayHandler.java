@@ -121,24 +121,6 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
 
     /**
      * Add a function that adds headers to the response.
-     * <p>
-     * Example:
-     * <pre>
-     *  {@code
-     *
-     * @Override
-     *     protected String processInput(String input, RequestInfo requestInfo, Context context) throws Exception {
-     *
-     *         byte[] md5 = DigestUtils.md5(input);
-     *         addAdditionalHeaders(
-     *                  () -> Collections.singletonMap(HttpHeaders.CONTENT_MD5, new String(md5))
-     *          );
-     *         String output = input;
-     *         return output;
-     *     }
-     * }
-     * </pre>
-     * </p>
      *
      * @param additionalHeaders A supplier.
      */
@@ -175,8 +157,10 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
      * another additional message.
      *
      * @param exception  the thrown Exception.
-     * @param statusCode the statusCode that should be returned to the API-client
+     * @param statusCode the statusCode that should be returned to the API-client.
+     * @param requestId the id of the request that caused the exception.
      * @throws IOException when the writer throws an IOException.
+     * @throws GatewayResponseSerializingException when the writer throws an GatewayResponseSerializingException.
      */
 
     protected void writeFailure(Exception exception, Integer statusCode, String requestId)

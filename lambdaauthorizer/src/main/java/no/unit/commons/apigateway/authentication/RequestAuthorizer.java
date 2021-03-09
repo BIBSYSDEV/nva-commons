@@ -20,8 +20,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Abstract class for implementing a Request Authorizer. Implementation is based on the AWS examples found in the
- * following page : {@see
- * <a href=https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html>}.
+ * following page : "https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer
+ * .html".
  */
 
 public abstract class RequestAuthorizer extends RestRequestHandler<Void, AuthorizerResponse> {
@@ -94,8 +94,12 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
      * allowed to. It can contain wildcards.
      *
      * <p>Example methodARN:
-     * arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod/GET/some/path/to/resource Example output:
-     * arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod\/*\/* <br/> Another possible output is: "*"
+     * arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod/GET/some/path/to/resource
+     * Example output:
+     * arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod\/*\/*
+     *
+     * Another possible output is: "*"
+     *</p>
      *
      * @param methodArn the method ARN as provided by the API gateway
      * @return a resource for the policy

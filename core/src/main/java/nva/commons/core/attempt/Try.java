@@ -20,8 +20,9 @@ public abstract class Try<T> {
     }
 
     /**
-     * A wrapper for actions that throw checked Exceptions. See {@see https://www.oreilly.com/content/handling
-     * -checked-exceptions-in-java-streams/} Try to perform the action. Any exception will be enclosed in a Failure.
+     * A wrapper for actions that throw checked Exceptions.
+     * See: "https://www.oreilly.com/content/handling-checked-exceptions-in-java-streams"
+     * Try to perform the action. Any exception will be enclosed in a Failure.
      *
      * @param action a {@link Callable} action that throws or does not throw a checked Exception
      * @param <S>    the resulting object
@@ -36,8 +37,9 @@ public abstract class Try<T> {
     }
 
     /**
-     * A wrapper for functions that throw checked Exceptions. See {@see https://www.oreilly.com/content/handling
-     * -checked-exceptions-in-java-streams/} Try to perform the action. Any exception will be enclosed in a Failure.
+     * A wrapper for functions that throw checked Exceptions.
+     * See: "https://www.oreilly.com/content/handling-checked-exceptions-in-java-streams"
+     * Try to perform the action. Any exception will be enclosed in a Failure.
      *
      * @param fe  a {@link FunctionWithException} function that throws or does not throw a checked Exception
      * @param <T> the type of the argument of the function.
