@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.JsonUtils;
 
@@ -76,11 +77,11 @@ public class RequestInfo {
         return Optional.ofNullable(getHeaders().get(header))
                    .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_HEADERS + header));
     }
-    
+
     @JsonIgnore
-    public String getQueryParameter(String parameter) {
+    public String getQueryParameter(String parameter) throws BadRequestException {
         return Optional.ofNullable(getQueryParameters().get(parameter))
-                   .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_QUERY_PARAMETERS + parameter));
+                   .orElseThrow(() -> new BadRequestException(MISSING_FROM_QUERY_PARAMETERS + parameter));
     }
     
     @JsonIgnore
