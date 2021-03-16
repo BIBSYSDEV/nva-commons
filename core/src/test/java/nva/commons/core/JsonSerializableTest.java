@@ -15,15 +15,6 @@ class JsonSerializableTest {
     public static final String EXAMPLE_NAME = "Ola Nordmann";
     private static final ObjectNode JSON_OBJECT_WITH_NAME = objectMapper.createObjectNode().put("name", EXAMPLE_NAME);
 
-//    @Test
-    void toJsonStringReturnsEmptyObjectAsStringWhenFieldsForJsonSerializableImplementationIsNull()
-        throws JsonProcessingException {
-        String dummyObject = new Dummy().toJsonString();
-
-        JsonNode jsonNode = objectMapper.readValue(dummyObject, JsonNode.class);
-        assertThat(jsonNode, is(equalTo(EMPTY_OBJECT)));
-    }
-
     @Test
     void toJsonStringReturnsJsonObjectWithNameAsStringWhenFieldNameIsSet() throws JsonProcessingException {
         String dummyObject = new Dummy(EXAMPLE_NAME).toJsonString();

@@ -45,6 +45,7 @@ public class JsonUtilsTest {
     public static final String NULL_MAP = "nullMap";
     public static final String EMPTY_MAP = "emptyMap";
     public static final String NULL_STRING = "nullString";
+    public static final String OBJECT_WITH_NULL_VALUES = "{\n  \"emptyString\" : \"\",\n  \"nullValue\" : null\n}";
 
     @DisplayName("jsonParser serializes empty string as null")
     @Test
@@ -68,12 +69,6 @@ public class JsonUtilsTest {
     public void jsonParserSerializesOptionalPresentAsContainedObject() {
         JsonNode actual = serialize(objectWithSomeValue());
         assertThat(actual, is(equalTo(JSON_OBJECT_WITH_VALUE)));
-    }
-
-//    @Test
-    public void jsonParserSerializesOptionalNotPresentAsNull() {
-        JsonNode actual = serialize(objectWithoutValue());
-        assertThat(actual, is(equalTo(JSON_OBJECT_WITHOUT_VALUE)));
     }
 
     @Test
@@ -120,8 +115,7 @@ public class JsonUtilsTest {
         mapToSerialize.put("nullValue", null);
         String actualJson = objectMapper.writeValueAsString(mapToSerialize);
         ObjectNode sampleJsonObjectWithoutValue = objectMapper.createObjectNode();
-        String expectedJson = objectMapper.writeValueAsString(sampleJsonObjectWithoutValue);
-        expectedJson = "{\n  \"emptyString\" : \"\",\n  \"nullValue\" : null\n}";
+        String expectedJson = OBJECT_WITH_NULL_VALUES;
         assertThat(actualJson, is(equalTo(expectedJson)));
     }
 
