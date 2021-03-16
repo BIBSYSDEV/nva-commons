@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Map;
+import nva.commons.apigateway.exceptions.BadRequestException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,7 @@ public class RequestInfoUtilityFunctionsTest {
     }
 
     @Test
-    public void getQueryParameterReturnsValueOnValidKey() {
+    public void getQueryParameterReturnsValueOnValidKey() throws BadRequestException {
         when(requestInfo.getQueryParameters()).thenReturn(Map.of(KEY, VALUE));
         String value = requestInfo.getQueryParameter(KEY);
         assertEquals(VALUE, value);
@@ -51,7 +52,7 @@ public class RequestInfoUtilityFunctionsTest {
     public void getQueryParameterThrowsExceptionOnMissingKey() {
         when(requestInfo.getQueryParameters()).thenReturn(Map.of());
         Executable action = () -> requestInfo.getQueryParameter(KEY);
-        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, action);
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, action);
         String expected = RequestInfo.MISSING_FROM_QUERY_PARAMETERS + KEY;
         assertEquals(expected, exception.getMessage());
     }
