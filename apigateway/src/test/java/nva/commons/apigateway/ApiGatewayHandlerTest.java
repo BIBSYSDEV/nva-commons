@@ -140,13 +140,13 @@ public class ApiGatewayHandlerTest {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         handler.handleRequest(input, output, context);
 
-        GatewayResponse<String> response = GatewayResponse.fromOutputStream(output);
-        String body = response.getBodyObject(String.class);
+        GatewayResponse<RequestBody> response = GatewayResponse.fromOutputStream(output);
+        RequestBody body = response.getBodyObject(RequestBody.class);
 
         String expectedValueForField1 = "value1";
         String expectedValueForField2 = "value2";
-        assertThat(body, containsString(expectedValueForField1));
-        assertThat(body, containsString(expectedValueForField2));
+        assertThat(body.getField1(), containsString(expectedValueForField1));
+        assertThat(body.getField2(), containsString(expectedValueForField2));
     }
 
     @Test
@@ -316,7 +316,7 @@ public class ApiGatewayHandlerTest {
     private Handler handlerThatThrowsUncheckedExceptions() {
         return new Handler(environment) {
             @Override
-            protected String processInput(RequestBody input, RequestInfo requestInfo, Context context) {
+            protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context) {
                 throwUncheckedExceptions();
                 return null;
             }
@@ -331,7 +331,7 @@ public class ApiGatewayHandlerTest {
             }
 
             @Override
-            protected String processInput(RequestBody input, RequestInfo requestInfo, Context context)
+            protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
                 throws ApiGatewayException {
                 throwExceptions();
                 return null;
@@ -410,7 +410,7 @@ public class ApiGatewayHandlerTest {
     private Handler handlerThatThrowsExceptions() {
         return new Handler(environment) {
             @Override
-            protected String processInput(RequestBody input, RequestInfo requestInfo, Context context)
+            protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
                 throws ApiGatewayException {
                 throwExceptions();
                 return null;
