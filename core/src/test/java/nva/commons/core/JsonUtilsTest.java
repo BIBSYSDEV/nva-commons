@@ -119,7 +119,8 @@ public class JsonUtilsTest {
     @Test
     public void objectMapperSerializesEmptyStringAsNull() throws JsonProcessingException {
         String expectedJson = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, POJO_WITH_MISSING_VALUES));
-        String sampleWithEmptyValueJson = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, POJO_WITH_EMPTY_VALUES));
+        String sampleWithEmptyValueJson =
+                IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, POJO_WITH_EMPTY_VALUES));
         SamplePojo sampleWithMissingValuesPojo = objectMapper.readValue(sampleWithEmptyValueJson, SamplePojo.class);
         String actualJson = objectMapper.writeValueAsString(sampleWithMissingValuesPojo);
         assertThat(actualJson, is(equalTo(expectedJson)));
