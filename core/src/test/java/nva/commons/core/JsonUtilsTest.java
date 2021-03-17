@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.nio.file.Path;
 import java.time.Instant;
@@ -22,6 +24,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
 
 public class JsonUtilsTest {
@@ -122,6 +125,15 @@ public class JsonUtilsTest {
         SamplePojo sampleWithMissingValuesPojo = objectMapper.readValue(sampleWithEmptyValueJson, SamplePojo.class);
         String actualJson = objectMapper.writeValueAsString(sampleWithMissingValuesPojo);
         assertThat(actualJson, is(equalTo(expectedJson)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={POJO_WITH_MISSING_VALUES, POJO_WITH_EMPTY_VALUES})
+    public void objectMapperDeserializesEmptyStringAsNull(String resourceInput) throws JsonProcessingException {
+        String jsonString = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES,resourceInput));
+        SamplePojo actualObject = objectMapper.readValue(jsonString,SamplePojo.class);
+        assertThat(actualObject.getField2(),is(nullValue()));
+        assertThat(actualObject.getField1(),is(not(nullValue())));
     }
 
     @Test
