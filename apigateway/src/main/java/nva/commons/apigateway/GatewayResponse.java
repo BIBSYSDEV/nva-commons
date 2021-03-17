@@ -49,7 +49,7 @@ public class GatewayResponse<T> implements Serializable {
         throws GatewayResponseSerializingException {
         try {
             this.statusCode = statusCode;
-            this.body = JsonUtils.objectMapper.writeValueAsString(body);
+            this.body = JsonUtils.objectMapperWithEmpty.writeValueAsString(body);
             this.headers = Collections.unmodifiableMap(Map.copyOf(headers));
         } catch (JsonProcessingException e) {
             throw new GatewayResponseSerializingException(e);

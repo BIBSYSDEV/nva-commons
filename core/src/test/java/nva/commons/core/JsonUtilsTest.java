@@ -1,31 +1,30 @@
 package nva.commons.core;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import nva.commons.core.ioutils.IoUtils;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-
-import java.nio.file.Path;
-import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isPresentAnd;
 import static nva.commons.core.JsonUtils.objectMapper;
+import static nva.commons.core.JsonUtils.objectMapperWithEmpty;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import nva.commons.core.ioutils.IoUtils;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class JsonUtilsTest {
 
@@ -98,12 +97,12 @@ public class JsonUtilsTest {
     }
 
     @Test
-    public void objectMapperSerializesInstantAsIsoStrings() throws JsonProcessingException {
+    public void objectMapperWithEmptySerializesInstantAsIsoStrings() throws JsonProcessingException {
 
         String instantString = "2020-12-29T19:23:09.357248Z";
 
         Instant timestamp = Instant.parse(instantString);
-        String jsonNow = objectMapper.writeValueAsString(timestamp);
+        String jsonNow = objectMapperWithEmpty.writeValueAsString(timestamp);
 
         String expectedString = "\"" + instantString + "\"";
         assertThat(jsonNow, is(equalTo(expectedString)));
@@ -112,8 +111,8 @@ public class JsonUtilsTest {
     @Test
     public void objectMapperSerializesNullStringAsNull() throws JsonProcessingException {
         String expectedJson = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, POJO_WITH_MISSING_VALUES));
-        SamplePojo sampleWithMissingValuesPojo = objectMapper.readValue(expectedJson, SamplePojo.class);
-        String actualJson = objectMapper.writeValueAsString(sampleWithMissingValuesPojo);
+        SamplePojo sampleWithMissingValuesPojo = objectMapperWithEmpty.readValue(expectedJson, SamplePojo.class);
+        String actualJson = objectMapperWithEmpty.writeValueAsString(sampleWithMissingValuesPojo);
         assertThat(actualJson, is(equalTo(expectedJson)));
     }
 
@@ -123,7 +122,7 @@ public class JsonUtilsTest {
         String sampleWithEmptyValueJson =
                 IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, POJO_WITH_EMPTY_VALUES));
         SamplePojo sampleWithMissingValuesPojo = objectMapper.readValue(sampleWithEmptyValueJson, SamplePojo.class);
-        String actualJson = objectMapper.writeValueAsString(sampleWithMissingValuesPojo);
+        String actualJson = objectMapperWithEmpty.writeValueAsString(sampleWithMissingValuesPojo);
         assertThat(actualJson, is(equalTo(expectedJson)));
     }
 
@@ -139,8 +138,8 @@ public class JsonUtilsTest {
     @Test
     public void objectMapperWithEmptySerializesAllEmptyFields() throws JsonProcessingException {
         TestForEmptyFields testObj = new TestForEmptyFields();
-        String json = objectMapper.writeValueAsString(testObj);
-        JsonNode node = objectMapper.readTree(json);
+        String json = objectMapperWithEmpty.writeValueAsString(testObj);
+        JsonNode node = objectMapperWithEmpty.readTree(json);
 
         assertThat(node.has(EMPTY_STRING), is(true));
         assertThat(node.has(NULL_STRING), is(true));
