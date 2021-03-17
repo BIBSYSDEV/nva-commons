@@ -128,7 +128,7 @@ public class JsonUtilsTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings={POJO_WITH_MISSING_VALUES, POJO_WITH_EMPTY_VALUES})
+    @ValueSource(strings = {POJO_WITH_MISSING_VALUES, POJO_WITH_EMPTY_VALUES})
     public void objectMapperDeserializesEmptyStringAsNull(String resourceInput) throws JsonProcessingException {
         String jsonString = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES,resourceInput));
         SamplePojo actualObject = objectMapper.readValue(jsonString,SamplePojo.class);
