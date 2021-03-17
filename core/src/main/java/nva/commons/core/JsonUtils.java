@@ -20,10 +20,7 @@ import org.zalando.problem.ProblemModule;
 
 public final class JsonUtils {
 
-//    public static final ObjectMapper objectMapperNoEmpty = createJsonParser(Include.NON_EMPTY);
-    public static final ObjectMapper objectMapperWithEmpty = createJsonParser(Include.ALWAYS);
-
-    public static final ObjectMapper objectMapper = objectMapperWithEmpty;
+    public static final ObjectMapper objectMapper = createJsonParser(Include.ALWAYS);
 
     private JsonUtils() {
     }

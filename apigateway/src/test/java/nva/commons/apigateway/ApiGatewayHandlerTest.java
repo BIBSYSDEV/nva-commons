@@ -269,7 +269,7 @@ public class ApiGatewayHandlerTest {
 
     @Test
     void handlerSerializesBodyWithNonDefaultSerializationWhenDefaultSerializerIsOverridden() throws IOException {
-        ObjectMapper spiedMapper = spy(JsonUtils.objectMapperWithEmpty);
+        ObjectMapper spiedMapper = spy(JsonUtils.objectMapper);
         var handler = new Handler(environment, spiedMapper);
         var inputStream = requestWithHeaders();
         var outputStream = outputStream();

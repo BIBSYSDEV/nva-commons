@@ -20,7 +20,6 @@ import java.util.Optional;
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isPresentAnd;
 import static nva.commons.core.JsonUtils.objectMapper;
-import static nva.commons.core.JsonUtils.objectMapperWithEmpty;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -122,8 +121,8 @@ public class JsonUtilsTest {
     @Test
     public void objectMapperWithEmptySerializesAllEmptyFields() throws JsonProcessingException {
         TestForEmptyFields testObj = new TestForEmptyFields();
-        String json = objectMapperWithEmpty.writeValueAsString(testObj);
-        JsonNode node = objectMapperWithEmpty.readTree(json);
+        String json = objectMapper.writeValueAsString(testObj);
+        JsonNode node = objectMapper.readTree(json);
 
         assertThat(node.has(EMPTY_STRING), is(true));
         assertThat(node.has(NULL_STRING), is(true));
