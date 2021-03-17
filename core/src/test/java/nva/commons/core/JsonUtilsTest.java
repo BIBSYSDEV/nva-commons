@@ -44,7 +44,8 @@ public class JsonUtilsTest {
     public static final String NULL_MAP = "nullMap";
     public static final String EMPTY_MAP = "emptyMap";
     public static final String NULL_STRING = "nullString";
-    public static final String OBJECT_WITH_NULL_VALUES = "{\n  \"emptyString\" : \"\",\n  \"nullValue\" : null\n}";
+    private static final String POJO_WITH_MISSING_VALUES = "missingStringValues.json";
+    private static final String POJO_WITH_EMPTY_VALUES = "emptyStringValues.json";
 
     @DisplayName("jsonParser serializes empty string as null")
     @Test
@@ -108,13 +109,19 @@ public class JsonUtilsTest {
     }
 
     @Test
+    public void objectMapperSerializesNullStringAsNull() throws JsonProcessingException {
+        String expectedJson = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, POJO_WITH_MISSING_VALUES));
+        SamplePojo sampleWithMissingValuesPojo = objectMapper.readValue(expectedJson, SamplePojo.class);
+        String actualJson = objectMapper.writeValueAsString(sampleWithMissingValuesPojo);
+        assertThat(actualJson, is(equalTo(expectedJson)));
+    }
+
+    @Test
     public void objectMapperSerializesEmptyStringAsNull() throws JsonProcessingException {
-        Map<String, Object> mapToSerialize = new HashMap<>();
-        mapToSerialize.put("emptyString", "");
-        mapToSerialize.put("nullValue", null);
-        String actualJson = objectMapper.writeValueAsString(mapToSerialize);
-        ObjectNode sampleJsonObjectWithoutValue = objectMapper.createObjectNode();
-        String expectedJson = OBJECT_WITH_NULL_VALUES;
+        String expectedJson = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, POJO_WITH_MISSING_VALUES));
+        String sampleWithEmptyValueJson = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, POJO_WITH_EMPTY_VALUES));
+        SamplePojo sampleWithMissingValuesPojo = objectMapper.readValue(sampleWithEmptyValueJson, SamplePojo.class);
+        String actualJson = objectMapper.writeValueAsString(sampleWithMissingValuesPojo);
         assertThat(actualJson, is(equalTo(expectedJson)));
     }
 

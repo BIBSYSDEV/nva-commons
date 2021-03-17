@@ -46,7 +46,7 @@ public class Handler extends ApiGatewayHandler<RequestBody, RequestBody> {
         this.path = requestInfo.getPath();
         this.body = input;
         this.addAdditionalHeaders(() -> additionalHeaders(body));
-        return this.body; //String.join(",", input.getField1(), input.getField2());
+        return this.body;
     }
 
     private Map<String, String> additionalHeaders(RequestBody input) {
