@@ -43,7 +43,7 @@ public class AwsEventBridgeEventTest {
     public void toStringIsValidJsonString() throws JsonProcessingException {
         var expected = parseEvent();
         var actual = parseEvent(expected.toString());
-        assertThat(actual, is(equalTo(expected)));
+        assertThat(actual.toString(), is(equalTo(expected.toString())));
     }
 
     private AwsEventBridgeEvent<AwsEventBridgeDetail<SampleEventDetail>> parseEvent()
