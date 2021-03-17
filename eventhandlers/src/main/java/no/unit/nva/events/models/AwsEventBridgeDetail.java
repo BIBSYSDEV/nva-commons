@@ -11,8 +11,8 @@ public class AwsEventBridgeDetail<I> {
     private String version;
     @JsonProperty("timestamp")
     private String timestamp;
-    @JsonProperty("requestPayload")
-    private JsonNode requestPayload;
+    @JsonProperty("requestContext")
+    private JsonNode requestContext;
     @JsonProperty("responseContext")
     private AwsEventBridgeResponseContext responseContext;
     @JsonProperty("responsePayload")
@@ -25,7 +25,7 @@ public class AwsEventBridgeDetail<I> {
     private AwsEventBridgeDetail(Builder<I> builder) {
         setVersion(builder.version);
         setTimestamp(builder.timestamp);
-        setRequestPayload(builder.requestPayload);
+        setRequestContext(builder.requestPayload);
         setResponseContext(builder.responseContext);
         setResponsePayload(builder.responsePayload);
     }
@@ -36,9 +36,9 @@ public class AwsEventBridgeDetail<I> {
 
     public Builder<I> copy() {
         return AwsEventBridgeDetail.<I>newBuilder()
-            .withVersion(this.getVersion())
-            .withTimestamp(this.getTimestamp())
-            .withRequestPayload(this.getRequestPayload())
+                   .withVersion(this.getVersion())
+                   .withTimestamp(this.getTimestamp())
+                   .withRequestPayload(this.getRequestContext())
             .withResponseContext(this.getResponseContext())
             .withResponsePayload(this.getResponsePayload());
     }
@@ -46,8 +46,8 @@ public class AwsEventBridgeDetail<I> {
     @JacocoGenerated
     @Override
     public int hashCode() {
-        return Objects.hash(getVersion(), getTimestamp(), getRequestPayload(), getResponseContext(),
-            getResponsePayload());
+        return Objects.hash(getVersion(), getTimestamp(), getRequestContext(), getResponseContext(),
+                            getResponsePayload());
     }
 
     @Override
@@ -61,7 +61,7 @@ public class AwsEventBridgeDetail<I> {
         AwsEventBridgeDetail<?> that = (AwsEventBridgeDetail<?>) o;
         return Objects.equals(getVersion(), that.getVersion())
                && Objects.equals(getTimestamp(), that.getTimestamp())
-               && Objects.equals(getRequestPayload(), that.getRequestPayload())
+               && Objects.equals(getRequestContext(), that.getRequestContext())
                && Objects.equals(getResponseContext(), that.getResponseContext())
                && Objects.equals(getResponsePayload(), that.getResponsePayload());
     }
@@ -82,12 +82,12 @@ public class AwsEventBridgeDetail<I> {
         this.timestamp = timestamp;
     }
 
-    public JsonNode getRequestPayload() {
-        return requestPayload;
+    public JsonNode getRequestContext() {
+        return requestContext;
     }
 
-    public void setRequestPayload(JsonNode requestPayload) {
-        this.requestPayload = requestPayload;
+    public void setRequestContext(JsonNode requestContext) {
+        this.requestContext = requestContext;
     }
 
     public AwsEventBridgeResponseContext getResponseContext() {
