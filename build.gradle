@@ -25,7 +25,7 @@ wrapper {
 
 allprojects {
     group = 'com.github.bibsysdev'
-    version = '1.5.0'
+    version = '1.5.1'
 
     apply plugin: 'java-library'
     apply plugin: 'jacoco'
@@ -180,7 +180,16 @@ subprojects {
     publishing {
         publications {
             mavenJava(MavenPublication) {
+                artifactId = project.name
                 from components.java
+                versionMapping {
+                    usage('java-api') {
+                        fromResolutionOf('runtimeClasspath')
+                    }
+                    usage('java-runtime') {
+                        fromResolutionResult()
+                    }
+                }
                 pom {
                     name = project.name
                     description = 'A commons library for the NVA project'
@@ -210,10 +219,28 @@ subprojects {
     }
 
     signing {
-        useInMemoryPgpKeys(findProperty("signingKey"), findProperty("signingPassword"))
-        sign publishing.publications.mavenJava
+        if (isMainBranch()) {
+            useInMemoryPgpKeys(findProperty("signingKey"), findProperty("signingPassword"))
+            sign publishing.publications.mavenJava
+        }
+
     }
 }
+
+def gitBranch() {
+    def branch = ""
+    def proc = "git rev-parse --abbrev-ref HEAD".execute()
+    proc.in.eachLine { line -> branch = line }
+    proc.err.eachLine { line -> println line }
+    proc.waitFor()
+    branch
+}
+
+boolean isMainBranch() {
+    def branch = gitBranch()
+    return ((branch == "master" || branch == "main"))
+}
+
 
 def getProjectList() {
     // These projects are considered. Replace with a different list as needed.
