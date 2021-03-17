@@ -8,6 +8,9 @@ import java.util.Objects;
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = RequestBody.TYPE_ATTRIBUTE)
 public class RequestBody {
 
+    public static final String FIELD1 = "field1";
+    public static final String FIELD2 = "field2";
+
     public static final String TYPE_ATTRIBUTE = "type";
     String field1;
     String field2;

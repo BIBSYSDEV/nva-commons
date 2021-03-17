@@ -184,7 +184,7 @@ public class ApiGatewayHandlerTest {
 
     @Test
     @DisplayName("Handler does not reveal information for runtime exceptions")
-    public void handlerDoesnRevealInformationForRuntimeExceptions() throws IOException {
+    public void handlerDoesNotRevealInformationForRuntimeExceptions() throws IOException {
         Handler handler = handlerThatThrowsUncheckedExceptions();
         ByteArrayOutputStream outputStream = outputStream();
         handler.handleRequest(requestWithHeaders(), outputStream, context);
@@ -286,6 +286,30 @@ public class ApiGatewayHandlerTest {
         var expectedRequestId = contextWithRequestId.getAwsRequestId();
         handler.handleRequest(requestWithHeadersAndPath(), output, contextWithRequestId);
         assertThat(appender.getMessages(), containsString(expectedRequestId));
+    }
+
+    @Test
+    public void handlerReturnsResponseThatIncludesAllEmptyFields() throws IOException {
+        var handler = new Handler(environment);
+        var output = outputStream();
+        InputStream input = requestWithBodyWithEmptyFields();
+        handler.handleRequest(input, output, context);
+        GatewayResponse<JsonNode> response = GatewayResponse.fromOutputStream(output);
+        JsonNode jsonNode = response.getBodyObject(JsonNode.class);
+
+        assertThat(jsonNode.has(RequestBody.FIELD1), is(true));
+        assertThat(jsonNode.has(RequestBody.FIELD2), is(true));
+        assertThat(jsonNode.get(RequestBody.FIELD2), is(equalTo(objectMapper.nullNode())));
+    }
+
+    private InputStream requestWithBodyWithEmptyFields() throws JsonProcessingException {
+        RequestBody requestBody = new RequestBody();
+        requestBody.setField1("Some value");
+        requestBody.setField2(null);
+
+        return new HandlerRequestBuilder<RequestBody>(objectMapper)
+                   .withBody(requestBody)
+                   .build();
     }
 
     private InputStream requestWithBodyWithoutType() throws JsonProcessingException {
