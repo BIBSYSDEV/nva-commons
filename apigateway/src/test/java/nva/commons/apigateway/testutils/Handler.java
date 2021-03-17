@@ -13,7 +13,7 @@ import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.core.Environment;
 
-public class Handler extends ApiGatewayHandler<RequestBody, String> {
+public class Handler extends ApiGatewayHandler<RequestBody, RequestBody> {
 
     private Map<String, String> headers;
     private String proxy;
@@ -39,14 +39,14 @@ public class Handler extends ApiGatewayHandler<RequestBody, String> {
     }
 
     @Override
-    protected String processInput(RequestBody input, RequestInfo requestInfo, Context context)
+    protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
         throws ApiGatewayException {
         this.headers = requestInfo.getHeaders();
         this.proxy = requestInfo.getPathParameters().get(PROXY_TAG);
         this.path = requestInfo.getPath();
         this.body = input;
         this.addAdditionalHeaders(() -> additionalHeaders(body));
-        return String.join(",", input.getField1(), input.getField2());
+        return this.body;
     }
 
     private Map<String, String> additionalHeaders(RequestBody input) {
@@ -54,7 +54,7 @@ public class Handler extends ApiGatewayHandler<RequestBody, String> {
     }
 
     @Override
-    protected Integer getSuccessStatusCode(RequestBody input, String output) {
+    protected Integer getSuccessStatusCode(RequestBody input, RequestBody output) {
         return HttpURLConnection.HTTP_OK;
     }
 
