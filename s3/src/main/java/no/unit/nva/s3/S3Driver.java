@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
+import nva.commons.core.Environment;
+import nva.commons.core.JacocoGenerated;
+import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -28,12 +31,30 @@ public class S3Driver {
 
     public static final String GZIP_ENDING = ".gz";
     private static final String LINE_SEPARATOR = System.lineSeparator();
+    public static final String AWS_ACCESS_KEY_ID_ENV_VARIABLE_NAME = "AWS_ACCESS_KEY_ID";
+    private static final String AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME = "AWS_SECRET_ACCESS_KEY";
     private final S3Client client;
     private final String bucketName;
 
     public S3Driver(S3Client s3Client, String bucketName) {
         this.client = s3Client;
         this.bucketName = bucketName;
+    }
+
+    @JacocoGenerated
+    public static S3Driver fromPermanentCredentialsInEnvironment(String bucketName) {
+        verifyThatRequiredEnvVariablesAreInPlace();
+        S3Client s3Client = S3Client.builder()
+                                .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
+                                .build();
+        return new S3Driver(s3Client, bucketName);
+    }
+
+    @JacocoGenerated
+    private static void verifyThatRequiredEnvVariablesAreInPlace() {
+        Environment environment = new Environment();
+        environment.readEnv(AWS_ACCESS_KEY_ID_ENV_VARIABLE_NAME);
+        environment.readEnv(AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME);
     }
 
     public void insertFile(Path fullPath, String content) {
