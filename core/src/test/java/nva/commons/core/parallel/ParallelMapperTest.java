@@ -1,4 +1,4 @@
-package nva.commons.core;
+package nva.commons.core.parallel;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 
 class ParallelMapperTest {
 
-    public static final String MESSAGE_TEMPLATE = "ExpectedMessage:";
-    public static final int NUMBER_OF_INPUTS_WITH_TOTAL_FOOTPRINT_LARGER_THAN_AVAILABLE_MEMORY = 10;
-    public static final int SIGNIFICANT_PART_OF_AVAIALABLE_MEMORY = 3;
+    private static final String MESSAGE_TEMPLATE = "ExpectedMessage:";
+    private static final int NUMBER_OF_INPUTS_WITH_TOTAL_FOOTPRINT_LARGER_THAN_AVAILABLE_MEMORY = 10;
+    private static final int SIGNIFICANT_PART_OF_AVAILABLE_MEMORY = 3;
 
     @Test
     public void parallelMapperReturnsFunctionResultsOnSetOfInputs() throws InterruptedException {
@@ -34,13 +34,29 @@ class ParallelMapperTest {
         List<Integer> inputs = sampleInputs(100);
         ParallelMapper<Integer, String> mapper = new ParallelMapper<>(inputs, this::failingIntegerToString).run();
 
-        List<String> actualExceptionMessages = mapper.getExceptions().stream()
+        List<ParallelExecutionException> actualExceptions = mapper.getExceptions();
+
+        List<String> actualExceptionMessages = actualExceptions.stream()
                                                    .map(Throwable::getMessage)
                                                    .collect(Collectors.toList());
         List<String> expectedExceptionMessages = inputs.stream()
                                                      .map(this::constructExpectedMessage)
                                                      .collect(Collectors.toList());
         assertThat(actualExceptionMessages, is(equalTo(expectedExceptionMessages)));
+    }
+
+    @Test
+    public void parallelMapperReturnsExceptionsContainingTheFailingInputs() throws InterruptedException {
+        List<Integer> inputs = sampleInputs(100);
+        ParallelMapper<Integer, String> mapper = new ParallelMapper<>(inputs, this::failingIntegerToString).run();
+
+        List<Integer> regeneratedInputs = mapper.getExceptions()
+                                              .stream()
+                                              .map(ParallelExecutionException::getInput)
+                                              .map(input -> (Integer) input)
+                                              .collect(Collectors.toList());
+
+        assertThat(regeneratedInputs, is(equalTo(inputs)));
     }
 
     @Test
@@ -63,7 +79,7 @@ class ParallelMapperTest {
 
     private String tenMbString() {
         int freeMemory = (int) Runtime.getRuntime().freeMemory();
-        int stringSize = freeMemory / SIGNIFICANT_PART_OF_AVAIALABLE_MEMORY;
+        int stringSize = freeMemory / SIGNIFICANT_PART_OF_AVAILABLE_MEMORY;
         char[] hugeString = garbageString(stringSize);
         return String.valueOf(hugeString);
     }
@@ -85,7 +101,7 @@ class ParallelMapperTest {
     }
 
     private void verifyParallelMapperTransformsInputObjects(ParallelMapper<Integer, String> mapper,
-                                                            List<Integer> inputs) throws InterruptedException {
+                                                            List<Integer> inputs) {
 
         List<String> outputs = mapper.getSuccesses();
         List<Integer> regeneratedInputs = outputs.stream().map(Integer::parseInt).collect(Collectors.toList());
@@ -102,7 +118,7 @@ class ParallelMapperTest {
 
     private String constructExpectedMessage(Integer input) {
         RuntimeException cause = new RuntimeException(exceptionMessage(input));
-        return new RuntimeException(cause).getMessage();
+        return new ParallelExecutionException(input, cause).getMessage();
     }
 
     private String exceptionMessage(Integer input) {

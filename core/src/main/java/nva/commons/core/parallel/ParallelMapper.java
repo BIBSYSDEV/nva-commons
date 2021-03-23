@@ -1,4 +1,4 @@
-package nva.commons.core;
+package nva.commons.core.parallel;
 
 import static java.lang.Math.min;
 import static nva.commons.core.attempt.Try.attempt;
@@ -21,6 +21,7 @@ public class ParallelMapper<I, O> {
     private final List<Callable<O>> actions;
     private final int batchSize;
     private final List<Future<O>> futures;
+    private final Function<I, O> function;
 
     public ParallelMapper(Collection<I> inputs, Function<I, O> function) {
         this(inputs.stream().parallel(), function, DEFAULT_BATCH_SIZE);
@@ -35,7 +36,8 @@ public class ParallelMapper<I, O> {
     }
 
     public ParallelMapper(Stream<I> inputs, Function<I, O> function, int batchSize) {
-        actions = inputs.map(input -> toCallable(function, input)).collect(Collectors.toList());
+        this.function = function;
+        actions = inputs.map(this::toCallable).collect(Collectors.toList());
         this.batchSize = batchSize;
         futures = new ArrayList<>();
     }
@@ -58,14 +60,6 @@ public class ParallelMapper<I, O> {
         return min(actions.size(), index + batchSize);
     }
 
-    @JacocoGenerated
-    public List<Future<O>> getCancelled() {
-        return futures.stream()
-                   .parallel()
-                   .filter(Future::isCancelled)
-                   .collect(Collectors.toList());
-    }
-
     private Stream<Try<O>> getCompleted() {
         return futures.stream()
                    .parallel()
@@ -80,14 +74,21 @@ public class ParallelMapper<I, O> {
                    .collect(Collectors.toList());
     }
 
-    public List<Exception> getExceptions() {
+    public List<ParallelExecutionException> getExceptions() {
         return getCompleted()
                    .filter(Try::isFailure)
                    .map(Try::getException)
+                   .map(this::getExceptionWithInput)
+                   .map(exception -> (ParallelExecutionException) exception)
                    .collect(Collectors.toList());
     }
 
-    private Callable<O> toCallable(Function<I, O> function, I input) {
-        return () -> function.apply(input);
+    private Throwable getExceptionWithInput(Exception exception) {
+        return exception.getCause();
+    }
+
+    private Callable<O> toCallable(I input) {
+        return () -> attempt(() -> function.apply(input))
+                         .orElseThrow(fail -> new ParallelExecutionException(input, fail.getException()));
     }
 }
