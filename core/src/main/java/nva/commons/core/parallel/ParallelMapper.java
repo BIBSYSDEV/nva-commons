@@ -78,12 +78,12 @@ public class ParallelMapper<I, O> {
         return getCompleted()
                    .filter(Try::isFailure)
                    .map(Try::getException)
-                   .map(this::getExceptionWithInput)
+                   .map(this::getExceptionWithInputObject)
                    .map(exception -> (ParallelExecutionException) exception)
                    .collect(Collectors.toList());
     }
 
-    private Throwable getExceptionWithInput(Exception exception) {
+    private Throwable getExceptionWithInputObject(Exception exception) {
         return exception.getCause();
     }
 
