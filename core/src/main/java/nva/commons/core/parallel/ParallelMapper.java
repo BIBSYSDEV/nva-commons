@@ -12,6 +12,7 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import nva.commons.core.attempt.Failure;
 import nva.commons.core.attempt.Try;
 
 @SuppressWarnings("PMD.DoNotUseThreads")
@@ -89,6 +90,10 @@ public class ParallelMapper<I, O> {
 
     private Callable<O> toCallable(I input) {
         return () -> attempt(() -> function.apply(input))
-                         .orElseThrow(fail -> new ParallelExecutionException(input, fail.getException()));
+                         .orElseThrow(fail -> captureAllExceptionsAndAddInputObject(input, fail));
+    }
+
+    private ParallelExecutionException captureAllExceptionsAndAddInputObject(I input, Failure<O> fail) {
+        return new ParallelExecutionException(input, fail.getException());
     }
 }
