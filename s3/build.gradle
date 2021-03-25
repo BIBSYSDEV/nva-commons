@@ -3,6 +3,6 @@ dependencies {
     implementation group: 'software.amazon.awssdk', name: 's3', version: project.ext.awsSkd2Version
     implementation group: 'software.amazon.awssdk', name: 'sdk-core', version: project.ext.awsSkd2Version
     testImplementation group: 'software.amazon.awssdk', name: 'http-client-spi', version: project.ext.awsSkd2Version
-    implementation group: 'software.amazon.awssdk', name: 'apache-client', version: '2.16.26'
+    implementation group: 'software.amazon.awssdk', name: 'apache-client', version: project.ext.awsSkd2Version
     testImplementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
 }
