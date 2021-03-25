@@ -25,7 +25,7 @@ wrapper {
 
 allprojects {
     group = 'com.github.bibsysdev'
-    version = '1.5.4'
+    version = '1.5.5'
 
     apply plugin: 'java-library'
     apply plugin: 'jacoco'
@@ -49,7 +49,7 @@ allprojects {
     project.ext {
         jacksonVersion = "2.12.0"
         awsSdkVersion = "1.11.931"
-        awsSkd2Version = '2.16.8'
+        awsSkd2Version = '2.16.26'
         jupiterVersion = "5.7.0"
         log4jVersion = "2.13.2"
         nvaTestUtilsVersion = "0.1.16"

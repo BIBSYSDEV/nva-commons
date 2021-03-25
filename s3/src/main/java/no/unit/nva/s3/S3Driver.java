@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +20,10 @@ import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
+import software.amazon.awssdk.http.SdkHttpClient;
+import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
@@ -30,11 +34,17 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 public class S3Driver {
 
     public static final String GZIP_ENDING = ".gz";
-    private static final String LINE_SEPARATOR = System.lineSeparator();
     public static final String AWS_ACCESS_KEY_ID_ENV_VARIABLE_NAME = "AWS_ACCESS_KEY_ID";
-    private static final String AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME = "AWS_SECRET_ACCESS_KEY";
+    public static final String AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME = "AWS_SECRET_ACCESS_KEY";
+    public static final int MAX_CONNECTIONS = 10_000;
+    private static final String LINE_SEPARATOR = System.lineSeparator();
     private final S3Client client;
     private final String bucketName;
+
+    @JacocoGenerated
+    public S3Driver(String bucketName) {
+        this(defaultS3Client().build(), bucketName);
+    }
 
     public S3Driver(S3Client s3Client, String bucketName) {
         this.client = s3Client;
@@ -44,17 +54,20 @@ public class S3Driver {
     @JacocoGenerated
     public static S3Driver fromPermanentCredentialsInEnvironment(String bucketName) {
         verifyThatRequiredEnvVariablesAreInPlace();
-        S3Client s3Client = S3Client.builder()
+        S3Client s3Client = defaultS3Client()
                                 .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
                                 .build();
         return new S3Driver(s3Client, bucketName);
     }
 
     @JacocoGenerated
-    private static void verifyThatRequiredEnvVariablesAreInPlace() {
-        Environment environment = new Environment();
-        environment.readEnv(AWS_ACCESS_KEY_ID_ENV_VARIABLE_NAME);
-        environment.readEnv(AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME);
+    public static SdkHttpClient httpClientForConcurrentQueries() {
+        return ApacheHttpClient.builder()
+                   .useIdleConnectionReaper(true)
+                   .maxConnections(MAX_CONNECTIONS)
+                   .connectionMaxIdleTime(Duration.ofMinutes(30))
+                   .connectionTimeout(Duration.ofMinutes(30))
+                   .build();
     }
 
     public void insertFile(Path fullPath, String content) {
@@ -82,11 +95,6 @@ public class S3Driver {
         return resultBuffer;
     }
 
-    private ListObjectsResponse fetchNewResultsBatch(Path folder, String listingStartingPoint) {
-        ListObjectsRequest request = requestForListingFiles(folder, listingStartingPoint);
-        return client.listObjects(request);
-    }
-
     public Optional<String> getFile(Path file) {
         GetObjectRequest getObjectRequest = createGetObjectRequest(file);
         ResponseBytes<GetObjectResponse> response = fetchObject(getObjectRequest);
@@ -98,6 +106,23 @@ public class S3Driver {
         try (ResponseInputStream<GetObjectResponse> response = client.getObject(getObjectRequest)) {
             return decompressInputToString(response);
         }
+    }
+
+    @JacocoGenerated
+    private static S3ClientBuilder defaultS3Client() {
+        return S3Client.builder().httpClient(httpClientForConcurrentQueries());
+    }
+
+    @JacocoGenerated
+    private static void verifyThatRequiredEnvVariablesAreInPlace() {
+        Environment environment = new Environment();
+        environment.readEnv(AWS_ACCESS_KEY_ID_ENV_VARIABLE_NAME);
+        environment.readEnv(AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME);
+    }
+
+    private ListObjectsResponse fetchNewResultsBatch(Path folder, String listingStartingPoint) {
+        ListObjectsRequest request = requestForListingFiles(folder, listingStartingPoint);
+        return client.listObjects(request);
     }
 
     private RequestBody createRequestBody(String content) {
