@@ -38,7 +38,6 @@ public class StringToGzipInputStream {
                 writer.write(line);
                 writer.newLine();
             }
-            writer.flush();
         }
     }
 
