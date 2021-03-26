@@ -1,6 +1,7 @@
 package no.unit.nva.s3;
 
 import static nva.commons.core.ioutils.IoUtils.pathToString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -17,14 +18,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import nva.commons.core.ioutils.IoUtils;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -55,7 +56,6 @@ class S3DriverTest {
     private static final String FIRST_EXPECTED_OBJECT_KEY = randomFileName();
     private static final String SECOND_EXPECTED_OBJECT_KEY = randomFileName();
     private static final String EXPECTED_NON_COMPRESSED_CONTENT = randomString();
-    private static final String LINE_SEPARATOR = System.lineSeparator();
     private static final String PUT_ITEM_EXPECTED_PATH = pathToString(constructNestedPath());
     private static final int PUT_OBJECT_REQUEST_ARG_INDEX = 0;
     private static final String EXPECTED_COMPRESSED_CONTENT = randomString();
@@ -64,17 +64,9 @@ class S3DriverTest {
     private static final String COMPRESSED_OBJECT_KEY = randomFileName() + S3Driver.GZIP_ENDING;
 
     private S3Driver s3Driver;
-    private String actualPutObjectContent;
+    private InputStream actualPutObjectContent;
     private String actualPutObjectKey;
     private S3Client s3Client;
-
-    public static String streamToString(InputStream stream) {
-        try (BufferedReader reader = new BufferedReader(readInputStreamUsingUtf8(stream))) {
-            return reader.lines().collect(Collectors.joining(LINE_SEPARATOR));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
 
     @BeforeEach
     public void init() throws IOException {
@@ -88,61 +80,62 @@ class S3DriverTest {
         S3Driver s3Driver = new S3Driver(S3Client.create(), REMOTELY_EXISTING_BUCKET);
         String expectedFilename = constructNestedPath().toString();
         Path parentFolder = Path.of(expectedFilename).getParent();
-        String content = randomString();
+        String content = longText();
         s3Driver.insertFile(Path.of(expectedFilename), content);
         List<String> files = s3Driver.listFiles(Path.of(pathToString(parentFolder)));
-        MatcherAssert.assertThat(files, CoreMatchers.hasItem(expectedFilename));
+        assertThat(files, CoreMatchers.hasItem(expectedFilename));
     }
 
     @Test
     @Tag("RemoteTest")
     public void getFileReturnsFileWhenFileExistsInRemoteFolder() {
         S3Driver s3Driver = new S3Driver(S3Client.create(), REMOTELY_EXISTING_BUCKET);
-        String expectedContent = randomString();
+        String expectedContent = longText();
         Path expectedFilePath = constructNestedPath();
         s3Driver.insertFile(expectedFilePath, expectedContent);
         String actualContent = s3Driver.getFile(expectedFilePath).orElseThrow();
-        MatcherAssert.assertThat(actualContent, is(equalTo(expectedContent)));
+        assertThat(actualContent, is(equalTo(expectedContent)));
     }
 
     @Test
     @Tag("RemoteTest")
     public void getFilesReturnsTheContentsOfAllFilesInARemoteFolder() {
         S3Driver s3Driver = new S3Driver(S3Client.create(), REMOTELY_EXISTING_BUCKET);
-        String expectedContent = randomString();
+        String expectedContent = longText();
         Path expectedFilePath = constructNestedPath();
         s3Driver.insertFile(expectedFilePath, expectedContent);
         List<String> actualContent = s3Driver.getFiles(expectedFilePath);
 
-        MatcherAssert.assertThat(actualContent.size(), is(equalTo(1)));
-        MatcherAssert.assertThat(actualContent, CoreMatchers.hasItem(expectedContent));
+        assertThat(actualContent.size(), is(equalTo(1)));
+        assertThat(actualContent, CoreMatchers.hasItem(expectedContent));
     }
 
     @Test
     public void listFilesReturnsListWithAllFilenamesInS3Folder() {
         List<String> files = s3Driver.listFiles(Path.of(SOME_PATH));
-        MatcherAssert.assertThat(files, contains(FIRST_EXPECTED_OBJECT_KEY, SECOND_EXPECTED_OBJECT_KEY));
+        assertThat(files, contains(FIRST_EXPECTED_OBJECT_KEY, SECOND_EXPECTED_OBJECT_KEY));
     }
 
     @Test
     public void getFileReturnsFileWhenFileExists() {
         Path somePath = Path.of(SOME_PATH);
         String actualContent = s3Driver.getFile(somePath).orElseThrow();
-        MatcherAssert.assertThat(actualContent, is(equalTo(EXPECTED_NON_COMPRESSED_CONTENT)));
+        assertThat(actualContent, is(equalTo(EXPECTED_NON_COMPRESSED_CONTENT)));
     }
 
     @Test
     public void insertFileInsertsObjectEncodedInUtf8() {
         s3Driver.insertFile(Path.of(PUT_ITEM_EXPECTED_PATH), EXPECTED_NON_COMPRESSED_CONTENT);
-        MatcherAssert.assertThat(actualPutObjectContent, is(equalTo(EXPECTED_NON_COMPRESSED_CONTENT)));
-        MatcherAssert.assertThat(actualPutObjectKey, is(equalTo(PUT_ITEM_EXPECTED_PATH)));
+        String actualContent = IoUtils.streamToString(actualPutObjectContent);
+        assertThat(actualContent, is(equalTo(EXPECTED_NON_COMPRESSED_CONTENT)));
+        assertThat(actualPutObjectKey, is(equalTo(PUT_ITEM_EXPECTED_PATH)));
     }
 
     @Test
     public void getCompressedFileReturnsContentsWhenInputIsCompressed() throws IOException {
         String compressedFilename = "compressed.gz";
         String result = s3Driver.getCompressedFile(Path.of(compressedFilename));
-        MatcherAssert.assertThat(result, is(equalTo(EXPECTED_COMPRESSED_CONTENT)));
+        assertThat(result, is(equalTo(EXPECTED_COMPRESSED_CONTENT)));
     }
 
     @Test
@@ -156,8 +149,31 @@ class S3DriverTest {
         s3Driver.insertFile(expectedFilePath, expectedContent);
         List<String> actualContent = s3Driver.getFiles(expectedFilePath);
 
-        MatcherAssert.assertThat(actualContent.size(), is(equalTo(NUMBER_OF_LISTED_ITEMS_IN_MOCKED_LISTING)));
-        MatcherAssert.assertThat(actualContent, contains(EXPECTED_NON_COMPRESSED_CONTENT, EXPECTED_COMPRESSED_CONTENT));
+        assertThat(actualContent.size(), is(equalTo(NUMBER_OF_LISTED_ITEMS_IN_MOCKED_LISTING)));
+        assertThat(actualContent, contains(EXPECTED_NON_COMPRESSED_CONTENT, EXPECTED_COMPRESSED_CONTENT));
+    }
+
+    @Test
+    public void insertFileWithInputStreamSendsDataToS3() throws IOException {
+        String randomString = longText();
+        InputStream inputStream = IoUtils.stringToStream(randomString);
+
+        s3Driver.insertFile(Path.of("input"), inputStream);
+        BufferedReader inputReader = new BufferedReader(new InputStreamReader(actualPutObjectContent));
+        String actualContent = inputReader.lines().collect(Collectors.joining(S3Driver.LINE_SEPARATOR));
+
+        assertThat(actualContent, is(equalTo(randomString)));
+    }
+
+    @Test
+    public void insertFilesStoresAllFilesCompressedInGzipStream() throws IOException {
+        List<String> input = List.of(longText(), longText(), longText());
+        s3Driver.insertFiles(input);
+        BufferedReader inputReader =
+            new BufferedReader(new InputStreamReader(new GZIPInputStream(actualPutObjectContent)));
+        List<String> actualContent = inputReader.lines().collect(Collectors.toList());
+        assertThat(actualContent, is(equalTo(input)));
+        ;
     }
 
     private static String randomFileName() {
@@ -165,16 +181,11 @@ class S3DriverTest {
     }
 
     private static String randomString() {
-        return FAKER.lorem().sentence();
+        return FAKER.lorem().word();
     }
 
-    private static InputStreamReader readInputStreamUsingUtf8(InputStream stream) {
-        return new InputStreamReader(stream, StandardCharsets.UTF_8);
-    }
-
-    private static String parseContentAsUtf8String(RequestBody content) {
-        InputStream contentSteam = content.contentStreamProvider().newStream();
-        return streamToString(contentSteam);
+    private static InputStream requestContentStream(RequestBody content) {
+        return content.contentStreamProvider().newStream();
     }
 
     private static Path constructNestedPath() {
@@ -191,6 +202,10 @@ class S3DriverTest {
         }
     }
 
+    private String longText() {
+        return FAKER.lorem().paragraph(10);
+    }
+
     private S3Client mockS3Client() throws IOException {
         S3Client s3Client = mock(S3Client.class);
         setupObjectListing(s3Client);
@@ -203,7 +218,7 @@ class S3DriverTest {
     private PutObjectResponse extractInformationFromPutObjectRequest(InvocationOnMock invocation) {
         PutObjectRequest request = invocation.getArgument(PUT_OBJECT_REQUEST_ARG_INDEX);
         RequestBody content = invocation.getArgument(REQUEST_BODY_ARG_INDEX);
-        actualPutObjectContent = parseContentAsUtf8String(content);
+        actualPutObjectContent = requestContentStream(content);
         actualPutObjectKey = request.key();
         return PutObjectResponse.builder().build();
     }
@@ -226,7 +241,7 @@ class S3DriverTest {
 
     private ResponseInputStream<GetObjectResponse> s3InputStreamWithCompressedContents() throws IOException {
         return new ResponseInputStream<>(GetObjectResponse.builder().build(),
-            AbortableInputStream.create(zippedStream()));
+                                         AbortableInputStream.create(zippedStream()));
     }
 
     private ResponseBytes<GetObjectResponse> returnPredefinedContent() {
@@ -254,7 +269,6 @@ class S3DriverTest {
     }
 
     private InputStream zippedStream() throws IOException {
-
         File tempFile = createTempFile();
         writeStringToCompressedFile(tempFile);
         return inputStreamToCompressedFile(tempFile);

@@ -2,6 +2,7 @@ package nva.commons.core.ioutils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -123,6 +124,12 @@ public final class IoUtils {
      */
     public static InputStream stringToStream(String input) {
         return new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static byte[] inputStreamToBytes(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        inputStream.transferTo(byteArrayOutputStream);
+        return byteArrayOutputStream.toByteArray();
     }
 
     private static String replaceWinPathSeparatorsWithUniversalPathSeparators(String path) {

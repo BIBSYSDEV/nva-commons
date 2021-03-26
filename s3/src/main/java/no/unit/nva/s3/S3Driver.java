@@ -4,6 +4,7 @@ import static nva.commons.core.attempt.Try.attempt;
 import static nva.commons.core.ioutils.IoUtils.pathToString;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -11,10 +12,12 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
+import nva.commons.core.ioutils.IoUtils;
 import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.ResponseInputStream;
@@ -37,7 +40,7 @@ public class S3Driver {
     public static final String AWS_ACCESS_KEY_ID_ENV_VARIABLE_NAME = "AWS_ACCESS_KEY_ID";
     public static final String AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME = "AWS_SECRET_ACCESS_KEY";
     public static final int MAX_CONNECTIONS = 10_000;
-    private static final String LINE_SEPARATOR = System.lineSeparator();
+    public static final String LINE_SEPARATOR = System.lineSeparator();
     private final S3Client client;
     private final String bucketName;
 
@@ -73,6 +76,20 @@ public class S3Driver {
     public void insertFile(Path fullPath, String content) {
         PutObjectRequest putObjectRequest = newPutObjectRequest(fullPath);
         client.putObject(putObjectRequest, createRequestBody(content));
+    }
+
+    public void insertFile(Path fullPath, InputStream content) throws IOException {
+        PutObjectRequest putObjectRequest = newPutObjectRequest(fullPath);
+        client.putObject(putObjectRequest, createRequestBody(content));
+    }
+
+    public void insertFiles(List<String> content) throws IOException {
+        Path path = Path.of(UUID.randomUUID().toString() + GZIP_ENDING);
+        PutObjectRequest putObjectRequest = newPutObjectRequest(path);
+        try (InputStream compressedContent = contentToZippedStream(content)) {
+            RequestBody requestBody = createRequestBody(compressedContent);
+            client.putObject(putObjectRequest, requestBody);
+        }
     }
 
     public List<String> getFiles(Path folder) {
@@ -118,6 +135,15 @@ public class S3Driver {
         Environment environment = new Environment();
         environment.readEnv(AWS_ACCESS_KEY_ID_ENV_VARIABLE_NAME);
         environment.readEnv(AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME);
+    }
+
+    private RequestBody createRequestBody(InputStream compressedContent) throws IOException {
+        var bytes = IoUtils.inputStreamToBytes(compressedContent);
+        return RequestBody.fromBytes(bytes);
+    }
+
+    private InputStream contentToZippedStream(List<String> content) throws IOException {
+        return new StringToGzipInputStream(content).getGzipInputStream();
     }
 
     private ListObjectsResponse fetchNewResultsBatch(Path folder, String listingStartingPoint) {
