@@ -1,47 +1,46 @@
 package no.unit.nva.s3;
 
-import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class StringToGzipInputStream {
 
+    public static final String LINE_SEPARATOR = System.lineSeparator();
     private final List<String> input;
 
     public StringToGzipInputStream(List<String> input) {
         this.input = input;
     }
 
-    public GZIPInputStream getGzipInputStream() throws IOException {
-        try (PipedOutputStream pos = new PipedOutputStream()) {
-            PipedInputStream inputStream = new PipedInputStream(pos);
-            transferDataToInputStream(pos);
-            return new GZIPInputStream(inputStream);
+    public InputStream compressData() throws IOException {
+        byte[] bytes = dataToByteArray();
+        return new ByteArrayInputStream(bytes);
+    }
+
+    private byte[] dataToByteArray() throws IOException {
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            compressData(outputStream);
+            return outputStream.toByteArray();
         }
     }
 
-    private void transferDataToInputStream(PipedOutputStream pos) throws IOException {
-        try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(pos)) {
-            writeDataToZipOutputStream(gzipOutputStream);
-        }
-    }
-
-    private void writeDataToZipOutputStream(GZIPOutputStream gzipOutputStream) throws IOException {
-        try (BufferedWriter writer = newBufferedWriter(gzipOutputStream)) {
+    private void compressData(ByteArrayOutputStream outputStream) throws IOException {
+        try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream)) {
             for (String line : input) {
-                writer.write(line);
-                writer.newLine();
+                gzipOutputStream.write(line.getBytes(StandardCharsets.UTF_8));
+                gzipOutputStream.write(LINE_SEPARATOR.getBytes(StandardCharsets.UTF_8));
             }
         }
     }
 
-    private BufferedWriter newBufferedWriter(OutputStream outputStream) throws IOException {
-        return new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(outputStream)));
+    private OutputStreamWriter newWriter(OutputStream outputStream) throws IOException {
+        return new OutputStreamWriter(new GZIPOutputStream(outputStream));
     }
 }

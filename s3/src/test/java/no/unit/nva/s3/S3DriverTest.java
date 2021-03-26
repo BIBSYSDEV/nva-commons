@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
@@ -167,13 +168,15 @@ class S3DriverTest {
 
     @Test
     public void insertFilesStoresAllFilesCompressedInGzipStream() throws IOException {
-        List<String> input = List.of(longText(), longText(), longText());
+        List<String> input = new ArrayList<>();
+        for (int i = 0; i < 10000; i++) {
+            input.add(longText());
+        }
         s3Driver.insertFiles(input);
         BufferedReader inputReader =
             new BufferedReader(new InputStreamReader(new GZIPInputStream(actualPutObjectContent)));
         List<String> actualContent = inputReader.lines().collect(Collectors.toList());
         assertThat(actualContent, is(equalTo(input)));
-        ;
     }
 
     private static String randomFileName() {
