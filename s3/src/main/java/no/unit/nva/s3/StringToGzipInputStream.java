@@ -4,8 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
@@ -38,9 +36,5 @@ public class StringToGzipInputStream {
                 gzipOutputStream.write(LINE_SEPARATOR.getBytes(StandardCharsets.UTF_8));
             }
         }
-    }
-
-    private OutputStreamWriter newWriter(OutputStream outputStream) throws IOException {
-        return new OutputStreamWriter(new GZIPOutputStream(outputStream));
     }
 }
