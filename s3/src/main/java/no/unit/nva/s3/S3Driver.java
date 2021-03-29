@@ -144,6 +144,10 @@ public class S3Driver {
         return RequestBody.fromBytes(bytes);
     }
 
+    private RequestBody createRequestBody(String content) {
+        return RequestBody.fromBytes(content.getBytes(StandardCharsets.UTF_8));
+    }
+
     private InputStream contentToZippedStream(List<String> content) throws IOException {
         return new StringCompressor(content).gzippedData();
     }
@@ -151,10 +155,6 @@ public class S3Driver {
     private ListObjectsResponse fetchNewResultsBatch(Path folder, String listingStartingPoint) {
         ListObjectsRequest request = requestForListingFiles(folder, listingStartingPoint);
         return client.listObjects(request);
-    }
-
-    private RequestBody createRequestBody(String content) {
-        return RequestBody.fromBytes(content.getBytes(StandardCharsets.UTF_8));
     }
 
     private ResponseBytes<GetObjectResponse> fetchObject(GetObjectRequest getObjectRequest) {
