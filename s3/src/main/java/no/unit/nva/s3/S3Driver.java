@@ -82,7 +82,7 @@ public class S3Driver {
     }
 
     public void insertAndCompressFiles(List<String> content) throws IOException {
-        Path path = Path.of(UUID.randomUUID().toString() + GZIP_ENDING);
+        Path path = filenameForZippedFile();
         PutObjectRequest putObjectRequest = newPutObjectRequest(path);
         try (InputStream compressedContent = contentToZippedStream(content)) {
             RequestBody requestBody = createRequestBody(compressedContent);
@@ -133,6 +133,10 @@ public class S3Driver {
         Environment environment = new Environment();
         environment.readEnv(AWS_ACCESS_KEY_ID_ENV_VARIABLE_NAME);
         environment.readEnv(AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME);
+    }
+
+    private Path filenameForZippedFile() {
+        return Path.of(UUID.randomUUID().toString() + GZIP_ENDING);
     }
 
     private RequestBody createRequestBody(InputStream compressedContent) throws IOException {
