@@ -74,13 +74,11 @@ public class S3Driver {
     }
 
     public void insertFile(Path fullPath, String content) {
-        PutObjectRequest putObjectRequest = newPutObjectRequest(fullPath);
-        client.putObject(putObjectRequest, createRequestBody(content));
+        client.putObject(newPutObjectRequest(fullPath), createRequestBody(content));
     }
 
     public void insertFile(Path fullPath, InputStream content) throws IOException {
-        PutObjectRequest putObjectRequest = newPutObjectRequest(fullPath);
-        client.putObject(putObjectRequest, createRequestBody(content));
+        client.putObject(newPutObjectRequest(fullPath), createRequestBody(content));
     }
 
     public void insertAndCompressFiles(List<String> content) throws IOException {
@@ -93,8 +91,8 @@ public class S3Driver {
     }
 
     public List<String> getFiles(Path folder) {
-        List<String> filenames = listFiles(folder);
-        return filenames.stream()
+        return listFiles(folder)
+                   .stream()
                    .map(this::readFileContent)
                    .collect(Collectors.toList());
     }
