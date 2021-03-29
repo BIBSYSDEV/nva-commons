@@ -40,9 +40,10 @@ import nva.commons.core.attempt.Try;
  * going to be processed in parallel. The batches are executed sequentially one after the other and the
  * items inside the batch are processed in parallel.
  *
- * <p>For example, if the input has 10.000 elements and the batch size is 1000, all 1000 elements of the first batch
+ * <p>For example, if the input has 10.000 elements and the batch size is 1.000, all 1.000 elements of the first batch
  * are going to be processed in parallel, and then the second batch is going to be executed, etc. {@code ParallelMapper}
- * creates one thread per batch item and therefore it can be a very heavy operation if the mapping function is trivial.
+ * creates one execution thread per item in a batch and therefore it not recommended when the
+ * mapping function is trivial.
  *
  * @param <I> the class of the input objects.
  * @param <O> the class of the output objects.
