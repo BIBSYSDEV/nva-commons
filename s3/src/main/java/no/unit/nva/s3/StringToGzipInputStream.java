@@ -17,7 +17,7 @@ public class StringToGzipInputStream {
         this.input = input;
     }
 
-    public InputStream compressData() throws IOException {
+    public InputStream gzippedData() throws IOException {
         byte[] bytes = dataToByteArray();
         return new ByteArrayInputStream(bytes);
     }

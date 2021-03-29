@@ -143,7 +143,7 @@ public class S3Driver {
     }
 
     private InputStream contentToZippedStream(List<String> content) throws IOException {
-        return new StringToGzipInputStream(content).compressData();
+        return new StringToGzipInputStream(content).gzippedData();
     }
 
     private ListObjectsResponse fetchNewResultsBatch(Path folder, String listingStartingPoint) {
