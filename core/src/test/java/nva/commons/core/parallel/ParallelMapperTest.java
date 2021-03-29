@@ -18,21 +18,21 @@ class ParallelMapperTest {
     public void parallelMapperReturnsFunctionResultsOnSetOfInputs() throws InterruptedException {
         List<Integer> inputs = sampleInputs(1_000);
 
-        ParallelMapper<Integer, String> mapper = new ParallelMapper<>(inputs, this::integerToString).run();
+        ParallelMapper<Integer, String> mapper = new ParallelMapper<>(inputs, this::integerToString).map();
         verifyParallelMapperTransformsInputObjects(mapper, inputs);
     }
 
     @Test
     public void parallelMapperAcceptsStreamsAsInput() throws InterruptedException {
         List<Integer> inputs = sampleInputs(100);
-        ParallelMapper<Integer, String> mapper = new ParallelMapper<>(inputs.stream(), this::integerToString).run();
+        ParallelMapper<Integer, String> mapper = new ParallelMapper<>(inputs.stream(), this::integerToString).map();
         verifyParallelMapperTransformsInputObjects(mapper, inputs);
     }
 
     @Test
     public void parallelMapperReturnsExceptionsForFailedExecutions() throws InterruptedException {
         List<Integer> inputs = sampleInputs(100);
-        ParallelMapper<Integer, String> mapper = new ParallelMapper<>(inputs, this::failingIntegerToString).run();
+        ParallelMapper<Integer, String> mapper = new ParallelMapper<>(inputs, this::failingIntegerToString).map();
 
         List<ParallelExecutionException> actualExceptions = mapper.getExceptions();
 
@@ -48,7 +48,7 @@ class ParallelMapperTest {
     @Test
     public void parallelMapperReturnsExceptionsContainingTheFailingInputs() throws InterruptedException {
         List<Integer> inputs = sampleInputs(100);
-        ParallelMapper<Integer, String> mapper = new ParallelMapper<>(inputs, this::failingIntegerToString).run();
+        ParallelMapper<Integer, String> mapper = new ParallelMapper<>(inputs, this::failingIntegerToString).map();
 
         List<Integer> regeneratedInputs = mapper.getExceptions()
                                               .stream()
@@ -64,7 +64,7 @@ class ParallelMapperTest {
         List<Integer> input = sampleInputs(NUMBER_OF_INPUTS_WITH_TOTAL_FOOTPRINT_LARGER_THAN_AVAILABLE_MEMORY);
         ParallelMapper<Integer, String> mapper =
             new ParallelMapper<>(input, this::processingWithTemporarilyLargeFootPrint, 1);
-        List<String> successes = mapper.run().getSuccesses();
+        List<String> successes = mapper.map().getSuccesses();
         assertThat(successes.size(), is(equalTo(input.size())));
     }
 
