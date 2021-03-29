@@ -31,16 +31,16 @@ import nva.commons.core.attempt.Try;
  * <p>Example:
  * <pre>
  *      List&#60;URI&#62; inputs = someUris();
- *      ParallelMapper &#60;URI,String&#62;  mapper = new ParallelMapper &#60;&#62;(inputs,uri-&#62;dereference(URI);
+ *      ParallelMapper &#60;URI,String&#62;  mapper = new ParallelMapper &#60;&#62;(inputs,uri-&#62;dereference(URI));
  *      mapper.map();
  *      List&#60;Strings&#62; results = mapper.getSuccesses();
  * </pre>
  *
  * <p>{@link ParallelMapper} accepts also another parameter: batchSize. This indicates the size of each batch that is
- * going to be processed in parallel. Attention, the batches are executed sequentially one after the other and the items
- * inside the batch are processed in parallel.
+ * going to be processed in parallel. The batches are executed sequentially one after the other and the
+ * items inside the batch are processed in parallel.
  *
- * <p>For example if the input has 10.000 elements and the batch size is 1000, all 1000 elements of the first batch
+ * <p>For example, if the input has 10.000 elements and the batch size is 1000, all 1000 elements of the first batch
  * are going to be processed in parallel, and then the second batch is going to be executed, etc. {@code ParallelMapper}
  * creates one thread per batch item and therefore it can be a very heavy operation if the mapping function is trivial.
  *
