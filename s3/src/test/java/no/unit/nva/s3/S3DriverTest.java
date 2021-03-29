@@ -63,6 +63,7 @@ class S3DriverTest {
     private static final Integer NUMBER_OF_LISTED_ITEMS_IN_MOCKED_LISTING = 2;
     private static final String NOT_COMPRESSED_OBJECT_KEY = randomFileName();
     private static final String COMPRESSED_OBJECT_KEY = randomFileName() + S3Driver.GZIP_ENDING;
+    public static final int LARGE_NUMBER_OF_INPUTS = 10_000;
 
     private S3Driver s3Driver;
     private InputStream actualPutObjectContent;
@@ -167,12 +168,12 @@ class S3DriverTest {
     }
 
     @Test
-    public void insertFilesStoresAllFilesCompressedInGzipStream() throws IOException {
+    public void insertAndCompressFilesFilesStoresAllFilesCompressedInGzipStream() throws IOException {
         List<String> input = new ArrayList<>();
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < LARGE_NUMBER_OF_INPUTS; i++) {
             input.add(longText());
         }
-        s3Driver.insertFiles(input);
+        s3Driver.insertAndCompressFiles(input);
         BufferedReader inputReader =
             new BufferedReader(new InputStreamReader(new GZIPInputStream(actualPutObjectContent)));
         List<String> actualContent = inputReader.lines().collect(Collectors.toList());

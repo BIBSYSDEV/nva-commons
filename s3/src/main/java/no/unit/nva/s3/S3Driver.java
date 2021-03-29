@@ -83,7 +83,7 @@ public class S3Driver {
         client.putObject(putObjectRequest, createRequestBody(content));
     }
 
-    public void insertFiles(List<String> content) throws IOException {
+    public void insertAndCompressFiles(List<String> content) throws IOException {
         Path path = Path.of(UUID.randomUUID().toString() + GZIP_ENDING);
         PutObjectRequest putObjectRequest = newPutObjectRequest(path);
         try (InputStream compressedContent = contentToZippedStream(content)) {
