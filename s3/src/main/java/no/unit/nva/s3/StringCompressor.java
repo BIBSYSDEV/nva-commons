@@ -8,12 +8,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
-public class StringToGzipInputStream {
+public class StringCompressor {
 
     public static final String LINE_SEPARATOR = System.lineSeparator();
     private final List<String> input;
 
-    public StringToGzipInputStream(List<String> input) {
+    public StringCompressor(List<String> input) {
         this.input = input;
     }
 
