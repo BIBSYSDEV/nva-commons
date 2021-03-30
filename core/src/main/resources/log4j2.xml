@@ -15,4 +15,4 @@
       <AppenderRef ref="Lambda"/>
     </Root>
   </Loggers>
-</Configuration>q
+</Configuration>
