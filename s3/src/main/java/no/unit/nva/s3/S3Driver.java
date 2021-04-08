@@ -96,7 +96,7 @@ public class S3Driver {
     public List<String> getFiles(Path folder) {
         return listFiles(folder)
                    .stream()
-                   .map(this::readFileContent)
+                   .map(this::getFile)
                    .collect(Collectors.toList());
     }
 
@@ -113,7 +113,7 @@ public class S3Driver {
         return resultBuffer;
     }
 
-    public Optional<String> getFile(Path file) {
+    public Optional<String> getUncompressedFile(Path file) {
         GetObjectRequest getObjectRequest = createGetObjectRequest(file);
         ResponseBytes<GetObjectResponse> response = fetchObject(getObjectRequest);
         return attempt(response::asUtf8String).toOptional();
@@ -123,6 +123,14 @@ public class S3Driver {
         GetObjectRequest getObjectRequest = createGetObjectRequest(file);
         try (ResponseInputStream<GetObjectResponse> response = client.getObject(getObjectRequest)) {
             return decompressInputToString(response);
+        }
+    }
+
+    public String getFile(String filename) {
+        if (isCompressed(filename)) {
+            return attempt(() -> getCompressedFile(Path.of(filename))).orElseThrow();
+        } else {
+            return getUncompressedFile(Path.of(filename)).orElseThrow();
         }
     }
 
@@ -178,14 +186,6 @@ public class S3Driver {
     private String readCompressedStream(GZIPInputStream gzipInputStream) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(gzipInputStream))) {
             return reader.lines().collect(Collectors.joining(LINE_SEPARATOR));
-        }
-    }
-
-    private String readFileContent(String filename) {
-        if (isCompressed(filename)) {
-            return attempt(() -> getCompressedFile(Path.of(filename))).orElseThrow();
-        } else {
-            return getFile(Path.of(filename)).orElseThrow();
         }
     }
 
