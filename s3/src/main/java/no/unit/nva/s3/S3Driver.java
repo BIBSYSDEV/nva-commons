@@ -25,6 +25,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.http.SdkHttpClient;
 import software.amazon.awssdk.http.apache.ApacheHttpClient;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
@@ -41,6 +42,8 @@ public class S3Driver {
     public static final String AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME = "AWS_SECRET_ACCESS_KEY";
     public static final int MAX_CONNECTIONS = 10_000;
     public static final String LINE_SEPARATOR = System.lineSeparator();
+    public static final String AWS_REGION_ENV_VARIABLE = "AWS_REGION";
+    private static final Environment ENVIRONMENT = new Environment();
     private final S3Client client;
     private final String bucketName;
 
@@ -125,14 +128,19 @@ public class S3Driver {
 
     @JacocoGenerated
     private static S3ClientBuilder defaultS3Client() {
-        return S3Client.builder().httpClient(httpClientForConcurrentQueries());
+        Region region = ENVIRONMENT.readEnvOpt(AWS_REGION_ENV_VARIABLE)
+                            .map(Region::of)
+                            .orElse(Region.EU_WEST_1);
+        return S3Client.builder()
+                   .region(region)
+                   .httpClient(httpClientForConcurrentQueries());
     }
 
     @JacocoGenerated
     private static void verifyThatRequiredEnvVariablesAreInPlace() {
-        Environment environment = new Environment();
-        environment.readEnv(AWS_ACCESS_KEY_ID_ENV_VARIABLE_NAME);
-        environment.readEnv(AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME);
+
+        ENVIRONMENT.readEnv(AWS_ACCESS_KEY_ID_ENV_VARIABLE_NAME);
+        ENVIRONMENT.readEnv(AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME);
     }
 
     private Path filenameForZippedFile() {
