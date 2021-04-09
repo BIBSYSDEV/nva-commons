@@ -90,12 +90,12 @@ class S3DriverTest {
 
     @Test
     @Tag("RemoteTest")
-    public void getFileReturnsFileWhenFileExistsInRemoteFolder() {
+    public void getUncompressedFileReturnsFileWhenFileExistsInRemoteFolder() {
         S3Driver s3Driver = new S3Driver(S3Client.create(), REMOTELY_EXISTING_BUCKET);
         String expectedContent = longText();
         Path expectedFilePath = constructNestedPath();
         s3Driver.insertFile(expectedFilePath, expectedContent);
-        String actualContent = s3Driver.getFile(expectedFilePath).orElseThrow();
+        String actualContent = s3Driver.getUncompressedFile(expectedFilePath).orElseThrow();
         assertThat(actualContent, is(equalTo(expectedContent)));
     }
 
@@ -121,7 +121,7 @@ class S3DriverTest {
     @Test
     public void getFileReturnsFileWhenFileExists() {
         Path somePath = Path.of(SOME_PATH);
-        String actualContent = s3Driver.getFile(somePath).orElseThrow();
+        String actualContent = s3Driver.getUncompressedFile(somePath).orElseThrow();
         assertThat(actualContent, is(equalTo(EXPECTED_NON_COMPRESSED_CONTENT)));
     }
 
