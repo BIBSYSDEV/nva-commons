@@ -90,7 +90,7 @@ class S3DriverTest {
 
     @Test
     @Tag("RemoteTest")
-    public void getUncompresssedFileReturnsFileWhenFileExistsInRemoteFolder() {
+    public void getUncompressedFileReturnsFileWhenFileExistsInRemoteFolder() {
         S3Driver s3Driver = new S3Driver(S3Client.create(), REMOTELY_EXISTING_BUCKET);
         String expectedContent = longText();
         Path expectedFilePath = constructNestedPath();
