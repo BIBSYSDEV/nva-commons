@@ -50,7 +50,7 @@ public class EventParser<InputType> {
     private AwsEventBridgeEvent<?> parseJson(Class<?>... nestedClasses)
         throws JsonProcessingException {
         JavaType nestedJavaTypes = nestedGenericTypesToJavaType(nestedClasses);
-        JavaType eventBridgeJavaType = constructParametricType(AwsEventBridgeEvent.class, nestedJavaTypes);
+        JavaType eventBridgeJavaType = constructAwsEventBridgeDataTypeWithAllNestedTypes(nestedJavaTypes);
         return objectMapper.readValue(input, eventBridgeJavaType);
     }
 
@@ -67,22 +67,23 @@ public class EventParser<InputType> {
     @SuppressWarnings(RAWTYPES)
     private JavaType nestedGenericTypesToJavaType(Class[] classes) {
         //Variables not inlined for readability purposes.
-        JavaType innerMostType = constructNonParametricType(classes[classes.length - 1]);
-        JavaType mostRecentType = innerMostType;
+        JavaType mostRecentType = objectMapper.getTypeFactory().constructType(innermostType(classes));
         for (int index = classes.length - SKIP_BOTTOM_TYPE; index >= 0; index--) {
             Class<?> currentClass = classes[index];
-            JavaType newType = constructParametricType(currentClass, mostRecentType);
-            mostRecentType = newType;
+            mostRecentType = createGenericClassContainingAllPreviousTypes(mostRecentType, currentClass);
         }
         return mostRecentType;
     }
 
-    private JavaType constructParametricType(Class<?> currentClass, JavaType mostRecentType) {
+    private JavaType createGenericClassContainingAllPreviousTypes(JavaType mostRecentType, Class<?> currentClass) {
         return objectMapper.getTypeFactory().constructParametricType(currentClass, mostRecentType);
     }
 
-    @SuppressWarnings(RAWTYPES)
-    private JavaType constructNonParametricType(Class nonParametricClass) {
-        return objectMapper.getTypeFactory().constructType(nonParametricClass);
+    private <T> T innermostType(T[] classes) {
+        return classes[classes.length - 1];
+    }
+
+    private JavaType constructAwsEventBridgeDataTypeWithAllNestedTypes(JavaType mostRecentType) {
+        return objectMapper.getTypeFactory().constructParametricType(AwsEventBridgeEvent.class, mostRecentType);
     }
 }
