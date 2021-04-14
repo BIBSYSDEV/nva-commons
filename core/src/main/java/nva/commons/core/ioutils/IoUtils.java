@@ -21,6 +21,7 @@ public final class IoUtils {
     public static final String LINE_SEPARATOR = System.lineSeparator();
     public static final String WIN_PATH_SEPARATOR_REGEX = "\\\\";
     public static final String PATH_SEPARATOR_FOR_RESOURCES = "/";
+    public static final String ROOT = "/";
 
     private IoUtils() {
     }
