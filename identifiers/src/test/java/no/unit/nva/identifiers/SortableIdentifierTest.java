@@ -1,5 +1,6 @@
 package no.unit.nva.identifiers;
 
+import static no.unit.nva.identifiers.SortableIdentifier.BLANK_IDENTIFIER_ERROR;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.javafaker.Faker;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -23,6 +25,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import nva.commons.core.JsonUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class SortableIdentifierTest {
 
@@ -30,12 +35,14 @@ public class SortableIdentifierTest {
     public static final int ADDITIONAL_SHUFFLES = 10;
     public static final String DELIMITER = "-";
     public static final SortableIdentifier SAMPLE_IDENTIFIER = SortableIdentifier.next();
-    public static final String SAMPLE_CLASS_ID_FIELD = String.format("\"id\" : \"%s\"",
-        SAMPLE_IDENTIFIER.toString());
+    public static final String SAMPLE_CLASS_ID_FIELD = String.format("\"id\" : \"%s\"", SAMPLE_IDENTIFIER);
     public static final String SAMPLE_EXAMPLE_CLASS_JSON = "{" + SAMPLE_CLASS_ID_FIELD + "}";
     public static final String EXAMPLE_HOST = "www.example.org";
     public static final String EXAMPLE_SCHEME = "https";
     public static final String EMPTY_FRAGMENT = null;
+    public static final String EMPTY_PATH = "";
+    public static final Faker FAKER = Faker.instance();
+    public static final int DO_NOT_USE_UP_MEMORY = 1000;
 
     @Test
     public void sortableIdentifierStringContainsSixParts() {
@@ -48,7 +55,7 @@ public class SortableIdentifierTest {
     @Test
     public void sortableIdentifierAcceptsUuidString() {
         UUID oldId = UUID.randomUUID();
-        SortableIdentifier identifier = new SortableIdentifier(oldId.toString());
+        SortableIdentifier identifier = SortableIdentifier.fromString(oldId.toString());
         assertThat(identifier.toString(), is(equalTo(oldId.toString())));
     }
 
@@ -105,17 +112,16 @@ public class SortableIdentifierTest {
     public void fromUriReturnsSortableIdentifierWhenUriContainsSortableIdentifierAsLastPartOfItsPath()
         throws URISyntaxException {
         SortableIdentifier identifier = SortableIdentifier.next();
-        String path = "/this/is/a/path/after/the/host/" + identifier.toString();
+        String path = "/this/is/a/path/after/the/host/" + identifier;
         var sampleUri = new URI(EXAMPLE_SCHEME, EXAMPLE_HOST, path, EMPTY_FRAGMENT);
         SortableIdentifier actualIdentifier = SortableIdentifier.fromUri(sampleUri);
         assertThat(actualIdentifier, is(equalTo(identifier)));
     }
 
     @Test
-    public void fromUriThrowsIllegalArgumentExceptionContainingTheInvalidUriWhenPathDoesNotContainSortableIdentifier()
+    public void fromUriThrowsIllegalArgumentExceptionContainingTheInvalidUriWhenUriDoesNotContainPath()
         throws URISyntaxException {
-        String path = "/this/is/a/path/after/the/host";
-        var sampleUri = new URI(EXAMPLE_SCHEME, EXAMPLE_HOST, path, EMPTY_FRAGMENT);
+        var sampleUri = new URI(EXAMPLE_SCHEME, EXAMPLE_HOST, EMPTY_PATH, EMPTY_FRAGMENT);
         Executable action = () -> SortableIdentifier.fromUri(sampleUri);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, action);
         assertThat(exception.getMessage(), containsString(sampleUri.toString()));
@@ -129,6 +135,24 @@ public class SortableIdentifierTest {
         Executable action = () -> SortableIdentifier.fromUri(sampleUri);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, action);
         assertThat(exception.getMessage(), containsString(sampleUri.toString()));
+    }
+
+    @Test
+    public void fromStringReturnsIdentifierForAnyNonEmptyString() {
+        int randomNumber = new Random(System.currentTimeMillis()).nextInt(DO_NOT_USE_UP_MEMORY);
+        String identifierString = FAKER.lorem().characters(randomNumber);
+        SortableIdentifier sortableIdentifier = SortableIdentifier.fromString(identifierString);
+        assertThat(sortableIdentifier.toString(), is(equalTo(identifierString)));
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t"})
+    public void fromStringThrowsExceptionWhenInputStringIsBlank(String inputString) {
+        Executable action = () -> SortableIdentifier.fromString(inputString);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                                                          action);
+        assertThat(exception.getMessage(), containsString(BLANK_IDENTIFIER_ERROR));
     }
 
     private void shuffle(List<SortableIdentifier> idStrings) {

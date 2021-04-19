@@ -5,26 +5,27 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.net.URI;
 import java.util.Objects;
 import java.util.UUID;
+import nva.commons.core.StringUtils;
 
 /**
  * Generates ids of the form "0176f264a5ad-446893d8-3c02-4f64-936b-2997fec34e98". where the first part is an Instant
  * encoded in 12 hex digits (enough until the year 10889) and the rest is a UUID. The timestamp is should be used only
- * for sorting and not for identifying creation date
+ * for sorting and not for identifying creation date.
  */
 @JsonSerialize(using = SortableIdentifierSerializer.class)
 @JsonDeserialize(using = SortableIdentifierDeserializer.class)
 public final class SortableIdentifier implements Comparable<SortableIdentifier> {
 
-    public static final int UUID_LENGTH = 36;
     public static final int TIMESTAMP_LENGTH = 12;
-    public static final int EXTRA_DASH = 1;
-    public static final int SORTABLE_ID_LENGTH = UUID_LENGTH + TIMESTAMP_LENGTH + EXTRA_DASH;
-    public static final String INVALID_SORTABLE_IDENTIFIER_ERROR = "Invalid sortable identifier";
+
     public static final String PATH_DELIMITER = "/";
     public static final String INVALID_URI_ERROR_MESSAGE = "The URI %s does not contain a valid Sortable identifier:";
+    public static final String BLANK_IDENTIFIER_ERROR = "Identifier string cannot be null or blank";
     private static final String IDENTIFIER_FORMATTING = "%0" + TIMESTAMP_LENGTH + "x-%s";
     private final String identifier;
 
+    //User the static method fromString
+    @Deprecated
     public SortableIdentifier(String identifier) {
         validate(identifier);
         this.identifier = identifier;
@@ -37,10 +38,15 @@ public final class SortableIdentifier implements Comparable<SortableIdentifier> 
     public static SortableIdentifier fromUri(URI uri) {
         try {
             String path = uri.getPath();
-            return new SortableIdentifier(path.substring(path.lastIndexOf(PATH_DELIMITER) + 1));
+            String identifierString = path.substring(path.lastIndexOf(PATH_DELIMITER) + 1);
+            return new SortableIdentifier(identifierString);
         } catch (Exception exception) {
             throw invalidUriError(uri);
         }
+    }
+
+    public static SortableIdentifier fromString(String identifier) {
+        return new SortableIdentifier(identifier);
     }
 
     @Override
@@ -79,10 +85,8 @@ public final class SortableIdentifier implements Comparable<SortableIdentifier> 
     }
 
     private void validate(String identifier) {
-        if (identifier.length() == UUID_LENGTH || identifier.length() == SORTABLE_ID_LENGTH) {
-            return;
-        } else {
-            throw new IllegalArgumentException(INVALID_SORTABLE_IDENTIFIER_ERROR);
+        if (StringUtils.isBlank(identifier)) {
+            throw new IllegalArgumentException(BLANK_IDENTIFIER_ERROR);
         }
     }
 }

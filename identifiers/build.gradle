@@ -1,4 +1,4 @@
 dependencies{
     implementation project (":core")
-
+    testImplementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
 }
