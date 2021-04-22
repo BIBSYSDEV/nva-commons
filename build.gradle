@@ -202,8 +202,8 @@ subprojects {
                     }
                     developers {
                         developer {
-                            name = 'Mattias Håheim Johnsen'
-                            email = 'mattias.haheim.johnsen@unit.no'
+                            name = 'Orestis Gkorgkas'
+                            email = 'og@unit.no'
                             organization = 'UNIT'
                             organizationUrl = 'https://www.unit.no/'
                         }
