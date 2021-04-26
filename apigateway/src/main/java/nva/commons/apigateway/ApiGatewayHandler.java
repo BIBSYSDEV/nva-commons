@@ -3,18 +3,18 @@ package nva.commons.apigateway;
 import static nva.commons.apigateway.ContentTypes.APPLICATION_JSON;
 import static nva.commons.core.JsonUtils.objectMapper;
 import com.amazonaws.services.lambda.runtime.Context;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.ApiGatewayUncheckedException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
@@ -72,9 +72,9 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     @Override
     protected void writeOutput(I input, O output)
         throws IOException, GatewayResponseSerializingException {
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
             GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, getSuccessHeaders(),
-                getSuccessStatusCode(input, output));
+                                                                       getSuccessStatusCode(input, output));
             String responseJson = mapper.writeValueAsString(gatewayResponse);
             writer.write(responseJson);
         }
@@ -158,14 +158,14 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
      *
      * @param exception  the thrown Exception.
      * @param statusCode the statusCode that should be returned to the API-client.
-     * @param requestId the id of the request that caused the exception.
-     * @throws IOException when the writer throws an IOException.
+     * @param requestId  the id of the request that caused the exception.
+     * @throws IOException                         when the writer throws an IOException.
      * @throws GatewayResponseSerializingException when the writer throws an GatewayResponseSerializingException.
      */
 
     protected void writeFailure(Exception exception, Integer statusCode, String requestId)
         throws IOException, GatewayResponseSerializingException {
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
             String errorMessage = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
             Status status = Status.valueOf(statusCode);
 

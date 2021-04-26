@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Optional;
 import nva.commons.apigateway.RequestInfo;
@@ -63,7 +64,7 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
     @Override
     protected void writeOutput(Void input, AuthorizerResponse output)
         throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
             String responseJson = objectMapper.writeValueAsString(output);
             writer.write(responseJson);
         }
@@ -94,12 +95,11 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
      * allowed to. It can contain wildcards.
      *
      * <p>Example methodARN:
-     * arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod/GET/some/path/to/resource
-     * Example output:
+     * arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod/GET/some/path/to/resource Example output:
      * arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod\/*\/*
-     *
+     * <p>
      * Another possible output is: "*"
-     *</p>
+     * </p>
      *
      * @param methodArn the method ARN as provided by the API gateway
      * @return a resource for the policy
@@ -153,7 +153,7 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
     }
 
     private void writeFailure() throws IOException, ForbiddenException {
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
             String principalId = attempt(this::principalId).orElseThrow(this::logErrorAndThrowException);
             AuthorizerResponse denyResponse = AuthorizerResponse
                                                   .newBuilder()
