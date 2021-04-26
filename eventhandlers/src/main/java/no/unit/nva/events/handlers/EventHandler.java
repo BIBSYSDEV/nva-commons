@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import no.unit.nva.events.models.AwsEventBridgeEvent;
 import nva.commons.core.JsonUtils;
 import nva.commons.core.ioutils.IoUtils;
@@ -52,7 +53,8 @@ public abstract class EventHandler<InputType, OutputType> implements RequestStre
 
     protected void writeOutput(OutputStream outputStream, OutputType output) {
         {
-            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
+            try (BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
                 String responseJson = JsonUtils.objectMapper.writeValueAsString(output);
                 writer.write(responseJson);
             } catch (IOException e) {
