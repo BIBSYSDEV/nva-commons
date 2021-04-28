@@ -1,0 +1,30 @@
+version: 2
+updates:
+- package-ecosystem: gradle
+  directory: "/"
+  schedule:
+    interval: daily
+    timezone: Europe/Oslo
+  open-pull-requests-limit: 20
+  ignore:
+  - dependency-name: nebula.lint
+    versions:
+    - 16.17.1
+    - 16.18.0
+    - 16.19.0
+    - 16.20.0
+    - 16.22.0
+  - dependency-name: software.amazon.awssdk:s3
+    versions:
+    - 2.16.12
+    - 2.16.13
+    - 2.16.14
+  - dependency-name: io.codearte.nexus-staging
+    versions:
+    - 0.30.0
+  - dependency-name: org.mockito:mockito-core
+    versions:
+    - 3.7.7
+  - dependency-name: com.jfrog.bintray
+    versions:
+    - 1.8.5
