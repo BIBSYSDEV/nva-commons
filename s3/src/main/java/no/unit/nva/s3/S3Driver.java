@@ -43,7 +43,12 @@ public class S3Driver {
     public static final int MAX_CONNECTIONS = 10_000;
     public static final String LINE_SEPARATOR = System.lineSeparator();
     public static final String AWS_REGION_ENV_VARIABLE = "AWS_REGION";
+    public static final String DOUBLE_BACKSLASH = "\\\\\\\\";
+    public static final String SINGLE_BACKSLASH = "\\\\";
+    public static final String UNIX_SEPARATOR = "/";
+    public static final int REMOVE_ROOT = 1;
     private static final Environment ENVIRONMENT = new Environment();
+    private static final String EMPTY_STRING = "";
     private final S3Client client;
     private final String bucketName;
 
@@ -84,13 +89,17 @@ public class S3Driver {
         client.putObject(newPutObjectRequest(fullPath), createRequestBody(content));
     }
 
-    public void insertAndCompressFiles(List<String> content) throws IOException {
-        Path path = filenameForZippedFile();
+    public void insertAndCompressFiles(Path s3Folder, List<String> content) throws IOException {
+        Path path = filenameForZippedFile(s3Folder);
         PutObjectRequest putObjectRequest = newPutObjectRequest(path);
         try (InputStream compressedContent = contentToZippedStream(content)) {
             RequestBody requestBody = createRequestBody(compressedContent);
             client.putObject(putObjectRequest, requestBody);
         }
+    }
+
+    public void insertAndCompressFiles(List<String> content) throws IOException {
+        insertAndCompressFiles(Path.of(EMPTY_STRING), content);
     }
 
     public List<String> getFiles(Path folder) {
@@ -151,8 +160,18 @@ public class S3Driver {
         ENVIRONMENT.readEnv(AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME);
     }
 
-    private Path filenameForZippedFile() {
-        return Path.of(UUID.randomUUID().toString() + GZIP_ENDING);
+    private Path filenameForZippedFile(Path s3Folder) {
+        String folderPath = processPath(s3Folder);
+        return Path.of(folderPath, UUID.randomUUID().toString() + GZIP_ENDING);
+    }
+
+    private String processPath(Path s3Folder) {
+        String unixPath = s3Folder.toString()
+                              .replaceAll(DOUBLE_BACKSLASH, UNIX_SEPARATOR)
+                              .replaceAll(SINGLE_BACKSLASH, UNIX_SEPARATOR);
+        return unixPath.startsWith(UNIX_SEPARATOR)
+                   ? unixPath.substring(REMOVE_ROOT)
+                   : unixPath;
     }
 
     private RequestBody createRequestBody(InputStream compressedContent) throws IOException {

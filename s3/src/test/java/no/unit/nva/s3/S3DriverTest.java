@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.StringStartsWith.startsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -30,6 +31,8 @@ import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.invocation.InvocationOnMock;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.ResponseInputStream;
@@ -47,6 +50,9 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 
 class S3DriverTest {
 
+    public static final int LARGE_NUMBER_OF_INPUTS = 10_000;
+    public static final String EMPTY_STRING = "";
+    public static final String ROOT = "/";
     private static final Faker FAKER = Faker.instance();
     private static final String SAMPLE_BUCKET = "sampleBucket";
     private static final boolean NOT_LAST_OBJECT = false;
@@ -63,8 +69,6 @@ class S3DriverTest {
     private static final Integer NUMBER_OF_LISTED_ITEMS_IN_MOCKED_LISTING = 2;
     private static final String NOT_COMPRESSED_OBJECT_KEY = randomFileName();
     private static final String COMPRESSED_OBJECT_KEY = randomFileName() + S3Driver.GZIP_ENDING;
-    public static final int LARGE_NUMBER_OF_INPUTS = 10_000;
-
     private S3Driver s3Driver;
     private InputStream actualPutObjectContent;
     private String actualPutObjectKey;
@@ -178,6 +182,23 @@ class S3DriverTest {
             new BufferedReader(new InputStreamReader(new GZIPInputStream(actualPutObjectContent)));
         List<String> actualContent = inputReader.lines().collect(Collectors.toList());
         assertThat(actualContent, is(equalTo(input)));
+    }
+
+    @ParameterizedTest(name = "insertAndCompressFilesStoresAllFilesCompressedInGzipStreamInSpecifiedFolder")
+    @ValueSource(strings = {EMPTY_STRING, ROOT})
+    public void insertAndCompressFilesStoresAllFilesCompressedInGzipStreamInSpecifiedFolder(String pathPrefix)
+        throws IOException {
+        List<String> input = new ArrayList<>();
+        for (int i = 0; i < LARGE_NUMBER_OF_INPUTS; i++) {
+            input.add(longText());
+        }
+        String expectedFolderPath = "parent/child/";
+        s3Driver.insertAndCompressFiles(Path.of(pathPrefix + expectedFolderPath), input);
+        BufferedReader inputReader =
+            new BufferedReader(new InputStreamReader(new GZIPInputStream(actualPutObjectContent)));
+        List<String> actualContent = inputReader.lines().collect(Collectors.toList());
+        assertThat(actualContent, is(equalTo(input)));
+        assertThat(actualPutObjectKey, startsWith(expectedFolderPath));
     }
 
     private static String randomFileName() {
