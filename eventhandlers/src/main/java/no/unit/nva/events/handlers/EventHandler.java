@@ -38,15 +38,16 @@ public abstract class EventHandler<InputType, OutputType> implements RequestStre
 
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) {
+        String inputString = null;
         try {
-            String inputString = IoUtils.streamToString(inputStream);
+            inputString = IoUtils.streamToString(inputStream);
             logger.trace(HANDLER_INPUT + inputString);
             AwsEventBridgeEvent<InputType> input = parseEvent(inputString);
             OutputType output = processInput(input.getDetail(), input, context);
 
             writeOutput(outputStream, output);
         } catch (Exception e) {
-            handleError(e);
+            handleError(e, inputString);
             throw e;
         }
     }
@@ -70,7 +71,7 @@ public abstract class EventHandler<InputType, OutputType> implements RequestStre
         return new EventParser<InputType>(input).parse(iclass);
     }
 
-    private void handleError(Exception e) {
+    protected void handleError(Exception e, String inputString) {
         logger.error(stackTraceInSingleLine(e));
     }
 }
