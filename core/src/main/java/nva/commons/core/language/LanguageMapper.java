@@ -8,13 +8,17 @@ import nva.commons.core.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LanguageMapper {
+public final class LanguageMapper {
 
     public static final String LEXVO_URI_PREFIX = "http://lexvo.org/id/iso639-3/";
     public static final URI LEXVO_URI_UNDEFINED = URI.create(LEXVO_URI_PREFIX + "und");
     public static final String ERROR_MESSAGE_MISSING_RESOURCE_EXCEPTION = "Failing to retrieve UIR for the "
         + "language code ";
     private static final Logger logger = LoggerFactory.getLogger(LanguageMapper.class);
+
+    private LanguageMapper() {
+
+    }
 
     public static Optional<URI> toUriOpt(String languageCode) {
         try {
