@@ -8,7 +8,6 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringContains.containsString;
 import java.net.URI;
-import java.util.Optional;
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
 import org.junit.jupiter.api.Test;
@@ -18,32 +17,24 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 public class LanguageMapperTest {
 
-    public static final String ISO3_LANG_CODE = "eng";
-    public static final String ISO1_LANG_CODE = "en";
-    public static final String ISO3_LANG_CODE_UPPERCASE = "ENG";
-    public static final String ISO1_LANG_CODE_UPPERCASE = "EN";
+    public static final String ISO_639_3_LANGUAGE_CODE = "eng";
+    public static final String ISO_639_1_LANGUAGE_CODE = "en";
+    public static final String ISO_639_3_LANGUAGE_CODE_UPPERCASE = "ENG";
+    public static final String ISO_639_1_LANGUAGE_CODE_UPPERCASE = "EN";
     public static final String NON_EXISTENT_CODE = "afadfad";
 
     @Test
-    public void toUriOptReturnsUriWhenInputIsIso3() {
-        URI expectedOutput = URI.create(LEXVO_URI_PREFIX + ISO3_LANG_CODE);
-        Optional<URI> actualOutput = LanguageMapper.toUriOpt(ISO3_LANG_CODE);
-        assertThat(actualOutput.isPresent(), is(true));
-        assertThat(actualOutput.orElseThrow(), is(equalTo(expectedOutput)));
+    public void toUriReturnsUriWhenInputIsIso3() {
+        URI expectedOutput = URI.create(LEXVO_URI_PREFIX + ISO_639_3_LANGUAGE_CODE);
+        URI actualOutput = LanguageMapper.toUri(ISO_639_3_LANGUAGE_CODE);
+        assertThat(actualOutput, is(equalTo(expectedOutput)));
     }
 
     @Test
-    public void toUriOptReturnsUriWhenInputIsIso1() {
-        URI expectedOutput = URI.create(LEXVO_URI_PREFIX + ISO3_LANG_CODE);
-        Optional<URI> actualOutput = LanguageMapper.toUriOpt(ISO1_LANG_CODE);
-        assertThat(actualOutput.isPresent(), is(true));
-        assertThat(actualOutput.orElseThrow(), is(equalTo(expectedOutput)));
-    }
-
-    @Test
-    public void toUriOptReturnsOptionalEmptyWhenInputLanguageCodeIsNotFound() {
-        Optional<URI> actualOutput = LanguageMapper.toUriOpt(NON_EXISTENT_CODE);
-        assertThat(actualOutput, is(equalTo(Optional.empty())));
+    public void toUriReturnsUriWhenInputIsIso1() {
+        URI expectedOutput = URI.create(LEXVO_URI_PREFIX + ISO_639_3_LANGUAGE_CODE);
+        URI actualOutput = LanguageMapper.toUri(ISO_639_1_LANGUAGE_CODE);
+        assertThat(actualOutput, is(equalTo(expectedOutput)));
     }
 
     @Test
@@ -52,16 +43,15 @@ public class LanguageMapperTest {
         assertThat(actualOutput, is(equalTo(LEXVO_URI_UNDEFINED)));
     }
 
-    @ParameterizedTest(name = "{0}")
-    @ValueSource(strings = {ISO3_LANG_CODE_UPPERCASE, ISO1_LANG_CODE_UPPERCASE})
-    public void toUriOptReturnsUriWhenInputIsUpperCase(String upperCaseLangCode) {
-        URI expectedOutput = URI.create(LEXVO_URI_PREFIX + ISO3_LANG_CODE);
-        Optional<URI> actualOutput = LanguageMapper.toUriOpt(upperCaseLangCode);
-        assertThat(actualOutput.isPresent(), is(true));
-        assertThat(actualOutput.orElseThrow(), is(equalTo(expectedOutput)));
+    @ParameterizedTest(name = "LanguageMapper.toUri returns URI when input is code: {0}")
+    @ValueSource(strings = {ISO_639_3_LANGUAGE_CODE_UPPERCASE, ISO_639_1_LANGUAGE_CODE_UPPERCASE})
+    public void toUriReturnsUriWhenInputIsUpperCase(String upperCaseLangCode) {
+        URI expectedOutput = URI.create(LEXVO_URI_PREFIX + ISO_639_3_LANGUAGE_CODE);
+        URI actualOutput = LanguageMapper.toUri(upperCaseLangCode);
+        assertThat(actualOutput, is(equalTo(expectedOutput)));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "LanguageMapper.toUri returns URI for undefined language when input is code: \"{0}\"")
     @NullAndEmptySource
     public void toUriReturnUndefinedWhenInputIsEmpty(String emptyLanguageCode) {
         URI actualOutput = LanguageMapper.toUri(emptyLanguageCode);
