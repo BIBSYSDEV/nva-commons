@@ -13,10 +13,10 @@ import nva.commons.core.StringUtils;
 
 public final class UnixPath {
 
+    public static final UnixPath EMPTY_PATH = new UnixPath(Collections.emptyList());
     private static final String PATH_DELIMITER = "/";
     private static final String ROOT = "/";
     public static final UnixPath ROOT_PATH = UnixPath.of(ROOT);
-    public static final UnixPath EMPTY_PATH = new UnixPath(Collections.emptyList());
     private static final String EMPTY_STRING = "";
 
     private final List<String> path;
@@ -42,8 +42,60 @@ public final class UnixPath {
                    : new UnixPath(pathElements);
     }
 
+    public static UnixPath fromString(String childPath) {
+        return UnixPath.of(childPath);
+    }
+
     public boolean isRoot() {
         return this.equals(ROOT_PATH);
+    }
+
+    public Optional<UnixPath> getParent() {
+        return path.size() > 1
+                   ? Optional.of(new UnixPath(path.subList(0, path.size() - 1)))
+                   : Optional.empty();
+    }
+
+    @JacocoGenerated
+    @Override
+    public int hashCode() {
+        return Objects.hash(path);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof UnixPath)) {
+            return false;
+        }
+        UnixPath unixPath = (UnixPath) o;
+        return Objects.equals(path, unixPath.path);
+    }
+
+    @Override
+    public String toString() {
+        if (pathIsEmpty(path)) {
+            return EMPTY_STRING;
+        } else if (ROOT.equals(path.get(0))) {
+            return ROOT + toString(path.subList(1, path.size()));
+        } else {
+            return
+                toString(path);
+        }
+    }
+
+    private String toString(List<String> pathArray) {
+        return String.join(PATH_DELIMITER, pathArray);
+    }
+
+    public UnixPath addChild(String childPath) {
+        UnixPath child = fromString(childPath);
+        ArrayList<String> newPathArray = new ArrayList<>();
+        newPathArray.addAll(this.path);
+        newPathArray.addAll(child.path);
+        return new UnixPath(newPathArray);
     }
 
     private static List<String> addRootIfPresentInOriginalPath(List<String> pathElements, String[] path) {
@@ -62,59 +114,7 @@ public final class UnixPath {
         return nonNull(path) && path.length > 0 && nonNull(path[0]) && path[0].startsWith(ROOT);
     }
 
-    public Optional<UnixPath> getParent() {
-        return path.size() > 1
-                   ? Optional.of(new UnixPath(path.subList(0, path.size() - 1)))
-                   : Optional.empty();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof UnixPath)) {
-            return false;
-        }
-        UnixPath unixPath = (UnixPath) o;
-        return Objects.equals(path, unixPath.path);
-    }
-
-    @JacocoGenerated
-    @Override
-    public int hashCode() {
-        return Objects.hash(path);
-    }
-
     private static boolean pathIsEmpty(List<String> path) {
         return Objects.isNull(path) || path.isEmpty();
-    }
-
-    @Override
-    public String toString() {
-        if (pathIsEmpty(path)) {
-            return EMPTY_STRING;
-        } else if (ROOT.equals(path.get(0))) {
-            return ROOT + toString(path.subList(1, path.size()));
-        } else {
-            return
-                toString(path);
-        }
-    }
-
-    public UnixPath addChild(String childPath) {
-        UnixPath child = fromString(childPath);
-        ArrayList<String> newPathArray = new ArrayList<>();
-        newPathArray.addAll(this.path);
-        newPathArray.addAll(child.path);
-        return new UnixPath(newPathArray);
-    }
-
-    public static UnixPath fromString(String childPath) {
-        return UnixPath.of(childPath);
-    }
-
-    private String toString(List<String> pathArray) {
-        return String.join(PATH_DELIMITER, pathArray);
     }
 }
