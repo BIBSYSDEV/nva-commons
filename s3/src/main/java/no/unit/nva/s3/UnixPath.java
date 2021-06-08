@@ -32,7 +32,7 @@ public final class UnixPath {
                                         .stream()
                                         .flatMap(Arrays::stream)
                                         .filter(Objects::nonNull)
-                                        .map(pathElement -> pathElement.split(PATH_DELIMITER))
+                                        .map(UnixPath::splitCompositePathElements)
                                         .flatMap(Arrays::stream)
                                         .filter(StringUtils::isNotBlank)
                                         .collect(Collectors.toList());
@@ -40,6 +40,10 @@ public final class UnixPath {
         return pathIsEmpty(pathElements)
                    ? EMPTY_PATH
                    : new UnixPath(pathElements);
+    }
+
+    private static String[] splitCompositePathElements(String pathElement) {
+        return pathElement.split(PATH_DELIMITER);
     }
 
     public static UnixPath fromString(String childPath) {
@@ -79,11 +83,14 @@ public final class UnixPath {
         if (pathIsEmpty(path)) {
             return EMPTY_STRING;
         } else if (ROOT.equals(path.get(0))) {
-            return ROOT + toString(path.subList(1, path.size()));
+            return avoidPrintingPathDelimiterTwice();
         } else {
-            return
-                toString(path);
+            return toString(path);
         }
+    }
+
+    private String avoidPrintingPathDelimiterTwice() {
+        return ROOT + toString(path.subList(1, path.size()));
     }
 
     private String toString(List<String> pathArray) {
