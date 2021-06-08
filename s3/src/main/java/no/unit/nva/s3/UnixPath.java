@@ -42,10 +42,6 @@ public final class UnixPath {
                    : new UnixPath(pathElements);
     }
 
-    private static String[] splitCompositePathElements(String pathElement) {
-        return pathElement.split(PATH_DELIMITER);
-    }
-
     public static UnixPath fromString(String childPath) {
         return UnixPath.of(childPath);
     }
@@ -89,20 +85,16 @@ public final class UnixPath {
         }
     }
 
-    private String avoidPrintingPathDelimiterTwice() {
-        return ROOT + toString(path.subList(1, path.size()));
-    }
-
-    private String toString(List<String> pathArray) {
-        return String.join(PATH_DELIMITER, pathArray);
-    }
-
     public UnixPath addChild(String childPath) {
         UnixPath child = fromString(childPath);
         ArrayList<String> newPathArray = new ArrayList<>();
         newPathArray.addAll(this.path);
         newPathArray.addAll(child.path);
         return new UnixPath(newPathArray);
+    }
+
+    private static String[] splitCompositePathElements(String pathElement) {
+        return pathElement.split(PATH_DELIMITER);
     }
 
     private static List<String> addRootIfPresentInOriginalPath(List<String> pathElements, String[] path) {
@@ -123,5 +115,13 @@ public final class UnixPath {
 
     private static boolean pathIsEmpty(List<String> path) {
         return Objects.isNull(path) || path.isEmpty();
+    }
+
+    private String avoidPrintingPathDelimiterTwice() {
+        return ROOT + toString(path.subList(1, path.size()));
+    }
+
+    private String toString(List<String> pathArray) {
+        return String.join(PATH_DELIMITER, pathArray);
     }
 }
