@@ -74,6 +74,14 @@ public final class UnixPath {
         return Objects.equals(path, unixPath.path);
     }
 
+    public UnixPath addChild(String childPath) {
+        UnixPath child = fromString(childPath);
+        ArrayList<String> newPathArray = new ArrayList<>();
+        newPathArray.addAll(this.path);
+        newPathArray.addAll(child.path);
+        return new UnixPath(newPathArray);
+    }
+
     @Override
     public String toString() {
         if (pathIsEmpty(path)) {
@@ -85,12 +93,8 @@ public final class UnixPath {
         }
     }
 
-    public UnixPath addChild(String childPath) {
-        UnixPath child = fromString(childPath);
-        ArrayList<String> newPathArray = new ArrayList<>();
-        newPathArray.addAll(this.path);
-        newPathArray.addAll(child.path);
-        return new UnixPath(newPathArray);
+    private String toString(List<String> pathArray) {
+        return String.join(PATH_DELIMITER, pathArray);
     }
 
     private static String[] splitCompositePathElements(String pathElement) {
@@ -119,9 +123,5 @@ public final class UnixPath {
 
     private String avoidPrintingPathDelimiterTwice() {
         return ROOT + toString(path.subList(1, path.size()));
-    }
-
-    private String toString(List<String> pathArray) {
-        return String.join(PATH_DELIMITER, pathArray);
     }
 }
