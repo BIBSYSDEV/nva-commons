@@ -1,13 +1,11 @@
 package no.unit.nva.s3;
 
 import static nva.commons.core.attempt.Try.attempt;
-import static nva.commons.core.ioutils.IoUtils.pathToString;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,16 +79,16 @@ public class S3Driver {
                    .build();
     }
 
-    public void insertFile(Path fullPath, String content) {
+    public void insertFile(UnixPath fullPath, String content) {
         client.putObject(newPutObjectRequest(fullPath), createRequestBody(content));
     }
 
-    public void insertFile(Path fullPath, InputStream content) throws IOException {
+    public void insertFile(UnixPath fullPath, InputStream content) throws IOException {
         client.putObject(newPutObjectRequest(fullPath), createRequestBody(content));
     }
 
-    public void insertAndCompressFiles(Path s3Folder, List<String> content) throws IOException {
-        Path path = filenameForZippedFile(s3Folder);
+    public void insertAndCompressFiles(UnixPath s3Folder, List<String> content) throws IOException {
+        UnixPath path = filenameForZippedFile(s3Folder);
         PutObjectRequest putObjectRequest = newPutObjectRequest(path);
         try (InputStream compressedContent = contentToZippedStream(content)) {
             RequestBody requestBody = createRequestBody(compressedContent);
@@ -99,17 +97,17 @@ public class S3Driver {
     }
 
     public void insertAndCompressFiles(List<String> content) throws IOException {
-        insertAndCompressFiles(Path.of(EMPTY_STRING), content);
+        insertAndCompressFiles(UnixPath.of(EMPTY_STRING), content);
     }
 
-    public List<String> getFiles(Path folder) {
+    public List<String> getFiles(UnixPath folder) {
         return listFiles(folder)
                    .stream()
                    .map(this::getFile)
                    .collect(Collectors.toList());
     }
 
-    public List<String> listFiles(Path folder) {
+    public List<String> listFiles(UnixPath folder) {
         List<String> resultBuffer = new ArrayList<>();
         ListObjectsResponse partialResult;
         String listingStartingPoint = null;
@@ -122,13 +120,13 @@ public class S3Driver {
         return resultBuffer;
     }
 
-    public Optional<String> getUncompressedFile(Path file) {
+    public Optional<String> getUncompressedFile(UnixPath file) {
         GetObjectRequest getObjectRequest = createGetObjectRequest(file);
         ResponseBytes<GetObjectResponse> response = fetchObject(getObjectRequest);
         return attempt(response::asUtf8String).toOptional();
     }
 
-    public String getCompressedFile(Path file) throws IOException {
+    public String getCompressedFile(UnixPath file) throws IOException {
         GetObjectRequest getObjectRequest = createGetObjectRequest(file);
         try (ResponseInputStream<GetObjectResponse> response = client.getObject(getObjectRequest)) {
             return decompressInputToString(response);
@@ -137,9 +135,9 @@ public class S3Driver {
 
     public String getFile(String filename) {
         if (isCompressed(filename)) {
-            return attempt(() -> getCompressedFile(Path.of(filename))).orElseThrow();
+            return attempt(() -> getCompressedFile(UnixPath.of(filename))).orElseThrow();
         } else {
-            return getUncompressedFile(Path.of(filename)).orElseThrow();
+            return getUncompressedFile(UnixPath.of(filename)).orElseThrow();
         }
     }
 
@@ -160,12 +158,12 @@ public class S3Driver {
         ENVIRONMENT.readEnv(AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME);
     }
 
-    private Path filenameForZippedFile(Path s3Folder) {
+    private UnixPath filenameForZippedFile(UnixPath s3Folder) {
         String folderPath = processPath(s3Folder);
-        return Path.of(folderPath, UUID.randomUUID().toString() + GZIP_ENDING);
+        return UnixPath.of(folderPath, UUID.randomUUID().toString() + GZIP_ENDING);
     }
 
-    private String processPath(Path s3Folder) {
+    private String processPath(UnixPath s3Folder) {
         String unixPath = s3Folder.toString()
                               .replaceAll(DOUBLE_BACKSLASH, UNIX_SEPARATOR)
                               .replaceAll(SINGLE_BACKSLASH, UNIX_SEPARATOR);
@@ -187,7 +185,7 @@ public class S3Driver {
         return new StringCompressor(content).gzippedData();
     }
 
-    private ListObjectsResponse fetchNewResultsBatch(Path folder, String listingStartingPoint) {
+    private ListObjectsResponse fetchNewResultsBatch(UnixPath folder, String listingStartingPoint) {
         ListObjectsRequest request = requestForListingFiles(folder, listingStartingPoint);
         return client.listObjects(request);
     }
@@ -219,10 +217,10 @@ public class S3Driver {
         return null;
     }
 
-    private GetObjectRequest createGetObjectRequest(Path file) {
+    private GetObjectRequest createGetObjectRequest(UnixPath file) {
         return GetObjectRequest.builder()
                    .bucket(bucketName)
-                   .key(pathToString(file))
+                   .key(file.toString())
                    .build();
     }
 
@@ -239,18 +237,18 @@ public class S3Driver {
         return result.contents().stream().map(S3Object::key).collect(Collectors.toList());
     }
 
-    private ListObjectsRequest requestForListingFiles(Path folder, String startingPoint) {
+    private ListObjectsRequest requestForListingFiles(UnixPath folder, String startingPoint) {
         return ListObjectsRequest.builder()
                    .bucket(bucketName)
-                   .prefix(pathToString(folder))
+                   .prefix(folder.toString())
                    .marker(startingPoint)
                    .build();
     }
 
-    private PutObjectRequest newPutObjectRequest(Path fullPath) {
+    private PutObjectRequest newPutObjectRequest(UnixPath fullPath) {
         return PutObjectRequest.builder()
                    .bucket(bucketName)
-                   .key(pathToString(fullPath))
+                   .key(fullPath.toString())
                    .build();
     }
 }
