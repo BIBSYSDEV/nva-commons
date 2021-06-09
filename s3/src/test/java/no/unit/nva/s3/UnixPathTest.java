@@ -10,6 +10,7 @@ import static org.hamcrest.text.IsEmptyString.emptyString;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 
 class UnixPathTest {
@@ -132,5 +133,15 @@ class UnixPathTest {
         UnixPath parent = path.getParent().orElseThrow();
         assertThat(parent.isRoot(), is(true));
         assertThat(parent, is(equalTo(UnixPath.ROOT_PATH)));
+    }
+
+    @ParameterizedTest(name = "getFilename returns ${1} when input is ${0}")
+    @CsvSource({
+        "/some/existing/folder/, folder",
+        "/some/existing/folder/existingFile.ending, existingFile.ending"
+    })
+    public void getFilenameReturnsTheLastElementOfaUnixPath(String inputPath, String expectedFilename) {
+        UnixPath unixPath = UnixPath.of(inputPath);
+        assertThat(unixPath.getFilename(), is(equalTo(expectedFilename)));
     }
 }
