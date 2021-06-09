@@ -1,6 +1,8 @@
 package no.unit.nva.s3;
 
 import static java.util.Objects.nonNull;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,6 +28,7 @@ public final class UnixPath {
         this.path = path;
     }
 
+
     @SuppressWarnings("PMD.ShortMethodName")
     public static UnixPath of(String... path) {
         Stream<String> pathElements = extractAllPathElements(path);
@@ -36,6 +39,7 @@ public final class UnixPath {
                    : new UnixPath(pathElementsList);
     }
 
+    @JsonCreator
     public static UnixPath fromString(String childPath) {
         return UnixPath.of(childPath);
     }
@@ -68,6 +72,7 @@ public final class UnixPath {
         return Objects.equals(path, unixPath.path);
     }
 
+    @JsonValue
     @Override
     public String toString() {
         if (pathIsEmpty(path)) {
