@@ -156,7 +156,7 @@ class UnixPathTest {
         String unixPath = "/some/folder";
 
         ClassWithUnixPath classWithUnixPath = new ClassWithUnixPath();
-        classWithUnixPath.setUnixPath(UnixPath.of(unixPath));
+        classWithUnixPath.setField(UnixPath.of(unixPath));
         String jsonString = objectMapper.writeValueAsString(classWithUnixPath);
         JsonNode actualJson = objectMapperNoEmpty.readTree(jsonString);
 
@@ -176,24 +176,24 @@ class UnixPathTest {
         ClassWithUnixPath objectContainingUnixPath =
             objectMapper.readValue(jsonString, ClassWithUnixPath.class);
 
-        assertThat(objectContainingUnixPath.getUnixPath().toString(), is(equalTo(expectedPath)));
+        assertThat(objectContainingUnixPath.getField().toString(), is(equalTo(expectedPath)));
     }
 
     private static class ClassWithUnixPath {
 
-        private UnixPath unixPath;
+        private UnixPath field;
 
         @JsonIgnore
         public static String fieldName() {
-            return "unixPath";
+            return "field";
         }
 
-        public UnixPath getUnixPath() {
-            return unixPath;
+        public UnixPath getField() {
+            return field;
         }
 
-        public void setUnixPath(UnixPath unixPath) {
-            this.unixPath = unixPath;
+        public void setField(UnixPath field) {
+            this.field = field;
         }
     }
 }
