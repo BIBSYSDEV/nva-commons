@@ -28,7 +28,6 @@ public final class UnixPath {
         this.path = path;
     }
 
-
     @SuppressWarnings("PMD.ShortMethodName")
     public static UnixPath of(String... path) {
         Stream<String> pathElements = extractAllPathElements(path);
@@ -78,9 +77,9 @@ public final class UnixPath {
         if (pathIsEmpty(path)) {
             return EMPTY_STRING;
         } else if (ROOT.equals(path.get(0))) {
-            return avoidPrintingPathDelimiterTwice();
+            return avoidWritingRootPathTwice();
         } else {
-            return toString(path);
+            return formatPathAsString(path);
         }
     }
 
@@ -139,15 +138,15 @@ public final class UnixPath {
         return Objects.isNull(path) || path.isEmpty();
     }
 
+    private String formatPathAsString(List<String> pathArray) {
+        return String.join(PATH_DELIMITER, pathArray);
+    }
+
     private int lastPathElementIndex() {
         return path.size() - 1;
     }
 
-    private String toString(List<String> pathArray) {
-        return String.join(PATH_DELIMITER, pathArray);
-    }
-
-    private String avoidPrintingPathDelimiterTwice() {
-        return ROOT + toString(path.subList(1, path.size()));
+    private String avoidWritingRootPathTwice() {
+        return ROOT + formatPathAsString(path.subList(1, path.size()));
     }
 }
