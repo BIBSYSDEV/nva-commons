@@ -7,16 +7,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import java.net.URI;
-import java.nio.file.Path;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import nva.commons.core.ioutils.IoUtils;
+import java.util.stream.Stream;
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -73,29 +72,14 @@ public class LanguageMapperTest {
         assertThat(appender.getMessages(), containsString(expectedValue));
     }
 
-    @Test
-    public void toUriReturnsUriAsSpecifiedInLexvoResourceFilesForAllIsoCodes() {
-        final Map<String, URI> lexvoMappings = new ConcurrentHashMap<>();
-        IoUtils.linesfromResource(Path.of("lexvo", "lexvoMappings.txt"))
-            .stream()
-            .map(line -> line.split("\\s+"))
-            .forEach(array -> insertTomMap(array, lexvoMappings));
-
-        Set<String> isoCodes = lexvoMappings.keySet();
-        for (String isoCode : isoCodes) {
-            URI expectedUri = lexvoMappings.get(isoCode);
-            URI actualUri = LanguageMapper.toUri(isoCode);
-            assertThat(actualUri, is(equalTo(expectedUri)));
-        }
+    @ParameterizedTest(name = "toUri returns {1} when input is ISO-639-2 code {0}")
+    @MethodSource("uriProviderForHardCodedMappings")
+    public void toUriReturnsUriWithHardCodedMappingWhenInputMatchesHardcodedInputs(String iso2Code, URI expectedUri) {
+        assertThat(LanguageMapper.toUri(iso2Code), is(equalTo(expectedUri)));
     }
 
-    private void insertTomMap(String[] array, Map<String, URI> lexvoMappings) {
-        String isoCode = array[ISO_CODE_INDEX];
-        URI lexvoUri = URI.create(array[LEXVO_URI_INDEX]);
-        if (lexvoMappings.containsKey(isoCode) && !lexvoMappings.get(isoCode).equals(lexvoUri)) {
-            throw new RuntimeException("ISO code mismatch:" + isoCode);
-        } else {
-            lexvoMappings.put(isoCode, lexvoUri);
-        }
+    private static Stream<Arguments> uriProviderForHardCodedMappings() {
+        return LanguageMapper.IS02_TO_ISO3_CODES.entrySet().stream()
+                   .map(entry -> arguments(entry.getKey(), URI.create(LEXVO_URI_PREFIX + entry.getValue())));
     }
 }
