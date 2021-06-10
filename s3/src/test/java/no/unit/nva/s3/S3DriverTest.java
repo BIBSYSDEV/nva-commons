@@ -58,15 +58,15 @@ class S3DriverTest {
     private static final String REMOTELY_EXISTING_BUCKET = "orestis-export";
     private static final int REQUEST_BODY_ARG_INDEX = 1;
     private static final String SOME_PATH = "somePath";
-    private static final String FIRST_EXPECTED_OBJECT_KEY = randomFileName();
-    private static final String SECOND_EXPECTED_OBJECT_KEY = randomFileName();
+    private static final UnixPath FIRST_EXPECTED_OBJECT_KEY = UnixPath.of(randomFileName());
+    private static final UnixPath SECOND_EXPECTED_OBJECT_KEY = UnixPath.of(randomFileName());
     private static final String EXPECTED_NON_COMPRESSED_CONTENT = randomString();
     private static final String PUT_ITEM_EXPECTED_PATH = constructNestedPath().toString();
     private static final int PUT_OBJECT_REQUEST_ARG_INDEX = 0;
     private static final String EXPECTED_COMPRESSED_CONTENT = randomString();
     private static final Integer NUMBER_OF_LISTED_ITEMS_IN_MOCKED_LISTING = 2;
-    private static final String NOT_COMPRESSED_OBJECT_KEY = randomFileName();
-    private static final String COMPRESSED_OBJECT_KEY = randomFileName() + S3Driver.GZIP_ENDING;
+    private static final UnixPath NOT_COMPRESSED_OBJECT_KEY = UnixPath.of(randomFileName());
+    private static final UnixPath COMPRESSED_OBJECT_KEY = UnixPath.of(randomFileName() + S3Driver.GZIP_ENDING);
     private S3Driver s3Driver;
     private InputStream actualPutObjectContent;
     private String actualPutObjectKey;
@@ -82,11 +82,11 @@ class S3DriverTest {
     @Tag("RemoteTest")
     public void listFilesReturnsListWithAllFilenamesInRemoteS3Folder() {
         S3Driver s3Driver = new S3Driver(S3Client.create(), REMOTELY_EXISTING_BUCKET);
-        String expectedFilename = constructNestedPath().toString();
-        UnixPath parentFolder = UnixPath.of(expectedFilename).getParent().orElseThrow();
+        UnixPath expectedFilename = constructNestedPath();
+        UnixPath parentFolder = expectedFilename.getParent().orElseThrow();
         String content = longText();
-        s3Driver.insertFile(UnixPath.of(expectedFilename), content);
-        List<String> files = s3Driver.listFiles(UnixPath.of(parentFolder.toString()));
+        s3Driver.insertFile(expectedFilename, content);
+        List<UnixPath> files = s3Driver.listFiles(UnixPath.of(parentFolder.toString()));
         assertThat(files, CoreMatchers.hasItem(expectedFilename));
     }
 
@@ -116,7 +116,7 @@ class S3DriverTest {
 
     @Test
     public void listFilesReturnsListWithAllFilenamesInS3Folder() {
-        List<String> files = s3Driver.listFiles(UnixPath.of(SOME_PATH));
+        List<UnixPath> files = s3Driver.listFiles(UnixPath.of(SOME_PATH));
         assertThat(files, contains(FIRST_EXPECTED_OBJECT_KEY, SECOND_EXPECTED_OBJECT_KEY));
     }
 
@@ -212,7 +212,7 @@ class S3DriverTest {
     }
 
     private static UnixPath constructNestedPath() {
-        String expectedFileName = randomFileName();
+        UnixPath expectedFileName = UnixPath.of(randomFileName());
         UnixPath parentFolder = UnixPath.of("some", "nested", "path");
         return parentFolder.addChild(expectedFileName);
     }
@@ -279,7 +279,8 @@ class S3DriverTest {
             .thenAnswer(invocation -> listObjectsResponseWithSingleObject(SECOND_EXPECTED_OBJECT_KEY, LAST_OBJECT));
     }
 
-    private ListObjectsResponse listObjectsResponseWithSingleObject(String firstExpectedObjectKey, boolean lastObject) {
+    private ListObjectsResponse listObjectsResponseWithSingleObject(UnixPath firstExpectedObjectKey,
+                                                                    boolean lastObject) {
         S3Object responseObject = sampleObjectListing(firstExpectedObjectKey);
         return ListObjectsResponse.builder()
                    .contents(responseObject)
@@ -287,8 +288,8 @@ class S3DriverTest {
                    .build();
     }
 
-    private S3Object sampleObjectListing(String firstExpectedObjectKey) {
-        return S3Object.builder().key(firstExpectedObjectKey).build();
+    private S3Object sampleObjectListing(UnixPath firstExpectedObjectKey) {
+        return S3Object.builder().key(firstExpectedObjectKey.toString()).build();
     }
 
     private InputStream zippedStream() throws IOException {

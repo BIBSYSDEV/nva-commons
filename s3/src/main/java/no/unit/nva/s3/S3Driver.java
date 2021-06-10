@@ -107,8 +107,8 @@ public class S3Driver {
                    .collect(Collectors.toList());
     }
 
-    public List<String> listFiles(UnixPath folder) {
-        List<String> resultBuffer = new ArrayList<>();
+    public List<UnixPath> listFiles(UnixPath folder) {
+        List<UnixPath> resultBuffer = new ArrayList<>();
         ListObjectsResponse partialResult;
         String listingStartingPoint = null;
         do {
@@ -133,11 +133,11 @@ public class S3Driver {
         }
     }
 
-    public String getFile(String filename) {
-        if (isCompressed(filename)) {
-            return attempt(() -> getCompressedFile(UnixPath.of(filename))).orElseThrow();
+    public String getFile(UnixPath filename) {
+        if (isCompressed(filename.getFilename())) {
+            return attempt(() -> getCompressedFile(filename)).orElseThrow();
         } else {
-            return getUncompressedFile(UnixPath.of(filename)).orElseThrow();
+            return getUncompressedFile(filename).orElseThrow();
         }
     }
 
@@ -153,7 +153,6 @@ public class S3Driver {
 
     @JacocoGenerated
     private static void verifyThatRequiredEnvVariablesAreInPlace() {
-
         ENVIRONMENT.readEnv(AWS_ACCESS_KEY_ID_ENV_VARIABLE_NAME);
         ENVIRONMENT.readEnv(AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME);
     }
@@ -228,13 +227,16 @@ public class S3Driver {
         return result.contents().get(result.contents().size() - 1).key();
     }
 
-    private void addResultsToBuffer(List<String> resultBuffer, ListObjectsResponse result) {
-        List<String> results = extractResultsFromResponse(result);
+    private void addResultsToBuffer(List<UnixPath> resultBuffer, ListObjectsResponse result) {
+        List<UnixPath> results = extractResultsFromResponse(result);
         resultBuffer.addAll(results);
     }
 
-    private List<String> extractResultsFromResponse(ListObjectsResponse result) {
-        return result.contents().stream().map(S3Object::key).collect(Collectors.toList());
+    private List<UnixPath> extractResultsFromResponse(ListObjectsResponse result) {
+        return result.contents().stream()
+                   .map(S3Object::key)
+                   .map(UnixPath::of)
+                   .collect(Collectors.toList());
     }
 
     private ListObjectsRequest requestForListingFiles(UnixPath folder, String startingPoint) {
