@@ -1,6 +1,7 @@
 package no.unit.nva.s3;
 
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
+import static no.unit.nva.s3.UnixPath.ROOT;
 import static nva.commons.core.JsonUtils.objectMapper;
 import static nva.commons.core.JsonUtils.objectMapperNoEmpty;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -177,6 +178,35 @@ class UnixPathTest {
             objectMapper.readValue(jsonString, ClassWithUnixPath.class);
 
         assertThat(objectContainingUnixPath.getUnixPath().toString(), is(equalTo(expectedPath)));
+    }
+
+    @Test
+    public void addRootAddsRootToNonAbsoluteUnixPath() {
+        String pathString = "some/path";
+        String expectedPathString = ROOT + pathString;
+        String actualPathString = UnixPath.fromString(pathString).addRoot().toString();
+        assertThat(actualPathString, is(equalTo(expectedPathString)));
+    }
+
+    @Test
+    public void addRootReturnsSamePathWhenPathIsAbsoluteUnixPath() {
+        String expectedPathString = ROOT + "some/path";
+        String actualPathString = UnixPath.fromString(expectedPathString).addRoot().toString();
+        assertThat(actualPathString, is(equalTo(expectedPathString)));
+    }
+
+    @Test
+    public void removeRootRemovesRootToNonAbsoluteUnixPath() {
+        String expectedPathString = "some/path";
+        String actualPathString = UnixPath.fromString(ROOT + expectedPathString).removeRoot().toString();
+        assertThat(actualPathString, is(equalTo(expectedPathString)));
+    }
+
+    @Test
+    public void removeRootReturnsSamePathWhenUnixPathIsNotAbsolute() {
+        String expectedPathString = "some/path";
+        String actualPathString = UnixPath.fromString(expectedPathString).removeRoot().toString();
+        assertThat(actualPathString, is(equalTo(expectedPathString)));
     }
 
     private static class ClassWithUnixPath {

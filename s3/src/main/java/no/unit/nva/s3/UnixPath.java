@@ -18,7 +18,7 @@ public final class UnixPath {
 
     public static final UnixPath EMPTY_PATH = new UnixPath(Collections.emptyList());
     private static final String PATH_DELIMITER = "/";
-    private static final String ROOT = "/";
+    public static final String ROOT = "/";
     public static final UnixPath ROOT_PATH = UnixPath.of(ROOT);
     private static final String EMPTY_STRING = "";
 
@@ -76,7 +76,7 @@ public final class UnixPath {
     public String toString() {
         if (pathIsEmpty(path)) {
             return EMPTY_STRING;
-        } else if (ROOT.equals(path.get(0))) {
+        } else if (isAbsolute()) {
             return avoidWritingRootPathTwice();
         } else {
             return formatPathAsString(path);
@@ -96,6 +96,18 @@ public final class UnixPath {
 
     public String getFilename() {
         return path.get(lastPathElementIndex());
+    }
+
+    public UnixPath addRoot() {
+        return isAbsolute()
+                   ? this
+                   : ROOT_PATH.addChild(this);
+    }
+
+    public UnixPath removeRoot() {
+        return isAbsolute()
+                   ? new UnixPath(this.path.subList(1, path.size()))
+                   : this;
     }
 
     private static Stream<String> extractAllPathElements(String[] path) {
@@ -136,6 +148,10 @@ public final class UnixPath {
 
     private static boolean pathIsEmpty(List<String> path) {
         return Objects.isNull(path) || path.isEmpty();
+    }
+
+    private boolean isAbsolute() {
+        return ROOT.equals(path.get(0));
     }
 
     private String formatPathAsString(List<String> pathArray) {
