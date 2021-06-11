@@ -16,6 +16,21 @@ import org.slf4j.LoggerFactory;
 public final class LanguageMapper {
 
     public static final Map<String, String> IS02_TO_ISO3_CODES = hardCodedMappings();
+    public static final String LEXVO_URI_PREFIX = "http://lexvo.org/id/iso639-3/";
+    public static final URI LEXVO_URI_UNDEFINED = URI.create(LEXVO_URI_PREFIX + "und");
+    public static final String ERROR_MESSAGE_MISSING_RESOURCE_EXCEPTION = "Failing to retrieve URI for the "
+                                                                          + "language code ";
+    private static final Logger logger = LoggerFactory.getLogger(LanguageMapper.class);
+
+    private LanguageMapper() {
+
+    }
+
+    public static URI toUri(String languageCode) {
+        return toIso3Code(languageCode)
+                   .map(iso3 -> URI.create(LEXVO_URI_PREFIX + iso3))
+                   .orElse(LEXVO_URI_UNDEFINED);
+    }
 
     private static Map<String, String> hardCodedMappings() {
         return Stream.of(
@@ -42,16 +57,6 @@ public final class LanguageMapper {
                    .collect(Collectors.toUnmodifiableMap(SimpleEntry::getKey, SimpleEntry::getValue));
     }
 
-    public static final String LEXVO_URI_PREFIX = "http://lexvo.org/id/iso639-3/";
-    public static final URI LEXVO_URI_UNDEFINED = URI.create(LEXVO_URI_PREFIX + "und");
-    public static final String ERROR_MESSAGE_MISSING_RESOURCE_EXCEPTION = "Failing to retrieve URI for the "
-                                                                          + "language code ";
-    private static final Logger logger = LoggerFactory.getLogger(LanguageMapper.class);
-
-    private LanguageMapper() {
-
-    }
-
     private static Optional<String> toIso3Code(String languageCode) {
         try {
             return Optional.ofNullable(languageCode)
@@ -67,11 +72,5 @@ public final class LanguageMapper {
 
     private static String returnHardCodedMappingIfExistsOrSameValue(String code) {
         return IS02_TO_ISO3_CODES.getOrDefault(code, code);
-    }
-
-    public static URI toUri(String languageCode) {
-        return toIso3Code(languageCode)
-                   .map(iso3 -> URI.create(LEXVO_URI_PREFIX + iso3))
-                   .orElse(LEXVO_URI_UNDEFINED);
     }
 }
