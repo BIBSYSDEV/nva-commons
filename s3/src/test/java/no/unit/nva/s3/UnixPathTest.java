@@ -1,12 +1,18 @@
 package no.unit.nva.s3;
 
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
+import static nva.commons.core.JsonUtils.objectMapper;
+import static nva.commons.core.JsonUtils.objectMapperNoEmpty;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsSame.sameInstance;
 import static org.hamcrest.text.IsEmptyString.emptyString;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -143,5 +149,51 @@ class UnixPathTest {
     public void getFilenameReturnsTheLastElementOfaUnixPath(String inputPath, String expectedFilename) {
         UnixPath unixPath = UnixPath.of(inputPath);
         assertThat(unixPath.getFilename(), is(equalTo(expectedFilename)));
+    }
+
+    @Test
+    public void objectMapperSerializesUnixPathAsString() throws JsonProcessingException {
+        String unixPath = "/some/folder";
+
+        ClassWithUnixPath classWithUnixPath = new ClassWithUnixPath();
+        classWithUnixPath.setField(UnixPath.of(unixPath));
+        String jsonString = objectMapper.writeValueAsString(classWithUnixPath);
+        JsonNode actualJson = objectMapperNoEmpty.readTree(jsonString);
+
+        ObjectNode expectedJson = objectMapperNoEmpty.createObjectNode();
+        expectedJson.put(ClassWithUnixPath.fieldName(), unixPath);
+
+        assertThat(actualJson, is(equalTo(expectedJson)));
+    }
+
+    @Test
+    public void objectMapperReturnsValidUnixPathWhenMappingStringToUnixPath()
+        throws JsonProcessingException {
+        String expectedPath = "/some/folder";
+        ObjectNode json = objectMapperNoEmpty.createObjectNode();
+        json.put(ClassWithUnixPath.fieldName(), expectedPath);
+        String jsonString = objectMapperNoEmpty.writeValueAsString(json);
+        ClassWithUnixPath objectContainingUnixPath =
+            objectMapper.readValue(jsonString, ClassWithUnixPath.class);
+
+        assertThat(objectContainingUnixPath.getField().toString(), is(equalTo(expectedPath)));
+    }
+
+    private static class ClassWithUnixPath {
+
+        private UnixPath field;
+
+        @JsonIgnore
+        public static String fieldName() {
+            return "field";
+        }
+
+        public UnixPath getField() {
+            return field;
+        }
+
+        public void setField(UnixPath field) {
+            this.field = field;
+        }
     }
 }

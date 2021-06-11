@@ -1,6 +1,8 @@
 package no.unit.nva.s3;
 
 import static java.util.Objects.nonNull;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,6 +38,7 @@ public final class UnixPath {
                    : new UnixPath(pathElementsList);
     }
 
+    @JsonCreator
     public static UnixPath fromString(String childPath) {
         return UnixPath.of(childPath);
     }
@@ -68,14 +71,15 @@ public final class UnixPath {
         return Objects.equals(path, unixPath.path);
     }
 
+    @JsonValue
     @Override
     public String toString() {
         if (pathIsEmpty(path)) {
             return EMPTY_STRING;
         } else if (ROOT.equals(path.get(0))) {
-            return avoidPrintingPathDelimiterTwice();
+            return avoidWritingRootPathTwice();
         } else {
-            return toString(path);
+            return formatPathAsString(path);
         }
     }
 
@@ -134,15 +138,15 @@ public final class UnixPath {
         return Objects.isNull(path) || path.isEmpty();
     }
 
+    private String formatPathAsString(List<String> pathArray) {
+        return String.join(PATH_DELIMITER, pathArray);
+    }
+
     private int lastPathElementIndex() {
         return path.size() - 1;
     }
 
-    private String toString(List<String> pathArray) {
-        return String.join(PATH_DELIMITER, pathArray);
-    }
-
-    private String avoidPrintingPathDelimiterTwice() {
-        return ROOT + toString(path.subList(1, path.size()));
+    private String avoidWritingRootPathTwice() {
+        return ROOT + formatPathAsString(path.subList(1, path.size()));
     }
 }
