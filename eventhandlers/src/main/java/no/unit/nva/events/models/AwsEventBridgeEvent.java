@@ -154,7 +154,7 @@ public class AwsEventBridgeEvent<I> implements JsonSerializable {
                && Objects.equals(getSource(), that.getSource())
                && Objects.equals(getAccount(), that.getAccount())
                && Objects.equals(getTime(), that.getTime())
-               && getRegion() == that.getRegion()
+               && getRegion().equals(that.getRegion())
                && Objects.equals(getResources(), that.getResources())
                && Objects.equals(getDetail(), that.getDetail());
     }
