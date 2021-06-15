@@ -209,6 +209,15 @@ class UnixPathTest {
         assertThat(actualPathString, is(equalTo(expectedPathString)));
     }
 
+    @Test
+    public void addChildReturnsPathRemovingRootFromChildThatHasRoot() {
+        String parentFolder = "/some/folder";
+        String childFolder = "/child";
+        String expectedPath = "/some/folder/child";
+        String actualPath = UnixPath.of(parentFolder).addChild(childFolder).toString();
+        assertThat(actualPath, is(equalTo(expectedPath)));
+    }
+
     private static class ClassWithUnixPath {
 
         private UnixPath field;

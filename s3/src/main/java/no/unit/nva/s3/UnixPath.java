@@ -17,9 +17,9 @@ import nva.commons.core.StringUtils;
 public final class UnixPath {
 
     public static final UnixPath EMPTY_PATH = new UnixPath(Collections.emptyList());
-    private static final String PATH_DELIMITER = "/";
     public static final String ROOT = "/";
     public static final UnixPath ROOT_PATH = UnixPath.of(ROOT);
+    private static final String PATH_DELIMITER = "/";
     private static final String EMPTY_STRING = "";
 
     private final List<String> path;
@@ -88,10 +88,10 @@ public final class UnixPath {
     }
 
     public UnixPath addChild(UnixPath childPath) {
-        ArrayList<String> newPathArray = new ArrayList<>();
+        List<String> newPathArray = new ArrayList<>();
         newPathArray.addAll(this.path);
         newPathArray.addAll(childPath.path);
-        return new UnixPath(newPathArray);
+        return UnixPath.of(newPathArray.toArray(String[]::new));
     }
 
     public String getFilename() {
@@ -108,6 +108,10 @@ public final class UnixPath {
         return isAbsolute()
                    ? new UnixPath(this.path.subList(1, path.size()))
                    : this;
+    }
+
+    private static Stream<String> prependRoot(Stream<String> pathElements) {
+        return Stream.concat(Stream.of(ROOT), pathElements);
     }
 
     private static Stream<String> extractAllPathElements(String[] path) {
@@ -135,11 +139,7 @@ public final class UnixPath {
     }
 
     private static Stream<String> addRootIfPresentInOriginalPath(Stream<String> pathElements, String[] path) {
-        return pathBeginsWithRoot(path) ? addRoot(pathElements) : pathElements;
-    }
-
-    private static Stream<String> addRoot(Stream<String> pathElements) {
-        return Stream.concat(Stream.of(ROOT), pathElements);
+        return pathBeginsWithRoot(path) ? prependRoot(pathElements) : pathElements;
     }
 
     private static boolean pathBeginsWithRoot(String[] path) {
