@@ -3,6 +3,8 @@ package nva.commons.core;
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isPresentAnd;
 import static nva.commons.core.JsonUtils.objectMapper;
+import static nva.commons.core.JsonUtils.objectMapperNoEmpty;
+import static nva.commons.core.JsonUtils.objectMapperSingleLine;
 import static nva.commons.core.JsonUtils.objectMapperWithEmpty;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -151,13 +153,24 @@ public class JsonUtilsTest {
         assertThat(node.has(NULL_MAP), is(true));
     }
 
+    @Test
+    public void objectMapperSingleLineReturnsObjectsInSingleLine() throws JsonProcessingException {
+        SamplePojo samplePojo = new SamplePojo();
+        samplePojo.setField1("someValue");
+        samplePojo.setField2("someValue");
+        String jsonInSingleLine = objectMapperSingleLine.writeValueAsString(samplePojo);
+        String prettyJson = objectMapperNoEmpty.writeValueAsString(samplePojo);
+        assertThat(jsonInSingleLine, not(containsString(System.lineSeparator())));
+        assertThat(prettyJson, containsString(System.lineSeparator()));
+    }
+
     private TestObjectForOptionals objectWithoutValue() {
         return new TestObjectForOptionals(null);
     }
 
     private TestObjectForOptionals deserialize(JsonNode jsonObjectWithoutValue) {
         return objectMapper.convertValue(jsonObjectWithoutValue,
-            TestObjectForOptionals.class);
+                                         TestObjectForOptionals.class);
     }
 
     private TestObjectForOptionals objectWithSomeValue() {
