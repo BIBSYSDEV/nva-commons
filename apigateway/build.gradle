@@ -1,6 +1,6 @@
 dependencies{
     implementation project(":core")
-    implementation group: 'org.zalando', name: 'problem', version: '0.25.0'
+    implementation group: 'org.zalando', name: 'problem', version: '0.26.0'
     implementation (group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: project.ext.awsSdkVersion){
         exclude  group:"com.fasterxml.jackson.core", module: "jackson-databind"
         exclude  group:"com.fasterxml.jackson.dataformat", module: "jackson-dataformat-cbor"
