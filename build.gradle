@@ -140,7 +140,7 @@ subprojects {
             exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jdk8"
             exclude group: "org.apache.logging.log4j", module: "log4j-core:2.8.2"
         }
-        api(group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.25.0') {
+        api(group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.26.0') {
             exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
             exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
             exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
