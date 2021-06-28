@@ -165,7 +165,7 @@ subprojects {
         testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: project.ext.jupiterVersion
         testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: project.ext.jupiterVersion
 
-        compileOnly(group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.1') {
+        compileOnly(group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.2') {
             because("junit.jupiter version 5 depends on it and testImplementation seems not enough")
         }
 
