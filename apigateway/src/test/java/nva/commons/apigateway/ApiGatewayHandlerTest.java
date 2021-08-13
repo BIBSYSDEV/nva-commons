@@ -37,7 +37,6 @@ import javax.management.modelmbean.XMLParseException;
 import no.unit.nva.stubs.FakeContext;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
-import nva.commons.apigateway.exceptions.InvalidOrMissingTypeException;
 import nva.commons.apigateway.exceptions.TestException;
 import nva.commons.apigateway.testutils.Handler;
 import nva.commons.apigateway.testutils.RequestBody;
@@ -62,8 +61,8 @@ public class ApiGatewayHandlerTest {
     public static final int OVERRIDEN_STATUS_CODE = 418;  //I'm a teapot
     public static final Path EVENT_WITH_UNKNOWN_REQUEST_INFO = Path.of("apiGatewayMessages",
                                                                        "eventWithUnknownRequestInfo.json");
-    public Environment environment;
     private static final String PATH = "path1/path2/path3";
+    public Environment environment;
     private Context context;
 
     /**
@@ -253,31 +252,6 @@ public class ApiGatewayHandlerTest {
     }
 
     @Test
-    public void handlerReturnsBadRequestForJsonInvalidTypeError() throws IOException {
-        Handler handler = new Handler(environment);
-
-        InputStream inputStream = requestWithBodyWithoutType();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        handler.handleRequest(inputStream, outputStream, context);
-
-        GatewayResponse<Problem> response = GatewayResponse.fromOutputStream(outputStream);
-        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_BAD_REQUEST)));
-
-        Problem details = response.getBodyObject(Problem.class);
-        assertThat(details.getDetail(), containsString(InvalidOrMissingTypeException.MESSAGE));
-    }
-
-    @Test
-    void handlerSerializesBodyWithNonDefaultSerializationWhenDefaultSerializerIsOverridden() throws IOException {
-        ObjectMapper spiedMapper = spy(JsonUtils.objectMapper);
-        var handler = new Handler(environment, spiedMapper);
-        var inputStream = requestWithHeaders();
-        var outputStream = outputStream();
-        handler.handleRequest(inputStream, outputStream, context);
-        verify(spiedMapper, atLeast(1)).writeValueAsString(any());
-    }
-
-    @Test
     public void handlerLogsRequestIdForEveryRequest() throws IOException {
         var appender = LogUtils.getTestingAppender(RestRequestHandler.class);
         var handler = new Handler(environment);
@@ -302,14 +276,47 @@ public class ApiGatewayHandlerTest {
         assertThat(jsonNode.get(RequestBody.FIELD2), is(equalTo(objectMapper.nullNode())));
     }
 
+    @Test
+    public void handlerReturnsBadRequestWhenInputParsingFails() throws IOException {
+        String expectedMessage = "Expected error message when parsing fails";
+        Handler handler = handlerFailingWhenParsing(expectedMessage);
+        InputStream input = requestWithHeadersAndPath();
+        ByteArrayOutputStream output = outputStream();
+        handler.handleRequest(input, output, context);
+        GatewayResponse<Problem> response = GatewayResponse.fromOutputStream(output);
+        Problem problem = response.getBodyObject(Problem.class);
+
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_BAD_REQUEST)));
+        assertThat(problem.getDetail(), containsString(expectedMessage));
+    }
+
+    @Test
+    void handlerSerializesBodyWithNonDefaultSerializationWhenDefaultSerializerIsOverridden() throws IOException {
+        ObjectMapper spiedMapper = spy(JsonUtils.objectMapper);
+        var handler = new Handler(environment, spiedMapper);
+        var inputStream = requestWithHeaders();
+        var outputStream = outputStream();
+        handler.handleRequest(inputStream, outputStream, context);
+        verify(spiedMapper, atLeast(1)).writeValueAsString(any());
+    }
+
+    private Handler handlerFailingWhenParsing(String expectedMessage) {
+        return new Handler(environment) {
+            @Override
+            protected RequestBody parseInput(String inputString) {
+                throw new RuntimeException(expectedMessage);
+            }
+        };
+    }
+
     private InputStream requestWithBodyWithEmptyFields() throws JsonProcessingException {
         RequestBody requestBody = new RequestBody();
         requestBody.setField1("Some value");
         requestBody.setField2(null);
 
         return new HandlerRequestBuilder<RequestBody>(objectMapper)
-                   .withBody(requestBody)
-                   .build();
+            .withBody(requestBody)
+            .build();
     }
 
     private InputStream requestWithBodyWithoutType() throws JsonProcessingException {
@@ -320,8 +327,8 @@ public class ApiGatewayHandlerTest {
         objectWithoutType.remove(RequestBody.TYPE_ATTRIBUTE);
 
         return new HandlerRequestBuilder<ObjectNode>(objectMapper)
-                   .withBody(objectWithoutType)
-                   .build();
+            .withBody(objectWithoutType)
+            .build();
     }
 
     private Problem getProblemFromFailureResponse(ByteArrayOutputStream outputStream) throws JsonProcessingException {

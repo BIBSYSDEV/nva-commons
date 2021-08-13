@@ -1,16 +1,17 @@
 package nva.commons.apigateway;
 
+import static nva.commons.core.attempt.Try.attempt;
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
+import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
-import nva.commons.apigateway.exceptions.InvalidOrMissingTypeException;
 import nva.commons.core.Environment;
+import nva.commons.core.attempt.Failure;
 import nva.commons.core.ioutils.IoUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,8 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
             init(output, context);
             String inputString = IoUtils.streamToString(input);
-            inputObject = parseInput(inputString);
+            inputObject = attempt(() -> parseInput(inputString))
+                .orElseThrow(this::parsingExceptionToBadRequestException);
 
             O response;
             response = processInput(inputObject, inputString, context);
@@ -62,24 +64,19 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
             writeOutput(inputObject, response);
         } catch (ApiGatewayException e) {
             handleExpectedException(context, inputObject, e);
-        } catch (InvalidTypeIdException e) {
-            handleTypeIdException(context, inputObject, e);
         } catch (Exception e) {
             handleUnexpectedException(context, inputObject, e);
         }
+    }
+
+    protected ApiGatewayException parsingExceptionToBadRequestException(Failure<I> fail) {
+        return new BadRequestException(fail.getException().getMessage(), fail.getException());
     }
 
     protected void handleUnexpectedException(Context context, I inputObject, Exception e) throws IOException {
         logger.error(e.getMessage());
         logger.error(stackTraceInSingleLine(e));
         writeUnexpectedFailure(inputObject, e, context.getAwsRequestId());
-    }
-
-    protected void handleTypeIdException(Context context, I inputObject, InvalidTypeIdException e) throws IOException {
-        logger.warn(e.getMessage());
-        logger.warn(stackTraceInSingleLine(e));
-        InvalidOrMissingTypeException apiGatewayInvalidTypeException = transformExceptionToApiGatewayException(e);
-        writeExpectedFailure(inputObject, apiGatewayInvalidTypeException, context.getAwsRequestId());
     }
 
     protected void handleExpectedException(Context context, I inputObject, ApiGatewayException e) throws IOException {
@@ -160,10 +157,6 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     private Class<I> getIClass() {
         return iclass;
-    }
-
-    private InvalidOrMissingTypeException transformExceptionToApiGatewayException(InvalidTypeIdException e) {
-        return new InvalidOrMissingTypeException(e);
     }
 }
 
