@@ -47,12 +47,13 @@ allprojects {
     }
 
     project.ext {
-        jacksonVersion = "2.12.0"
-        awsSdkVersion = "1.11.931"
-        awsSkd2Version = '2.16.37'
-        jupiterVersion = "5.7.0"
-        log4jVersion = "2.13.2"
-        nvaTestUtilsVersion = "0.1.16"
+        jacksonVersion = "2.12.4"
+        awsSdkVersion = "1.12.52"
+        awsSkd2Version = '2.17.24'
+        jupiterVersion = "5.7.2"
+        log4jVersion = "2.14.1"
+        nvaTestUtilsVersion = "0.1.22"
+        zalandoProblemVersion ='0.26.0'
     }
 
     test {
@@ -125,8 +126,8 @@ subprojects {
 
     dependencies {
         // This method contains the logger class for AWS Lambda functions.
-        api(group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.1') {
-            exclude group: "org.apache.logging.log4j", module: "log4j-core:2.8.2"
+        api(group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.2.0') {
+            exclude group: "org.apache.logging.log4j", module: "log4j-core"
             exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
             exclude group: "com.amazonaws", module: "aws-lambda-java-core"
             exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
@@ -140,7 +141,7 @@ subprojects {
             exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jdk8"
             exclude group: "org.apache.logging.log4j", module: "log4j-core:2.8.2"
         }
-        api(group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.25.0') {
+        api(group: 'org.zalando', name: 'jackson-datatype-problem', version: project.ext.zalandoProblemVersion) {
             exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
             exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
             exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
@@ -169,11 +170,11 @@ subprojects {
             because("junit.jupiter version 5 depends on it and testImplementation seems not enough")
         }
 
-        testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.8.0'
+        testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.12.1'
         testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
         testImplementation group: 'org.hamcrest', name: 'hamcrest-core', version: '2.2'
         testImplementation group: 'com.github.npathai', name: 'hamcrest-optional', version: '2.0.0'
-        testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.14'
+        testImplementation group: 'com.github.bibsysdev', name: 'nva-testutils', version: project.ext.nvaTestUtilsVersion
 
     }
 
