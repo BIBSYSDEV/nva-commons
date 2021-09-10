@@ -6,11 +6,9 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
-
 import nva.commons.core.attempt.Failure;
 import nva.commons.core.attempt.Success;
 import nva.commons.core.attempt.Try;

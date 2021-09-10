@@ -4,7 +4,7 @@ plugins {
     id 'base'
     id 'checkstyle'
     id 'pmd'
-    id 'nebula.lint' version '16.17.0'
+    id 'nebula.lint' version '17.1.1'
     id 'maven-publish'
     id 'signing'
     id 'io.github.gradle-nexus.publish-plugin' version '1.0.0'
@@ -25,7 +25,7 @@ wrapper {
 
 allprojects {
     group = 'com.github.bibsysdev'
-    version = '1.8.0'
+    version = '1.8.1'
 
     apply plugin: 'java-library'
     apply plugin: 'jacoco'
@@ -38,6 +38,7 @@ allprojects {
     targetCompatibility = JavaVersion.VERSION_11
 
     repositories {
+        mavenLocal()
         mavenCentral()
         maven { url 'https://jitpack.io' }
     }
@@ -175,6 +176,10 @@ subprojects {
         testImplementation group: 'org.hamcrest', name: 'hamcrest-core', version: '2.2'
         testImplementation group: 'com.github.npathai', name: 'hamcrest-optional', version: '2.0.0'
         testImplementation group: 'com.github.bibsysdev', name: 'nva-testutils', version: project.ext.nvaTestUtilsVersion
+        testImplementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
+        testImplementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
+
+
 
     }
 
