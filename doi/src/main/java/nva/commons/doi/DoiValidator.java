@@ -5,6 +5,7 @@ import static nva.commons.core.attempt.Try.attempt;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
@@ -102,7 +103,7 @@ public class DoiValidator {
     }
 
     private CompletableFuture<HttpResponse<String>> resolveAsync(URI doi) {
-        Builder getRequest = HttpRequest.newBuilder(doi);
+        Builder getRequest = HttpRequest.newBuilder(doi).method("HEAD", BodyPublishers.noBody());
         return httpClient.sendAsync(getRequest, BodyHandlers.ofString(StandardCharsets.UTF_8));
     }
 }
