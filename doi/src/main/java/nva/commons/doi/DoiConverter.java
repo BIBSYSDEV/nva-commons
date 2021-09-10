@@ -25,7 +25,7 @@ public class DoiConverter {
     public static final String NON_ALPHANUMERIC_CHARACTERS_AT_THE_END_OF_STRING = "[^\\w\\d]+$";
     private static final String ERROR_WHEN_SETTING_DOI_HOST = "Unexpected error while setting host for DOI URI:";
     private static final Logger logger = LoggerFactory.getLogger(DoiConverter.class);
-    private static final String DOI_PREFIX_REGEX = "[dD][oO][iI]:";
+    private static final String NOT_HTTP_URI_REGEX = "([^/]+:)";
 
     private final Function<URI, Boolean> onlineValidationFunction;
 
@@ -77,7 +77,7 @@ public class DoiConverter {
     }
 
     private String stripPrefix(String doi) {
-        return doi.replaceFirst(DOI_PREFIX_REGEX, EMPTY_STRING);
+        return doi.replaceFirst(NOT_HTTP_URI_REGEX, EMPTY_STRING);
     }
 
     private boolean isUrl(String doi) {
