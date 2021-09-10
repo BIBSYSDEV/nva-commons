@@ -38,7 +38,6 @@ allprojects {
     targetCompatibility = JavaVersion.VERSION_11
 
     repositories {
-        mavenLocal()
         mavenCentral()
         maven { url 'https://jitpack.io' }
     }
@@ -178,9 +177,6 @@ subprojects {
         testImplementation group: 'com.github.bibsysdev', name: 'nva-testutils', version: project.ext.nvaTestUtilsVersion
         testImplementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
         testImplementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
-
-
-
     }
 
     publishing {

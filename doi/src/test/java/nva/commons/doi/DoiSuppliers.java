@@ -44,8 +44,7 @@ public final class DoiSuppliers {
     public static Stream<DoiInput> validDois() throws URISyntaxException {
         String doiValue = randomDoiString();
 
-        final URI expectedUri = new URI(HTTPS, DOI_HOST, doiValueToPath(doiValue), EMPTY_FRAGMENT);
-        assertThat(expectedUri.toString(), is(equalTo("https://doi.org/" + doiValue)));
+        final URI expectedUri = constructExpectedValue(doiValue);
 
         DoiInput nonCustomaryPrefixNonUriDoi = createDoiInput(doiValue, expectedUri);
         assertThat(nonCustomaryPrefixNonUriDoi.getDoi(), startsWith("10."));
@@ -76,6 +75,12 @@ public final class DoiSuppliers {
                          httpsDoiDx,
                          httpDoiOrg,
                          httpsDoiOrg);
+    }
+
+    private static URI constructExpectedValue(String doiValue) throws URISyntaxException {
+        final URI expectedUri = new URI(HTTPS, DOI_HOST, doiValueToPath(doiValue), EMPTY_FRAGMENT);
+        assertThat(expectedUri.toString(), is(equalTo("https://doi.org/" + doiValue)));
+        return expectedUri;
     }
 
     private static DoiInput createDoiInput(String doiString, URI expectedUri) {
