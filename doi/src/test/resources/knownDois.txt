@@ -39,3 +39,7 @@ https://dx.doi.org/10.31810/RSEL.50.2.3
 https://doi.org/10.1016/j.quascirev.2020.106295
 http://dx.doi.org/10.1891/IJCBIRTH-D-19-00019
 DOI: 10.1016/j.seares.2007.02.001.
+DDD:10.1016/j.seares.2007.02.001
+URI:10.1016/j.seares.2007.02.001
+DOC:10.1016/j.seares.2007.02.001
+Hello:10.1016/j.seares.2007.02.001

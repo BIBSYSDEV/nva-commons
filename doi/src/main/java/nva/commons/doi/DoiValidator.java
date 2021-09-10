@@ -23,8 +23,10 @@ public class DoiValidator {
         Pattern.compile("^https?://(?:dx\\.)?doi\\.org/10\\.[\\w\\d][\\w\\d.]+/.+$",
                         Pattern.CASE_INSENSITIVE);
 
+    // matches all strings of the form <someScheme>:10.<anything>.<anything>
+    // Does not match URIs that contain slash, in an effort to not match http(s):// URIs.
     public static final Pattern DOI_STRING_PATTERN =
-        Pattern.compile("^(doi:)?10\\.[\\w\\d][\\w\\d.]+/.+$", Pattern.CASE_INSENSITIVE);
+        Pattern.compile("^([^/]+:)?10\\.[\\w\\d][\\w\\d.]+/.+$", Pattern.CASE_INSENSITIVE);
     public static final String INVALID_DOI_ERROR = "Invalid DOI";
     private static final Logger logger = LoggerFactory.getLogger(DoiValidator.class);
     private final UnitHttpClient httpClient;

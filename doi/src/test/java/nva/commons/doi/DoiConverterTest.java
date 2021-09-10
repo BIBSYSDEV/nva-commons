@@ -21,6 +21,7 @@ import nva.commons.doi.DoiSuppliers.DoiInput;
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -34,7 +35,7 @@ public class DoiConverterTest {
     private static final String EXPECTED = "https://doi.org/" + DOI;
     DoiConverter doiConverterImpl = new DoiConverter((uri) -> DO_NOT_VALIDATE_ONLINE);
 
-//    @Tag("RemoteTest")
+    @Tag("RemoteTest")
     @ParameterizedTest(name = "validateOnline returns true for doi:{0}")
     @MethodSource("resolvableDois")
     public void toUriReturnsUrisWhenInputCanBeEasilyConvertedToValidDoi(String doi) {

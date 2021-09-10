@@ -18,8 +18,6 @@ public class DoiConverter {
     public static final String HTTP = "http";
     public static final String EMPTY_FRAGMENT = null;
     public static final String PATH_SEPARATOR = "/";
-
-    public static final String ERROR_WHEN_CREATING_URI = "Unexpected error while creating URI for doi:";
     public static final String ROOT_PATH = PATH_SEPARATOR;
     public static final String EMPTY_STRING = "";
     public static final String NON_ALPHANUMERIC_CHARACTERS_AT_THE_END_OF_STRING = "[^\\w\\d]+$";
