@@ -19,7 +19,6 @@ public class DoiValidatorTest {
     private static final String HTTP_DOI = "http://doi.org/";
     private static final String HTTPS_DX_DOI = "https://dx.doi.org/";
     private static final String INVALID_URL = "https://something.com";
-    private static final String INVALID_PREFIX = "odi:";
 
     @ParameterizedTest(name = "validate returns true when doi is {0}")
     @MethodSource("validDois")
@@ -59,12 +58,6 @@ public class DoiValidatorTest {
     @Test
     public void validateReturnsFalseForInvalidDoiUri() {
         String input = INVALID_URL + DOI;
-        assertThat(DoiValidator.validateOffline(input), is((equalTo(false))));
-    }
-
-    @Test
-    public void validateReturnsFalseForInvalidDoiPrefix() {
-        String input = INVALID_PREFIX + DOI;
         assertThat(DoiValidator.validateOffline(input), is((equalTo(false))));
     }
 
