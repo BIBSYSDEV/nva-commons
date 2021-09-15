@@ -51,9 +51,9 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
         }
     }
 
-    private void suppliedAcceptsHeadersAreSupported(RequestInfo requestInfo, List<String> listSupportedHeaders)
+    private void suppliedAcceptsHeadersAreSupported(RequestInfo requestInfo, List<String> supportedHeaders)
             throws UnsupportedAcceptHeaderException {
-        listSupportedHeaders.stream()
+        supportedHeaders.stream()
                 .filter(header -> header.equalsIgnoreCase(requestInfo.getHeader(HttpHeaders.ACCEPT)))
                 .findAny()
                 .orElseThrow(() -> new UnsupportedAcceptHeaderException());
