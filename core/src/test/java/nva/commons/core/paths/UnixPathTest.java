@@ -15,7 +15,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Optional;
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -29,40 +28,40 @@ class UnixPathTest {
     @Test
     public void ofReturnsPathWithAllPathElementsInOrderWhenInputArrayIsNotEmpty() {
         UnixPath unixPath = UnixPath.of("first", "second", "third");
-        MatcherAssert.assertThat(unixPath.toString(), is(equalTo("first/second/third")));
+        assertThat(unixPath.toString(), is(equalTo("first/second/third")));
     }
 
     @Test
     public void ofReturnsPathWithRootWhenRootIsFirstElement() {
         UnixPath unixPath = UnixPath.of(PATH_DELIMITER, "first", "second", "third");
-        MatcherAssert.assertThat(unixPath.toString(), is(equalTo("/first/second/third")));
+        assertThat(unixPath.toString(), is(equalTo("/first/second/third")));
     }
 
     @Test
     public void ofReturnsEmptyPathWhenInputIsNull() {
         UnixPath unixPath = UnixPath.of(NULL_STRING);
         System.out.println(unixPath);
-        MatcherAssert.assertThat(unixPath.toString(), is(emptyString()));
+        assertThat(unixPath.toString(), is(emptyString()));
     }
 
     @Test
     public void ofReturnsEmptyPathWhenInputIsEmptyArray() {
         UnixPath unixPath = UnixPath.of();
-        MatcherAssert.assertThat(unixPath.toString(), is(emptyString()));
+        assertThat(unixPath.toString(), is(emptyString()));
     }
 
     @Test
     public void fromStringReturnsPathElementsWhenInputIsPathStringWithElementsDividedWithUnixPathDelimiter() {
         String originalPathString = "first/second/third";
         UnixPath unixPath = UnixPath.fromString(originalPathString);
-        MatcherAssert.assertThat(unixPath.toString(), is(equalTo(originalPathString)));
+        assertThat(unixPath.toString(), is(equalTo(originalPathString)));
     }
 
     @Test
     public void fromStringReturnsPathWithRootWhenInputContainsRoot() {
         String originalPathString = "/first/second/third";
         UnixPath unixPath = UnixPath.fromString(originalPathString);
-        MatcherAssert.assertThat(unixPath.toString(), is(equalTo(originalPathString)));
+        assertThat(unixPath.toString(), is(equalTo(originalPathString)));
     }
 
     @Test
@@ -72,7 +71,7 @@ class UnixPathTest {
         String grandChildPath = "fourth/fifth";
         UnixPath actualPath = UnixPath.fromString(parentPath).addChild(childPath).addChild(grandChildPath);
         String expectedPath = "first/second/third/fourth/fifth";
-        MatcherAssert.assertThat(actualPath.toString(), is(equalTo(expectedPath)));
+        assertThat(actualPath.toString(), is(equalTo(expectedPath)));
     }
 
     @Test
@@ -81,14 +80,14 @@ class UnixPathTest {
         String parent = "first/second";
         UnixPath originalPath = UnixPath.of(path);
         Optional<UnixPath> parentPath = originalPath.getParent();
-        MatcherAssert.assertThat(parentPath.orElseThrow().toString(), is(equalTo(parent)));
+        assertThat(parentPath.orElseThrow().toString(), is(equalTo(parent)));
     }
 
     @ParameterizedTest(name = "getParent returns empty optional when Unix Path is empty : \"{0}\"")
     @NullAndEmptySource
     public void getParentReturnsEmptyOptionalWhenUnixPathIsEmpty(String path) {
         UnixPath unixPath = UnixPath.of(path);
-        MatcherAssert.assertThat(unixPath.getParent(), isEmpty());
+        assertThat(unixPath.getParent(), isEmpty());
     }
 
     @Test
@@ -105,7 +104,7 @@ class UnixPathTest {
         UnixPath right = UnixPath.fromString("first//second//third");
         assertThat(left, is(equalTo(right)));
         assertThat(left, is(not(sameInstance(right))));
-        MatcherAssert.assertThat(right.toString(), is(equalTo("first/second/third")));
+        assertThat(right.toString(), is(equalTo("first/second/third")));
     }
 
     @Test
@@ -126,13 +125,13 @@ class UnixPathTest {
     @Test
     public void ofReturnsPathSplittingStringElementsOnPathSeparator() {
         UnixPath path = UnixPath.of("first/second/", "third/fourth", "fifth");
-        MatcherAssert.assertThat(path.toString(), is(equalTo("first/second/third/fourth/fifth")));
+        assertThat(path.toString(), is(equalTo("first/second/third/fourth/fifth")));
     }
 
     @Test
     public void isRootReturnsTrueWhenUnixPathIsRoot() {
         UnixPath path = UnixPath.of("/");
-        MatcherAssert.assertThat(path.isRoot(), is(true));
+        assertThat(path.isRoot(), is(true));
         assertThat(path, is(equalTo(UnixPath.ROOT_PATH)));
     }
 
@@ -140,7 +139,7 @@ class UnixPathTest {
     public void getParentReturnsRootIfPathHasRootAndParentPathIsRoot() {
         UnixPath path = UnixPath.of("/folder");
         UnixPath parent = path.getParent().orElseThrow();
-        MatcherAssert.assertThat(parent.isRoot(), is(true));
+        assertThat(parent.isRoot(), is(true));
         assertThat(parent, is(equalTo(UnixPath.ROOT_PATH)));
     }
 
@@ -151,7 +150,7 @@ class UnixPathTest {
     })
     public void getFilenameReturnsTheLastElementOfaUnixPath(String inputPath, String expectedFilename) {
         UnixPath unixPath = UnixPath.of(inputPath);
-        MatcherAssert.assertThat(unixPath.getFilename(), is(equalTo(expectedFilename)));
+        assertThat(unixPath.getFilename(), is(equalTo(expectedFilename)));
     }
 
     @Test
@@ -179,7 +178,7 @@ class UnixPathTest {
         ClassWithUnixPath objectContainingUnixPath =
             objectMapper.readValue(jsonString, ClassWithUnixPath.class);
 
-        MatcherAssert.assertThat(objectContainingUnixPath.getField().toString(), is(equalTo(expectedPath)));
+        assertThat(objectContainingUnixPath.getField().toString(), is(equalTo(expectedPath)));
     }
 
     @Test
