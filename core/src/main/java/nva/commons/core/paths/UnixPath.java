@@ -1,4 +1,4 @@
-package no.unit.nva.s3;
+package nva.commons.core.paths;
 
 import static java.util.Objects.nonNull;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -14,12 +14,16 @@ import java.util.stream.Stream;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.StringUtils;
 
+/**
+ * Class for manipulating Unix-like paths. Provides a standard way to add children to the paths so that we do not have
+ * to deal all the time with the path delimiters.
+ */
 public final class UnixPath {
 
     public static final UnixPath EMPTY_PATH = new UnixPath(Collections.emptyList());
     public static final String ROOT = "/";
     public static final UnixPath ROOT_PATH = UnixPath.of(ROOT);
-    private static final String PATH_DELIMITER = "/";
+    public static final String PATH_DELIMITER = "/";
     private static final String EMPTY_STRING = "";
 
     private final List<String> path;
@@ -32,7 +36,7 @@ public final class UnixPath {
     public static UnixPath of(String... path) {
         Stream<String> pathElements = extractAllPathElements(path);
         List<String> pathElementsList = addRootIfPresentInOriginalPath(pathElements, path)
-                                            .collect(Collectors.toList());
+            .collect(Collectors.toList());
         return pathIsEmpty(pathElementsList)
                    ? EMPTY_PATH
                    : new UnixPath(pathElementsList);
@@ -121,16 +125,16 @@ public final class UnixPath {
 
     private static Stream<String> splitInputElementsContainingPathDelimiter(Stream<String> pathElements) {
         return pathElements
-                   .map(UnixPath::splitCompositePathElements)
-                   .flatMap(Arrays::stream)
-                   .filter(StringUtils::isNotBlank);
+            .map(UnixPath::splitCompositePathElements)
+            .flatMap(Arrays::stream)
+            .filter(StringUtils::isNotBlank);
     }
 
     private static Stream<String> discardNullArrayElements(String[] path) {
         return Optional.ofNullable(path)
-                   .stream()
-                   .flatMap(Arrays::stream)
-                   .filter(Objects::nonNull);
+            .stream()
+            .flatMap(Arrays::stream)
+            .filter(Objects::nonNull);
     }
 
     //composite path element is an element of the form /folder1/folder2

@@ -1,9 +1,9 @@
-package no.unit.nva.s3;
+package nva.commons.core.paths;
 
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
-import static no.unit.nva.s3.UnixPath.ROOT;
 import static nva.commons.core.JsonUtils.objectMapper;
 import static nva.commons.core.JsonUtils.objectMapperNoEmpty;
+import static nva.commons.core.paths.UnixPath.PATH_DELIMITER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -23,6 +23,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 class UnixPathTest {
 
     public static final String EMPTY_STRING = "";
+    public static final String NULL_STRING = null;
 
     @Test
     public void ofReturnsPathWithAllPathElementsInOrderWhenInputArrayIsNotEmpty() {
@@ -32,13 +33,13 @@ class UnixPathTest {
 
     @Test
     public void ofReturnsPathWithRootWhenRootIsFirstElement() {
-        UnixPath unixPath = UnixPath.of("/", "first", "second", "third");
+        UnixPath unixPath = UnixPath.of(PATH_DELIMITER, "first", "second", "third");
         assertThat(unixPath.toString(), is(equalTo("/first/second/third")));
     }
 
     @Test
     public void ofReturnsEmptyPathWhenInputIsNull() {
-        UnixPath unixPath = UnixPath.of(null);
+        UnixPath unixPath = UnixPath.of(NULL_STRING);
         System.out.println(unixPath);
         assertThat(unixPath.toString(), is(emptyString()));
     }
@@ -183,14 +184,14 @@ class UnixPathTest {
     @Test
     public void addRootAddsRootToNonAbsoluteUnixPath() {
         String pathString = "some/path";
-        String expectedPathString = ROOT + pathString;
+        String expectedPathString = UnixPath.ROOT + pathString;
         String actualPathString = UnixPath.fromString(pathString).addRoot().toString();
         assertThat(actualPathString, is(equalTo(expectedPathString)));
     }
 
     @Test
     public void addRootReturnsSamePathWhenPathIsAbsoluteUnixPath() {
-        String expectedPathString = ROOT + "some/path";
+        String expectedPathString = UnixPath.ROOT + "some/path";
         String actualPathString = UnixPath.fromString(expectedPathString).addRoot().toString();
         assertThat(actualPathString, is(equalTo(expectedPathString)));
     }
@@ -198,7 +199,7 @@ class UnixPathTest {
     @Test
     public void removeRootRemovesRootToNonAbsoluteUnixPath() {
         String expectedPathString = "some/path";
-        String actualPathString = UnixPath.fromString(ROOT + expectedPathString).removeRoot().toString();
+        String actualPathString = UnixPath.fromString(UnixPath.ROOT + expectedPathString).removeRoot().toString();
         assertThat(actualPathString, is(equalTo(expectedPathString)));
     }
 
