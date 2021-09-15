@@ -2,6 +2,7 @@ package no.unit.nva.identifiers;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import java.net.URI;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -18,8 +19,10 @@ public final class SortableIdentifier implements Comparable<SortableIdentifier> 
     public static final int TIMESTAMP_LENGTH = 12;
     public static final int EXTRA_DASH = 1;
     public static final int SORTABLE_ID_LENGTH = UUID_LENGTH + TIMESTAMP_LENGTH + EXTRA_DASH;
+    public static final String INVALID_SORTABLE_IDENTIFIER_ERROR = "Invalid sortable identifier";
+    public static final String PATH_DELIMITER = "/";
+    public static final String INVALID_URI_ERROR_MESSAGE = "The URI %s does not contain a valid Sortable identifier:";
     private static final String IDENTIFIER_FORMATTING = "%0" + TIMESTAMP_LENGTH + "x-%s";
-
     private final String identifier;
 
     public SortableIdentifier(String identifier) {
@@ -29,6 +32,15 @@ public final class SortableIdentifier implements Comparable<SortableIdentifier> 
 
     public static SortableIdentifier next() {
         return new SortableIdentifier(newIdentifierString());
+    }
+
+    public static SortableIdentifier fromUri(URI uri) {
+        try {
+            String path = uri.getPath();
+            return new SortableIdentifier(path.substring(path.lastIndexOf(PATH_DELIMITER) + 1));
+        } catch (Exception exception) {
+            throw invalidUriError(uri);
+        }
     }
 
     @Override
@@ -58,6 +70,10 @@ public final class SortableIdentifier implements Comparable<SortableIdentifier> 
         return this.toString().compareTo(o.toString());
     }
 
+    private static IllegalArgumentException invalidUriError(URI uri) {
+        return new IllegalArgumentException(String.format(INVALID_URI_ERROR_MESSAGE, uri.toString()));
+    }
+
     private static String newIdentifierString() {
         return String.format(IDENTIFIER_FORMATTING, System.currentTimeMillis(), UUID.randomUUID());
     }
@@ -66,7 +82,7 @@ public final class SortableIdentifier implements Comparable<SortableIdentifier> 
         if (identifier.length() == UUID_LENGTH || identifier.length() == SORTABLE_ID_LENGTH) {
             return;
         } else {
-            throw new IllegalArgumentException("Invalid sortable identifier");
+            throw new IllegalArgumentException(INVALID_SORTABLE_IDENTIFIER_ERROR);
         }
     }
 }

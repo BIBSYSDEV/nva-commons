@@ -1,30 +1,27 @@
 package nva.commons.apigateway;
 
-import static java.util.Objects.isNull;
-import static nva.commons.apigateway.ContentTypes.APPLICATION_JSON;
-import static nva.commons.apigateway.ContentTypes.WILDCARD;
-import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
-
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URISyntaxException;
-import java.util.List;
-
 import nva.commons.apigateway.exceptions.ApiGatewayException;
+import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
-import nva.commons.apigateway.exceptions.InvalidOrMissingTypeException;
-import nva.commons.apigateway.exceptions.LoggerNotSetException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
+import nva.commons.core.attempt.Failure;
 import nva.commons.core.ioutils.IoUtils;
-import nva.commons.logutils.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
+
+import static nva.commons.apigateway.ContentTypes.APPLICATION_JSON;
+import static nva.commons.apigateway.ContentTypes.WILDCARD;
+import static nva.commons.core.attempt.Try.attempt;
+import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 
 /**
  * Template class for implementing Lambda function handlers that get activated through a call to ApiGateway. This class
@@ -37,10 +34,12 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
+    public static final String REQUEST_ID = "RequestId:";
+    private static final Logger logger = LoggerFactory.getLogger(RestRequestHandler.class);
     protected final Environment environment;
     private final transient Class<I> iclass;
     private final transient ApiMessageParser<I> inputParser = new ApiMessageParser<>();
-    protected Logger logger;
+
     protected transient OutputStream outputStream;
     protected transient String allowedOrigin;
 
@@ -75,20 +74,21 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
      * @param iclass      The class object of the input class.
      * @param environment the Environment from where the handler will read ENV variables.
      */
-    public RestRequestHandler(Class<I> iclass, Environment environment, Logger logger) {
+    public RestRequestHandler(Class<I> iclass, Environment environment) {
         this.iclass = iclass;
         this.environment = environment;
-        this.logger = logger;
     }
 
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
+        logger.info(REQUEST_ID + context.getAwsRequestId());
         I inputObject = null;
         try {
 
             init(output, context);
             String inputString = IoUtils.streamToString(input);
-            inputObject = parseInput(inputString);
+            inputObject = attempt(() -> parseInput(inputString))
+                .orElseThrow(this::parsingExceptionToBadRequestException);
 
             O response;
             response = processInput(inputObject, inputString, context);
@@ -96,11 +96,13 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
             writeOutput(inputObject, response);
         } catch (ApiGatewayException e) {
             handleExpectedException(context, inputObject, e);
-        } catch (InvalidTypeIdException e) {
-            handleTypeIdException(context, inputObject, e);
         } catch (Exception e) {
             handleUnexpectedException(context, inputObject, e);
         }
+    }
+
+    protected ApiGatewayException parsingExceptionToBadRequestException(Failure<I> fail) {
+        return new BadRequestException(fail.getException().getMessage(), fail.getException());
     }
 
     protected void handleUnexpectedException(Context context, I inputObject, Exception e) throws IOException {
@@ -109,25 +111,14 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
         writeUnexpectedFailure(inputObject, e, context.getAwsRequestId());
     }
 
-    protected void handleTypeIdException(Context context, I inputObject, InvalidTypeIdException e) throws IOException {
-        logger.warn(e.getMessage());
-        logger.warn(stackTraceInSingleLine(e));
-        InvalidOrMissingTypeException apiGatewayInvalidTypeException = transformExceptionToApiGatewayException(e);
-        writeExpectedFailure(inputObject, apiGatewayInvalidTypeException, context.getAwsRequestId());
-    }
-
     protected void handleExpectedException(Context context, I inputObject, ApiGatewayException e) throws IOException {
         logger.warn(e.getMessage());
         logger.warn(stackTraceInSingleLine(e));
         writeExpectedFailure(inputObject, e, context.getAwsRequestId());
     }
 
-    protected void init(OutputStream outputStream, Context context) throws LoggerNotSetException {
+    protected void init(OutputStream outputStream, Context context) {
         this.outputStream = outputStream;
-        if (isNull(logger)) {
-            logger = LoggerFactory.getLogger(RestRequestHandler.class);
-            throw new LoggerNotSetException(LogUtils.toLoggerName(this.getClass()));
-        }
     }
 
     /**
@@ -151,8 +142,6 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
      *                              fields during the processing
      * @param context               the Context
      * @return an output object of class O
-     * @throws IOException        when processing fails
-     * @throws URISyntaxException when processing fails
      * @throws ApiGatewayException when some predictable error happens.
      */
     protected O processInput(I input, String apiGatewayInputString, Context context) throws ApiGatewayException {
@@ -201,10 +190,6 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     private Class<I> getIClass() {
         return iclass;
-    }
-
-    private InvalidOrMissingTypeException transformExceptionToApiGatewayException(InvalidTypeIdException e) {
-        return new InvalidOrMissingTypeException(e);
     }
 }
 

@@ -1,0 +1,12 @@
+dependencies {
+    implementation project (":core")
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-core', version: project.ext.awsSdkVersion
+
+    api(group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: project.ext.awsSdkVersion) {
+        exclude(group:'com.amazonaws', module: 'aws-java-sdk-s3')
+        //exclude(group:'com.amazonaws', module: 'aws-java-sdk-core')
+        exclude(group:'com.amazonaws', module: 'jmespath-java')
+    }
+    api group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '3.2.0'
+
+}

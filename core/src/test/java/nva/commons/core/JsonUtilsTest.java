@@ -1,31 +1,32 @@
 package nva.commons.core;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Collections;
-import java.util.List;
-import nva.commons.core.ioutils.IoUtils;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import java.nio.file.Path;
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isPresentAnd;
 import static nva.commons.core.JsonUtils.objectMapper;
+import static nva.commons.core.JsonUtils.objectMapperNoEmpty;
+import static nva.commons.core.JsonUtils.objectMapperSingleLine;
 import static nva.commons.core.JsonUtils.objectMapperWithEmpty;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import nva.commons.core.ioutils.IoUtils;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class JsonUtilsTest {
 
@@ -45,6 +46,8 @@ public class JsonUtilsTest {
     public static final String NULL_MAP = "nullMap";
     public static final String EMPTY_MAP = "emptyMap";
     public static final String NULL_STRING = "nullString";
+    private static final String POJO_WITH_MISSING_VALUES = "missingStringValues.json";
+    private static final String POJO_WITH_EMPTY_VALUES = "emptyStringValues.json";
 
     @DisplayName("jsonParser serializes empty string as null")
     @Test
@@ -68,12 +71,6 @@ public class JsonUtilsTest {
     public void jsonParserSerializesOptionalPresentAsContainedObject() {
         JsonNode actual = serialize(objectWithSomeValue());
         assertThat(actual, is(equalTo(JSON_OBJECT_WITH_VALUE)));
-    }
-
-    @Test
-    public void jsonParserSerializesOptionalNotPresentAsNull() {
-        JsonNode actual = serialize(objectWithoutValue());
-        assertThat(actual, is(equalTo(JSON_OBJECT_WITHOUT_VALUE)));
     }
 
     @Test
@@ -102,26 +99,42 @@ public class JsonUtilsTest {
     }
 
     @Test
-    public void objectMapperSerializesInstantAsIsoStrings() throws JsonProcessingException {
+    public void objectMapperWithEmptySerializesInstantAsIsoStrings() throws JsonProcessingException {
 
         String instantString = "2020-12-29T19:23:09.357248Z";
 
         Instant timestamp = Instant.parse(instantString);
-        String jsonNow = objectMapper.writeValueAsString(timestamp);
+        String jsonNow = objectMapperWithEmpty.writeValueAsString(timestamp);
 
         String expectedString = "\"" + instantString + "\"";
         assertThat(jsonNow, is(equalTo(expectedString)));
     }
 
     @Test
-    public void objectMapperSerializesEmptyStringAsNull() throws JsonProcessingException {
-        Map<String, Object> mapToSerialize = new HashMap<>();
-        mapToSerialize.put("emptyString", "");
-        mapToSerialize.put("nullValue", null);
-        String actualJson = objectMapper.writeValueAsString(mapToSerialize);
-        ObjectNode sampleJsonObjectWithoutValue = objectMapper.createObjectNode();
-        String expectedJson = objectMapper.writeValueAsString(sampleJsonObjectWithoutValue);
+    public void objectMapperSerializesNullStringAsNull() throws JsonProcessingException {
+        String expectedJson = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, POJO_WITH_MISSING_VALUES));
+        SamplePojo sampleWithMissingValuesPojo = objectMapperWithEmpty.readValue(expectedJson, SamplePojo.class);
+        String actualJson = objectMapperWithEmpty.writeValueAsString(sampleWithMissingValuesPojo);
         assertThat(actualJson, is(equalTo(expectedJson)));
+    }
+
+    @Test
+    public void objectMapperSerializesEmptyStringAsNull() throws JsonProcessingException {
+        String expectedJson = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, POJO_WITH_MISSING_VALUES));
+        String sampleWithEmptyValueJson =
+                IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, POJO_WITH_EMPTY_VALUES));
+        SamplePojo sampleWithMissingValuesPojo = objectMapper.readValue(sampleWithEmptyValueJson, SamplePojo.class);
+        String actualJson = objectMapperWithEmpty.writeValueAsString(sampleWithMissingValuesPojo);
+        assertThat(actualJson, is(equalTo(expectedJson)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {POJO_WITH_MISSING_VALUES, POJO_WITH_EMPTY_VALUES})
+    public void objectMapperDeserializesEmptyStringAsNull(String resourceInput) throws JsonProcessingException {
+        String jsonString = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES,resourceInput));
+        SamplePojo actualObject = objectMapper.readValue(jsonString,SamplePojo.class);
+        assertThat(actualObject.getField2(),is(nullValue()));
+        assertThat(actualObject.getField1(),is(not(nullValue())));
     }
 
     @Test
@@ -140,13 +153,24 @@ public class JsonUtilsTest {
         assertThat(node.has(NULL_MAP), is(true));
     }
 
+    @Test
+    public void objectMapperSingleLineReturnsObjectsInSingleLine() throws JsonProcessingException {
+        SamplePojo samplePojo = new SamplePojo();
+        samplePojo.setField1("someValue");
+        samplePojo.setField2("someValue");
+        String jsonInSingleLine = objectMapperSingleLine.writeValueAsString(samplePojo);
+        String prettyJson = objectMapperNoEmpty.writeValueAsString(samplePojo);
+        assertThat(jsonInSingleLine, not(containsString(System.lineSeparator())));
+        assertThat(prettyJson, containsString(System.lineSeparator()));
+    }
+
     private TestObjectForOptionals objectWithoutValue() {
         return new TestObjectForOptionals(null);
     }
 
     private TestObjectForOptionals deserialize(JsonNode jsonObjectWithoutValue) {
         return objectMapper.convertValue(jsonObjectWithoutValue,
-            TestObjectForOptionals.class);
+                                         TestObjectForOptionals.class);
     }
 
     private TestObjectForOptionals objectWithSomeValue() {

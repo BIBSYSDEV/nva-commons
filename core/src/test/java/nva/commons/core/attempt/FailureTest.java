@@ -53,11 +53,11 @@ public class FailureTest {
 
     @Test
     @DisplayName("orElseThrow throws the specified exception when unchecked exception is thrown")
-    public void orElseThrowsTheSpecifiedExceptionWhenUncheckedExceptionIsThrown() {
+    public void orElseThrowThrowsTheSpecifiedExceptionWhenUncheckedExceptionIsThrown() {
         Executable action =
             () -> Try.of(sample)
-                .map(i -> throwUnCheckedException())
-                .orElseThrow(f -> new TestException(f.getException(), EXPECTED_EXCEPTION_MESSAGE));
+                      .map(i -> throwUnCheckedException(NESTED_EXCEPTION_MESSAGE))
+                      .orElseThrow(f -> new TestException(f.getException(), EXPECTED_EXCEPTION_MESSAGE));
 
         TestException exception = assertThrows(TestException.class, action);
         assertThat(exception.getMessage(), is(equalTo(EXPECTED_EXCEPTION_MESSAGE)));
@@ -93,18 +93,40 @@ public class FailureTest {
 
         Executable action =
             () -> Try.of(sample)
-                .map(i -> throwCheckedException(NESTED_EXCEPTION_MESSAGE))
-                .orElse(null);
+                      .map(i -> throwCheckedException(NESTED_EXCEPTION_MESSAGE))
+                      .orElse(null);
 
         assertThrows(IllegalStateException.class, action);
+    }
+
+    @Test
+    public void orElseThrowThrowsRuntimeExceptionWhenActionThrowsCheckedException() {
+        String someString = "hello";
+        Executable action = () -> Try.of(someString)
+                                      .map(str -> throwCheckedException(EXPECTED_EXCEPTION_MESSAGE))
+                                      .orElseThrow();
+
+        RuntimeException exception = assertThrows(RuntimeException.class, action);
+        assertThat(exception.getCause().getMessage(), is(Matchers.equalTo(EXPECTED_EXCEPTION_MESSAGE)));
+    }
+
+    @Test
+    public void orElseThrowThrowsOriginalExceptionWhenActionThrowsUncheckedException() {
+        String someString = "hello";
+        Executable action = () -> Try.of(someString)
+                                      .map(str -> throwUnCheckedException(EXPECTED_EXCEPTION_MESSAGE))
+                                      .orElseThrow();
+
+        RuntimeException exception = assertThrows(RuntimeException.class, action);
+        assertThat(exception.getMessage(), is(Matchers.equalTo(EXPECTED_EXCEPTION_MESSAGE)));
     }
 
     @Test
     @DisplayName("flatMap returns a failure with the first Exception")
     public void flatMapReturnsAFailureWithTheFirstException() {
         Try<Integer> actual = Try.of(sample)
-            .map(i -> throwCheckedException(EXPECTED_EXCEPTION_MESSAGE))
-            .flatMap(this::anotherTry);
+                                  .map(i -> throwCheckedException(EXPECTED_EXCEPTION_MESSAGE))
+                                  .flatMap(this::anotherTry);
 
         assertTrue(actual.isFailure());
         assertThat(actual.getException().getMessage(), is(equalTo(EXPECTED_EXCEPTION_MESSAGE)));
@@ -180,16 +202,7 @@ public class FailureTest {
         assertThat(actionAfterFailureRun.get(), is(true));
     }
 
-    @Test
-    public void orElseThrowThrowsRuntimeExceptionWhenTryisFailrure() {
-        String someString = "hello";
-        Executable action = () -> Try.of(someString)
-            .map(str -> throwCheckedException(EXPECTED_EXCEPTION_MESSAGE))
-            .orElseThrow();
 
-        RuntimeException exception = assertThrows(RuntimeException.class, action);
-        assertThat(exception.getCause().getMessage(), is(Matchers.equalTo(EXPECTED_EXCEPTION_MESSAGE)));
-    }
 
     private void consumeWithException(int input) throws RuntimeException {
         throw new RuntimeException(NOT_EXPECTED_MESSAGE);
@@ -203,8 +216,8 @@ public class FailureTest {
         throw new IOException(exceptionMessage);
     }
 
-    private int throwUnCheckedException() {
-        throw new RuntimeException(FailureTest.NESTED_EXCEPTION_MESSAGE);
+    private int throwUnCheckedException(String message) {
+        throw new RuntimeException(message);
     }
 
     private int throwAnotherCheckedException() throws TestException {

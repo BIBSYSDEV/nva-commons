@@ -1,22 +1,20 @@
 package nva.commons.apigateway.testutils;
 
-
 import static nva.commons.apigateway.RequestInfo.PROXY_TAG;
 import com.amazonaws.services.lambda.runtime.Context;
+import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import nva.commons.apigateway.ApiGatewayHandler;
+import nva.commons.apigateway.HttpHeaders;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.core.Environment;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class Handler extends ApiGatewayHandler<RequestBody, String> {
+public class Handler extends ApiGatewayHandler<RequestBody, RequestBody> {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(Handler.class);
     private Map<String, String> headers;
     private String proxy;
     private String path;
@@ -28,19 +26,27 @@ public class Handler extends ApiGatewayHandler<RequestBody, String> {
      * @param environment the environment.
      */
     public Handler(Environment environment) {
-        super(RequestBody.class, environment, LOGGER);
-        logger = LOGGER;
+        super(RequestBody.class, environment);
+    }
+
+    /**
+     * Constructor that overrides default serialization.
+     * @param environment the environment
+     * @param mapper      Object Mapper
+     */
+    public Handler(Environment environment, ObjectMapper mapper) {
+        super(RequestBody.class, environment, mapper);
     }
 
     @Override
-    protected String processInput(RequestBody input, RequestInfo requestInfo, Context context)
+    protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
         throws ApiGatewayException {
         this.headers = requestInfo.getHeaders();
         this.proxy = requestInfo.getPathParameters().get(PROXY_TAG);
         this.path = requestInfo.getPath();
         this.body = input;
-        this.setAdditionalHeadersSupplier(() -> additionalHeaders(body));
-        return String.join(",", input.getField1(), input.getField2());
+        this.addAdditionalHeaders(() -> additionalHeaders(body));
+        return this.body;
     }
 
     private Map<String, String> additionalHeaders(RequestBody input) {
@@ -48,8 +54,8 @@ public class Handler extends ApiGatewayHandler<RequestBody, String> {
     }
 
     @Override
-    protected Integer getSuccessStatusCode(RequestBody input, String output) {
-        return HttpStatus.SC_OK;
+    protected Integer getSuccessStatusCode(RequestBody input, RequestBody output) {
+        return HttpURLConnection.HTTP_OK;
     }
 
     public Map<String, String> getHeaders() {

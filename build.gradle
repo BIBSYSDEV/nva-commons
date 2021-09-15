@@ -4,11 +4,19 @@ plugins {
     id 'base'
     id 'checkstyle'
     id 'pmd'
-    id 'nebula.lint' version '16.15.9'
-    id 'maven'
-    id 'com.jfrog.bintray' version '1.7'
+    id 'nebula.lint' version '17.1.1'
+    id 'maven-publish'
+    id 'signing'
+    id 'io.github.gradle-nexus.publish-plugin' version '1.0.0'
 }
 
+nexusPublishing {
+    repositories {
+        sonatype {
+            stagingProfileId = "5ba11e4895739"
+        }
+    }
+}
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
@@ -16,21 +24,21 @@ wrapper {
 }
 
 allprojects {
-    group = 'no.unit.nva'
-    version = '1.0.0'
+    group = 'com.github.bibsysdev'
+    version = '1.9.0'
 
     apply plugin: 'java-library'
     apply plugin: 'jacoco'
     apply plugin: 'base'
     apply plugin: 'checkstyle'
     apply plugin: 'pmd'
-    apply plugin: 'com.jfrog.bintray'
+    apply plugin: 'nebula.lint'
 
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
 
     repositories {
-        jcenter()
+        mavenCentral()
         maven { url 'https://jitpack.io' }
     }
 
@@ -39,27 +47,30 @@ allprojects {
     }
 
     project.ext {
-        jacksonVersion = "2.12.0"
-        awsSdkVersion = "1.11.931"
-        jupiterVersion = "5.7.0"
-        log4jVersion = "2.13.2"
-        nvaTestUtilsVersion = "0.1.16"
+        jacksonVersion = "2.12.4"
+        awsSdkVersion = "1.12.52"
+        awsSkd2Version = '2.17.24'
+        jupiterVersion = "5.7.2"
+        log4jVersion = "2.14.1"
+        nvaTestUtilsVersion = "0.1.22"
+        zalandoProblemVersion ='0.26.0'
     }
 
     test {
         useJUnitPlatform {
+            excludeTags("RemoteTest")
         }
         failFast = true
         finalizedBy jacocoTestReport
         testLogging {
             events 'failed', 'passed', 'skipped'
         }
+
         Map<String, String> envVariables = new HashMap<>()
         envVariables.put("EXISTING_NON_EMPTY_VARIABLE", "SomeContent")
         envVariables.put("EXISTING_EMPTY_VARIABLE", "  ")
         environment(envVariables)
     }
-
 
     pmd {
         ruleSetConfig = rootProject.resources.text.fromFile('config/pmd/ruleset.xml')
@@ -79,7 +90,6 @@ allprojects {
             html.stylesheet rootProject.resources.text.fromFile('config/checkstyle/checkstyle-simple.xsl')
         }
     }
-
 
     check.dependsOn jacocoTestCoverageVerification
     jacocoTestCoverageVerification.dependsOn(jacocoTestReport)
@@ -104,20 +114,26 @@ allprojects {
         }
     }
 }
+
 subprojects {
+    apply plugin: 'maven-publish'
+    apply plugin: 'signing'
 
-    apply plugin: 'maven'
+    java {
+        withJavadocJar()
+        withSourcesJar()
+    }
+
     dependencies {
-
         // This method contains the logger class for AWS Lambda functions.
-        api (group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.1'){
-            exclude group: "org.apache.logging.log4j", module: "log4j-core:2.8.2"
+        api(group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.2.0') {
+            exclude group: "org.apache.logging.log4j", module: "log4j-core"
             exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
-            exclude group:"com.amazonaws", module:"aws-lambda-java-core"
-            exclude group:'org.apache.logging.log4j', module:'log4j-core'
+            exclude group: "com.amazonaws", module: "aws-lambda-java-core"
+            exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
         }
 
-        api (group: 'com.amazonaws',name: 'aws-lambda-java-core', version:'1.2.1'){
+        api(group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1') {
             exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
             exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
             exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
@@ -125,7 +141,7 @@ subprojects {
             exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jdk8"
             exclude group: "org.apache.logging.log4j", module: "log4j-core:2.8.2"
         }
-        api(group: 'org.zalando', name: 'jackson-datatype-problem', version: '0.25.0') {
+        api(group: 'org.zalando', name: 'jackson-datatype-problem', version: project.ext.zalandoProblemVersion) {
             exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
             exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
             exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
@@ -140,64 +156,93 @@ subprojects {
             because 'Because we use the library directly to define loggers in our code'
         }
 
-        compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
-        testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
-
-        compileOnly group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
-        testImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
-
-        compileOnly group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion
-        testImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion
-
-        compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
-        testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
-
-        compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
-        testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
-
+        api group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: project.ext.jacksonVersion
+        api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
+        api group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: project.ext.jacksonVersion
+        api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
+        api group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: project.ext.jacksonVersion
 
         testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: project.ext.jupiterVersion
         testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: project.ext.jupiterVersion
         testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: project.ext.jupiterVersion
 
-        compileOnly (group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.1'){
-            because ("junit.jupiter version 5 depends on it and testImplementation seems not enough")
+        compileOnly(group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.1') {
+            because("junit.jupiter version 5 depends on it and testImplementation seems not enough")
         }
 
-        testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.6.0'
+        testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.12.1'
         testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
+        testImplementation group: 'org.hamcrest', name: 'hamcrest-core', version: '2.2'
         testImplementation group: 'com.github.npathai', name: 'hamcrest-optional', version: '2.0.0'
-        testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.14'
-
+        testImplementation group: 'com.github.bibsysdev', name: 'nva-testutils', version: project.ext.nvaTestUtilsVersion
+        testImplementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
+        testImplementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
     }
 
-    // publish submodules
-    task sourcesJar(type: Jar, dependsOn: classes) {
-        archiveClassifier = 'sources'
-        from sourceSets.main.allSource
-    }
-
-    artifacts {
-        archives sourcesJar
-    }
-
-    bintray {
-        dryRun = project.hasProperty('bintrayDryRun') ? project.property('bintrayDryRun') : false
-        user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
-        key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
-        configurations = ['archives']
-        pkg {
-            repo = 'nva-commons'
-            name = project.name
-            userOrg = 'unit-nva'
-            licenses = ['MIT']
-            vcsUrl = 'https://github.com/BIBSYSDEV/nva-commons.git'
-            version {
-                name = version
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                artifactId = project.name
+                from components.java
+                versionMapping {
+                    usage('java-api') {
+                        fromResolutionOf('runtimeClasspath')
+                    }
+                    usage('java-runtime') {
+                        fromResolutionResult()
+                    }
+                }
+                pom {
+                    name = project.name
+                    description = 'A commons library for the NVA project'
+                    url = 'https://github.com/BIBSYSDEV/nva-commons'
+                    licenses {
+                        license {
+                            name = 'MIT License'
+                            url = 'http://www.opensource.org/licenses/mit-license.php'
+                        }
+                    }
+                    developers {
+                        developer {
+                            name = 'Orestis Gkorgkas'
+                            email = 'og@unit.no'
+                            organization = 'UNIT'
+                            organizationUrl = 'https://www.unit.no/'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:git://github.com/BIBSYSDEV/nva-commons.git'
+                        developerConnection = 'scm:git:ssh://github.com/BIBSYSDEV/nva-commons.git'
+                        url = 'https://github.com/BIBSYSDEV/nva-commons/tree/main'
+                    }
+                }
             }
         }
     }
+
+    signing {
+        if (isMainBranch()) {
+            useInMemoryPgpKeys(findProperty("signingKey"), findProperty("signingPassword"))
+            sign publishing.publications.mavenJava
+        }
+
+    }
 }
+
+def gitBranch() {
+    def branch = ""
+    def proc = "git rev-parse --abbrev-ref HEAD".execute()
+    proc.in.eachLine { line -> branch = line }
+    proc.err.eachLine { line -> println line }
+    proc.waitFor()
+    branch
+}
+
+boolean isMainBranch() {
+    def branch = gitBranch()
+    return ((branch == "master" || branch == "main"))
+}
+
 
 def getProjectList() {
     // These projects are considered. Replace with a different list as needed.
@@ -259,33 +304,6 @@ task jacocoRootReport(type: JacocoReport, dependsOn: tasks.jacocoMerge) {
     reports {
         xml.enabled true
     }
-}
-
-def gitBranch() {
-    def branch = ""
-    def proc = "git rev-parse --abbrev-ref HEAD".execute()
-    proc.in.eachLine { line -> branch = line }
-    proc.err.eachLine { line -> println line }
-    proc.waitFor()
-    branch
-}
-
-task bintraySubprojects {
-    def branch = gitBranch()
-    if (!(branch == "master" || branch == "main")) {
-        logger.warn("Warning: Can only publish to Bintray from master or main branch")
-        return
-    }
-
-    // define which subprojects to publish to bintray
-    dependsOn ':apigateway:bintrayUpload'
-    dependsOn ':core:bintrayUpload'
-    dependsOn ':doi:bintrayUpload'
-    dependsOn ':eventhandlers:bintrayUpload'
-    dependsOn ':identifiers:bintrayUpload'
-    dependsOn ':lambdaauthorizer:bintrayUpload'
-    dependsOn ':logutils:bintrayUpload'
-    dependsOn ':secrets:bintrayUpload'
 }
 
 build {

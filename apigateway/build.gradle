@@ -1,17 +1,12 @@
 dependencies{
-    compileOnly project(":core")
-    testImplementation project(":core")
-
-    compileOnly project(":logutils")
-    testImplementation project(":logutils")
-
-
-    compileOnly (group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: project.ext.awsSdkVersion){
+    implementation project(":core")
+    implementation group: 'org.zalando', name: 'problem', version: project.ext.zalandoProblemVersion
+    implementation (group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: project.ext.awsSdkVersion){
         exclude  group:"com.fasterxml.jackson.core", module: "jackson-databind"
         exclude  group:"com.fasterxml.jackson.dataformat", module: "jackson-dataformat-cbor"
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
-    testImplementation (group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: project.ext.awsSdkVersion)
-
+    testImplementation project(":core")
+    testImplementation project(":logutils")
 
 }

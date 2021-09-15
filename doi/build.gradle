@@ -1,7 +1,4 @@
 dependencies{
-    compileOnly project (":core")
-    testImplementation project (":core")
-
-    compileOnly project (":logutils")
+    implementation project (":core")
     testImplementation project (":logutils")
 }

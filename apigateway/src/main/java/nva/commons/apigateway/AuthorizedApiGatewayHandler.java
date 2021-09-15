@@ -6,10 +6,8 @@ import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.model.Tag;
 import java.util.List;
 import java.util.Optional;
-
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.core.Environment;
-import org.slf4j.Logger;
 
 public abstract class AuthorizedApiGatewayHandler<I, O> extends ApiGatewayHandler<I, O> {
 
@@ -20,10 +18,9 @@ public abstract class AuthorizedApiGatewayHandler<I, O> extends ApiGatewayHandle
 
     protected AuthorizedApiGatewayHandler(Class<I> iclass,
                                           Environment environment,
-                                          AWSSecurityTokenService stsClient,
-                                          Logger logger
+                                          AWSSecurityTokenService stsClient
     ) {
-        super(iclass, environment, logger);
+        super(iclass, environment);
         this.stsClient = stsClient;
     }
 

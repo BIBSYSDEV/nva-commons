@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import no.unit.nva.events.models.AwsEventBridgeEvent;
 import nva.commons.core.JsonUtils;
 import nva.commons.core.ioutils.IoUtils;
@@ -37,22 +38,24 @@ public abstract class EventHandler<InputType, OutputType> implements RequestStre
 
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) {
+        String inputString = null;
         try {
-            String inputString = IoUtils.streamToString(inputStream);
+            inputString = IoUtils.streamToString(inputStream);
             logger.trace(HANDLER_INPUT + inputString);
             AwsEventBridgeEvent<InputType> input = parseEvent(inputString);
             OutputType output = processInput(input.getDetail(), input, context);
 
             writeOutput(outputStream, output);
         } catch (Exception e) {
-            handleError(e);
+            handleError(e, inputString);
             throw e;
         }
     }
 
     protected void writeOutput(OutputStream outputStream, OutputType output) {
         {
-            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
+            try (BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
                 String responseJson = JsonUtils.objectMapper.writeValueAsString(output);
                 writer.write(responseJson);
             } catch (IOException e) {
@@ -68,7 +71,7 @@ public abstract class EventHandler<InputType, OutputType> implements RequestStre
         return new EventParser<InputType>(input).parse(iclass);
     }
 
-    private void handleError(Exception e) {
+    protected void handleError(Exception e, String inputString) {
         logger.error(stackTraceInSingleLine(e));
     }
 }

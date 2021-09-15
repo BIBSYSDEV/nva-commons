@@ -27,6 +27,16 @@ public final class SingletonCollector {
         return Collectors.collectingAndThen(Collectors.toList(), SingletonCollector::get);
     }
 
+    /**
+     * Returns the single expected value in the {@link java.util.stream.Stream} or the  alternative if nothing was
+     * found. It throws an {@link IllegalStateException} when more than one results have been collected from the {@link
+     * java.util.stream.Stream}
+     *
+     * @param alternative the alterative value if the {@link java.util.stream.Stream} is empty.
+     * @param <T>         the class of the collected object.
+     * @return the single value of the {@link java.util.stream.Stream} or the alternative if the {@link
+     *     java.util.stream.Stream} is empty.
+     */
     public static <T> Collector<T, ?, T> collectOrElse(T alternative) {
         return Collectors.collectingAndThen(Collectors.toList(), list -> orElse(list, alternative));
     }
@@ -38,7 +48,6 @@ public final class SingletonCollector {
      * @param <T> The type of input elements to the reduction operation.
      * @param <E> The type of the exception to be thrown.
      * @return A type of the singleton.
-     * @throws E If the input list is empty or contains more than one element.
      */
     public static <T, E extends Exception> Collector<T, ?, Try<T>> tryCollect() {
         return Collectors.collectingAndThen(Collectors.toList(), list -> attempt(() -> get(list)));

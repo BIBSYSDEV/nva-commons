@@ -2,6 +2,7 @@ package nva.commons.core.ioutils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -20,6 +21,7 @@ public final class IoUtils {
     public static final String LINE_SEPARATOR = System.lineSeparator();
     public static final String WIN_PATH_SEPARATOR_REGEX = "\\\\";
     public static final String PATH_SEPARATOR_FOR_RESOURCES = "/";
+    public static final String ROOT = "/";
 
     private IoUtils() {
     }
@@ -33,7 +35,7 @@ public final class IoUtils {
      */
     @Deprecated
     public static InputStream inputStreamFromResources(Path path) {
-        String pathString = replaceWinPathSeparatorsWithUniversalPathSeparators(path.toString());
+        String pathString = pathToString(path);
         return inputStreamFromResources(pathString);
     }
 
@@ -54,12 +56,8 @@ public final class IoUtils {
         }
     }
 
-    private static String replaceWinPathSeparatorsWithUniversalPathSeparators(String path) {
-        return path.replaceAll(WIN_PATH_SEPARATOR_REGEX, PATH_SEPARATOR_FOR_RESOURCES);
-    }
-
-    private static void requireResourceExists(InputStream stream) {
-        Objects.requireNonNull(stream);
+    public static String pathToString(Path path) {
+        return replaceWinPathSeparatorsWithUniversalPathSeparators(path.toString());
     }
 
     /**
@@ -74,10 +72,6 @@ public final class IoUtils {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-    }
-
-    private static InputStreamReader newInputStreamReader(InputStream stream) {
-        return new InputStreamReader(stream, StandardCharsets.UTF_8);
     }
 
     /**
@@ -131,5 +125,23 @@ public final class IoUtils {
      */
     public static InputStream stringToStream(String input) {
         return new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static byte[] inputStreamToBytes(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        inputStream.transferTo(byteArrayOutputStream);
+        return byteArrayOutputStream.toByteArray();
+    }
+
+    private static String replaceWinPathSeparatorsWithUniversalPathSeparators(String path) {
+        return path.replaceAll(WIN_PATH_SEPARATOR_REGEX, PATH_SEPARATOR_FOR_RESOURCES);
+    }
+
+    private static void requireResourceExists(InputStream stream) {
+        Objects.requireNonNull(stream);
+    }
+
+    private static InputStreamReader newInputStreamReader(InputStream stream) {
+        return new InputStreamReader(stream, StandardCharsets.UTF_8);
     }
 }

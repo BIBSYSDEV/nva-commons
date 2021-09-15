@@ -8,6 +8,7 @@ import static org.hamcrest.core.StringContains.containsString;
 import static org.hamcrest.text.IsEmptyString.emptyOrNullString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,7 +19,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 import nva.commons.core.ioutils.exceptions.FileNotFoundUncheckedException;
-import nva.commons.core.ioutils.IoUtils;
 import nva.commons.core.ioutils.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -115,10 +115,19 @@ public class IoUtilsTest {
         assertThat(actualString, is(equalTo(sample)));
     }
 
+    @Test
+    public void inputStreamToBytesReturnsBytesOfInputStreamWithoutLossOfInformation() throws IOException {
+        String sample = createSampleString();
+        InputStream stream = IoUtils.stringToStream(sample);
+        byte[] bytes = IoUtils.inputStreamToBytes(stream);
+        String regeneratedSample = IoUtils.streamToString(new ByteArrayInputStream(bytes));
+        assertThat(regeneratedSample, is(equalTo(sample)));
+    }
+
     private String createSampleString() {
         return "First line"
-            + System.lineSeparator()
-            + "Second line";
+               + System.lineSeparator()
+               + "Second line";
     }
 
     private InputStream streamThrowingIoException() throws IOException {

@@ -11,45 +11,44 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.management.modelmbean.XMLParseException;
+import no.unit.nva.stubs.FakeContext;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
-import nva.commons.apigateway.exceptions.InvalidOrMissingTypeException;
 import nva.commons.apigateway.exceptions.TestException;
-import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.apigateway.testutils.Handler;
 import nva.commons.apigateway.testutils.RequestBody;
 import nva.commons.core.Environment;
-
+import nva.commons.core.JsonUtils;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
@@ -60,11 +59,12 @@ public class ApiGatewayHandlerTest {
     public static final String MIDDLE_EXCEPTION_MESSAGE = "MIDDLE Exception";
     public static final String BOTTOM_EXCEPTION_MESSAGE = "BOTTOM Exception";
     public static final String SOME_REQUEST_ID = "RequestID:123456";
-    public static final int OVERRIDEN_STATUS_CODE = 418;  //I'm a teapot
+    public static final int OVERRIDDEN_STATUS_CODE = 418;  //I'm a teapot
+    public static final int UNSUPPORTED_MEDIA_TYPE_STATUS_CODE = 415;
     public static final Path EVENT_WITH_UNKNOWN_REQUEST_INFO = Path.of("apiGatewayMessages",
-        "eventWithUnknownRequestInfo.json");
-    public Environment environment;
+                                                                       "eventWithUnknownRequestInfo.json");
     private static final String PATH = "path1/path2/path3";
+    public Environment environment;
     private Context context;
 
     /**
@@ -81,8 +81,7 @@ public class ApiGatewayHandlerTest {
     @Test
     @DisplayName("ApiGatewayHandler has a constructor with input class as only parameter")
     public void apiGatewayHandlerHasACostructorWithInputClassAsOnlyParameter() {
-        Logger logger = LoggerFactory.getLogger(RestRequestHandler.class);
-        RestRequestHandler<String, String> handler = new ApiGatewayHandler<>(String.class, logger) {
+        RestRequestHandler<String, String> handler = new ApiGatewayHandler<>(String.class) {
             @Override
             protected String processInput(String input, RequestInfo requestInfo, Context context) {
                 return null;
@@ -90,7 +89,7 @@ public class ApiGatewayHandlerTest {
 
             @Override
             protected Integer getSuccessStatusCode(String input, String output) {
-                return HttpStatus.SC_OK;
+                return HttpURLConnection.HTTP_OK;
             }
         };
     }
@@ -107,7 +106,8 @@ public class ApiGatewayHandlerTest {
         Map<String, String> headers = handler.getHeaders();
         JsonNode expectedHeaders = createHeaders();
         expectedHeaders.fieldNames().forEachRemaining(expectedHeader ->
-            assertThat(headers.get(expectedHeader), is(equalTo(expectedHeaders.get(expectedHeader).textValue()))));
+                                                          assertThat(headers.get(expectedHeader), is(equalTo(
+                                                              expectedHeaders.get(expectedHeader).textValue()))));
     }
 
     @Test
@@ -116,14 +116,14 @@ public class ApiGatewayHandlerTest {
         Handler handler = new Handler(environment);
 
         Map<String,String> headers = new ConcurrentHashMap<>();
-        headers.put(HttpHeaders.ACCEPT, ContentType.APPLICATION_XML.getMimeType());
+        headers.put(HttpHeaders.ACCEPT, ContentTypes.APPLICATION_XML);
         InputStream input = requestWithHeaders(headers);
 
         ByteArrayOutputStream outputStream = outputStream();
         handler.handleRequest(input, outputStream, context);
 
         GatewayResponse<String> response = GatewayResponse.fromOutputStream(outputStream);
-        assertThat(response.getStatusCode(), is(equalTo(HttpStatus.SC_UNSUPPORTED_MEDIA_TYPE)));
+        assertThat(response.getStatusCode(), is(equalTo(UNSUPPORTED_MEDIA_TYPE_STATUS_CODE)));
         assertThat(response.getBody(), containsString(UNSUPPORTED_ACCEPT_HEADER_VALUE));
     }
 
@@ -158,19 +158,19 @@ public class ApiGatewayHandlerTest {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         handler.handleRequest(input, output, context);
 
-        GatewayResponse<String> response = GatewayResponse.fromOutputStream(output);
-        String body = response.getBodyObject(String.class);
+        GatewayResponse<RequestBody> response = GatewayResponse.fromOutputStream(output);
+        RequestBody body = response.getBodyObject(RequestBody.class);
 
         String expectedValueForField1 = "value1";
         String expectedValueForField2 = "value2";
-        assertThat(body, containsString(expectedValueForField1));
-        assertThat(body, containsString(expectedValueForField2));
+        assertThat(body.getField1(), containsString(expectedValueForField1));
+        assertThat(body.getField2(), containsString(expectedValueForField2));
     }
 
     @Test
     @DisplayName("Logger logs the whole exception stacktrace when an exception has occurred 2")
     public void loggerLogsTheWholeExceptionStackTraceWhenAnExceptionHasOccurred() throws IOException {
-        TestAppender appender = LogUtils.getTestingAppender(Handler.class);
+        TestAppender appender = LogUtils.getTestingAppenderForRootLogger();
         Handler handler = handlerThatThrowsExceptions();
         handler.handleRequest(requestWithHeadersAndPath(), outputStream(), context);
 
@@ -187,7 +187,7 @@ public class ApiGatewayHandlerTest {
     @Test
     @DisplayName("Logger logs the whole exception stacktrace when an exception has occurred")
     public void loggerLogsTheWholeExceptionStackTraceWhenAnUncheckedExceptionHasOccurred() throws IOException {
-        TestAppender appender = LogUtils.getTestingAppender(Handler.class);
+        TestAppender appender = LogUtils.getTestingAppenderForRootLogger();
         Handler handler = handlerThatThrowsUncheckedExceptions();
 
         handler.handleRequest(requestWithHeadersAndPath(), outputStream(), context);
@@ -202,7 +202,7 @@ public class ApiGatewayHandlerTest {
 
     @Test
     @DisplayName("Handler does not reveal information for runtime exceptions")
-    public void handlerDoesnRevealInformationForRuntimeExceptions() throws IOException {
+    public void handlerDoesNotRevealInformationForRuntimeExceptions() throws IOException {
         Handler handler = handlerThatThrowsUncheckedExceptions();
         ByteArrayOutputStream outputStream = outputStream();
         handler.handleRequest(requestWithHeaders(), outputStream, context);
@@ -253,9 +253,9 @@ public class ApiGatewayHandlerTest {
         ByteArrayOutputStream outputStream = outputStream();
         handler.handleRequest(anyRequest(), outputStream, context);
         GatewayResponse<Problem> response = getApiGatewayResponse(outputStream);
-        assertThat(response.getStatusCode(), is(equalTo(OVERRIDEN_STATUS_CODE)));
+        assertThat(response.getStatusCode(), is(equalTo(OVERRIDDEN_STATUS_CODE)));
         assertThat(response.getBodyObject(Problem.class).getStatus().getStatusCode(),
-            is(equalTo(OVERRIDEN_STATUS_CODE)));
+                   is(equalTo(OVERRIDDEN_STATUS_CODE)));
     }
 
     @Test
@@ -267,33 +267,75 @@ public class ApiGatewayHandlerTest {
         GatewayResponse<Problem> response = getApiGatewayResponse(outputStream);
         assertThat(response.getStatusCode(), is(equalTo(TestException.ERROR_STATUS_CODE)));
         assertThat(response.getBodyObject(Problem.class).getStatus().getStatusCode(),
-            is(equalTo(TestException.ERROR_STATUS_CODE)));
+                   is(equalTo(TestException.ERROR_STATUS_CODE)));
     }
 
     @Test
-    public void handlerReturnsInternalServerErrorWhenLoggerHasNotBeenExplicitlySet() throws IOException {
-        Handler handler = handlerThatHasNotSetLogger();
-        ByteArrayOutputStream outputStream = outputStream();
-        handler.handleRequest(anyRequest(), outputStream, context);
-
-        GatewayResponse<Problem> response = getApiGatewayResponse(outputStream);
-        assertThat(response.getStatusCode(), is(equalTo(HttpStatus.SC_INTERNAL_SERVER_ERROR)));
-        assertThat(response.getBodyObject(Problem.class).getDetail(), containsString(handler.getClass().getName()));
+    public void handlerLogsRequestIdForEveryRequest() throws IOException {
+        var appender = LogUtils.getTestingAppender(RestRequestHandler.class);
+        var handler = new Handler(environment);
+        var output = outputStream();
+        var contextWithRequestId = new FakeContext();
+        var expectedRequestId = contextWithRequestId.getAwsRequestId();
+        handler.handleRequest(requestWithHeadersAndPath(), output, contextWithRequestId);
+        assertThat(appender.getMessages(), containsString(expectedRequestId));
     }
 
     @Test
-    public void handlerReturnsBadRequestForJsonInvalidTypeError() throws IOException {
-        Handler handler = new Handler(environment);
+    public void handlerReturnsResponseThatIncludesAllEmptyFields() throws IOException {
+        var handler = new Handler(environment);
+        var output = outputStream();
+        InputStream input = requestWithBodyWithEmptyFields();
+        handler.handleRequest(input, output, context);
+        GatewayResponse<JsonNode> response = GatewayResponse.fromOutputStream(output);
+        JsonNode jsonNode = response.getBodyObject(JsonNode.class);
 
-        InputStream inputStream = requestWithBodyWithoutType();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        assertThat(jsonNode.has(RequestBody.FIELD1), is(true));
+        assertThat(jsonNode.has(RequestBody.FIELD2), is(true));
+        assertThat(jsonNode.get(RequestBody.FIELD2), is(equalTo(objectMapper.nullNode())));
+    }
+
+    @Test
+    public void handlerReturnsBadRequestWhenInputParsingFails() throws IOException {
+        String expectedMessage = "Expected error message when parsing fails";
+        Handler handler = handlerFailingWhenParsing(expectedMessage);
+        InputStream input = requestWithHeadersAndPath();
+        ByteArrayOutputStream output = outputStream();
+        handler.handleRequest(input, output, context);
+        GatewayResponse<Problem> response = GatewayResponse.fromOutputStream(output);
+        Problem problem = response.getBodyObject(Problem.class);
+
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_BAD_REQUEST)));
+        assertThat(problem.getDetail(), containsString(expectedMessage));
+    }
+
+    @Test
+    void handlerSerializesBodyWithNonDefaultSerializationWhenDefaultSerializerIsOverridden() throws IOException {
+        ObjectMapper spiedMapper = spy(JsonUtils.objectMapper);
+        var handler = new Handler(environment, spiedMapper);
+        var inputStream = requestWithHeaders();
+        var outputStream = outputStream();
         handler.handleRequest(inputStream, outputStream, context);
+        verify(spiedMapper, atLeast(1)).writeValueAsString(any());
+    }
 
-        GatewayResponse<Problem> response = GatewayResponse.fromOutputStream(outputStream);
-        assertThat(response.getStatusCode(), is(equalTo(HttpStatus.SC_BAD_REQUEST)));
+    private Handler handlerFailingWhenParsing(String expectedMessage) {
+        return new Handler(environment) {
+            @Override
+            protected RequestBody parseInput(String inputString) {
+                throw new RuntimeException(expectedMessage);
+            }
+        };
+    }
 
-        Problem details = response.getBodyObject(Problem.class);
-        assertThat(details.getDetail(), containsString(InvalidOrMissingTypeException.MESSAGE));
+    private InputStream requestWithBodyWithEmptyFields() throws JsonProcessingException {
+        RequestBody requestBody = new RequestBody();
+        requestBody.setField1("Some value");
+        requestBody.setField2(null);
+
+        return new HandlerRequestBuilder<RequestBody>(objectMapper)
+            .withBody(requestBody)
+            .build();
     }
 
     private InputStream requestWithBodyWithoutType() throws JsonProcessingException {
@@ -314,28 +356,17 @@ public class ApiGatewayHandlerTest {
         return response.getBodyObject(Problem.class);
     }
 
-    private Handler handlerThatHasNotSetLogger() {
-        return new Handler(environment) {
-
-            @Override
-            public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context)
-                throws IOException {
-                logger = null;
-                super.handleRequest(inputStream, outputStream, context);
-            }
-        };
-    }
-
     private GatewayResponse<Problem> getApiGatewayResponse(ByteArrayOutputStream outputStream)
         throws JsonProcessingException {
-        TypeReference<GatewayResponse<Problem>> tr = new TypeReference<>() {};
+        TypeReference<GatewayResponse<Problem>> tr = new TypeReference<>() {
+        };
         return objectMapper.readValue(outputStream.toString(StandardCharsets.UTF_8), tr);
     }
 
     private Handler handlerThatThrowsUncheckedExceptions() {
         return new Handler(environment) {
             @Override
-            protected String processInput(RequestBody input, RequestInfo requestInfo, Context context) {
+            protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context) {
                 throwUncheckedExceptions();
                 return null;
             }
@@ -346,11 +377,11 @@ public class ApiGatewayHandlerTest {
         return new Handler(environment) {
             @Override
             public int getFailureStatusCode(RequestBody input, ApiGatewayException exception) {
-                return OVERRIDEN_STATUS_CODE;
+                return OVERRIDDEN_STATUS_CODE;
             }
 
             @Override
-            protected String processInput(RequestBody input, RequestInfo requestInfo, Context context)
+            protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
                 throws ApiGatewayException {
                 throwExceptions();
                 return null;
@@ -418,8 +449,8 @@ public class ApiGatewayHandlerTest {
 
     private JsonNode createHeaders() {
         Map<String, String> headers = new ConcurrentHashMap<>();
-        headers.put(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
-        headers.put(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+        headers.put(HttpHeaders.ACCEPT, ContentTypes.APPLICATION_JSON);
+        headers.put(HttpHeaders.CONTENT_TYPE, ContentTypes.APPLICATION_JSON);
         return createHeaders(headers);
     }
 
@@ -441,7 +472,7 @@ public class ApiGatewayHandlerTest {
     private Handler handlerThatThrowsExceptions() {
         return new Handler(environment) {
             @Override
-            protected String processInput(RequestBody input, RequestInfo requestInfo, Context context)
+            protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
                 throws ApiGatewayException {
                 throwExceptions();
                 return null;

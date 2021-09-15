@@ -44,6 +44,11 @@ public class Failure<T> extends Try<T> {
     }
 
     @Override
+    public <E extends Exception> Try<Void> forEach(ConsumerWithException<T, E> consumer) {
+        return new Failure<Void>(exception);
+    }
+
+    @Override
     public <E extends Exception> T orElseThrow(Function<Failure<T>, E> action) throws E {
         if (action != null) {
             throw action.apply(this);
@@ -54,7 +59,11 @@ public class Failure<T> extends Try<T> {
 
     @Override
     public T orElseThrow() {
-        throw new RuntimeException(this.getException());
+        if (this.getException() instanceof RuntimeException) {
+            throw (RuntimeException) this.getException();
+        } else {
+            throw new RuntimeException(this.getException());
+        }
     }
 
     @Override
@@ -75,10 +84,5 @@ public class Failure<T> extends Try<T> {
     @Override
     public Optional<T> toOptional() {
         return Optional.empty();
-    }
-
-    @Override
-    public <E extends Exception> Try<Void> forEach(ConsumerWithException<T, E> consumer) {
-        return new Failure<Void>(exception);
     }
 }

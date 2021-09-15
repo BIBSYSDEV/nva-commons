@@ -1,0 +1,10 @@
+dependencies {
+    implementation project (":core")
+    implementation group: 'software.amazon.awssdk', name: 's3', version: project.ext.awsSkd2Version
+    implementation group: 'software.amazon.awssdk', name: 'sdk-core', version: project.ext.awsSkd2Version
+    testImplementation group: 'software.amazon.awssdk', name: 'http-client-spi', version: project.ext.awsSkd2Version
+    implementation group: 'software.amazon.awssdk', name: 'apache-client', version: project.ext.awsSkd2Version
+    testImplementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
+    testImplementation group: 'com.github.npathai', name: 'hamcrest-optional', version: '2.0.0'
+
+}
