@@ -1,6 +1,8 @@
 package nva.commons.apigateway;
 
 import static java.util.Objects.isNull;
+import static nva.commons.apigateway.ContentTypes.APPLICATION_JSON;
+import static nva.commons.apigateway.ContentTypes.WILDCARD;
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 
 import com.amazonaws.services.lambda.runtime.Context;
@@ -10,11 +12,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
+import java.util.List;
+
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
 import nva.commons.apigateway.exceptions.InvalidOrMissingTypeException;
 import nva.commons.apigateway.exceptions.LoggerNotSetException;
+import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
+import nva.commons.core.JacocoGenerated;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.logutils.LogUtils;
 import org.slf4j.Logger;
@@ -38,6 +44,30 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     protected transient OutputStream outputStream;
     protected transient String allowedOrigin;
 
+    public static final List<String> DEFAULT_SUPPORTED_HEADERS = List.of(APPLICATION_JSON, WILDCARD);
+
+    protected void checkHeaders(RequestInfo requestInfo) throws UnsupportedAcceptHeaderException {
+        if (requestInfo.getHeaders().keySet().contains(HttpHeaders.ACCEPT)) {
+            suppliedAcceptsHeadersAreSupported(requestInfo, listSupportedHeaders());
+        }
+    }
+
+    private void suppliedAcceptsHeadersAreSupported(RequestInfo requestInfo, List<String> listSupportedHeaders)
+            throws UnsupportedAcceptHeaderException {
+        listSupportedHeaders.stream()
+                .filter(header -> header.equalsIgnoreCase(requestInfo.getHeader(HttpHeaders.ACCEPT)))
+                .findAny()
+                .orElseThrow(() -> new UnsupportedAcceptHeaderException());
+    }
+
+    protected List<String>  listSupportedHeaders() {
+        return DEFAULT_SUPPORTED_HEADERS;
+    }
+
+    @JacocoGenerated
+    protected String getDefaultResponseHeader() {
+        return DEFAULT_SUPPORTED_HEADERS.get(0);
+    }
 
     /**
      * The input class should be set explicitly by the inherting class.
@@ -127,6 +157,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
      */
     protected O processInput(I input, String apiGatewayInputString, Context context) throws ApiGatewayException {
         RequestInfo requestInfo = inputParser.getRequestInfo(apiGatewayInputString);
+        checkHeaders(requestInfo);
         return processInput(input, requestInfo, context);
     }
 

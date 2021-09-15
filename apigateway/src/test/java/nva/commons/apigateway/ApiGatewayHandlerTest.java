@@ -3,6 +3,7 @@ package nva.commons.apigateway;
 import static nva.commons.apigateway.ApiGatewayHandler.APPLICATION_PROBLEM_JSON;
 import static nva.commons.apigateway.ApiGatewayHandler.CONTENT_TYPE;
 import static nva.commons.apigateway.ApiGatewayHandler.REQUEST_ID;
+import static nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException.UNSUPPORTED_ACCEPT_HEADER_VALUE;
 import static nva.commons.core.JsonUtils.objectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -33,6 +34,7 @@ import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.InvalidOrMissingTypeException;
 import nva.commons.apigateway.exceptions.TestException;
+import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.apigateway.testutils.Handler;
 import nva.commons.apigateway.testutils.RequestBody;
 import nva.commons.core.Environment;
@@ -106,6 +108,23 @@ public class ApiGatewayHandlerTest {
         JsonNode expectedHeaders = createHeaders();
         expectedHeaders.fieldNames().forEachRemaining(expectedHeader ->
             assertThat(headers.get(expectedHeader), is(equalTo(expectedHeaders.get(expectedHeader).textValue()))));
+    }
+
+    @Test
+    @DisplayName("handleRequest should return UnsupportedMediaType")
+    public void handleRequestShouldReturnUnsupportedMediaType() throws IOException {
+        Handler handler = new Handler(environment);
+
+        Map<String,String> headers = new ConcurrentHashMap<>();
+        headers.put(HttpHeaders.ACCEPT, ContentType.APPLICATION_XML.getMimeType());
+        InputStream input = requestWithHeaders(headers);
+
+        ByteArrayOutputStream outputStream = outputStream();
+        handler.handleRequest(input, outputStream, context);
+
+        GatewayResponse<String> response = GatewayResponse.fromOutputStream(outputStream);
+        assertThat(response.getStatusCode(), is(equalTo(HttpStatus.SC_UNSUPPORTED_MEDIA_TYPE)));
+        assertThat(response.getBody(), containsString(UNSUPPORTED_ACCEPT_HEADER_VALUE));
     }
 
     @Test
@@ -381,6 +400,14 @@ public class ApiGatewayHandlerTest {
         return IoUtils.stringToStream(requestString);
     }
 
+    private InputStream requestWithHeaders(Map<String,String> headers) throws JsonProcessingException {
+        ObjectNode request = objectMapper.createObjectNode();
+        ObjectNode node = createBody();
+        request.set("body", node);
+        request.set("headers", createHeaders(headers));
+        return jsonNodeToInputStream(request);
+    }
+
     private InputStream requestWithHeaders() throws JsonProcessingException {
         ObjectNode request = objectMapper.createObjectNode();
         ObjectNode node = createBody();
@@ -393,6 +420,10 @@ public class ApiGatewayHandlerTest {
         Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
         headers.put(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+        return createHeaders(headers);
+    }
+
+    private JsonNode createHeaders(Map<String, String> headers) {
         return objectMapper.convertValue(headers, JsonNode.class);
     }
 
