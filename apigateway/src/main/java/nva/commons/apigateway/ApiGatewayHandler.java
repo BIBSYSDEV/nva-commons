@@ -1,6 +1,5 @@
 package nva.commons.apigateway;
 
-import static nva.commons.apigateway.ContentTypes.APPLICATION_JSON;
 import static nva.commons.core.JsonUtils.objectMapper;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
