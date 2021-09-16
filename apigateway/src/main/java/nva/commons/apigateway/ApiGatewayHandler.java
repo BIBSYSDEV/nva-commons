@@ -196,7 +196,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     protected Map<String, String> defaultHeaders() {
         Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
-        headers.put(CONTENT_TYPE, APPLICATION_JSON);
+        headers.put(CONTENT_TYPE, getDefaultResponseHeader().toString());
         return headers;
     }
 

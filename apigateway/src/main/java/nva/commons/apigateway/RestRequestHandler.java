@@ -73,6 +73,10 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
         return DEFAULT_SUPPORTED_HEADERS;
     }
 
+    protected MediaType getDefaultResponseHeader() {
+        return listSupportedHeaders().get(0);
+    }
+
     /**
      * The input class should be set explicitly by the inherting class.
      *
