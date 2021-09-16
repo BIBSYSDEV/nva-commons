@@ -49,6 +49,8 @@ import nva.commons.logutils.TestAppender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
@@ -64,6 +66,7 @@ public class ApiGatewayHandlerTest {
     public static final Path EVENT_WITH_UNKNOWN_REQUEST_INFO = Path.of("apiGatewayMessages",
                                                                        "eventWithUnknownRequestInfo.json");
     private static final String PATH = "path1/path2/path3";
+    public static final int OK_STATUS_CODE = 200;
     public Environment environment;
     private Context context;
 
@@ -110,14 +113,17 @@ public class ApiGatewayHandlerTest {
                                                               expectedHeaders.get(expectedHeader).textValue()))));
     }
 
-    @Test
-    @DisplayName("handleRequest should return UnsupportedMediaType")
-    public void handleRequestShouldReturnUnsupportedMediaType() throws IOException {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "application/xml",
+            "text/plain; charset=UTF-8"
+    })
+    public void handleRequestShouldReturnUnsupportedMediaTypeOnUnsupportedAcceptHeader(String mediaType) throws IOException {
         Handler handler = new Handler(environment);
 
-        Map<String,String> headers = new ConcurrentHashMap<>();
-        headers.put(HttpHeaders.ACCEPT, ContentTypes.APPLICATION_XML);
-        InputStream input = requestWithHeaders(headers);
+        Map<String,String> unsupportedHeaders = new ConcurrentHashMap<>();
+        unsupportedHeaders.put(HttpHeaders.ACCEPT, mediaType);
+        InputStream input = requestWithHeaders(unsupportedHeaders);
 
         ByteArrayOutputStream outputStream = outputStream();
         handler.handleRequest(input, outputStream, context);
@@ -125,6 +131,27 @@ public class ApiGatewayHandlerTest {
         GatewayResponse<String> response = GatewayResponse.fromOutputStream(outputStream);
         assertThat(response.getStatusCode(), is(equalTo(UNSUPPORTED_MEDIA_TYPE_STATUS_CODE)));
         assertThat(response.getBody(), containsString(UNSUPPORTED_ACCEPT_HEADER_VALUE));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "*/*",
+            "application/json",
+            "application/json; charset=UTF-8",
+            "text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8"
+    })
+    public void handleRequestShouldReturnOkOnSupportedAcceptHeader(String mediaType) throws IOException {
+        Handler handler = new Handler(environment);
+
+        Map<String,String> unsupportedHeaders = new ConcurrentHashMap<>();
+        unsupportedHeaders.put(HttpHeaders.ACCEPT, mediaType);
+        InputStream input = requestWithHeaders(unsupportedHeaders);
+
+        ByteArrayOutputStream outputStream = outputStream();
+        handler.handleRequest(input, outputStream, context);
+
+        GatewayResponse<String> response = GatewayResponse.fromOutputStream(outputStream);
+        assertThat(response.getStatusCode(), is(equalTo(OK_STATUS_CODE)));
     }
 
     @Test

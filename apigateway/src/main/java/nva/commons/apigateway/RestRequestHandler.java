@@ -2,12 +2,12 @@ package nva.commons.apigateway;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import com.google.common.net.MediaType;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
-import nva.commons.core.JacocoGenerated;
 import nva.commons.core.attempt.Failure;
 import nva.commons.core.ioutils.IoUtils;
 import org.slf4j.Logger;
@@ -16,10 +16,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static nva.commons.apigateway.ContentTypes.APPLICATION_JSON;
-import static nva.commons.apigateway.ContentTypes.WILDCARD;
 import static nva.commons.core.attempt.Try.attempt;
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 
@@ -43,29 +43,34 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     protected transient OutputStream outputStream;
     protected transient String allowedOrigin;
 
-    public static final List<String> DEFAULT_SUPPORTED_HEADERS = List.of(APPLICATION_JSON, WILDCARD);
+    public static final List<MediaType> DEFAULT_SUPPORTED_HEADERS = List.of(MediaType.JSON_UTF_8);
 
     protected void checkHeaders(RequestInfo requestInfo) throws UnsupportedAcceptHeaderException {
         if (requestInfo.getHeaders().keySet().contains(HttpHeaders.ACCEPT)) {
-            suppliedAcceptsHeadersAreSupported(requestInfo, listSupportedHeaders());
+            List<MediaType> acceptMediaTypes = parseAcceptHeader(requestInfo.getHeader(HttpHeaders.ACCEPT));
+            suppliedAcceptsHeadersAreSupported(acceptMediaTypes);
         }
     }
 
-    private void suppliedAcceptsHeadersAreSupported(RequestInfo requestInfo, List<String> supportedHeaders)
+    private List<MediaType> parseAcceptHeader(String header) {
+        return Arrays.stream(header.replace(" ","").split(","))
+                .map(string -> MediaType.parse(string))
+                .map(mediaType -> mediaType.withoutParameters())
+                .collect(Collectors.toList());
+    }
+
+    private void suppliedAcceptsHeadersAreSupported(List<MediaType> acceptMediaTypes)
             throws UnsupportedAcceptHeaderException {
-        supportedHeaders.stream()
-                .filter(header -> header.equalsIgnoreCase(requestInfo.getHeader(HttpHeaders.ACCEPT)))
+        acceptMediaTypes.stream()
+                .filter(outer -> listSupportedHeaders().stream()
+                        .filter(inner -> inner.is(outer))
+                        .findAny().isPresent())
                 .findAny()
                 .orElseThrow(() -> new UnsupportedAcceptHeaderException());
     }
 
-    protected List<String>  listSupportedHeaders() {
+    protected List<MediaType>  listSupportedHeaders() {
         return DEFAULT_SUPPORTED_HEADERS;
-    }
-
-    @JacocoGenerated
-    protected String getDefaultResponseHeader() {
-        return DEFAULT_SUPPORTED_HEADERS.get(0);
     }
 
     /**

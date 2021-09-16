@@ -6,6 +6,7 @@ dependencies{
         exclude  group:"com.fasterxml.jackson.dataformat", module: "jackson-dataformat-cbor"
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
+    implementation group: 'com.google.guava', name: 'guava', version: project.ext.guavaVersion
     testImplementation project(":core")
     testImplementation project(":logutils")
 

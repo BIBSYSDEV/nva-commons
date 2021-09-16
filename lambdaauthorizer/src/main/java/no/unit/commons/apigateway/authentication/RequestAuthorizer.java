@@ -176,4 +176,10 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
         logger.error(failure.getException().getMessage(), failure.getException());
         return new RuntimeException(failure.getException());
     }
+
+    @Override
+    @SuppressWarnings("PMD.EmptyMethodInAbstractClassShouldBeAbstract")
+    protected void checkHeaders(RequestInfo requestInfo)  {
+        //do nothing;
+    }
 }
