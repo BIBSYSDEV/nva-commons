@@ -43,7 +43,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     protected transient OutputStream outputStream;
     protected transient String allowedOrigin;
 
-    public static final List<MediaType> DEFAULT_SUPPORTED_HEADERS = List.of(MediaType.JSON_UTF_8);
+    public static final List<MediaType> DEFAULT_SUPPORTED_MEDIA_TYPES = List.of(MediaType.JSON_UTF_8);
 
     protected void checkHeaders(RequestInfo requestInfo) throws UnsupportedAcceptHeaderException {
         if (requestInfo.getHeaders().keySet().contains(HttpHeaders.ACCEPT)) {
@@ -62,19 +62,23 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     private void suppliedAcceptsHeadersAreSupported(List<MediaType> acceptMediaTypes)
             throws UnsupportedAcceptHeaderException {
         acceptMediaTypes.stream()
-                .filter(outer -> listSupportedHeaders().stream()
-                        .filter(inner -> inner.is(outer))
-                        .findAny().isPresent())
+                .filter(acceptMediaType -> inSupportedMediaTypeRange(acceptMediaType))
                 .findAny()
                 .orElseThrow(() -> new UnsupportedAcceptHeaderException());
     }
 
-    protected List<MediaType>  listSupportedHeaders() {
-        return DEFAULT_SUPPORTED_HEADERS;
+    private boolean inSupportedMediaTypeRange(MediaType mediaType) {
+        return listSupportedMediaTypes().stream()
+                .filter(supportedMediaType ->supportedMediaType.is(mediaType))
+                .findAny().isPresent();
+    }
+
+    protected List<MediaType> listSupportedMediaTypes() {
+        return DEFAULT_SUPPORTED_MEDIA_TYPES;
     }
 
     protected MediaType getDefaultResponseHeader() {
-        return listSupportedHeaders().get(0);
+        return listSupportedMediaTypes().get(0);
     }
 
     /**
