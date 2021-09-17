@@ -2,6 +2,7 @@ package nva.commons.apigateway;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.BadRequestException;

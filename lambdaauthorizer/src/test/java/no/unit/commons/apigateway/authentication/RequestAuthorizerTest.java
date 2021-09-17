@@ -13,8 +13,9 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.Map;
 import java.util.Optional;
+
+import com.google.common.net.HttpHeaders;
 import no.unit.nva.testutils.HandlerRequestBuilder;
-import nva.commons.apigateway.HttpHeaders;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ForbiddenException;
 import nva.commons.core.Environment;

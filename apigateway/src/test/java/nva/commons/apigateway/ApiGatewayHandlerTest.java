@@ -35,6 +35,9 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.management.modelmbean.XMLParseException;
+
+import com.google.common.net.HttpHeaders;
+import com.google.common.net.MediaType;
 import no.unit.nva.stubs.FakeContext;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
@@ -62,11 +65,9 @@ public class ApiGatewayHandlerTest {
     public static final String BOTTOM_EXCEPTION_MESSAGE = "BOTTOM Exception";
     public static final String SOME_REQUEST_ID = "RequestID:123456";
     public static final int OVERRIDDEN_STATUS_CODE = 418;  //I'm a teapot
-    public static final int UNSUPPORTED_MEDIA_TYPE_STATUS_CODE = 415;
     public static final Path EVENT_WITH_UNKNOWN_REQUEST_INFO = Path.of("apiGatewayMessages",
                                                                        "eventWithUnknownRequestInfo.json");
     private static final String PATH = "path1/path2/path3";
-    public static final int OK_STATUS_CODE = 200;
     public Environment environment;
     private Context context;
 
@@ -129,7 +130,7 @@ public class ApiGatewayHandlerTest {
         handler.handleRequest(input, outputStream, context);
 
         GatewayResponse<String> response = GatewayResponse.fromOutputStream(outputStream);
-        assertThat(response.getStatusCode(), is(equalTo(UNSUPPORTED_MEDIA_TYPE_STATUS_CODE)));
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_UNSUPPORTED_TYPE)));
         assertThat(response.getBody(), containsString(UNSUPPORTED_ACCEPT_HEADER_VALUE));
     }
 
@@ -151,7 +152,7 @@ public class ApiGatewayHandlerTest {
         handler.handleRequest(input, outputStream, context);
 
         GatewayResponse<String> response = GatewayResponse.fromOutputStream(outputStream);
-        assertThat(response.getStatusCode(), is(equalTo(OK_STATUS_CODE)));
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
     }
 
     @Test
@@ -476,8 +477,8 @@ public class ApiGatewayHandlerTest {
 
     private JsonNode createHeaders() {
         Map<String, String> headers = new ConcurrentHashMap<>();
-        headers.put(HttpHeaders.ACCEPT, ContentTypes.APPLICATION_JSON);
-        headers.put(HttpHeaders.CONTENT_TYPE, ContentTypes.APPLICATION_JSON);
+        headers.put(HttpHeaders.ACCEPT, MediaType.JSON_UTF_8.toString());
+        headers.put(HttpHeaders.CONTENT_TYPE, MediaType.JSON_UTF_8.toString());
         return createHeaders(headers);
     }
 
