@@ -69,8 +69,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     private boolean inSupportedMediaTypeRange(MediaType mediaType) {
         return listSupportedMediaTypes().stream()
-                .filter(supportedMediaType ->supportedMediaType.is(mediaType))
-                .findAny().isPresent();
+                .anyMatch(supportedMediaType ->supportedMediaType.is(mediaType));
     }
 
     protected List<MediaType> listSupportedMediaTypes() {
