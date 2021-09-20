@@ -37,6 +37,9 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     public static final String REQUEST_ID = "RequestId:";
     private static final Logger logger = LoggerFactory.getLogger(RestRequestHandler.class);
+    public static final String SPACE = " ";
+    public static final String EMPTY_STRING = "";
+    public static final String COMMA = ",";
     protected final Environment environment;
     private final transient Class<I> iclass;
     private final transient ApiMessageParser<I> inputParser = new ApiMessageParser<>();
@@ -44,8 +47,13 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     protected transient OutputStream outputStream;
     protected transient String allowedOrigin;
 
-    public static final List<MediaType> DEFAULT_SUPPORTED_MEDIA_TYPES = List.of(MediaType.JSON_UTF_8);
+    private static final List<MediaType> DEFAULT_SUPPORTED_MEDIA_TYPES = List.of(MediaType.JSON_UTF_8);
 
+    /**
+     * Checking headers on request and acting upon known headers.
+     * @param requestInfo the request
+     * @throws UnsupportedAcceptHeaderException if no provided Accept header media types are supported in this handler.
+     */
     protected void checkHeaders(RequestInfo requestInfo) throws UnsupportedAcceptHeaderException {
         if (requestInfo.getHeaders().keySet().contains(HttpHeaders.ACCEPT)) {
             List<MediaType> acceptMediaTypes = parseAcceptHeader(requestInfo.getHeader(HttpHeaders.ACCEPT));
@@ -54,9 +62,8 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     }
 
     private List<MediaType> parseAcceptHeader(String header) {
-        return Arrays.stream(header.replace(" ","").split(","))
+        return Arrays.stream(header.replace(SPACE, EMPTY_STRING).split(COMMA))
                 .map(string -> MediaType.parse(string))
-                .map(mediaType -> mediaType.withoutParameters())
                 .collect(Collectors.toList());
     }
 
@@ -65,14 +72,19 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
         acceptMediaTypes.stream()
                 .filter(acceptMediaType -> inSupportedMediaTypeRange(acceptMediaType))
                 .findAny()
-                .orElseThrow(() -> new UnsupportedAcceptHeaderException());
+                .orElseThrow(() -> new UnsupportedAcceptHeaderException(acceptMediaTypes, listSupportedMediaTypes()));
     }
 
     private boolean inSupportedMediaTypeRange(MediaType mediaType) {
+        MediaType mediaTypeRange = mediaType.withoutParameters();
         return listSupportedMediaTypes().stream()
-                .anyMatch(supportedMediaType ->supportedMediaType.is(mediaType));
+                .anyMatch(supportedMediaType -> supportedMediaType.is(mediaTypeRange));
     }
 
+    /**
+     * Override this method to change the supported media types for the handler.
+     * @return a list of supported media types
+     */
     protected List<MediaType> listSupportedMediaTypes() {
         return DEFAULT_SUPPORTED_MEDIA_TYPES;
     }

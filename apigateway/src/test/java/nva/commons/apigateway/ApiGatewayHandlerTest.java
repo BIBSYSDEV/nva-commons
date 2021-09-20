@@ -32,6 +32,7 @@ import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.management.modelmbean.XMLParseException;
@@ -42,6 +43,7 @@ import no.unit.nva.stubs.FakeContext;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.TestException;
+import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.apigateway.testutils.Handler;
 import nva.commons.apigateway.testutils.RequestBody;
 import nva.commons.core.Environment;
@@ -114,7 +116,7 @@ public class ApiGatewayHandlerTest {
                                                               expectedHeaders.get(expectedHeader).textValue()))));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name="handleRequest should return Unsupported media-type when input is {0}")
     @ValueSource(strings = {
             "application/xml",
             "text/plain; charset=UTF-8"
@@ -131,10 +133,13 @@ public class ApiGatewayHandlerTest {
 
         GatewayResponse<String> response = GatewayResponse.fromOutputStream(outputStream);
         assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_UNSUPPORTED_TYPE)));
-        assertThat(response.getBody(), containsString(UNSUPPORTED_ACCEPT_HEADER_VALUE));
+        String expectedMessage = UnsupportedAcceptHeaderException.createMessage(
+                List.of(MediaType.parse(mediaType)),
+                handler.listSupportedMediaTypes());
+        assertThat(response.getBody(), containsString(expectedMessage));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name="handleRequest should return OK when input is {0}")
     @ValueSource(strings = {
             "*/*",
             "application/json",
