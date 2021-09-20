@@ -116,12 +116,13 @@ public class ApiGatewayHandlerTest {
                                                               expectedHeaders.get(expectedHeader).textValue()))));
     }
 
-    @ParameterizedTest(name="handleRequest should return Unsupported media-type when input is {0}")
+    @ParameterizedTest(name = "handleRequest should return Unsupported media-type when input is {0}")
     @ValueSource(strings = {
             "application/xml",
             "text/plain; charset=UTF-8"
     })
-    public void handleRequestShouldReturnUnsupportedMediaTypeOnUnsupportedAcceptHeader(String mediaType) throws IOException {
+    public void handleRequestShouldReturnUnsupportedMediaTypeOnUnsupportedAcceptHeader(String mediaType)
+            throws IOException {
         InputStream input = requestWithAcceptHeader(mediaType);
 
         GatewayResponse<String> response = getStringResponse(input, handler);
@@ -137,7 +138,7 @@ public class ApiGatewayHandlerTest {
                 handler.listSupportedMediaTypes());
     }
 
-    @ParameterizedTest(name="handleRequest should return OK when input is {0}")
+    @ParameterizedTest(name = "handleRequest should return OK when input is {0}")
     @ValueSource(strings = {
             "*/*",
             "application/json",
