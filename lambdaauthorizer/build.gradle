@@ -3,4 +3,5 @@ dependencies {
     implementation project(":apigateway")
     implementation project(":logutils")
 
+    api group: 'com.google.guava', name: 'guava', version:project.ext.guavaVersion
 }

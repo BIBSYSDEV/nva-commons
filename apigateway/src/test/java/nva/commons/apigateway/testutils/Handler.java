@@ -7,8 +7,8 @@ import java.util.Collections;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.net.HttpHeaders;
 import nva.commons.apigateway.ApiGatewayHandler;
-import nva.commons.apigateway.HttpHeaders;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.core.Environment;

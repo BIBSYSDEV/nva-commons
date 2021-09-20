@@ -1,6 +1,5 @@
 package nva.commons.apigateway;
 
-import static nva.commons.apigateway.ContentTypes.APPLICATION_JSON;
 import static nva.commons.core.JsonUtils.objectMapper;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -196,7 +195,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     protected Map<String, String> defaultHeaders() {
         Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
-        headers.put(CONTENT_TYPE, APPLICATION_JSON);
+        headers.put(CONTENT_TYPE, getDefaultResponseHeader().toString());
         return headers;
     }
 

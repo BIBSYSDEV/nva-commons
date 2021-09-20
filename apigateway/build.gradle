@@ -1,5 +1,8 @@
 dependencies{
     implementation project(":core")
+
+    api group: 'com.google.guava', name: 'guava', version: project.ext.guavaVersion
+
     implementation group: 'org.zalando', name: 'problem', version: project.ext.zalandoProblemVersion
     implementation (group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: project.ext.awsSdkVersion){
         exclude  group:"com.fasterxml.jackson.core", module: "jackson-databind"
