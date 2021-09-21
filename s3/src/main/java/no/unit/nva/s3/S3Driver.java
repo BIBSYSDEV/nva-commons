@@ -48,6 +48,7 @@ public class S3Driver {
     public static final int REMOVE_ROOT = 1;
     private static final Environment ENVIRONMENT = new Environment();
     private static final String EMPTY_STRING = "";
+    public static final int MAX_RESPONSE_SIZE_FOR_S3_LISTING = 1000;
     private final S3Client client;
     private final String bucketName;
 
@@ -65,19 +66,19 @@ public class S3Driver {
     public static S3Driver fromPermanentCredentialsInEnvironment(String bucketName) {
         verifyThatRequiredEnvVariablesAreInPlace();
         S3Client s3Client = defaultS3Client()
-                                .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
-                                .build();
+            .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
+            .build();
         return new S3Driver(s3Client, bucketName);
     }
 
     @JacocoGenerated
     public static SdkHttpClient httpClientForConcurrentQueries() {
         return ApacheHttpClient.builder()
-                   .useIdleConnectionReaper(true)
-                   .maxConnections(MAX_CONNECTIONS)
-                   .connectionMaxIdleTime(Duration.ofMinutes(30))
-                   .connectionTimeout(Duration.ofMinutes(30))
-                   .build();
+            .useIdleConnectionReaper(true)
+            .maxConnections(MAX_CONNECTIONS)
+            .connectionMaxIdleTime(Duration.ofMinutes(30))
+            .connectionTimeout(Duration.ofMinutes(30))
+            .build();
     }
 
     public void insertFile(UnixPath fullPath, String content) {
@@ -102,23 +103,42 @@ public class S3Driver {
     }
 
     public List<String> getFiles(UnixPath folder) {
-        return listFiles(folder)
-                   .stream()
-                   .map(this::getFile)
-                   .collect(Collectors.toList());
+        return listAllFiles(folder)
+            .stream()
+            .map(this::getFile)
+            .collect(Collectors.toList());
     }
 
-    public List<UnixPath> listFiles(UnixPath folder) {
+    public List<UnixPath> listAllFiles(UnixPath folder) {
         List<UnixPath> resultBuffer = new ArrayList<>();
-        ListObjectsResponse partialResult;
+        ListingResult partialResult;
         String listingStartingPoint = null;
         do {
-            partialResult = fetchNewResultsBatch(folder, listingStartingPoint);
-            addResultsToBuffer(resultBuffer, partialResult);
-            listingStartingPoint = extractNextListingStartingPoint(partialResult);
+            partialResult = listFiles(folder, listingStartingPoint, MAX_RESPONSE_SIZE_FOR_S3_LISTING);
+            resultBuffer.addAll(partialResult.getFiles());
+            listingStartingPoint = partialResult.getListingStartingPoint();
         } while (partialResult.isTruncated());
 
         return resultBuffer;
+    }
+
+    /**
+     * Returns a partial result of the files contained in the specified folder. The listing starts from the {@code
+     * listingStartingPoint}  if is not null or from the beginning if it is null. After a call the next starting point
+     * can be acquired by the {@link ListingResult}
+     *
+     * @param folder               The folder that we wish to list its files.
+     * @param listingStartingPoint The starting point for the listing, can be {@code null} to indicate that the
+     *                             beginning of the listing.
+     * @param responseSize         The number of filenames returned in each batch. Max size determined by S3 is 1000.
+     * @return a result containing the returned filenames, the next {@code listingStartingPoint} and whether there are
+     *     more files to list.
+     */
+    public ListingResult listFiles(UnixPath folder, String listingStartingPoint, int responseSize) {
+        ListObjectsResponse listingResult = fetchNewResultsBatch(folder, listingStartingPoint, responseSize);
+        List<UnixPath> files = extractResultsFromResponse(listingResult);
+        String newListingStartingPoint = extractNextListingStartingPoint(listingResult);
+        return new ListingResult(files, newListingStartingPoint, listingResult.isTruncated());
     }
 
     public Optional<String> getUncompressedFile(UnixPath file) {
@@ -145,11 +165,11 @@ public class S3Driver {
     @JacocoGenerated
     private static S3ClientBuilder defaultS3Client() {
         Region region = ENVIRONMENT.readEnvOpt(AWS_REGION_ENV_VARIABLE)
-                            .map(Region::of)
-                            .orElse(Region.EU_WEST_1);
+            .map(Region::of)
+            .orElse(Region.EU_WEST_1);
         return S3Client.builder()
-                   .region(region)
-                   .httpClient(httpClientForConcurrentQueries());
+            .region(region)
+            .httpClient(httpClientForConcurrentQueries());
     }
 
     @JacocoGenerated
@@ -165,8 +185,8 @@ public class S3Driver {
 
     private String processPath(UnixPath s3Folder) {
         String unixPath = s3Folder.toString()
-                              .replaceAll(DOUBLE_BACKSLASH, UNIX_SEPARATOR)
-                              .replaceAll(SINGLE_BACKSLASH, UNIX_SEPARATOR);
+            .replaceAll(DOUBLE_BACKSLASH, UNIX_SEPARATOR)
+            .replaceAll(SINGLE_BACKSLASH, UNIX_SEPARATOR);
         return unixPath.startsWith(UNIX_SEPARATOR)
                    ? unixPath.substring(REMOVE_ROOT)
                    : unixPath;
@@ -185,8 +205,8 @@ public class S3Driver {
         return new StringCompressor(content).gzippedData();
     }
 
-    private ListObjectsResponse fetchNewResultsBatch(UnixPath folder, String listingStartingPoint) {
-        ListObjectsRequest request = requestForListingFiles(folder, listingStartingPoint);
+    private ListObjectsResponse fetchNewResultsBatch(UnixPath folder, String listingStartingPoint, int responseSize) {
+        ListObjectsRequest request = requestForListingFiles(folder, listingStartingPoint, responseSize);
         return client.listObjects(request);
     }
 
@@ -219,39 +239,35 @@ public class S3Driver {
 
     private GetObjectRequest createGetObjectRequest(UnixPath file) {
         return GetObjectRequest.builder()
-                   .bucket(bucketName)
-                   .key(file.toString())
-                   .build();
+            .bucket(bucketName)
+            .key(file.toString())
+            .build();
     }
 
     private String lastObjectKeyInReturnedResults(ListObjectsResponse result) {
         return result.contents().get(result.contents().size() - 1).key();
     }
 
-    private void addResultsToBuffer(List<UnixPath> resultBuffer, ListObjectsResponse result) {
-        List<UnixPath> results = extractResultsFromResponse(result);
-        resultBuffer.addAll(results);
-    }
-
     private List<UnixPath> extractResultsFromResponse(ListObjectsResponse result) {
         return result.contents().stream()
-                   .map(S3Object::key)
-                   .map(UnixPath::of)
-                   .collect(Collectors.toList());
+            .map(S3Object::key)
+            .map(UnixPath::of)
+            .collect(Collectors.toList());
     }
 
-    private ListObjectsRequest requestForListingFiles(UnixPath folder, String startingPoint) {
+    private ListObjectsRequest requestForListingFiles(UnixPath folder, String startingPoint, int responseSize) {
         return ListObjectsRequest.builder()
-                   .bucket(bucketName)
-                   .prefix(folder.toString())
-                   .marker(startingPoint)
-                   .build();
+            .bucket(bucketName)
+            .prefix(folder.toString())
+            .marker(startingPoint)
+            .maxKeys(responseSize)
+            .build();
     }
 
     private PutObjectRequest newPutObjectRequest(UnixPath fullPath) {
         return PutObjectRequest.builder()
-                   .bucket(bucketName)
-                   .key(fullPath.toString())
-                   .build();
+            .bucket(bucketName)
+            .key(fullPath.toString())
+            .build();
     }
 }
