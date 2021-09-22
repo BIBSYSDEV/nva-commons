@@ -81,14 +81,30 @@ class S3DriverTest {
 
     @Test
     @Tag("RemoteTest")
-    public void listFilesReturnsListWithAllFilenamesInRemoteS3Folder() {
+    public void listAllFilesReturnsListWithAllFilenamesInRemoteS3Folder() {
         S3Driver s3Driver = new S3Driver(S3Client.create(), REMOTELY_EXISTING_BUCKET);
         UnixPath expectedFilename = constructNestedPath();
         UnixPath parentFolder = expectedFilename.getParent().orElseThrow();
         String content = longText();
         s3Driver.insertFile(expectedFilename, content);
-        List<UnixPath> files = s3Driver.listFiles(UnixPath.of(parentFolder.toString()));
+        List<UnixPath> files = s3Driver.listAllFiles(UnixPath.of(parentFolder.toString()));
         assertThat(files, CoreMatchers.hasItem(expectedFilename));
+    }
+
+    @Test
+    @Tag("RemoteTest")
+    public void listFilesReturnsPartialResultAndInformationForFetchingNextBatch() {
+
+        S3Driver s3Driver = new S3Driver(S3Client.create(), REMOTELY_EXISTING_BUCKET);
+        UnixPath path = UnixPath.of("some/known/path");
+        ListingResult result = s3Driver.listFiles(path, null, 100);
+        List<UnixPath> totalResults = new ArrayList<>(result.getFiles());
+        while (result.isTruncated()) {
+            result = s3Driver.listFiles(path, result.getListingStartingPoint(), 100);
+            totalResults.addAll(result.getFiles());
+        }
+        int knownSizeOfResult = 2000;
+        assertThat(totalResults.size(), is(equalTo(knownSizeOfResult)));
     }
 
     @Test
@@ -116,9 +132,20 @@ class S3DriverTest {
     }
 
     @Test
-    public void listFilesReturnsListWithAllFilenamesInS3Folder() {
-        List<UnixPath> files = s3Driver.listFiles(UnixPath.of(SOME_PATH));
+    public void listAllFilesReturnsListWithAllFilenamesInS3Folder() {
+        List<UnixPath> files = s3Driver.listAllFiles(UnixPath.of(SOME_PATH));
         assertThat(files, contains(FIRST_EXPECTED_OBJECT_KEY, SECOND_EXPECTED_OBJECT_KEY));
+    }
+
+    @Test
+    public void listFilesReturnsResultContainingPartialFileListAndNewListStartingPointAndSignForTerminatingListing() {
+        ListingResult firstBatch = s3Driver.listFiles(UnixPath.of(SOME_PATH), null, 1);
+        assertThat(firstBatch.getListingStartingPoint(), is(equalTo(FIRST_EXPECTED_OBJECT_KEY.toString())));
+        assertThat(firstBatch.isTruncated(), is(true));
+
+        ListingResult secondBatch = s3Driver.listFiles(UnixPath.of(SOME_PATH), FIRST_EXPECTED_OBJECT_KEY.toString(), 1);
+        assertThat(secondBatch.getListingStartingPoint(), is(equalTo(SECOND_EXPECTED_OBJECT_KEY.toString())));
+        assertThat(secondBatch.isTruncated(), is(false));
     }
 
     @Test
@@ -280,13 +307,13 @@ class S3DriverTest {
             .thenAnswer(invocation -> listObjectsResponseWithSingleObject(SECOND_EXPECTED_OBJECT_KEY, LAST_OBJECT));
     }
 
-    private ListObjectsResponse listObjectsResponseWithSingleObject(UnixPath firstExpectedObjectKey,
+    private ListObjectsResponse listObjectsResponseWithSingleObject(UnixPath listingStartingPoint,
                                                                     boolean lastObject) {
-        S3Object responseObject = sampleObjectListing(firstExpectedObjectKey);
+        S3Object responseObject = sampleObjectListing(listingStartingPoint);
         return ListObjectsResponse.builder()
-                   .contents(responseObject)
-                   .isTruncated(!lastObject)
-                   .build();
+            .contents(responseObject)
+            .isTruncated(!lastObject)
+            .build();
     }
 
     private S3Object sampleObjectListing(UnixPath firstExpectedObjectKey) {
