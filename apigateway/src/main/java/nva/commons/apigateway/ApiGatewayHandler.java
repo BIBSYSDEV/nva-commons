@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.ApiGatewayUncheckedException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
@@ -69,10 +70,10 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
      * @throws IOException when serializing fails
      */
     @Override
-    protected void writeOutput(I input, O output)
+    protected void writeOutput(I input, O output, RequestInfo requestInfo)
         throws IOException, GatewayResponseSerializingException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-            GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, getSuccessHeaders(),
+            GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, getSuccessHeaders(requestInfo),
                                                                        getSuccessStatusCode(input, output));
             String responseJson = mapper.writeValueAsString(gatewayResponse);
             writer.write(responseJson);
@@ -144,8 +145,8 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
      *
      * @return a map with the response headers in case of success.
      */
-    protected Map<String, String> getSuccessHeaders() {
-        Map<String, String> headers = defaultHeaders();
+    protected Map<String, String> getSuccessHeaders(RequestInfo requestInfo) {
+        Map<String, String> headers = defaultHeaders(requestInfo);
         headers.putAll(additionalSuccessHeadersSupplier.get());
         return headers;
     }
@@ -186,16 +187,17 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
      *
      * @return a map with the response headers in case of failure.
      */
-    protected Map<String, String> getFailureHeaders() {
-        Map<String, String> headers = defaultHeaders();
+    private Map<String, String> getFailureHeaders() {
+        Map<String, String> headers = new ConcurrentHashMap<>();
+        headers.put(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
         headers.put(CONTENT_TYPE, APPLICATION_PROBLEM_JSON);
         return headers;
     }
 
-    protected Map<String, String> defaultHeaders() {
+    private Map<String, String> defaultHeaders(RequestInfo requestInfo) {
         Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
-        headers.put(CONTENT_TYPE, getDefaultResponseHeader().toString());
+        headers.put(CONTENT_TYPE, getDefaultResponseHeader(requestInfo).toString());
         return headers;
     }
 

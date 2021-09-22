@@ -62,7 +62,7 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
     }
 
     @Override
-    protected void writeOutput(Void input, AuthorizerResponse output)
+    protected void writeOutput(Void input, AuthorizerResponse output, RequestInfo requestInfo)
         throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
             String responseJson = objectMapper.writeValueAsString(output);

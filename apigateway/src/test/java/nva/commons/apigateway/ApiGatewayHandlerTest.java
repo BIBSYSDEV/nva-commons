@@ -154,6 +154,32 @@ public class ApiGatewayHandlerTest {
     }
 
     @Test
+    public void handleRequestWildcard()
+            throws IOException {
+        Handler handler = handlerThatOverridesListSupportedMediaTypes();
+
+        InputStream input = requestWithAcceptHeader(MediaType.ANY_TYPE.toString());
+
+        GatewayResponse<String> response = getStringResponse(input, handler);
+
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
+        assertThat(response.getHeaders().get(HttpHeaders.CONTENT_TYPE), is(equalTo(MediaType.JSON_UTF_8.toString())));
+    }
+
+    @Test
+    public void handleRequestJsonLd()
+            throws IOException {
+        Handler handler = handlerThatOverridesListSupportedMediaTypes();
+
+        InputStream input = requestWithAcceptHeader(MediaTypes.APPLICATION_JSON_LD.toString());
+
+        GatewayResponse<String> response = getStringResponse(input, handler);
+
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
+        assertThat(response.getHeaders().get(HttpHeaders.CONTENT_TYPE), is(equalTo(MediaTypes.APPLICATION_JSON_LD.toString())));
+    }
+
+    @Test
     @DisplayName("handleRequest should have available the request path")
     public void handleRequestShouldHaveAvailableTheRequestPath() throws IOException {
         InputStream input = requestWithHeadersAndPath();
@@ -396,6 +422,15 @@ public class ApiGatewayHandlerTest {
             protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context) {
                 throwUncheckedExceptions();
                 return null;
+            }
+        };
+    }
+
+    private Handler handlerThatOverridesListSupportedMediaTypes() {
+        return new Handler(environment) {
+            @Override
+            public List<MediaType> listSupportedMediaTypes() {
+                return List.of(MediaType.JSON_UTF_8, MediaTypes.APPLICATION_JSON_LD);
             }
         };
     }
