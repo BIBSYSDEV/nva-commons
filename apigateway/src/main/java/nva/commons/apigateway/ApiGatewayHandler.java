@@ -1,5 +1,7 @@
 package nva.commons.apigateway;
 
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
+import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static nva.commons.core.JsonUtils.objectMapper;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +19,7 @@ import java.util.function.Supplier;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.ApiGatewayUncheckedException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
+import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
 import org.zalando.problem.Problem;
@@ -25,7 +28,6 @@ import org.zalando.problem.ThrowableProblem;
 
 public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
 
-    public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
     public static final String ALLOWED_ORIGIN_ENV = "ALLOWED_ORIGIN";
     public static final String MESSAGE_FOR_RUNTIME_EXCEPTIONS_HIDING_IMPLEMENTATION_DETAILS_TO_API_CLIENTS =
         "Internal server error."
@@ -33,8 +35,6 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     public static final String DEFAULT_ERROR_MESSAGE = "Unknown error in handler";
     public static final String REQUEST_ID = "requestId";
 
-    public static final String CONTENT_TYPE = "Content-Type";
-    public static final String APPLICATION_PROBLEM_JSON = "application/problem+json";
     private final ObjectMapper mapper;
 
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
@@ -69,11 +69,12 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
      * @throws IOException when serializing fails
      */
     @Override
-    protected void writeOutput(I input, O output)
-        throws IOException, GatewayResponseSerializingException {
+    protected void writeOutput(I input, O output, RequestInfo requestInfo)
+        throws IOException, GatewayResponseSerializingException, UnsupportedAcceptHeaderException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-            GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, getSuccessHeaders(),
-                                                                       getSuccessStatusCode(input, output));
+            Map<String, String> headers = getSuccessHeaders(requestInfo);
+            Integer statusCode = getSuccessStatusCode(input, output);
+            GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, headers, statusCode);
             String responseJson = mapper.writeValueAsString(gatewayResponse);
             writer.write(responseJson);
         }
@@ -91,7 +92,8 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     @Override
     protected void writeExpectedFailure(I input, ApiGatewayException exception, String requestId) throws IOException {
         try {
-            writeFailure(exception, getFailureStatusCode(input, exception), requestId);
+            Integer statusCode = getFailureStatusCode(input, exception);
+            writeFailure(exception, statusCode, requestId);
         } catch (GatewayResponseSerializingException e) {
             throw new ApiGatewayUncheckedException(e);
         }
@@ -140,12 +142,14 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     }
 
     /**
-     * If you want to override this method, maybe better to override the {@link ApiGatewayHandler#defaultHeaders()}.
+     * If you want to override this method, maybe better to override the
+     * {@link ApiGatewayHandler#defaultHeaders(RequestInfo
+     * requestInfo)}.
      *
      * @return a map with the response headers in case of success.
      */
-    protected Map<String, String> getSuccessHeaders() {
-        Map<String, String> headers = defaultHeaders();
+    protected Map<String, String> getSuccessHeaders(RequestInfo requestInfo) throws UnsupportedAcceptHeaderException {
+        Map<String, String> headers = defaultHeaders(requestInfo);
         headers.putAll(additionalSuccessHeadersSupplier.get());
         return headers;
     }
@@ -174,28 +178,31 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
                                            .with(REQUEST_ID, requestId)
                                            .build();
 
+            Map<String, String> headers = getFailureHeaders();
             GatewayResponse<ThrowableProblem> gatewayResponse =
-                new GatewayResponse<>(problem, getFailureHeaders(), statusCode);
+                new GatewayResponse<>(problem, headers, statusCode);
             String gateWayResponseJson = objectMapper.writeValueAsString(gatewayResponse);
             writer.write(gateWayResponseJson);
         }
     }
 
     /**
-     * If you want to override this method, maybe better to override the {@link ApiGatewayHandler#defaultHeaders()}.
+     * If you want to override this method, maybe better to override the
+     * {@link ApiGatewayHandler#defaultHeaders(RequestInfo requestInfo)}.
      *
      * @return a map with the response headers in case of failure.
      */
-    protected Map<String, String> getFailureHeaders() {
-        Map<String, String> headers = defaultHeaders();
-        headers.put(CONTENT_TYPE, APPLICATION_PROBLEM_JSON);
+    private Map<String, String> getFailureHeaders() {
+        Map<String, String> headers = new ConcurrentHashMap<>();
+        headers.put(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
+        headers.put(CONTENT_TYPE, MediaTypes.APPLICATION_PROBLEM_JSON.toString());
         return headers;
     }
 
-    protected Map<String, String> defaultHeaders() {
+    private Map<String, String> defaultHeaders(RequestInfo requestInfo) throws UnsupportedAcceptHeaderException {
         Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
-        headers.put(CONTENT_TYPE, getDefaultResponseHeader().toString());
+        headers.put(CONTENT_TYPE, getDefaultResponseContentTypeHeaderValue(requestInfo).toString());
         return headers;
     }
 

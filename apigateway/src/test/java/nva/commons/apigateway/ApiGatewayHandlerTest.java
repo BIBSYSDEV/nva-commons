@@ -1,12 +1,11 @@
 package nva.commons.apigateway;
 
-import static nva.commons.apigateway.ApiGatewayHandler.APPLICATION_PROBLEM_JSON;
-import static nva.commons.apigateway.ApiGatewayHandler.CONTENT_TYPE;
+import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static nva.commons.apigateway.ApiGatewayHandler.REQUEST_ID;
+import static nva.commons.apigateway.MediaTypes.APPLICATION_PROBLEM_JSON;
 import static nva.commons.core.JsonUtils.objectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.in;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
@@ -154,6 +153,32 @@ public class ApiGatewayHandlerTest {
     }
 
     @Test
+    public void handleRequestReturnsContentTypeJsonOnAcceptWildcard()
+            throws IOException {
+        Handler handler = handlerThatOverridesListSupportedMediaTypes();
+
+        InputStream input = requestWithAcceptHeader(MediaType.ANY_TYPE.toString());
+
+        GatewayResponse<String> response = getStringResponse(input, handler);
+
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
+        assertThat(response.getHeaders().get(CONTENT_TYPE), is(equalTo(MediaType.JSON_UTF_8.toString())));
+    }
+
+    @Test
+    public void handleRequestReturnsContentTypeJsonLdOnAcceptJsonLd()
+            throws IOException {
+        Handler handler = handlerThatOverridesListSupportedMediaTypes();
+
+        InputStream input = requestWithAcceptHeader(MediaTypes.APPLICATION_JSON_LD.toString());
+
+        GatewayResponse<String> response = getStringResponse(input, handler);
+
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
+        assertThat(response.getHeaders().get(CONTENT_TYPE), is(equalTo(MediaTypes.APPLICATION_JSON_LD.toString())));
+    }
+
+    @Test
     @DisplayName("handleRequest should have available the request path")
     public void handleRequestShouldHaveAvailableTheRequestPath() throws IOException {
         InputStream input = requestWithHeadersAndPath();
@@ -258,7 +283,7 @@ public class ApiGatewayHandlerTest {
 
         GatewayResponse<Problem> responseParsing = getProblemResponse(requestWithHeadersAndPath(), handler);
 
-        assertThat(responseParsing.getHeaders().get(CONTENT_TYPE), is(equalTo(APPLICATION_PROBLEM_JSON)));
+        assertThat(responseParsing.getHeaders().get(CONTENT_TYPE), is(equalTo(APPLICATION_PROBLEM_JSON.toString())));
     }
 
     @Test
@@ -400,6 +425,15 @@ public class ApiGatewayHandlerTest {
         };
     }
 
+    private Handler handlerThatOverridesListSupportedMediaTypes() {
+        return new Handler(environment) {
+            @Override
+            public List<MediaType> listSupportedMediaTypes() {
+                return List.of(MediaType.JSON_UTF_8, MediaTypes.APPLICATION_JSON_LD);
+            }
+        };
+    }
+
     private Handler handlerThatOverridesGetFailureStatusCode() {
         return new Handler(environment) {
             @Override
@@ -483,7 +517,7 @@ public class ApiGatewayHandlerTest {
     private JsonNode createHeaders() {
         Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(HttpHeaders.ACCEPT, MediaType.JSON_UTF_8.toString());
-        headers.put(HttpHeaders.CONTENT_TYPE, MediaType.JSON_UTF_8.toString());
+        headers.put(CONTENT_TYPE, MediaType.JSON_UTF_8.toString());
         return createHeaders(headers);
     }
 
