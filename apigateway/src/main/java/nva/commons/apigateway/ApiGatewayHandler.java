@@ -72,8 +72,9 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     protected void writeOutput(I input, O output, RequestInfo requestInfo)
         throws IOException, GatewayResponseSerializingException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-            GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, getSuccessHeaders(requestInfo),
-                                                                       getSuccessStatusCode(input, output));
+            Map<String, String> headers = getSuccessHeaders(requestInfo);
+            Integer statusCode = getSuccessStatusCode(input, output);
+            GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, headers, statusCode);
             String responseJson = mapper.writeValueAsString(gatewayResponse);
             writer.write(responseJson);
         }
@@ -91,7 +92,8 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     @Override
     protected void writeExpectedFailure(I input, ApiGatewayException exception, String requestId) throws IOException {
         try {
-            writeFailure(exception, getFailureStatusCode(input, exception), requestId);
+            Integer statusCode = getFailureStatusCode(input, exception);
+            writeFailure(exception, statusCode, requestId);
         } catch (GatewayResponseSerializingException e) {
             throw new ApiGatewayUncheckedException(e);
         }
@@ -175,8 +177,9 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
                                            .with(REQUEST_ID, requestId)
                                            .build();
 
+            Map<String, String> headers = getFailureHeaders();
             GatewayResponse<ThrowableProblem> gatewayResponse =
-                new GatewayResponse<>(problem, getFailureHeaders(), statusCode);
+                new GatewayResponse<>(problem, headers, statusCode);
             String gateWayResponseJson = objectMapper.writeValueAsString(gatewayResponse);
             writer.write(gateWayResponseJson);
         }
@@ -198,7 +201,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     private Map<String, String> defaultHeaders(RequestInfo requestInfo) {
         Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
-        headers.put(CONTENT_TYPE, getDefaultResponseHeader(requestInfo).toString());
+        headers.put(CONTENT_TYPE, getDefaultResponseMediaType(requestInfo).toString());
         return headers;
     }
 

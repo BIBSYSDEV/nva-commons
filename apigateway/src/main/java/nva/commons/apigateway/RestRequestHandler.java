@@ -2,7 +2,6 @@ package nva.commons.apigateway;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.BadRequestException;
@@ -21,6 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.google.common.net.HttpHeaders.ACCEPT;
+import static com.google.common.net.MediaType.JSON_UTF_8;
 import static nva.commons.core.attempt.Try.attempt;
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 
@@ -47,7 +48,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     protected transient OutputStream outputStream;
     protected transient String allowedOrigin;
 
-    private static final List<MediaType> DEFAULT_SUPPORTED_MEDIA_TYPES = List.of(MediaType.JSON_UTF_8);
+    private static final List<MediaType> DEFAULT_SUPPORTED_MEDIA_TYPES = List.of(JSON_UTF_8);
 
     /**
      * Checking headers on request and acting upon known headers.
@@ -55,8 +56,8 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
      * @throws UnsupportedAcceptHeaderException if no provided Accept header media types are supported in this handler.
      */
     protected void checkHeaders(RequestInfo requestInfo) throws UnsupportedAcceptHeaderException {
-        if (requestInfo.getHeaders().keySet().contains(HttpHeaders.ACCEPT)) {
-            List<MediaType> acceptMediaTypes = parseAcceptHeader(requestInfo.getHeader(HttpHeaders.ACCEPT));
+        if (requestInfo.getHeaders().containsKey(ACCEPT)) {
+            List<MediaType> acceptMediaTypes = parseAcceptHeader(requestInfo.getHeader(ACCEPT));
             List<MediaType> matches = findMediaTypeMatches(acceptMediaTypes);
             if (matches.isEmpty()) {
                 throw new UnsupportedAcceptHeaderException(acceptMediaTypes, listSupportedMediaTypes());
@@ -78,10 +79,8 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     private boolean inAcceptedMediaTypeRange(MediaType mediaType, List<MediaType> acceptMediaTypes) {
         return acceptMediaTypes.stream()
-                .map(acceptMediaType -> acceptMediaType.withoutParameters())
-                .filter(acceptMediaTypeRange -> mediaType.is(acceptMediaTypeRange))
-                .findFirst()
-                .isPresent();
+                .map(MediaType::withoutParameters)
+                .anyMatch(mediaType::is);
     }
 
     /**
@@ -92,15 +91,19 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
         return DEFAULT_SUPPORTED_MEDIA_TYPES;
     }
 
-    protected MediaType getDefaultResponseHeader(RequestInfo requestInfo) {
-        if (requestInfo.getHeaders().containsKey(HttpHeaders.ACCEPT)) {
-            List<MediaType> mediaTypes = parseAcceptHeader(requestInfo.getHeader(HttpHeaders.ACCEPT));
-            List<MediaType> matches = findMediaTypeMatches(mediaTypes);
-
-            return matches.stream().findFirst().orElse(listSupportedMediaTypes().get(0));
+    protected MediaType getDefaultResponseMediaType(RequestInfo requestInfo) {
+        if (requestInfo.getHeaders().containsKey(ACCEPT)) {
+            List<MediaType> mediaTypes = parseAcceptHeader(requestInfo.getHeader(ACCEPT));
+            return findMediaTypeMatches(mediaTypes).stream()
+                    .findFirst()
+                    .orElseGet(this::defaultResponseMediaTypeWhenNotSpecifiedByClientRequest);
         } else {
-            return listSupportedMediaTypes().get(0);
+            return defaultResponseMediaTypeWhenNotSpecifiedByClientRequest();
         }
+    }
+
+    private MediaType defaultResponseMediaTypeWhenNotSpecifiedByClientRequest() {
+        return listSupportedMediaTypes().get(0);
     }
 
     /**
