@@ -1,9 +1,17 @@
 package nva.commons.apigateway;
 
+import static nva.commons.core.attempt.Try.attempt;
+import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
@@ -13,16 +21,6 @@ import nva.commons.core.attempt.Failure;
 import nva.commons.core.ioutils.IoUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static nva.commons.core.attempt.Try.attempt;
-import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 
 /**
  * Template class for implementing Lambda function handlers that get activated through a call to ApiGateway. This class
@@ -51,60 +49,64 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     /**
      * Checking headers on request and acting upon known headers.
+     *
      * @param requestInfo the request
+     * @return
      * @throws UnsupportedAcceptHeaderException if no provided Accept header media types are supported in this handler.
      */
-    protected void checkHeaders(RequestInfo requestInfo) throws UnsupportedAcceptHeaderException {
-        if (requestInfo.getHeaders().keySet().contains(HttpHeaders.ACCEPT)) {
+    protected MediaType calculateContentTypeHeaderReturnValue(RequestInfo requestInfo)
+        throws UnsupportedAcceptHeaderException {
+        if (requestInfo.getHeaders().containsKey(HttpHeaders.ACCEPT)) {
             List<MediaType> acceptMediaTypes = parseAcceptHeader(requestInfo.getHeader(HttpHeaders.ACCEPT));
             List<MediaType> matches = findMediaTypeMatches(acceptMediaTypes);
-            if (matches.isEmpty()) {
-                throw new UnsupportedAcceptHeaderException(acceptMediaTypes, listSupportedMediaTypes());
-            }
+
+            return matches.stream().findFirst().orElseThrow(() -> handleUnsupportedAcceptHeaders(acceptMediaTypes));
         }
+        return defaultContentHeaderWhenNotSpecifiedByClientRequest();
+    }
+
+    private UnsupportedAcceptHeaderException handleUnsupportedAcceptHeaders(List<MediaType> acceptMediaTypes) {
+        return new UnsupportedAcceptHeaderException(acceptMediaTypes, listSupportedMediaTypes());
     }
 
     private List<MediaType> parseAcceptHeader(String header) {
         return Arrays.stream(header.replace(SPACE, EMPTY_STRING).split(COMMA))
-                .map(string -> MediaType.parse(string))
-                .collect(Collectors.toList());
+            .map(MediaType::parse)
+            .collect(Collectors.toList());
     }
 
     protected List<MediaType> findMediaTypeMatches(List<MediaType> acceptMediaTypes) {
         return listSupportedMediaTypes().stream()
-                .filter(mediaType -> inAcceptedMediaTypeRange(mediaType, acceptMediaTypes))
-                .collect(Collectors.toList());
+            .filter(mediaType -> inAcceptedMediaTypeRange(mediaType, acceptMediaTypes))
+            .collect(Collectors.toList());
     }
 
     private boolean inAcceptedMediaTypeRange(MediaType mediaType, List<MediaType> acceptMediaTypes) {
         return acceptMediaTypes.stream()
-                .map(acceptMediaType -> acceptMediaType.withoutParameters())
-                .filter(acceptMediaTypeRange -> mediaType.is(acceptMediaTypeRange))
-                .findFirst()
-                .isPresent();
+            .map(MediaType::withoutParameters)
+            .anyMatch(mediaType::is);
     }
 
     /**
      * Override this method to change the supported media types for the handler.
+     *
      * @return a list of supported media types
      */
     protected List<MediaType> listSupportedMediaTypes() {
         return DEFAULT_SUPPORTED_MEDIA_TYPES;
     }
 
-    protected MediaType getDefaultResponseHeader(RequestInfo requestInfo) {
-        if (requestInfo.getHeaders().containsKey(HttpHeaders.ACCEPT)) {
-            List<MediaType> mediaTypes = parseAcceptHeader(requestInfo.getHeader(HttpHeaders.ACCEPT));
-            List<MediaType> matches = findMediaTypeMatches(mediaTypes);
+    protected MediaType getDefaultResponseContentHeaderValue(RequestInfo requestInfo)
+        throws UnsupportedAcceptHeaderException {
+        return calculateContentTypeHeaderReturnValue(requestInfo);
+    }
 
-            return matches.stream().findFirst().orElse(listSupportedMediaTypes().get(0));
-        } else {
-            return listSupportedMediaTypes().get(0);
-        }
+    private MediaType defaultContentHeaderWhenNotSpecifiedByClientRequest() {
+        return listSupportedMediaTypes().get(0);
     }
 
     /**
-     * The input class should be set explicitly by the inherting class.
+     * The input class should be set explicitly by the inheriting class.
      *
      * @param iclass      The class object of the input class.
      * @param environment the Environment from where the handler will read ENV variables.
@@ -125,7 +127,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
                 .orElseThrow(this::parsingExceptionToBadRequestException);
 
             RequestInfo requestInfo = inputParser.getRequestInfo(inputString);
-            checkHeaders(requestInfo);
+
             O response = processInput(inputObject, requestInfo, context);
 
             writeOutput(inputObject, response, requestInfo);
@@ -201,7 +203,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     protected abstract Integer getSuccessStatusCode(I input, O output);
 
     protected abstract void writeOutput(I input, O output, RequestInfo requestInfo)
-            throws IOException, GatewayResponseSerializingException;
+        throws IOException, GatewayResponseSerializingException, UnsupportedAcceptHeaderException;
 
     protected abstract void writeExpectedFailure(I input, ApiGatewayException exception, String requestId)
         throws IOException;

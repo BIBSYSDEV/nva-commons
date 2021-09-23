@@ -16,10 +16,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
-
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.ApiGatewayUncheckedException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
+import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
 import org.zalando.problem.Problem;
@@ -70,10 +70,11 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
      */
     @Override
     protected void writeOutput(I input, O output, RequestInfo requestInfo)
-        throws IOException, GatewayResponseSerializingException {
+        throws IOException, GatewayResponseSerializingException, UnsupportedAcceptHeaderException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-            GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, getSuccessHeaders(requestInfo),
-                                                                       getSuccessStatusCode(input, output));
+            Map<String, String> successHeaders = getSuccessHeaders(requestInfo);
+            Integer successStatusCode = getSuccessStatusCode(input, output);
+            GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, successHeaders, successStatusCode);
             String responseJson = mapper.writeValueAsString(gatewayResponse);
             writer.write(responseJson);
         }
@@ -141,11 +142,12 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
 
     /**
      * If you want to override this method, maybe better to override the
-     * {@link ApiGatewayHandler#defaultHeaders(RequestInfo requestInfo)}.
+     * {@link ApiGatewayHandler#defaultHeaders(RequestInfo
+     * requestInfo)}.
      *
      * @return a map with the response headers in case of success.
      */
-    protected Map<String, String> getSuccessHeaders(RequestInfo requestInfo) {
+    protected Map<String, String> getSuccessHeaders(RequestInfo requestInfo) throws UnsupportedAcceptHeaderException {
         Map<String, String> headers = defaultHeaders(requestInfo);
         headers.putAll(additionalSuccessHeadersSupplier.get());
         return headers;
@@ -195,10 +197,10 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         return headers;
     }
 
-    private Map<String, String> defaultHeaders(RequestInfo requestInfo) {
+    private Map<String, String> defaultHeaders(RequestInfo requestInfo) throws UnsupportedAcceptHeaderException {
         Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
-        headers.put(CONTENT_TYPE, getDefaultResponseHeader(requestInfo).toString());
+        headers.put(CONTENT_TYPE, getDefaultResponseContentHeaderValue(requestInfo).toString());
         return headers;
     }
 
