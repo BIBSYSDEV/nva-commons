@@ -200,7 +200,8 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
      */
     protected abstract Integer getSuccessStatusCode(I input, O output);
 
-    protected abstract void writeOutput(I input, O output, RequestInfo requestInfo) throws IOException, GatewayResponseSerializingException;
+    protected abstract void writeOutput(I input, O output, RequestInfo requestInfo)
+            throws IOException, GatewayResponseSerializingException;
 
     protected abstract void writeExpectedFailure(I input, ApiGatewayException exception, String requestId)
         throws IOException;

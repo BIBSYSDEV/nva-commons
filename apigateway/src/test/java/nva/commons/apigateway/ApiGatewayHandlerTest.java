@@ -1,12 +1,11 @@
 package nva.commons.apigateway;
 
-import static nva.commons.apigateway.ApiGatewayHandler.APPLICATION_PROBLEM_JSON;
-import static nva.commons.apigateway.ApiGatewayHandler.CONTENT_TYPE;
+import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static nva.commons.apigateway.ApiGatewayHandler.REQUEST_ID;
+import static nva.commons.apigateway.MediaTypes.APPLICATION_PROBLEM_JSON;
 import static nva.commons.core.JsonUtils.objectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.in;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
@@ -154,7 +153,7 @@ public class ApiGatewayHandlerTest {
     }
 
     @Test
-    public void handleRequestWildcard()
+    public void handleRequestReturnsContentTypeJsonOnAcceptWildcard()
             throws IOException {
         Handler handler = handlerThatOverridesListSupportedMediaTypes();
 
@@ -163,11 +162,11 @@ public class ApiGatewayHandlerTest {
         GatewayResponse<String> response = getStringResponse(input, handler);
 
         assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
-        assertThat(response.getHeaders().get(HttpHeaders.CONTENT_TYPE), is(equalTo(MediaType.JSON_UTF_8.toString())));
+        assertThat(response.getHeaders().get(CONTENT_TYPE), is(equalTo(MediaType.JSON_UTF_8.toString())));
     }
 
     @Test
-    public void handleRequestJsonLd()
+    public void handleRequestReturnsContentTypeJsonLdOnAcceptJsonLd()
             throws IOException {
         Handler handler = handlerThatOverridesListSupportedMediaTypes();
 
@@ -176,7 +175,7 @@ public class ApiGatewayHandlerTest {
         GatewayResponse<String> response = getStringResponse(input, handler);
 
         assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
-        assertThat(response.getHeaders().get(HttpHeaders.CONTENT_TYPE), is(equalTo(MediaTypes.APPLICATION_JSON_LD.toString())));
+        assertThat(response.getHeaders().get(CONTENT_TYPE), is(equalTo(MediaTypes.APPLICATION_JSON_LD.toString())));
     }
 
     @Test
@@ -284,7 +283,7 @@ public class ApiGatewayHandlerTest {
 
         GatewayResponse<Problem> responseParsing = getProblemResponse(requestWithHeadersAndPath(), handler);
 
-        assertThat(responseParsing.getHeaders().get(CONTENT_TYPE), is(equalTo(APPLICATION_PROBLEM_JSON)));
+        assertThat(responseParsing.getHeaders().get(CONTENT_TYPE), is(equalTo(APPLICATION_PROBLEM_JSON.toString())));
     }
 
     @Test
@@ -518,7 +517,7 @@ public class ApiGatewayHandlerTest {
     private JsonNode createHeaders() {
         Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(HttpHeaders.ACCEPT, MediaType.JSON_UTF_8.toString());
-        headers.put(HttpHeaders.CONTENT_TYPE, MediaType.JSON_UTF_8.toString());
+        headers.put(CONTENT_TYPE, MediaType.JSON_UTF_8.toString());
         return createHeaders(headers);
     }
 
