@@ -1,9 +1,18 @@
 package nva.commons.apigateway;
 
+import static com.google.common.net.MediaType.JSON_UTF_8;
+import static nva.commons.core.attempt.Try.attempt;
+import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
@@ -13,17 +22,6 @@ import nva.commons.core.attempt.Failure;
 import nva.commons.core.ioutils.IoUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.google.common.net.MediaType.JSON_UTF_8;
-import static nva.commons.core.attempt.Try.attempt;
-import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 
 /**
  * Template class for implementing Lambda function handlers that get activated through a call to ApiGateway. This class
@@ -51,11 +49,13 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     private static final List<MediaType> DEFAULT_SUPPORTED_MEDIA_TYPES = List.of(JSON_UTF_8);
 
     /**
-     * Checking headers on request and acting upon known headers.
+     * Calculates the Content MediaType of the response based on the supported Media Types and the requested Media
+     * Types.
      *
-     * @param requestInfo the request
-     * @return
-     * @throws UnsupportedAcceptHeaderException if no provided Accept header media types are supported in this handler.
+     * @param requestInfo The request as sent by ApiGateway
+     * @return the MediaType value of the Response. Basically the value of the Content header.
+     * @throws UnsupportedAcceptHeaderException when no provided Accept header media types are supported in this
+     *                                          handler.
      */
     protected MediaType calculateContentTypeHeaderReturnValue(RequestInfo requestInfo)
         throws UnsupportedAcceptHeaderException {
