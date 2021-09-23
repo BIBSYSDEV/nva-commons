@@ -1,17 +1,9 @@
 package nva.commons.apigateway;
 
-import static nva.commons.core.attempt.Try.attempt;
-import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
@@ -21,6 +13,17 @@ import nva.commons.core.attempt.Failure;
 import nva.commons.core.ioutils.IoUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.google.common.net.MediaType.JSON_UTF_8;
+import static nva.commons.core.attempt.Try.attempt;
+import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 
 /**
  * Template class for implementing Lambda function handlers that get activated through a call to ApiGateway. This class
@@ -45,7 +48,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     protected transient OutputStream outputStream;
     protected transient String allowedOrigin;
 
-    private static final List<MediaType> DEFAULT_SUPPORTED_MEDIA_TYPES = List.of(MediaType.JSON_UTF_8);
+    private static final List<MediaType> DEFAULT_SUPPORTED_MEDIA_TYPES = List.of(JSON_UTF_8);
 
     /**
      * Checking headers on request and acting upon known headers.
@@ -57,12 +60,12 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     protected MediaType calculateContentTypeHeaderReturnValue(RequestInfo requestInfo)
         throws UnsupportedAcceptHeaderException {
         if (requestInfo.getHeaders().containsKey(HttpHeaders.ACCEPT)) {
-            return bestMatchingHeaderBasedOnRequestAcceptHeader(requestInfo);
+            return bestMatchingMediaTypeBasedOnRequestAcceptHeader(requestInfo);
         }
-        return defaultContentHeaderWhenNotSpecifiedByClientRequest();
+        return defaultResponseContentTypeWhenNotSpecifiedByClientRequest();
     }
 
-    private MediaType bestMatchingHeaderBasedOnRequestAcceptHeader(RequestInfo requestInfo)
+    private MediaType bestMatchingMediaTypeBasedOnRequestAcceptHeader(RequestInfo requestInfo)
         throws UnsupportedAcceptHeaderException {
         List<MediaType> acceptMediaTypes = parseAcceptHeader(requestInfo.getHeader(HttpHeaders.ACCEPT));
         List<MediaType> matches = findMediaTypeMatches(acceptMediaTypes);
@@ -86,8 +89,8 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     private boolean inAcceptedMediaTypeRange(MediaType mediaType, List<MediaType> acceptMediaTypes) {
         return acceptMediaTypes.stream()
-            .map(MediaType::withoutParameters)
-            .anyMatch(mediaType::is);
+                .map(MediaType::withoutParameters)
+                .anyMatch(mediaType::is);
     }
 
     /**
@@ -99,15 +102,15 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
         return DEFAULT_SUPPORTED_MEDIA_TYPES;
     }
 
-    protected MediaType getDefaultResponseContentHeaderValue(RequestInfo requestInfo)
+    protected MediaType getDefaultResponseContentTypeHeaderValue(RequestInfo requestInfo)
         throws UnsupportedAcceptHeaderException {
         return calculateContentTypeHeaderReturnValue(requestInfo);
     }
 
-    private MediaType defaultContentHeaderWhenNotSpecifiedByClientRequest() {
+    private MediaType defaultResponseContentTypeWhenNotSpecifiedByClientRequest() {
         return listSupportedMediaTypes().get(0);
     }
-
+    
     /**
      * The input class should be set explicitly by the inheriting class.
      *
