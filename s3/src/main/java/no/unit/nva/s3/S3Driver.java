@@ -46,9 +46,9 @@ public class S3Driver {
     public static final String SINGLE_BACKSLASH = "\\\\";
     public static final String UNIX_SEPARATOR = "/";
     public static final int REMOVE_ROOT = 1;
+    public static final int MAX_RESPONSE_SIZE_FOR_S3_LISTING = 1000;
     private static final Environment ENVIRONMENT = new Environment();
     private static final String EMPTY_STRING = "";
-    public static final int MAX_RESPONSE_SIZE_FOR_S3_LISTING = 1000;
     private final S3Client client;
     private final String bucketName;
 
@@ -147,16 +147,17 @@ public class S3Driver {
         return attempt(response::asUtf8String).toOptional();
     }
 
-    public String getCompressedFile(UnixPath file) throws IOException {
+    public GZIPInputStream getCompressedFile(UnixPath file) throws IOException {
         GetObjectRequest getObjectRequest = createGetObjectRequest(file);
-        try (ResponseInputStream<GetObjectResponse> response = client.getObject(getObjectRequest)) {
-            return decompressInputToString(response);
-        }
+        ResponseInputStream<GetObjectResponse> response = client.getObject(getObjectRequest);
+        return new GZIPInputStream(response);
     }
 
     public String getFile(UnixPath filename) {
         if (isCompressed(filename.getFilename())) {
-            return attempt(() -> getCompressedFile(filename)).orElseThrow();
+            return attempt(() -> getCompressedFile(filename))
+                .map(this::readCompressedStream)
+                .orElseThrow();
         } else {
             return getUncompressedFile(filename).orElseThrow();
         }
@@ -212,12 +213,6 @@ public class S3Driver {
 
     private ResponseBytes<GetObjectResponse> fetchObject(GetObjectRequest getObjectRequest) {
         return client.getObject(getObjectRequest, ResponseTransformer.toBytes());
-    }
-
-    private String decompressInputToString(ResponseInputStream<GetObjectResponse> response) throws IOException {
-        try (GZIPInputStream gzipInputStream = new GZIPInputStream(response)) {
-            return readCompressedStream(gzipInputStream);
-        }
     }
 
     private String readCompressedStream(GZIPInputStream gzipInputStream) throws IOException {

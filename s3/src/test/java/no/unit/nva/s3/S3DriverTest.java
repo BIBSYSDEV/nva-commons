@@ -166,7 +166,9 @@ class S3DriverTest {
     @Test
     public void getCompressedFileReturnsContentsWhenInputIsCompressed() throws IOException {
         String compressedFilename = "compressed.gz";
-        String result = s3Driver.getCompressedFile(UnixPath.of(compressedFilename));
+        GZIPInputStream contents = s3Driver.getCompressedFile(UnixPath.of(compressedFilename));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(contents));
+        String result = reader.lines().collect(Collectors.joining());
         assertThat(result, is(equalTo(EXPECTED_COMPRESSED_CONTENT)));
     }
 
