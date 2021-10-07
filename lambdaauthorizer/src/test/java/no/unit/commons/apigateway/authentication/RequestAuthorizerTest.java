@@ -1,6 +1,6 @@
 package no.unit.commons.apigateway.authentication;
 
-import static nva.commons.apigateway.RestConfig.restObjectMapper;
+import static no.unit.commons.apigateway.authentication.AuthorizerObjectMapperConfig.authorizerObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -148,7 +148,7 @@ public class RequestAuthorizerTest {
     private InputStream requestWithoutApiKey() throws com.fasterxml.jackson.core.JsonProcessingException {
         Map<String, Object> methodArn = Map.of(METHOD_ARN_FIELD, DEFAULT_METHOD_ARN);
 
-        return new HandlerRequestBuilder<Map<String, String>>(restObjectMapper)
+        return new HandlerRequestBuilder<Map<String, String>>(authorizerObjectMapper)
             .withOtherProperties(methodArn)
             .build();
     }
@@ -157,7 +157,7 @@ public class RequestAuthorizerTest {
         throws com.fasterxml.jackson.core.JsonProcessingException {
         Map<String, Object> methodArn = Map.of(METHOD_ARN_FIELD, DEFAULT_METHOD_ARN);
 
-        return new HandlerRequestBuilder<Map<String, String>>(restObjectMapper)
+        return new HandlerRequestBuilder<Map<String, String>>(authorizerObjectMapper)
             .withHeaders(authHeaders(apiKey))
             .withOtherProperties(methodArn)
             .build();

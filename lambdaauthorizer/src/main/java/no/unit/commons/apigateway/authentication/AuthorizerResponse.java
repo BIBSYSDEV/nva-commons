@@ -1,6 +1,6 @@
 package no.unit.commons.apigateway.authentication;
 
-import static nva.commons.apigateway.RestConfig.restObjectMapper;
+import static no.unit.commons.apigateway.authentication.AuthorizerObjectMapperConfig.authorizerObjectMapper;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.ByteArrayOutputStream;
@@ -25,7 +25,7 @@ public class AuthorizerResponse {
     public static AuthorizerResponse fromOutputStream(ByteArrayOutputStream outputStream)
         throws JsonProcessingException {
         String content = outputStream.toString(StandardCharsets.UTF_8);
-        return restObjectMapper.readValue(content, AuthorizerResponse.class);
+        return authorizerObjectMapper.readValue(content, AuthorizerResponse.class);
     }
 
     public static Builder newBuilder() {

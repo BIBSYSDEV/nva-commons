@@ -1,6 +1,6 @@
 package no.unit.commons.apigateway.authentication;
 
-import static nva.commons.apigateway.RestConfig.restObjectMapper;
+import static no.unit.commons.apigateway.authentication.AuthorizerObjectMapperConfig.authorizerObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
 import com.amazonaws.services.lambda.runtime.Context;
 import java.io.BufferedWriter;
@@ -65,7 +65,7 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
     protected void writeOutput(Void input, AuthorizerResponse output, RequestInfo requestInfo)
         throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-            String responseJson = restObjectMapper.writeValueAsString(output);
+            String responseJson = authorizerObjectMapper.writeValueAsString(output);
             writer.write(responseJson);
         }
     }
@@ -160,7 +160,7 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
                 .withPrincipalId(principalId)
                 .withPolicyDocument(createDenyAuthPolicy())
                 .build();
-            String response = restObjectMapper.writeValueAsString(denyResponse);
+            String response = authorizerObjectMapper.writeValueAsString(denyResponse);
             writer.write(response);
         }
     }

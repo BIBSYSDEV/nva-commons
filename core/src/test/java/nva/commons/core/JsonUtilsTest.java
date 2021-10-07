@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Collections;
@@ -160,6 +161,14 @@ public class JsonUtilsTest {
         String prettyJson = dtoObjectMapper.writeValueAsString(samplePojo);
         assertThat(jsonInSingleLine, not(containsString(System.lineSeparator())));
         assertThat(prettyJson, containsString(System.lineSeparator()));
+    }
+
+    @Test
+    public void dynamoObjectMapperReturnsJsonWithOnlyNonEmptyFields() throws JsonProcessingException {
+        TestForEmptyFields testForEmptyFields = new TestForEmptyFields();
+        String jsonString = JsonUtils.dynamoObjectMapper.writeValueAsString(testForEmptyFields);
+        ObjectNode json = (ObjectNode) dtoObjectMapper.readTree(jsonString);
+        assertThat(json.has(EMPTY_STRING), is(false));
     }
 
     private TestObjectForOptionals deserialize(JsonNode jsonObjectWithoutValue) {
