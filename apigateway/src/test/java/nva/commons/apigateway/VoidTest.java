@@ -1,6 +1,5 @@
 package nva.commons.apigateway;
 
-import static nva.commons.apigateway.RestConfig.restObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -8,7 +7,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import com.amazonaws.services.lambda.runtime.Context;
-import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,10 +46,7 @@ public class VoidTest {
     public void handleRequestReturnsSuccessWhenInputClassIsVoidAndBodyFieldIsMissingFromApiGatewayEvent()
         throws IOException {
         ByteArrayOutputStream outputStream = responseFromVoidHandler(MISSING_BODY_REQUEST);
-
-        TypeReference<GatewayResponse<String>> tr = new TypeReference<>() {
-        };
-        GatewayResponse<String> output = restObjectMapper.readValue(outputStream.toString(), tr);
+        GatewayResponse<String> output = GatewayResponse.fromOutputStream(outputStream);
         assertThat(output.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
     }
 
@@ -61,10 +56,7 @@ public class VoidTest {
     public void handleRequestReturnsSuccessWhenInputClassIsVoidAndBodyFieldIsAnEmptyObjectInApiGatewayEvent()
         throws IOException {
         ByteArrayOutputStream outputStream = responseFromVoidHandler(EMPT_BODY_REQUEST);
-
-        TypeReference<GatewayResponse<String>> tr = new TypeReference<>() {
-        };
-        GatewayResponse<String> output = restObjectMapper.readValue(outputStream.toString(), tr);
+        GatewayResponse<String> output = GatewayResponse.fromOutputStream(outputStream);
         assertThat(output.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
     }
 
