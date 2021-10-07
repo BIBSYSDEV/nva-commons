@@ -1,5 +1,6 @@
 package nva.commons.apigateway;
 
+import static nva.commons.apigateway.RestConfig.restObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -23,7 +24,6 @@ import no.unit.nva.stubs.FakeContext;
 import no.unit.nva.stubs.FakeStsClient;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.core.Environment;
-import nva.commons.core.JsonUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -135,7 +135,7 @@ public class AuthorizedApiGatewayHandlerTest {
     }
 
     private InputStream requestWithClaims() throws com.fasterxml.jackson.core.JsonProcessingException {
-        return new HandlerRequestBuilder<Void>(JsonUtils.objectMapper)
+        return new HandlerRequestBuilder<Void>(restObjectMapper)
             .withFeideId(SAMPLE_FEIDE_ID)
             .withCustomerId(SAMPLE_CUSTOMER_ID)
             .withRoles(SAMPLE_ROLES)

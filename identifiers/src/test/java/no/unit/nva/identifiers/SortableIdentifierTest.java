@@ -56,13 +56,13 @@ public class SortableIdentifierTest {
     public void sortableIdentifierSerializesAsString() throws JsonProcessingException {
         ExampleClass exampleClass = new ExampleClass();
         exampleClass.setId(SAMPLE_IDENTIFIER);
-        String json = JsonUtils.objectMapper.writeValueAsString(exampleClass);
+        String json = JsonUtils.dtoObjectMapper.writeValueAsString(exampleClass);
         assertThat(json, containsString(SAMPLE_CLASS_ID_FIELD));
     }
 
     @Test
     public void sortableIdentifierDeserializesFromString() throws JsonProcessingException {
-        ExampleClass actual = JsonUtils.objectMapper.readValue(SAMPLE_EXAMPLE_CLASS_JSON, ExampleClass.class);
+        ExampleClass actual = JsonUtils.dtoObjectMapper.readValue(SAMPLE_EXAMPLE_CLASS_JSON, ExampleClass.class);
         SortableIdentifier actualIdentifier = actual.getId();
         assertThat(actualIdentifier, is(equalTo(SAMPLE_IDENTIFIER)));
     }

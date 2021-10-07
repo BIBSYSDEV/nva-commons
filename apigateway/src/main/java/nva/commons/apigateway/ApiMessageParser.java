@@ -1,5 +1,6 @@
 package nva.commons.apigateway;
 
+import static nva.commons.apigateway.RestConfig.restObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,7 +10,6 @@ import java.io.StringReader;
 import java.util.Optional;
 import nva.commons.apigateway.exceptions.ApiIoException;
 import nva.commons.core.JacocoGenerated;
-import nva.commons.core.JsonUtils;
 
 /**
  * Not intended for use outside the {@link RestRequestHandler}. Class for parsing a message from ApiGateway.
@@ -23,7 +23,7 @@ public class ApiMessageParser<T> {
 
     @JacocoGenerated
     public ApiMessageParser() {
-        this.mapper = JsonUtils.objectMapper;
+        this.mapper = restObjectMapper;
     }
 
     public ApiMessageParser(ObjectMapper mapper) {

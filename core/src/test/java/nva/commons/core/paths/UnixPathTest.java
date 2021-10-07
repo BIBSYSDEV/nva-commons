@@ -1,8 +1,7 @@
 package nva.commons.core.paths;
 
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
-import static nva.commons.core.JsonUtils.objectMapper;
-import static nva.commons.core.JsonUtils.objectMapperNoEmpty;
+import static nva.commons.core.JsonUtils.dtoObjectMapper;
 import static nva.commons.core.paths.UnixPath.PATH_DELIMITER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -159,10 +158,10 @@ class UnixPathTest {
 
         ClassWithUnixPath classWithUnixPath = new ClassWithUnixPath();
         classWithUnixPath.setField(UnixPath.of(unixPath));
-        String jsonString = objectMapper.writeValueAsString(classWithUnixPath);
-        JsonNode actualJson = objectMapperNoEmpty.readTree(jsonString);
+        String jsonString = dtoObjectMapper.writeValueAsString(classWithUnixPath);
+        JsonNode actualJson = dtoObjectMapper.readTree(jsonString);
 
-        ObjectNode expectedJson = objectMapperNoEmpty.createObjectNode();
+        ObjectNode expectedJson = dtoObjectMapper.createObjectNode();
         expectedJson.put(ClassWithUnixPath.fieldName(), unixPath);
 
         assertThat(actualJson, is(equalTo(expectedJson)));
@@ -172,11 +171,11 @@ class UnixPathTest {
     public void objectMapperReturnsValidUnixPathWhenMappingStringToUnixPath()
         throws JsonProcessingException {
         String expectedPath = "/some/folder";
-        ObjectNode json = objectMapperNoEmpty.createObjectNode();
+        ObjectNode json = dtoObjectMapper.createObjectNode();
         json.put(ClassWithUnixPath.fieldName(), expectedPath);
-        String jsonString = objectMapperNoEmpty.writeValueAsString(json);
+        String jsonString = dtoObjectMapper.writeValueAsString(json);
         ClassWithUnixPath objectContainingUnixPath =
-            objectMapper.readValue(jsonString, ClassWithUnixPath.class);
+            dtoObjectMapper.readValue(jsonString, ClassWithUnixPath.class);
 
         assertThat(objectContainingUnixPath.getField().toString(), is(equalTo(expectedPath)));
     }

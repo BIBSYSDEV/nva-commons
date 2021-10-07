@@ -1,6 +1,7 @@
 package no.unit.nva.events.handlers;
 
-import static nva.commons.core.JsonUtils.objectMapper;
+import static no.unit.nva.events.handlers.EventHandlersConfig.eventObjectMapper;
+import static nva.commons.core.JsonUtils.dtoObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -43,15 +44,16 @@ public class EventParser<InputType> {
     }
 
     private AwsEventBridgeEvent<InputType> parseJson(Class<InputType> iclass) throws JsonProcessingException {
-        JavaType javaType = objectMapper.getTypeFactory().constructParametricType(AwsEventBridgeEvent.class, iclass);
-        return objectMapper.readValue(input, javaType);
+        JavaType javaType =
+            eventObjectMapper.getTypeFactory().constructParametricType(AwsEventBridgeEvent.class, iclass);
+        return eventObjectMapper.readValue(input, javaType);
     }
 
     private AwsEventBridgeEvent<?> parseJson(Class<?>... nestedClasses)
         throws JsonProcessingException {
         JavaType nestedJavaTypes = nestedGenericTypesToJavaType(nestedClasses);
         JavaType eventBridgeJavaType = constructAwsEventBridgeDataTypeWithAllNestedTypes(nestedJavaTypes);
-        return objectMapper.readValue(input, eventBridgeJavaType);
+        return dtoObjectMapper.readValue(input, eventBridgeJavaType);
     }
 
     private <OutputType> RuntimeException handleParsingError(Failure<OutputType> fail) {
@@ -67,7 +69,7 @@ public class EventParser<InputType> {
     @SuppressWarnings(RAWTYPES)
     private JavaType nestedGenericTypesToJavaType(Class[] classes) {
         //Variables not inlined for readability purposes.
-        JavaType mostRecentType = objectMapper.getTypeFactory().constructType(innermostType(classes));
+        JavaType mostRecentType = dtoObjectMapper.getTypeFactory().constructType(innermostType(classes));
         for (int index = classes.length - SKIP_BOTTOM_TYPE; index >= 0; index--) {
             Class<?> currentClass = classes[index];
             mostRecentType = createGenericClassContainingAllPreviousTypes(mostRecentType, currentClass);
@@ -76,7 +78,7 @@ public class EventParser<InputType> {
     }
 
     private JavaType createGenericClassContainingAllPreviousTypes(JavaType mostRecentType, Class<?> currentClass) {
-        return objectMapper.getTypeFactory().constructParametricType(currentClass, mostRecentType);
+        return eventObjectMapper.getTypeFactory().constructParametricType(currentClass, mostRecentType);
     }
 
     private <T> T innermostType(T[] classes) {
@@ -84,6 +86,6 @@ public class EventParser<InputType> {
     }
 
     private JavaType constructAwsEventBridgeDataTypeWithAllNestedTypes(JavaType mostRecentType) {
-        return objectMapper.getTypeFactory().constructParametricType(AwsEventBridgeEvent.class, mostRecentType);
+        return eventObjectMapper.getTypeFactory().constructParametricType(AwsEventBridgeEvent.class, mostRecentType);
     }
 }

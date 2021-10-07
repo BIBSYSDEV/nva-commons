@@ -1,6 +1,6 @@
 package no.unit.nva.events.handlers;
 
-import static nva.commons.core.JsonUtils.objectMapper;
+import static nva.commons.core.JsonUtils.dtoObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -44,9 +44,9 @@ public class DestinationsEventBridgeEventHandlerTest {
     }
 
     private SampleEventDetail extractInputFromValidAwsEventBridgeEvent() throws JsonProcessingException {
-        JsonNode tree = objectMapper.readTree(VALID_AWS_EVENT_BRIDGE_EVENT);
+        JsonNode tree = dtoObjectMapper.readTree(VALID_AWS_EVENT_BRIDGE_EVENT);
         JsonNode inputNode = tree.at(RESPONSE_PAYLOAD_POINTER);
-        return objectMapper.convertValue(inputNode, SampleEventDetail.class);
+        return dtoObjectMapper.convertValue(inputNode, SampleEventDetail.class);
     }
 
     private static class DestinationsHandlerTestClass

@@ -1,6 +1,7 @@
 package no.unit.nva.events.models;
 
 import static no.unit.nva.hamcrest.DoesNotHaveNullOrEmptyFields.doesNotHaveNullOrEmptyFields;
+import static nva.commons.core.JsonUtils.dtoObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
@@ -11,7 +12,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.nio.file.Path;
 import no.unit.nva.events.handlers.SampleEventDetail;
-import nva.commons.core.JsonUtils;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.Test;
 
@@ -45,6 +45,6 @@ public class AwsEventBridgeDetailTest {
     private AwsEventBridgeDetail<SampleEventDetail> parseSampleEventDetail()
         throws JsonProcessingException {
         TypeReference<AwsEventBridgeDetail<SampleEventDetail>> detailTypeReference = new TypeReference<>() {};
-        return JsonUtils.objectMapper.readValue(SAMPLE_EVENT_DETAIL, detailTypeReference);
+        return dtoObjectMapper.readValue(SAMPLE_EVENT_DETAIL, detailTypeReference);
     }
 }

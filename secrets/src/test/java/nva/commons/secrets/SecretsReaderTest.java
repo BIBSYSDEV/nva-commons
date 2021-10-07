@@ -1,5 +1,6 @@
 package nva.commons.secrets;
 
+import static nva.commons.core.JsonUtils.dtoObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -15,9 +16,6 @@ import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
 import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Map;
-
-import nva.commons.core.JsonUtils;
-
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
 import org.junit.jupiter.api.Test;
@@ -102,6 +100,6 @@ public class SecretsReaderTest {
 
     private String createSecretJsonObject() throws JsonProcessingException {
         Map<String, String> secret = Map.of(SECRET_KEY, SECRET_VALUE);
-        return JsonUtils.objectMapper.writeValueAsString(secret);
+        return dtoObjectMapper.writeValueAsString(secret);
     }
 }

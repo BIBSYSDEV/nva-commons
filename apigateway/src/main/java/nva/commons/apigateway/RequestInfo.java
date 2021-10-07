@@ -3,6 +3,7 @@ package nva.commons.apigateway;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.function.Predicate.not;
+import static nva.commons.apigateway.RestConfig.restObjectMapper;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -18,7 +19,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.core.JacocoGenerated;
-import nva.commons.core.JsonUtils;
 
 public class RequestInfo {
     
@@ -45,6 +45,7 @@ public class RequestInfo {
     public static final JsonPointer CUSTOMER_ID = claimToJsonPointer(CUSTOMER_ID_CLAIM);
     public static final JsonPointer APPLICATION_ROLES = claimToJsonPointer(APPLICATION_ROLES_CLAIM);
     public static final JsonPointer ACCESS_RIGHTS = claimToJsonPointer(ACCESS_RIGHTS_CLAIM);
+
     
     @JsonProperty(HEADERS_FIELD)
     private Map<String, String> headers;
@@ -69,7 +70,7 @@ public class RequestInfo {
         this.pathParameters = new HashMap<>();
         this.queryParameters = new HashMap<>();
         this.otherProperties = new LinkedHashMap<>(); // ordinary HashMap and ConcurrentHashMap fail.
-        this.requestContext = JsonUtils.objectMapper.createObjectNode();
+        this.requestContext = restObjectMapper.createObjectNode();
     }
     
     @JsonIgnore
@@ -181,7 +182,7 @@ public class RequestInfo {
     @JacocoGenerated
     public void setRequestContext(JsonNode requestContext) {
         if (isNull(requestContext)) {
-            this.requestContext = JsonUtils.objectMapper.createObjectNode();
+            this.requestContext = restObjectMapper.createObjectNode();
         } else {
             this.requestContext = requestContext;
         }

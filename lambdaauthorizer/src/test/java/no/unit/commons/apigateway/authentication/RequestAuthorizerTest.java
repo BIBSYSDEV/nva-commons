@@ -1,5 +1,6 @@
 package no.unit.commons.apigateway.authentication;
 
+import static nva.commons.apigateway.RestConfig.restObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -7,19 +8,17 @@ import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import com.amazonaws.services.lambda.runtime.Context;
+import com.google.common.net.HttpHeaders;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.Map;
 import java.util.Optional;
-
-import com.google.common.net.HttpHeaders;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ForbiddenException;
 import nva.commons.core.Environment;
-import nva.commons.core.JsonUtils;
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
 import org.junit.jupiter.api.Test;
@@ -149,7 +148,7 @@ public class RequestAuthorizerTest {
     private InputStream requestWithoutApiKey() throws com.fasterxml.jackson.core.JsonProcessingException {
         Map<String, Object> methodArn = Map.of(METHOD_ARN_FIELD, DEFAULT_METHOD_ARN);
 
-        return new HandlerRequestBuilder<Map<String, String>>(JsonUtils.objectMapper)
+        return new HandlerRequestBuilder<Map<String, String>>(restObjectMapper)
             .withOtherProperties(methodArn)
             .build();
     }
@@ -158,7 +157,7 @@ public class RequestAuthorizerTest {
         throws com.fasterxml.jackson.core.JsonProcessingException {
         Map<String, Object> methodArn = Map.of(METHOD_ARN_FIELD, DEFAULT_METHOD_ARN);
 
-        return new HandlerRequestBuilder<Map<String, String>>(JsonUtils.objectMapper)
+        return new HandlerRequestBuilder<Map<String, String>>(restObjectMapper)
             .withHeaders(authHeaders(apiKey))
             .withOtherProperties(methodArn)
             .build();

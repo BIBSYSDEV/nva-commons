@@ -1,18 +1,16 @@
 package nva.commons.dynamodb;
 
+import static nva.commons.core.JsonUtils.dtoObjectMapper;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.junit.jupiter.api.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import static nva.commons.core.JsonUtils.objectMapper;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import org.junit.jupiter.api.Test;
 
 public class ItemMapperTest {
 
@@ -29,7 +27,7 @@ public class ItemMapperTest {
 
         JsonNode actual = ItemMapper.toJsonNode(attributeValueMap);
 
-        var expected = objectMapper.readTree(new File(EXPECTED_JSON));
+        var expected = dtoObjectMapper.readTree(new File(EXPECTED_JSON));
         assertThat(actual, is(equalTo(expected)));
     }
 
@@ -50,7 +48,7 @@ public class ItemMapperTest {
 
         JsonNode actual = ItemMapper.toJsonNodeFromEvent(attributeValueMap);
 
-        var expected = objectMapper.readTree(new File(EXPECTED_JSON));
+        var expected = dtoObjectMapper.readTree(new File(EXPECTED_JSON));
         assertThat(actual, is(equalTo(expected)));
     }
 }

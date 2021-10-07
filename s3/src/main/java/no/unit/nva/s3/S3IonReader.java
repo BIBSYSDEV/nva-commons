@@ -1,5 +1,6 @@
 package no.unit.nva.s3;
 
+import static nva.commons.core.JsonUtils.dtoObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.BufferedReader;
@@ -8,7 +9,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
-import nva.commons.core.JsonUtils;
 import nva.commons.core.attempt.Try;
 import software.amazon.ion.IonReader;
 import software.amazon.ion.IonWriter;
@@ -30,7 +30,7 @@ public final class S3IonReader {
     }
 
     private static JsonNode toJsonNode(String jsonString) {
-        return attempt(() -> JsonUtils.objectMapperWithEmpty.readTree(jsonString)).orElseThrow();
+        return attempt(() -> dtoObjectMapper.readTree(jsonString)).orElseThrow();
     }
 
     private static Stream<String> contentToLines(InputStream content) {

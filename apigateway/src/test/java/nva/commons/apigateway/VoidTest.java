@@ -1,5 +1,6 @@
 package nva.commons.apigateway;
 
+import static nva.commons.apigateway.RestConfig.restObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -14,7 +15,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.nio.file.Path;
 import nva.commons.core.Environment;
-import nva.commons.core.JsonUtils;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,8 +49,9 @@ public class VoidTest {
         throws IOException {
         ByteArrayOutputStream outputStream = responseFromVoidHandler(MISSING_BODY_REQUEST);
 
-        TypeReference<GatewayResponse<String>> tr = new TypeReference<>() {};
-        GatewayResponse<String> output = JsonUtils.objectMapper.readValue(outputStream.toString(), tr);
+        TypeReference<GatewayResponse<String>> tr = new TypeReference<>() {
+        };
+        GatewayResponse<String> output = restObjectMapper.readValue(outputStream.toString(), tr);
         assertThat(output.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
     }
 
@@ -61,8 +62,9 @@ public class VoidTest {
         throws IOException {
         ByteArrayOutputStream outputStream = responseFromVoidHandler(EMPT_BODY_REQUEST);
 
-        TypeReference<GatewayResponse<String>> tr = new TypeReference<>() {};
-        GatewayResponse<String> output = JsonUtils.objectMapper.readValue(outputStream.toString(), tr);
+        TypeReference<GatewayResponse<String>> tr = new TypeReference<>() {
+        };
+        GatewayResponse<String> output = restObjectMapper.readValue(outputStream.toString(), tr);
         assertThat(output.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
     }
 

@@ -1,5 +1,6 @@
 package nva.commons.apigateway;
 
+import static nva.commons.apigateway.RestConfig.restObjectMapper;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -12,7 +13,6 @@ import java.util.Map;
 import java.util.Objects;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
 import nva.commons.core.JacocoGenerated;
-import nva.commons.core.JsonUtils;
 
 public class GatewayResponse<T> implements Serializable {
 
@@ -49,55 +49,11 @@ public class GatewayResponse<T> implements Serializable {
         throws GatewayResponseSerializingException {
         try {
             this.statusCode = statusCode;
-            this.body = JsonUtils.objectMapperWithEmpty.writeValueAsString(body);
+            this.body = restObjectMapper.writeValueAsString(body);
             this.headers = Collections.unmodifiableMap(Map.copyOf(headers));
         } catch (JsonProcessingException e) {
             throw new GatewayResponseSerializingException(e);
         }
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    /**
-     * Parses the JSON body to an object.
-     *
-     * @param clazz the class of the body object
-     * @return the body object.
-     * @throws JsonProcessingException when JSON processing fails
-     */
-    public T getBodyObject(Class<T> clazz) throws JsonProcessingException {
-        return JsonUtils.objectMapper.readValue(body, clazz);
-    }
-
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-
-    public int getStatusCode() {
-        return statusCode;
-    }
-
-    @Override
-    @JacocoGenerated
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        GatewayResponse<?> that = (GatewayResponse<?>) o;
-        return statusCode == that.statusCode
-            && Objects.equals(body, that.body)
-            && Objects.equals(headers, that.headers);
-    }
-
-    @Override
-    @JacocoGenerated
-    public int hashCode() {
-        return Objects.hash(body, headers, statusCode);
     }
 
     /**
@@ -126,7 +82,52 @@ public class GatewayResponse<T> implements Serializable {
      */
     public static <T> GatewayResponse<T> fromString(String responseString)
         throws JsonProcessingException {
-        TypeReference<GatewayResponse<T>> typeref = new TypeReference<>() {};
-        return JsonUtils.objectMapper.readValue(responseString, typeref);
+        TypeReference<GatewayResponse<T>> typeref = new TypeReference<>() {
+        };
+        return restObjectMapper.readValue(responseString, typeref);
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    /**
+     * Parses the JSON body to an object.
+     *
+     * @param clazz the class of the body object
+     * @return the body object.
+     * @throws JsonProcessingException when JSON processing fails
+     */
+    public T getBodyObject(Class<T> clazz) throws JsonProcessingException {
+        return restObjectMapper.readValue(body, clazz);
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    @Override
+    @JacocoGenerated
+    public int hashCode() {
+        return Objects.hash(body, headers, statusCode);
+    }
+
+    @Override
+    @JacocoGenerated
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        GatewayResponse<?> that = (GatewayResponse<?>) o;
+        return statusCode == that.statusCode
+               && Objects.equals(body, that.body)
+               && Objects.equals(headers, that.headers);
     }
 }
