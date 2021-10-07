@@ -1,5 +1,6 @@
 package no.unit.nva.events.handlers;
 
+import static nva.commons.core.JsonUtils.dtoObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -9,7 +10,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Objects;
 import no.unit.nva.events.models.AwsEventBridgeEvent;
-import nva.commons.core.JsonUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
@@ -29,7 +29,7 @@ public class EventMessageParserTest {
         OuterClass<MiddleClass<InnerClass<String>>> expectedDetail = createdNestedGenericsObject();
         AwsEventBridgeEvent<OuterClass<MiddleClass<InnerClass<String>>>> event = createEventWithDetail(expectedDetail);
 
-        String eventJson = JsonUtils.objectMapper.writeValueAsString(event);
+        String eventJson = dtoObjectMapper.writeValueAsString(event);
 
         EventParser<OuterClass<MiddleClass<InnerClass<String>>>> parser = new EventParser<>(eventJson);
 

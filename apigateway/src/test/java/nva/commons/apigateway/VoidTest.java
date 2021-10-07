@@ -7,14 +7,12 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import com.amazonaws.services.lambda.runtime.Context;
-import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.nio.file.Path;
 import nva.commons.core.Environment;
-import nva.commons.core.JsonUtils;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -48,9 +46,7 @@ public class VoidTest {
     public void handleRequestReturnsSuccessWhenInputClassIsVoidAndBodyFieldIsMissingFromApiGatewayEvent()
         throws IOException {
         ByteArrayOutputStream outputStream = responseFromVoidHandler(MISSING_BODY_REQUEST);
-
-        TypeReference<GatewayResponse<String>> tr = new TypeReference<>() {};
-        GatewayResponse<String> output = JsonUtils.objectMapper.readValue(outputStream.toString(), tr);
+        GatewayResponse<String> output = GatewayResponse.fromOutputStream(outputStream);
         assertThat(output.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
     }
 
@@ -60,9 +56,7 @@ public class VoidTest {
     public void handleRequestReturnsSuccessWhenInputClassIsVoidAndBodyFieldIsAnEmptyObjectInApiGatewayEvent()
         throws IOException {
         ByteArrayOutputStream outputStream = responseFromVoidHandler(EMPT_BODY_REQUEST);
-
-        TypeReference<GatewayResponse<String>> tr = new TypeReference<>() {};
-        GatewayResponse<String> output = JsonUtils.objectMapper.readValue(outputStream.toString(), tr);
+        GatewayResponse<String> output = GatewayResponse.fromOutputStream(outputStream);
         assertThat(output.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
     }
 

@@ -1,5 +1,6 @@
 package no.unit.nva.events.handlers;
 
+import static nva.commons.core.JsonUtils.dtoObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.Is.is;
@@ -14,7 +15,6 @@ import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
 import no.unit.nva.events.models.AwsEventBridgeEvent;
 import no.unit.nva.stubs.FakeContext;
-import nva.commons.core.JsonUtils;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
@@ -67,9 +67,9 @@ public class EventHandlerTest {
     }
 
     private AwsEventBridgeEvent<SampleEventDetail> parseEventFromSampleEventString() throws JsonProcessingException {
-        JavaType javatype = JsonUtils.objectMapper.getTypeFactory()
+        JavaType javatype = dtoObjectMapper.getTypeFactory()
             .constructParametricType(AwsEventBridgeEvent.class, SampleEventDetail.class);
-        return JsonUtils.objectMapper.readValue(AWS_EVENT_BRIDGE_EVENT, javatype);
+        return dtoObjectMapper.readValue(AWS_EVENT_BRIDGE_EVENT, javatype);
     }
 
     private static class EventHandlerTestClass extends EventHandler<SampleEventDetail, SampleEventDetail> {

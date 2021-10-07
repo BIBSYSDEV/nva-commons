@@ -2,10 +2,8 @@ package nva.commons.core;
 
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isPresentAnd;
-import static nva.commons.core.JsonUtils.objectMapper;
-import static nva.commons.core.JsonUtils.objectMapperNoEmpty;
-import static nva.commons.core.JsonUtils.objectMapperSingleLine;
-import static nva.commons.core.JsonUtils.objectMapperWithEmpty;
+import static nva.commons.core.JsonUtils.dtoObjectMapper;
+import static nva.commons.core.JsonUtils.singleLineObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -16,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Collections;
@@ -63,7 +62,7 @@ public class JsonUtilsTest {
 
     private void readFieldFromJson(String fileName) throws JsonProcessingException {
         String json = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, fileName));
-        SamplePojo samplePojo = objectMapper.readValue(json, SamplePojo.class);
+        SamplePojo samplePojo = dtoObjectMapper.readValue(json, SamplePojo.class);
         assertThat(samplePojo.getField2(), is(nullValue()));
     }
 
@@ -88,13 +87,13 @@ public class JsonUtilsTest {
 
     @Test
     public void canParseEnumIgnoringCase() throws JsonProcessingException {
-        TestEnum testEnum = objectMapper.readValue(MIXED_CASE_ENUM_JSON, TestEnum.class);
+        TestEnum testEnum = dtoObjectMapper.readValue(MIXED_CASE_ENUM_JSON, TestEnum.class);
         assertThat(testEnum, is(equalTo(TestEnum.SOME_ENUM)));
     }
 
     @Test
     public void writeEnumAsUpperCaseJsonString() throws JsonProcessingException {
-        String json = objectMapper.writeValueAsString(TestEnum.ANOTHER_ENUM);
+        String json = dtoObjectMapper.writeValueAsString(TestEnum.ANOTHER_ENUM);
         assertThat(json, is(equalTo(UPPER_CASE_ENUM_JSON)));
     }
 
@@ -104,7 +103,7 @@ public class JsonUtilsTest {
         String instantString = "2020-12-29T19:23:09.357248Z";
 
         Instant timestamp = Instant.parse(instantString);
-        String jsonNow = objectMapperWithEmpty.writeValueAsString(timestamp);
+        String jsonNow = dtoObjectMapper.writeValueAsString(timestamp);
 
         String expectedString = "\"" + instantString + "\"";
         assertThat(jsonNow, is(equalTo(expectedString)));
@@ -113,8 +112,8 @@ public class JsonUtilsTest {
     @Test
     public void objectMapperSerializesNullStringAsNull() throws JsonProcessingException {
         String expectedJson = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, POJO_WITH_MISSING_VALUES));
-        SamplePojo sampleWithMissingValuesPojo = objectMapperWithEmpty.readValue(expectedJson, SamplePojo.class);
-        String actualJson = objectMapperWithEmpty.writeValueAsString(sampleWithMissingValuesPojo);
+        SamplePojo sampleWithMissingValuesPojo = dtoObjectMapper.readValue(expectedJson, SamplePojo.class);
+        String actualJson = dtoObjectMapper.writeValueAsString(sampleWithMissingValuesPojo);
         assertThat(actualJson, is(equalTo(expectedJson)));
     }
 
@@ -122,26 +121,26 @@ public class JsonUtilsTest {
     public void objectMapperSerializesEmptyStringAsNull() throws JsonProcessingException {
         String expectedJson = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, POJO_WITH_MISSING_VALUES));
         String sampleWithEmptyValueJson =
-                IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, POJO_WITH_EMPTY_VALUES));
-        SamplePojo sampleWithMissingValuesPojo = objectMapper.readValue(sampleWithEmptyValueJson, SamplePojo.class);
-        String actualJson = objectMapperWithEmpty.writeValueAsString(sampleWithMissingValuesPojo);
+            IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, POJO_WITH_EMPTY_VALUES));
+        SamplePojo sampleWithMissingValuesPojo = dtoObjectMapper.readValue(sampleWithEmptyValueJson, SamplePojo.class);
+        String actualJson = dtoObjectMapper.writeValueAsString(sampleWithMissingValuesPojo);
         assertThat(actualJson, is(equalTo(expectedJson)));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {POJO_WITH_MISSING_VALUES, POJO_WITH_EMPTY_VALUES})
     public void objectMapperDeserializesEmptyStringAsNull(String resourceInput) throws JsonProcessingException {
-        String jsonString = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES,resourceInput));
-        SamplePojo actualObject = objectMapper.readValue(jsonString,SamplePojo.class);
+        String jsonString = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, resourceInput));
+        SamplePojo actualObject = dtoObjectMapper.readValue(jsonString, SamplePojo.class);
         assertThat(actualObject.getField2(),is(nullValue()));
         assertThat(actualObject.getField1(),is(not(nullValue())));
     }
 
     @Test
-    public void objectMapperWithEmptySerializesAllEmptyFields() throws JsonProcessingException {
+    public void dtoObjectMapperSerializesAllEmptyFields() throws JsonProcessingException {
         TestForEmptyFields testObj = new TestForEmptyFields();
-        String json = objectMapperWithEmpty.writeValueAsString(testObj);
-        JsonNode node = objectMapperWithEmpty.readTree(json);
+        String json = dtoObjectMapper.writeValueAsString(testObj);
+        JsonNode node = dtoObjectMapper.readTree(json);
 
         assertThat(node.has(EMPTY_STRING), is(true));
         assertThat(node.has(NULL_STRING), is(true));
@@ -158,19 +157,23 @@ public class JsonUtilsTest {
         SamplePojo samplePojo = new SamplePojo();
         samplePojo.setField1("someValue");
         samplePojo.setField2("someValue");
-        String jsonInSingleLine = objectMapperSingleLine.writeValueAsString(samplePojo);
-        String prettyJson = objectMapperNoEmpty.writeValueAsString(samplePojo);
+        String jsonInSingleLine = singleLineObjectMapper.writeValueAsString(samplePojo);
+        String prettyJson = dtoObjectMapper.writeValueAsString(samplePojo);
         assertThat(jsonInSingleLine, not(containsString(System.lineSeparator())));
         assertThat(prettyJson, containsString(System.lineSeparator()));
     }
 
-    private TestObjectForOptionals objectWithoutValue() {
-        return new TestObjectForOptionals(null);
+    @Test
+    public void dynamoObjectMapperReturnsJsonWithOnlyNonEmptyFields() throws JsonProcessingException {
+        TestForEmptyFields testForEmptyFields = new TestForEmptyFields();
+        String jsonString = JsonUtils.dynamoObjectMapper.writeValueAsString(testForEmptyFields);
+        ObjectNode json = (ObjectNode) dtoObjectMapper.readTree(jsonString);
+        assertThat(json.has(EMPTY_STRING), is(false));
     }
 
     private TestObjectForOptionals deserialize(JsonNode jsonObjectWithoutValue) {
-        return objectMapper.convertValue(jsonObjectWithoutValue,
-                                         TestObjectForOptionals.class);
+        return dtoObjectMapper.convertValue(jsonObjectWithoutValue,
+                                            TestObjectForOptionals.class);
     }
 
     private TestObjectForOptionals objectWithSomeValue() {
@@ -178,15 +181,15 @@ public class JsonUtilsTest {
     }
 
     private <T> JsonNode serialize(T objectWithNullValue) {
-        return objectMapper.convertValue(objectWithNullValue, JsonNode.class);
+        return dtoObjectMapper.convertValue(objectWithNullValue, JsonNode.class);
     }
 
     private static JsonNode sampleJsonObjectWithSomeValue() {
-        return objectMapper.createObjectNode().put(JSON_KEY, SAMPLE_VALUE);
+        return dtoObjectMapper.createObjectNode().put(JSON_KEY, SAMPLE_VALUE);
     }
 
     private static JsonNode sampleJsonObjectWithoutValue() {
-        return objectMapper.createObjectNode();
+        return dtoObjectMapper.createObjectNode();
     }
 
     private enum TestEnum {

@@ -1,5 +1,6 @@
 package no.unit.nva.events.handlers;
 
+import static no.unit.nva.events.handlers.EventHandlersConfig.eventObjectMapper;
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
@@ -11,7 +12,6 @@ import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import no.unit.nva.events.models.AwsEventBridgeEvent;
-import nva.commons.core.JsonUtils;
 import nva.commons.core.ioutils.IoUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +56,7 @@ public abstract class EventHandler<InputType, OutputType> implements RequestStre
         {
             try (BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-                String responseJson = JsonUtils.objectMapper.writeValueAsString(output);
+                String responseJson = eventObjectMapper.writeValueAsString(output);
                 writer.write(responseJson);
             } catch (IOException e) {
                 logger.error(ERROR_WRITING_TO_OUTPUT_STREAM + output.toString());

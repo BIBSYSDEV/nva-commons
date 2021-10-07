@@ -1,10 +1,10 @@
 package no.unit.commons.apigateway.authentication;
 
+import static no.unit.commons.apigateway.authentication.AuthorizerObjectMapperConfig.authorizerObjectMapper;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
-import nva.commons.core.JsonUtils;
 
 public class AuthorizerResponse {
 
@@ -25,7 +25,7 @@ public class AuthorizerResponse {
     public static AuthorizerResponse fromOutputStream(ByteArrayOutputStream outputStream)
         throws JsonProcessingException {
         String content = outputStream.toString(StandardCharsets.UTF_8);
-        return JsonUtils.objectMapper.readValue(content, AuthorizerResponse.class);
+        return authorizerObjectMapper.readValue(content, AuthorizerResponse.class);
     }
 
     public static Builder newBuilder() {

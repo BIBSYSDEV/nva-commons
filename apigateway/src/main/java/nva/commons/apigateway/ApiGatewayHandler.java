@@ -2,7 +2,7 @@ package nva.commons.apigateway;
 
 import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
-import static nva.commons.core.JsonUtils.objectMapper;
+import static nva.commons.apigateway.RestConfig.restObjectMapper;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedWriter;
@@ -35,7 +35,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     public static final String DEFAULT_ERROR_MESSAGE = "Unknown error in handler";
     public static final String REQUEST_ID = "requestId";
 
-    private final ObjectMapper mapper;
+    private final ObjectMapper objectMapper;
 
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
 
@@ -44,13 +44,13 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     }
 
     public ApiGatewayHandler(Class<I> iclass, Environment environment) {
-        this(iclass, environment, objectMapper);
+        this(iclass, environment, restObjectMapper);
         this.additionalSuccessHeadersSupplier = Collections::emptyMap;
     }
 
-    public ApiGatewayHandler(Class<I> iclass, Environment environment, ObjectMapper mapper) {
+    public ApiGatewayHandler(Class<I> iclass, Environment environment, ObjectMapper objectMapper) {
         super(iclass, environment);
-        this.mapper = mapper;
+        this.objectMapper = objectMapper;
         this.additionalSuccessHeadersSupplier = Collections::emptyMap;
     }
 
@@ -75,7 +75,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
             Map<String, String> headers = getSuccessHeaders(requestInfo);
             Integer statusCode = getSuccessStatusCode(input, output);
             GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, headers, statusCode);
-            String responseJson = mapper.writeValueAsString(gatewayResponse);
+            String responseJson = objectMapper.writeValueAsString(gatewayResponse);
             writer.write(responseJson);
         }
     }
