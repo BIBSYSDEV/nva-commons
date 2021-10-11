@@ -1,5 +1,6 @@
 package nva.commons.apigateway;
 
+import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -12,9 +13,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
-
 import nva.commons.apigateway.testutils.RequestBody;
-
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -69,7 +68,10 @@ public class GatewayResponseTest {
 
     private GatewayResponse<RequestBody> sampleGatewayResponse()
         throws GatewayResponseSerializingException {
-        return new GatewayResponse<>(sampleRequestBody(), sampleHeaders(), HttpURLConnection.HTTP_OK);
+        return new GatewayResponse<>(sampleRequestBody(),
+                                     sampleHeaders(),
+                                     HttpURLConnection.HTTP_OK,
+                                     defaultRestObjectMapper);
     }
 
     private Map<String, String> sampleHeaders() {

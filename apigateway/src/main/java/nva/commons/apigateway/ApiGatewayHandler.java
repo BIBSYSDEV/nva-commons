@@ -74,7 +74,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
             Map<String, String> headers = getSuccessHeaders(requestInfo);
             Integer statusCode = getSuccessStatusCode(input, output);
-            GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, headers, statusCode);
+            GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, headers, statusCode, objectMapper);
             String responseJson = objectMapper.writeValueAsString(gatewayResponse);
             writer.write(responseJson);
         }
@@ -180,7 +180,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
 
             Map<String, String> headers = getFailureHeaders();
             GatewayResponse<ThrowableProblem> gatewayResponse =
-                new GatewayResponse<>(problem, headers, statusCode);
+                new GatewayResponse<>(problem, headers, statusCode, objectMapper);
             String gateWayResponseJson = objectMapper.writeValueAsString(gatewayResponse);
             writer.write(gateWayResponseJson);
         }
