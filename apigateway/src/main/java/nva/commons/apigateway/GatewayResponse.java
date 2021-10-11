@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
@@ -45,11 +46,11 @@ public class GatewayResponse<T> implements Serializable {
      * @param statusCode status code for response
      * @throws GatewayResponseSerializingException when serializing fails
      */
-    public GatewayResponse(T body, Map<String, String> headers, int statusCode)
+    public GatewayResponse(T body, Map<String, String> headers, int statusCode, ObjectMapper objectMapper)
         throws GatewayResponseSerializingException {
         try {
             this.statusCode = statusCode;
-            this.body = defaultRestObjectMapper.writeValueAsString(body);
+            this.body = objectMapper.writeValueAsString(body);
             this.headers = Collections.unmodifiableMap(Map.copyOf(headers));
         } catch (JsonProcessingException e) {
             throw new GatewayResponseSerializingException(e);
