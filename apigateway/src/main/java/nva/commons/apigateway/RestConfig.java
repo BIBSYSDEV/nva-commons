@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public final class RestConfig {
 
-    /* default */ static final ObjectMapper restObjectMapper = dtoObjectMapper;
+    /* default */ static final ObjectMapper defaultRestObjectMapper = dtoObjectMapper;
 
     private RestConfig() {
     }

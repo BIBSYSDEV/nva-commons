@@ -3,7 +3,7 @@ package nva.commons.apigateway;
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static nva.commons.apigateway.ApiGatewayHandler.REQUEST_ID;
 import static nva.commons.apigateway.MediaTypes.APPLICATION_PROBLEM_JSON;
-import static nva.commons.apigateway.RestConfig.restObjectMapper;
+import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.Is.is;
@@ -328,7 +328,7 @@ public class ApiGatewayHandlerTest {
 
         assertThat(jsonNode.has(RequestBody.FIELD1), is(true));
         assertThat(jsonNode.has(RequestBody.FIELD2), is(true));
-        assertThat(jsonNode.get(RequestBody.FIELD2), is(equalTo(restObjectMapper.nullNode())));
+        assertThat(jsonNode.get(RequestBody.FIELD2), is(equalTo(defaultRestObjectMapper.nullNode())));
     }
 
     @Test
@@ -345,7 +345,7 @@ public class ApiGatewayHandlerTest {
 
     @Test
     void handlerSerializesBodyWithNonDefaultSerializationWhenDefaultSerializerIsOverridden() throws IOException {
-        ObjectMapper spiedMapper = spy(restObjectMapper);
+        ObjectMapper spiedMapper = spy(defaultRestObjectMapper);
         var handler = new Handler(environment, spiedMapper);
         var inputStream = requestWithHeaders();
         var outputStream = outputStream();
@@ -383,7 +383,7 @@ public class ApiGatewayHandlerTest {
         requestBody.setField1("Some value");
         requestBody.setField2(null);
 
-        return new HandlerRequestBuilder<RequestBody>(restObjectMapper)
+        return new HandlerRequestBuilder<RequestBody>(defaultRestObjectMapper)
             .withBody(requestBody)
             .build();
     }
@@ -392,18 +392,18 @@ public class ApiGatewayHandlerTest {
         RequestBody requestBody = new RequestBody();
         requestBody.setField1("Some value");
         requestBody.setField2("Some value");
-        ObjectNode objectWithoutType = restObjectMapper.convertValue(requestBody, ObjectNode.class);
+        ObjectNode objectWithoutType = defaultRestObjectMapper.convertValue(requestBody, ObjectNode.class);
         objectWithoutType.remove(RequestBody.TYPE_ATTRIBUTE);
 
-        return new HandlerRequestBuilder<ObjectNode>(restObjectMapper)
+        return new HandlerRequestBuilder<ObjectNode>(defaultRestObjectMapper)
             .withBody(objectWithoutType)
             .build();
     }
 
     private Problem getProblemFromFailureResponse(ByteArrayOutputStream outputStream) throws JsonProcessingException {
-        JavaType javaType = restObjectMapper.getTypeFactory()
+        JavaType javaType = defaultRestObjectMapper.getTypeFactory()
             .constructParametricType(GatewayResponse.class, Problem.class);
-        GatewayResponse<Problem> response = restObjectMapper.readValue(outputStream.toString(), javaType);
+        GatewayResponse<Problem> response = defaultRestObjectMapper.readValue(outputStream.toString(), javaType);
         return response.getBodyObject(Problem.class);
     }
 
@@ -411,7 +411,7 @@ public class ApiGatewayHandlerTest {
         throws JsonProcessingException {
         TypeReference<GatewayResponse<Problem>> tr = new TypeReference<>() {
         };
-        return restObjectMapper.readValue(outputStream.toString(StandardCharsets.UTF_8), tr);
+        return defaultRestObjectMapper.readValue(outputStream.toString(StandardCharsets.UTF_8), tr);
     }
 
     private Handler handlerThatThrowsUncheckedExceptions() {
@@ -478,7 +478,7 @@ public class ApiGatewayHandlerTest {
     }
 
     private InputStream requestWithHeadersAndPath() throws JsonProcessingException {
-        ObjectNode request = restObjectMapper.createObjectNode();
+        ObjectNode request = defaultRestObjectMapper.createObjectNode();
         ObjectNode node = createBody();
         request.set("body", node);
         request.set("headers", createHeaders());
@@ -487,7 +487,7 @@ public class ApiGatewayHandlerTest {
     }
 
     private InputStream jsonNodeToInputStream(JsonNode request) throws JsonProcessingException {
-        String requestString = restObjectMapper.writeValueAsString(request);
+        String requestString = defaultRestObjectMapper.writeValueAsString(request);
         return IoUtils.stringToStream(requestString);
     }
 
@@ -498,7 +498,7 @@ public class ApiGatewayHandlerTest {
     }
 
     private InputStream requestWithHeaders(Map<String,String> headers) throws JsonProcessingException {
-        ObjectNode request = restObjectMapper.createObjectNode();
+        ObjectNode request = defaultRestObjectMapper.createObjectNode();
         ObjectNode node = createBody();
         request.set("body", node);
         request.set("headers", createHeaders(headers));
@@ -506,7 +506,7 @@ public class ApiGatewayHandlerTest {
     }
 
     private InputStream requestWithHeaders() throws JsonProcessingException {
-        ObjectNode request = restObjectMapper.createObjectNode();
+        ObjectNode request = defaultRestObjectMapper.createObjectNode();
         ObjectNode node = createBody();
         request.set("body", node);
         request.set("headers", createHeaders());
@@ -521,14 +521,14 @@ public class ApiGatewayHandlerTest {
     }
 
     private JsonNode createHeaders(Map<String, String> headers) {
-        return restObjectMapper.convertValue(headers, JsonNode.class);
+        return defaultRestObjectMapper.convertValue(headers, JsonNode.class);
     }
 
     private ObjectNode createBody() {
         RequestBody requestBody = new RequestBody();
         requestBody.setField1("value1");
         requestBody.setField2("value2");
-        return restObjectMapper.convertValue(requestBody, ObjectNode.class);
+        return defaultRestObjectMapper.convertValue(requestBody, ObjectNode.class);
     }
 
     private ByteArrayOutputStream outputStream() {

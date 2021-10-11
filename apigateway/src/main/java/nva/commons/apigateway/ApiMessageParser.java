@@ -1,6 +1,6 @@
 package nva.commons.apigateway;
 
-import static nva.commons.apigateway.RestConfig.restObjectMapper;
+import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +23,7 @@ public class ApiMessageParser<T> {
 
     @JacocoGenerated
     public ApiMessageParser() {
-        this.mapper = restObjectMapper;
+        this.mapper = defaultRestObjectMapper;
     }
 
     public ApiMessageParser(ObjectMapper mapper) {

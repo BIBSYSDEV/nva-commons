@@ -1,6 +1,8 @@
 package no.unit.nva.events.handlers;
 
+import static no.unit.nva.events.handlers.EventHandlersConfig.defaultEventObjectMapper;
 import com.amazonaws.services.lambda.runtime.Context;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.unit.nva.events.models.AwsEventBridgeDetail;
 import no.unit.nva.events.models.AwsEventBridgeEvent;
 
@@ -10,7 +12,12 @@ public abstract class DestinationsEventBridgeEventHandler<InputType, OutputType>
     private final Class<InputType> iclass;
 
     protected DestinationsEventBridgeEventHandler(Class<InputType> iclass) {
-        super(AwsEventBridgeDetail.class);
+        super(AwsEventBridgeDetail.class, defaultEventObjectMapper);
+        this.iclass = iclass;
+    }
+
+    protected DestinationsEventBridgeEventHandler(Class<InputType> iclass, ObjectMapper objectMapper) {
+        super(AwsEventBridgeDetail.class, objectMapper);
         this.iclass = iclass;
     }
 
@@ -24,7 +31,8 @@ public abstract class DestinationsEventBridgeEventHandler<InputType, OutputType>
     @SuppressWarnings("unchecked")
     @Override
     protected AwsEventBridgeEvent<AwsEventBridgeDetail<InputType>> parseEvent(String input) {
-        return new EventParser<AwsEventBridgeDetail<InputType>>(input).parse(AwsEventBridgeDetail.class, iclass);
+        return new EventParser<AwsEventBridgeDetail<InputType>>(input, objectMapper)
+            .parse(AwsEventBridgeDetail.class, iclass);
     }
 
     protected abstract OutputType processInputPayload(InputType input,

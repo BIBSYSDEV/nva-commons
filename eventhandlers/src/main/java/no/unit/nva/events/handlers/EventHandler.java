@@ -1,9 +1,10 @@
 package no.unit.nva.events.handlers;
 
-import static no.unit.nva.events.handlers.EventHandlersConfig.eventObjectMapper;
+import static no.unit.nva.events.handlers.EventHandlersConfig.defaultEventObjectMapper;
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,15 +26,22 @@ public abstract class EventHandler<InputType, OutputType> implements RequestStre
     public static final String HANDLER_INPUT = "Handler input:\n";
     public static final String ERROR_WRITING_TO_OUTPUT_STREAM = "Error writing output to output stream. Output is: ";
     private static final Logger logger = LoggerFactory.getLogger(EventHandler.class);
+    protected final ObjectMapper objectMapper;
     private final Class<InputType> iclass;
-
     /*
       Raw class usage in order to support parameterized types when EventHandler is extended by another class.
      */
+
     @SuppressWarnings({"rawtypes", "unchecked"})
-    protected EventHandler(Class iclass) {
+    protected EventHandler(Class iclass, ObjectMapper objectMapper) {
         super();
         this.iclass = (Class<InputType>) iclass;
+        this.objectMapper = objectMapper;
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    protected EventHandler(Class iclass) {
+        this(iclass, defaultEventObjectMapper);
     }
 
     @Override
@@ -56,7 +64,7 @@ public abstract class EventHandler<InputType, OutputType> implements RequestStre
         {
             try (BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-                String responseJson = eventObjectMapper.writeValueAsString(output);
+                String responseJson = objectMapper.writeValueAsString(output);
                 writer.write(responseJson);
             } catch (IOException e) {
                 logger.error(ERROR_WRITING_TO_OUTPUT_STREAM + output.toString());
@@ -68,7 +76,7 @@ public abstract class EventHandler<InputType, OutputType> implements RequestStre
     protected abstract OutputType processInput(InputType input, AwsEventBridgeEvent<InputType> event, Context context);
 
     protected AwsEventBridgeEvent<InputType> parseEvent(String input) {
-        return new EventParser<InputType>(input).parse(iclass);
+        return new EventParser<InputType>(input, objectMapper).parse(iclass);
     }
 
     protected void handleError(Exception e, String inputString) {

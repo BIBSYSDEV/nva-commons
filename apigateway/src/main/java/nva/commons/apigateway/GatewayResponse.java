@@ -1,6 +1,6 @@
 package nva.commons.apigateway;
 
-import static nva.commons.apigateway.RestConfig.restObjectMapper;
+import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -49,7 +49,7 @@ public class GatewayResponse<T> implements Serializable {
         throws GatewayResponseSerializingException {
         try {
             this.statusCode = statusCode;
-            this.body = restObjectMapper.writeValueAsString(body);
+            this.body = defaultRestObjectMapper.writeValueAsString(body);
             this.headers = Collections.unmodifiableMap(Map.copyOf(headers));
         } catch (JsonProcessingException e) {
             throw new GatewayResponseSerializingException(e);
@@ -84,7 +84,7 @@ public class GatewayResponse<T> implements Serializable {
         throws JsonProcessingException {
         TypeReference<GatewayResponse<T>> typeref = new TypeReference<>() {
         };
-        return restObjectMapper.readValue(responseString, typeref);
+        return defaultRestObjectMapper.readValue(responseString, typeref);
     }
 
     public String getBody() {
@@ -99,7 +99,7 @@ public class GatewayResponse<T> implements Serializable {
      * @throws JsonProcessingException when JSON processing fails
      */
     public T getBodyObject(Class<T> clazz) throws JsonProcessingException {
-        return restObjectMapper.readValue(body, clazz);
+        return defaultRestObjectMapper.readValue(body, clazz);
     }
 
     public Map<String, String> getHeaders() {

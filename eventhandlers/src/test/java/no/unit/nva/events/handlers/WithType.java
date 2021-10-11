@@ -7,7 +7,7 @@ package no.unit.nva.events.handlers;
 public interface WithType {
 
     default String getType() {
-        return this.getClass().getName();
+        return this.getClass().getSimpleName();
     }
 
     default void setType() {

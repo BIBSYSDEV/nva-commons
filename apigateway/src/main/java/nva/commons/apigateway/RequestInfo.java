@@ -3,7 +3,7 @@ package nva.commons.apigateway;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.function.Predicate.not;
-import static nva.commons.apigateway.RestConfig.restObjectMapper;
+import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -70,7 +70,7 @@ public class RequestInfo {
         this.pathParameters = new HashMap<>();
         this.queryParameters = new HashMap<>();
         this.otherProperties = new LinkedHashMap<>(); // ordinary HashMap and ConcurrentHashMap fail.
-        this.requestContext = restObjectMapper.createObjectNode();
+        this.requestContext = defaultRestObjectMapper.createObjectNode();
     }
     
     @JsonIgnore
@@ -182,7 +182,7 @@ public class RequestInfo {
     @JacocoGenerated
     public void setRequestContext(JsonNode requestContext) {
         if (isNull(requestContext)) {
-            this.requestContext = restObjectMapper.createObjectNode();
+            this.requestContext = defaultRestObjectMapper.createObjectNode();
         } else {
             this.requestContext = requestContext;
         }
