@@ -4,7 +4,7 @@ import static nva.commons.apigateway.RequestInfo.APPLICATION_ROLES;
 import static nva.commons.apigateway.RequestInfo.CUSTOMER_ID;
 import static nva.commons.apigateway.RequestInfo.FEIDE_ID;
 import static nva.commons.apigateway.RequestInfo.REQUEST_CONTEXT_FIELD;
-import static nva.commons.apigateway.RestConfig.restObjectMapper;
+import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasKey;
@@ -64,7 +64,7 @@ public class RequestInfoTest {
     @DisplayName("RequestInfo can accept unknown fields")
     public void requestInfoAcceptsUnknownsFields() throws JsonProcessingException {
         String requestInfoString = IoUtils.stringFromResources(EVENT_WITH_UNKNOWN_REQUEST_INFO);
-        RequestInfo requestInfo = restObjectMapper.readValue(requestInfoString, RequestInfo.class);
+        RequestInfo requestInfo = defaultRestObjectMapper.readValue(requestInfoString, RequestInfo.class);
         
         assertThat(requestInfo.getOtherProperties(), hasKey(UNDEFINED_REQUEST_INFO_PROPERTY));
     }
@@ -199,8 +199,8 @@ public class RequestInfoTest {
             )
         );
 
-        RequestInfo requestInfo = restObjectMapper
-            .readValue(restObjectMapper.writeValueAsString(map), RequestInfo.class);
+        RequestInfo requestInfo = defaultRestObjectMapper
+            .readValue(defaultRestObjectMapper.writeValueAsString(map), RequestInfo.class);
 
         JsonPointer jsonPointer = JsonPointer.compile(JSON_POINTER);
         JsonNode jsonNode = requestInfo.getRequestContext().at(jsonPointer);
@@ -275,7 +275,7 @@ public class RequestInfoTest {
     private List<SimpleEntry<String, ObjectNode>> createListWithEmptyObjectNodes(JsonPointer jsonPointer) {
         return Arrays.stream(jsonPointer.toString()
                                  .split(PATH_DELIMITER))
-            .map(nodeName -> new SimpleEntry<>(nodeName, restObjectMapper.createObjectNode()))
+            .map(nodeName -> new SimpleEntry<>(nodeName, defaultRestObjectMapper.createObjectNode()))
                    .collect(Collectors.toList());
     }
     
@@ -286,7 +286,7 @@ public class RequestInfoTest {
     private void checkForNonNullMap(Path resourceFile, Function<RequestInfo, Object> getObject)
         throws JsonProcessingException {
         String apiGatewayEvent = IoUtils.stringFromResources(resourceFile);
-        RequestInfo requestInfo = restObjectMapper.readValue(apiGatewayEvent, RequestInfo.class);
+        RequestInfo requestInfo = defaultRestObjectMapper.readValue(apiGatewayEvent, RequestInfo.class);
         assertNotNull(getObject.apply(requestInfo));
     }
 }

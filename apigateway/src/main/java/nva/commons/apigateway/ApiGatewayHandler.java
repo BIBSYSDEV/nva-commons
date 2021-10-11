@@ -2,7 +2,7 @@ package nva.commons.apigateway;
 
 import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
-import static nva.commons.apigateway.RestConfig.restObjectMapper;
+import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedWriter;
@@ -44,7 +44,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     }
 
     public ApiGatewayHandler(Class<I> iclass, Environment environment) {
-        this(iclass, environment, restObjectMapper);
+        this(iclass, environment, defaultRestObjectMapper);
         this.additionalSuccessHeadersSupplier = Collections::emptyMap;
     }
 

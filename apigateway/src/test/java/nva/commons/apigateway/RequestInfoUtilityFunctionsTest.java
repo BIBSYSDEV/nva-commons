@@ -1,6 +1,6 @@
 package nva.commons.apigateway;
 
-import static nva.commons.apigateway.RestConfig.restObjectMapper;
+import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -77,7 +77,7 @@ public class RequestInfoUtilityFunctionsTest {
     @Test
     public void getRequestContextParameterReturnsValueOnValidJsonPointer() {
         when(requestInfo.getRequestContext())
-            .thenReturn(restObjectMapper.convertValue(Map.of(KEY, VALUE), JsonNode.class));
+            .thenReturn(defaultRestObjectMapper.convertValue(Map.of(KEY, VALUE), JsonNode.class));
         String value = requestInfo.getRequestContextParameter(JsonPointer.compile("/" + KEY));
         assertEquals(VALUE, value);
     }
@@ -85,7 +85,7 @@ public class RequestInfoUtilityFunctionsTest {
     @Test
     public void getRequestContextParameterThrowsExceptionOnInvalidJsonPointer() {
         when(requestInfo.getRequestContext())
-            .thenReturn(restObjectMapper.createObjectNode());
+            .thenReturn(defaultRestObjectMapper.createObjectNode());
         JsonPointer jsonPointer = JsonPointer.compile("/" + KEY);
 
         Executable action = () -> requestInfo.getRequestContextParameter(jsonPointer);

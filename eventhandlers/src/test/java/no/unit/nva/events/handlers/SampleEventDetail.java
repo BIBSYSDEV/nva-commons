@@ -1,6 +1,13 @@
 package no.unit.nva.events.handlers;
 
+import static no.unit.nva.events.handlers.EventHandlerTest.CLASS_PROPERTY;
+import java.beans.FeatureDescriptor;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class SampleEventDetail implements WithType {
 
@@ -49,5 +56,12 @@ public class SampleEventDetail implements WithType {
         return Objects.equals(getName(), that.getName())
                && Objects.equals(getMessage(), that.getMessage())
                && Objects.equals(getIdentifier(), that.getIdentifier());
+    }
+
+    public static List<String> extractPropertyNamesFromSampleEventDetailClass() throws IntrospectionException {
+        return Arrays.stream(
+                Introspector.getBeanInfo(SampleEventDetail.class).getPropertyDescriptors())
+            .map(FeatureDescriptor::getName)
+            .filter(name -> !name.equals(CLASS_PROPERTY)).collect(Collectors.toList());
     }
 }

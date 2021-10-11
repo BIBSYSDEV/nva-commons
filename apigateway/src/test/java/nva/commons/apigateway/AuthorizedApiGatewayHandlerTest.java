@@ -1,6 +1,6 @@
 package nva.commons.apigateway;
 
-import static nva.commons.apigateway.RestConfig.restObjectMapper;
+import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -135,7 +135,7 @@ public class AuthorizedApiGatewayHandlerTest {
     }
 
     private InputStream requestWithClaims() throws com.fasterxml.jackson.core.JsonProcessingException {
-        return new HandlerRequestBuilder<Void>(restObjectMapper)
+        return new HandlerRequestBuilder<Void>(defaultRestObjectMapper)
             .withFeideId(SAMPLE_FEIDE_ID)
             .withCustomerId(SAMPLE_CUSTOMER_ID)
             .withRoles(SAMPLE_ROLES)
