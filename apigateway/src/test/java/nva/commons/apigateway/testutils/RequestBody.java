@@ -3,6 +3,8 @@ package nva.commons.apigateway.testutils;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = RequestBody.TYPE_ATTRIBUTE)
@@ -10,10 +12,12 @@ public class RequestBody {
 
     public static final String FIELD1 = "field1";
     public static final String FIELD2 = "field2";
+    public static final String EMPTY_LIST = "emptyList";
 
     public static final String TYPE_ATTRIBUTE = "type";
-    String field1;
-    String field2;
+    private List<Object> emptyList = Collections.emptyList();
+    private String field1;
+    private String field2;
 
     public RequestBody() {
     }
@@ -21,6 +25,14 @@ public class RequestBody {
     public RequestBody(String field1, String field2) {
         this.field1 = field1;
         this.field2 = field2;
+    }
+
+    public List<Object> getEmptyList() {
+        return emptyList;
+    }
+
+    public void setEmptyList(List<Object> emptyList) {
+        this.emptyList = emptyList;
     }
 
     public String getField1() {
@@ -40,6 +52,11 @@ public class RequestBody {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(field1, field2);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -49,11 +66,6 @@ public class RequestBody {
         }
         RequestBody that = (RequestBody) o;
         return Objects.equals(field1, that.field1)
-            && Objects.equals(field2, that.field2);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(field1, field2);
+               && Objects.equals(field2, that.field2);
     }
 }

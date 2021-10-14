@@ -1,6 +1,6 @@
 package no.unit.nva.events.handlers;
 
-import static no.unit.nva.events.handlers.SampleEventDetail.extractPropertyNamesFromSampleEventDetailClass;
+import static no.unit.nva.events.handlers.SampleEventDetail.propertyNamesOfEmptyFields;
 import static nva.commons.core.JsonUtils.dtoObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -29,8 +29,7 @@ public class DestinationsEventBridgeEventHandlerTest {
 
     public static final String VALID_AWS_EVENT_BRIDGE_EVENT = IoUtils.stringFromResources(
         Path.of("validAwsEventBridgeEvent.json"));
-    public static final String VALID_AWS_EVENT_BRIDGE_EVENT_WITH_EMPTY_VALUES = IoUtils.stringFromResources(
-        Path.of("validAwsEventBridgeEventWithResponseObjectContainingEmptyValues.json"));
+
     public static final boolean CONTAINS_EMPTY_FIELDS = true;
     private static final boolean DOES_NOT_CONTAIN_EMPTY_FIELDS = !CONTAINS_EMPTY_FIELDS;
     private static final JsonPointer RESPONSE_PAYLOAD_POINTER = JsonPointer.compile("/detail/responsePayload");
@@ -56,7 +55,7 @@ public class DestinationsEventBridgeEventHandlerTest {
     @Test
     public void handleRequestSerializesObjectsWithoutOmittingEmptyValuesWhenSuchMapperHasBeenSet()
         throws JsonProcessingException, IntrospectionException {
-        final InputStream input = IoUtils.stringToStream(VALID_AWS_EVENT_BRIDGE_EVENT_WITH_EMPTY_VALUES);
+        final InputStream input = IoUtils.stringToStream(VALID_AWS_EVENT_BRIDGE_EVENT);
         ObjectMapper injectedMapper = JsonUtils.dtoObjectMapper;
         DestinationsHandlerTestClass handler = new DestinationsHandlerTestClass(injectedMapper);
         handler.handleRequest(input, outputStream, context);
@@ -67,7 +66,7 @@ public class DestinationsEventBridgeEventHandlerTest {
     @Test
     public void handleRequestSerializesObjectsOmittingEmptyValuesWhenSuchMapperHasBeenSet()
         throws JsonProcessingException, IntrospectionException {
-        final InputStream input = IoUtils.stringToStream(VALID_AWS_EVENT_BRIDGE_EVENT_WITH_EMPTY_VALUES);
+        final InputStream input = IoUtils.stringToStream(VALID_AWS_EVENT_BRIDGE_EVENT);
         ObjectMapper injectedMapper = JsonUtils.dynamoObjectMapper;
         DestinationsHandlerTestClass handler = new DestinationsHandlerTestClass(injectedMapper);
         handler.handleRequest(input, outputStream, context);
@@ -78,7 +77,7 @@ public class DestinationsEventBridgeEventHandlerTest {
     private void assertThatProducedJsonContainsOrNotContainsEmptyFields(ObjectNode json,
                                                                         boolean containsEmptyFields)
         throws IntrospectionException {
-        List<String> properties = extractPropertyNamesFromSampleEventDetailClass();
+        List<String> properties = propertyNamesOfEmptyFields();
         properties.forEach(property -> assertThat(property, json.has(property), is(containsEmptyFields)));
     }
 
@@ -115,7 +114,7 @@ public class DestinationsEventBridgeEventHandlerTest {
                                                         Context context) {
             this.inputBuffer.set(input);
             this.eventBuffer.set(event);
-            return input;
+            return SampleEventDetail.eventWithEmptyFields();
         }
     }
 }

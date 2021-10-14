@@ -37,8 +37,7 @@ public class EventHandlerTest {
 
     public static final String AWS_EVENT_BRIDGE_EVENT =
         IoUtils.stringFromResources(Path.of("validEventBridgeEvent.json"));
-    public static final String AWS_EVENT_BRIDGE_EVENT_WITH_OBJECT_CONTAINING_EMPTY_VALUES =
-        IoUtils.stringFromResources(Path.of("validEventBridgeEventWithObjectContainingEmptyValues.json"));
+
     public static final String EXCEPTION_MESSAGE = "EXCEPTION_MESSAGE";
     public static final String CLASS_PROPERTY = "class";
     public static final boolean CONTAINS_EMPTY_FIELDS = true;
@@ -84,36 +83,36 @@ public class EventHandlerTest {
     @Test
     public void handleRequestSerializesObjectsWithoutOmittingEmptyValuesWhenSuchMapperHasBeenSet()
         throws JsonProcessingException, IntrospectionException {
-        final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT_WITH_OBJECT_CONTAINING_EMPTY_VALUES);
+        final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT);
         EventHandlerTestClass handler = new EventHandlerTestClass(dtoObjectMapper);
         ObjectNode objectNode = sendEventAndCollectOutputAsJsonObject(input, handler);
-        assertThatJsonObjectContainsOrNotContainsEmptyFields(objectNode, CONTAINS_EMPTY_FIELDS);
+        assertThatJsonObjectContainsOrNotContainsNonNullEmptyFields(objectNode, CONTAINS_EMPTY_FIELDS);
     }
 
-    private void assertThatJsonObjectContainsOrNotContainsEmptyFields(ObjectNode objectNode,
-                                                                      boolean containsEmptyFields)
+    private void assertThatJsonObjectContainsOrNotContainsNonNullEmptyFields(ObjectNode objectNode,
+                                                                             boolean containsEmptyFields)
         throws IntrospectionException {
-        List<String> properties = SampleEventDetail.extractPropertyNamesFromSampleEventDetailClass();
+        List<String> properties = SampleEventDetail.propertyNamesOfEmptyFields();
         properties.forEach(property -> assertThat(property, objectNode.has(property), is(containsEmptyFields)));
     }
 
     @Test
     public void handleRequestSerializesObjectsOmittingEmptyValuesWhenSuchMapperHasBeenSet()
         throws JsonProcessingException, IntrospectionException {
-        final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT_WITH_OBJECT_CONTAINING_EMPTY_VALUES);
+        final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT);
         EventHandlerTestClass handler = new EventHandlerTestClass(dynamoObjectMapper);
         ObjectNode objectNode = sendEventAndCollectOutputAsJsonObject(input, handler);
 
-        assertThatJsonObjectContainsOrNotContainsEmptyFields(objectNode, DOES_NOT_CONTAIN_EMPTY_FIELDS);
+        assertThatJsonObjectContainsOrNotContainsNonNullEmptyFields(objectNode, DOES_NOT_CONTAIN_EMPTY_FIELDS);
     }
 
     @Test
     public void handleRequestSerializesObjectsOmittingEmptyValuesByDefault()
         throws JsonProcessingException, IntrospectionException {
-        final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT_WITH_OBJECT_CONTAINING_EMPTY_VALUES);
+        final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT);
         EventHandlerTestClass handler = new EventHandlerTestClass();
         ObjectNode objectNode = sendEventAndCollectOutputAsJsonObject(input, handler);
-        assertThatJsonObjectContainsOrNotContainsEmptyFields(objectNode, false);
+        assertThatJsonObjectContainsOrNotContainsNonNullEmptyFields(objectNode, false);
     }
 
     private ObjectNode sendEventAndCollectOutputAsJsonObject(InputStream input, EventHandlerTestClass handler)
@@ -160,7 +159,7 @@ public class EventHandlerTest {
             eventBuffer.set(event);
             inputBuffer.set(input);
 
-            return input;
+            return SampleEventDetail.eventWithEmptyFields();
         }
     }
 

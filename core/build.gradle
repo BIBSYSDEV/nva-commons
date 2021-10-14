@@ -1,3 +1,6 @@
 dependencies{
     testImplementation project(":logutils")
+    implementation group : "org.zalando", name :"jackson-datatype-problem", version: project.ext.zalandoProblemVersion
+    testImplementation group: 'com.spotify', name: 'hamcrest-jackson', version: project.ext.spotifyHamcrest
+
 }
