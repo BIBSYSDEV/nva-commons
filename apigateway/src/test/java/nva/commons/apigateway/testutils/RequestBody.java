@@ -1,13 +1,12 @@
 package nva.commons.apigateway.testutils;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = RequestBody.TYPE_ATTRIBUTE)
+@JsonTypeInfo(use = Id.NAME, property = RequestBody.TYPE_ATTRIBUTE)
 public class RequestBody {
 
     public static final String FIELD1 = "field1";

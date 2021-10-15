@@ -321,7 +321,7 @@ public class ApiGatewayHandlerTest {
     }
 
     @Test
-    public void handlerReturnsResponseThatIncludesAllEmptyFields() throws IOException {
+    public void itReturnsResponseWithPopulatedFieldsAndBothEmptyAndNonEmptyLists() throws IOException {
         var output = outputStream();
         InputStream input = requestWithBodyWithEmptyFields();
         handler.handleRequest(input, output, context);

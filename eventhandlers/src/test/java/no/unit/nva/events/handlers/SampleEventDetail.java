@@ -1,10 +1,11 @@
 package no.unit.nva.events.handlers;
 
-import java.beans.IntrospectionException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+//Getters are used by Jackson
+@SuppressWarnings("unused")
 public class SampleEventDetail implements WithType {
 
     private String emptyString;
@@ -12,7 +13,7 @@ public class SampleEventDetail implements WithType {
     private Integer identifier;
     private List<String> someEmptyList;
 
-    public static List<String> propertyNamesOfEmptyFields() throws IntrospectionException {
+    public static List<String> propertyNamesOfEmptyFields() {
         return List.of("emptyString", "someEmptyList");
     }
 

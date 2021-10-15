@@ -45,9 +45,9 @@ public class JsonUtilsTest {
     public static final String NULL_MAP_FIELD = "nullMap";
     public static final String EMPTY_MAP_FIELD = "emptyMap";
     public static final String NULL_STRING_FIELD = "nullString";
+    public static final String EMPTY_STRING = "";
     private static final String POJO_WITH_MISSING_VALUES = "missingStringValues.json";
     private static final String POJO_WITH_EMPTY_VALUES = "emptyStringValues.json";
-    public static final String EMPTY_STRING = "";
 
     @DisplayName("jsonParser serializes empty string as null")
     @Test
@@ -59,12 +59,6 @@ public class JsonUtilsTest {
     @Test
     public void jsonParserSerializedMissingValuesAsNull() throws JsonProcessingException {
         readFieldFromJson("missingStringValues.json");
-    }
-
-    private void readFieldFromJson(String fileName) throws JsonProcessingException {
-        String json = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, fileName));
-        SamplePojo samplePojo = dtoObjectMapper.readValue(json, SamplePojo.class);
-        assertThat(samplePojo.getField2(), is(nullValue()));
     }
 
     @Test
@@ -118,11 +112,6 @@ public class JsonUtilsTest {
         ObjectNode actualJson = toObjectNode(pojo);
         assertThat(actualJson.has("field1"), is(true));
         assertThat(actualJson.has("field2"), is(false));
-    }
-
-    private ObjectNode toObjectNode(SamplePojo pojo) throws JsonProcessingException {
-        String actualJsonString = dtoObjectMapper.writeValueAsString(pojo);
-        return (ObjectNode) dtoObjectMapper.readTree(actualJsonString);
     }
 
     @Test
@@ -182,6 +171,25 @@ public class JsonUtilsTest {
         assertThat(json.has(EMPTY_STRING_FIELD), is(false));
     }
 
+    private static JsonNode sampleJsonObjectWithSomeValue() {
+        return dtoObjectMapper.createObjectNode().put(JSON_KEY, SAMPLE_VALUE);
+    }
+
+    private static JsonNode sampleJsonObjectWithoutValue() {
+        return dtoObjectMapper.createObjectNode();
+    }
+
+    private void readFieldFromJson(String fileName) throws JsonProcessingException {
+        String json = IoUtils.stringFromResources(Path.of(JSON_UTILS_RESOURCES, fileName));
+        SamplePojo samplePojo = dtoObjectMapper.readValue(json, SamplePojo.class);
+        assertThat(samplePojo.getField2(), is(nullValue()));
+    }
+
+    private ObjectNode toObjectNode(SamplePojo pojo) throws JsonProcessingException {
+        String actualJsonString = dtoObjectMapper.writeValueAsString(pojo);
+        return (ObjectNode) dtoObjectMapper.readTree(actualJsonString);
+    }
+
     private TestObjectForOptionals deserialize(JsonNode jsonObjectWithoutValue) {
         return dtoObjectMapper.convertValue(jsonObjectWithoutValue,
                                             TestObjectForOptionals.class);
@@ -195,17 +203,9 @@ public class JsonUtilsTest {
         return dtoObjectMapper.convertValue(objectWithNullValue, JsonNode.class);
     }
 
-    private static JsonNode sampleJsonObjectWithSomeValue() {
-        return dtoObjectMapper.createObjectNode().put(JSON_KEY, SAMPLE_VALUE);
-    }
-
-    private static JsonNode sampleJsonObjectWithoutValue() {
-        return dtoObjectMapper.createObjectNode();
-    }
-
     private enum TestEnum {
         SOME_ENUM,
-        ANOTHER_ENUM;
+        ANOTHER_ENUM
     }
 
     private static class TestObjectForOptionals {
@@ -223,6 +223,7 @@ public class JsonUtilsTest {
         }
     }
 
+    @SuppressWarnings("unused")
     private static class TestForEmptyFields {
 
         @JsonProperty(EMPTY_STRING_FIELD)
@@ -245,6 +246,10 @@ public class JsonUtilsTest {
         @JsonProperty(EMPTY_MAP_FIELD)
         private final Map<String, Object> emptyMap = Collections.emptyMap();
 
+        public String getEmptyString() {
+            return emptyString;
+        }
+
         public String getNullString() {
             return nullString;
         }
@@ -259,6 +264,14 @@ public class JsonUtilsTest {
 
         public List<String> getEmptyList() {
             return emptyList;
+        }
+
+        public Map<String, Object> getNullMap() {
+            return nullMap;
+        }
+
+        public Map<String, Object> getEmptyMap() {
+            return emptyMap;
         }
     }
 }
