@@ -1,3 +1,4 @@
 dependencies{
     testImplementation project(":logutils")
+    implementation group : "org.zalando", name :"jackson-datatype-problem", version: project.ext.zalandoProblemVersion
 }

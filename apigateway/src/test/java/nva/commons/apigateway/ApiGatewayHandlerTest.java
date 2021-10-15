@@ -6,6 +6,7 @@ import static nva.commons.apigateway.MediaTypes.APPLICATION_PROBLEM_JSON;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
@@ -23,6 +24,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
@@ -319,16 +321,18 @@ public class ApiGatewayHandlerTest {
     }
 
     @Test
-    public void handlerReturnsResponseThatIncludesAllEmptyFields() throws IOException {
+    public void itReturnsResponseWithPopulatedFieldsAndBothEmptyAndNonEmptyLists() throws IOException {
         var output = outputStream();
         InputStream input = requestWithBodyWithEmptyFields();
         handler.handleRequest(input, output, context);
         GatewayResponse<JsonNode> response = GatewayResponse.fromOutputStream(output);
         JsonNode jsonNode = response.getBodyObject(JsonNode.class);
-
-        assertThat(jsonNode.has(RequestBody.FIELD1), is(true));
-        assertThat(jsonNode.has(RequestBody.FIELD2), is(true));
-        assertThat(jsonNode.get(RequestBody.FIELD2), is(equalTo(defaultRestObjectMapper.nullNode())));
+        String nullField = RequestBody.FIELD2;
+        String presentField = RequestBody.FIELD1;
+        assertThat(jsonNode.has(presentField), is(true));
+        assertThat(jsonNode.has(nullField), is(false));
+        assertThat(jsonNode.has(RequestBody.EMPTY_LIST), is(true));
+        assertThat(jsonNode.get(RequestBody.EMPTY_LIST), is(instanceOf(ArrayNode.class)));
     }
 
     @Test

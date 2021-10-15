@@ -1,6 +1,5 @@
 package no.unit.nva.events.handlers;
 
-import static no.unit.nva.events.handlers.SampleEventDetail.extractPropertyNamesFromSampleEventDetailClass;
 import static nva.commons.core.JsonUtils.dtoObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -15,7 +14,6 @@ import java.beans.IntrospectionException;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import no.unit.nva.events.models.AwsEventBridgeDetail;
 import no.unit.nva.events.models.AwsEventBridgeEvent;
@@ -25,12 +23,11 @@ import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class DestinationsEventBridgeEventHandlerTest {
+public class DestinationsEventBridgeEventHandlerTest extends AbstractEventHandlerTest {
 
     public static final String VALID_AWS_EVENT_BRIDGE_EVENT = IoUtils.stringFromResources(
         Path.of("validAwsEventBridgeEvent.json"));
-    public static final String VALID_AWS_EVENT_BRIDGE_EVENT_WITH_EMPTY_VALUES = IoUtils.stringFromResources(
-        Path.of("validAwsEventBridgeEventWithResponseObjectContainingEmptyValues.json"));
+
     public static final boolean CONTAINS_EMPTY_FIELDS = true;
     private static final boolean DOES_NOT_CONTAIN_EMPTY_FIELDS = !CONTAINS_EMPTY_FIELDS;
     private static final JsonPointer RESPONSE_PAYLOAD_POINTER = JsonPointer.compile("/detail/responsePayload");
@@ -56,30 +53,23 @@ public class DestinationsEventBridgeEventHandlerTest {
     @Test
     public void handleRequestSerializesObjectsWithoutOmittingEmptyValuesWhenSuchMapperHasBeenSet()
         throws JsonProcessingException, IntrospectionException {
-        final InputStream input = IoUtils.stringToStream(VALID_AWS_EVENT_BRIDGE_EVENT_WITH_EMPTY_VALUES);
+        final InputStream input = IoUtils.stringToStream(VALID_AWS_EVENT_BRIDGE_EVENT);
         ObjectMapper injectedMapper = JsonUtils.dtoObjectMapper;
         DestinationsHandlerTestClass handler = new DestinationsHandlerTestClass(injectedMapper);
         handler.handleRequest(input, outputStream, context);
         ObjectNode outputObject = (ObjectNode) injectedMapper.readTree(outputStream.toString());
-        assertThatProducedJsonContainsOrNotContainsEmptyFields(outputObject, CONTAINS_EMPTY_FIELDS);
+        assertThatJsonObjectContainsEmptyFields(outputObject);
     }
 
     @Test
     public void handleRequestSerializesObjectsOmittingEmptyValuesWhenSuchMapperHasBeenSet()
         throws JsonProcessingException, IntrospectionException {
-        final InputStream input = IoUtils.stringToStream(VALID_AWS_EVENT_BRIDGE_EVENT_WITH_EMPTY_VALUES);
+        final InputStream input = IoUtils.stringToStream(VALID_AWS_EVENT_BRIDGE_EVENT);
         ObjectMapper injectedMapper = JsonUtils.dynamoObjectMapper;
         DestinationsHandlerTestClass handler = new DestinationsHandlerTestClass(injectedMapper);
         handler.handleRequest(input, outputStream, context);
         ObjectNode outputObject = (ObjectNode) injectedMapper.readTree(outputStream.toString());
-        assertThatProducedJsonContainsOrNotContainsEmptyFields(outputObject, DOES_NOT_CONTAIN_EMPTY_FIELDS);
-    }
-
-    private void assertThatProducedJsonContainsOrNotContainsEmptyFields(ObjectNode json,
-                                                                        boolean containsEmptyFields)
-        throws IntrospectionException {
-        List<String> properties = extractPropertyNamesFromSampleEventDetailClass();
-        properties.forEach(property -> assertThat(property, json.has(property), is(containsEmptyFields)));
+        assertThatJsonNodeDoesNotContainEmptyFields(outputObject);
     }
 
     private SampleEventDetail extractInputFromValidAwsEventBridgeEvent(String awsEventBridgeEvent)
@@ -110,12 +100,14 @@ public class DestinationsEventBridgeEventHandlerTest {
         }
 
         @Override
-        protected SampleEventDetail processInputPayload(SampleEventDetail input,
-                                                        AwsEventBridgeEvent<AwsEventBridgeDetail<SampleEventDetail>> event,
-                                                        Context context) {
+        protected SampleEventDetail processInputPayload(
+            SampleEventDetail input,
+            AwsEventBridgeEvent<AwsEventBridgeDetail<SampleEventDetail>> event,
+            Context context
+        ) {
             this.inputBuffer.set(input);
             this.eventBuffer.set(event);
-            return input;
+            return SampleEventDetail.eventWithEmptyFields();
         }
     }
 }

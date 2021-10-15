@@ -1,5 +1,4 @@
 {
   "type" : "SamplePojo",
-  "field1" : "value1",
-  "field2" : null
+  "field1": "value1"
 }

@@ -21,7 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 import no.unit.nva.events.models.AwsEventBridgeEvent;
@@ -33,16 +32,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-public class EventHandlerTest {
+public class EventHandlerTest extends AbstractEventHandlerTest {
 
     public static final String AWS_EVENT_BRIDGE_EVENT =
         IoUtils.stringFromResources(Path.of("validEventBridgeEvent.json"));
-    public static final String AWS_EVENT_BRIDGE_EVENT_WITH_OBJECT_CONTAINING_EMPTY_VALUES =
-        IoUtils.stringFromResources(Path.of("validEventBridgeEventWithObjectContainingEmptyValues.json"));
+
     public static final String EXCEPTION_MESSAGE = "EXCEPTION_MESSAGE";
     public static final String CLASS_PROPERTY = "class";
-    public static final boolean CONTAINS_EMPTY_FIELDS = true;
-    public static final boolean DOES_NOT_CONTAIN_EMPTY_FIELDS = !CONTAINS_EMPTY_FIELDS;
+
     private ByteArrayOutputStream outputStream;
     private Context context;
 
@@ -84,36 +81,28 @@ public class EventHandlerTest {
     @Test
     public void handleRequestSerializesObjectsWithoutOmittingEmptyValuesWhenSuchMapperHasBeenSet()
         throws JsonProcessingException, IntrospectionException {
-        final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT_WITH_OBJECT_CONTAINING_EMPTY_VALUES);
+        final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT);
         EventHandlerTestClass handler = new EventHandlerTestClass(dtoObjectMapper);
         ObjectNode objectNode = sendEventAndCollectOutputAsJsonObject(input, handler);
-        assertThatJsonObjectContainsOrNotContainsEmptyFields(objectNode, CONTAINS_EMPTY_FIELDS);
-    }
-
-    private void assertThatJsonObjectContainsOrNotContainsEmptyFields(ObjectNode objectNode,
-                                                                      boolean containsEmptyFields)
-        throws IntrospectionException {
-        List<String> properties = SampleEventDetail.extractPropertyNamesFromSampleEventDetailClass();
-        properties.forEach(property -> assertThat(property, objectNode.has(property), is(containsEmptyFields)));
+        assertThatJsonObjectContainsEmptyFields(objectNode);
     }
 
     @Test
     public void handleRequestSerializesObjectsOmittingEmptyValuesWhenSuchMapperHasBeenSet()
         throws JsonProcessingException, IntrospectionException {
-        final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT_WITH_OBJECT_CONTAINING_EMPTY_VALUES);
+        final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT);
         EventHandlerTestClass handler = new EventHandlerTestClass(dynamoObjectMapper);
         ObjectNode objectNode = sendEventAndCollectOutputAsJsonObject(input, handler);
-
-        assertThatJsonObjectContainsOrNotContainsEmptyFields(objectNode, DOES_NOT_CONTAIN_EMPTY_FIELDS);
+        assertThatJsonNodeDoesNotContainEmptyFields(objectNode);
     }
 
     @Test
     public void handleRequestSerializesObjectsOmittingEmptyValuesByDefault()
         throws JsonProcessingException, IntrospectionException {
-        final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT_WITH_OBJECT_CONTAINING_EMPTY_VALUES);
+        final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT);
         EventHandlerTestClass handler = new EventHandlerTestClass();
         ObjectNode objectNode = sendEventAndCollectOutputAsJsonObject(input, handler);
-        assertThatJsonObjectContainsOrNotContainsEmptyFields(objectNode, false);
+        assertThatJsonNodeDoesNotContainEmptyFields(objectNode);
     }
 
     private ObjectNode sendEventAndCollectOutputAsJsonObject(InputStream input, EventHandlerTestClass handler)
@@ -160,7 +149,7 @@ public class EventHandlerTest {
             eventBuffer.set(event);
             inputBuffer.set(input);
 
-            return input;
+            return SampleEventDetail.eventWithEmptyFields();
         }
     }
 
