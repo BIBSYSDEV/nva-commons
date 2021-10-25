@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.core.paths.UnixPath;
+import nva.commons.core.paths.UriWrapper;
 import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.ResponseInputStream;
@@ -47,6 +49,7 @@ public class S3Driver {
     public static final String UNIX_SEPARATOR = "/";
     public static final int REMOVE_ROOT = 1;
     public static final int MAX_RESPONSE_SIZE_FOR_S3_LISTING = 1000;
+    public static final String S3_SCHEME = "s3";
     private static final Environment ENVIRONMENT = new Environment();
     private static final String EMPTY_STRING = "";
     private final S3Client client;
@@ -87,6 +90,19 @@ public class S3Driver {
 
     public void insertFile(UnixPath fullPath, InputStream content) throws IOException {
         client.putObject(newPutObjectRequest(fullPath), createRequestBody(content));
+    }
+
+    /**
+     * Method for creating event bodies in S3 bucket.
+     *
+     * @param folder  The folder where the event will be stored
+     * @param content the event body
+     * @return S3 uri to the event file.
+     */
+    public URI insertEvent(UnixPath folder, String content) {
+        UnixPath filePath = folder.addChild(UUID.randomUUID().toString());
+        insertFile(filePath, content);
+        return new UriWrapper(S3_SCHEME, bucketName).addChild(filePath).getUri();
     }
 
     public void insertAndCompressFiles(UnixPath s3Folder, List<String> content) throws IOException {
