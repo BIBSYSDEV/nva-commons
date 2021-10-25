@@ -3,9 +3,12 @@ package nva.commons.core.paths;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.net.URI;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 
 class UriWrapperTest {
 
@@ -82,5 +85,17 @@ class UriWrapperTest {
         URI s3Uri = URI.create("s3://somebucket" + ROOT + filePath);
         UriWrapper wrapper = new UriWrapper(s3Uri);
         assertThat(wrapper.getFilename(), is(equalTo(expectedFilename)));
+    }
+
+    @Test
+    public void shouldReturnUriWithSchemeAndHostWhenCalledWithSchemeAndHost() {
+        var uri = new UriWrapper("https", "example.org");
+        assertThat(uri.getUri(), is(equalTo(URI.create("https://example.org"))));
+    }
+
+    @ParameterizedTest(name = "should throw exception when either host is empty")
+    @NullAndEmptySource
+    public void shouldThrowExceptionWhenHostIsEmpty(String emptyInput) {
+        assertThrows(IllegalArgumentException.class, () -> new UriWrapper("https", emptyInput));
     }
 }

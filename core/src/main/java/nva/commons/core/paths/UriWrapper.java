@@ -14,6 +14,7 @@ public class UriWrapper {
 
     public static final String EMPTY_FRAGMENT = null;
     public static final String EMPTY_PATH = null;
+    public static final String MISSING_HOST = "Missing host for creating URI";
     private final URI uri;
 
     public UriWrapper(URI uri) {
@@ -23,6 +24,15 @@ public class UriWrapper {
 
     public UriWrapper(String uri) {
         this(URI.create(uri));
+    }
+
+    public UriWrapper(String scheme, String host) {
+        this(createUriWithSchemeAndHost(scheme, host));
+    }
+
+    private static URI createUriWithSchemeAndHost(String scheme, String host) {
+        return attempt(() -> new URI(scheme, host, EMPTY_PATH, EMPTY_FRAGMENT))
+            .orElseThrow(fail -> new IllegalArgumentException(MISSING_HOST, fail.getException()));
     }
 
     public URI getUri() {

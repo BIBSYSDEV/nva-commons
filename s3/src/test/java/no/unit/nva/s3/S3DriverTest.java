@@ -1,5 +1,6 @@
 package no.unit.nva.s3;
 
+import static no.unit.nva.s3.S3Driver.S3_SCHEME;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.core.Is.is;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.core.paths.UnixPath;
+import nva.commons.core.paths.UriWrapper;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -210,6 +213,17 @@ class S3DriverTest {
             new BufferedReader(new InputStreamReader(new GZIPInputStream(actualPutObjectContent)));
         List<String> actualContent = inputReader.lines().collect(Collectors.toList());
         assertThat(actualContent, is(equalTo(input)));
+    }
+
+    @Test
+    public void shouldReturnUriToS3FileLocationWhenSavingEvent() {
+        String content = randomString();
+        UnixPath someFolder = UnixPath.of("parent", "child1", "child2");
+        URI fileLocation = s3Driver.insertEvent(someFolder, content);
+        String randomFilename = new UriWrapper(fileLocation).getFilename();
+        assertThat(fileLocation.getScheme(), is(equalTo(S3_SCHEME)));
+        assertThat(fileLocation.getHost(), is(equalTo(SAMPLE_BUCKET)));
+        assertThat(fileLocation.getPath(), is(equalTo("/parent/child1/child2/" + randomFilename)));
     }
 
     @ParameterizedTest(name = "insertAndCompressFilesStoresAllFilesCompressedInGzipStreamInSpecifiedFolder")
