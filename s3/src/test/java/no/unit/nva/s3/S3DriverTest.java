@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import no.unit.nva.stubs.FakeS3Client;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.core.paths.UnixPath;
 import nva.commons.core.paths.UriWrapper;
@@ -216,7 +217,7 @@ class S3DriverTest {
     }
 
     @Test
-    public void shouldReturnUriToS3FileLocationWhenSavingEvent() {
+    public void shouldReturnUriToS3FileLocationWhenSavingEvent() throws IOException {
         String content = randomString();
         UnixPath someFolder = UnixPath.of("parent", "child1", "child2");
         URI fileLocation = s3Driver.insertEvent(someFolder, content);
@@ -224,6 +225,16 @@ class S3DriverTest {
         assertThat(fileLocation.getScheme(), is(equalTo(S3_SCHEME)));
         assertThat(fileLocation.getHost(), is(equalTo(SAMPLE_BUCKET)));
         assertThat(fileLocation.getPath(), is(equalTo("/parent/child1/child2/" + randomFilename)));
+    }
+
+    @Test
+    public void shouldReadFileContentBasedOnUri() throws IOException {
+        s3Driver = new S3Driver(new FakeS3Client(), "ignoredBucketName");
+        String content = randomString();
+        UnixPath someFolder = UnixPath.of("parent", "child1", "child2");
+        URI fileLocation = s3Driver.insertEvent(someFolder, content);
+        String retrievedContent = s3Driver.readEvent(fileLocation);
+        assertThat(retrievedContent, is(equalTo(content)));
     }
 
     @ParameterizedTest(name = "insertAndCompressFilesStoresAllFilesCompressedInGzipStreamInSpecifiedFolder")

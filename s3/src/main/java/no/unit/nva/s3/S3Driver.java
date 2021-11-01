@@ -98,11 +98,25 @@ public class S3Driver {
      * @param folder  The folder where the event will be stored
      * @param content the event body
      * @return S3 uri to the event file.
+     * @throws IOException when IO fails
      */
-    public URI insertEvent(UnixPath folder, String content) {
-        UnixPath filePath = folder.addChild(UUID.randomUUID().toString());
-        insertFile(filePath, content);
+    public URI insertEvent(UnixPath folder, String content) throws IOException {
+        UnixPath filePath = folder.addChild(UUID.randomUUID() + GZIP_ENDING);
+        try (InputStream compressedContent = contentToZippedStream(List.of(content))) {
+            insertFile(filePath, compressedContent);
+        }
         return new UriWrapper(S3_SCHEME, bucketName).addChild(filePath).getUri();
+    }
+
+    /**
+     * Method for reading event bodies from S3 bucket.
+     *
+     * @param uri the S3 URI to the file. The host must be equal to the bucket name of the S3 driver
+     * @return the file contents uncompressed.
+     */
+    public String readEvent(URI uri) {
+        UnixPath filePath = new UriWrapper(uri).toS3bucketPath();
+        return getFile(filePath);
     }
 
     public void insertAndCompressFiles(UnixPath s3Folder, List<String> content) throws IOException {
