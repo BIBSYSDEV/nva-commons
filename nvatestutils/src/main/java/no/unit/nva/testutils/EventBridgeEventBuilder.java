@@ -10,6 +10,7 @@ import java.util.List;
 import no.unit.nva.events.models.AwsEventBridgeDetail;
 import no.unit.nva.events.models.AwsEventBridgeEvent;
 import nva.commons.core.JacocoGenerated;
+import nva.commons.core.JsonSerializable;
 import nva.commons.core.JsonUtils;
 import nva.commons.core.attempt.Try;
 import nva.commons.core.ioutils.IoUtils;
@@ -27,7 +28,7 @@ public final class EventBridgeEventBuilder {
     @JacocoGenerated
     public static <T> InputStream sampleLambdaDestinationsEvent(T eventBody) {
         var detail = createDestinationsEventDetailBody(eventBody);
-        var event = sampleEvent(detail);
+        var event = sampleEventObject(detail);
         return Try.of(event)
             .map(AwsEventBridgeEvent::toJsonString)
             .map(IoUtils::stringToStream)
@@ -35,7 +36,15 @@ public final class EventBridgeEventBuilder {
     }
 
     @JacocoGenerated
-    public static <T> AwsEventBridgeEvent<T> sampleEvent(T detail) {
+    public static <T> InputStream sampleEvent(T detail) {
+        return Try.of(sampleEventObject(detail))
+            .map(JsonSerializable::toJsonString)
+            .map(IoUtils::stringToStream)
+            .orElseThrow();
+    }
+
+    @JacocoGenerated
+    public static <T> AwsEventBridgeEvent<T> sampleEventObject(T detail) {
         var event = new AwsEventBridgeEvent<T>();
         event.setDetail(detail);
         event.setVersion(randomString());
