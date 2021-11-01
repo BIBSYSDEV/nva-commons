@@ -40,7 +40,7 @@ public class RandomDataGenerator {
     }
 
     public static URI randomDoi() {
-        return URI.create("https://doi.org/10.1000/" + randomInteger(10000));
+        return URI.create("https://doi.org/10.1000/" + randomInteger(10_000));
     }
 
     public static String randomIsbn10() {
