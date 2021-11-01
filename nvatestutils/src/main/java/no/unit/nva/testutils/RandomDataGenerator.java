@@ -39,6 +39,10 @@ public class RandomDataGenerator {
         return URI.create("https://www.example.com/" + randomString());
     }
 
+    public static URI randomDoi() {
+        return URI.create("https://doi.org/10.1000/" + randomInteger(10000));
+    }
+
     public static String randomIsbn10() {
         return FAKER.code().isbn10();
     }

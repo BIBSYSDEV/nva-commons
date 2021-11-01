@@ -1,5 +1,6 @@
 package no.unit.nva.testutils;
 
+import static no.unit.nva.testutils.RandomDataGenerator.randomDoi;
 import static no.unit.nva.testutils.RandomDataGenerator.randomInstant;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -10,6 +11,7 @@ import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import java.net.URI;
 import java.time.Instant;
 import java.util.List;
+import nva.commons.doi.DoiValidator;
 import org.apache.commons.validator.routines.ISBNValidator;
 import org.hamcrest.number.OrderingComparison;
 import org.junit.jupiter.api.Test;
@@ -75,5 +77,11 @@ class RandomDataGeneratorTest {
     void shouldReturnRandomInstantAfterSuppliedDate() {
         Instant earliestDate = Instant.parse("2007-12-03T10:15:30.00Z");
         assertThat(randomInstant(earliestDate), is(OrderingComparison.greaterThan(earliestDate)));
+    }
+
+    @Test
+    void shouldReturnRandomValidDois() {
+        URI doiURi = randomDoi();
+        assertThat(DoiValidator.validateOffline(doiURi), is(true));
     }
 }
