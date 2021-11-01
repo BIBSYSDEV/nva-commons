@@ -49,13 +49,18 @@ allprojects {
     project.ext {
         jacksonVersion = "2.12.4"
         awsSdkVersion = "1.12.52"
-        awsSkd2Version = '2.17.24'
-        jupiterVersion = "5.7.2"
+        awsSdk2Version = '2.17.24'
+        jupiterVersion = "5.8.1"
         log4jVersion = "2.14.1"
         nvaTestUtilsVersion = "0.1.27"
         zalandoProblemVersion ='0.26.0'
         guavaVersion = '30.1.1-jre'
         spotifyHamcrest = '1.2.0'
+        mockitoVersion = '4.0.0'
+        hamcrestVersion = '2.2'
+        javaFaker = '1.0.2'
+        apacheCommons= '3.12.0'
+        commonsValidator = '1.7'
     }
 
     test {
