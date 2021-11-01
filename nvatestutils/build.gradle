@@ -1,6 +1,7 @@
 dependencies {
     implementation project(":core")
     implementation project(":eventhandlers")
+    testImplementation project(":doi")
 
     implementation group: 'org.mockito', name: 'mockito-core', version: project.ext.mockitoVersion
     implementation group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.13'
@@ -19,6 +20,7 @@ dependencies {
     implementation group: 'commons-validator', name: 'commons-validator', version: project.ext.commonsValidator
     implementation group: 'com.github.javafaker', name: 'javafaker', version: project.ext.javaFaker
 
+    testImplementation project(":doi")
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: project.ext.jupiterVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: project.ext.mockitoVersion
 
