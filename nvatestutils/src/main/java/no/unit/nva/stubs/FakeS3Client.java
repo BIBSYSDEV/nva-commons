@@ -62,10 +62,8 @@ public class FakeS3Client implements S3Client {
         List<String> fileKeys = filesAndContent.keySet().stream().sorted().collect(Collectors.toList());
         var startIndex = calculateStartIndex(fileKeys, listObjectsRequest.marker());
         var endIndex = calculateEndIndex(fileKeys, listObjectsRequest.marker(), listObjectsRequest.maxKeys());
-
         var truncated = endIndex < fileKeys.size();
         List<S3Object> files = fileKeys.subList(startIndex, endIndex).stream()
-
             .map(filename -> S3Object.builder().key(filename).build())
             .collect(Collectors.toList());
 

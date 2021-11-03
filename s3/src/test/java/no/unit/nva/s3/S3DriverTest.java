@@ -20,9 +20,7 @@ import no.unit.nva.stubs.FakeS3Client;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.core.paths.UnixPath;
 import nva.commons.core.paths.UriWrapper;
-import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -36,9 +34,6 @@ class S3DriverTest {
     public static final String ROOT = "/";
     private static final Faker FAKER = Faker.instance();
     private static final String SAMPLE_BUCKET = "sampleBucket";
-
-    private static final String REMOTELY_EXISTING_BUCKET = "orestis-export";
-
     private static final String SOME_PATH = randomString();
     private S3Driver s3Driver;
     private S3Client s3Client;
@@ -50,59 +45,7 @@ class S3DriverTest {
     }
 
     @Test
-    @Tag("RemoteTest")
-    public void listAllFilesReturnsListWithAllFilenamesInRemoteS3Folder() throws IOException {
-        S3Driver s3Driver = new S3Driver(S3Client.create(), REMOTELY_EXISTING_BUCKET);
-        UnixPath expectedFilename = constructNestedPath();
-        UnixPath parentFolder = expectedFilename.getParent().orElseThrow();
-        String content = longText();
-        s3Driver.insertFile(expectedFilename, content);
-        List<UnixPath> files = s3Driver.listAllFiles(UnixPath.of(parentFolder.toString()));
-        assertThat(files, CoreMatchers.hasItem(expectedFilename));
-    }
-
-    @Test
-    @Tag("RemoteTest")
-    public void listFilesReturnsPartialResultAndInformationForFetchingNextBatch() {
-
-        S3Driver s3Driver = new S3Driver(S3Client.create(), REMOTELY_EXISTING_BUCKET);
-        UnixPath path = UnixPath.of("some/known/path");
-        ListingResult result = s3Driver.listFiles(path, null, 100);
-        List<UnixPath> totalResults = new ArrayList<>(result.getFiles());
-        while (result.isTruncated()) {
-            result = s3Driver.listFiles(path, result.getListingStartingPoint(), 100);
-            totalResults.addAll(result.getFiles());
-        }
-        int knownSizeOfResult = 2000;
-        assertThat(totalResults.size(), is(equalTo(knownSizeOfResult)));
-    }
-
-    @Test
-    @Tag("RemoteTest")
-    public void getUncompressedFileReturnsFileWhenFileExistsInRemoteFolder() throws IOException {
-        S3Driver s3Driver = new S3Driver(S3Client.create(), REMOTELY_EXISTING_BUCKET);
-        String expectedContent = longText();
-        UnixPath expectedFilePath = constructNestedPath();
-        s3Driver.insertFile(expectedFilePath, expectedContent);
-        String actualContent = s3Driver.getUncompressedFile(expectedFilePath).orElseThrow();
-        assertThat(actualContent, is(equalTo(expectedContent)));
-    }
-
-    @Test
-    @Tag("RemoteTest")
-    public void getFilesReturnsTheContentsOfAllFilesInARemoteFolder() throws IOException {
-        S3Driver s3Driver = new S3Driver(S3Client.create(), REMOTELY_EXISTING_BUCKET);
-        String expectedContent = longText();
-        UnixPath expectedFilePath = constructNestedPath();
-        s3Driver.insertFile(expectedFilePath, expectedContent);
-        List<String> actualContent = s3Driver.getFiles(expectedFilePath);
-
-        assertThat(actualContent.size(), is(equalTo(1)));
-        assertThat(actualContent, CoreMatchers.hasItem(expectedContent));
-    }
-
-    @Test
-    public void listAllFilesReturnsListWithAllFilenamesInS3Folder() throws IOException {
+    void shouldReturnListWithAllFilenamesInS3Folder() throws IOException {
         UnixPath firstPath = UnixPath.of(SOME_PATH).addChild(randomString()).addChild(randomString());
         UnixPath secondPath = UnixPath.of(SOME_PATH).addChild(randomString()).addChild(randomString());
         s3Driver.insertFile(firstPath, randomString());
@@ -112,10 +55,10 @@ class S3DriverTest {
     }
 
     @Test
-    public void listFilesReturnsResultContainingPartialFileListAndNewListStartingPointAndSignForTerminatingListing()
+    void shouldReturnResultContainingPartialFileListAndNewListStartingPointAndSignForTerminatingListing()
         throws IOException {
-        final UnixPath firstFilePath = UnixPath.of(SOME_PATH, "aaa");
-        final UnixPath secondFilePath = UnixPath.of(SOME_PATH, "bbb");
+        final UnixPath firstFilePath = UnixPath.of(SOME_PATH, "a-alphabeticallyOrdered");
+        final UnixPath secondFilePath = UnixPath.of(SOME_PATH, "b-alphabeticallyOrdered");
         final String firstFileContent = randomString();
         final String secondFileContent = randomString();
         s3Driver.insertFile(firstFilePath, firstFileContent);
@@ -131,7 +74,7 @@ class S3DriverTest {
     }
 
     @Test
-    public void getFilesReturnsTheContentsOfAllFilesInFolder() throws IOException {
+    void shouldReturnTheContentsOfAllFilesInFolder() throws IOException {
 
         final UnixPath firstFilePath = UnixPath.of(SOME_PATH, randomString());
         final UnixPath secondFilePath = UnixPath.of(SOME_PATH, randomString());
@@ -148,7 +91,7 @@ class S3DriverTest {
     }
 
     @Test
-    public void getFileReturnsFileWhenFileExists() throws IOException {
+    void shouldReturnFileWhenFileExists() throws IOException {
         UnixPath somePath = UnixPath.of(SOME_PATH);
         String expectedContent = randomString();
         URI fileLocation = s3Driver.insertFile(somePath, expectedContent);
@@ -157,7 +100,7 @@ class S3DriverTest {
     }
 
     @Test
-    public void insertFileInsertsObjectEncodedInUtf8() throws IOException {
+    void shouldInsertObjectEncodedInUtf8() throws IOException {
         UnixPath filePath = constructNestedPath();
         String expectedContent = randomString();
         s3Driver.insertFile(filePath, expectedContent);
@@ -166,7 +109,7 @@ class S3DriverTest {
     }
 
     @Test
-    public void getCompressedFileReturnsContentsWhenInputIsCompressed() throws IOException {
+    void shouldReturnContentsAsCompressedStreamWhenInputIsCompressed() throws IOException {
         String compressedFilename = "compressed.gz";
         String expectedContents = randomString();
         s3Driver.insertFile(UnixPath.of(compressedFilename), expectedContents);
@@ -176,7 +119,7 @@ class S3DriverTest {
     }
 
     @Test
-    public void insertFileWithInputStreamSendsDataToS3() throws IOException {
+    void shouldSendDataToS3WhenInputIsInputStream() throws IOException {
         String expectedContent = longText();
         InputStream inputStream = IoUtils.stringToStream(expectedContent);
 
@@ -187,7 +130,7 @@ class S3DriverTest {
     }
 
     @Test
-    public void shouldCompressAndStoreFileWhenInputFilenameEndsWithGzAndContentIsString() throws IOException {
+    void shouldCompressAndStoreFileWhenInputFilenameEndsWithGzAndContentIsString() throws IOException {
         String expectedContent = longText();
         UnixPath filePath = UnixPath.of("input.gz");
         s3Driver.insertFile(filePath, expectedContent);
@@ -198,7 +141,28 @@ class S3DriverTest {
     }
 
     @Test
-    public void insertAndCompressFilesFilesStoresAllFilesCompressedInGzipStream() throws IOException {
+    void shouldReturnUriToS3FileLocationWhenSavingEvent() throws IOException {
+        String content = randomString();
+        UnixPath someFolder = UnixPath.of("parent", "child1", "child2");
+        URI fileLocation = s3Driver.insertEvent(someFolder, content);
+        String randomFilename = new UriWrapper(fileLocation).getFilename();
+        assertThat(fileLocation.getScheme(), is(equalTo(S3_SCHEME)));
+        assertThat(fileLocation.getHost(), is(equalTo(SAMPLE_BUCKET)));
+        assertThat(fileLocation.getPath(), is(equalTo("/parent/child1/child2/" + randomFilename)));
+    }
+
+    @Test
+    void shouldReadFileContentBasedOnUri() throws IOException {
+        s3Driver = new S3Driver(new FakeS3Client(), "ignoredBucketName");
+        String content = randomString();
+        UnixPath someFolder = UnixPath.of("parent", "child1", "child2");
+        URI fileLocation = s3Driver.insertEvent(someFolder, content);
+        String retrievedContent = s3Driver.readEvent(fileLocation);
+        assertThat(retrievedContent, is(equalTo(content)));
+    }
+
+    @Test
+    void shouldCompressCollectionUnderSpecifiedPath() throws IOException {
         List<String> input = new ArrayList<>();
         for (int i = 0; i < LARGE_NUMBER_OF_INPUTS; i++) {
             input.add(longText());
@@ -211,30 +175,9 @@ class S3DriverTest {
         assertThat(actualContent, is(equalTo(input)));
     }
 
-    @Test
-    public void shouldReturnUriToS3FileLocationWhenSavingEvent() throws IOException {
-        String content = randomString();
-        UnixPath someFolder = UnixPath.of("parent", "child1", "child2");
-        URI fileLocation = s3Driver.insertEvent(someFolder, content);
-        String randomFilename = new UriWrapper(fileLocation).getFilename();
-        assertThat(fileLocation.getScheme(), is(equalTo(S3_SCHEME)));
-        assertThat(fileLocation.getHost(), is(equalTo(SAMPLE_BUCKET)));
-        assertThat(fileLocation.getPath(), is(equalTo("/parent/child1/child2/" + randomFilename)));
-    }
-
-    @Test
-    public void shouldReadFileContentBasedOnUri() throws IOException {
-        s3Driver = new S3Driver(new FakeS3Client(), "ignoredBucketName");
-        String content = randomString();
-        UnixPath someFolder = UnixPath.of("parent", "child1", "child2");
-        URI fileLocation = s3Driver.insertEvent(someFolder, content);
-        String retrievedContent = s3Driver.readEvent(fileLocation);
-        assertThat(retrievedContent, is(equalTo(content)));
-    }
-
-    @ParameterizedTest(name = "insertAndCompressFilesStoresAllFilesCompressedInGzipStreamInSpecifiedFolder")
+    @ParameterizedTest(name = "should store all content under specified path removing root")
     @ValueSource(strings = {EMPTY_STRING, ROOT})
-    public void insertAndCompressFilesStoresAllFilesCompressedInGzipStreamInSpecifiedFolder(String pathPrefix)
+    void shouldStoreAllContentUnderSpecifiedPathRemovingRoot(String pathPrefix)
         throws IOException {
         List<String> input = new ArrayList<>();
         for (int i = 0; i < LARGE_NUMBER_OF_INPUTS; i++) {
@@ -252,7 +195,7 @@ class S3DriverTest {
     }
 
     @Test
-    public void insertAndCompressObjectsStoresAllFilesDirectlyUnderBucketWhenCalledWithoutPath() throws IOException {
+    void shouldStoreAllFilesDirectlyUnderBucketWhenCalledWithoutPath() throws IOException {
         String input = longText();
         URI fileLocation = s3Driver.insertAndCompressObjects(List.of(input));
         String actualContent = s3Driver.getFile(toS3Path(fileLocation));
