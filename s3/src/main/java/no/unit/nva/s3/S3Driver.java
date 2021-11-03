@@ -163,14 +163,14 @@ public class S3Driver {
     }
 
     public List<UnixPath> listAllFiles(UnixPath folder) {
-        ListingResult partialResult = ListingResult.emptyResult();
+        ListingResult result = ListingResult.emptyResult();
         do {
-            String currentStartingPoint = partialResult.getListingStartingPoint();
+            String currentStartingPoint = result.getListingStartingPoint();
             ListingResult newBatch = listFiles(folder, currentStartingPoint, MAX_RESPONSE_SIZE_FOR_S3_LISTING);
-            partialResult = partialResult.add(newBatch);
-        } while (partialResult.isTruncated());
+            result = result.add(newBatch);
+        } while (result.isTruncated());
 
-        return partialResult.getFiles();
+        return result.getFiles();
     }
 
     /**
