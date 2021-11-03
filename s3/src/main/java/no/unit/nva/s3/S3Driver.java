@@ -6,9 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,8 +48,9 @@ public class S3Driver {
     public static final int REMOVE_ROOT = 1;
     public static final int MAX_RESPONSE_SIZE_FOR_S3_LISTING = 1000;
     public static final String S3_SCHEME = "s3";
+    public static final int IDLE_TIME = 30;
+    public static final int TIMEOUT_TIME = 30;
     private static final Environment ENVIRONMENT = new Environment();
-    private static final String EMPTY_STRING = "";
     private final S3Client client;
     private final String bucketName;
 
@@ -79,17 +78,30 @@ public class S3Driver {
         return ApacheHttpClient.builder()
             .useIdleConnectionReaper(true)
             .maxConnections(MAX_CONNECTIONS)
-            .connectionMaxIdleTime(Duration.ofMinutes(30))
-            .connectionTimeout(Duration.ofMinutes(30))
+            .connectionMaxIdleTime(Duration.ofMinutes(IDLE_TIME))
+            .connectionTimeout(Duration.ofMinutes(TIMEOUT_TIME))
             .build();
     }
 
-    public void insertFile(UnixPath fullPath, String content) {
-        client.putObject(newPutObjectRequest(fullPath), createRequestBody(content));
+    /**
+     * Inserts the content of the string in the specified location.If the filename is gz, it compresses the contents.
+     *
+     * @param fullPath the Location path of the item (without the bucketname)
+     * @param content  The data we want to store
+     * @throws IOException when compression fails.
+     */
+    public URI insertFile(UnixPath fullPath, String content) throws IOException {
+        if (fullPath.getFilename().endsWith(GZIP_ENDING)) {
+            insertCompressedFile(fullPath, content);
+        } else {
+            insertUncompressedFile(fullPath, content);
+        }
+        return s3BucketUri().addChild(fullPath).getUri();
     }
 
-    public void insertFile(UnixPath fullPath, InputStream content) throws IOException {
+    public URI insertFile(UnixPath fullPath, InputStream content) throws IOException {
         client.putObject(newPutObjectRequest(fullPath), createRequestBody(content));
+        return s3BucketUri().addChild(fullPath).getUri();
     }
 
     /**
@@ -102,10 +114,8 @@ public class S3Driver {
      */
     public URI insertEvent(UnixPath folder, String content) throws IOException {
         UnixPath filePath = folder.addChild(UUID.randomUUID() + GZIP_ENDING);
-        try (InputStream compressedContent = contentToZippedStream(List.of(content))) {
-            insertFile(filePath, compressedContent);
-        }
-        return new UriWrapper(S3_SCHEME, bucketName).addChild(filePath).getUri();
+        insertCompressedFile(filePath, content);
+        return s3BucketUri().addChild(filePath).getUri();
     }
 
     /**
@@ -119,17 +129,30 @@ public class S3Driver {
         return getFile(filePath);
     }
 
-    public void insertAndCompressFiles(UnixPath s3Folder, List<String> content) throws IOException {
+    @JacocoGenerated
+    @Deprecated
+    public URI insertAndCompressFiles(UnixPath s3Folder, List<String> content) throws IOException {
+        return insertAndCompressObjects(s3Folder, content);
+    }
+
+    public URI insertAndCompressObjects(UnixPath s3Folder, List<String> content) throws IOException {
         UnixPath path = filenameForZippedFile(s3Folder);
         PutObjectRequest putObjectRequest = newPutObjectRequest(path);
-        try (InputStream compressedContent = contentToZippedStream(content)) {
+        try (InputStream compressedContent = compressContent(content)) {
             RequestBody requestBody = createRequestBody(compressedContent);
             client.putObject(putObjectRequest, requestBody);
         }
+        return s3BucketUri().addChild(path).getUri();
     }
 
-    public void insertAndCompressFiles(List<String> content) throws IOException {
-        insertAndCompressFiles(UnixPath.of(EMPTY_STRING), content);
+    public URI insertAndCompressObjects(List<String> content) throws IOException {
+        return insertAndCompressObjects(UnixPath.EMPTY_PATH, content);
+    }
+
+    @JacocoGenerated
+    @Deprecated
+    public URI insertAndCompressFiles(List<String> content) throws IOException {
+        return insertAndCompressObjects(content);
     }
 
     public List<String> getFiles(UnixPath folder) {
@@ -140,16 +163,14 @@ public class S3Driver {
     }
 
     public List<UnixPath> listAllFiles(UnixPath folder) {
-        List<UnixPath> resultBuffer = new ArrayList<>();
-        ListingResult partialResult;
-        String listingStartingPoint = null;
+        ListingResult result = ListingResult.emptyResult();
         do {
-            partialResult = listFiles(folder, listingStartingPoint, MAX_RESPONSE_SIZE_FOR_S3_LISTING);
-            resultBuffer.addAll(partialResult.getFiles());
-            listingStartingPoint = partialResult.getListingStartingPoint();
-        } while (partialResult.isTruncated());
+            String currentStartingPoint = result.getListingStartingPoint();
+            ListingResult newBatch = listFiles(folder, currentStartingPoint, MAX_RESPONSE_SIZE_FOR_S3_LISTING);
+            result = result.add(newBatch);
+        } while (result.isTruncated());
 
-        return resultBuffer;
+        return result.getFiles();
     }
 
     /**
@@ -209,9 +230,25 @@ public class S3Driver {
         ENVIRONMENT.readEnv(AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME);
     }
 
+    private UriWrapper s3BucketUri() {
+        return new UriWrapper(S3_SCHEME, bucketName);
+    }
+
+    private void insertUncompressedFile(UnixPath fullPath, String content) throws IOException {
+        try (InputStream inputStream = IoUtils.stringToStream(content)) {
+            client.putObject(newPutObjectRequest(fullPath), createRequestBody(inputStream));
+        }
+    }
+
+    private void insertCompressedFile(UnixPath fullPath, String content) throws IOException {
+        try (InputStream inputStream = compressContent(List.of(content))) {
+            insertFile(fullPath, inputStream);
+        }
+    }
+
     private UnixPath filenameForZippedFile(UnixPath s3Folder) {
         String folderPath = processPath(s3Folder);
-        return UnixPath.of(folderPath, UUID.randomUUID().toString() + GZIP_ENDING);
+        return UnixPath.of(folderPath, UUID.randomUUID() + GZIP_ENDING);
     }
 
     private String processPath(UnixPath s3Folder) {
@@ -223,16 +260,12 @@ public class S3Driver {
                    : unixPath;
     }
 
-    private RequestBody createRequestBody(InputStream compressedContent) throws IOException {
-        var bytes = IoUtils.inputStreamToBytes(compressedContent);
+    private RequestBody createRequestBody(InputStream input) throws IOException {
+        var bytes = IoUtils.inputStreamToBytes(input);
         return RequestBody.fromBytes(bytes);
     }
 
-    private RequestBody createRequestBody(String content) {
-        return RequestBody.fromBytes(content.getBytes(StandardCharsets.UTF_8));
-    }
-
-    private InputStream contentToZippedStream(List<String> content) throws IOException {
+    private InputStream compressContent(List<String> content) throws IOException {
         return new StringCompressor(content).gzippedData();
     }
 

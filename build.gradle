@@ -25,7 +25,7 @@ wrapper {
 
 allprojects {
     group = 'com.github.bibsysdev'
-    version = '1.16.6'
+    version = '1.16.7'
 
     apply plugin: 'java-library'
     apply plugin: 'jacoco'
@@ -52,7 +52,6 @@ allprojects {
         awsSdk2Version = '2.17.24'
         jupiterVersion = "5.8.1"
         log4jVersion = "2.14.1"
-        nvaTestUtilsVersion = "0.1.27"
         zalandoProblemVersion ='0.26.0'
         guavaVersion = '30.1.1-jre'
         spotifyHamcrest = '1.2.0'
@@ -181,7 +180,6 @@ subprojects {
         testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
         testImplementation group: 'org.hamcrest', name: 'hamcrest-core', version: '2.2'
         testImplementation group: 'com.github.npathai', name: 'hamcrest-optional', version: '2.0.0'
-        testImplementation group: 'com.github.bibsysdev', name: 'nva-testutils', version: project.ext.nvaTestUtilsVersion
         testImplementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
         testImplementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
     }
