@@ -1,5 +1,6 @@
 package no.unit.nva.s3;
 
+import java.util.ArrayList;
 import java.util.List;
 import nva.commons.core.paths.UnixPath;
 
@@ -15,6 +16,10 @@ public class ListingResult {
         this.truncated = isTruncated;
     }
 
+    public static ListingResult emptyResult() {
+        return new ListingResult(new ArrayList<>(), null, false);
+    }
+
     public String getListingStartingPoint() {
         return listingStartingPoint;
     }
@@ -25,5 +30,13 @@ public class ListingResult {
 
     public boolean isTruncated() {
         return truncated;
+    }
+
+    public ListingResult add(ListingResult listFiles) {
+        List<UnixPath> allFiles = new ArrayList<>(this.getFiles());
+        allFiles.addAll(listFiles.getFiles());
+        return new ListingResult(allFiles,
+                                 listFiles.getListingStartingPoint(),
+                                 listFiles.isTruncated());
     }
 }

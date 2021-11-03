@@ -11,5 +11,6 @@ dependencies{
     }
     testImplementation project(":core")
     testImplementation project(":logutils")
+    testImplementation project(":nvatestutils")
 
 }
