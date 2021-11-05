@@ -5,10 +5,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.ioutils.IoUtils;
@@ -36,7 +37,7 @@ public class FakeS3Client implements S3Client {
     }
 
     public FakeS3Client(Map<String, InputStream> filesAndContent) {
-        this.filesAndContent = new ConcurrentHashMap<>(filesAndContent);
+        this.filesAndContent = new LinkedHashMap<>(filesAndContent);
     }
 
     //TODO: fix if necessary
@@ -59,7 +60,8 @@ public class FakeS3Client implements S3Client {
      */
     @Override
     public ListObjectsResponse listObjects(ListObjectsRequest listObjectsRequest) {
-        List<String> fileKeys = filesAndContent.keySet().stream().sorted().collect(Collectors.toList());
+        List<String> fileKeys = new ArrayList<>(filesAndContent.keySet());
+
         var startIndex = calculateStartIndex(fileKeys, listObjectsRequest.marker());
         var endIndex = calculateEndIndex(fileKeys, listObjectsRequest.marker(), listObjectsRequest.maxKeys());
         var truncated = endIndex < fileKeys.size();
