@@ -4,6 +4,7 @@ import static nva.commons.core.attempt.Try.attempt;
 import java.net.URI;
 import java.util.Objects;
 import java.util.Optional;
+import nva.commons.core.StringUtils;
 import nva.commons.core.attempt.Try;
 
 /**
@@ -59,7 +60,8 @@ public class UriWrapper {
         UnixPath thisPath = getPath();
         UnixPath totalPath = thisPath.addChild(childPath).addRoot();
 
-        return attempt(() -> new URI(uri.getScheme(), uri.getHost(), totalPath.toString(), EMPTY_FRAGMENT))
+        return attempt(
+            () -> new URI(uri.getScheme(), uri.getHost(), totalPath.toString(), uri.getQuery(), EMPTY_FRAGMENT))
             .map(UriWrapper::new)
             .orElseThrow();
     }
@@ -85,5 +87,14 @@ public class UriWrapper {
 
     public String getFilename() {
         return getPath().getFilename();
+    }
+
+    public UriWrapper addQueryParameter(String param, String value) {
+        var queryString = StringUtils.isBlank(uri.getQuery())
+                              ? param + "=" + value
+                              : uri.getQuery() + "&" + param + "=" + value;
+        URI newUri = attempt(() -> new URI(uri.getScheme(), uri.getHost(), uri.getPath(), queryString, EMPTY_FRAGMENT))
+            .orElseThrow();
+        return new UriWrapper(newUri);
     }
 }
