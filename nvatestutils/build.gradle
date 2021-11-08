@@ -1,7 +1,7 @@
 dependencies {
     implementation project(":core")
     implementation project(":eventhandlers")
-    testImplementation project(":doi")
+
 
 
     implementation group: 'org.mockito', name: 'mockito-core', version: project.ext.mockitoVersion
@@ -22,7 +22,7 @@ dependencies {
     implementation group: 'com.github.javafaker', name: 'javafaker', version: project.ext.javaFaker
 
     testImplementation project(":doi")
-    testImplementation project(":nvatestutils")
+    testImplementation project(":doi")
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: project.ext.jupiterVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: project.ext.mockitoVersion
 

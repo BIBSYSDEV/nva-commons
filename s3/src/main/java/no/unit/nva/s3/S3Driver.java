@@ -135,6 +135,12 @@ public class S3Driver {
         return insertAndCompressObjects(s3Folder, content);
     }
 
+    @JacocoGenerated
+    @Deprecated
+    public URI insertAndCompressFiles(List<String> content) throws IOException {
+        return insertAndCompressObjects(content);
+    }
+
     public URI insertAndCompressObjects(UnixPath s3Folder, List<String> content) throws IOException {
         UnixPath path = filenameForZippedFile(s3Folder);
         PutObjectRequest putObjectRequest = newPutObjectRequest(path);
@@ -147,12 +153,6 @@ public class S3Driver {
 
     public URI insertAndCompressObjects(List<String> content) throws IOException {
         return insertAndCompressObjects(UnixPath.EMPTY_PATH, content);
-    }
-
-    @JacocoGenerated
-    @Deprecated
-    public URI insertAndCompressFiles(List<String> content) throws IOException {
-        return insertAndCompressObjects(content);
     }
 
     public List<String> getFiles(UnixPath folder) {
