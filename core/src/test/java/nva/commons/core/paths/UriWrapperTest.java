@@ -93,6 +93,31 @@ class UriWrapperTest {
         assertThat(uri.getUri(), is(equalTo(URI.create("https://example.org"))));
     }
 
+    @Test
+    public void shouldReturnUriWithQueryParametersWhenSingleQueryParameterIsPresent() {
+        URI expectedUri = URI.create("https://www.example.org/path1/path2?key1=value1");
+        URI uri = URI.create("https://www.example.org/");
+        URI actualUri = new UriWrapper(uri)
+            .addChild("path1")
+            .addQueryParameter("key1", "value1")
+            .addChild("path2")
+            .getUri();
+        assertThat(actualUri, is(equalTo(expectedUri)));
+    }
+
+    @Test
+    public void shouldReturnUriWithQueryParametersWhenManyQueryParametersArePresent() {
+        URI expectedUri = URI.create("https://www.example.org/path1/path2?key1=value1&key2=value2");
+        URI uri = URI.create("https://www.example.org/");
+        URI actualUri = new UriWrapper(uri)
+            .addChild("path1")
+            .addQueryParameter("key1", "value1")
+            .addQueryParameter("key2", "value2")
+            .addChild("path2")
+            .getUri();
+        assertThat(actualUri, is(equalTo(expectedUri)));
+    }
+
     @ParameterizedTest(name = "should throw exception when either host is empty")
     @NullAndEmptySource
     public void shouldThrowExceptionWhenHostIsEmpty(String emptyInput) {
