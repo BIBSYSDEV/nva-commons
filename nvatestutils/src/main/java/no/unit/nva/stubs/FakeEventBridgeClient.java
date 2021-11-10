@@ -3,8 +3,6 @@ package no.unit.nva.stubs;
 import java.util.ArrayList;
 import java.util.List;
 import nva.commons.core.JacocoGenerated;
-import software.amazon.awssdk.awscore.exception.AwsServiceException;
-import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.eventbridge.EventBridgeClient;
 import software.amazon.awssdk.services.eventbridge.model.PutEventsRequest;
 import software.amazon.awssdk.services.eventbridge.model.PutEventsRequestEntry;
@@ -20,17 +18,18 @@ public class FakeEventBridgeClient implements EventBridgeClient {
     }
 
     @Override
-    public PutEventsResponse putEvents(PutEventsRequest putEventsRequest)
-        throws AwsServiceException, SdkClientException {
+    public PutEventsResponse putEvents(PutEventsRequest putEventsRequest) {
         requestEntries.addAll(putEventsRequest.entries());
         return PutEventsResponse.builder().failedEntryCount(0).build();
     }
 
+    @JacocoGenerated
     @Override
     public String serviceName() {
         return "FakeEventBridgeClient";
     }
 
+    @JacocoGenerated
     @Override
     public void close() {
     }
