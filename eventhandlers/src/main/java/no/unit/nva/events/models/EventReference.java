@@ -14,7 +14,7 @@ import nva.commons.core.JsonSerializable;
  * location. The location is stored in the EventReference as a URI. The {@link EventReference} contains also the topic
  * of the event
  */
-public class EventReference implements JsonSerializable {
+public class EventReference implements JsonSerializable, EventBody {
 
     public static final String TOPIC = "topic";
     public static final String URI = "uri";
@@ -34,9 +34,16 @@ public class EventReference implements JsonSerializable {
         return attempt(() -> defaultEventObjectMapper.readValue(json, EventReference.class)).orElseThrow();
     }
 
+    @Override
     @JacocoGenerated
     public String getTopic() {
         return topic;
+    }
+
+    @JacocoGenerated
+    @Override
+    public void setTopic(String topic) {
+        //do nothing;
     }
 
     @JacocoGenerated
