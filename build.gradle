@@ -25,7 +25,7 @@ wrapper {
 
 allprojects {
     group = 'com.github.bibsysdev'
-    version = '1.16.11'
+    version = '1.16.12'
 
     apply plugin: 'java-library'
     apply plugin: 'jacoco'
