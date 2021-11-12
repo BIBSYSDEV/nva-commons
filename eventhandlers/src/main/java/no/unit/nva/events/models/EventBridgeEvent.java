@@ -2,7 +2,7 @@ package no.unit.nva.events.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public interface Event {
+public interface EventBridgeEvent {
 
     @JsonProperty("topic")
     String getTopic();
