@@ -7,7 +7,7 @@ public final class EventHandlersConfig {
 
     //Events are considered internal operations. Therefore, the default objectMapper is the one that saves
     // the most space. If other mapper is necessary, it can be set accordingly.
-    /* default */ static final ObjectMapper defaultEventObjectMapper = dynamoObjectMapper;
+    public static final ObjectMapper defaultEventObjectMapper = dynamoObjectMapper;
 
     private EventHandlersConfig() {
     }
