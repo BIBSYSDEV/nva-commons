@@ -1,13 +1,17 @@
 package no.unit.nva.testutils;
 
+import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomDoi;
 import static no.unit.nva.testutils.RandomDataGenerator.randomInstant;
+import static no.unit.nva.testutils.RandomDataGenerator.randomJson;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.collection.IsIn.in;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
 import java.time.Instant;
 import java.util.List;
@@ -83,5 +87,12 @@ class RandomDataGeneratorTest {
     void shouldReturnRandomValidDois() {
         URI doiURi = randomDoi();
         assertThat(DoiValidator.validateOffline(doiURi), is(true));
+    }
+
+    @Test
+    void shouldGenerateValidRandomJsonObject() throws JsonProcessingException {
+        String json = randomJson();
+        var root = (ObjectNode) objectMapper.readTree(json);
+        assertThat(root.fields().hasNext(), is(true));
     }
 }

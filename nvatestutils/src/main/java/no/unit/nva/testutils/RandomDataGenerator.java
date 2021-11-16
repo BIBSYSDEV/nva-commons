@@ -25,7 +25,7 @@ public class RandomDataGenerator {
     public static final Faker FAKER = Faker.instance();
     public static final Instant BEGINNING_OF_TIME = LocalDateTime.of(1971, Month.JANUARY, 2, 0, 0)
         .toInstant(ZoneOffset.UTC);
-    public static final ObjectMapper objectMapper = JsonUtils.dtoObjectMapper;
+    protected static final ObjectMapper objectMapper = JsonUtils.dtoObjectMapper;
     private static final Instant END_OF_TIME = Instant.now();
     private static final int ARBITRARY_FIELDS_NUMBER = 5;
 
