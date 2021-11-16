@@ -41,12 +41,6 @@ public class EventReference implements JsonSerializable, EventBody {
     }
 
     @JacocoGenerated
-    @Override
-    public void setTopic(String topic) {
-        //do nothing;
-    }
-
-    @JacocoGenerated
     public URI getUri() {
         return uri;
     }
