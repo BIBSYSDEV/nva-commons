@@ -1,0 +1,73 @@
+plugins {
+    id 'maven-publish'
+    id 'signing'
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = project.name
+            from components.java
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+            pom {
+                name = project.name
+                description = 'A commons library for the NVA project'
+                url = 'https://github.com/BIBSYSDEV/nva-commons'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'http://www.opensource.org/licenses/mit-license.php'
+                    }
+                }
+                developers {
+                    developer {
+                        name = 'Orestis Gkorgkas'
+                        email = 'og@unit.no'
+                        organization = 'UNIT'
+                        organizationUrl = 'https://www.unit.no/'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/BIBSYSDEV/nva-commons.git'
+                    developerConnection = 'scm:git:ssh://github.com/BIBSYSDEV/nva-commons.git'
+                    url = 'https://github.com/BIBSYSDEV/nva-commons/tree/main'
+                }
+            }
+        }
+    }
+}
+
+def gitBranch() {
+    def branch = ""
+    def proc = "git rev-parse --abbrev-ref HEAD".execute()
+    proc.in.eachLine { line -> branch = line }
+    proc.err.eachLine { line -> println line }
+    proc.waitFor()
+    branch
+}
+
+boolean isMainBranch() {
+    def branch = gitBranch()
+    return ((branch == "master" || branch == "main"))
+}
+
+signing {
+    if (isMainBranch()) {
+        def signingKey = findProperty("signingKey")
+        def signingPassword = findProperty("signingPassword")
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign publishing.publications.mavenJava
+    }
+}
