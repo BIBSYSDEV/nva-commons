@@ -1,0 +1,23 @@
+plugins {
+    // Support convention plugins written in Groovy. Convention plugins are build scripts in 'src/main' that automatically become available as plugins in the main build.
+    id 'groovy-gradle-plugin'
+}
+
+repositories {
+    // Use the plugin portal to apply community plugins in convention plugins.
+    gradlePluginPortal()
+    mavenCentral()
+}
+
+wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+    gradleVersion = "7.2"
+}
+
+
+dependencies {
+    implementation group: 'nebula.lint', name: 'nebula.lint.gradle.plugin', version: '17.2.3'
+    implementation group: 'org.jacoco', name: 'org.jacoco.core', version: '0.8.7'
+    implementation group: 'org.jacoco', name: 'org.jacoco.report', version: '0.8.7'
+    implementation group: 'io.github.gradle-nexus', name: 'publish-plugin', version: '1.1.0'
+}
