@@ -4,10 +4,10 @@ plugins {
     id 'base'
     id 'checkstyle'
     id 'pmd'
-    id 'nebula.lint' version '17.1.1'
+    id 'nebula.lint'
     id 'maven-publish'
     id 'signing'
-    id 'io.github.gradle-nexus.publish-plugin' version '1.0.0'
+    id 'io.github.gradle-nexus.publish-plugin'
 }
 
 nexusPublishing {
@@ -20,12 +20,12 @@ nexusPublishing {
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
-    gradleVersion = "6.7"
+    gradleVersion = "7.3"
 }
 
 allprojects {
     group = 'com.github.bibsysdev'
-    version = '1.16.12'
+    version = '1.16.14'
 
     apply plugin: 'java-library'
     apply plugin: 'jacoco'
