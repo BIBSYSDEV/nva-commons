@@ -8,6 +8,4 @@ public interface EventBody {
 
     @JsonProperty(TOPIC)
     String getTopic();
-
-    void setTopic(String topic);
 }
