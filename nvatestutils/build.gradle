@@ -3,7 +3,6 @@ dependencies {
     implementation project(":eventhandlers")
 
 
-
     implementation group: 'org.mockito', name: 'mockito-core', version: project.ext.mockitoVersion
     implementation group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.13'
 
