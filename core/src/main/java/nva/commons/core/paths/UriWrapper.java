@@ -2,6 +2,7 @@ package nva.commons.core.paths;
 
 import static nva.commons.core.attempt.Try.attempt;
 import java.net.URI;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import nva.commons.core.StringUtils;
@@ -96,5 +97,13 @@ public class UriWrapper {
         URI newUri = attempt(() -> new URI(uri.getScheme(), uri.getHost(), uri.getPath(), queryString, EMPTY_FRAGMENT))
             .orElseThrow();
         return new UriWrapper(newUri);
+    }
+
+    public UriWrapper addQueryParameters(Map<String, String> parameters) {
+        UriWrapper uriWrapper = new UriWrapper(getUri());
+        for (Map.Entry<String, String> e : parameters.entrySet()) {
+            uriWrapper = uriWrapper.addQueryParameter(e.getKey(), e.getValue());
+        }
+        return uriWrapper;
     }
 }
