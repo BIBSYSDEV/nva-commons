@@ -22,6 +22,9 @@ dependencies {
     implementation group: 'commons-validator', name: 'commons-validator', version: project.ext.commonsValidator
     implementation group: 'com.github.javafaker', name: 'javafaker', version: project.ext.javaFaker
 
+    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+
+
     testImplementation project(":doi")
     testImplementation project(":doi")
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: project.ext.jupiterVersion
