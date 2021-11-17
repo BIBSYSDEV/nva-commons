@@ -5,7 +5,10 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.net.URI;
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
@@ -117,6 +120,28 @@ class UriWrapperTest {
             .getUri();
         assertThat(actualUri, is(equalTo(expectedUri)));
     }
+
+    @Test
+    public void shouldReturnUriWithQueryParametersWhenQueryParametersAreMap() {
+        URI expectedUri = URI.create("https://www.example.org/path1/path2?key1=value1&key2=value2&key3=value3");
+        URI uri = URI.create("https://www.example.org/");
+        final Map<String, String> parameters = getOrderedParametersMap();
+        URI actualUri = new UriWrapper(uri)
+                .addChild("path1")
+                .addQueryParameters(parameters)
+                .addChild("path2")
+                .addQueryParameter("key3", "value3")
+                .getUri();
+        assertThat(actualUri, is(equalTo(expectedUri)));
+    }
+
+    private TreeMap<String, String> getOrderedParametersMap() {
+        final TreeMap<String, String> parameters = new TreeMap();
+        parameters.put("key1", "value1");
+        parameters.put("key2", "value2");
+        return parameters;
+    }
+
 
     @ParameterizedTest(name = "should throw exception when either host is empty")
     @NullAndEmptySource
