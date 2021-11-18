@@ -1,0 +1,12 @@
+[versions]
+zalandoProblem = { strictly = '0.26.0' }
+lambdaLog4j = { strictly = '1.2.0' }
+guava = { strictly = '31.0.1-jre' }
+
+[libraries]
+zalando = { group = 'org.zalando', name = 'problem', version.ref = 'zalandoProblem' }
+lambda-log4j = { group = 'com.amazonaws', name = 'aws-lambda-java-log4j2', version.ref = 'lambdaLog4j' }
+guava = { group = 'com.google.guava', name = 'guava', version.ref = 'guava' }
+
+
+[bundles]
