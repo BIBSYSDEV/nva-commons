@@ -4,12 +4,14 @@ import static java.util.Objects.isNull;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.ioutils.IoUtils;
@@ -30,14 +32,20 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 public class FakeS3Client implements S3Client {
 
     private static final int START_FROM_BEGINNING = 0;
-    private final Map<String, InputStream> filesAndContent;
+    private final Map<String, ByteBuffer> filesAndContent;
 
     public FakeS3Client(String... filesInBucket) {
         this(readResourceFiles(filesInBucket));
     }
 
-    public FakeS3Client(Map<String, InputStream> filesAndContent) {
+    public FakeS3Client(Map<String, ByteBuffer> filesAndContent) {
         this.filesAndContent = new LinkedHashMap<>(filesAndContent);
+    }
+
+    public static FakeS3Client fromContentsMap(Map<String, InputStream> filesAndContent) {
+        var toByteBuffer = filesAndContent.entrySet().stream()
+            .collect(Collectors.toMap(Entry::getKey, entry -> inputSteamToByteBuffer(entry.getValue())));
+        return new FakeS3Client(toByteBuffer);
     }
 
     //TODO: fix if necessary
@@ -46,10 +54,9 @@ public class FakeS3Client implements S3Client {
     public <ReturnT> ReturnT getObject(GetObjectRequest getObjectRequest,
                                        ResponseTransformer<GetObjectResponse, ReturnT> responseTransformer) {
         String filename = getObjectRequest.key();
-        InputStream inputStream = extractInputStream(filename);
-        byte[] contentBytes = readAllBytes(inputStream);
-        GetObjectResponse response = GetObjectResponse.builder().contentLength((long) contentBytes.length).build();
-        return transformResponse(responseTransformer, new ByteArrayInputStream(contentBytes), response);
+        var contents = extractContent(filename).array();
+        GetObjectResponse response = GetObjectResponse.builder().contentLength((long) contents.length).build();
+        return transformResponse(responseTransformer, new ByteArrayInputStream(contents), response);
     }
 
     /**
@@ -78,7 +85,7 @@ public class FakeS3Client implements S3Client {
     public PutObjectResponse putObject(PutObjectRequest putObjectRequest, RequestBody requestBody) {
         String path = putObjectRequest.key();
         InputStream inputStream = requestBody.contentStreamProvider().newStream();
-        this.filesAndContent.put(path, inputStream);
+        this.filesAndContent.put(path, inputSteamToByteBuffer(inputStream));
         return PutObjectResponse.builder().build();
     }
 
@@ -92,11 +99,20 @@ public class FakeS3Client implements S3Client {
 
     }
 
-    private static Map<String, InputStream> readResourceFiles(String[] filesInBucket) {
+    private static Map<String, ByteBuffer> readResourceFiles(String[] filesInBucket) {
         List<String> suppliedFilenames = Arrays.asList(filesInBucket);
         return suppliedFilenames.stream()
-            .map(filename -> new SimpleEntry<>(filename, IoUtils.inputStreamFromResources(filename)))
+            .map(filename -> new SimpleEntry<>(filename, readFileFromResources(filename)))
             .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
+    }
+
+    private static ByteBuffer readFileFromResources(String filename) {
+        final var inputStream = IoUtils.inputStreamFromResources(filename);
+        return inputSteamToByteBuffer(inputStream);
+    }
+
+    private static ByteBuffer inputSteamToByteBuffer(InputStream inputStream) {
+        return ByteBuffer.wrap(readAllBytes(inputStream));
     }
 
     private int calculateEndIndex(List<String> fileKeys, String marker, Integer pageSize) {
@@ -116,7 +132,7 @@ public class FakeS3Client implements S3Client {
         throw new IllegalStateException("Start index is out of bounds in FakeS3Client");
     }
 
-    private byte[] readAllBytes(InputStream inputStream) {
+    private static byte[] readAllBytes(InputStream inputStream) {
         try {
             return inputStream.readAllBytes();
         } catch (IOException e) {
@@ -124,7 +140,7 @@ public class FakeS3Client implements S3Client {
         }
     }
 
-    private InputStream extractInputStream(String filename) {
+    private ByteBuffer extractContent(String filename) {
         if (filesAndContent.containsKey(filename)) {
             return filesAndContent.get(filename);
         } else {

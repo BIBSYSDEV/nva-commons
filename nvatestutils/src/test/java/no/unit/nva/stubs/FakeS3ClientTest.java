@@ -51,7 +51,7 @@ class FakeS3ClientTest {
         Map<String, InputStream> inputData = new ConcurrentHashMap<>();
         inputData.put(randomString(), IoUtils.stringToStream(randomString()));
         Map<String, InputStream> inputDataCopy = new ConcurrentHashMap<>(inputData);
-        FakeS3Client fakeS3Client = new FakeS3Client(inputData);
+        FakeS3Client fakeS3Client = FakeS3Client.fromContentsMap(inputData);
         putObject(fakeS3Client, SOME_URI, randomString());
         assertThat(inputData, is(equalTo(inputDataCopy)));
     }
