@@ -2,29 +2,19 @@ dependencies {
     implementation project(":core")
     implementation project(":eventhandlers")
 
-
-    implementation group: 'org.mockito', name: 'mockito-core', version: project.ext.mockitoVersion
-    implementation group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.13'
-
-    implementation group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
-    implementation group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: project.ext.awsSdkVersion
-
-    implementation group: 'software.amazon.awssdk', name: 's3', version: project.ext.awsSdk2Version
-    implementation group: 'software.amazon.awssdk', name: 'eventbridge', version: project.ext.awsSdk2Version
+    implementation libs.bundles.testing
+    implementation libs.httpmime
 
 
-    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: project.ext.jacksonVersion
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project.ext.jacksonVersion
-    implementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: project.ext.jacksonVersion
+    implementation libs.aws.sdk.sts
+    implementation libs.aws.lambda.core
+    implementation libs.aws.sdk.s3
+    implementation libs.aws.sdk.eventbridge
 
-    implementation group: 'org.hamcrest', name: 'hamcrest', version: project.ext.hamcrestVersion
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: project.ext.apacheCommons
-    implementation group: 'commons-validator', name: 'commons-validator', version: project.ext.commonsValidator
-    implementation group: 'com.github.javafaker', name: 'javafaker', version: project.ext.javaFaker
+    implementation libs.bundles.jackson
+    implementation libs.commons.lang
+    implementation libs.commons.validator
 
     testImplementation project(":doi")
-    testImplementation project(":doi")
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: project.ext.jupiterVersion
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: project.ext.mockitoVersion
 
 }
