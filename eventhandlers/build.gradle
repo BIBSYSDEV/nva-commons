@@ -1,9 +1,15 @@
+plugins{
+    id 'nvacommons.java-conventions'
+    id 'nvacommons.publish-maven'
+}
+
 dependencies {
     implementation project(":core")
     implementation libs.aws.lambda.core
     implementation libs.aws.sdk2.core
-    implementation group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
-    implementation group: 'com.amazonaws', name: 'aws-java-sdk-core', version: project.ext.awsSdkVersion
+    implementation libs.aws.lambda.core
+    implementation libs.aws.sdk.core
+
 
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")

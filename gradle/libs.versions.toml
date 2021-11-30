@@ -16,9 +16,15 @@ javaFaker = { strictly = '1.0.2' }
 jupiter = { strictly = '5.8.1' }
 awsIon = { strictly = '1.5.1' }
 hamcrestOptional = { strictly = '2.0.0' }
+log4j = { strictly = '2.14.1' }
+slf4j = { strictly = '1.8.0-beta4' }
+apiGuardian = { strictly = '1.1.1' }
+
 
 [libraries]
 zalando = { group = 'org.zalando', name = 'problem', version.ref = 'zalandoProblem' }
+jackson-datatype-problem = { group = 'org.zalando', name = 'jackson-datatype-problem', version.ref = 'zalandoProblem' }
+
 lambda-log4j = { group = 'com.amazonaws', name = 'aws-lambda-java-log4j2', version.ref = 'lambdaLog4j' }
 guava = { group = 'com.google.guava', name = 'guava', version.ref = 'guava' }
 
@@ -38,20 +44,38 @@ aws-apache-client = { group = 'software.amazon.awssdk', name = 'apache-client', 
 
 httpmime = { group = 'org.apache.httpcomponents', name = 'httpmime', version.ref = 'httpmime' }
 
-jackson-datatype = { group = 'com.fasterxml.jackson.datatype', name = 'jackson-datatype-jdk8', version.ref = 'jackson' }
+jackson-core = { group = 'com.fasterxml.jackson.core', name = 'jackson-core', version.ref = 'jackson' }
+jackson-datatype-jdk8 = { group = 'com.fasterxml.jackson.datatype', name = 'jackson-datatype-jdk8', version.ref = 'jackson' }
+jackson-datatype-jsr310 = { group = 'com.fasterxml.jackson.datatype', name = 'jackson-datatype-jsr310', version.ref = 'jackson' }
 jackson-databind = { group = 'com.fasterxml.jackson.core', name = 'jackson-databind', version.ref = 'jackson' }
+jackson-annotations = { group = 'com.fasterxml.jackson.core', name = 'jackson-annotations', version.ref = 'jackson' }
 jackson-module-parameter-names = { group = 'com.fasterxml.jackson.module', name = 'jackson-module-parameter-names', version.ref = 'jackson' }
+
 
 commons-lang = { group = 'org.apache.commons', name = 'commons-lang3', version.ref = 'apacheCommons' }
 commons-validator = { group = 'commons-validator', name = 'commons-validator', version.ref = 'commonsValidator' }
 
+log4j-core = { group = 'org.apache.logging.log4j', name = 'log4j-core', version.ref = 'log4j' }
+log4j-api = { group = 'org.apache.logging.log4j', name = 'log4j-api', version.ref = 'log4j' }
+log4j-slf4j18-impl = { group = 'org.apache.logging.log4j', name = 'log4j-slf4j18-impl', version.ref = 'log4j' }
+slf4j-api = { group = 'org.slf4j', name = 'slf4j-api', version.ref = 'slf4j' }
+
 junit-jupiter = { group = 'org.junit.jupiter', name = 'junit-jupiter', version.ref = 'jupiter' }
+junit-jupiter-api = { group = 'org.junit.jupiter', name = 'junit-jupiter-api', version.ref = 'jupiter' }
+junit-jupiter-params = { group = 'org.junit.jupiter', name = 'junit-jupiter-params', version.ref = 'jupiter' }
+junit-jupiter-engine = { group = 'org.junit.jupiter', name = 'junit-jupiter-engine', version.ref = 'jupiter' }
 hamcrest = { group = 'org.hamcrest', name = 'hamcrest', version.ref = 'hamcrest' }
+hamcrest-core = { group = 'org.hamcrest', name = 'hamcrest-core', version.ref = 'hamcrest' }
 javaFaker = { group = 'com.github.javafaker', name = 'javafaker', version.ref = 'javaFaker' }
 mockito-core = { group = 'org.mockito', name = 'mockito-core', version.ref = 'mockito' }
 hamcrest-optional = { group = 'com.github.npathai', name = 'hamcrest-optional', version.ref = 'hamcrestOptional' }
 
+apiguardian = { group = 'org.apiguardian', name = 'apiguardian-api', version.ref = 'apiGuardian' }
+
 
 [bundles]
-testing = ['mockito-core', 'hamcrest', 'junit-jupiter', 'javaFaker', 'hamcrest-optional']
-jackson = ['jackson-datatype', 'jackson-databind', 'jackson-module-parameter-names']
+testing = ['mockito-core', 'hamcrest', 'hamcrest-core', 'junit-jupiter', 'junit-jupiter-api',
+    'junit-jupiter-params', 'junit-jupiter-engine', 'javaFaker', 'hamcrest-optional', 'commons-lang']
+jackson = ['jackson-core', 'jackson-datatype-jdk8', 'jackson-datatype-jsr310', 'jackson-databind', 'jackson-annotations', 'jackson-module-parameter-names', 'jackson-datatype-problem']
+logging = ['log4j-core', 'log4j-api', 'log4j-slf4j18-impl', 'slf4j-api']
+

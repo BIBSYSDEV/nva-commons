@@ -1,3 +1,8 @@
+plugins{
+    id 'nvacommons.java-conventions'
+    id 'nvacommons.publish-maven'
+}
+
 dependencies {
     implementation project (":core")
     implementation libs.aws.sdk.core
@@ -7,5 +12,7 @@ dependencies {
         exclude(group:'com.amazonaws', module: 'jmespath-java')
     }
     api libs.aws.lambda.events
+
+
 
 }

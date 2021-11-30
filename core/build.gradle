@@ -1,5 +1,14 @@
+plugins{
+    id 'nvacommons.java-conventions'
+    id 'nvacommons.publish-maven'
+}
+
 dependencies{
     implementation libs.zalando
     testImplementation project(":logutils")
+}
 
+test{
+    environment "EXISTING_NON_EMPTY_VARIABLE", "SomeContent"
+    environment "EXISTING_EMPTY_VARIABLE", "  "
 }

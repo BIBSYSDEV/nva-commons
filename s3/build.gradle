@@ -1,3 +1,8 @@
+plugins{
+    id 'nvacommons.java-conventions'
+    id 'nvacommons.publish-maven'
+}
+
 dependencies {
     implementation project (":core")
     implementation libs.aws.sdk.s3
@@ -8,8 +13,7 @@ dependencies {
 
     implementation libs.aws.apache.client
     testImplementation libs.aws.http.client.spi
-    testImplementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
-    testImplementation group: 'com.github.npathai', name: 'hamcrest-optional', version: '2.0.0'
+
     testImplementation project(":nvatestutils")
 
 }
