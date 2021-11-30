@@ -1,13 +1,13 @@
-plugins{
+plugins {
     id 'nvacommons.java-conventions'
     id 'nvacommons.publish-maven'
 }
 
-dependencies{
+dependencies {
     testImplementation project(":logutils")
 }
 
-test{
+test {
     environment "EXISTING_NON_EMPTY_VARIABLE", "SomeContent"
     environment "EXISTING_EMPTY_VARIABLE", "  "
 }

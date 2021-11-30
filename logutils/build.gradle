@@ -1,4 +1,4 @@
-plugins{
+plugins {
     id 'nvacommons.java-conventions'
     id 'nvacommons.publish-maven'
 }

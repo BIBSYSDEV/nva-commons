@@ -1,4 +1,4 @@
-plugins{
+plugins {
     id 'nvacommons.java-conventions'
     id 'nvacommons.publish-maven'
 }
@@ -7,7 +7,6 @@ dependencies {
     implementation project(":core")
     implementation libs.aws.sdk2.core
     implementation libs.aws.sdk.core
-
 
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")
