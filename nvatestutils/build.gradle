@@ -5,14 +5,11 @@ dependencies {
     implementation libs.bundles.testing
     implementation libs.httpmime
 
-
     implementation libs.aws.sdk.sts
-    implementation libs.aws.lambda.core
     implementation libs.aws.sdk.s3
     implementation libs.aws.sdk.eventbridge
 
     implementation libs.bundles.jackson
-    implementation libs.commons.lang
     implementation libs.commons.validator
 
     testImplementation project(":doi")

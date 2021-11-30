@@ -3,7 +3,6 @@ plugins{
     id 'nvacommons.publish-maven'
 }
 
-dependencies{
-    implementation project (":core")
-
+dependencies {
+    implementation project(":core")
 }
