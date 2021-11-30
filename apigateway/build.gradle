@@ -8,6 +8,7 @@ dependencies {
         exclude group: "com.fasterxml.jackson.dataformat", module: "jackson-dataformat-cbor"
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
+
     testImplementation project(":core")
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")
