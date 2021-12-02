@@ -9,7 +9,7 @@ plugins {
 }
 
 group 'com.github.bibsysdev'
-version = '1.16.18'
+version = '1.16.20'
 
 repositories {
     mavenCentral()
