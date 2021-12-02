@@ -1,16 +1,19 @@
-dependencies{
+plugins {
+    id 'nvacommons.java-conventions'
+    id 'nvacommons.publish-maven'
+}
+
+dependencies {
     implementation project(":core")
+    implementation libs.guava
 
-    api group: 'com.google.guava', name: 'guava', version: project.ext.guavaVersion
-
-    implementation group: 'org.zalando', name: 'problem', version: project.ext.zalandoProblemVersion
-    implementation (group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: project.ext.awsSdkVersion){
-        exclude  group:"com.fasterxml.jackson.core", module: "jackson-databind"
-        exclude  group:"com.fasterxml.jackson.dataformat", module: "jackson-dataformat-cbor"
+    implementation(libs.aws.sdk.sts) {
+        exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
+        exclude group: "com.fasterxml.jackson.dataformat", module: "jackson-dataformat-cbor"
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
+
     testImplementation project(":core")
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")
-
 }

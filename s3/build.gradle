@@ -1,13 +1,19 @@
+plugins{
+    id 'nvacommons.java-conventions'
+    id 'nvacommons.publish-maven'
+}
+
 dependencies {
     implementation project (":core")
-    implementation group: 'software.amazon.awssdk', name: 's3', version: project.ext.awsSdk2Version
-    implementation group: 'software.amazon.awssdk', name: 'sdk-core', version: project.ext.awsSdk2Version
-    testImplementation group: 'software.amazon.awssdk', name: 'http-client-spi', version: project.ext.awsSdk2Version
-    implementation group:'software.amazon.ion', name: 'ion-java', version: '1.5.1'
+    implementation libs.aws.sdk.s3
+    implementation libs.aws.sdk.core
 
-    implementation group: 'software.amazon.awssdk', name: 'apache-client', version: project.ext.awsSdk2Version
-    testImplementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
-    testImplementation group: 'com.github.npathai', name: 'hamcrest-optional', version: '2.0.0'
+    implementation libs.aws.sdk2.core
+    implementation libs.aws.ion
+
+    implementation libs.aws.apache.client
+    testImplementation libs.aws.http.client.spi
+
     testImplementation project(":nvatestutils")
 
 }

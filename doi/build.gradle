@@ -1,4 +1,9 @@
-dependencies{
-    implementation project (":core")
-    testImplementation project (":logutils")
+plugins {
+    id 'nvacommons.java-conventions'
+    id 'nvacommons.publish-maven'
+}
+dependencies {
+    implementation project(":core")
+    testImplementation project(":logutils")
+
 }

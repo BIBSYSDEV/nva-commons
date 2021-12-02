@@ -1,4 +1,13 @@
-dependencies{
+plugins {
+    id 'nvacommons.java-conventions'
+    id 'nvacommons.publish-maven'
+}
+
+dependencies {
     testImplementation project(":logutils")
-    implementation group : "org.zalando", name :"jackson-datatype-problem", version: project.ext.zalandoProblemVersion
+}
+
+test {
+    environment "EXISTING_NON_EMPTY_VARIABLE", "SomeContent"
+    environment "EXISTING_EMPTY_VARIABLE", "  "
 }

@@ -1,8 +1,4 @@
-plugins{
+plugins {
     id 'nvacommons.java-conventions'
     id 'nvacommons.publish-maven'
-}
-
-dependencies {
-    implementation project(":core")
 }
