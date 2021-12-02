@@ -1,6 +1,7 @@
 package no.unit.nva.testutils;
 
 import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
+import static no.unit.nva.testutils.RandomDataGenerator.randomBoolean;
 import static no.unit.nva.testutils.RandomDataGenerator.randomDoi;
 import static no.unit.nva.testutils.RandomDataGenerator.randomInstant;
 import static no.unit.nva.testutils.RandomDataGenerator.randomJson;
@@ -10,17 +11,21 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.collection.IsIn.in;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.hamcrest.core.IsNot.not;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.IntStream;
 import nva.commons.doi.DoiValidator;
 import org.apache.commons.validator.routines.ISBNValidator;
 import org.hamcrest.number.OrderingComparison;
 import org.junit.jupiter.api.Test;
 
 class RandomDataGeneratorTest {
+
+    public static final int BIG_ENOUGH_NUMBER_TO_PRODUCE_ALl_POSSIBLE_VALUES = 100;
 
     @Test
     void shouldReturnRandomString() {
@@ -94,5 +99,16 @@ class RandomDataGeneratorTest {
         String json = randomJson();
         var root = (ObjectNode) objectMapper.readTree(json);
         assertThat(root.fields().hasNext(), is(true));
+    }
+
+    @Test
+    void shouldReturnRandomBoolean() {
+        boolean firstValue = RandomDataGenerator.randomBoolean();
+        boolean oppositeValue =
+            IntStream.range(0, BIG_ENOUGH_NUMBER_TO_PRODUCE_ALl_POSSIBLE_VALUES).boxed().map(ignored -> randomBoolean())
+                .filter(randomValue -> !randomValue.equals(firstValue))
+                .findAny()
+                .orElse(firstValue);
+        assertThat(oppositeValue, is(not(equalTo(firstValue))));
     }
 }

@@ -57,6 +57,10 @@ public class RandomDataGenerator {
         return FAKER.code().isbn13();
     }
 
+    public static boolean randomBoolean() {
+        return randomElement(true, false);
+    }
+
     public static <T> T randomElement(T... elements) {
         return elements[RANDOM.nextInt(elements.length)];
     }
