@@ -2,23 +2,23 @@
 zalandoProblem = { strictly = '0.26.0' }
 lambdaLog4j = { strictly = '1.2.0' }
 guava = { strictly = '31.0.1-jre' }
-awsSdk = { strictly = '1.12.112' }
-awsSdk2 = { strictly = '2.17.24' }
-awsLambdaEvents = { strictly = '3.2.0' }
+awsSdk = { strictly = '1.12.122' }
+awsSdk2 = { strictly = '2.17.93' }
+awsLambdaEvents = { strictly = '3.11.0' }
 awsLambdaCore = { strictly = '1.2.1' }
-mockito = { strictly = '4.0.0' }
+mockito = { strictly = '4.1.0' }
 httpmime = { strictly = '4.5.13' }
-jackson = { strictly = '2.12.4' }
+jackson = { strictly = '2.13.0' }
 hamcrest = { strictly = '2.2' }
 apacheCommons = { strictly = '3.12.0' }
 commonsValidator = { strictly = '1.7' }
 javaFaker = { strictly = '1.0.2' }
-jupiter = { strictly = '5.8.1' }
+jupiter = { strictly = '5.8.2' }
 awsIon = { strictly = '1.5.1' }
 hamcrestOptional = { strictly = '2.0.0' }
 log4j = { strictly = '2.14.1' }
 slf4j = { strictly = '1.8.0-beta4' }
-apiGuardian = { strictly = '1.1.1' }
+apiGuardian = { strictly = '1.1.2' }
 
 
 [libraries]
