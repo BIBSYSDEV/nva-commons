@@ -107,6 +107,7 @@ public class UriWrapper {
         return uriWrapper;
     }
 
+    @Override
     public String toString() {
         return this.getUri().toString();
     }
