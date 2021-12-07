@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import nva.commons.apigateway.exceptions.ApiIoException;
@@ -66,8 +67,13 @@ public class RequestInfoTest {
             "awsSampleProxyEvent.json");
     public static final String DOMAIN_NAME_FOUND_IN_RESOURCE_FILE = "id.execute-api.us-east-1.amazonaws.com";
     public static final String PATH_FOUND_IN_RESOURCE_FILE = "my/path";
-    public static final Map<String, String> QUERY_PARAMS_FOUND_IN_RESOURCE_FILE = Map.of(
-            "parameter1", "value1", "parameter2", "value");
+    public static final Map<String, String> QUERY_PARAMS_FOUND_IN_RESOURCE_FILE;
+
+    static {
+        QUERY_PARAMS_FOUND_IN_RESOURCE_FILE = new TreeMap<>();
+        QUERY_PARAMS_FOUND_IN_RESOURCE_FILE.put("parameter1", "value1");
+        QUERY_PARAMS_FOUND_IN_RESOURCE_FILE.put("parameter2", "value");
+    }
 
     @Test
     @DisplayName("RequestInfo can accept unknown fields")
