@@ -64,8 +64,10 @@ public class RequestInfoTest {
         "missingRequestInfo.json");
     private static final Path AWS_SAMPLE_PROXY_EVENT = Path.of(API_GATEWAY_MESSAGES_FOLDER,
             "awsSampleProxyEvent.json");
-    public static final String SAMPLE_DOMAIN_NAME = "id.execute-api.us-east-1.amazonaws.com";
-    public static final String SAMPLE_PATH = "my/path";
+    public static final String DOMAIN_NAME_FOUND_IN_RESOURCE_FILE = "id.execute-api.us-east-1.amazonaws.com";
+    public static final String PATH_FOUND_IN_RESOURCE_FILE = "my/path";
+    public static final Map<String, String> QUERY_PARAMS_FOUND_IN_RESOURCE_FILE = Map.of(
+            "parameter1", "value1", "parameter2", "value");
 
     @Test
     @DisplayName("RequestInfo can accept unknown fields")
@@ -238,7 +240,10 @@ public class RequestInfoTest {
         RequestInfo requestInfo = extractRequestInfoFromApiGatewayEvent(AWS_SAMPLE_PROXY_EVENT);
 
         URI requestUri = requestInfo.getRequestUri();
-        URI expectedRequestUri = new UriWrapper(RequestInfo.HTTPS, SAMPLE_DOMAIN_NAME).addChild(SAMPLE_PATH).getUri();
+        URI expectedRequestUri = new UriWrapper(RequestInfo.HTTPS, DOMAIN_NAME_FOUND_IN_RESOURCE_FILE)
+                .addChild(PATH_FOUND_IN_RESOURCE_FILE)
+                .addQueryParameters(QUERY_PARAMS_FOUND_IN_RESOURCE_FILE)
+                .getUri();
 
         assertThat(requestUri, is(equalTo(expectedRequestUri)));
     }

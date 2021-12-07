@@ -199,6 +199,7 @@ public class RequestInfo {
     public URI getRequestUri() {
         return new UriWrapper(HTTPS, getDomainName())
                 .addChild(getPath())
+                .addQueryParameters(getQueryParameters())
                 .getUri();
     }
 
