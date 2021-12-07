@@ -17,6 +17,8 @@ import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
@@ -27,6 +29,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import nva.commons.apigateway.exceptions.ApiIoException;
 import nva.commons.core.ioutils.IoUtils;
+import nva.commons.core.paths.UriWrapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -59,7 +62,11 @@ public class RequestInfoTest {
         "mapParametersAreNull.json");
     private static final Path MISSING_MAP_VALUES = Path.of(API_GATEWAY_MESSAGES_FOLDER,
         "missingRequestInfo.json");
-    
+    private static final Path AWS_SAMPLE_PROXY_EVENT = Path.of(API_GATEWAY_MESSAGES_FOLDER,
+            "awsSampleProxyEvent.json");
+    public static final String SAMPLE_DOMAIN_NAME = "id.execute-api.us-east-1.amazonaws.com";
+    public static final String SAMPLE_PATH = "my/path";
+
     @Test
     @DisplayName("RequestInfo can accept unknown fields")
     public void requestInfoAcceptsUnknownsFields() throws JsonProcessingException {
@@ -225,7 +232,17 @@ public class RequestInfoTest {
         
         assertThat(requestInfo.userHasAccessRight(unexpectedAccessRight), is(false));
     }
-    
+
+    @Test
+    public void shouldReturnRequestUriFromRequestInfo() throws ApiIoException {
+        RequestInfo requestInfo = extractRequestInfoFromApiGatewayEvent(AWS_SAMPLE_PROXY_EVENT);
+
+        URI requestUri = requestInfo.getRequestUri();
+        URI expectedRequestUri = new UriWrapper(RequestInfo.HTTPS, SAMPLE_DOMAIN_NAME).addChild(SAMPLE_PATH).getUri();
+
+        assertThat(requestUri, is(equalTo(expectedRequestUri)));
+    }
+
     private RequestInfo extractRequestInfoFromApiGatewayEvent(Path eventWithAccessRights)
         throws ApiIoException {
         String event = IoUtils.stringFromResources(eventWithAccessRights);
