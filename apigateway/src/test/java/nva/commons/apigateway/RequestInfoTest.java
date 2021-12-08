@@ -17,16 +17,20 @@ import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import nva.commons.apigateway.exceptions.ApiIoException;
 import nva.commons.core.ioutils.IoUtils;
+import nva.commons.core.paths.UriWrapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -59,7 +63,18 @@ public class RequestInfoTest {
         "mapParametersAreNull.json");
     private static final Path MISSING_MAP_VALUES = Path.of(API_GATEWAY_MESSAGES_FOLDER,
         "missingRequestInfo.json");
-    
+    private static final Path AWS_SAMPLE_PROXY_EVENT = Path.of(API_GATEWAY_MESSAGES_FOLDER,
+            "awsSampleProxyEvent.json");
+    public static final String DOMAIN_NAME_FOUND_IN_RESOURCE_FILE = "id.execute-api.us-east-1.amazonaws.com";
+    public static final String PATH_FOUND_IN_RESOURCE_FILE = "my/path";
+    public static final Map<String, String> QUERY_PARAMS_FOUND_IN_RESOURCE_FILE;
+
+    static {
+        QUERY_PARAMS_FOUND_IN_RESOURCE_FILE = new TreeMap<>();
+        QUERY_PARAMS_FOUND_IN_RESOURCE_FILE.put("parameter1", "value1");
+        QUERY_PARAMS_FOUND_IN_RESOURCE_FILE.put("parameter2", "value");
+    }
+
     @Test
     @DisplayName("RequestInfo can accept unknown fields")
     public void requestInfoAcceptsUnknownsFields() throws JsonProcessingException {
@@ -225,7 +240,20 @@ public class RequestInfoTest {
         
         assertThat(requestInfo.userHasAccessRight(unexpectedAccessRight), is(false));
     }
-    
+
+    @Test
+    public void shouldReturnRequestUriFromRequestInfo() throws ApiIoException {
+        RequestInfo requestInfo = extractRequestInfoFromApiGatewayEvent(AWS_SAMPLE_PROXY_EVENT);
+
+        URI requestUri = requestInfo.getRequestUri();
+        URI expectedRequestUri = new UriWrapper(RequestInfo.HTTPS, DOMAIN_NAME_FOUND_IN_RESOURCE_FILE)
+                .addChild(PATH_FOUND_IN_RESOURCE_FILE)
+                .addQueryParameters(QUERY_PARAMS_FOUND_IN_RESOURCE_FILE)
+                .getUri();
+
+        assertThat(requestUri, is(equalTo(expectedRequestUri)));
+    }
+
     private RequestInfo extractRequestInfoFromApiGatewayEvent(Path eventWithAccessRights)
         throws ApiIoException {
         String event = IoUtils.stringFromResources(eventWithAccessRights);

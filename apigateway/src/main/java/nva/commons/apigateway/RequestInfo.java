@@ -4,12 +4,16 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.function.Predicate.not;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
+import static nva.commons.core.attempt.Try.attempt;
+
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
+
+import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -19,6 +23,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.core.JacocoGenerated;
+import nva.commons.core.paths.UriWrapper;
 
 public class RequestInfo {
     
@@ -45,8 +50,9 @@ public class RequestInfo {
     public static final JsonPointer CUSTOMER_ID = claimToJsonPointer(CUSTOMER_ID_CLAIM);
     public static final JsonPointer APPLICATION_ROLES = claimToJsonPointer(APPLICATION_ROLES_CLAIM);
     public static final JsonPointer ACCESS_RIGHTS = claimToJsonPointer(ACCESS_RIGHTS_CLAIM);
+    public static final String HTTPS = "https"; // Api Gateway only supports HTTPS
+    public static final String DOMAIN_NAME_FIELD = "domainName";
 
-    
     @JsonProperty(HEADERS_FIELD)
     private Map<String, String> headers;
     @JsonProperty(PATH_FIELD)
@@ -187,7 +193,23 @@ public class RequestInfo {
             this.requestContext = requestContext;
         }
     }
-    
+
+
+    @JsonIgnore
+    public URI getRequestUri() {
+        return new UriWrapper(HTTPS, getDomainName())
+                .addChild(getPath())
+                .addQueryParameters(getQueryParameters())
+                .getUri();
+    }
+
+    @JsonIgnore
+    public String getDomainName() {
+        return attempt(() -> this.getRequestContext()
+                .get(DOMAIN_NAME_FIELD).asText())
+                .orElseThrow();
+    }
+
     @JsonIgnore
     public Optional<String> getFeideId() {
         return this.getRequestContextParameterOpt(FEIDE_ID);
