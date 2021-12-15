@@ -145,8 +145,9 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
      * If you want to override this method, maybe better to override the
      * {@link ApiGatewayHandler#defaultHeaders(RequestInfo
      * requestInfo)}.
-     *
+     * @param requestInfo Request Info object.
      * @return a map with the response headers in case of success.
+     * @throws UnsupportedAcceptHeaderException If the accept-header contains an unsupported mimetype.
      */
     protected Map<String, String> getSuccessHeaders(RequestInfo requestInfo) throws UnsupportedAcceptHeaderException {
         Map<String, String> headers = defaultHeaders(requestInfo);
