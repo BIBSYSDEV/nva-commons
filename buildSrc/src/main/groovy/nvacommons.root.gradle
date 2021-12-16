@@ -16,7 +16,6 @@ nexusPublishing {
             username = findProperty("sonatypeUsername")
             password = findProperty("sonatypePassword")
             stagingProfileId = "5ba11e4895739"
-            stagingProgressTimeoutMinutes = 10
         }
     }
 }
