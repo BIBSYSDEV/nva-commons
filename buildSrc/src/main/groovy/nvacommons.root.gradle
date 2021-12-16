@@ -18,6 +18,9 @@ nexusPublishing {
             stagingProfileId = "5ba11e4895739"
         }
     }
+
+    clientTimeout = Duration.ofSeconds(600)
+    connectTimeout = Duration.ofSeconds(60)
 }
 
 build {
