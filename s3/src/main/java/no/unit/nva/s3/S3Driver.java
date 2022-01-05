@@ -88,6 +88,7 @@ public class S3Driver {
      *
      * @param fullPath the Location path of the item (without the bucketname)
      * @param content  The data we want to store
+     * @return URI for the S3 object
      * @throws IOException when compression fails.
      */
     public URI insertFile(UnixPath fullPath, String content) throws IOException {

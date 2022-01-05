@@ -44,6 +44,7 @@ public class GatewayResponse<T> implements Serializable {
      * @param body       body of response
      * @param headers    http headers for response
      * @param statusCode status code for response
+     * @param objectMapper desired object mapper
      * @throws GatewayResponseSerializingException when serializing fails
      */
     public GatewayResponse(T body, Map<String, String> headers, int statusCode, ObjectMapper objectMapper)

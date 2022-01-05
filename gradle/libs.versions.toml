@@ -1,9 +1,9 @@
 [versions]
 zalandoProblem = { strictly = '0.26.0' }
-lambdaLog4j = { strictly = '1.2.0' }
+lambdaLog4j = { strictly = '1.5.0' }
 guava = { strictly = '31.0.1-jre' }
-awsSdk = { strictly = '1.12.122' }
-awsSdk2 = { strictly = '2.17.93' }
+awsSdk = { strictly = '1.12.129' }
+awsSdk2 = { strictly = '2.17.99' }
 awsLambdaEvents = { strictly = '3.11.0' }
 awsLambdaCore = { strictly = '1.2.1' }
 mockito = { strictly = '4.1.0' }
@@ -16,7 +16,7 @@ javaFaker = { strictly = '1.0.2' }
 jupiter = { strictly = '5.8.2' }
 awsIon = { strictly = '1.5.1' }
 hamcrestOptional = { strictly = '2.0.0' }
-log4j = { strictly = '2.15.0' }
+log4j = { strictly = '2.17.0' }
 slf4j = { strictly = '1.8.0-beta4' }
 apiGuardian = { strictly = '1.1.2' }
 
