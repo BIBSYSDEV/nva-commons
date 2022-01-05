@@ -6,14 +6,14 @@ plugins{
 dependencies {
     implementation project (":core")
     implementation libs.aws.sdk.s3
-    implementation libs.aws.sdk.core
-
     implementation libs.aws.sdk2.core
     implementation libs.aws.ion
 
+    implementation libs.jackson.databind
     implementation libs.aws.apache.client
-    testImplementation libs.aws.http.client.spi
 
+    testImplementation libs.bundles.testing
+    testImplementation libs.aws.http.client.spi
     testImplementation project(":nvatestutils")
 
 }

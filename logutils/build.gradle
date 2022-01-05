@@ -2,3 +2,12 @@ plugins {
     id 'nvacommons.java-conventions'
     id 'nvacommons.publish-maven'
 }
+
+dependencies {
+    implementation libs.bundles.logging
+    implementation libs.bundles.jackson
+    implementation libs.aws.lambda.core
+
+    testImplementation libs.bundles.testing
+
+}

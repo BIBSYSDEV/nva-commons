@@ -4,8 +4,19 @@ plugins {
 }
 
 dependencies {
+    api(libs.aws.lambda.core)
+
     implementation project(":core")
     implementation libs.guava
+    implementation libs.bundles.logging
+
+    implementation libs.jackson.core
+    implementation libs.jackson.databind
+    implementation libs.jackson.annotations
+    implementation libs.jackson.datatype.jdk8
+    implementation libs.jackson.datatype.jsr310
+    implementation libs.jackson.datatype.problem
+
 
     implementation(libs.aws.sdk.sts) {
         exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
@@ -13,6 +24,7 @@ dependencies {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
 
+    testImplementation libs.bundles.testing
     testImplementation project(":core")
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")

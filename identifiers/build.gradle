@@ -5,4 +5,8 @@ plugins{
 
 dependencies {
     implementation project(":core")
+    implementation libs.jackson.core
+    implementation libs.jackson.databind
+
+    testImplementation libs.bundles.testing
 }

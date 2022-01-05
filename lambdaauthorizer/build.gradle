@@ -7,9 +7,12 @@ dependencies {
     implementation project(":core")
     implementation project(":apigateway")
     implementation project(":logutils")
+    implementation libs.bundles.logging
 
+    implementation libs.jackson.databind
     implementation libs.guava
 
+    testImplementation libs.bundles.testing
     testImplementation project(":nvatestutils")
 
 }

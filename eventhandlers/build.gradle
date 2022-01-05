@@ -4,10 +4,15 @@ plugins {
 }
 
 dependencies {
+    api(libs.aws.lambda.core)
+
     implementation project(":core")
     implementation libs.aws.sdk2.core
     implementation libs.aws.sdk.core
+    implementation libs.jackson.databind
 
+    testImplementation libs.bundles.testing
+    testImplementation libs.bundles.logging
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")
 }
