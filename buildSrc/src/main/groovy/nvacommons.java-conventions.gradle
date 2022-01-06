@@ -9,7 +9,8 @@ plugins {
 }
 
 group 'com.github.bibsysdev'
-version = '1.16.30'
+version = '1.16.31-alpha'
+
 
 repositories {
     mavenCentral()
@@ -80,26 +81,6 @@ dependencies {
         exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
 
     }
-    api(libs.aws.lambda.core) {
-        exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
-        exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
-        exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
-        exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jsr310"
-        exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jdk8"
-        exclude group: "org.apache.logging.log4j", module: "log4j-core:2.8.2"
-    }
-    api(libs.zalando) {
-        exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
-        exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
-        exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
-        exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jsr310"
-        exclude group: "com.fasterxml.jackson.datatype", module: "jackson-datatype-jdk8"
-    }
-
-    api libs.bundles.jackson
-    api libs.bundles.logging
-
-    testImplementation libs.bundles.testing
 
     compileOnly libs.apiguardian
 }

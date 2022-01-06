@@ -5,12 +5,13 @@ plugins {
 
 dependencies {
     implementation project(":core")
-    implementation libs.aws.sdk.core
 
     api(libs.aws.sdk.dynamo) {
         exclude(group: 'com.amazonaws', module: 'aws-java-sdk-s3')
         exclude(group: 'com.amazonaws', module: 'jmespath-java')
     }
     api libs.aws.lambda.events
+
+    testImplementation libs.bundles.testing
 
 }

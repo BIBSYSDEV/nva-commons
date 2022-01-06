@@ -4,6 +4,10 @@ plugins {
 }
 dependencies {
     implementation project(":core")
+    implementation libs.bundles.logging
+
+    testImplementation libs.bundles.testing
+    testImplementation libs.aws.lambda.core
     testImplementation project(":logutils")
 
 }
