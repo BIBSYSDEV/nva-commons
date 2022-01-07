@@ -5,14 +5,12 @@ import static java.util.Objects.nonNull;
 import static java.util.function.Predicate.not;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
-
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
-
 import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -26,33 +24,29 @@ import nva.commons.core.JacocoGenerated;
 import nva.commons.core.paths.UriWrapper;
 
 public class RequestInfo {
-    
+
     public static final String QUERY_STRING_PARAMETERS_FIELD = "queryStringParameters";
     public static final String PATH_PARAMETERS_FIELD = "pathParameters";
     public static final String PATH_FIELD = "path";
     public static final String HEADERS_FIELD = "headers";
     public static final String METHOD_ARN_FIELD = "methodArn";
     public static final String REQUEST_CONTEXT_FIELD = "requestContext";
-    
+
     public static final String PROXY_TAG = "proxy";
     public static final String MISSING_FROM_HEADERS = "Missing from headers: ";
     public static final String MISSING_FROM_QUERY_PARAMETERS = "Missing from query parameters: ";
     public static final String MISSING_FROM_PATH_PARAMETERS = "Missing from pathParameters: ";
     public static final String MISSING_FROM_REQUEST_CONTEXT = "Missing from requestContext: ";
-    
-    public static final String FEIDE_ID_CLAIM = "custom:feideId";
-    public static final String CUSTOMER_ID_CLAIM = "custom:customerId";
-    public static final String APPLICATION_ROLES_CLAIM = "custom:applicationRoles";
-    public static final String ACCESS_RIGHTS_CLAIM = "custom:accessRights";
+
     public static final String COMMA_DELIMITER = ",";
-    private static final String CLAIMS_PATH = "/authorizer/claims/";
-    public static final JsonPointer FEIDE_ID = claimToJsonPointer(FEIDE_ID_CLAIM);
-    public static final JsonPointer CUSTOMER_ID = claimToJsonPointer(CUSTOMER_ID_CLAIM);
-    public static final JsonPointer APPLICATION_ROLES = claimToJsonPointer(APPLICATION_ROLES_CLAIM);
-    public static final JsonPointer ACCESS_RIGHTS = claimToJsonPointer(ACCESS_RIGHTS_CLAIM);
     public static final String HTTPS = "https"; // Api Gateway only supports HTTPS
     public static final String DOMAIN_NAME_FIELD = "domainName";
-
+    private static final String CLAIMS_PATH = "/authorizer/claims/";
+    public static final JsonPointer FEIDE_ID = claimToJsonPointer("custom:feideId");
+    public static final JsonPointer CUSTOMER_ID = claimToJsonPointer("custom:customerId");
+    public static final JsonPointer APPLICATION_ROLES = claimToJsonPointer("custom:applicationRoles");
+    public static final JsonPointer ACCESS_RIGHTS = claimToJsonPointer("custom:accessRights");
+    public static final JsonPointer CUSTOMER_CRISTIN_ID = claimToJsonPointer("custom:cristinId");
     @JsonProperty(HEADERS_FIELD)
     private Map<String, String> headers;
     @JsonProperty(PATH_FIELD)
@@ -67,7 +61,7 @@ public class RequestInfo {
     private String methodArn;
     @JsonAnySetter
     private Map<String, Object> otherProperties;
-    
+
     /**
      * Default constructor.
      */
@@ -78,32 +72,37 @@ public class RequestInfo {
         this.otherProperties = new LinkedHashMap<>(); // ordinary HashMap and ConcurrentHashMap fail.
         this.requestContext = defaultRestObjectMapper.createObjectNode();
     }
-    
+
     @JsonIgnore
     public String getHeader(String header) {
         return Optional.ofNullable(getHeaders().get(header))
-                   .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_HEADERS + header));
+            .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_HEADERS + header));
     }
 
     @JsonIgnore
     public String getQueryParameter(String parameter) throws BadRequestException {
-        return Optional.ofNullable(getQueryParameters().get(parameter))
-                   .orElseThrow(() -> new BadRequestException(MISSING_FROM_QUERY_PARAMETERS + parameter));
+        return getQueryParameterOpt(parameter)
+            .orElseThrow(() -> new BadRequestException(MISSING_FROM_QUERY_PARAMETERS + parameter));
     }
-    
+
+    @JsonIgnore
+    public Optional<String> getQueryParameterOpt(String parameter) {
+        return Optional.ofNullable(getQueryParameters()).map(params -> params.get(parameter));
+    }
+
     @JsonIgnore
     public String getPathParameter(String parameter) {
         return Optional.ofNullable(getPathParameters().get(parameter))
-                   .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_PATH_PARAMETERS + parameter));
+            .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_PATH_PARAMETERS + parameter));
     }
-    
+
     @JsonIgnore
     public String getRequestContextParameter(JsonPointer jsonPointer) {
         return getRequestContextParameterOpt(jsonPointer)
-                   .orElseThrow(
-                       () -> new IllegalArgumentException(MISSING_FROM_REQUEST_CONTEXT + jsonPointer.toString()));
+            .orElseThrow(
+                () -> new IllegalArgumentException(MISSING_FROM_REQUEST_CONTEXT + jsonPointer.toString()));
     }
-    
+
     /**
      * Get request context parameter. The root node is the {@link RequestInfo#REQUEST_CONTEXT_FIELD} node of the {@link
      * RequestInfo} class.
@@ -116,70 +115,70 @@ public class RequestInfo {
      */
     public Optional<String> getRequestContextParameterOpt(JsonPointer jsonPointer) {
         return Optional.ofNullable(getRequestContext())
-                   .map(requestContext -> requestContext.at(jsonPointer))
-                   .filter(not(JsonNode::isMissingNode))
-                   .filter(not(JsonNode::isNull))
-                   .map(JsonNode::asText);
+            .map(requestContext -> requestContext.at(jsonPointer))
+            .filter(not(JsonNode::isMissingNode))
+            .filter(not(JsonNode::isNull))
+            .map(JsonNode::asText);
     }
-    
+
     @JacocoGenerated
     public String getMethodArn() {
         return methodArn;
     }
-    
+
     @JacocoGenerated
     public void setMethodArn(String methodArn) {
         this.methodArn = methodArn;
     }
-    
+
     @JacocoGenerated
     @JsonAnyGetter
     public Map<String, Object> getOtherProperties() {
         return otherProperties;
     }
-    
+
     @JacocoGenerated
     public void setOtherProperties(Map<String, Object> otherProperties) {
         this.otherProperties = otherProperties;
     }
-    
+
     public Map<String, String> getHeaders() {
         return headers;
     }
-    
+
     public void setHeaders(Map<String, String> headers) {
         this.headers = nonNullMap(headers);
     }
-    
+
     public String getPath() {
         return path;
     }
-    
+
     public void setPath(String path) {
         this.path = path;
     }
-    
+
     public Map<String, String> getPathParameters() {
         return pathParameters;
     }
-    
+
     public void setPathParameters(Map<String, String> pathParameters) {
         this.pathParameters = nonNullMap(pathParameters);
     }
-    
+
     public Map<String, String> getQueryParameters() {
         return queryParameters;
     }
-    
+
     public void setQueryParameters(Map<String, String> queryParameters) {
         this.queryParameters = nonNullMap(queryParameters);
     }
-    
+
     @JacocoGenerated
     public JsonNode getRequestContext() {
         return requestContext;
     }
-    
+
     /**
      * Sets the request context.
      *
@@ -194,55 +193,59 @@ public class RequestInfo {
         }
     }
 
-
     @JsonIgnore
     public URI getRequestUri() {
         return new UriWrapper(HTTPS, getDomainName())
-                .addChild(getPath())
-                .addQueryParameters(getQueryParameters())
-                .getUri();
+            .addChild(getPath())
+            .addQueryParameters(getQueryParameters())
+            .getUri();
     }
 
     @JsonIgnore
     public String getDomainName() {
         return attempt(() -> this.getRequestContext()
-                .get(DOMAIN_NAME_FIELD).asText())
-                .orElseThrow();
+            .get(DOMAIN_NAME_FIELD).asText())
+            .orElseThrow();
     }
 
     @JsonIgnore
     public Optional<String> getFeideId() {
         return this.getRequestContextParameterOpt(FEIDE_ID);
     }
-    
+
     @JsonIgnore
     public Optional<String> getCustomerId() {
         return getRequestContextParameterOpt(CUSTOMER_ID);
     }
-    
+
+    @JsonIgnore
+    public Optional<URI> getCustomerCristinId() {
+        return getRequestContextParameterOpt(CUSTOMER_CRISTIN_ID).map(URI::create);
+    }
+
     @JsonIgnore
     public Optional<String> getAssignedRoles() {
         return getRequestContextParameterOpt(APPLICATION_ROLES);
     }
-    
+
     @JsonIgnore
     public Set<String> getAccessRights() {
         return getRequestContextParameterOpt(ACCESS_RIGHTS)
-                   .stream()
-                   .filter(not(String::isBlank))
-                   .map(accessRightsStr -> accessRightsStr.split(COMMA_DELIMITER))
-                   .flatMap(Arrays::stream)
-                   .collect(Collectors.toSet());
+            .stream()
+            .filter(not(String::isBlank))
+            .map(accessRightsStr -> accessRightsStr.split(COMMA_DELIMITER))
+            .flatMap(Arrays::stream)
+            .collect(Collectors.toSet());
     }
-    
+
     public boolean userHasAccessRight(String accessRight) {
         return nonNull(getAccessRights()) && this.getAccessRights().contains(accessRight);
     }
-    
+
     private static JsonPointer claimToJsonPointer(String claim) {
         return JsonPointer.compile(CLAIMS_PATH + claim);
     }
-    
+
     private <K, V> Map<K, V> nonNullMap(Map<K, V> map) {
         if (isNull(map)) {
             return new HashMap<>();
