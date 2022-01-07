@@ -9,7 +9,7 @@ plugins {
 }
 
 group 'com.github.bibsysdev'
-version = '1.18.0-beta'
+version = '1.18.1'
 
 
 repositories {
