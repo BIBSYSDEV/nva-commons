@@ -10,10 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import com.amazonaws.services.secretsmanager.AWSSecretsManager;
-import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
-import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
-import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Map;
 import nva.commons.logutils.LogUtils;
@@ -21,6 +17,9 @@ import nva.commons.logutils.TestAppender;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.invocation.InvocationOnMock;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse;
 
 public class SecretsReaderTest {
 
@@ -32,7 +31,7 @@ public class SecretsReaderTest {
     public static final String ERROR_MESSAGE_FROM_AWS_SECRET_MANAGER = "Secret not found";
     private final SecretsReader secretsReader;
 
-    public SecretsReaderTest() throws JsonProcessingException {
+    public SecretsReaderTest() {
         secretsReader = createSecretsReaderMock();
     }
 
@@ -70,32 +69,33 @@ public class SecretsReaderTest {
     }
 
     private SecretsReader createSecretsReaderMock() {
-        AWSSecretsManager secretsManager = mock(AWSSecretsManager.class);
+        var secretsManager = mock(SecretsManagerClient.class);
         when(secretsManager.getSecretValue(any(GetSecretValueRequest.class)))
             .thenAnswer(this::provideGetSecretValueResult);
         return new SecretsReader(secretsManager);
     }
 
-    private GetSecretValueResult provideGetSecretValueResult(InvocationOnMock invocation)
+    private GetSecretValueResponse provideGetSecretValueResult(InvocationOnMock invocation)
         throws JsonProcessingException {
         String providedSecretName = getSecretNameFromRequest(invocation);
         if (providedSecretName.equals(SECRET_NAME)) {
             String secretString = createSecretJsonObject();
             return createGetSecretValueResult(secretString);
         } else {
-            throw new ResourceNotFoundException(ERROR_MESSAGE_FROM_AWS_SECRET_MANAGER);
+            throw new RuntimeException(ERROR_MESSAGE_FROM_AWS_SECRET_MANAGER);
         }
     }
 
     private String getSecretNameFromRequest(InvocationOnMock invocation) {
         GetSecretValueRequest request = invocation.getArgument(0);
-        return request.getSecretId();
+        return request.secretId();
     }
 
-    private GetSecretValueResult createGetSecretValueResult(String secretString) {
-        return new GetSecretValueResult()
-            .withSecretString(secretString)
-            .withName(SECRET_NAME);
+    private GetSecretValueResponse createGetSecretValueResult(String secretString) {
+        return GetSecretValueResponse.builder()
+            .secretString(secretString)
+            .name(SECRET_NAME)
+            .build();
     }
 
     private String createSecretJsonObject() throws JsonProcessingException {

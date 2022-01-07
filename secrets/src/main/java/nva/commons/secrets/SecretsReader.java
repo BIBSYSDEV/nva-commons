@@ -2,30 +2,35 @@ package nva.commons.secrets;
 
 import static nva.commons.core.JsonUtils.dtoObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
-import com.amazonaws.services.secretsmanager.AWSSecretsManager;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
-import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
-import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
 import com.fasterxml.jackson.databind.JsonNode;
+import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.attempt.Failure;
 import nva.commons.core.attempt.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse;
 
 public class SecretsReader {
 
-    private static final Logger logger = LoggerFactory.getLogger(SecretsReader.class);
     public static final String COULD_NOT_READ_SECRET_ERROR = "Could not read secret: ";
+    private static final Logger logger = LoggerFactory.getLogger(SecretsReader.class);
+    private static final String AWS_REGION = new Environment().readEnvOpt("AWS_REGION")
+        .orElse(Region.EU_WEST_1.id());
 
-    private final AWSSecretsManager awsSecretsManager;
+    private final SecretsManagerClient awsSecretsManager;
 
     @JacocoGenerated
     public SecretsReader() {
-        this(AWSSecretsManagerClientBuilder.defaultClient());
+        this(defaultSecretsManagerClient());
     }
 
-    public SecretsReader(AWSSecretsManager awsSecretsManager) {
+    public SecretsReader(SecretsManagerClient awsSecretsManager) {
         this.awsSecretsManager = awsSecretsManager;
     }
 
@@ -44,16 +49,29 @@ public class SecretsReader {
             .orElseThrow(this::logErrorAndThrowException);
     }
 
-    private GetSecretValueResult fetchSecretFromAws(String secretName) {
-        return awsSecretsManager
-            .getSecretValue(new GetSecretValueRequest().withSecretId(secretName));
+    public String errorReadingSecretMessage(String secretName) {
+        return COULD_NOT_READ_SECRET_ERROR + secretName;
     }
 
-    private String extractApiKey(GetSecretValueResult getSecretResult, String secretKey, String secretName)
+    @JacocoGenerated
+    private static SecretsManagerClient defaultSecretsManagerClient() {
+        return SecretsManagerClient.builder()
+            .region(Region.of(AWS_REGION))
+            .credentialsProvider(DefaultCredentialsProvider.create())
+            .httpClient(UrlConnectionHttpClient.create())
+            .build();
+    }
+
+    private GetSecretValueResponse fetchSecretFromAws(String secretName) {
+        return awsSecretsManager
+            .getSecretValue(GetSecretValueRequest.builder().secretId(secretName).build());
+    }
+
+    private String extractApiKey(GetSecretValueResponse getSecretResult, String secretKey, String secretName)
         throws ErrorReadingSecretException {
 
         return Try.of(getSecretResult)
-            .map(GetSecretValueResult::getSecretString)
+            .map(GetSecretValueResponse::secretString)
             .flatMap(this::readStringAsJsonObject)
             .map(secretJson -> secretJson.get(secretKey))
             .map(JsonNode::textValue)
@@ -63,10 +81,6 @@ public class SecretsReader {
     private ErrorReadingSecretException errorReadingSecret(Failure<String> fail, String secretName) {
         logger.error(errorReadingSecretMessage(secretName), fail.getException());
         return new ErrorReadingSecretException();
-    }
-
-    public String errorReadingSecretMessage(String secretName) {
-        return COULD_NOT_READ_SECRET_ERROR + secretName;
     }
 
     private Try<JsonNode> readStringAsJsonObject(String secretString) {
