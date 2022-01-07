@@ -35,8 +35,10 @@ public class HandlerRequestBuilder<T> {
     public static final String CUSTOMER_ID_CLAIM = "custom:customerId";
     public static final String APPLICATION_ROLES_CLAIM = "custom:applicationRoles";
     public static final String ACCESS_RIGHTS_CLAIM = "custom:accessRights";
+    private static final String CUSTOMER_CRISTIN_ID_CLAIM = "custom:cristinId";
     public static final String ACCESS_RIGHTS_SEPARATOR = ",";
     public static final String EMPTY_STRING = "";
+
     private final transient ObjectMapper objectMapper;
     @JsonProperty("body")
     private String body;
@@ -165,6 +167,12 @@ public class HandlerRequestBuilder<T> {
     public HandlerRequestBuilder<T> withCustomerId(String customerId) {
         ObjectNode claims = getOrCreateClaimsNode();
         claims.put(CUSTOMER_ID_CLAIM, customerId);
+        return this;
+    }
+
+    public HandlerRequestBuilder<T> withCustomerCristinId(String customerCristinId) {
+        ObjectNode claims = getOrCreateClaimsNode();
+        claims.put(CUSTOMER_CRISTIN_ID_CLAIM, customerCristinId);
         return this;
     }
 

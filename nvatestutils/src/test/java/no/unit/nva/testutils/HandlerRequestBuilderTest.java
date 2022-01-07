@@ -1,5 +1,6 @@
 package no.unit.nva.testutils;
 
+import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
@@ -36,6 +37,8 @@ public class HandlerRequestBuilderTest {
         JsonPointer.compile("/requestContext/authorizer/claims/custom:applicationRoles");
     public static final JsonPointer ACCESS_RIGHTS =
         JsonPointer.compile("/requestContext/authorizer/claims/custom:accessRights");
+    public static final JsonPointer CRISTIN_ID =
+        JsonPointer.compile("/requestContext/authorizer/claims/custom:cristinId");
 
     private static final String HTTP_METHOD = "httpMethod";
 
@@ -206,6 +209,18 @@ public class HandlerRequestBuilderTest {
         String accessRights = requestJson.at(ACCESS_RIGHTS).textValue();
         assertThat(accessRights, containsString(accessRight1));
         assertThat(accessRights, containsString(accessRight2));
+    }
+
+    @Test
+    void shouldInsertCustomersCristinIdWhenSet() throws JsonProcessingException {
+        var expectedCristinId = randomUri().toString();
+        var request = new HandlerRequestBuilder<String>(objectMapper)
+            .withCustomerCristinId(expectedCristinId)
+            .build();
+
+        JsonNode requestJson = toJsonNode(request);
+        String actualCristinId = requestJson.at(CRISTIN_ID).asText();
+        assertThat(actualCristinId, is(equalTo(expectedCristinId)));
     }
 
     private Map<String, Object> toMap(InputStream inputStream) throws JsonProcessingException {
