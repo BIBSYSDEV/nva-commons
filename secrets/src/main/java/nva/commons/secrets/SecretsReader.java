@@ -54,7 +54,7 @@ public class SecretsReader {
     }
 
     @JacocoGenerated
-    private static SecretsManagerClient defaultSecretsManagerClient() {
+    public static SecretsManagerClient defaultSecretsManagerClient() {
         return SecretsManagerClient.builder()
             .region(Region.of(AWS_REGION))
             .credentialsProvider(DefaultCredentialsProvider.create())
