@@ -74,7 +74,7 @@ public class S3Driver {
     }
 
     @JacocoGenerated
-    public static SdkHttpClient httpClientForConcurrentQueries() {
+    private static SdkHttpClient httpClientForConcurrentQueries() {
         return ApacheHttpClient.builder()
             .useIdleConnectionReaper(true)
             .maxConnections(MAX_CONNECTIONS)
