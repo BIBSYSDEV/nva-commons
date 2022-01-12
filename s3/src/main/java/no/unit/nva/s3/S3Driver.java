@@ -216,7 +216,7 @@ public class S3Driver {
     }
 
     @JacocoGenerated
-    private static S3ClientBuilder defaultS3Client() {
+    public static S3ClientBuilder defaultS3Client() {
         Region region = ENVIRONMENT.readEnvOpt(AWS_REGION_ENV_VARIABLE)
             .map(Region::of)
             .orElse(Region.EU_WEST_1);
