@@ -194,6 +194,12 @@ public class HandlerRequestBuilder<T> {
         return this;
     }
 
+    public HandlerRequestBuilder<T> withRequestContextValue(String propertyName, String value) {
+        initializeRequestContextIfNotExists();
+        requestContext.put(propertyName, value);
+        return this;
+    }
+
     private String toAccessRightsString(List<String> accessRightsList) {
         return String.join(ACCESS_RIGHTS_SEPARATOR, accessRightsList);
     }
