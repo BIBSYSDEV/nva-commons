@@ -223,6 +223,23 @@ public class HandlerRequestBuilderTest {
         assertThat(actualCristinId, is(equalTo(expectedCristinId)));
     }
 
+    @Test
+    public void shouldReturnRequestContextWithSetValues() throws JsonProcessingException {
+        var expectedPath = "/path";
+        var expectedDomainName = "localhost";
+        var request = new HandlerRequestBuilder<String>(objectMapper)
+                .withRequestContextValue("path", expectedPath)
+                .withRequestContextValue("domainName", expectedDomainName)
+                .build();
+
+        JsonNode requestJson = toJsonNode(request);
+        String actualPath = requestJson.at("/requestContext/path").asText();
+        assertThat(actualPath, is(equalTo(expectedPath)));
+
+        String actualDomainName = requestJson.at("/requestContext/domainName").asText();
+        assertThat(actualDomainName, is(equalTo(expectedDomainName)));
+    }
+
     private Map<String, Object> toMap(InputStream inputStream) throws JsonProcessingException {
         TypeReference<Map<String, Object>> type = new TypeReference<>() {
         };
