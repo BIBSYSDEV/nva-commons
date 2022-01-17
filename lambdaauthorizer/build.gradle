@@ -7,12 +7,20 @@ dependencies {
     implementation project(":core")
     implementation project(":apigateway")
     implementation project(":logutils")
-    implementation libs.bundles.logging
+    implementation project(":secrets")
 
+    implementation libs.aws.sdk2.secrets
+
+    implementation libs.bundles.logging
     implementation libs.jackson.databind
     implementation libs.guava
 
     testImplementation libs.bundles.testing
     testImplementation project(":nvatestutils")
 
+}
+
+test{
+    environment "API_KEY_SECRET_NAME","secretName-1234"
+    environment "API_KEY_SECRET_KEY","secretKey-1234"
 }

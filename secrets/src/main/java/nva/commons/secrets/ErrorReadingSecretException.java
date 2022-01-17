@@ -1,6 +1,6 @@
 package nva.commons.secrets;
 
-public class ErrorReadingSecretException extends Exception {
+public class ErrorReadingSecretException extends RuntimeException {
 
     public ErrorReadingSecretException() {
         super();

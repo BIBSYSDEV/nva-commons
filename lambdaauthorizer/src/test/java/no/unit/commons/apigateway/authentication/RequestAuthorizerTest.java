@@ -8,6 +8,7 @@ import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import com.amazonaws.services.lambda.runtime.Context;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.net.HttpHeaders;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -29,7 +30,7 @@ public class RequestAuthorizerTest {
     public static final String SOME_PRINCIPAL_ID = "somePrincipalId";
     public static final String CORRECT_KEY = "SOME_KEY";
     public static final String DEFAULT_METHOD_ARN = "arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod/GET"
-        + "/service/users/orestis@unit.no";
+                                                    + "/service/users/orestis@unit.no";
     public static final String EXPECTED_RESOURCE = "arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod/*/*";
     public static final String METHOD_ARN_FIELD = "methodArn";
     public static final String UNEXPECTED_EXCEPTION_MESSAGE = "UnexpectedExceptionMessage";
@@ -153,8 +154,7 @@ public class RequestAuthorizerTest {
             .build();
     }
 
-    private InputStream createRequestStream(String apiKey)
-        throws com.fasterxml.jackson.core.JsonProcessingException {
+    public static InputStream createRequestStream(String apiKey) throws JsonProcessingException {
         Map<String, Object> methodArn = Map.of(METHOD_ARN_FIELD, DEFAULT_METHOD_ARN);
 
         return new HandlerRequestBuilder<Map<String, String>>(authorizerObjectMapper)
@@ -167,7 +167,7 @@ public class RequestAuthorizerTest {
         return new ByteArrayOutputStream();
     }
 
-    private Map<String, String> authHeaders(String apiKey) {
+    public static Map<String, String> authHeaders(String apiKey) {
         return Map.of(HttpHeaders.AUTHORIZATION, apiKey);
     }
 
