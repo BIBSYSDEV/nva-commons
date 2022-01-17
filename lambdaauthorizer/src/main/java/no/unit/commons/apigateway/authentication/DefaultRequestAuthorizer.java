@@ -18,6 +18,8 @@ public class DefaultRequestAuthorizer extends RequestAuthorizer {
     private final String principalIdentifier;
 
     /**
+     * The constructor that should be inherited by the default constructor of the custom Lambda Authorizer.
+     *
      * @param principalId A string describing the service tha is using the Authorizer.
      */
     @JacocoGenerated

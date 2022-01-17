@@ -42,7 +42,7 @@ public class SecretsReader {
      * @return the value for the specified key
      * @throws ErrorReadingSecretException when any error occurs.
      */
-    public String fetchSecret(String secretName, String secretKey) throws ErrorReadingSecretException {
+    public String fetchSecret(String secretName, String secretKey) {
 
         return attempt(() -> fetchSecretFromAws(secretName))
             .map(fetchResult -> extractApiKey(fetchResult, secretKey, secretName))
@@ -67,8 +67,7 @@ public class SecretsReader {
             .getSecretValue(GetSecretValueRequest.builder().secretId(secretName).build());
     }
 
-    private String extractApiKey(GetSecretValueResponse getSecretResult, String secretKey, String secretName)
-        throws ErrorReadingSecretException {
+    private String extractApiKey(GetSecretValueResponse getSecretResult, String secretKey, String secretName) {
 
         return Try.of(getSecretResult)
             .map(GetSecretValueResponse::secretString)
