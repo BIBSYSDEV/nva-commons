@@ -12,6 +12,12 @@ import nva.commons.core.JacocoGenerated;
 import nva.commons.core.JsonSerializable;
 import software.amazon.awssdk.services.eventbridge.model.PutEventsRequestEntry;
 
+/**
+ * Class that can be sent as an event to a lambda handler for scanning a page of a DynamoDB table. The {@code
+ * startMarker} is a scan start marker as required by the DynamoDb client. The {@code pageSize} is the number of the
+ * results the scan will return (max 1000). The {@code topic} is the event topic that the handler is listening for
+ * events.
+ */
 public class ScanDatabaseRequest implements JsonSerializable {
 
     public static final String START_MARKER = "startMarker";
@@ -57,6 +63,12 @@ public class ScanDatabaseRequest implements JsonSerializable {
         return startMarker;
     }
 
+    /**
+     * Utility method for creating easily the next scan request.
+     *
+     * @param newStartMarker the start marker for the next scan operation.
+     * @return a new ScanDatabaseRequest containing the the {@code newStartMarker}
+     */
     public ScanDatabaseRequest newScanDatabaseRequest(Map<String, AttributeValue> newStartMarker) {
         return new ScanDatabaseRequest(this.getTopic(), this.getPageSize(), newStartMarker);
     }
