@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.JsonSerializable;
 import software.amazon.awssdk.services.eventbridge.model.PutEventsRequestEntry;
@@ -36,9 +37,9 @@ public class ScanDatabaseRequest implements JsonSerializable {
     @JsonCreator
     public ScanDatabaseRequest(
         @JsonProperty(TOPIC) String topic,
-        @JsonProperty(PAGE_SIZE) int pageSize,
+        @JsonProperty(PAGE_SIZE) Integer pageSize,
         @JsonProperty(START_MARKER) Map<String, AttributeValue> startMarker) {
-        this.pageSize = pageSize;
+        this.pageSize = Optional.ofNullable(pageSize).orElse(DEFAULT_PAGE_SIZE);
         this.startMarker = startMarker;
         this.topic = topic;
     }

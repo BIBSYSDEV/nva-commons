@@ -7,8 +7,10 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import no.unit.nva.events.EventsConfig;
+import nva.commons.core.JsonUtils;
 import org.junit.jupiter.api.Test;
 
 class ScanDatabaseRequestTest {
@@ -39,5 +41,22 @@ class ScanDatabaseRequestTest {
                                          randomString(), new AttributeValue(randomString()));
         var newRequest = originalRequest.newScanDatabaseRequest(expectedStartMarker);
         assertThat(newRequest.getStartMarker(), is(equalTo(expectedStartMarker)));
+    }
+
+    @Test
+    void shouldDeserializeEmptyObject() throws JsonProcessingException {
+        var deserializedFromEmptyJson = objectMapperWithoutSpecialConfig()
+            .readValue(emptyJson(), ScanDatabaseRequest.class);
+        var expectedDeserializedObject =
+            new ScanDatabaseRequest(null, ScanDatabaseRequest.DEFAULT_PAGE_SIZE, null);
+        assertThat(deserializedFromEmptyJson, is(equalTo(expectedDeserializedObject)));
+    }
+
+    private String emptyJson() {
+        return JsonUtils.dtoObjectMapper.createObjectNode().toString();
+    }
+
+    private ObjectMapper objectMapperWithoutSpecialConfig() {
+        return new ObjectMapper();
     }
 }
