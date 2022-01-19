@@ -5,8 +5,6 @@ plugins {
 
 dependencies {
     implementation  libs.bundles.logging
-
-    implementation libs.aws.lambda.core
     implementation libs.jackson.core
     implementation libs.jackson.databind
     implementation libs.jackson.annotations

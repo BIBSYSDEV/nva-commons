@@ -8,6 +8,7 @@ dependencies {
 
     implementation project(":core")
     implementation libs.guava
+    implementation libs.aws.lambda.events
     implementation libs.bundles.logging
 
     implementation libs.jackson.core
