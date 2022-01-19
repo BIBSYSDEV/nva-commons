@@ -19,14 +19,14 @@ import software.amazon.awssdk.services.eventbridge.model.PutEventsRequestEntry;
  * results the scan will return (max 1000). The {@code topic} is the event topic that the handler is listening for
  * events.
  */
-public class ScanDatabaseRequest implements JsonSerializable {
+public class ScanDatabaseRequest implements EventBody, JsonSerializable {
 
     public static final String START_MARKER = "startMarker";
     public static final String PAGE_SIZE = "pageSize";
 
     public static final int DEFAULT_PAGE_SIZE = 700; // Choosing for safety 3/4 of max page size.
     public static final int MAX_PAGE_SIZE = 1000;
-    public static final String TOPIC = "topic";
+
     @JsonProperty(START_MARKER)
     private final Map<String, AttributeValue> startMarker;
     @JsonProperty(PAGE_SIZE)
@@ -49,6 +49,7 @@ public class ScanDatabaseRequest implements JsonSerializable {
     }
 
     @JacocoGenerated
+    @Override
     public String getTopic() {
         return topic;
     }
