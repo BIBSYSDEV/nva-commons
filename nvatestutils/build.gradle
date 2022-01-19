@@ -11,8 +11,8 @@ dependencies {
     implementation libs.httpmime
 
     implementation libs.aws.sdk.sts
-    implementation libs.aws.sdk.s3
-    implementation libs.aws.sdk.eventbridge
+    implementation libs.aws.sdk2.s3
+    implementation libs.aws.sdk2.eventbridge
 
     implementation libs.bundles.jackson
     implementation libs.commons.validator
