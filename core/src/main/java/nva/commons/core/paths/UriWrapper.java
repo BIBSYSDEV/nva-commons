@@ -35,7 +35,6 @@ public class UriWrapper {
      */
     @JacocoGenerated
     @Deprecated(forRemoval = true)
-    // use fromUri(String uri)
     public UriWrapper(String uri) {
         this(URI.create(uri));
     }
