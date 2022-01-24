@@ -17,13 +17,6 @@ dependencies {
     implementation libs.jackson.datatype.jsr310
     implementation libs.jackson.datatype.problem
 
-
-    implementation(libs.aws.sdk.sts) {
-        exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
-        exclude group: "com.fasterxml.jackson.dataformat", module: "jackson-dataformat-cbor"
-        exclude group: 'org.apache.httpcomponents', module: 'httpclient'
-    }
-
     testImplementation libs.bundles.testing
     testImplementation project(":core")
     testImplementation project(":logutils")

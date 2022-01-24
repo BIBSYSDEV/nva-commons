@@ -3,7 +3,6 @@ package no.unit.nva.testutils;
 import static no.unit.nva.testutils.RandomDataGenerator.randomElement;
 import static no.unit.nva.testutils.RandomDataGenerator.randomInstant;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
-import com.amazonaws.regions.Regions;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.InputStream;
 import java.util.List;
@@ -14,6 +13,7 @@ import nva.commons.core.JsonSerializable;
 import nva.commons.core.JsonUtils;
 import nva.commons.core.attempt.Try;
 import nva.commons.core.ioutils.IoUtils;
+import software.amazon.awssdk.regions.Region;
 
 @JacocoGenerated
 @SuppressWarnings("FeatureEnvy")
@@ -50,7 +50,7 @@ public final class EventBridgeEventBuilder {
         event.setVersion(randomString());
         event.setResources(List.of(randomString()));
         event.setId(randomString());
-        event.setRegion(randomElement(Regions.values()));
+        event.setRegion(randomElement(Region.regions()));
         event.setTime(randomInstant());
         event.setSource(randomString());
         event.setAccount(randomString());

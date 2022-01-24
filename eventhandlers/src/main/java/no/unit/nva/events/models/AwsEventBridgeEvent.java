@@ -1,12 +1,12 @@
 package no.unit.nva.events.models;
 
-import com.amazonaws.regions.Regions;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Objects;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.JsonSerializable;
+import software.amazon.awssdk.regions.Region;
 
 public class AwsEventBridgeEvent<I> implements JsonSerializable {
 
@@ -24,7 +24,7 @@ public class AwsEventBridgeEvent<I> implements JsonSerializable {
     @JsonProperty("time")
     private Instant time;
     // look at getter.
-    private Regions region;
+    private Region region;
     @JsonProperty("resources")
     private Collection<String> resources;
 
@@ -39,16 +39,16 @@ public class AwsEventBridgeEvent<I> implements JsonSerializable {
     @JacocoGenerated
     @JsonProperty("region")
     public String getRegion() {
-        return region == null ? null : region.getName();
+        return region == null ? null : region.toString();
     }
 
     @JacocoGenerated
     public void setRegion(String region) {
-        this.region = region == null ? null : Regions.fromName(region);
+        this.region = region == null ? null : Region.of(region);
     }
 
     @JacocoGenerated
-    public void setRegion(Regions region) {
+    public void setRegion(Region region) {
         this.region = region;
     }
 
@@ -136,7 +136,7 @@ public class AwsEventBridgeEvent<I> implements JsonSerializable {
     @Override
     public int hashCode() {
         return Objects.hash(getVersion(), getId(), getDetailType(), getSource(), getAccount(), getTime(), getRegion(),
-            getResources(), getDetail());
+                            getResources(), getDetail());
     }
 
     @Override

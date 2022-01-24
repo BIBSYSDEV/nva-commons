@@ -28,7 +28,6 @@ jackson-datatype-problem = { group = 'org.zalando', name = 'jackson-datatype-pro
 lambda-log4j = { group = 'com.amazonaws', name = 'aws-lambda-java-log4j2', version.ref = 'lambdaLog4j' }
 guava = { group = 'com.google.guava', name = 'guava', version.ref = 'guava' }
 
-aws-sdk-sts = { group = 'com.amazonaws', name = 'aws-java-sdk-sts', version.ref = 'awsSdk' }
 aws-sdk-core = { group = 'com.amazonaws', name = 'aws-java-sdk-core', version.ref = 'awsSdk' }
 aws-sdk-dynamo = { group = 'com.amazonaws', name = 'aws-java-sdk-dynamodb', version.ref = 'awsSdk' }
 aws-lambda-events = { group = 'com.amazonaws', name = 'aws-lambda-java-events', version.ref = 'awsLambdaEvents' }
@@ -36,6 +35,8 @@ aws-lambda-core = { group = 'com.amazonaws', name = 'aws-lambda-java-core', vers
 
 aws-sdk2-core = { group = 'software.amazon.awssdk', name = 'sdk-core', version.ref = 'awsSdk2' }
 aws-sdk2-secrets = { group = 'software.amazon.awssdk', name = 'secretsmanager', version.ref = 'awsSdk2' }
+
+
 aws-sdk2-urlconnection = { group = 'software.amazon.awssdk', name = 'url-connection-client', version.ref = 'awsSdk2' }
 
 aws-ion = { group = 'software.amazon.ion', name = 'ion-java', version.ref = 'awsIon' }
