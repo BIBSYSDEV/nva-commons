@@ -1,5 +1,6 @@
 enableFeaturePreview('VERSION_CATALOGS')
 rootProject.name = 'nva-commons'
+include 'json'
 include 'logutils'
 include 'core'
 include 'apigateway'
@@ -11,5 +12,6 @@ include 'identifiers'
 include 'dynamodb'
 include 's3'
 include 'nvatestutils'
+
 
 

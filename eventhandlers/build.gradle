@@ -8,7 +8,6 @@ dependencies {
 
     implementation project(":core")
     implementation libs.aws.sdk2.core
-    implementation libs.aws.sdk.core
     implementation libs.jackson.databind
     implementation libs.jackson.core
     implementation libs.aws.sdk.dynamo
