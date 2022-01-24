@@ -18,17 +18,17 @@ class UriWrapperTest {
     private static final String ROOT = "/";
 
     @Test
-    public void getPathRemovesPathDelimiterFromTheEndOfTheUri() {
+    void getPathRemovesPathDelimiterFromTheEndOfTheUri() {
         String inputPath = "/some/folder/file.json/";
-        UriWrapper uriWrapper = new UriWrapper("http://www.example.org" + inputPath);
+        UriWrapper uriWrapper = UriWrapper.fromUri("http://www.example.org" + inputPath);
         String actualPath = uriWrapper.getPath().toString();
         String expectedPath = "/some/folder/file.json";
         assertThat(actualPath, is(equalTo(expectedPath)));
     }
 
     @Test
-    public void getParentReturnsParentPathIfParentExists() {
-        UriWrapper uriWrapper = new UriWrapper(HOST + "/level1/level2/file.json");
+    void getParentReturnsParentPathIfParentExists() {
+        UriWrapper uriWrapper = UriWrapper.fromUri(HOST + "/level1/level2/file.json");
         UriWrapper parent = uriWrapper.getParent().orElseThrow();
         assertThat(parent.getPath().toString(), is(equalTo("/level1/level2")));
         UriWrapper grandParent = parent.getParent().orElseThrow();
@@ -36,23 +36,23 @@ class UriWrapperTest {
     }
 
     @Test
-    public void getParentReturnsEmptyWhenPathIsRoot() {
-        UriWrapper uriWrapper = new UriWrapper(HOST + "/");
+    void getParentReturnsEmptyWhenPathIsRoot() {
+        UriWrapper uriWrapper = UriWrapper.fromUri((HOST + "/"));
         Optional<UriWrapper> parent = uriWrapper.getParent();
         assertThat(parent.isEmpty(), is(true));
     }
 
     @Test
-    public void getHostReturnsHostUri() {
-        UriWrapper uriWrapper = new UriWrapper(HOST + "/some/path/is.here");
+    void getHostReturnsHostUri() {
+        UriWrapper uriWrapper = UriWrapper.fromUri(HOST + "/some/path/is.here");
         URI expectedUri = URI.create(HOST);
         assertThat(uriWrapper.getHost().getUri(), is(equalTo(expectedUri)));
     }
 
     @Test
-    public void addChildAddsChildToPath() {
+    void addChildAddsChildToPath() {
         String originalPath = "/some/path";
-        UriWrapper parent = new UriWrapper(HOST + originalPath);
+        UriWrapper parent = UriWrapper.fromUri(HOST + originalPath);
         UriWrapper child = parent.addChild("level1", "level2", "level3");
         URI expectedChildUri = URI.create(HOST + originalPath + "/level1/level2/level3");
         assertThat(child.getUri(), is(equalTo(expectedChildUri)));
@@ -63,8 +63,8 @@ class UriWrapperTest {
     }
 
     @Test
-    public void addChildReturnsPathWithChildWhenChildDoesNotStartWithDelimiter() {
-        UriWrapper parentPath = new UriWrapper(HOST);
+    void addChildReturnsPathWithChildWhenChildDoesNotStartWithDelimiter() {
+        UriWrapper parentPath = UriWrapper.fromUri(HOST);
         String inputChildPath = "some/path";
         URI expectedResult = URI.create(HOST + ROOT + inputChildPath);
         UriWrapper actualResult = parentPath.addChild(inputChildPath);
@@ -72,7 +72,7 @@ class UriWrapperTest {
     }
 
     @Test
-    public void toS3BucketPathReturnsPathWithoutRoot() {
+    void toS3BucketPathReturnsPathWithoutRoot() {
         String expectedPath = "parent1/parent2/filename.txt";
         URI s3Uri = URI.create("s3://somebucket" + ROOT + expectedPath);
         UriWrapper wrapper = new UriWrapper(s3Uri);
@@ -81,7 +81,7 @@ class UriWrapperTest {
     }
 
     @Test
-    public void getFilenameReturnsFilenameOfUri() {
+    void getFilenameReturnsFilenameOfUri() {
         String expectedFilename = "filename.txt";
         String filePath = String.join(UnixPath.PATH_DELIMITER, "parent1", "parent2", expectedFilename);
         URI s3Uri = URI.create("s3://somebucket" + ROOT + filePath);
@@ -90,13 +90,13 @@ class UriWrapperTest {
     }
 
     @Test
-    public void shouldReturnUriWithSchemeAndHostWhenCalledWithSchemeAndHost() {
+    void shouldReturnUriWithSchemeAndHostWhenCalledWithSchemeAndHost() {
         var uri = new UriWrapper("https", "example.org");
         assertThat(uri.getUri(), is(equalTo(URI.create("https://example.org"))));
     }
 
     @Test
-    public void shouldReturnUriWithQueryParametersWhenSingleQueryParameterIsPresent() {
+    void shouldReturnUriWithQueryParametersWhenSingleQueryParameterIsPresent() {
         URI expectedUri = URI.create("https://www.example.org/path1/path2?key1=value1");
         URI uri = URI.create("https://www.example.org/");
         URI actualUri = new UriWrapper(uri)
@@ -108,7 +108,7 @@ class UriWrapperTest {
     }
 
     @Test
-    public void shouldReturnUriWithQueryParametersWhenManyQueryParametersArePresent() {
+    void shouldReturnUriWithQueryParametersWhenManyQueryParametersArePresent() {
         URI expectedUri = URI.create("https://www.example.org/path1/path2?key1=value1&key2=value2");
         URI uri = URI.create("https://www.example.org/");
         URI actualUri = new UriWrapper(uri)
@@ -121,7 +121,7 @@ class UriWrapperTest {
     }
 
     @Test
-    public void shouldReturnUriWithQueryParametersWhenQueryParametersAreMap() {
+    void shouldReturnUriWithQueryParametersWhenQueryParametersAreMap() {
         URI expectedUri = URI.create("https://www.example.org/path1/path2?key1=value1&key2=value2&key3=value3");
         URI uri = URI.create("https://www.example.org/");
         final Map<String, String> parameters = getOrderedParametersMap();
@@ -135,7 +135,7 @@ class UriWrapperTest {
     }
 
     @Test
-    public void shouldReturnStringRepresentationOfUri() {
+    void shouldReturnStringRepresentationOfUri() {
         URI expectedUri = URI.create("https://www.example.org/path1/path2?key1=value1&key2=value2&key3=value3");
         UriWrapper uri = new UriWrapper("https", "www.example.org")
             .addChild("path1")
@@ -156,7 +156,13 @@ class UriWrapperTest {
 
     @ParameterizedTest(name = "should throw exception when either host is empty")
     @NullAndEmptySource
-    public void shouldThrowExceptionWhenHostIsEmpty(String emptyInput) {
+    void shouldThrowExceptionWhenHostIsEmpty(String emptyInput) {
         assertThrows(IllegalArgumentException.class, () -> new UriWrapper("https", emptyInput));
+    }
+
+    @Test
+    void shouldCreateAnHttpsUriByDefault() {
+        var constructedUri = UriWrapper.fromHost("example.org").getUri();
+        assertThat(constructedUri.getScheme(), is(equalTo(UriWrapper.HTTPS)));
     }
 }

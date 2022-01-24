@@ -1,10 +1,11 @@
 package nva.commons.core.paths;
 
+import static java.util.Objects.isNull;
 import static nva.commons.core.attempt.Try.attempt;
 import java.net.URI;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
+import nva.commons.core.JacocoGenerated;
 import nva.commons.core.StringUtils;
 import nva.commons.core.attempt.Try;
 
@@ -17,13 +18,24 @@ public class UriWrapper {
     public static final String EMPTY_FRAGMENT = null;
     public static final String EMPTY_PATH = null;
     public static final String MISSING_HOST = "Missing host for creating URI";
+    public static final String HTTPS = "https";
+    public static final String NULL_INPUT_ERROR = "Input URI cannot be null.";
     private final URI uri;
 
     public UriWrapper(URI uri) {
-        assert Objects.nonNull(uri);
+        if (isNull(uri)) {
+            throw new IllegalArgumentException(NULL_INPUT_ERROR);
+        }
         this.uri = uri;
     }
 
+    /**
+     * @param uri the URI string
+     * @deprecated Use the static call {@link UriWrapper#fromUri(String)} instead.
+     */
+    @JacocoGenerated
+    @Deprecated(forRemoval = true)
+    // use fromUri(String uri)
     public UriWrapper(String uri) {
         this(URI.create(uri));
     }
@@ -32,9 +44,12 @@ public class UriWrapper {
         this(createUriWithSchemeAndHost(scheme, host));
     }
 
-    private static URI createUriWithSchemeAndHost(String scheme, String host) {
-        return attempt(() -> new URI(scheme, host, EMPTY_PATH, EMPTY_FRAGMENT))
-            .orElseThrow(fail -> new IllegalArgumentException(MISSING_HOST, fail.getException()));
+    public static UriWrapper fromUri(String uri) {
+        return new UriWrapper(URI.create(uri));
+    }
+
+    public static UriWrapper fromHost(String host) {
+        return new UriWrapper(createUriWithSchemeAndHost(UriWrapper.HTTPS, host));
     }
 
     public URI getUri() {
@@ -110,5 +125,10 @@ public class UriWrapper {
     @Override
     public String toString() {
         return this.getUri().toString();
+    }
+
+    private static URI createUriWithSchemeAndHost(String scheme, String host) {
+        return attempt(() -> new URI(scheme, host, EMPTY_PATH, EMPTY_FRAGMENT))
+            .orElseThrow(fail -> new IllegalArgumentException(MISSING_HOST, fail.getException()));
     }
 }
