@@ -110,12 +110,6 @@ public class EventHandlerTest extends AbstractEventHandlerTest {
         return (ObjectNode) dtoObjectMapper.readTree(output);
     }
 
-    //    private Stream<String> extractPropertyNamesFromSamleEventDetailClass() throws IntrospectionException {
-    //        return Arrays.stream(Introspector.getBeanInfo(SampleEventDetail.class).getPropertyDescriptors())
-    //            .map(FeatureDescriptor::getName)
-    //            .filter(name -> !name.equals(CLASS_PROPERTY));
-    //    }
-
     private InputStream sampleInputStream(String filename) {
         return IoUtils.stringToStream(filename);
     }
