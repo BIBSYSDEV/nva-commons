@@ -7,6 +7,7 @@ dependencies {
     api(libs.aws.lambda.core)
 
     implementation project(":core")
+    implementation project(":json")
     implementation libs.guava
     implementation libs.bundles.logging
 

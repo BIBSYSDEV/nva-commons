@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Objects;
+import no.unit.nva.commons.json.JsonSerializable;
 import nva.commons.core.JacocoGenerated;
-import nva.commons.core.JsonSerializable;
 import software.amazon.awssdk.regions.Region;
 
 public class AwsEventBridgeEvent<I> implements JsonSerializable {

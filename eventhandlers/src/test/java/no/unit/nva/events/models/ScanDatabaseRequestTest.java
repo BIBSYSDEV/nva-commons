@@ -9,8 +9,8 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
+import no.unit.nva.commons.json.JsonUtils;
 import no.unit.nva.events.EventsConfig;
-import nva.commons.core.JsonUtils;
 import org.junit.jupiter.api.Test;
 
 class ScanDatabaseRequestTest {

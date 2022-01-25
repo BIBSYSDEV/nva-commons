@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     implementation project(":core")
+    implementation project(":json")
 
     api(libs.aws.sdk.dynamo) {
         exclude(group: 'com.amazonaws', module: 'aws-java-sdk-s3')

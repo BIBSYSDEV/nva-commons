@@ -1,6 +1,6 @@
-package nva.commons.core;
+package no.unit.nva.commons.json;
 
-import static nva.commons.core.JsonUtils.dtoObjectMapper;
+import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test;
 class JsonSerializableTest {
 
     public static final String EXAMPLE_NAME = "Ola Nordmann";
-    private static final ObjectNode JSON_OBJECT_WITH_NAME = dtoObjectMapper.createObjectNode().put("name",
-                                                                                                   EXAMPLE_NAME);
+    private static final ObjectNode JSON_OBJECT_WITH_NAME =
+        dtoObjectMapper.createObjectNode().put("name", EXAMPLE_NAME);
 
     @Test
     void toJsonStringReturnsJsonObjectWithNameAsStringWhenFieldNameIsSet() throws JsonProcessingException {

@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import nva.commons.core.JsonUtils;
+import no.unit.nva.commons.json.JsonUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
@@ -30,8 +30,7 @@ public class SortableIdentifierTest {
     public static final int ADDITIONAL_SHUFFLES = 10;
     public static final String DELIMITER = "-";
     public static final SortableIdentifier SAMPLE_IDENTIFIER = SortableIdentifier.next();
-    public static final String SAMPLE_CLASS_ID_FIELD = String.format("\"id\" : \"%s\"",
-        SAMPLE_IDENTIFIER.toString());
+    public static final String SAMPLE_CLASS_ID_FIELD = String.format("\"id\" : \"%s\"", SAMPLE_IDENTIFIER);
     public static final String SAMPLE_EXAMPLE_CLASS_JSON = "{" + SAMPLE_CLASS_ID_FIELD + "}";
     public static final String EXAMPLE_HOST = "www.example.org";
     public static final String EXAMPLE_SCHEME = "https";

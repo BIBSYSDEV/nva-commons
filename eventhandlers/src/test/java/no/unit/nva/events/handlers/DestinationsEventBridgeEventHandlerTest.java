@@ -1,6 +1,6 @@
 package no.unit.nva.events.handlers;
 
-import static nva.commons.core.JsonUtils.dtoObjectMapper;
+import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -15,10 +15,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
+import no.unit.nva.commons.json.JsonUtils;
 import no.unit.nva.events.models.AwsEventBridgeDetail;
 import no.unit.nva.events.models.AwsEventBridgeEvent;
 import no.unit.nva.stubs.FakeContext;
-import nva.commons.core.JsonUtils;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,8 +28,6 @@ public class DestinationsEventBridgeEventHandlerTest extends AbstractEventHandle
     public static final String VALID_AWS_EVENT_BRIDGE_EVENT = IoUtils.stringFromResources(
         Path.of("validAwsEventBridgeEvent.json"));
 
-    public static final boolean CONTAINS_EMPTY_FIELDS = true;
-    private static final boolean DOES_NOT_CONTAIN_EMPTY_FIELDS = !CONTAINS_EMPTY_FIELDS;
     private static final JsonPointer RESPONSE_PAYLOAD_POINTER = JsonPointer.compile("/detail/responsePayload");
 
     private ByteArrayOutputStream outputStream;

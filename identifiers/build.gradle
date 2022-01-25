@@ -8,5 +8,6 @@ dependencies {
     implementation libs.jackson.core
     implementation libs.jackson.databind
 
+    testImplementation project (":json")
     testImplementation libs.bundles.testing
 }

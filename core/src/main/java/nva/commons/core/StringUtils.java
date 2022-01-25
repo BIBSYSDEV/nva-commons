@@ -40,6 +40,7 @@ public final class StringUtils {
 
     /**
      * Checks if string input is blank or null.
+     *
      * @param input input string
      * @return <code>true</code> if blank.
      */
@@ -72,18 +73,6 @@ public final class StringUtils {
      *
      * @param string string to check
      * @return <code>true</code> if string is neither null or empty.
-     * @see #isNotEmpty(String)
-     */
-    @Deprecated(forRemoval = true)
-    public static boolean isNotNullOrEmpty(String string) {
-        return isNotEmpty(string);
-    }
-
-    /**
-     * Checks if string is neither null or empty.
-     *
-     * @param string string to check
-     * @return <code>true</code> if string is neither null or empty.
      */
     public static boolean isNotEmpty(String string) {
         return !isEmpty(string);
@@ -94,44 +83,8 @@ public final class StringUtils {
      *
      * @param string string to check
      * @return <code>true</code> if string is neither null or empty.
-     * @see #isNotBlank(String)
-     */
-    @Deprecated(forRemoval = true)
-    public static boolean isNotNullOrBlank(String string) {
-        return isNotBlank(string);
-    }
-
-    /**
-     * Checks if string is neither null or blank.
-     *
-     * @param string string to check
-     * @return <code>true</code> if string is neither null or empty.
      */
     public static boolean isNotBlank(String string) {
         return !isBlank(string);
-    }
-
-    /**
-     * Checks if string is null or empty.
-     *
-     * @param string string to check
-     * @return <code>true</code> if string is null or empty.
-     * @see #isEmpty(String)
-     */
-    @Deprecated(forRemoval = true)
-    public static boolean isNullOrEmpty(String string) {
-        return isEmpty(string);
-    }
-
-    /**
-     * Checks if string is null or blank.
-     *
-     * @param string string to check
-     * @return <code>true</code> if string is null or empty.
-     * @see #isBlank(String)
-     */
-    @Deprecated(forRemoval = true)
-    public static boolean isNullOrBlank(String string) {
-        return isBlank(string);
     }
 }

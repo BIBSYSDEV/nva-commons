@@ -1,7 +1,7 @@
 package no.unit.nva.events.handlers;
 
+import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.events.handlers.EventHandlersConfig.defaultEventObjectMapper;
-import static nva.commons.core.JsonUtils.dtoObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -14,10 +14,10 @@ import no.unit.nva.events.models.AwsEventBridgeEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-public class EventMessageParserTest {
+class EventMessageParserTest {
 
     @Test
-    public void parseThrowsRuntimeExceptionWhenParsingFails() {
+    void parseThrowsRuntimeExceptionWhenParsingFails() {
         String invalidJson = "invalidJson";
         EventParser<SampleEventDetail> eventParser = new EventParser<>(invalidJson, defaultEventObjectMapper);
         Executable action = () -> eventParser.parse(SampleEventDetail.class);
@@ -26,7 +26,7 @@ public class EventMessageParserTest {
     }
 
     @Test
-    public void parseParsesCorrectlyNestedGenericTypes() throws JsonProcessingException {
+    void parseParsesCorrectlyNestedGenericTypes() throws JsonProcessingException {
         OuterClass<MiddleClass<InnerClass<String>>> expectedDetail = createdNestedGenericsObject();
         AwsEventBridgeEvent<OuterClass<MiddleClass<InnerClass<String>>>> event = createEventWithDetail(expectedDetail);
 

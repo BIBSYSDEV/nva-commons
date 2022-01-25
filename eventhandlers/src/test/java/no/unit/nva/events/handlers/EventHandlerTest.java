@@ -1,7 +1,7 @@
 package no.unit.nva.events.handlers;
 
-import static nva.commons.core.JsonUtils.dtoObjectMapper;
-import static nva.commons.core.JsonUtils.dynamoObjectMapper;
+import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
+import static no.unit.nva.commons.json.JsonUtils.dynamoObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.Is.is;
@@ -14,15 +14,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.beans.FeatureDescriptor;
 import java.beans.IntrospectionException;
-import java.beans.Introspector;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Stream;
 import no.unit.nva.events.models.AwsEventBridgeEvent;
 import no.unit.nva.stubs.FakeContext;
 import nva.commons.core.ioutils.IoUtils;
@@ -39,6 +35,7 @@ public class EventHandlerTest extends AbstractEventHandlerTest {
 
     public static final String EXCEPTION_MESSAGE = "EXCEPTION_MESSAGE";
     public static final String CLASS_PROPERTY = "class";
+
 
     private ByteArrayOutputStream outputStream;
     private Context context;
@@ -113,11 +110,11 @@ public class EventHandlerTest extends AbstractEventHandlerTest {
         return (ObjectNode) dtoObjectMapper.readTree(output);
     }
 
-    private Stream<String> extractPropertyNamesFromSamleEventDetailClass() throws IntrospectionException {
-        return Arrays.stream(Introspector.getBeanInfo(SampleEventDetail.class).getPropertyDescriptors())
-            .map(FeatureDescriptor::getName)
-            .filter(name -> !name.equals(CLASS_PROPERTY));
-    }
+    //    private Stream<String> extractPropertyNamesFromSamleEventDetailClass() throws IntrospectionException {
+    //        return Arrays.stream(Introspector.getBeanInfo(SampleEventDetail.class).getPropertyDescriptors())
+    //            .map(FeatureDescriptor::getName)
+    //            .filter(name -> !name.equals(CLASS_PROPERTY));
+    //    }
 
     private InputStream sampleInputStream(String filename) {
         return IoUtils.stringToStream(filename);
