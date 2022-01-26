@@ -2,6 +2,7 @@ package no.unit.nva.commons.json;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -11,7 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StringDeserializer;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -30,25 +30,27 @@ public final class JsonUtils {
     }
 
     private static ObjectMapper createJsonParser(JsonInclude.Include includeEmptyValuesOption, boolean prettyJson) {
-        var objectMapper = JsonMapper.builder()
-            .addModule(new ProblemModule())
-            //TODO: JavaTimeModule belongs to an obsolete library, find alternative
-            .addModule(new JavaTimeModule())
-            .addModule(new Jdk8Module())
-            .addModule(emptyStringAsNullModule())
-            .enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
-            .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        JsonFactory jsonFactory =
+            new JsonFactory().configure(Feature.ALLOW_SINGLE_QUOTES, true);
 
-            // We want date-time format, not unix timestamps
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            // Ignore null and empty fields
-            .configure(Feature.ALLOW_SINGLE_QUOTES, true)
-            .serializationInclusion(includeEmptyValuesOption);
+        ObjectMapper objectMapper =
 
+            new ObjectMapper(jsonFactory)
+                .registerModule(new ProblemModule())
+                //TODO: JavaTimeModule belongs to an obsolete library, find alternative
+                .registerModule(new JavaTimeModule())
+                .registerModule(new Jdk8Module())
+                .registerModule(emptyStringAsNullModule())
+                .enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
+                .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                // We want date-time format, not unix timestamps
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                // Ignore null and empty fields
+                .setSerializationInclusion(includeEmptyValuesOption);
         return prettyJson
-                   ? objectMapper.enable(SerializationFeature.INDENT_OUTPUT).build()
-                   : objectMapper.disable(SerializationFeature.INDENT_OUTPUT).build();
+                   ? objectMapper.enable(SerializationFeature.INDENT_OUTPUT)
+                   : objectMapper.disable(SerializationFeature.INDENT_OUTPUT);
     }
 
     private static SimpleModule emptyStringAsNullModule() {
