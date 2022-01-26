@@ -52,7 +52,7 @@ class DoiTest {
         assertThat(actualDoiString, is(equalTo(expectedDoiString)));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "should transform non standard doi formats to the standard doi format")
     @ValueSource(strings = {
         "http://doi.org/10.1000/12234",
         "http://dx.doi.org/10.1000/12234",
