@@ -1,6 +1,6 @@
 package no.unit.nva.events.handlers;
 
-import static nva.commons.core.JsonUtils.dynamoObjectMapper;
+import static no.unit.nva.commons.json.JsonUtils.dynamoObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public final class EventHandlersConfig {

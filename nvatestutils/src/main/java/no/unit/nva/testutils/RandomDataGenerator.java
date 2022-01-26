@@ -12,12 +12,12 @@ import java.time.Month;
 import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.Random;
+import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.core.JacocoGenerated;
-import nva.commons.core.JsonUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 
 @JacocoGenerated
-public class RandomDataGenerator {
+public final class RandomDataGenerator {
 
     public static final int MIN_RANDOM_STRING_LENGTH = 10;
     public static final int MAX_RANDOM_STRING_LENGTH = 20;
@@ -25,9 +25,13 @@ public class RandomDataGenerator {
     public static final Faker FAKER = Faker.instance();
     public static final Instant BEGINNING_OF_TIME = LocalDateTime.of(1971, Month.JANUARY, 2, 0, 0)
         .toInstant(ZoneOffset.UTC);
-    protected static final ObjectMapper objectMapper = JsonUtils.dtoObjectMapper;
+    public static final ObjectMapper objectMapper = JsonUtils.dtoObjectMapper;
     private static final Instant END_OF_TIME = Instant.now();
     private static final int ARBITRARY_FIELDS_NUMBER = 5;
+
+    private RandomDataGenerator() {
+
+    }
 
     public static String randomString() {
         return RandomStringUtils.randomAlphanumeric(MIN_RANDOM_STRING_LENGTH, MAX_RANDOM_STRING_LENGTH);

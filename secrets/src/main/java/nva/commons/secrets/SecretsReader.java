@@ -1,6 +1,6 @@
 package nva.commons.secrets;
 
-import static nva.commons.core.JsonUtils.dtoObjectMapper;
+import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
 import com.fasterxml.jackson.databind.JsonNode;
 import nva.commons.core.Environment;

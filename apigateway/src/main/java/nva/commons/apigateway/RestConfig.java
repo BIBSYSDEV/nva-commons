@@ -1,6 +1,6 @@
 package nva.commons.apigateway;
 
-import static nva.commons.core.JsonUtils.dtoObjectMapper;
+import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public final class RestConfig {

@@ -1,7 +1,8 @@
 package no.unit.nva.events.models;
 
-import static no.unit.nva.hamcrest.DoesNotHaveNullOrEmptyFields.doesNotHaveNullOrEmptyFields;
-import static nva.commons.core.JsonUtils.dtoObjectMapper;
+import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
+import static no.unit.nva.events.handlers.SampleEventDetail.propertyNamesOfEmptyFields;
+import static no.unit.nva.hamcrest.DoesNotHaveEmptyValues.doesNotHaveEmptyValuesIgnoringFields;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
@@ -15,27 +16,22 @@ import no.unit.nva.events.handlers.SampleEventDetail;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.Test;
 
-public class AwsEventBridgeDetailTest {
+class AwsEventBridgeDetailTest {
 
     private static final String SAMPLE_EVENT_DETAIL = IoUtils.stringFromResources(
         Path.of("validEventBridgeDetailSample.json"));
+    public static final String RESPONSE_PAYLOAD_FIELD = "responsePayload";
 
     @Test
-    public void objectMapperReturnsAwsEverBridgeDetailObjectForValidJson() throws JsonProcessingException {
+    void objectMapperReturnsAwsEverBridgeDetailObjectForValidJson() throws JsonProcessingException {
         var detail = parseSampleEventDetail();
         assertThat(detail, is(not(nullValue())));
-        assertThat(detail, doesNotHaveNullOrEmptyFields());
+        var emptyFields = propertyNamesOfEmptyFields(RESPONSE_PAYLOAD_FIELD);
+        assertThat(detail, doesNotHaveEmptyValuesIgnoringFields(emptyFields));
     }
 
     @Test
-    public void objectMapperSerialized() throws JsonProcessingException {
-        var detail = parseSampleEventDetail();
-        assertThat(detail, is(not(nullValue())));
-        assertThat(detail, doesNotHaveNullOrEmptyFields());
-    }
-
-    @Test
-    public void copyCreatesEqualObject() throws JsonProcessingException {
+    void copyCreatesEqualObject() throws JsonProcessingException {
         var original = parseSampleEventDetail();
         var copy = original.copy().build();
         assertThat(copy, is(equalTo(original)));
@@ -44,7 +40,8 @@ public class AwsEventBridgeDetailTest {
 
     private AwsEventBridgeDetail<SampleEventDetail> parseSampleEventDetail()
         throws JsonProcessingException {
-        TypeReference<AwsEventBridgeDetail<SampleEventDetail>> detailTypeReference = new TypeReference<>() {};
+        TypeReference<AwsEventBridgeDetail<SampleEventDetail>> detailTypeReference = new TypeReference<>() {
+        };
         return dtoObjectMapper.readValue(SAMPLE_EVENT_DETAIL, detailTypeReference);
     }
 }

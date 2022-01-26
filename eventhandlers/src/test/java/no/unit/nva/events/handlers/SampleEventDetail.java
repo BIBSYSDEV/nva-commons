@@ -3,18 +3,29 @@ package no.unit.nva.events.handlers;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 //Getters are used by Jackson
 @SuppressWarnings("unused")
 public class SampleEventDetail implements WithType {
 
+    public static final String CUSTOM_HAMCREST_MATCHER_FIELD_SEPARATOR = ".";
     private String emptyString;
     private String message;
     private Integer identifier;
+    private String name;
     private List<String> someEmptyList;
 
-    public static List<String> propertyNamesOfEmptyFields() {
-        return List.of("emptyString", "someEmptyList");
+    public static Set<String> propertyNamesOfEmptyFields() {
+        return Set.of("emptyString", "someEmptyList");
+    }
+
+    public static Set<String> propertyNamesOfEmptyFields(String parentField) {
+        return propertyNamesOfEmptyFields()
+            .stream()
+            .map(field -> parentField + CUSTOM_HAMCREST_MATCHER_FIELD_SEPARATOR + field)
+            .collect(Collectors.toSet());
     }
 
     public static SampleEventDetail eventWithEmptyFields() {
@@ -54,6 +65,14 @@ public class SampleEventDetail implements WithType {
 
     public void setIdentifier(Integer identifier) {
         this.identifier = identifier;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override

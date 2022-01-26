@@ -4,12 +4,6 @@ plugins {
 }
 
 dependencies {
-    api(libs.aws.lambda.core)
-
-    implementation project(":core")
-    implementation project(":json")
-    implementation libs.guava
-    implementation libs.bundles.logging
 
     implementation libs.jackson.core
     implementation libs.jackson.databind
@@ -18,8 +12,6 @@ dependencies {
     implementation libs.jackson.datatype.jsr310
     implementation libs.jackson.datatype.problem
 
+    testImplementation project (":core")
     testImplementation libs.bundles.testing
-    testImplementation project(":core")
-    testImplementation project(":logutils")
-    testImplementation project(":nvatestutils")
 }

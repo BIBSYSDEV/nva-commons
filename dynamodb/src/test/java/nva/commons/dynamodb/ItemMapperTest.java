@@ -1,6 +1,6 @@
 package nva.commons.dynamodb;
 
-import static nva.commons.core.JsonUtils.dtoObjectMapper;
+import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;

@@ -33,7 +33,7 @@ public class StringUtilsTest {
     public void removeMulitpleWhitespacesPreserversSingleWhitespacess() {
         String input = EXPECTED_OUTPUT;
         String output = StringUtils.removeMultipleWhiteSpaces(input);
-        ;
+
         assertThat(output, is(equalTo(EXPECTED_OUTPUT)));
     }
 
@@ -101,58 +101,34 @@ public class StringUtilsTest {
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
     @NullAndEmptySource
     @DisplayName("isEmpty should return true for empty string")
-    public void stringUtilReturnsTrueForANullString(String input) {
+    void stringUtilReturnsTrueForANullString(String input) {
         assertThat(StringUtils.isEmpty(input), is(equalTo(true)));
-    }
-
-    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
-    @ValueSource(strings = {" ", "\t", "\n", "a"})
-    @DisplayName("isNotNullOrEmpty should return true where string is neither null or empty")
-    @Deprecated(forRemoval = true)
-    public void stringUtilIsNotNullOrEmpty(String input) {
-        assertThat(StringUtils.isNotNullOrEmpty(input), is(equalTo(true)));
     }
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
     @ValueSource(strings = {" ", "\t", "\n", "a"})
     @DisplayName("isNotEmpty should return true where string is neither null or empty")
-    public void stringUtilIsNotEmpty(String input) {
+    void stringUtilIsNotEmpty(String input) {
         assertThat(StringUtils.isNotEmpty(input), is(equalTo(true)));
     }
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
     @NullAndEmptySource
-    @DisplayName("isNullOrEmpty should return true where string is null or empty.")
-    @Deprecated(forRemoval = true)
-    public void stringUtilIsNullOrEmpty(String input) {
-        assertThat(StringUtils.isNullOrEmpty(input), is(equalTo(true)));
-    }
-
-    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
-    @NullAndEmptySource
     @DisplayName("isEmpty should return true where string is null or empty.")
-    public void stringUtilIsEmpty(String input) {
+    void stringUtilIsEmpty(String input) {
         assertThat(StringUtils.isEmpty(input), is(equalTo(true)));
-    }
-
-    @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
-    @ValueSource(strings = {"a", " a", "a "})
-    @DisplayName("isNotNullOrBlank should return true where string is neither null or blank.")
-    @Deprecated(forRemoval = true)
-    public void stringUtilIsNotNullOrBlank(String input) {
-        assertThat(StringUtils.isNotNullOrBlank(input), is(equalTo(true)));
     }
 
     @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
     @MethodSource("blankStrings")
     @DisplayName("isNullOrBlank should return true where string is null or blank.")
     @Deprecated(forRemoval = true)
-    public void stringUtilIsNullOrBlank(String input) {
-        assertThat(StringUtils.isNullOrBlank(input), is(equalTo(true)));
+    void shouldReturnTrueForBlankStrings(String input) {
+        assertThat(StringUtils.isBlank(input), is(equalTo(true)));
     }
 
     @Test
-    public void stringToStreamReturnsAnInputStreamWithTheStringContents() throws IOException {
+    void stringToStreamReturnsAnInputStreamWithTheStringContents() throws IOException {
         String sample = "sample string";
         InputStream inputStream = IoUtils.stringToStream(sample);
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
