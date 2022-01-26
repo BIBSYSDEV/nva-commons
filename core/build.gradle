@@ -5,15 +5,10 @@ plugins {
 
 dependencies {
     implementation  libs.bundles.logging
-    implementation libs.jackson.core
-    implementation libs.jackson.databind
+
     implementation libs.jackson.annotations
-    implementation libs.jackson.datatype.jdk8
-    implementation libs.jackson.datatype.jsr310
-    implementation libs.jackson.datatype.problem
-
-
     testImplementation libs.bundles.testing
+    testImplementation libs.bundles.jackson
     testImplementation project(":logutils")
 }
 
