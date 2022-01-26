@@ -22,3 +22,8 @@ dependencies {
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")
 }
+
+
+test{
+    environment "EVENT_BUS", "eventBus"
+}
