@@ -23,8 +23,6 @@ apiGuardian = { strictly = '1.1.2' }
 
 [libraries]
 zalando = { group = 'org.zalando', name = 'problem', version.ref = 'zalandoProblem' }
-jackson-datatype-problem = { group = 'org.zalando', name = 'jackson-datatype-problem', version.ref = 'zalandoProblem' }
-
 
 guava = { group = 'com.google.guava', name = 'guava', version.ref = 'guava' }
 
@@ -39,7 +37,6 @@ aws-sdk2-eventbridge = { group = 'software.amazon.awssdk', name = 'eventbridge',
 aws-sdk2-urlconnection = { group = 'software.amazon.awssdk', name = 'url-connection-client', version.ref = 'awsSdk2' }
 aws-http-client-spi = { group = 'software.amazon.awssdk', name = 'http-client-spi', version = 'awsSdk2' }
 aws-apache-client = { group = 'software.amazon.awssdk', name = 'apache-client', version.ref = 'awsSdk2' }
-
 aws-ion = { group = 'software.amazon.ion', name = 'ion-java', version.ref = 'awsIon' }
 
 httpmime = { group = 'org.apache.httpcomponents', name = 'httpmime', version.ref = 'httpmime' }
@@ -50,6 +47,7 @@ jackson-datatype-jsr310 = { group = 'com.fasterxml.jackson.datatype', name = 'ja
 jackson-databind = { group = 'com.fasterxml.jackson.core', name = 'jackson-databind', version.ref = 'jackson' }
 jackson-annotations = { group = 'com.fasterxml.jackson.core', name = 'jackson-annotations', version.ref = 'jackson' }
 jackson-module-parameter-names = { group = 'com.fasterxml.jackson.module', name = 'jackson-module-parameter-names', version.ref = 'jackson' }
+jackson-datatype-problem = { group = 'org.zalando', name = 'jackson-datatype-problem', version.ref = 'zalandoProblem' }
 
 commons-lang = { group = 'org.apache.commons', name = 'commons-lang3', version.ref = 'apacheCommons' }
 commons-validator = { group = 'commons-validator', name = 'commons-validator', version.ref = 'commonsValidator' }
