@@ -1,6 +1,7 @@
 package no.unit.nva.doi.models;
 
 import static no.unit.nva.testutils.RandomDataGenerator.randomDoi;
+import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -95,6 +96,16 @@ class DoiTest {
         assertThat(expectedDoiUri.toString(), startsWith("https://example.org/"));
         var actualDoi = Doi.fromUri(seedValue).changeHost(hostOfSandboxEnvironment).getUri();
         assertThat(actualDoi, is(equalTo(expectedDoiUri)));
+    }
+
+    @Test
+    void shouldReturnExpectedUriWhenHostPrefixAndSuffixAreSupplied() {
+        var host = randomString() + ".org";
+        var prefix = UnixPath.of(randomDoi().getPath()).removeRoot().getParent().orElseThrow().toString();
+        var suffix = UnixPath.of(randomDoi().getPath()).getFilename();
+        var expectedUri = URI.create(String.format("https://%s/%s/%s", host, prefix, suffix));
+        var actualUri = Doi.fromPrefixAndSuffix(host, prefix, suffix).getUri();
+        assertThat(actualUri, is(equalTo(expectedUri)));
     }
 
     private URI createExpectedSandboxDoiUri(URI seedValue, String hostOfSandboxEnvironment) throws URISyntaxException {

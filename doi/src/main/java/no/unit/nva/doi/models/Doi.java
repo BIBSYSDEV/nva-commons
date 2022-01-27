@@ -1,5 +1,6 @@
 package no.unit.nva.doi.models;
 
+import static nva.commons.core.StringUtils.isBlank;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.net.URI;
@@ -9,6 +10,7 @@ import nva.commons.core.paths.UriWrapper;
 public class Doi {
 
     public static final String DEFAULT_HOST = "doi.org";
+    public static final String NULL_ARGUMENT_ERROR = "No argument should be blank";
     private final URI uri;
 
     public Doi(URI doiUri) {
@@ -26,6 +28,13 @@ public class Doi {
 
     public static Doi fromDoiIdentifier(String doiHost, String doiIdentifier) {
         return new Doi(UriWrapper.fromHost(doiHost).addChild(doiIdentifier).getUri());
+    }
+
+    public static Doi fromPrefixAndSuffix(String doiHost, String prefix, String suffix) {
+        if (isBlank(doiHost) || isBlank(prefix) || isBlank(suffix)) {
+            throw new IllegalArgumentException(NULL_ARGUMENT_ERROR);
+        }
+        return new Doi(UriWrapper.fromHost(doiHost).addChild(prefix).addChild(suffix).getUri());
     }
 
     public static Doi fromDoiIdentifier(String doiIdentifier) {
