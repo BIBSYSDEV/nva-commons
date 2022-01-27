@@ -21,6 +21,8 @@ class DoiTest {
 
     public static final int SECOND_CHARACTER = 1;
     public static final String EMPTY_FRAGMENT = null;
+    public static final String DEFAULT_DOI_URI_PREFIX = "https://doi.org/";
+    public static final String URI_PATH_SEPARATOR = "/";
 
     @Test
     void shouldBeGeneratedFromUriAndBeThatUri() {
@@ -30,20 +32,20 @@ class DoiTest {
     }
 
     @Test
-    void shouldReturnUriWhenCratedWithHostAndDoiString() {
+    void shouldReturnUriWhenCreatedWithHostAndDoiString() {
         var doiWithoutRootPath = UnixPath.of(randomDoi().getPath()).removeRoot().toString();
-        assertThat(doiWithoutRootPath, not(startsWith("/")));
+        assertThat(doiWithoutRootPath, not(startsWith(URI_PATH_SEPARATOR)));
         var doi = Doi.fromDoiIdentifier(Doi.DEFAULT_HOST, doiWithoutRootPath);
-        assertThat(doi.getUri(), is(equalTo(URI.create("https://doi.org/" + doiWithoutRootPath))));
+        assertThat(doi.getUri(), is(equalTo(URI.create(DEFAULT_DOI_URI_PREFIX + doiWithoutRootPath))));
     }
 
     @Test
-    void shouldReturnUriWhenCratedWithHostAndDoiPathExtractedFromJavasUriClass() {
+    void shouldReturnUriWhenCreatedWithHostAndDoiPathExtractedFromJavasUriClass() {
         var doiUri = randomDoi();
         var extractedPathDirectlyFromUri = doiUri.getPath();
-        assertThat(extractedPathDirectlyFromUri, startsWith("/"));
+        assertThat(extractedPathDirectlyFromUri, startsWith(URI_PATH_SEPARATOR));
         var doi = Doi.fromDoiIdentifier(Doi.DEFAULT_HOST, extractedPathDirectlyFromUri);
-        assertThat(doi.getUri(), is(equalTo(URI.create("https://doi.org" + extractedPathDirectlyFromUri))));
+        assertThat(doi.getUri(), is(equalTo(URI.create(DEFAULT_DOI_URI_PREFIX + extractedPathDirectlyFromUri))));
     }
 
     @Test
@@ -83,7 +85,7 @@ class DoiTest {
     @Test
     void shouldReturnStandardFormatOfDoiUriWhenCreatedOnlyWithIdentifier() {
         var expectedDoi = randomDoi();
-        assertThat(expectedDoi.toString(), startsWith("https://doi.org"));
+        assertThat(expectedDoi.toString(), startsWith(DEFAULT_DOI_URI_PREFIX));
         var actualDoi = Doi.fromDoiIdentifier(expectedDoi.getPath()).getUri();
         assertThat(actualDoi, is(equalTo(expectedDoi)));
     }
@@ -99,7 +101,7 @@ class DoiTest {
     }
 
     @Test
-    void shouldReturnExpectedUriWhenHostPrefixAndSuffixAreSupplied() {
+    void shouldReturnExpectedUriWhenCustomHostPrefixAndSuffixAreSupplied() {
         var host = randomString() + ".org";
         var prefix = UnixPath.of(randomDoi().getPath()).removeRoot().getParent().orElseThrow().toString();
         var suffix = UnixPath.of(randomDoi().getPath()).getFilename();
@@ -113,8 +115,6 @@ class DoiTest {
     }
 
     private String removeRoot(String path) {
-        return path.startsWith("/")
-                   ? path.substring(SECOND_CHARACTER)
-                   : path;
+        return path.startsWith(URI_PATH_SEPARATOR) ? path.substring(SECOND_CHARACTER) : path;
     }
 }
