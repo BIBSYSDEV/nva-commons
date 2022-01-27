@@ -48,7 +48,7 @@ class DoiTest {
     void shouldReturnNonUriFormOfDoi() {
         var doiUri = randomDoi();
         var expectedDoiString = removeRoot(doiUri.getPath());
-        var actualDoiString = new Doi(doiUri).getDoiString();
+        var actualDoiString = new Doi(doiUri).toIdentifier();
         assertThat(actualDoiString, is(equalTo(expectedDoiString)));
     }
 

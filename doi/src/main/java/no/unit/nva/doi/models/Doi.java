@@ -38,7 +38,7 @@ public class Doi {
         return uri.toString();
     }
 
-    public String getDoiString() {
+    public String toIdentifier() {
         return UnixPath.fromString(uri.getPath()).removeRoot().toString();
     }
 
