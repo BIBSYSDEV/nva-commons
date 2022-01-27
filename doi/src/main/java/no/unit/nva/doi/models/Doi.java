@@ -75,6 +75,6 @@ public class Doi {
     }
 
     private boolean isDoiUri() {
-        return DOI_SCHEME.equals(uri.getScheme()) || DOC_SCHEME.equals(uri.getScheme());
+        return DOI_SCHEME.equalsIgnoreCase(uri.getScheme()) || DOC_SCHEME.equalsIgnoreCase(uri.getScheme());
     }
 }
