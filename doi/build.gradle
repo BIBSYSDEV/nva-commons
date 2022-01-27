@@ -5,9 +5,14 @@ plugins {
 dependencies {
     implementation project(":core")
     implementation libs.bundles.logging
+    implementation libs.jackson.annotations
 
     testImplementation libs.bundles.testing
+    testImplementation libs.bundles.jackson
+    testImplementation project(":json")
     testImplementation libs.aws.lambda.core
+    testImplementation project(":json")
     testImplementation project(":logutils")
+    testImplementation project(":nvatestutils")
 
 }
