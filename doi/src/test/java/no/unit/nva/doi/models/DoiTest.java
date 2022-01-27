@@ -54,7 +54,7 @@ class DoiTest {
     void shouldReturnNonUriFormOfDoi() {
         var doiUri = randomDoi();
         var expectedDoiString = removeRoot(doiUri.getPath());
-        var actualDoiString = new Doi(doiUri).toIdentifier();
+        var actualDoiString = Doi.fromUri(doiUri).toIdentifier();
         assertThat(actualDoiString, is(equalTo(expectedDoiString)));
     }
 
@@ -110,6 +110,14 @@ class DoiTest {
         var expectedUri = URI.create(String.format("https://%s/%s/%s", host, prefix, suffix));
         var actualUri = Doi.fromPrefixAndSuffix(host, prefix, suffix).getUri();
         assertThat(actualUri, is(equalTo(expectedUri)));
+    }
+
+    @Test
+    void shouldReturnStandardHttpsUriWhenInputIsDoiUri() {
+        var inputDoi = URI.create("doi:10.1000/182");
+        var parsedDoi = Doi.fromUri(inputDoi);
+        var expectedDoi = URI.create(DEFAULT_DOI_URI_PREFIX + URI_PATH_SEPARATOR + "10.1000/182");
+        assertThat(parsedDoi.getStandardizedUri(), is(equalTo(expectedDoi)));
     }
 
     private URI createExpectedSandboxDoiUri(URI seedValue, String hostOfSandboxEnvironment) throws URISyntaxException {

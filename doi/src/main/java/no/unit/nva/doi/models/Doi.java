@@ -11,9 +11,10 @@ public class Doi {
 
     public static final String DEFAULT_HOST = "doi.org";
     public static final String NULL_ARGUMENT_ERROR = "No argument should be blank";
+    private static final String DOI_SCHEME = "doi";
     private final URI uri;
 
-    public Doi(URI doiUri) {
+    protected Doi(URI doiUri) {
         this.uri = doiUri;
     }
 
@@ -61,6 +62,18 @@ public class Doi {
     }
 
     public URI getStandardizedUri() {
-        return UriWrapper.fromHost(DEFAULT_HOST).addChild(uri.getPath()).getUri();
+        return isDoiUri() ? convertDoiUriToHttpsUri() : convertHttpBasedUri();
+    }
+
+    private URI convertHttpBasedUri() {
+        return new Doi(UriWrapper.fromHost(DEFAULT_HOST).addChild(uri.getPath()).getUri()).getUri();
+    }
+
+    private URI convertDoiUriToHttpsUri() {
+        return UriWrapper.fromHost(DEFAULT_HOST).addChild(uri.getSchemeSpecificPart()).getUri();
+    }
+
+    private boolean isDoiUri() {
+        return DOI_SCHEME.equals(uri.getScheme());
     }
 }
