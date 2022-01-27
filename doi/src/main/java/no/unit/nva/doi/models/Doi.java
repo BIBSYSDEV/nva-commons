@@ -4,6 +4,8 @@ import static nva.commons.core.StringUtils.isBlank;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.net.URI;
+import java.util.Objects;
+import nva.commons.core.JacocoGenerated;
 import nva.commons.core.paths.UnixPath;
 import nva.commons.core.paths.UriWrapper;
 
@@ -64,6 +66,25 @@ public class Doi {
 
     public URI getStandardizedUri() {
         return isDoiUri() ? convertDoiUriToHttpsUri() : convertHttpBasedUri();
+    }
+
+    @JacocoGenerated
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Doi)) {
+            return false;
+        }
+        Doi doi = (Doi) o;
+        return Objects.equals(getUri(), doi.getUri());
+    }
+
+    @JacocoGenerated
+    @Override
+    public int hashCode() {
+        return Objects.hash(getUri());
     }
 
     private URI convertHttpBasedUri() {
