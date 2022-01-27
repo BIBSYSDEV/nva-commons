@@ -4,18 +4,26 @@ plugins {
 }
 
 dependencies {
-    api(libs.aws.lambda.core)
+    api libs.aws.lambda.core
 
     implementation project(":core")
     implementation project(":json")
-    implementation libs.aws.sdk2.core
+
     implementation libs.jackson.databind
     implementation libs.jackson.core
+
     implementation libs.aws.sdk.dynamo
+    implementation libs.aws.sdk2.core
     implementation libs.aws.sdk2.eventbridge
 
     testImplementation libs.bundles.testing
     testImplementation libs.bundles.logging
+
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")
+}
+
+
+test{
+    environment "EVENT_BUS", "eventBus"
 }
