@@ -12,6 +12,7 @@ public class Doi {
     public static final String DEFAULT_HOST = "doi.org";
     public static final String NULL_ARGUMENT_ERROR = "No argument should be blank";
     private static final String DOI_SCHEME = "doi";
+    private static final String DOC_SCHEME = "doc";
     private final URI uri;
 
     protected Doi(URI doiUri) {
@@ -74,6 +75,6 @@ public class Doi {
     }
 
     private boolean isDoiUri() {
-        return DOI_SCHEME.equals(uri.getScheme());
+        return DOI_SCHEME.equals(uri.getScheme()) || DOC_SCHEME.equals(uri.getScheme());
     }
 }

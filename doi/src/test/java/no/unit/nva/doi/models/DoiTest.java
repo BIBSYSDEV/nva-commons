@@ -112,9 +112,10 @@ class DoiTest {
         assertThat(actualUri, is(equalTo(expectedUri)));
     }
 
-    @Test
-    void shouldReturnStandardHttpsUriWhenInputIsDoiUri() {
-        var inputDoi = URI.create("doi:10.1000/182");
+    @ParameterizedTest(name = "should return standard https URI when input is old-stlye presentation doi")
+    @ValueSource(strings = {"doi:10.1000/182", "doc:10.1000/182"})
+    void shouldReturnStandardHttpsUriWhenInputIsOldStylePresentationDoi(String oldStyleDoi) {
+        var inputDoi = URI.create(oldStyleDoi);
         var parsedDoi = Doi.fromUri(inputDoi);
         var expectedDoi = URI.create(DEFAULT_DOI_URI_PREFIX + URI_PATH_SEPARATOR + "10.1000/182");
         assertThat(parsedDoi.getStandardizedUri(), is(equalTo(expectedDoi)));
