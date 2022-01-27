@@ -11,6 +11,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.core.paths.UnixPath;
+import nva.commons.core.paths.UriWrapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -31,7 +32,7 @@ class DoiTest {
     void shouldReturnUriWhenCratedWithHostAndDoiString() {
         var doiWithoutRootPath = UnixPath.of(randomDoi().getPath()).removeRoot().toString();
         assertThat(doiWithoutRootPath, not(startsWith("/")));
-        var doi = Doi.fromDoiString(Doi.DEFAULT_HOST, doiWithoutRootPath);
+        var doi = Doi.fromDoiIdentifier(Doi.DEFAULT_HOST, doiWithoutRootPath);
         assertThat(doi.getUri(), is(equalTo(URI.create("https://doi.org/" + doiWithoutRootPath))));
     }
 
@@ -40,7 +41,7 @@ class DoiTest {
         var doiUri = randomDoi();
         var extractedPathDirectlyFromUri = doiUri.getPath();
         assertThat(extractedPathDirectlyFromUri, startsWith("/"));
-        var doi = Doi.fromDoiString(Doi.DEFAULT_HOST, extractedPathDirectlyFromUri);
+        var doi = Doi.fromDoiIdentifier(Doi.DEFAULT_HOST, extractedPathDirectlyFromUri);
         assertThat(doi.getUri(), is(equalTo(URI.create("https://doi.org" + extractedPathDirectlyFromUri))));
     }
 
@@ -69,13 +70,35 @@ class DoiTest {
 
     @Test
     void shouldBeDeserializedFromStringAndSerializedAsString() throws JsonProcessingException {
-        String expectedDoiString = randomDoi().toString();
+        var expectedDoiString = randomDoi().toString();
         var jsonString = "\"" + expectedDoiString + "\"";
         var doi = JsonUtils.dtoObjectMapper.readValue(jsonString, Doi.class);
         assertThat(doi.toString(), is(equalTo(expectedDoiString)));
 
         var serializedDoi = JsonUtils.dtoObjectMapper.writeValueAsString(doi);
         assertThat(serializedDoi, is(equalTo(jsonString)));
+    }
+
+    @Test
+    void shouldReturnStandardFormatOfDoiUriWhenCreatedOnlyWithIdentifier() {
+        var expectedDoi = randomDoi();
+        assertThat(expectedDoi.toString(), startsWith("https://doi.org"));
+        var actualDoi = Doi.fromDoiIdentifier(expectedDoi.getPath()).getUri();
+        assertThat(actualDoi, is(equalTo(expectedDoi)));
+    }
+
+    @Test
+    void shouldReturnStandardUriWithCustomHostWhenCustomHostIsSupplied() throws URISyntaxException {
+        var seedValue = randomDoi();
+        var hostOfSandboxEnvironment = "example.org";
+        var expectedDoiUri = createExpectedSandboxDoiUri(seedValue, hostOfSandboxEnvironment);
+        assertThat(expectedDoiUri.toString(), startsWith("https://example.org/"));
+        var actualDoi = Doi.fromUri(seedValue).changeHost(hostOfSandboxEnvironment).getUri();
+        assertThat(actualDoi, is(equalTo(expectedDoiUri)));
+    }
+
+    private URI createExpectedSandboxDoiUri(URI seedValue, String hostOfSandboxEnvironment) throws URISyntaxException {
+        return new URI(UriWrapper.HTTPS, hostOfSandboxEnvironment, seedValue.getPath(), DoiTest.EMPTY_FRAGMENT);
     }
 
     private String removeRoot(String path) {

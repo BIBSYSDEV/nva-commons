@@ -24,12 +24,21 @@ public class Doi {
         return new Doi(doiUri);
     }
 
-    public static Doi fromDoiString(String doiHost, String doiPath) {
-        return new Doi(UriWrapper.fromHost(doiHost).addChild(doiPath).getUri());
+    public static Doi fromDoiIdentifier(String doiHost, String doiIdentifier) {
+        return new Doi(UriWrapper.fromHost(doiHost).addChild(doiIdentifier).getUri());
+    }
+
+    public static Doi fromDoiIdentifier(String doiIdentifier) {
+        return new Doi(UriWrapper.fromHost(DEFAULT_HOST).addChild(doiIdentifier).getUri());
     }
 
     public URI getUri() {
         return uri;
+    }
+
+    public Doi changeHost(String host) {
+        var newUri = UriWrapper.fromHost(host).addChild(uri.getPath()).getUri();
+        return Doi.fromUri(newUri);
     }
 
     @Override
