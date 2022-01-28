@@ -83,7 +83,13 @@ public class UriWrapper {
         UnixPath totalPath = thisPath.addChild(childPath).addRoot();
 
         return attempt(
-            () -> new URI(uri.getScheme(), uri.getHost(), totalPath.toString(), uri.getQuery(), EMPTY_FRAGMENT))
+            () -> new URI(uri.getScheme(),
+                          uri.getUserInfo(),
+                          uri.getHost(),
+                          uri.getPort(),
+                          totalPath.toString(),
+                          uri.getQuery(),
+                          EMPTY_FRAGMENT))
             .map(UriWrapper::new)
             .orElseThrow();
     }
@@ -102,7 +108,13 @@ public class UriWrapper {
             .map(URI::getPath)
             .map(UnixPath::of)
             .flatMap(UnixPath::getParent)
-            .map(attempt(p -> new URI(uri.getScheme(), uri.getHost(), p.toString(), EMPTY_FRAGMENT)))
+            .map(attempt(p -> new URI(uri.getScheme(),
+                                      uri.getUserInfo(),
+                                      uri.getHost(),
+                                      uri.getPort(),
+                                      p.toString(),
+                                      EMPTY_QUERY,
+                                      EMPTY_FRAGMENT)))
             .map(Try::orElseThrow)
             .map(UriWrapper::new);
     }
@@ -115,7 +127,13 @@ public class UriWrapper {
         var queryString = StringUtils.isBlank(uri.getQuery())
                               ? param + "=" + value
                               : uri.getQuery() + "&" + param + "=" + value;
-        URI newUri = attempt(() -> new URI(uri.getScheme(), uri.getHost(), uri.getPath(), queryString, EMPTY_FRAGMENT))
+        URI newUri = attempt(() -> new URI(uri.getScheme(),
+                                           uri.getUserInfo(),
+                                           uri.getHost(),
+                                           uri.getPort(),
+                                           uri.getPath(),
+                                           queryString,
+                                           EMPTY_FRAGMENT))
             .orElseThrow();
         return new UriWrapper(newUri);
     }

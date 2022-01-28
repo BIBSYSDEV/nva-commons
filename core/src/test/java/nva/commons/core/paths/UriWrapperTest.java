@@ -110,6 +110,18 @@ class UriWrapperTest {
     }
 
     @Test
+    void shouldPreservePortWhenAddingPathAndQueryPapametersInUri() {
+        var expectedUri = URI.create("https://www.example.org:1234/path1/path2?key1=value1");
+        var host = URI.create("https://www.example.org:1234");
+        var actualUri = new UriWrapper(host)
+            .addChild("path1")
+            .addQueryParameter("key1", "value1")
+            .addChild("path2")
+            .getUri();
+        assertThat(actualUri, is(equalTo(expectedUri)));
+    }
+
+    @Test
     void shouldReturnUriWithQueryParametersWhenManyQueryParametersArePresent() {
         URI expectedUri = URI.create("https://www.example.org/path1/path2?key1=value1&key2=value2");
         URI uri = URI.create("https://www.example.org/");
