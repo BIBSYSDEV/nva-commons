@@ -17,9 +17,12 @@ public class UriWrapper {
 
     public static final String EMPTY_FRAGMENT = null;
     public static final String EMPTY_PATH = null;
+    public static final String EMPTY_USER_INFO = null;
+    public static final String EMPTY_QUERY = null;
     public static final String MISSING_HOST = "Missing host for creating URI";
     public static final String HTTPS = "https";
     public static final String NULL_INPUT_ERROR = "Input URI cannot be null.";
+    private static final int DEFAULT_PORT = -1;
     private final URI uri;
 
     public UriWrapper(URI uri) {
@@ -40,7 +43,7 @@ public class UriWrapper {
     }
 
     public UriWrapper(String scheme, String host) {
-        this(createUriWithSchemeAndHost(scheme, host));
+        this(createUriWithSchemeAndHost(scheme, host, DEFAULT_PORT));
     }
 
     public static UriWrapper fromUri(String uri) {
@@ -48,7 +51,11 @@ public class UriWrapper {
     }
 
     public static UriWrapper fromHost(String host) {
-        return new UriWrapper(createUriWithSchemeAndHost(UriWrapper.HTTPS, host));
+        return new UriWrapper(createUriWithSchemeAndHost(UriWrapper.HTTPS, host, DEFAULT_PORT));
+    }
+
+    public static UriWrapper fromHost(String host, int port) {
+        return new UriWrapper(createUriWithSchemeAndHost(UriWrapper.HTTPS, host, port));
     }
 
     public URI getUri() {
@@ -76,7 +83,13 @@ public class UriWrapper {
         UnixPath totalPath = thisPath.addChild(childPath).addRoot();
 
         return attempt(
-            () -> new URI(uri.getScheme(), uri.getHost(), totalPath.toString(), uri.getQuery(), EMPTY_FRAGMENT))
+            () -> new URI(uri.getScheme(),
+                          uri.getUserInfo(),
+                          uri.getHost(),
+                          uri.getPort(),
+                          totalPath.toString(),
+                          uri.getQuery(),
+                          EMPTY_FRAGMENT))
             .map(UriWrapper::new)
             .orElseThrow();
     }
@@ -95,7 +108,13 @@ public class UriWrapper {
             .map(URI::getPath)
             .map(UnixPath::of)
             .flatMap(UnixPath::getParent)
-            .map(attempt(p -> new URI(uri.getScheme(), uri.getHost(), p.toString(), EMPTY_FRAGMENT)))
+            .map(attempt(p -> new URI(uri.getScheme(),
+                                      uri.getUserInfo(),
+                                      uri.getHost(),
+                                      uri.getPort(),
+                                      p.toString(),
+                                      EMPTY_QUERY,
+                                      EMPTY_FRAGMENT)))
             .map(Try::orElseThrow)
             .map(UriWrapper::new);
     }
@@ -108,7 +127,13 @@ public class UriWrapper {
         var queryString = StringUtils.isBlank(uri.getQuery())
                               ? param + "=" + value
                               : uri.getQuery() + "&" + param + "=" + value;
-        URI newUri = attempt(() -> new URI(uri.getScheme(), uri.getHost(), uri.getPath(), queryString, EMPTY_FRAGMENT))
+        URI newUri = attempt(() -> new URI(uri.getScheme(),
+                                           uri.getUserInfo(),
+                                           uri.getHost(),
+                                           uri.getPort(),
+                                           uri.getPath(),
+                                           queryString,
+                                           EMPTY_FRAGMENT))
             .orElseThrow();
         return new UriWrapper(newUri);
     }
@@ -126,8 +151,8 @@ public class UriWrapper {
         return this.getUri().toString();
     }
 
-    private static URI createUriWithSchemeAndHost(String scheme, String host) {
-        return attempt(() -> new URI(scheme, host, EMPTY_PATH, EMPTY_FRAGMENT))
+    private static URI createUriWithSchemeAndHost(String scheme, String host, int port) {
+        return attempt(() -> new URI(scheme, EMPTY_USER_INFO, host, port, EMPTY_PATH, EMPTY_QUERY, EMPTY_FRAGMENT))
             .orElseThrow(fail -> new IllegalArgumentException(MISSING_HOST, fail.getException()));
     }
 }
