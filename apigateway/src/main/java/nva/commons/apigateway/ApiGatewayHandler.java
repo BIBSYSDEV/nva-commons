@@ -153,7 +153,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
 
     private void sendErrorResponse(I input, ApiGatewayException exception, String requestId)
         throws GatewayResponseSerializingException, IOException {
-        Integer statusCode = getFailureStatusCode(input, exception);
+        var statusCode = getFailureStatusCode(input, exception);
         var response = createResponseReportingProblemToClient(exception, statusCode, requestId);
         writeGatewayResponse(response);
     }
