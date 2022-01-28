@@ -183,8 +183,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
      * @param exception  the thrown Exception.
      * @param statusCode the statusCode that should be returned to the API-client.
      * @param requestId  the id of the request that caused the exception.
-     * @return
-     * @throws IOException                         when the writer throws an IOException.
+     * @return a GatewayResponse with a Problem.
      * @throws GatewayResponseSerializingException when the writer throws an GatewayResponseSerializingException.
      */
 
