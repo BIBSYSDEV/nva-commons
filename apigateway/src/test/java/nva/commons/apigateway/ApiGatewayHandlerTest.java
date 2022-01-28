@@ -1,18 +1,19 @@
 package nva.commons.apigateway;
 
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
+import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static nva.commons.apigateway.ApiGatewayHandler.REQUEST_ID;
 import static nva.commons.apigateway.MediaTypes.APPLICATION_PROBLEM_JSON;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -32,6 +33,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -45,8 +47,8 @@ import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.TestException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.apigateway.testutils.Handler;
+import nva.commons.apigateway.testutils.RedirectHandler;
 import nva.commons.apigateway.testutils.RequestBody;
-import nva.commons.core.Environment;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
@@ -60,7 +62,6 @@ import org.zalando.problem.Status;
 
 public class ApiGatewayHandlerTest {
 
-    public static final String SOME_ENV_VALUE = "SomeEnvValue";
     public static final String TOP_EXCEPTION_MESSAGE = "TOP Exception";
     public static final String MIDDLE_EXCEPTION_MESSAGE = "MIDDLE Exception";
     public static final String BOTTOM_EXCEPTION_MESSAGE = "BOTTOM Exception";
@@ -69,7 +70,6 @@ public class ApiGatewayHandlerTest {
     public static final Path EVENT_WITH_UNKNOWN_REQUEST_INFO = Path.of("apiGatewayMessages",
                                                                        "eventWithUnknownRequestInfo.json");
     private static final String PATH = "path1/path2/path3";
-    public Environment environment;
     private Context context;
     private Handler handler;
 
@@ -78,11 +78,9 @@ public class ApiGatewayHandlerTest {
      */
     @BeforeEach
     public void setup() {
-        environment = mock(Environment.class);
-        when(environment.readEnv(anyString())).thenReturn(SOME_ENV_VALUE);
         context = mock(Context.class);
         when(context.getAwsRequestId()).thenReturn(SOME_REQUEST_ID);
-        handler = new Handler(environment);
+        handler = new Handler();
     }
 
     @Test
@@ -117,11 +115,11 @@ public class ApiGatewayHandlerTest {
 
     @ParameterizedTest(name = "handleRequest should return Unsupported media-type when input is {0}")
     @ValueSource(strings = {
-            "application/xml",
-            "text/plain; charset=UTF-8"
+        "application/xml",
+        "text/plain; charset=UTF-8"
     })
     public void handleRequestShouldReturnUnsupportedMediaTypeOnUnsupportedAcceptHeader(String mediaType)
-            throws IOException {
+        throws IOException {
         InputStream input = requestWithAcceptHeader(mediaType);
 
         GatewayResponse<String> response = getStringResponse(input, handler);
@@ -131,18 +129,12 @@ public class ApiGatewayHandlerTest {
         assertThat(response.getBody(), containsString(expectedMessage));
     }
 
-    private String getUnsupportedMediaTypeErrorMessage(String mediaType) {
-        return UnsupportedAcceptHeaderException.createMessage(
-                List.of(MediaType.parse(mediaType)),
-                handler.listSupportedMediaTypes());
-    }
-
     @ParameterizedTest(name = "handleRequest should return OK when input is {0}")
     @ValueSource(strings = {
-            "*/*",
-            "application/json",
-            "application/json; charset=UTF-8",
-            "text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8"
+        "*/*",
+        "application/json",
+        "application/json; charset=UTF-8",
+        "text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8"
     })
     public void handleRequestShouldReturnOkOnSupportedAcceptHeader(String mediaType) throws IOException {
         InputStream input = requestWithAcceptHeader(mediaType);
@@ -154,7 +146,7 @@ public class ApiGatewayHandlerTest {
 
     @Test
     public void handleRequestReturnsContentTypeJsonOnAcceptWildcard()
-            throws IOException {
+        throws IOException {
         Handler handler = handlerThatOverridesListSupportedMediaTypes();
 
         InputStream input = requestWithAcceptHeader(MediaType.ANY_TYPE.toString());
@@ -167,7 +159,7 @@ public class ApiGatewayHandlerTest {
 
     @Test
     public void handleRequestReturnsContentTypeJsonLdOnAcceptJsonLd()
-            throws IOException {
+        throws IOException {
         Handler handler = handlerThatOverridesListSupportedMediaTypes();
 
         InputStream input = requestWithAcceptHeader(MediaTypes.APPLICATION_JSON_LD.toString());
@@ -350,11 +342,28 @@ public class ApiGatewayHandlerTest {
     @Test
     void handlerSerializesBodyWithNonDefaultSerializationWhenDefaultSerializerIsOverridden() throws IOException {
         ObjectMapper spiedMapper = spy(defaultRestObjectMapper);
-        var handler = new Handler(environment, spiedMapper);
+        var handler = new Handler(spiedMapper);
         var inputStream = requestWithHeaders();
         var outputStream = outputStream();
         handler.handleRequest(inputStream, outputStream, context);
         verify(spiedMapper, atLeast(1)).writeValueAsString(any());
+    }
+
+    @Test
+    void handlerSendsRedirectionWhenItReceivesARedirectException() throws IOException {
+        URI expectedRedirectLocation = randomUri();
+        int expectedRedirectStatusCode = HttpURLConnection.HTTP_SEE_OTHER;
+        var handler = new RedirectHandler(expectedRedirectLocation, expectedRedirectStatusCode);
+        var request = requestWithHeaders(Map.of(HttpHeaders.ACCEPT, MediaType.HTML_UTF_8.toString()));
+        var response = getResponse(Void.class, request, handler);
+        assertThat(response.getStatusCode(), is(equalTo(expectedRedirectStatusCode)));
+        assertThat(response.getHeaders(), hasEntry(HttpHeaders.LOCATION, expectedRedirectLocation.toString()));
+    }
+
+    private String getUnsupportedMediaTypeErrorMessage(String mediaType) {
+        return UnsupportedAcceptHeaderException.createMessage(
+            List.of(MediaType.parse(mediaType)),
+            handler.listSupportedMediaTypes());
     }
 
     private <T> GatewayResponse<T> getResponse(Class<T> type, InputStream input, Handler handler) throws IOException {
@@ -363,18 +372,16 @@ public class ApiGatewayHandlerTest {
         return GatewayResponse.fromOutputStream(outputStream);
     }
 
-
     private GatewayResponse<String> getStringResponse(InputStream input, Handler handler) throws IOException {
         return getResponse(String.class, input, handler);
     }
 
     private GatewayResponse<Problem> getProblemResponse(InputStream input, Handler handler) throws IOException {
         return getResponse(Problem.class, input, handler);
-
     }
 
     private Handler handlerFailingWhenParsing(String expectedMessage) {
-        return new Handler(environment) {
+        return new Handler() {
             @Override
             protected RequestBody parseInput(String inputString) {
                 throw new RuntimeException(expectedMessage);
@@ -419,7 +426,7 @@ public class ApiGatewayHandlerTest {
     }
 
     private Handler handlerThatThrowsUncheckedExceptions() {
-        return new Handler(environment) {
+        return new Handler() {
             @Override
             protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context) {
                 throwUncheckedExceptions();
@@ -429,7 +436,7 @@ public class ApiGatewayHandlerTest {
     }
 
     private Handler handlerThatOverridesListSupportedMediaTypes() {
-        return new Handler(environment) {
+        return new Handler() {
             @Override
             public List<MediaType> listSupportedMediaTypes() {
                 return List.of(MediaType.JSON_UTF_8, MediaTypes.APPLICATION_JSON_LD);
@@ -438,7 +445,7 @@ public class ApiGatewayHandlerTest {
     }
 
     private Handler handlerThatOverridesGetFailureStatusCode() {
-        return new Handler(environment) {
+        return new Handler() {
             @Override
             public int getFailureStatusCode(RequestBody input, ApiGatewayException exception) {
                 return OVERRIDDEN_STATUS_CODE;
@@ -496,12 +503,12 @@ public class ApiGatewayHandlerTest {
     }
 
     private InputStream requestWithAcceptHeader(String acceptHeader) throws JsonProcessingException {
-        Map<String,String> headers = new ConcurrentHashMap<>();
+        Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(HttpHeaders.ACCEPT, acceptHeader);
         return requestWithHeaders(headers);
     }
 
-    private InputStream requestWithHeaders(Map<String,String> headers) throws JsonProcessingException {
+    private InputStream requestWithHeaders(Map<String, String> headers) throws JsonProcessingException {
         ObjectNode request = defaultRestObjectMapper.createObjectNode();
         ObjectNode node = createBody();
         request.set("body", node);
@@ -540,7 +547,7 @@ public class ApiGatewayHandlerTest {
     }
 
     private Handler handlerThatThrowsExceptions() {
-        return new Handler(environment) {
+        return new Handler() {
             @Override
             protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
                 throws ApiGatewayException {
