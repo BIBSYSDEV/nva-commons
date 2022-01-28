@@ -21,7 +21,6 @@ import nva.commons.apigateway.exceptions.ApiGatewayUncheckedException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
-import nva.commons.core.JacocoGenerated;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 import org.zalando.problem.ThrowableProblem;
@@ -128,17 +127,6 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
 
     protected void addAdditionalHeaders(Supplier<Map<String, String>> additionalHeaders) {
         this.additionalSuccessHeadersSupplier = additionalHeaders;
-    }
-
-    /**
-     * Use {@link ApiGatewayHandler#addAdditionalHeaders}.
-     *
-     * @param additionalHeaders a Map of additional success headers.
-     */
-    @Deprecated
-    @JacocoGenerated
-    protected void setAdditionalHeadersSupplier(Supplier<Map<String, String>> additionalHeaders) {
-        addAdditionalHeaders(additionalHeaders);
     }
 
     /**
