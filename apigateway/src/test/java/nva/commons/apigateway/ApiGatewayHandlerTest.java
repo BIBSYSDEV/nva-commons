@@ -33,7 +33,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -351,8 +350,8 @@ public class ApiGatewayHandlerTest {
 
     @Test
     void handlerSendsRedirectionWhenItReceivesARedirectException() throws IOException {
-        URI expectedRedirectLocation = randomUri();
-        int expectedRedirectStatusCode = HttpURLConnection.HTTP_SEE_OTHER;
+        var expectedRedirectLocation = randomUri();
+        var expectedRedirectStatusCode = HttpURLConnection.HTTP_SEE_OTHER;
         var handler = new RedirectHandler(expectedRedirectLocation, expectedRedirectStatusCode);
         var request = requestWithHeaders(Map.of(HttpHeaders.ACCEPT, MediaType.HTML_UTF_8.toString()));
         var response = getResponse(Void.class, request, handler);

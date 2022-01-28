@@ -35,6 +35,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         + " Contact application administrator.";
     public static final String DEFAULT_ERROR_MESSAGE = "Unknown error in handler";
     public static final String REQUEST_ID = "requestId";
+    public static final Void EMPTY_BODY = null;
 
     private final ObjectMapper objectMapper;
 
@@ -166,11 +167,8 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
 
     private GatewayResponse<Void> createRedirectResponse(RedirectException exception)
         throws GatewayResponseSerializingException {
-        RedirectException redirectException = exception;
-        var responseHeaders = Map.of(HttpHeaders.LOCATION, redirectException.getLocation().toString());
-        var response = new GatewayResponse<Void>(null, responseHeaders, redirectException.getStatusCode(),
-                                                 objectMapper);
-        return response;
+        var responseHeaders = Map.of(HttpHeaders.LOCATION, exception.getLocation().toString());
+        return new GatewayResponse<>(EMPTY_BODY, responseHeaders, exception.getStatusCode(), objectMapper);
     }
 
     private boolean failureIsARedirection(ApiGatewayException exception) {
@@ -185,8 +183,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
      * @param exception  the thrown Exception.
      * @param statusCode the statusCode that should be returned to the API-client.
      * @param requestId  the id of the request that caused the exception.
-     * @return
-     * @throws IOException                         when the writer throws an IOException.
+     * @return a GatewayResponse with a Problem.
      * @throws GatewayResponseSerializingException when the writer throws an GatewayResponseSerializingException.
      */
 
