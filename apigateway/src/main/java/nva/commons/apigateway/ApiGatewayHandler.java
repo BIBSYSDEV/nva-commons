@@ -145,6 +145,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
      * If you want to override this method, maybe better to override the
      * {@link ApiGatewayHandler#defaultHeaders(RequestInfo
      * requestInfo)}.
+     *
      * @param requestInfo Request Info object.
      * @return a map with the response headers in case of success.
      * @throws UnsupportedAcceptHeaderException If the accept-header contains an unsupported mimetype.
@@ -170,26 +171,28 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     protected void writeFailure(Exception exception, Integer statusCode, String requestId)
         throws IOException, GatewayResponseSerializingException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-            String errorMessage = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
-            Status status = Status.valueOf(statusCode);
-
-            ThrowableProblem problem = Problem.builder().withStatus(status)
-                                           .withTitle(status.getReasonPhrase())
-                                           .withDetail(errorMessage)
-                                           .with(REQUEST_ID, requestId)
-                                           .build();
-
-            Map<String, String> headers = getFailureHeaders();
+            ThrowableProblem problem = createProblemDescription(exception, statusCode, requestId);
             GatewayResponse<ThrowableProblem> gatewayResponse =
-                new GatewayResponse<>(problem, headers, statusCode, objectMapper);
+                new GatewayResponse<>(problem, getFailureHeaders(), statusCode, objectMapper);
             String gateWayResponseJson = objectMapper.writeValueAsString(gatewayResponse);
             writer.write(gateWayResponseJson);
         }
     }
 
+    private ThrowableProblem createProblemDescription(Exception exception, Integer statusCode, String requestId) {
+        String errorMessage = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
+        Status status = Status.valueOf(statusCode);
+        return Problem.builder().withStatus(status)
+            .withTitle(status.getReasonPhrase())
+            .withDetail(errorMessage)
+            .with(REQUEST_ID, requestId)
+            .build();
+    }
+
     /**
      * If you want to override this method, maybe better to override the
-     * {@link ApiGatewayHandler#defaultHeaders(RequestInfo requestInfo)}.
+     * {@link ApiGatewayHandler#defaultHeaders(RequestInfo
+     * requestInfo)}.
      *
      * @return a map with the response headers in case of failure.
      */
