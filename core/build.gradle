@@ -9,6 +9,7 @@ dependencies {
     implementation libs.jackson.annotations
     testImplementation libs.bundles.testing
     testImplementation libs.bundles.jackson
+    testImplementation project (":nvatestutils")
     testImplementation project(":logutils")
 }
 

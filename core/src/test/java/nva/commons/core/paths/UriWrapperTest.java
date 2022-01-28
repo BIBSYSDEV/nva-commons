@@ -1,5 +1,6 @@
 package nva.commons.core.paths;
 
+import static no.unit.nva.testutils.RandomDataGenerator.randomInteger;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -16,6 +17,7 @@ class UriWrapperTest {
 
     public static final String HOST = "http://www.example.org";
     private static final String ROOT = "/";
+    public static final int MAX_PORT_NUMBER = 65535;
 
     @Test
     void getPathRemovesPathDelimiterFromTheEndOfTheUri() {
@@ -164,5 +166,12 @@ class UriWrapperTest {
     void shouldCreateAnHttpsUriByDefault() {
         var constructedUri = UriWrapper.fromHost("example.org").getUri();
         assertThat(constructedUri.getScheme(), is(equalTo(UriWrapper.HTTPS)));
+    }
+
+    @Test
+    void shouldReturnUriWithCustomPort() {
+        var expectedPort = randomInteger(MAX_PORT_NUMBER);
+        var actualUri = UriWrapper.fromHost("example.org", expectedPort).getUri();
+        assertThat(actualUri, is(equalTo(URI.create("https://example.org:" + expectedPort))));
     }
 }
