@@ -2,12 +2,11 @@ package nva.commons.apigateway.testutils;
 
 import static nva.commons.apigateway.RequestInfo.PROXY_TAG;
 import com.amazonaws.services.lambda.runtime.Context;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.net.HttpHeaders;
 import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.Map;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.net.HttpHeaders;
 import nva.commons.apigateway.ApiGatewayHandler;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
@@ -20,22 +19,17 @@ public class Handler extends ApiGatewayHandler<RequestBody, RequestBody> {
     private String path;
     private RequestBody body;
 
-    /**
-     * Constructor with environment.
-     *
-     * @param environment the environment.
-     */
-    public Handler(Environment environment) {
-        super(RequestBody.class, environment);
+    public Handler() {
+        super(RequestBody.class);
     }
 
     /**
      * Constructor that overrides default serialization.
-     * @param environment the environment
-     * @param mapper      Object Mapper
+     *
+     * @param mapper Object Mapper
      */
-    public Handler(Environment environment, ObjectMapper mapper) {
-        super(RequestBody.class, environment, mapper);
+    public Handler(ObjectMapper mapper) {
+        super(RequestBody.class, new Environment(), mapper);
     }
 
     @Override

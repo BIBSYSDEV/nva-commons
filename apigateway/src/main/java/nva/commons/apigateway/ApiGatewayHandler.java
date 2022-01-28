@@ -2,14 +2,15 @@ package nva.commons.apigateway;
 
 import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
+import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.net.HttpHeaders;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
@@ -19,6 +20,7 @@ import java.util.function.Supplier;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.ApiGatewayUncheckedException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
+import nva.commons.apigateway.exceptions.RedirectException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
 import org.zalando.problem.Problem;
@@ -33,6 +35,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         + " Contact application administrator.";
     public static final String DEFAULT_ERROR_MESSAGE = "Unknown error in handler";
     public static final String REQUEST_ID = "requestId";
+    public static final Void EMPTY_BODY = null;
 
     private final ObjectMapper objectMapper;
 
@@ -91,8 +94,11 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     @Override
     protected void writeExpectedFailure(I input, ApiGatewayException exception, String requestId) throws IOException {
         try {
-            Integer statusCode = getFailureStatusCode(input, exception);
-            writeFailure(exception, statusCode, requestId);
+            if (failureIsARedirection(exception)) {
+                sendRedirectResponse((RedirectException) exception);
+            } else {
+                sendErrorResponse(input, exception, requestId);
+            }
         } catch (GatewayResponseSerializingException e) {
             throw new ApiGatewayUncheckedException(e);
         }
@@ -113,7 +119,9 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         try {
             RuntimeException runtimeException =
                 new RuntimeException(MESSAGE_FOR_RUNTIME_EXCEPTIONS_HIDING_IMPLEMENTATION_DETAILS_TO_API_CLIENTS);
-            writeFailure(runtimeException, HttpURLConnection.HTTP_INTERNAL_ERROR, requestId);
+            var response =
+                createResponseReportingProblemToClient(runtimeException, HTTP_INTERNAL_ERROR, requestId);
+            writeGatewayResponse(response);
         } catch (GatewayResponseSerializingException e) {
             throw new ApiGatewayUncheckedException(e);
         }
@@ -144,6 +152,29 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         return headers;
     }
 
+    private void sendErrorResponse(I input, ApiGatewayException exception, String requestId)
+        throws GatewayResponseSerializingException, IOException {
+        Integer statusCode = getFailureStatusCode(input, exception);
+        var response = createResponseReportingProblemToClient(exception, statusCode, requestId);
+        writeGatewayResponse(response);
+    }
+
+    private void sendRedirectResponse(RedirectException exception)
+        throws GatewayResponseSerializingException, IOException {
+        GatewayResponse<Void> response = createRedirectResponse(exception);
+        writeGatewayResponse(response);
+    }
+
+    private GatewayResponse<Void> createRedirectResponse(RedirectException exception)
+        throws GatewayResponseSerializingException {
+        var responseHeaders = Map.of(HttpHeaders.LOCATION, exception.getLocation().toString());
+        return new GatewayResponse<>(EMPTY_BODY, responseHeaders, exception.getStatusCode(), objectMapper);
+    }
+
+    private boolean failureIsARedirection(ApiGatewayException exception) {
+        return exception instanceof RedirectException;
+    }
+
     /**
      * Method for sending error messages in case of failure. It can be overriden but it should not be necessary in the
      * general case. It returns to the API-client a specified status code, the message of the exception and optionally
@@ -152,16 +183,21 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
      * @param exception  the thrown Exception.
      * @param statusCode the statusCode that should be returned to the API-client.
      * @param requestId  the id of the request that caused the exception.
-     * @throws IOException                         when the writer throws an IOException.
+     * @return a GatewayResponse with a Problem.
      * @throws GatewayResponseSerializingException when the writer throws an GatewayResponseSerializingException.
      */
 
-    protected void writeFailure(Exception exception, Integer statusCode, String requestId)
-        throws IOException, GatewayResponseSerializingException {
+    private GatewayResponse<ThrowableProblem> createResponseReportingProblemToClient(Exception exception,
+                                                                                     Integer statusCode,
+                                                                                     String requestId)
+        throws GatewayResponseSerializingException {
+        ThrowableProblem problem = createProblemDescription(exception, statusCode, requestId);
+        return new GatewayResponse<>(problem, getFailureHeaders(), statusCode, objectMapper);
+    }
+
+    private <T> void writeGatewayResponse(GatewayResponse<T> gatewayResponse)
+        throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-            ThrowableProblem problem = createProblemDescription(exception, statusCode, requestId);
-            GatewayResponse<ThrowableProblem> gatewayResponse =
-                new GatewayResponse<>(problem, getFailureHeaders(), statusCode, objectMapper);
             String gateWayResponseJson = objectMapper.writeValueAsString(gatewayResponse);
             writer.write(gateWayResponseJson);
         }

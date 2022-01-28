@@ -23,3 +23,8 @@ dependencies {
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")
 }
+
+
+test{
+   environment "ALLOWED_ORIGIN", "*"
+}
