@@ -80,7 +80,7 @@ public final class RandomDataGenerator {
     }
 
     public static LocalDateTime randomLocalDateTime() {
-        return LocalDateTime.ofInstant(randomInstant(), ZoneId.systemDefault());
+        return LocalDateTime.ofInstant(randomInstant(), ZONE_ID);
     }
 
     public static LocalDateTime randomLocalDateTime(LocalDateTime after) {
