@@ -7,8 +7,10 @@ import com.github.javafaker.Faker;
 import java.net.URI;
 import java.sql.Date;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.Random;
@@ -23,11 +25,13 @@ public final class RandomDataGenerator {
     public static final int MAX_RANDOM_STRING_LENGTH = 20;
     public static final Random RANDOM = new Random();
     public static final Faker FAKER = Faker.instance();
-    public static final Instant BEGINNING_OF_TIME = LocalDateTime.of(1971, Month.JANUARY, 2, 0, 0)
-        .toInstant(ZoneOffset.UTC);
+    public static final Instant BEGINNING_OF_TIME =
+        LocalDateTime.of(1971, Month.JANUARY, 2, 0, 0).toInstant(ZoneOffset.UTC);
     public static final ObjectMapper objectMapper = JsonUtils.dtoObjectMapper;
     private static final Instant END_OF_TIME = Instant.now();
     private static final int ARBITRARY_FIELDS_NUMBER = 5;
+    private static final ZoneId ZONE_ID = ZoneId.systemDefault();
+    private static final ZoneOffset CURRENT_ZONE_OFFSET = ZONE_ID.getRules().getOffset(Instant.now());
 
     private RandomDataGenerator() {
 
@@ -73,6 +77,24 @@ public final class RandomDataGenerator {
     public static <T> T randomElement(Collection<T> elements) {
         Object element = randomElement(elements.toArray());
         return (T) element;
+    }
+
+    public static LocalDateTime randomLocalDateTime() {
+        return LocalDateTime.ofInstant(randomInstant(), ZONE_ID);
+    }
+
+    public static LocalDateTime randomLocalDateTime(LocalDateTime after) {
+        var afterAsInstant = Instant.from(after.toInstant(CURRENT_ZONE_OFFSET));
+        return LocalDateTime.ofInstant(randomInstant(afterAsInstant), ZONE_ID);
+    }
+
+    public static LocalDate randomLocalDate() {
+        return LocalDate.from(randomLocalDateTime());
+    }
+
+    public static LocalDate randomLocalDate(LocalDate after) {
+        var afterAsInstant = Instant.from(after.atStartOfDay().toInstant(CURRENT_ZONE_OFFSET));
+        return LocalDate.ofInstant(randomInstant(afterAsInstant), ZONE_ID);
     }
 
     public static Instant randomInstant() {

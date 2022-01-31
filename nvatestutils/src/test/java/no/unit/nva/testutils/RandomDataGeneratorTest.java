@@ -7,7 +7,9 @@ import static no.unit.nva.testutils.RandomDataGenerator.randomInstant;
 import static no.unit.nva.testutils.RandomDataGenerator.randomJson;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.collection.IsIn.in;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
@@ -110,5 +112,31 @@ class RandomDataGeneratorTest {
                 .findAny()
                 .orElse(firstValue);
         assertThat(oppositeValue, is(not(equalTo(firstValue))));
+    }
+
+    @Test
+    void shouldReturnRandomLocalDateTime() {
+        var randomLocalDateTime = RandomDataGenerator.randomLocalDateTime();
+        assertThat(randomLocalDateTime, is(not(nullValue())));
+    }
+
+    @Test
+    void shouldReturnRandomLocalDateTimeAfterSuppliedLocalDateTime() {
+        var before = RandomDataGenerator.randomLocalDateTime();
+        var after = RandomDataGenerator.randomLocalDateTime(before);
+        assertThat(after, is(greaterThan(before)));
+    }
+
+    @Test
+    void shouldReturnRandomLocalDate() {
+        var randomLocalDate = RandomDataGenerator.randomLocalDate();
+        assertThat(randomLocalDate, is(not(nullValue())));
+    }
+
+    @Test
+    void shouldReturnRandomLocalDateAfterSuppliedLocalDate() {
+        var before = RandomDataGenerator.randomLocalDate();
+        var after = RandomDataGenerator.randomLocalDate(before);
+        assertThat(after, is(greaterThanOrEqualTo(before)));
     }
 }
