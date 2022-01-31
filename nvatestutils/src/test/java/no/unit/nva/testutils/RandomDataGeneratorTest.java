@@ -134,7 +134,7 @@ class RandomDataGeneratorTest {
     }
 
     @Test
-    void shouldReturnRandomLocalDateTimeAfterSuppliedLocalDate() {
+    void shouldReturnRandomLocalDateAfterSuppliedLocalDate() {
         var before = RandomDataGenerator.randomLocalDate();
         var after = RandomDataGenerator.randomLocalDate(before);
         assertThat(after, is(greaterThanOrEqualTo(before)));
