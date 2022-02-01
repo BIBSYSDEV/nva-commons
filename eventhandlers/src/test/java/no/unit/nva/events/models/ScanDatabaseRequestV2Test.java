@@ -13,14 +13,14 @@ import no.unit.nva.commons.json.JsonUtils;
 import no.unit.nva.events.EventsConfig;
 import org.junit.jupiter.api.Test;
 
-class ScanDatabaseRequestTest {
+class ScanDatabaseRequestV2Test {
 
     public static final String EVENT_TOPIC = "topic";
 
     @Test
     void shouldReturnAnEventBridgeEventWhereTheTopicIsSetInTheDetailBody() throws JsonProcessingException {
         String expectedTopic = randomString();
-        var request = new ScanDatabaseRequest(expectedTopic, 100, null);
+        var request = new ScanDatabaseRequestV2(expectedTopic, 100, null);
         var event = request.createNewEventEntry(randomString(), randomString(), randomString());
         var eventAsJson = EventsConfig.objectMapper.readTree(event.detail());
         assertThat(eventAsJson.get(EVENT_TOPIC).textValue(), is(equalTo(expectedTopic)));
@@ -28,16 +28,16 @@ class ScanDatabaseRequestTest {
 
     @Test
     void shouldReturnScanRequestFromEventDetail() throws JsonProcessingException {
-        var originalRequest = new ScanDatabaseRequest(randomString(), randomInteger(), null);
+        var originalRequest = new ScanDatabaseRequestV2(randomString(), randomInteger(), null);
         var event = originalRequest.createNewEventEntry(randomString(), randomString(), randomString());
         var reconstructedRequest =
-            ScanDatabaseRequest.fromJson(event.detail());
+            ScanDatabaseRequestV2.fromJson(event.detail());
         assertThat(reconstructedRequest, is(equalTo(originalRequest)));
     }
 
     @Test
     void shouldGenerateNewEventWithSameTopicAndPageSizer() {
-        var originalRequest = new ScanDatabaseRequest(randomString(), randomInteger(), null);
+        var originalRequest = new ScanDatabaseRequestV2(randomString(), randomInteger(), null);
         var expectedStartMarker = Map.of(randomString(), new AttributeValue(randomString()),
                                          randomString(), new AttributeValue(randomString()));
         var newRequest = originalRequest.newScanDatabaseRequest(expectedStartMarker);
@@ -47,9 +47,9 @@ class ScanDatabaseRequestTest {
     @Test
     void shouldDeserializeEmptyObject() throws JsonProcessingException {
         var deserializedFromEmptyJson = objectMapperWithoutSpecialConfig()
-            .readValue(emptyJson(), ScanDatabaseRequest.class);
+            .readValue(emptyJson(), ScanDatabaseRequestV2.class);
         var expectedDeserializedObject =
-            new ScanDatabaseRequest(null, ScanDatabaseRequest.DEFAULT_PAGE_SIZE, null);
+            new ScanDatabaseRequestV2(null, ScanDatabaseRequestV2.DEFAULT_PAGE_SIZE, null);
         assertThat(deserializedFromEmptyJson, is(equalTo(expectedDeserializedObject)));
     }
 

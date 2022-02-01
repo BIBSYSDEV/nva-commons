@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import no.unit.nva.events.models.AbstractScanDatabaseRequest;
 import no.unit.nva.events.models.ScanDatabaseRequest;
 import no.unit.nva.stubs.FakeEventBridgeClient;
 import nva.commons.core.SingletonCollector;
@@ -122,7 +123,7 @@ class StartBatchScanHandlerTest {
         };
     }
 
-    private ScanDatabaseRequest getEmittedScanRequest() {
+    private AbstractScanDatabaseRequest<AttributeValue> getEmittedScanRequest() {
         return eventBridgeClient.getRequestEntries().stream()
             .map(PutEventsRequestEntry::detail)
             .map(attempt(ScanDatabaseRequest::fromJson))
