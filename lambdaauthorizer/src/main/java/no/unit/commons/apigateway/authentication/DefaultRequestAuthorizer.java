@@ -41,7 +41,6 @@ public class DefaultRequestAuthorizer extends RequestAuthorizer {
 
     @Override
     protected String fetchSecret() {
-        var sercet = secretsReader.fetchSecret(API_KEY_SECRET_NAME, API_KEY_SECRET_KEY);
-        return sercet;
+        return secretsReader.fetchSecret(API_KEY_SECRET_NAME, API_KEY_SECRET_KEY);
     }
 }

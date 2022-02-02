@@ -36,7 +36,7 @@ class ScanDatabaseRequestTest {
     }
 
     @Test
-    void shouldGenerateNewEventWithSameTopicAndPageSizer() {
+    void shouldGenerateNewEventWithSameTopicAndPageSize() {
         var originalRequest = new ScanDatabaseRequest(randomString(), randomInteger(), null);
         var expectedStartMarker = Map.of(randomString(), new AttributeValue(randomString()),
                                          randomString(), new AttributeValue(randomString()));
