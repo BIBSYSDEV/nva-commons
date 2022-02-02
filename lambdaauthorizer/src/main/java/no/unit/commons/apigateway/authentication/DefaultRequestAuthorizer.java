@@ -12,8 +12,8 @@ import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 public class DefaultRequestAuthorizer extends RequestAuthorizer {
 
     private static final Environment ENVIRONMENT = new Environment();
-    protected static final String API_KEY_SECRET_NAME = ENVIRONMENT.readEnv("API_KEY_SECRET_NAME");
-    protected static final String API_KEY_SECRET_KEY = ENVIRONMENT.readEnv("API_KEY_SECRET_KEY");
+    public static final String API_KEY_SECRET_NAME = ENVIRONMENT.readEnv("API_KEY_SECRET_NAME");
+    public static final String API_KEY_SECRET_KEY = ENVIRONMENT.readEnv("API_KEY_SECRET_KEY");
     private final SecretsReader secretsReader;
     private final String principalIdentifier;
 
