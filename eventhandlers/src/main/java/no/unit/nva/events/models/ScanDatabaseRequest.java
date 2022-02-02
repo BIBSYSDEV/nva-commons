@@ -22,6 +22,11 @@ public class ScanDatabaseRequest extends AbstractScanDatabaseRequest<AttributeVa
         super(topic, pageSize, startMarker);
     }
 
+    @Override
+    public ScanDatabaseRequest newScanDatabaseRequest(Map<String, AttributeValue> newStartMarker) {
+        return new ScanDatabaseRequest(getTopic(), getPageSize(), newStartMarker);
+    }
+
     public static ScanDatabaseRequest fromJson(String detail)
         throws JsonProcessingException {
         return objectMapper.readValue(detail, ScanDatabaseRequest.class);

@@ -26,4 +26,9 @@ public class ScanDatabaseRequestV2 extends AbstractScanDatabaseRequest<Attribute
         throws JsonProcessingException {
         return objectMapper.readValue(detail, ScanDatabaseRequestV2.class);
     }
+
+    @Override
+    public ScanDatabaseRequestV2 newScanDatabaseRequest(Map<String, AttributeValue> newStartMarker) {
+        return new ScanDatabaseRequestV2(getTopic(), getPageSize(), newStartMarker);
+    }
 }

@@ -1,6 +1,5 @@
 package no.unit.nva.events.models;
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
@@ -65,9 +64,7 @@ public abstract class AbstractScanDatabaseRequest<T> implements EventBody, JsonS
      * @param newStartMarker the start marker for the next scan operation.
      * @return a new ScanDatabaseRequest containing the the {@code newStartMarker}
      */
-    public ScanDatabaseRequest newScanDatabaseRequest(Map<String, AttributeValue> newStartMarker) {
-        return new ScanDatabaseRequest(this.getTopic(), this.getPageSize(), newStartMarker);
-    }
+    public abstract AbstractScanDatabaseRequest<T> newScanDatabaseRequest(Map<String, T> newStartMarker);
 
     public PutEventsRequestEntry createNewEventEntry(
         String eventBusName,

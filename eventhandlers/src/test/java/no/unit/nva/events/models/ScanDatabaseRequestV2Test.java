@@ -5,13 +5,13 @@ import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import no.unit.nva.commons.json.JsonUtils;
 import no.unit.nva.events.EventsConfig;
 import org.junit.jupiter.api.Test;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 class ScanDatabaseRequestV2Test {
 
@@ -36,10 +36,10 @@ class ScanDatabaseRequestV2Test {
     }
 
     @Test
-    void shouldGenerateNewEventWithSameTopicAndPageSizer() {
+    void shouldGenerateNewEventWithSameTopicAndPageSize() {
         var originalRequest = new ScanDatabaseRequestV2(randomString(), randomInteger(), null);
-        var expectedStartMarker = Map.of(randomString(), new AttributeValue(randomString()),
-                                         randomString(), new AttributeValue(randomString()));
+        var expectedStartMarker = Map.of(randomString(), randomStringAttribute(),
+                                         randomString(), randomStringAttribute());
         var newRequest = originalRequest.newScanDatabaseRequest(expectedStartMarker);
         assertThat(newRequest.getStartMarker(), is(equalTo(expectedStartMarker)));
     }
@@ -51,6 +51,10 @@ class ScanDatabaseRequestV2Test {
         var expectedDeserializedObject =
             new ScanDatabaseRequestV2(null, ScanDatabaseRequestV2.DEFAULT_PAGE_SIZE, null);
         assertThat(deserializedFromEmptyJson, is(equalTo(expectedDeserializedObject)));
+    }
+
+    private AttributeValue randomStringAttribute() {
+        return AttributeValue.builder().s(randomString()).build();
     }
 
     private String emptyJson() {
