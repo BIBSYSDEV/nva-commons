@@ -18,20 +18,34 @@ public class EventReference implements JsonSerializable, EventBody {
 
     public static final String TOPIC = "topic";
     public static final String URI = "uri";
+    public static final String SUBTOPIC = "subtopic";
     @JsonProperty(TOPIC)
     private final String topic;
+    @JsonProperty(SUBTOPIC)
+    private final String subtopic;
     @JsonProperty(URI)
     private final URI uri;
 
     @JsonCreator
     public EventReference(@JsonProperty(TOPIC) String topic,
+                          @JsonProperty(SUBTOPIC) String subtopic,
                           @JsonProperty(URI) URI uri) {
         this.topic = topic;
+        this.subtopic = subtopic;
         this.uri = uri;
+    }
+
+    public EventReference(String topic, URI uri) {
+        this(topic, null, uri);
     }
 
     public static EventReference fromJson(String json) {
         return attempt(() -> defaultEventObjectMapper.readValue(json, EventReference.class)).orElseThrow();
+    }
+
+    @JacocoGenerated
+    public String getSubtopic() {
+        return subtopic;
     }
 
     @Override
