@@ -1,5 +1,7 @@
 package no.unit.nva.events.models;
 
+import static no.unit.nva.events.models.ScanDatabaseRequestV2.DEFAULT_PAGE_SIZE;
+import static no.unit.nva.events.models.ScanDatabaseRequestV2.MAX_PAGE_SIZE;
 import static no.unit.nva.testutils.RandomDataGenerator.randomInteger;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -11,6 +13,8 @@ import java.util.Map;
 import no.unit.nva.commons.json.JsonUtils;
 import no.unit.nva.events.EventsConfig;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 class ScanDatabaseRequestV2Test {
@@ -37,11 +41,12 @@ class ScanDatabaseRequestV2Test {
 
     @Test
     void shouldGenerateNewEventWithSameTopicAndPageSize() {
-        var originalRequest = new ScanDatabaseRequestV2(randomString(), randomInteger(), null);
+        var originalRequest =
+            new ScanDatabaseRequestV2(randomString(), randomInteger(MAX_PAGE_SIZE), null);
         var expectedStartMarker = Map.of(randomString(), randomStringAttribute(),
                                          randomString(), randomStringAttribute());
         var newRequest = originalRequest.newScanDatabaseRequest(expectedStartMarker);
-        assertThat(newRequest.getStartMarker(), is(equalTo(expectedStartMarker)));
+        assertThat(newRequest.toDynamoScanMarker(), is(equalTo(expectedStartMarker)));
     }
 
     @Test
@@ -51,6 +56,44 @@ class ScanDatabaseRequestV2Test {
         var expectedDeserializedObject =
             new ScanDatabaseRequestV2(null, ScanDatabaseRequestV2.DEFAULT_PAGE_SIZE, null);
         assertThat(deserializedFromEmptyJson, is(equalTo(expectedDeserializedObject)));
+    }
+
+    @ParameterizedTest(name = "should set default page size when page size is off limits.Page size:{0}")
+    @ValueSource(ints = {-1, 0, MAX_PAGE_SIZE + 1, MAX_PAGE_SIZE + 100})
+    void shouldSetDefaultPageSizeWhenRequestedPageSizeIsOfLimits(int pageSize) {
+        var expectedStartMarker = Map.of(randomString(), randomString(),
+                                         randomString(), randomString());
+        var expectedTopic = randomString();
+        var actualRequest =
+            new ScanDatabaseRequestV2(expectedTopic, pageSize, expectedStartMarker);
+        var expectedRequest = new ScanDatabaseRequestV2(expectedTopic, DEFAULT_PAGE_SIZE, expectedStartMarker);
+
+        assertThat(actualRequest, is(equalTo(expectedRequest)));
+    }
+
+    @Test
+    void shouldSerializeAndDeserializeWithoutInformationLoss() throws JsonProcessingException {
+        var startMarker = randomMarker();
+        var sampleRequest = new ScanDatabaseRequestV2(randomString(), randomInteger(), startMarker);
+        var json = sampleRequest.toJsonString();
+        var deserialized = ScanDatabaseRequestV2.fromJson(json);
+        assertThat(deserialized, is(equalTo(sampleRequest)));
+        assertThatNonSerializableDynamoScanMarkerConstainsSameValuesAsItsEquivalentSerializableRepresentation(
+            startMarker, deserialized);
+    }
+
+    private void assertThatNonSerializableDynamoScanMarkerConstainsSameValuesAsItsEquivalentSerializableRepresentation(
+        Map<String, String> startMarker, ScanDatabaseRequestV2 deserialized) {
+        for (var key : startMarker.keySet()) {
+            var expectedAttributeValue = startMarker.get(key);
+            var actualAttributeValue = deserialized.toDynamoScanMarker().get(key).s();
+            assertThat(actualAttributeValue, is(equalTo(expectedAttributeValue)));
+        }
+    }
+
+    private Map<String, String> randomMarker() {
+        return Map.of(randomString(), randomString(),
+                      randomString(), randomString());
     }
 
     private AttributeValue randomStringAttribute() {
