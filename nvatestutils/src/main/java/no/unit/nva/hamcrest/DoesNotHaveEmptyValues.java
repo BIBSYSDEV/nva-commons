@@ -55,7 +55,16 @@ public class DoesNotHaveEmptyValues<T> extends BaseMatcher<T> {
 
     public static <R> DoesNotHaveEmptyValues<R> doesNotHaveEmptyValuesIgnoringFields(Set<String> ignoreList) {
         DoesNotHaveEmptyValues<R> matcher = new DoesNotHaveEmptyValues<>();
-        matcher.ignoreFields = addFieldPathDelimiterToRootField(ignoreList);
+        initializeFieldNamesWhichWillBeIgnoredDuringChecking(ignoreList, matcher);
+        return matcher;
+    }
+
+    public static <R> DoesNotHaveEmptyValues<R> doesNotHaveEmptyValuesIgnoringFieldsAndClasses(
+        Set<Class<?>> ignoreClassesList,
+        Set<String> ignoreFieldsList) {
+        DoesNotHaveEmptyValues<R> matcher = new DoesNotHaveEmptyValues<>();
+        initializeClassesWhereRecursiveFieldCheckingWillStop(ignoreClassesList, matcher);
+        initializeFieldNamesWhichWillBeIgnoredDuringChecking(ignoreFieldsList, matcher);
         return matcher;
     }
 
@@ -84,6 +93,11 @@ public class DoesNotHaveEmptyValues<T> extends BaseMatcher<T> {
 
         description.appendText(EMPTY_FIELD_ERROR)
             .appendText(emptyFieldNames);
+    }
+
+    private static <R> void initializeFieldNamesWhichWillBeIgnoredDuringChecking(Set<String> ignoreList,
+                                                                                 DoesNotHaveEmptyValues<R> matcher) {
+        matcher.ignoreFields = addFieldPathDelimiterToRootField(ignoreList);
     }
 
     private static <R> void initializeClassesWhereRecursiveFieldCheckingWillStop(Set<Class<?>> ignoreList,
