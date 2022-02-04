@@ -206,12 +206,12 @@ public class DoesNotHaveEmptyValuesTest {
 
     @Test
     void shouldReturnTrueWhenIgnoredFieldIsEmptyAndFieldsInIgnoredClassAreEmpty() {
-        WithBaseTypes withBaseTypes = new WithBaseTypes(EMPTY_STRING,
-                                                        NULL_INTEGER,
-                                                        Collections.emptyList(),
-                                                        Collections.emptyMap(),
-                                                        JsonUtils.dtoObjectMapper.createObjectNode());
-        ClassWithChildrenWithMultipleFields objectWithBothEmptyValuesAndClassWithEmptyValues =
+        var withBaseTypes = new WithBaseTypes(EMPTY_STRING,
+                                              NULL_INTEGER,
+                                              Collections.emptyList(),
+                                              Collections.emptyMap(),
+                                              JsonUtils.dtoObjectMapper.createObjectNode());
+        var objectWithBothEmptyValuesAndClassWithEmptyValues =
             new ClassWithChildrenWithMultipleFields(NULL_STRING, withBaseTypes, SAMPLE_INT);
         assertThatContainedObjectHasEmptyFields(withBaseTypes);
         assertThat(objectWithBothEmptyValuesAndClassWithEmptyValues, doesNotHaveEmptyValuesIgnoringFieldsAndClasses(
