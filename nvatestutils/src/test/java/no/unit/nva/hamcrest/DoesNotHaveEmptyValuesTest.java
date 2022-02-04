@@ -3,10 +3,12 @@ package no.unit.nva.hamcrest;
 import static no.unit.nva.hamcrest.DoesNotHaveEmptyValues.EMPTY_FIELD_ERROR;
 import static no.unit.nva.hamcrest.DoesNotHaveEmptyValues.doesNotHaveEmptyValues;
 import static no.unit.nva.hamcrest.DoesNotHaveEmptyValues.doesNotHaveEmptyValuesIgnoringFields;
+import static no.unit.nva.hamcrest.DoesNotHaveEmptyValues.doesNotHaveEmptyValuesIgnoringFieldsAndClasses;
 import static no.unit.nva.hamcrest.PropertyValuePair.FIELD_PATH_DELIMITER;
 import static no.unit.nva.hamcrest.PropertyValuePair.LEFT_BRACE;
 import static no.unit.nva.hamcrest.PropertyValuePair.RIGHT_BRACE;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -20,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import no.unit.nva.commons.json.JsonUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -34,11 +37,19 @@ public class DoesNotHaveEmptyValuesTest {
     public static final String INT_FIELD = "intField";
     public static final String OBJECT_FIELD = "objectWithFields";
     public static final String STRING_FIELD = "stringField";
+    public static final String LIST_FIELD = "list";
+    public static final String MAP_FIELD = "map";
+    public static final String JSON_FIELD = "jsonNode";
+
+    public static final String LIST_WITH_INCOMPLETE_ENTRIES_FIELD = "listWithIncompleteEntries";
+
     public static final URI EXAMPLE_URI = URI.create("http://example.org");
-    public static final String LIST_FIELD = "listWithIncompleteEntries";
+
     public static final String MISSING_VALUE_IN_ARRAY_ELEMENT = "listWithIncompleteEntries[0].stringField";
     public static final String GENERIC_PATH_TO_FIELD_IN_ARRAY_ELEMENT = "listWithIncompleteEntries.stringField";
+    public static final Integer NULL_INTEGER = null;
     private static final JsonNode SAMPLE_JSON_NODE = nonEmptyJsonNode();
+    private static final String NULL_STRING = null;
     private DoesNotHaveEmptyValues<Object> matcher;
 
     @BeforeEach
@@ -169,7 +180,7 @@ public class DoesNotHaveEmptyValuesTest {
             new WithBaseTypes(null, SAMPLE_INT, SAMPLE_LIST, SAMPLE_MAP, SAMPLE_JSON_NODE);
         ClassWithList withList = new ClassWithList(List.of(objectWithSomeEmptyValue));
         AssertionError error = assertThrows(AssertionError.class, () -> assertThat(withList, doesNotHaveEmptyValues()));
-        String expectedFieldName = LIST_FIELD;
+        String expectedFieldName = LIST_WITH_INCOMPLETE_ENTRIES_FIELD;
         int expectedIndex = 0;
         assertThat(error.getMessage(), containsString(expectedFieldName));
         assertThat(error.getMessage(), containsString(LEFT_BRACE + expectedIndex + RIGHT_BRACE));
@@ -193,10 +204,34 @@ public class DoesNotHaveEmptyValuesTest {
         assertThat(withList, doesNotHaveEmptyValuesIgnoringFields(Set.of(GENERIC_PATH_TO_FIELD_IN_ARRAY_ELEMENT)));
     }
 
+    @Test
+    void shouldReturnTrueWhenIgnoredFieldIsEmptyAndFieldsInIgnoredClassAreEmpty() {
+        WithBaseTypes withBaseTypes = new WithBaseTypes(EMPTY_STRING,
+                                                        NULL_INTEGER,
+                                                        Collections.emptyList(),
+                                                        Collections.emptyMap(),
+                                                        JsonUtils.dtoObjectMapper.createObjectNode());
+        ClassWithChildrenWithMultipleFields objectWithBothEmptyValuesAndClassWithEmptyValues =
+            new ClassWithChildrenWithMultipleFields(NULL_STRING, withBaseTypes, SAMPLE_INT);
+        assertThatContainedObjectHasEmptyFields(withBaseTypes);
+        assertThat(objectWithBothEmptyValuesAndClassWithEmptyValues, doesNotHaveEmptyValuesIgnoringFieldsAndClasses(
+            Set.of(WithBaseTypes.class), Set.of("someStringField")));
+    }
+
     private static JsonNode nonEmptyJsonNode() {
         ObjectNode node = new ObjectMapper().createObjectNode();
         node.put(SAMPLE_STRING, SAMPLE_STRING);
         return node;
+    }
+
+    private void assertThatContainedObjectHasEmptyFields(WithBaseTypes withBaseTypes) {
+        var exception = assertThrows(AssertionError.class, () -> assertThat(withBaseTypes, doesNotHaveEmptyValues()));
+        assertThat(exception.getMessage(), allOf(
+            containsString(STRING_FIELD),
+            containsString(INT_FIELD),
+            containsString(LIST_FIELD),
+            containsString(MAP_FIELD),
+            containsString(JSON_FIELD)));
     }
 
     private WithBaseTypes objectMissingStringField() {
@@ -270,11 +305,6 @@ public class DoesNotHaveEmptyValuesTest {
     private static class ClassWithUri<T> {
 
         private final T uri;
-
-        public List<T> getUris() {
-            return uris;
-        }
-
         private final List<T> uris;
         private final String someOtherField;
 
@@ -282,6 +312,10 @@ public class DoesNotHaveEmptyValuesTest {
             this.uri = uri;
             this.uris = List.of(uri);
             this.someOtherField = someOtherField;
+        }
+
+        public List<T> getUris() {
+            return uris;
         }
 
         public String getSomeOtherField() {
