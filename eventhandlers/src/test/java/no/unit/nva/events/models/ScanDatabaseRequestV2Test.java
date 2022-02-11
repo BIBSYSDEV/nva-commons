@@ -1,6 +1,7 @@
 package no.unit.nva.events.models;
 
 import static no.unit.nva.events.models.ScanDatabaseRequestV2.DEFAULT_PAGE_SIZE;
+import static no.unit.nva.events.models.ScanDatabaseRequestV2.DYNAMODB_EMPTY_MARKER;
 import static no.unit.nva.events.models.ScanDatabaseRequestV2.MAX_PAGE_SIZE;
 import static no.unit.nva.testutils.RandomDataGenerator.randomInteger;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
@@ -20,6 +21,7 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 class ScanDatabaseRequestV2Test {
 
     public static final String EVENT_TOPIC = "topic";
+    private static final Map<String, String> EMPTY_MARKER = null;
 
     @Test
     void shouldReturnAnEventBridgeEventWhereTheTopicIsSetInTheDetailBody() throws JsonProcessingException {
@@ -80,6 +82,12 @@ class ScanDatabaseRequestV2Test {
         assertThat(deserialized, is(equalTo(sampleRequest)));
         assertThatNonSerializableDynamoScanMarkerConstainsSameValuesAsItsEquivalentSerializableRepresentation(
             startMarker, deserialized);
+    }
+
+    @Test
+    void shouldProduceDynamoCompatibleEmptyMarkerWhenSerializableVersionOfMarkerIsNull() {
+        var sampleRequest = new ScanDatabaseRequestV2(randomString(), randomInteger(), EMPTY_MARKER);
+        assertThat(sampleRequest.toDynamoScanMarker(), is(equalTo(DYNAMODB_EMPTY_MARKER)));
     }
 
     private void assertThatNonSerializableDynamoScanMarkerConstainsSameValuesAsItsEquivalentSerializableRepresentation(

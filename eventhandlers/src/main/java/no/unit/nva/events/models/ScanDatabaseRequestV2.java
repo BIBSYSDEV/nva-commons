@@ -29,6 +29,7 @@ public class ScanDatabaseRequestV2 implements EventBody, JsonSerializable {
 
     public static final int DEFAULT_PAGE_SIZE = 700; // Choosing for safety 3/4 of max page size.
     public static final int MAX_PAGE_SIZE = 1000;
+    public static final Map<String, AttributeValue> DYNAMODB_EMPTY_MARKER = null;
 
     @JsonProperty(START_MARKER)
     private final Map<String, String> startMarker;
@@ -70,8 +71,10 @@ public class ScanDatabaseRequestV2 implements EventBody, JsonSerializable {
 
     @JsonIgnore
     public Map<String, AttributeValue> toDynamoScanMarker() {
-        return getStartMarker().entrySet().stream()
-            .collect(Collectors.toMap(Entry::getKey, e -> createAttributeValue(e.getValue())));
+        return
+            nonNull(getStartMarker())
+                ? convertSerializableMarkerToDynamoDbMarker()
+                : DYNAMODB_EMPTY_MARKER;
     }
 
     public PutEventsRequestEntry createNewEventEntry(
@@ -109,6 +112,12 @@ public class ScanDatabaseRequestV2 implements EventBody, JsonSerializable {
         return getPageSize() == that.getPageSize()
                && Objects.equals(getStartMarker(), that.getStartMarker())
                && Objects.equals(getTopic(), that.getTopic());
+    }
+
+    private Map<String, AttributeValue> convertSerializableMarkerToDynamoDbMarker() {
+        return getStartMarker().entrySet()
+            .stream()
+            .collect(Collectors.toMap(Entry::getKey, e -> createAttributeValue(e.getValue())));
     }
 
     private boolean isValid(Integer pageSize) {
