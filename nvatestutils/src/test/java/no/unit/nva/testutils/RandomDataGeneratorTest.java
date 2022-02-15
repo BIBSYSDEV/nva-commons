@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 import nva.commons.doi.DoiValidator;
 import org.apache.commons.validator.routines.ISBNValidator;
+import org.apache.commons.validator.routines.ISSNValidator;
 import org.hamcrest.number.OrderingComparison;
 import org.junit.jupiter.api.Test;
 
@@ -138,5 +139,21 @@ class RandomDataGeneratorTest {
         var before = RandomDataGenerator.randomLocalDate();
         var after = RandomDataGenerator.randomLocalDate(before);
         assertThat(after, is(greaterThanOrEqualTo(before)));
+    }
+
+    @Test
+    void shouldReturnValidIssn(){
+        var issn = RandomDataGenerator.randomIssn();
+        var issnValidator = new ISSNValidator();
+        var isValidIssn = issnValidator.isValid(issn);
+        assertThat(isValidIssn, is(true));
+    }
+
+    @Test
+    void shouldReturnInvalidIssn(){
+        var issn = RandomDataGenerator.randomInvalidIssn();
+        var issnValidator = new ISSNValidator();
+        var isValidIssn = issnValidator.isValid(issn);
+        assertThat(isValidIssn, is(false));
     }
 }
