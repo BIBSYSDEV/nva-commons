@@ -25,7 +25,7 @@ public final class MediaTypes {
     public static MediaType parse(String mediaType, List<MediaType> supportedMediaTypes)
         throws UnsupportedAcceptHeaderException {
         var mediaTypeString = StringUtils.removeWhiteSpaces(mediaType);
-        MediaType mostPreferredMediaType = mostPreferredMediaType(supportedMediaTypes);
+        var mostPreferredMediaType = mostPreferredMediaType(supportedMediaTypes);
         var requestedMediaTypes = parseRequestMediaTypes(mediaTypeString, mostPreferredMediaType);
         var result = findFirstMatchingHeader(supportedMediaTypes, requestedMediaTypes);
         return result.orElseThrow(() -> new UnsupportedAcceptHeaderException(requestedMediaTypes, supportedMediaTypes));
