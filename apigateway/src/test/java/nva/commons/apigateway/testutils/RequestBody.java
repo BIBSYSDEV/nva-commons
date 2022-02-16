@@ -70,9 +70,8 @@ public class RequestBody {
                && Objects.equals(field2, that.field2);
     }
 
-
     @Override
-    public String toString(){
-        return attempt(()->JsonUtils.dtoObjectMapper.writeValueAsString(this)).orElseThrow();
+    public String toString() {
+        return attempt(() -> JsonUtils.dtoObjectMapper.writeValueAsString(this)).orElseThrow();
     }
 }

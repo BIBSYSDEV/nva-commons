@@ -3,16 +3,13 @@ package nva.commons.apigateway.testutils;
 import static nva.commons.apigateway.RequestInfo.PROXY_TAG;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
 import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.Map;
-import nva.commons.apigateway.ApiGatewayHandler;
+import java.util.Optional;
 import nva.commons.apigateway.ApiGatewayHandlerV2;
-import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
-import nva.commons.core.Environment;
 
 public class HandlerV2 extends ApiGatewayHandlerV2<RequestBody, RequestBody> {
 
@@ -25,12 +22,14 @@ public class HandlerV2 extends ApiGatewayHandlerV2<RequestBody, RequestBody> {
         super(RequestBody.class);
     }
 
-
     @Override
     protected RequestBody processInput(RequestBody input, APIGatewayProxyRequestEvent requestInfo, Context context)
         throws ApiGatewayException {
         this.headers = requestInfo.getHeaders();
-        this.proxy = requestInfo.getPathParameters().get(PROXY_TAG);
+        this.proxy = Optional.ofNullable(requestInfo)
+            .map(APIGatewayProxyRequestEvent::getPathParameters)
+            .map(pathParameters -> pathParameters.get(PROXY_TAG))
+            .orElse(null);
         this.path = requestInfo.getPath();
         this.body = input;
         this.addAdditionalSuccessHeaders(this::additionalHeaders);
