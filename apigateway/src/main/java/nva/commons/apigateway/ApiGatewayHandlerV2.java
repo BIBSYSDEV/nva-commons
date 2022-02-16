@@ -60,11 +60,11 @@ public abstract class ApiGatewayHandlerV2<I, O>
             return createSuccessfulResponse(input, inputBody, output);
         } catch (ApiGatewayException exception) {
             logger.error(ExceptionUtils.stackTraceInSingleLine(exception));
-            ThrowableProblem problem = createProblem(exception.getMessage(), exception.getStatusCode(), context);
+            var problem = createProblem(exception.getMessage(), exception.getStatusCode(), context);
             return problemToApiGatewayResponse(problem, exception);
         } catch (Exception exception) {
             logger.error(ExceptionUtils.stackTraceInSingleLine(exception));
-            ThrowableProblem problem = createProblem(INTERNAL_ERROR_MESSAGE, HTTP_INTERNAL_ERROR, context);
+            var problem = createProblem(INTERNAL_ERROR_MESSAGE, HTTP_INTERNAL_ERROR, context);
             return problemToApiGatewayResponse(problem, exception);
         }
     }
