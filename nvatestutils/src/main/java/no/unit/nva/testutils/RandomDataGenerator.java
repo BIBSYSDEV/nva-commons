@@ -113,6 +113,14 @@ public final class RandomDataGenerator {
         return attempt(() -> objectMapper.writeValueAsString(root)).orElseThrow();
     }
 
+    public static String randomIssn() {
+        return IssnGenerator.randomIssn();
+    }
+
+    public static String randomInvalidIssn() {
+        return IssnGenerator.randomInvalidIssn();
+    }
+
     private static ObjectNode randomFlatJson() {
         var root = objectMapper.createObjectNode();
         for (int i = 0; i < ARBITRARY_FIELDS_NUMBER; i++) {
