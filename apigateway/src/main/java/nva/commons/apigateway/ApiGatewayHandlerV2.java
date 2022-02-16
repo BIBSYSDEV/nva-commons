@@ -103,7 +103,7 @@ public abstract class ApiGatewayHandlerV2<I, O>
     }
 
     private ThrowableProblem createProblem(String message, Integer statusCode, Context context) {
-        Status status = Status.valueOf(statusCode);
+        var status = Status.valueOf(statusCode);
         return Problem.builder()
             .withDetail(message)
             .withTitle(status.getReasonPhrase())
