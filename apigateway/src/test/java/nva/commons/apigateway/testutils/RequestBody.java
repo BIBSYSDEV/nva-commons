@@ -1,10 +1,12 @@
 package nva.commons.apigateway.testutils;
 
+import static nva.commons.core.attempt.Try.attempt;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import no.unit.nva.commons.json.JsonUtils;
 
 @JsonTypeInfo(use = Id.NAME, property = RequestBody.TYPE_ATTRIBUTE)
 public class RequestBody {
@@ -66,5 +68,10 @@ public class RequestBody {
         RequestBody that = (RequestBody) o;
         return Objects.equals(field1, that.field1)
                && Objects.equals(field2, that.field2);
+    }
+
+    @Override
+    public String toString() {
+        return attempt(() -> JsonUtils.dtoObjectMapper.writeValueAsString(this)).orElseThrow();
     }
 }

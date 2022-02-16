@@ -161,7 +161,7 @@ public class ApiGatewayHandlerTest {
         throws IOException {
         Handler handler = handlerThatOverridesListSupportedMediaTypes();
 
-        InputStream input = requestWithAcceptHeader(MediaTypes.APPLICATION_JSON_LD.toString());
+        InputStream input = requestWithAcceptHeader("application/ld+json");
 
         GatewayResponse<String> response = getStringResponse(input, handler);
 
