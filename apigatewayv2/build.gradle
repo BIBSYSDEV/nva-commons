@@ -1,0 +1,26 @@
+plugins {
+    id 'nvacommons.java-conventions'
+    id 'nvacommons.publish-maven'
+}
+
+dependencies {
+    api libs.aws.lambda.core
+
+    implementation project(":core")
+//
+    implementation libs.guava
+    implementation libs.bundles.logging
+    implementation libs.aws.lambda.events
+    implementation libs.zalando
+    implementation libs.jackson.jr.objects
+
+    testImplementation libs.jackson.jr.stree
+    testImplementation libs.bundles.testing
+    testImplementation project(":logutils")
+    testImplementation project(":nvatestutils")
+}
+
+
+test{
+    environment "ALLOWED_ORIGIN", "*"
+}
