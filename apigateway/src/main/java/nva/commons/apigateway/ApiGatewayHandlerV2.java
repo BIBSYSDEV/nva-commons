@@ -2,7 +2,6 @@ package nva.commons.apigateway;
 
 import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
-import static java.util.Objects.isNull;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static nva.commons.apigateway.MediaTypes.DEFAULT_SUPPORTED_MEDIA_TYPES;
 import static nva.commons.apigateway.MediaTypes.MOST_PREFERRED_DEFAULT_MEDIA_TYPE;
@@ -11,7 +10,6 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import java.util.Collections;
@@ -22,7 +20,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
-import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.RedirectException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
@@ -41,11 +38,9 @@ public abstract class ApiGatewayHandlerV2<I, O>
     public static final String INTERNAL_ERROR_MESSAGE = "Internal error";
     private static final String ALLOWED_ORIGIN = new Environment().readEnv("ALLOWED_ORIGIN");
     private static final Logger logger = LoggerFactory.getLogger(ApiGatewayHandlerV2.class);
-    private final Class<I> iclass;
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
 
-    protected ApiGatewayHandlerV2(Class<I> iclass) {
-        this.iclass = iclass;
+    protected ApiGatewayHandlerV2() {
         additionalSuccessHeadersSupplier = Collections::emptyMap;
     }
 
@@ -53,11 +48,8 @@ public abstract class ApiGatewayHandlerV2<I, O>
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
         try {
             logger.info("{}:{}", REQUEST_ID, context.getAwsRequestId());
-            var inputBody = attempt(() -> parseInput(input.getBody()))
-                .orElseThrow(this::handleInputParsingError);
-            var output = processInput(inputBody, input, context);
-
-            return createSuccessfulResponse(input, inputBody, output);
+            var output = processInput(input.getBody(), input, context);
+            return createSuccessfulResponse(input, output);
         } catch (ApiGatewayException exception) {
             logger.error(ExceptionUtils.stackTraceInSingleLine(exception));
             var problem = createProblem(exception.getMessage(), exception.getStatusCode(), context);
@@ -73,9 +65,9 @@ public abstract class ApiGatewayHandlerV2<I, O>
         this.additionalSuccessHeadersSupplier = Optional.ofNullable(additionalHeaders).orElse(Collections::emptyMap);
     }
 
-    protected abstract Integer getSuccessStatusCode(I input, O output);
+    protected abstract Integer getSuccessStatusCode(String body, O output);
 
-    protected abstract O processInput(I body, APIGatewayProxyRequestEvent input, Context context)
+    protected abstract O processInput(String body, APIGatewayProxyRequestEvent input, Context context)
         throws ApiGatewayException;
 
     protected List<MediaType> listSupportedMediaTypes() {
@@ -86,20 +78,6 @@ public abstract class ApiGatewayHandlerV2<I, O>
         var headers = new HashMap<>(defaultHeaders());
         headers.put(HttpHeaders.CONTENT_TYPE, MediaTypes.APPLICATION_PROBLEM_JSON.toString());
         return headers;
-    }
-
-    protected I parseInput(String body) throws JsonProcessingException {
-        if (isNull(body)) {
-            return null;
-        } else if (String.class.equals(iclass)) {
-            return (I) body;
-        } else {
-            return dtoObjectMapper.readValue(body, iclass);
-        }
-    }
-
-    private BadRequestException handleInputParsingError(Try<I> fail) {
-        return new BadRequestException(fail.getException().getMessage(), fail.getException());
     }
 
     private ThrowableProblem createProblem(String message, Integer statusCode, Context context) {
@@ -131,11 +109,10 @@ public abstract class ApiGatewayHandlerV2<I, O>
     }
 
     private APIGatewayProxyResponseEvent createSuccessfulResponse(APIGatewayProxyRequestEvent input,
-                                                                  I inputBody,
                                                                   O output) throws UnsupportedAcceptHeaderException {
         return new APIGatewayProxyResponseEvent()
             .withBody(Optional.ofNullable(output).map(Object::toString).orElse(null))
-            .withStatusCode(getSuccessStatusCode(inputBody, output))
+            .withStatusCode(getSuccessStatusCode(input.getBody(), output))
             .withHeaders(getSuccessHeaders(input));
     }
 
