@@ -88,7 +88,7 @@ public class ApiGatewayHandlerV2Test {
     @Test
     @DisplayName("ApiGatewayHandler has a constructor with input class as only parameter")
     void apiGatewayHandlerHasAConstructorWithInputClassAsOnlyParameter() {
-        ApiGatewayHandlerV2<String, String> handler = new ApiGatewayHandlerV2<>(String.class) {
+        ApiGatewayHandlerV2<String, String> handler = new ApiGatewayHandlerV2<>() {
             @Override
             protected Integer getSuccessStatusCode(String input, String output) {
                 return HttpURLConnection.HTTP_OK;
@@ -283,18 +283,6 @@ public class ApiGatewayHandlerV2Test {
     }
 
     @Test
-    void handlerReturnsBadRequestWhenInputParsingFails() {
-        String expectedMessage = "Expected error message when parsing fails";
-        HandlerV2 handler = handlerFailingWhenParsing(expectedMessage);
-        var input = requestWithHeadersAndPath();
-        var response = handler.handleRequest(input, context);
-        Problem problem = extractProblemFromFailureResponse(response);
-
-        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_BAD_REQUEST)));
-        assertThat(problem.getDetail(), containsString(expectedMessage));
-    }
-
-    @Test
     void handlerSendsRedirectionWhenItReceivesARedirectException() {
         var expectedRedirectLocation = randomUri();
         var expectedRedirectStatusCode = HttpURLConnection.HTTP_SEE_OTHER;
@@ -311,14 +299,6 @@ public class ApiGatewayHandlerV2Test {
             handler.listSupportedMediaTypes());
     }
 
-    private HandlerV2 handlerFailingWhenParsing(String expectedMessage) {
-        return new HandlerV2() {
-            @Override
-            protected RequestBody parseInput(String inputString) {
-                throw new RuntimeException(expectedMessage);
-            }
-        };
-    }
 
     private APIGatewayProxyRequestEvent requestWithBodyWithEmptyFields() {
         RequestBody requestBody = new RequestBody();
@@ -337,7 +317,7 @@ public class ApiGatewayHandlerV2Test {
     private HandlerV2 handlerThatThrowsUncheckedExceptions() {
         return new HandlerV2() {
             @Override
-            protected RequestBody processInput(RequestBody input, APIGatewayProxyRequestEvent requestInfo,
+            protected RequestBody processInput(String input, APIGatewayProxyRequestEvent requestInfo,
                                                Context context) {
                 throwUncheckedExceptions();
                 return null;
@@ -345,7 +325,6 @@ public class ApiGatewayHandlerV2Test {
         };
     }
 
-    //
     private HandlerV2 handlerThatOverridesListSupportedMediaTypes() {
         return new HandlerV2() {
             @Override
@@ -431,9 +410,9 @@ public class ApiGatewayHandlerV2Test {
     private HandlerV2 handlerThatThrowsExceptions() {
         return new HandlerV2() {
             @Override
-            protected RequestBody processInput(RequestBody input, APIGatewayProxyRequestEvent requestInfo,
-                                               Context context)
-                throws ApiGatewayException {
+            protected RequestBody processInput(String input,
+                                               APIGatewayProxyRequestEvent requestInfo,
+                                               Context context) throws ApiGatewayException {
                 throwExceptions();
                 return null;
             }

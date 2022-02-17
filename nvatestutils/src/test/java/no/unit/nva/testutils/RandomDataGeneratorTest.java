@@ -142,7 +142,7 @@ class RandomDataGeneratorTest {
     }
 
     @Test
-    void shouldReturnValidIssn(){
+    void shouldReturnValidIssn() {
         var issn = RandomDataGenerator.randomIssn();
         var issnValidator = new ISSNValidator();
         var isValidIssn = issnValidator.isValid(issn);
@@ -150,7 +150,7 @@ class RandomDataGeneratorTest {
     }
 
     @Test
-    void shouldReturnInvalidIssn(){
+    void shouldReturnInvalidIssn() {
         var issn = RandomDataGenerator.randomInvalidIssn();
         var issnValidator = new ISSNValidator();
         var isValidIssn = issnValidator.isValid(issn);

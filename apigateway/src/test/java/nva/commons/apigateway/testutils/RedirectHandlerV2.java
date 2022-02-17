@@ -1,10 +1,12 @@
 package nva.commons.apigateway.testutils;
 
+import static nva.commons.core.attempt.Try.attempt;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import java.net.URI;
+import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.RedirectException;
 
@@ -20,12 +22,12 @@ public class RedirectHandlerV2 extends HandlerV2 {
     }
 
     @Override
-    protected RequestBody processInput(RequestBody input, APIGatewayProxyRequestEvent requestInfo, Context context)
+    protected RequestBody processInput(String input, APIGatewayProxyRequestEvent requestInfo, Context context)
         throws ApiGatewayException {
         if (clientIsRequestingHtmlContent(requestInfo)) {
             throw new ExampleRedirectException(redirectStatusCode, location);
         }
-        return input;
+        return attempt(() -> JsonUtils.dtoObjectMapper.readValue(input, RequestBody.class)).orElse(fail -> null);
     }
 
     private boolean clientIsRequestingHtmlContent(APIGatewayProxyRequestEvent requestInfo) {
