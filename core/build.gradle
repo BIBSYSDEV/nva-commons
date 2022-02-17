@@ -6,7 +6,7 @@ plugins {
 dependencies {
     implementation  libs.bundles.logging
 
-    implementation libs.jackson.annotations
+    compileOnly libs.jackson.annotations
     testImplementation libs.bundles.testing
     testImplementation libs.bundles.jackson
     testImplementation project (":nvatestutils")

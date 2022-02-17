@@ -1,10 +1,9 @@
-package nva.commons.apigateway;
+package nva.commons.apigatewayv2;
 
 import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
-import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
-import static nva.commons.apigateway.MediaTypes.DEFAULT_SUPPORTED_MEDIA_TYPES;
-import static nva.commons.apigateway.MediaTypes.MOST_PREFERRED_DEFAULT_MEDIA_TYPE;
+import static nva.commons.apigatewayv2.MediaTypes.DEFAULT_SUPPORTED_MEDIA_TYPES;
+import static nva.commons.apigatewayv2.MediaTypes.MOST_PREFERRED_DEFAULT_MEDIA_TYPE;
 import static nva.commons.core.attempt.Try.attempt;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -19,9 +18,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
-import nva.commons.apigateway.exceptions.ApiGatewayException;
-import nva.commons.apigateway.exceptions.RedirectException;
-import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
+import nva.commons.apigatewayv2.exceptions.ApiGatewayException;
+import nva.commons.apigatewayv2.exceptions.RedirectException;
+import nva.commons.apigatewayv2.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
 import nva.commons.core.attempt.Try;
 import nva.commons.core.exceptions.ExceptionUtils;
@@ -97,14 +96,15 @@ public abstract class ApiGatewayHandlerV2<I, O>
     }
 
     private Try<MediaType> attemptToMatchAcceptHeadersToSupportedHeaders(APIGatewayProxyRequestEvent requestEvent) {
+        List<MediaType> supportedMediaTypes = listSupportedMediaTypes();
         return extractAcceptHeaders(requestEvent)
-            .map(attempt(mediaTypesString -> MediaTypes.parse(mediaTypesString, listSupportedMediaTypes())))
-            .orElse(Try.of(listSupportedMediaTypes().get(MOST_PREFERRED_DEFAULT_MEDIA_TYPE)));
+            .map(attempt(acceptedMediaTypes -> MediaTypes.parse(acceptedMediaTypes, supportedMediaTypes)))
+            .orElse(Try.of(supportedMediaTypes.get(MOST_PREFERRED_DEFAULT_MEDIA_TYPE)));
     }
 
-    private Optional<String> extractAcceptHeaders(APIGatewayProxyRequestEvent requestEvent) {
+    private Optional<List<String>> extractAcceptHeaders(APIGatewayProxyRequestEvent requestEvent) {
         return Optional.ofNullable(requestEvent)
-            .map(APIGatewayProxyRequestEvent::getHeaders)
+            .map(APIGatewayProxyRequestEvent::getMultiValueHeaders)
             .map(headers -> headers.get(HttpHeaders.ACCEPT));
     }
 
@@ -141,6 +141,6 @@ public abstract class ApiGatewayHandlerV2<I, O>
         return new APIGatewayProxyResponseEvent()
             .withStatusCode(problem.getStatus().getStatusCode())
             .withHeaders(failureHeaders)
-            .withBody(attempt(() -> dtoObjectMapper.writeValueAsString(problem)).orElseThrow());
+            .withBody(attempt(problem::toString).orElseThrow());
     }
 }
