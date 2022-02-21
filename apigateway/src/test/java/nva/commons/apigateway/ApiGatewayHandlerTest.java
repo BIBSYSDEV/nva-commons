@@ -362,8 +362,8 @@ public class ApiGatewayHandlerTest {
     }
 
     @Test
-    void handlerSendsRawJsonWhenUsingNoopObjectMapper() throws Exception {
-        var objectMapper = new NoopObjectMapper();
+    void handlerSendsRawJsonWhenUsingPassthroughObjectMapper() throws Exception {
+        var objectMapper = new PassthroughObjectMapper();
         var handler = new RawJsonResponseHandler(objectMapper);
         var inputStream = requestWithHeaders();
         var outputStream = outputStream();

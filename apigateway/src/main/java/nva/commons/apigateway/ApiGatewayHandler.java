@@ -53,7 +53,8 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         this.additionalSuccessHeadersSupplier = Collections::emptyMap;
     }
 
-    public ApiGatewayHandler(Class<I> iclass, Environment environment, Map<MediaType, ObjectMapper> objectMappers, ObjectMapper defaultObjectMapper) {
+    public ApiGatewayHandler(Class<I> iclass, Environment environment, Map<MediaType, ObjectMapper> objectMappers,
+                             ObjectMapper defaultObjectMapper) {
         super(iclass, environment);
         this.objectMappers = objectMappers;
         this.defaultObjectMapper = defaultObjectMapper;

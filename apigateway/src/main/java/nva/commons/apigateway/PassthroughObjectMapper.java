@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * This ObjectMapper is used when you want to return raw string data from apigateway handler.
  */
-public class NoopObjectMapper extends ObjectMapper {
+public class PassthroughObjectMapper extends ObjectMapper {
 
     @Override
     public String writeValueAsString(Object value) throws JsonProcessingException {
