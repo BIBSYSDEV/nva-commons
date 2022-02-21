@@ -9,6 +9,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
@@ -46,6 +47,7 @@ import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.TestException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.apigateway.testutils.Handler;
+import nva.commons.apigateway.testutils.RawJsonResponseHandler;
 import nva.commons.apigateway.testutils.RedirectHandler;
 import nva.commons.apigateway.testutils.RequestBody;
 import nva.commons.core.ioutils.IoUtils;
@@ -357,6 +359,21 @@ public class ApiGatewayHandlerTest {
         var response = getResponse(Void.class, request, handler);
         assertThat(response.getStatusCode(), is(equalTo(expectedRedirectStatusCode)));
         assertThat(response.getHeaders(), hasEntry(HttpHeaders.LOCATION, expectedRedirectLocation.toString()));
+    }
+
+    @Test
+    void handlerSendsRawJsonWhenUsingNoopObjectMapper() throws Exception {
+        var objectMapper = new NoopObjectMapper();
+        var handler = new RawJsonResponseHandler(objectMapper);
+        var inputStream = requestWithHeaders();
+        var outputStream = outputStream();
+        handler.handleRequest(inputStream, outputStream, context);
+
+        GatewayResponse<String> response = GatewayResponse.fromOutputStream(outputStream);
+
+        var requestBody = objectMapper.readValue(response.getBody(), RequestBody.class);
+
+        assertThat(requestBody, is(notNullValue()));
     }
 
     private String getUnsupportedMediaTypeErrorMessage(String mediaType) {
