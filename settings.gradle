@@ -4,7 +4,7 @@ include 'json'
 include 'logutils'
 include 'core'
 include 'apigateway'
-include 'apigatewayv2'
+//include 'apigatewayv2' TODO: add this when module is ready
 include 'secrets'
 include 'doi'
 include 'lambdaauthorizer'
