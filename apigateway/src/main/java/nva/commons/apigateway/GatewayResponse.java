@@ -86,19 +86,20 @@ public class GatewayResponse<T> implements Serializable {
     public static <T> GatewayResponse<T> fromString(String responseString, Class<T> className)
         throws JsonProcessingException {
 
-        GatewayResponse<T> gatewayResponse;
-        if (className.getTypeName().equals(String.class.getTypeName())) {
-            gatewayResponse = constructGatewayResponse(responseString);
-        } else {
-            TypeReference<GatewayResponse<T>> typeref = new TypeReference<>() {
-            };
-            gatewayResponse = defaultRestObjectMapper.readValue(responseString, typeref);
-        }
-        return gatewayResponse;
+        return isString(className) ? constructGatewayResponse(responseString) : parseGatewayResponse(responseString);
+    }
+
+    private static <T> boolean isString(Class<T> className) {
+        return className.getTypeName().equals(String.class.getTypeName());
+    }
+
+    private static <T> GatewayResponse<T> parseGatewayResponse(String responseString) throws JsonProcessingException {
+        TypeReference<GatewayResponse<T>> typeref = new TypeReference<>() {
+        };
+        return defaultRestObjectMapper.readValue(responseString, typeref);
     }
 
     private static <T> GatewayResponse<T> constructGatewayResponse(String responseString) throws JsonProcessingException {
-        GatewayResponse<T> gatewayResponse;
         JsonNode jsonNode = defaultRestObjectMapper.readTree(responseString);
 
         String body = jsonNode.get("body").asText();
@@ -107,8 +108,7 @@ public class GatewayResponse<T> implements Serializable {
         Map<String, String> headers = defaultRestObjectMapper.convertValue(jsonNode.get("headers"), typeref);
         int statusCode = jsonNode.get("statusCode").asInt();
 
-        gatewayResponse = attempt(() -> new GatewayResponse(body, headers, statusCode, defaultRestObjectMapper)).orElseThrow();
-        return gatewayResponse;
+        return attempt(() -> new GatewayResponse(body, headers, statusCode, defaultRestObjectMapper)).orElseThrow();
     }
 
     public String getBody() {
