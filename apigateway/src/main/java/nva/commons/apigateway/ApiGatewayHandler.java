@@ -5,6 +5,7 @@ import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import com.amazonaws.services.lambda.runtime.Context;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
 import java.io.BufferedWriter;
@@ -25,6 +26,7 @@ import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
 import nva.commons.apigateway.exceptions.RedirectException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
+import nva.commons.core.JacocoGenerated;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 import org.zalando.problem.ThrowableProblem;
@@ -39,8 +41,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     public static final String REQUEST_ID = "requestId";
     public static final Void EMPTY_BODY = null;
 
-    private final Map<MediaType, ObjectMapper> objectMappers;
-    private final ObjectMapper defaultObjectMapper;
+    private final ObjectMapper objectMapper;
 
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
 
@@ -49,15 +50,13 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     }
 
     public ApiGatewayHandler(Class<I> iclass, Environment environment) {
-        this(iclass, environment, Collections.emptyMap(), defaultRestObjectMapper);
+        this(iclass, environment, defaultRestObjectMapper);
         this.additionalSuccessHeadersSupplier = Collections::emptyMap;
     }
 
-    public ApiGatewayHandler(Class<I> iclass, Environment environment, Map<MediaType, ObjectMapper> objectMappers,
-                             ObjectMapper defaultObjectMapper) {
+    public ApiGatewayHandler(Class<I> iclass, Environment environment, ObjectMapper objectMapper) {
         super(iclass, environment);
-        this.objectMappers = objectMappers;
-        this.defaultObjectMapper = defaultObjectMapper;
+        this.objectMapper = objectMapper;
         this.additionalSuccessHeadersSupplier = Collections::emptyMap;
     }
 
@@ -75,9 +74,14 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
      * @return objectMapper the objectMapper to use for this MediaType
      * @throws UnsupportedAcceptHeaderException when Accept Header value is unsupported by the service
      */
-    public ObjectMapper getObjectMapper(RequestInfo requestInfo) throws UnsupportedAcceptHeaderException {
+    protected ObjectMapper getObjectMapper(RequestInfo requestInfo) throws UnsupportedAcceptHeaderException {
         MediaType mediaType = getDefaultResponseContentTypeHeaderValue(requestInfo);
-        return objectMappers.getOrDefault(mediaType, defaultObjectMapper);
+        return getObjectMappers().getOrDefault(mediaType, objectMapper);
+    }
+
+    @JacocoGenerated
+    protected Map<MediaType, ObjectMapper> getObjectMappers() {
+        return Collections.emptyMap();
     }
 
     /**
@@ -94,11 +98,15 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
             Map<String, String> headers = getSuccessHeaders(requestInfo);
             Integer statusCode = getSuccessStatusCode(input, output);
-            ObjectMapper objectMapper = getObjectMapper(requestInfo);
-            GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, headers, statusCode, objectMapper);
+            String serializedOutput = getSerializedOutput(output);
+            GatewayResponse<String> gatewayResponse = new GatewayResponse<>(serializedOutput, headers, statusCode, objectMapper);
             String responseJson = objectMapper.writeValueAsString(gatewayResponse);
             writer.write(responseJson);
         }
+    }
+
+    private String getSerializedOutput(O output) throws JsonProcessingException {
+        return output instanceof String ? (String) output : objectMapper.writeValueAsString(output);
     }
 
     /**
@@ -187,7 +195,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     private GatewayResponse<Void> createRedirectResponse(RedirectException exception)
         throws GatewayResponseSerializingException {
         var responseHeaders = Map.of(HttpHeaders.LOCATION, exception.getLocation().toString());
-        return new GatewayResponse<>(EMPTY_BODY, responseHeaders, exception.getStatusCode(), defaultObjectMapper);
+        return new GatewayResponse<>(EMPTY_BODY, responseHeaders, exception.getStatusCode(), objectMapper);
     }
 
     private boolean failureIsARedirection(ApiGatewayException exception) {
@@ -211,13 +219,13 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
                                                                                      String requestId)
         throws GatewayResponseSerializingException {
         ThrowableProblem problem = createProblemDescription(exception, statusCode, requestId);
-        return new GatewayResponse<>(problem, getFailureHeaders(), statusCode, defaultObjectMapper);
+        return new GatewayResponse<>(problem, getFailureHeaders(), statusCode, objectMapper);
     }
 
     private <T> void writeGatewayResponse(GatewayResponse<T> gatewayResponse)
         throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-            String gateWayResponseJson = defaultObjectMapper.writeValueAsString(gatewayResponse);
+            String gateWayResponseJson = objectMapper.writeValueAsString(gatewayResponse);
             writer.write(gateWayResponseJson);
         }
     }

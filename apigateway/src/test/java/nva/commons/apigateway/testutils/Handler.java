@@ -29,7 +29,7 @@ public class Handler extends ApiGatewayHandler<RequestBody, RequestBody> {
      * @param mapper Object Mapper
      */
     public Handler(ObjectMapper mapper) {
-        super(RequestBody.class, new Environment(), Collections.emptyMap(), mapper);
+        super(RequestBody.class, new Environment(), mapper);
     }
 
     @Override

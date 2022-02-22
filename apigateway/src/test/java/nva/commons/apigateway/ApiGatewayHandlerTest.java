@@ -1,6 +1,50 @@
 package nva.commons.apigateway;
 
+import com.amazonaws.services.lambda.runtime.Context;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.google.common.net.HttpHeaders;
+import com.google.common.net.MediaType;
+import no.unit.nva.stubs.FakeContext;
+import no.unit.nva.testutils.HandlerRequestBuilder;
+import nva.commons.apigateway.exceptions.ApiGatewayException;
+import nva.commons.apigateway.exceptions.TestException;
+import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
+import nva.commons.apigateway.testutils.Handler;
+import nva.commons.apigateway.testutils.RawStringResponseHandler;
+import nva.commons.apigateway.testutils.RedirectHandler;
+import nva.commons.apigateway.testutils.RequestBody;
+import nva.commons.core.ioutils.IoUtils;
+import nva.commons.logutils.LogUtils;
+import nva.commons.logutils.TestAppender;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.zalando.problem.Problem;
+import org.zalando.problem.Status;
+
+import javax.management.modelmbean.XMLParseException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
+import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static nva.commons.apigateway.ApiGatewayHandler.REQUEST_ID;
 import static nva.commons.apigateway.MediaTypes.APPLICATION_PROBLEM_JSON;
@@ -20,46 +64,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import com.amazonaws.services.lambda.runtime.Context;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.net.HttpHeaders;
-import com.google.common.net.MediaType;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import javax.management.modelmbean.XMLParseException;
-import no.unit.nva.stubs.FakeContext;
-import no.unit.nva.testutils.HandlerRequestBuilder;
-import nva.commons.apigateway.exceptions.ApiGatewayException;
-import nva.commons.apigateway.exceptions.TestException;
-import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
-import nva.commons.apigateway.testutils.Handler;
-import nva.commons.apigateway.testutils.RawJsonResponseHandler;
-import nva.commons.apigateway.testutils.RedirectHandler;
-import nva.commons.apigateway.testutils.RequestBody;
-import nva.commons.core.ioutils.IoUtils;
-import nva.commons.logutils.LogUtils;
-import nva.commons.logutils.TestAppender;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
 
 public class ApiGatewayHandlerTest {
 
@@ -318,7 +322,7 @@ public class ApiGatewayHandlerTest {
         var output = outputStream();
         InputStream input = requestWithBodyWithEmptyFields();
         handler.handleRequest(input, output, context);
-        GatewayResponse<JsonNode> response = GatewayResponse.fromOutputStream(output);
+        GatewayResponse<JsonNode> response = GatewayResponse.fromOutputStream(output, JsonNode.class);
         JsonNode jsonNode = response.getBodyObject(JsonNode.class);
         String nullField = RequestBody.FIELD2;
         String presentField = RequestBody.FIELD1;
@@ -362,16 +366,29 @@ public class ApiGatewayHandlerTest {
     }
 
     @Test
-    void handlerSendsRawJsonWhenUsingPassthroughObjectMapper() throws Exception {
-        var objectMapper = new PassthroughObjectMapper();
-        var handler = new RawJsonResponseHandler(objectMapper);
+    void handlerRespondsWithJsonWhenClientAsksForJson() throws Exception {
+        var handler = new RawStringResponseHandler(dtoObjectMapper);
         var inputStream = requestWithHeaders();
         var outputStream = outputStream();
         handler.handleRequest(inputStream, outputStream, context);
 
-        GatewayResponse<String> response = GatewayResponse.fromOutputStream(outputStream);
+        var response = GatewayResponse.fromOutputStream(outputStream, String.class);
+        var requestBody = dtoObjectMapper.readValue(response.getBody(), RequestBody.class);
 
-        var requestBody = objectMapper.readValue(response.getBody(), RequestBody.class);
+        assertThat(requestBody, is(notNullValue()));
+    }
+
+    @Test
+    void handlerRespondsWithXmlBodyWhenClientAsksForXml() throws Exception {
+        var objectMapper = dtoObjectMapper;
+        var handler = new RawStringResponseHandler(dtoObjectMapper);
+        var inputStream = requestWithAcceptXmlHeader();
+        var outputStream = outputStream();
+        handler.handleRequest(inputStream, outputStream, context);
+
+        var response = GatewayResponse.fromOutputStream(outputStream, String.class);
+        var xmlMapper = new XmlMapper();
+        var requestBody = xmlMapper.readValue(response.getBody(), RequestBody.class);
 
         assertThat(requestBody, is(notNullValue()));
     }
@@ -385,7 +402,7 @@ public class ApiGatewayHandlerTest {
     private <T> GatewayResponse<T> getResponse(Class<T> type, InputStream input, Handler handler) throws IOException {
         ByteArrayOutputStream outputStream = outputStream();
         handler.handleRequest(input, outputStream, context);
-        return GatewayResponse.fromOutputStream(outputStream);
+        return GatewayResponse.fromOutputStream(outputStream, type);
     }
 
     private GatewayResponse<String> getStringResponse(InputStream input, Handler handler) throws IOException {
@@ -525,6 +542,18 @@ public class ApiGatewayHandlerTest {
     }
 
     private InputStream requestWithHeaders(Map<String, String> headers) throws JsonProcessingException {
+        ObjectNode request = defaultRestObjectMapper.createObjectNode();
+        ObjectNode node = createBody();
+        request.set("body", node);
+        request.set("headers", createHeaders(headers));
+        return jsonNodeToInputStream(request);
+    }
+
+    private InputStream requestWithAcceptXmlHeader() throws JsonProcessingException {
+        Map<String, String> headers = new ConcurrentHashMap<>();
+        headers.put(HttpHeaders.ACCEPT, MediaType.XML_UTF_8.toString());
+        headers.put(CONTENT_TYPE, MediaType.JSON_UTF_8.toString());
+
         ObjectNode request = defaultRestObjectMapper.createObjectNode();
         ObjectNode node = createBody();
         request.set("body", node);

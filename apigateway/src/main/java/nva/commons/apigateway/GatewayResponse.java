@@ -1,10 +1,13 @@
 package nva.commons.apigateway;
 
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
+import static nva.commons.core.attempt.Try.attempt;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
@@ -51,7 +54,7 @@ public class GatewayResponse<T> implements Serializable {
         throws GatewayResponseSerializingException {
         try {
             this.statusCode = statusCode;
-            this.body = objectMapper.writeValueAsString(body);
+            this.body = body instanceof String ? (String) body : objectMapper.writeValueAsString(body);
             this.headers = Collections.unmodifiableMap(Map.copyOf(headers));
         } catch (JsonProcessingException e) {
             throw new GatewayResponseSerializingException(e);
@@ -63,14 +66,13 @@ public class GatewayResponse<T> implements Serializable {
      * Handler directly and we want to read the output.
      *
      * @param outputStream the outputStream updated by the lambda handler
-     * @param <T>          the class of the body
      * @return the GatewayResponse containing the output of the handler
      * @throws JsonProcessingException when the OutputStream cannot be parsed to a JSON object.
      */
-    public static <T> GatewayResponse<T> fromOutputStream(ByteArrayOutputStream outputStream)
+    public static <T> GatewayResponse<T> fromOutputStream(ByteArrayOutputStream outputStream, Class<T> className)
         throws JsonProcessingException {
         String json = outputStream.toString(StandardCharsets.UTF_8);
-        return fromString(json);
+        return fromString(json,className);
     }
 
     /**
@@ -78,15 +80,35 @@ public class GatewayResponse<T> implements Serializable {
      * directly and we want to read the output. Usually the String is the output of an OutputStream.
      *
      * @param responseString a String containing the serialized GatwayResponse
-     * @param <T>            the class of the body
      * @return the GatewayResponse containing the output of the handler
      * @throws JsonProcessingException when the OutputStream cannot be parsed to a JSON object.
      */
-    public static <T> GatewayResponse<T> fromString(String responseString)
+    public static <T> GatewayResponse<T> fromString(String responseString, Class<T> className)
         throws JsonProcessingException {
-        TypeReference<GatewayResponse<T>> typeref = new TypeReference<>() {
+
+        GatewayResponse<T> gatewayResponse;
+        if (className.getTypeName().equals(String.class.getTypeName())) {
+            gatewayResponse = constructGatewayResponse(responseString);
+        } else {
+            TypeReference<GatewayResponse<T>> typeref = new TypeReference<>() {
+            };
+            gatewayResponse = defaultRestObjectMapper.readValue(responseString, typeref);
+        }
+        return gatewayResponse;
+    }
+
+    private static <T> GatewayResponse<T> constructGatewayResponse(String responseString) throws JsonProcessingException {
+        GatewayResponse<T> gatewayResponse;
+        JsonNode jsonNode = defaultRestObjectMapper.readTree(responseString);
+
+        String body = jsonNode.get("body").asText();
+        TypeReference<Map<String,String>> typeref = new TypeReference<>() {
         };
-        return defaultRestObjectMapper.readValue(responseString, typeref);
+        Map<String, String> headers = defaultRestObjectMapper.convertValue(jsonNode.get("headers"), typeref);
+        int statusCode = jsonNode.get("statusCode").asInt();
+
+        gatewayResponse = attempt(() -> new GatewayResponse(body, headers, statusCode, defaultRestObjectMapper)).orElseThrow();
+        return gatewayResponse;
     }
 
     public String getBody() {

@@ -2,28 +2,32 @@ package nva.commons.apigateway.testutils;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.common.net.HttpHeaders;
-import no.unit.nva.commons.json.JsonUtils;
+import com.google.common.net.MediaType;
 import nva.commons.apigateway.ApiGatewayHandler;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.core.Environment;
-import nva.commons.core.attempt.Try;
 
 import java.net.HttpURLConnection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
+import static com.google.common.net.MediaType.JSON_UTF_8;
+import static com.google.common.net.MediaType.XML_UTF_8;
 import static nva.commons.apigateway.RequestInfo.PROXY_TAG;
+import static nva.commons.core.attempt.Try.attempt;
 
-public class RawJsonResponseHandler extends ApiGatewayHandler<RequestBody, String> {
+public class RawStringResponseHandler extends ApiGatewayHandler<RequestBody, String> {
 
     private Map<String, String> headers;
     private String proxy;
     private String path;
     private RequestBody body;
 
-    public RawJsonResponseHandler() {
+    public RawStringResponseHandler() {
         super(RequestBody.class);
     }
 
@@ -32,9 +36,10 @@ public class RawJsonResponseHandler extends ApiGatewayHandler<RequestBody, Strin
      *
      * @param mapper Object Mapper
      */
-    public RawJsonResponseHandler(ObjectMapper mapper) {
-        super(RequestBody.class, new Environment(), Collections.emptyMap(), mapper);
+    public RawStringResponseHandler(ObjectMapper mapper) {
+        super(RequestBody.class, new Environment(), mapper);
     }
+
 
     @Override
     protected String processInput(RequestBody input, RequestInfo requestInfo, Context context)
@@ -44,11 +49,23 @@ public class RawJsonResponseHandler extends ApiGatewayHandler<RequestBody, Strin
         this.path = requestInfo.getPath();
         this.body = input;
         this.addAdditionalHeaders(() -> additionalHeaders(body));
-        return Try.attempt(() -> JsonUtils.dtoObjectMapper.writeValueAsString(body)).orElseThrow();
+
+        ObjectMapper objectMapper = getObjectMapper(requestInfo);
+        return attempt(() -> objectMapper.writeValueAsString(body)).orElseThrow();
     }
 
     private Map<String, String> additionalHeaders(RequestBody input) {
         return Collections.singletonMap(HttpHeaders.WARNING, body.getField1());
+    }
+
+    @Override
+    protected List<MediaType> listSupportedMediaTypes() {
+        return List.of(JSON_UTF_8, XML_UTF_8);
+    }
+
+    @Override
+    protected Map<MediaType, ObjectMapper> getObjectMappers() {
+        return Map.of(XML_UTF_8, new XmlMapper());
     }
 
     @Override
