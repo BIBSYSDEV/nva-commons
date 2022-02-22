@@ -79,6 +79,10 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         return getObjectMappers().getOrDefault(mediaType, objectMapper);
     }
 
+    /**
+     * Override this method to set different object mappers for different Accept media types.
+     * @return  map of object mappers by media type
+     */
     @JacocoGenerated
     protected Map<MediaType, ObjectMapper> getObjectMappers() {
         return Collections.emptyMap();
