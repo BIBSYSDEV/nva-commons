@@ -45,6 +45,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
+import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static nva.commons.apigateway.ApiGatewayHandler.REQUEST_ID;
 import static nva.commons.apigateway.MediaTypes.APPLICATION_PROBLEM_JSON;
@@ -53,7 +54,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
@@ -366,31 +366,32 @@ public class ApiGatewayHandlerTest {
     }
 
     @Test
-    void handlerRespondsWithJsonWhenClientAsksForJson() throws Exception {
+    void shouldReturnJsonObjectWhenClientAsksForJson() throws Exception {
         var handler = new RawStringResponseHandler(dtoObjectMapper);
         var inputStream = requestWithHeaders();
+        var expected = objectMapper.convertValue(createBody(), RequestBody.class);
         var outputStream = outputStream();
         handler.handleRequest(inputStream, outputStream, context);
 
         var response = GatewayResponse.fromOutputStream(outputStream, String.class);
-        var requestBody = dtoObjectMapper.readValue(response.getBody(), RequestBody.class);
+        var actual = dtoObjectMapper.readValue(response.getBody(), RequestBody.class);
 
-        assertThat(requestBody, is(notNullValue()));
+        assertThat(actual, is(equalTo(expected)));
     }
 
     @Test
-    void handlerRespondsWithXmlBodyWhenClientAsksForXml() throws Exception {
-        var objectMapper = dtoObjectMapper;
+    void shouldReturnXmlObjectWhenClientAsksForXml() throws Exception {
         var handler = new RawStringResponseHandler(dtoObjectMapper);
         var inputStream = requestWithAcceptXmlHeader();
+        var expected = objectMapper.convertValue(createBody(), RequestBody.class);
         var outputStream = outputStream();
         handler.handleRequest(inputStream, outputStream, context);
 
         var response = GatewayResponse.fromOutputStream(outputStream, String.class);
         var xmlMapper = new XmlMapper();
-        var requestBody = xmlMapper.readValue(response.getBody(), RequestBody.class);
+        var actual = xmlMapper.readValue(response.getBody(), RequestBody.class);
 
-        assertThat(requestBody, is(notNullValue()));
+        assertThat(actual, is(equalTo(expected)));
     }
 
     private String getUnsupportedMediaTypeErrorMessage(String mediaType) {

@@ -75,6 +75,14 @@ public class GatewayResponse<T> implements Serializable {
         return fromString(json,className);
     }
 
+    @Deprecated(forRemoval = true)
+    @JacocoGenerated
+    public static <T> GatewayResponse<T> fromOutputStream(ByteArrayOutputStream outputStream)
+            throws JsonProcessingException {
+        String json = outputStream.toString(StandardCharsets.UTF_8);
+        return fromString(json);
+    }
+
     /**
      * Create GatewayResponse object from a String. Used when we call the method {@code handleRequest()} of a Handler
      * directly and we want to read the output. Usually the String is the output of an OutputStream.
@@ -86,20 +94,29 @@ public class GatewayResponse<T> implements Serializable {
     public static <T> GatewayResponse<T> fromString(String responseString, Class<T> className)
         throws JsonProcessingException {
 
-        return isString(className) ? constructGatewayResponse(responseString) : parseGatewayResponse(responseString);
+        return isString(className) ? constructGatewayResponseWithStringBody(responseString) : constructResponseWithJsonObjectBody(responseString);
+    }
+
+    @Deprecated(forRemoval = true)
+    @JacocoGenerated
+    public static <T> GatewayResponse<T> fromString(String responseString)
+            throws JsonProcessingException {
+        return constructResponseWithJsonObjectBody(responseString);
     }
 
     private static <T> boolean isString(Class<T> className) {
         return className.getTypeName().equals(String.class.getTypeName());
     }
 
-    private static <T> GatewayResponse<T> parseGatewayResponse(String responseString) throws JsonProcessingException {
+    private static <T> GatewayResponse<T> constructResponseWithJsonObjectBody(String responseString)
+            throws JsonProcessingException {
         TypeReference<GatewayResponse<T>> typeref = new TypeReference<>() {
         };
         return defaultRestObjectMapper.readValue(responseString, typeref);
     }
 
-    private static <T> GatewayResponse<T> constructGatewayResponse(String responseString) throws JsonProcessingException {
+    private static <T> GatewayResponse<T> constructGatewayResponseWithStringBody(String responseString)
+            throws JsonProcessingException {
         JsonNode jsonNode = defaultRestObjectMapper.readTree(responseString);
 
         String body = jsonNode.get("body").asText();
@@ -108,7 +125,8 @@ public class GatewayResponse<T> implements Serializable {
         Map<String, String> headers = defaultRestObjectMapper.convertValue(jsonNode.get("headers"), typeref);
         int statusCode = jsonNode.get("statusCode").asInt();
 
-        return attempt(() -> new GatewayResponse(body, headers, statusCode, defaultRestObjectMapper)).orElseThrow();
+        return (GatewayResponse<T>)
+                attempt(() -> new GatewayResponse(body, headers, statusCode, defaultRestObjectMapper)).orElseThrow();
     }
 
     public String getBody() {
