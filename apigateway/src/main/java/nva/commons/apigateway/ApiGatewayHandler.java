@@ -5,6 +5,7 @@ import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import com.amazonaws.services.lambda.runtime.Context;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
 import java.io.BufferedWriter;
@@ -17,12 +18,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+
+import com.google.common.net.MediaType;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.ApiGatewayUncheckedException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
 import nva.commons.apigateway.exceptions.RedirectException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
+import nva.commons.core.JacocoGenerated;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 import org.zalando.problem.ThrowableProblem;
@@ -63,6 +67,28 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     }
 
     /**
+     * Get the ObjectMapper to use for the given MediaType. Defaults to defaultRestObjectMapper if no other
+     * ObjectMapper is found.
+     *
+     * @param requestInfo   the requestInfo object with information about MediaType
+     * @return objectMapper the objectMapper to use for this MediaType
+     * @throws UnsupportedAcceptHeaderException when Accept Header value is unsupported by the service
+     */
+    protected ObjectMapper getObjectMapper(RequestInfo requestInfo) throws UnsupportedAcceptHeaderException {
+        MediaType mediaType = getDefaultResponseContentTypeHeaderValue(requestInfo);
+        return getObjectMappers().getOrDefault(mediaType, objectMapper);
+    }
+
+    /**
+     * Override this method to set different object mappers for different Accept media types.
+     * @return  map of object mappers by media type
+     */
+    @JacocoGenerated
+    protected Map<MediaType, ObjectMapper> getObjectMappers() {
+        return Collections.emptyMap();
+    }
+
+    /**
      * This is the message for the success case. Sends a JSON string containing the response that APIGateway will send
      * to the user.
      *
@@ -76,10 +102,15 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
             Map<String, String> headers = getSuccessHeaders(requestInfo);
             Integer statusCode = getSuccessStatusCode(input, output);
-            GatewayResponse<O> gatewayResponse = new GatewayResponse<>(output, headers, statusCode, objectMapper);
+            String serializedOutput = getSerializedOutput(output);
+            GatewayResponse<String> gatewayResponse = new GatewayResponse<>(serializedOutput, headers, statusCode, objectMapper);
             String responseJson = objectMapper.writeValueAsString(gatewayResponse);
             writer.write(responseJson);
         }
+    }
+
+    private String getSerializedOutput(O output) throws JsonProcessingException {
+        return output instanceof String ? (String) output : objectMapper.writeValueAsString(output);
     }
 
     /**

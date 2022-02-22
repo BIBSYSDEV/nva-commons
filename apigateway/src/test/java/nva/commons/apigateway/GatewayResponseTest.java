@@ -52,7 +52,7 @@ public class GatewayResponseTest {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream(
             sampleResponse.getBytes(StandardCharsets.UTF_8).length);
         outputStream.write(sampleResponse.getBytes(StandardCharsets.UTF_8));
-        GatewayResponse<Map> response = GatewayResponse.fromOutputStream(outputStream);
+        GatewayResponse<Map> response = GatewayResponse.fromOutputStream(outputStream, Map.class);
         Map<String, String> body = response.getBodyObject(Map.class);
         assertFalse(body.isEmpty());
     }
@@ -61,7 +61,7 @@ public class GatewayResponseTest {
     @DisplayName("fromOutputStream returns a GatewayResponse object for a valid json input")
     public void fromOutputStreamReturnsGatewayResponseWhenInputIsValidJsonString() throws IOException {
         String sampleResponse = IoUtils.stringFromResources(Path.of(API_GATEWAY_RESOURCES, SAMPLE_RESPONSE_JSON));
-        GatewayResponse<Map> response = GatewayResponse.fromString(sampleResponse);
+        GatewayResponse<Map> response = GatewayResponse.fromString(sampleResponse,Map.class);
         Map<String, String> body = response.getBodyObject(Map.class);
         assertFalse(body.isEmpty());
     }

@@ -23,6 +23,7 @@ dependencies {
     testImplementation libs.bundles.testing
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")
+    testImplementation libs.jackson.dataformat.xml
 }
 
 

@@ -46,7 +46,7 @@ public class VoidTest {
     public void handleRequestReturnsSuccessWhenInputClassIsVoidAndBodyFieldIsMissingFromApiGatewayEvent()
         throws IOException {
         ByteArrayOutputStream outputStream = responseFromVoidHandler(MISSING_BODY_REQUEST);
-        GatewayResponse<String> output = GatewayResponse.fromOutputStream(outputStream);
+        GatewayResponse<String> output = GatewayResponse.fromOutputStream(outputStream, String.class);
         assertThat(output.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
     }
 
@@ -56,7 +56,7 @@ public class VoidTest {
     public void handleRequestReturnsSuccessWhenInputClassIsVoidAndBodyFieldIsAnEmptyObjectInApiGatewayEvent()
         throws IOException {
         ByteArrayOutputStream outputStream = responseFromVoidHandler(EMPT_BODY_REQUEST);
-        GatewayResponse<String> output = GatewayResponse.fromOutputStream(outputStream);
+        GatewayResponse<String> output = GatewayResponse.fromOutputStream(outputStream, String.class);
         assertThat(output.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
     }
 

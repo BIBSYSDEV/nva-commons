@@ -8,7 +8,7 @@ awsLambdaEvents = { strictly = '3.11.0' }
 awsLambdaCore = { strictly = '1.2.1' }
 mockito = { strictly = '4.1.0' }
 httpmime = { strictly = '4.5.13' }
-jackson = { strictly = '2.13.1' }
+jackson = { strictly = '2.13.0' }
 hamcrest = { strictly = '2.2' }
 apacheCommons = { strictly = '3.12.0' }
 commonsValidator = { strictly = '1.7' }
@@ -51,6 +51,7 @@ jackson-databind = { group = 'com.fasterxml.jackson.core', name = 'jackson-datab
 jackson-annotations = { group = 'com.fasterxml.jackson.core', name = 'jackson-annotations', version.ref = 'jackson' }
 jackson-module-parameter-names = { group = 'com.fasterxml.jackson.module', name = 'jackson-module-parameter-names', version.ref = 'jackson' }
 jackson-datatype-problem = { group = 'org.zalando', name = 'jackson-datatype-problem', version.ref = 'zalandoProblem' }
+jackson-dataformat-xml = { group = 'com.fasterxml.jackson.dataformat', name = 'jackson-dataformat-xml', version.ref = 'jackson' }
 
 
 jackson-jr-objects = { group = 'com.fasterxml.jackson.jr', name = 'jackson-jr-objects', version.ref = 'jacksonJr' }
