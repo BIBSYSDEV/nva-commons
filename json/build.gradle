@@ -6,12 +6,21 @@ plugins {
 dependencies {
 
     implementation project (":core")
-    implementation libs.jackson.core
-    implementation libs.jackson.databind
-    implementation libs.jackson.annotations
-    implementation libs.jackson.datatype.jdk8
-    implementation libs.jackson.datatype.jsr310
-    implementation libs.jackson.datatype.problem
+    compileOnly libs.jackson.core
+    compileOnly libs.jackson.databind
+    compileOnly libs.jackson.annotations
+    compileOnly libs.jackson.datatype.jdk8
+    compileOnly libs.jackson.datatype.jsr310
+    compileOnly libs.jackson.datatype.problem
+
+
+    testImplementation libs.jackson.core
+    testImplementation libs.jackson.databind
+    testImplementation libs.jackson.annotations
+    testImplementation libs.jackson.datatype.jdk8
+    testImplementation libs.jackson.datatype.jsr310
+    testImplementation libs.jackson.datatype.problem
+
 
     testImplementation libs.bundles.testing
 }
