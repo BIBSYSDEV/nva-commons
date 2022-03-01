@@ -8,7 +8,7 @@ awsLambdaEvents = { strictly = '3.11.0' }
 awsLambdaCore = { strictly = '1.2.1' }
 mockito = { strictly = '4.1.0' }
 httpmime = { strictly = '4.5.13' }
-jackson = { strictly = '2.13.0' }
+jackson = { strictly = '2.13.1' }
 hamcrest = { strictly = '2.2' }
 apacheCommons = { strictly = '3.12.0' }
 commonsValidator = { strictly = '1.7' }
@@ -19,7 +19,6 @@ hamcrestOptional = { strictly = '2.0.0' }
 log4j = { strictly = '2.17.1' }
 slf4j = { strictly = '1.8.0-beta4' }
 apiGuardian = { strictly = '1.1.2' }
-jacksonJr = { strictly = '2.13.1' }
 
 
 [libraries]
@@ -54,8 +53,8 @@ jackson-datatype-problem = { group = 'org.zalando', name = 'jackson-datatype-pro
 jackson-dataformat-xml = { group = 'com.fasterxml.jackson.dataformat', name = 'jackson-dataformat-xml', version.ref = 'jackson' }
 
 
-jackson-jr-objects = { group = 'com.fasterxml.jackson.jr', name = 'jackson-jr-objects', version.ref = 'jacksonJr' }
-jackson-jr-stree = { group = 'com.fasterxml.jackson.jr', name = 'jackson-jr-stree', version.ref = 'jacksonJr' }
+jackson-jr-objects = { group = 'com.fasterxml.jackson.jr', name = 'jackson-jr-objects', version.ref = 'jackson' }
+jackson-jr-stree = { group = 'com.fasterxml.jackson.jr', name = 'jackson-jr-stree', version.ref = 'jackson' }
 
 
 commons-lang = { group = 'org.apache.commons', name = 'commons-lang3', version.ref = 'apacheCommons' }
