@@ -29,7 +29,7 @@ public class DefaultRequestAuthorizer extends RequestAuthorizer {
 
     public DefaultRequestAuthorizer(SecretsManagerClient secretsClient,
                                     String principalId) {
-        super(ENVIRONMENT);
+        super();
         this.secretsReader = new SecretsReader(secretsClient);
         this.principalIdentifier = principalId;
     }

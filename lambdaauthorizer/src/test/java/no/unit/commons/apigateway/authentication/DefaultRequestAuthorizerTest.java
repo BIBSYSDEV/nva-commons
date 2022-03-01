@@ -1,6 +1,5 @@
 package no.unit.commons.apigateway.authentication;
 
-import static no.unit.commons.apigateway.authentication.RequestAuthorizerTest.METHOD_ARN_FIELD;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -10,15 +9,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import com.amazonaws.services.lambda.runtime.Context;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayCustomAuthorizerEvent;
 import com.google.common.net.HttpHeaders;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 import no.unit.nva.commons.json.JsonUtils;
-import no.unit.nva.testutils.HandlerRequestBuilder;
-import nva.commons.apigateway.exceptions.ForbiddenException;
 import nva.commons.logutils.LogUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +28,6 @@ class DefaultRequestAuthorizerTest {
     private static final String SECRET_KEY_SET_IN_TEST = "secretKey-1234";
     private String expectedApiKey;
     private DefaultRequestAuthorizer handler;
-    private ByteArrayOutputStream outputStream;
     private String inputMethodArn;
     private String arnForAllowingAllActionsOnLambda;
 
@@ -45,11 +38,10 @@ class DefaultRequestAuthorizerTest {
         this.arnForAllowingAllActionsOnLambda =
             String.join(RequestAuthorizer.PATH_DELIMITER, inputMethodArn, WILDCARD, WILDCARD);
         this.handler = new DefaultRequestAuthorizer(setupSecretsClient(), randomString());
-        this.outputStream = new ByteArrayOutputStream();
     }
 
     @Test
-    void shouldReturnAuthPolicyWhenApiKeyIsValid() throws IOException, ForbiddenException {
+    void shouldReturnAuthPolicyWhenApiKeyIsValid() {
         var input = requestWithValidApiKey();
         var returnedPolicy = sendRequestToHandler(input);
         var expectedPolicy = handler.createAllowAuthPolicy(arnForAllowingAllActionsOnLambda);
@@ -57,7 +49,7 @@ class DefaultRequestAuthorizerTest {
     }
 
     @Test
-    void shouldReturnForbiddenWhenApiKeyIsInvalid() throws IOException, ForbiddenException {
+    void shouldReturnForbiddenWhenApiKeyIsInvalid() {
         final var appender = LogUtils.getTestingAppenderForRootLogger();
         var input = requestWithInvalidApiKey();
         var returnedPolicy = sendRequestToHandler(input);
@@ -67,7 +59,7 @@ class DefaultRequestAuthorizerTest {
     }
 
     @Test
-    void shouldReturnForbiddenWhenApiKeyIsMissing() throws IOException, ForbiddenException {
+    void shouldReturnForbiddenWhenApiKeyIsMissing() {
         final var appender = LogUtils.getTestingAppenderForRootLogger();
         var input = requestWithoutApiKey();
         var returnedPolicy = sendRequestToHandler(input);
@@ -77,16 +69,12 @@ class DefaultRequestAuthorizerTest {
         assertThat(appender.getMessages(), containsString(ForbiddenException.DEFAULT_MESSAGE));
     }
 
-    private InputStream requestWithoutApiKey() throws JsonProcessingException {
-        return new HandlerRequestBuilder<Void>(JsonUtils.dtoObjectMapper)
-            .withOtherProperties(Map.of(METHOD_ARN_FIELD, this.inputMethodArn))
-            .build();
+    private APIGatewayCustomAuthorizerEvent requestWithoutApiKey() {
+        return APIGatewayCustomAuthorizerEvent.builder().withMethodArn(this.inputMethodArn).build();
     }
 
-    private AuthPolicy sendRequestToHandler(InputStream input) throws IOException {
-        handler.handleRequest(input, outputStream, CONTEXT);
-        var response = AuthorizerResponse.fromOutputStream(outputStream);
-        return response.getPolicyDocument();
+    private AuthPolicy sendRequestToHandler(APIGatewayCustomAuthorizerEvent input) {
+        return handler.handleRequest(input, CONTEXT).getPolicyDocument();
     }
 
     private SecretsManagerClient setupSecretsClient() {
@@ -99,6 +87,7 @@ class DefaultRequestAuthorizerTest {
     }
 
     private GetSecretValueResponse constructSecretsClientResponse(GetSecretValueRequest request) {
+
         if (request.secretId().equals(SECRET_NAME_SET_IN_TEST)) {
             var secret = JsonUtils.dtoObjectMapper.createObjectNode();
             secret.put(SECRET_KEY_SET_IN_TEST, expectedApiKey);
@@ -108,18 +97,18 @@ class DefaultRequestAuthorizerTest {
             GetSecretValueResponse.builder().build();
     }
 
-    private InputStream requestWithValidApiKey() throws JsonProcessingException {
+    private APIGatewayCustomAuthorizerEvent requestWithValidApiKey() {
         return requestWithApiKey(expectedApiKey);
     }
 
-    private InputStream requestWithInvalidApiKey() throws JsonProcessingException {
+    private APIGatewayCustomAuthorizerEvent requestWithInvalidApiKey() {
         return requestWithApiKey(randomString());
     }
 
-    private InputStream requestWithApiKey(String s) throws JsonProcessingException {
-        return new HandlerRequestBuilder<Void>(JsonUtils.dtoObjectMapper)
-            .withHeaders(Map.of(HttpHeaders.AUTHORIZATION, s))
-            .withOtherProperties(Map.of(METHOD_ARN_FIELD, this.inputMethodArn))
+    private APIGatewayCustomAuthorizerEvent requestWithApiKey(String authorizationHeader) {
+        return APIGatewayCustomAuthorizerEvent.builder()
+            .withMethodArn(this.inputMethodArn)
+            .withHeaders(Map.of(HttpHeaders.AUTHORIZATION, authorizationHeader))
             .build();
     }
 }

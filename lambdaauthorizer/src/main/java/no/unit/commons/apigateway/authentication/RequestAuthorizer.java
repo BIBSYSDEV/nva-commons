@@ -1,21 +1,13 @@
 package no.unit.commons.apigateway.authentication;
 
-import static no.unit.commons.apigateway.authentication.AuthorizerObjectMapperConfig.authorizerObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
 import com.amazonaws.services.lambda.runtime.Context;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.nio.charset.StandardCharsets;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayCustomAuthorizerEvent;
 import java.util.Collections;
 import java.util.Optional;
-import nva.commons.apigateway.RequestInfo;
-import nva.commons.apigateway.RestRequestHandler;
-import nva.commons.apigateway.exceptions.ApiGatewayException;
-import nva.commons.apigateway.exceptions.ForbiddenException;
-import nva.commons.core.Environment;
 import nva.commons.core.attempt.Failure;
+import nva.commons.core.exceptions.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * .html".
  */
 
-public abstract class RequestAuthorizer extends RestRequestHandler<Void, AuthorizerResponse> {
+public abstract class RequestAuthorizer implements RequestHandler<APIGatewayCustomAuthorizerEvent, AuthorizerResponse> {
 
     public static final String EXECUTE_API_ACTION = "execute-api:Invoke";
     public static final String ALLOW_EFFECT = "Allow";
@@ -36,58 +28,21 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
     public static final int API_GATEWAY_IDENTIFIER_INDEX = 0;
     public static final int STAGE_INDEX = 1;
     public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String COULD_NOT_READ_PRINCIPAL_ID_ERROR = "Error while trying to get the principal ID.";
     private static final String DENY_EFFECT = "Deny";
     private static final Logger logger = LoggerFactory.getLogger(RequestAuthorizer.class);
 
-    public RequestAuthorizer(Environment environment) {
-        super(Void.class, environment);
+    protected RequestAuthorizer() {
+
     }
 
     @Override
-    protected AuthorizerResponse processInput(Void input, RequestInfo requestInfo, Context context)
-        throws ApiGatewayException {
-
-        logger.debug("Requesting authorizing: " + principalId());
-        secretCheck(requestInfo);
-        String resource = formatPolicyResource(requestInfo.getMethodArn());
-
-        AuthPolicy authPolicy = createAllowAuthPolicy(resource);
-
-        return createResponse(authPolicy);
-    }
-
-    @Override
-    protected Integer getSuccessStatusCode(Void input, AuthorizerResponse output) {
-        return HttpURLConnection.HTTP_OK;
-    }
-
-    @Override
-    protected void writeOutput(Void input, AuthorizerResponse output, RequestInfo requestInfo)
-        throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-            String responseJson = authorizerObjectMapper.writeValueAsString(output);
-            writer.write(responseJson);
-        }
-    }
-
-    @Override
-    protected void writeExpectedFailure(Void input, ApiGatewayException exception, String requestId)
-        throws IOException {
-        try {
-            writeFailure();
-        } catch (ForbiddenException e) {
-            throw new IOException(e);
-        }
-    }
-
-    @Override
-    protected void writeUnexpectedFailure(Void input, Exception exception, String requestId)
-        throws IOException {
-        try {
-            writeFailure();
-        } catch (ForbiddenException e) {
-            throw new IOException(e);
-        }
+    public AuthorizerResponse handleRequest(APIGatewayCustomAuthorizerEvent input, Context context) {
+        return attempt(() -> callerIsAllowedToPerformAction(input))
+            .map(callerIsAuthorized -> formatPolicyResource(input.getMethodArn()))
+            .map(this::createAllowAuthPolicy)
+            .map(this::createResponse)
+            .orElse(fail -> createForbiddenResponse(fail.getException()));
     }
 
     /**
@@ -112,35 +67,51 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
         return String.join(PATH_DELIMITER, apiGateway, stage, ANY_HTTP_METHOD, ALL_PATHS);
     }
 
-    protected AuthPolicy createAllowAuthPolicy(String methodArn) throws ForbiddenException {
-        logger.info("Allowed to access: " + principalId());
+    protected AuthPolicy createAllowAuthPolicy(String methodArn) {
         StatementElement statement = StatementElement.newBuilder()
-                                         .withResource(methodArn)
-                                         .withAction(EXECUTE_API_ACTION)
-                                         .withEffect(ALLOW_EFFECT)
-                                         .build();
+            .withResource(methodArn)
+            .withAction(EXECUTE_API_ACTION)
+            .withEffect(ALLOW_EFFECT)
+            .build();
         return AuthPolicy.newBuilder().withStatement(Collections.singletonList(statement)).build();
     }
 
-    protected AuthPolicy createDenyAuthPolicy() throws ForbiddenException {
-        logger.info("Denied access: " + principalId());
+    protected AuthPolicy createDenyAuthPolicy() {
         StatementElement statement = StatementElement.newBuilder()
-                                         .withResource(ANY_RESOURCE)
-                                         .withAction(EXECUTE_API_ACTION)
-                                         .withEffect(DENY_EFFECT)
-                                         .build();
+            .withResource(ANY_RESOURCE)
+            .withAction(EXECUTE_API_ACTION)
+            .withEffect(DENY_EFFECT)
+            .build();
         return AuthPolicy.newBuilder().withStatement(Collections.singletonList(statement)).build();
     }
 
-    protected abstract String principalId() throws ForbiddenException;
+    protected abstract String principalId();
 
     protected abstract String fetchSecret() throws ForbiddenException;
 
-    protected void secretCheck(RequestInfo requestInfo) throws ForbiddenException {
-        Optional.ofNullable(requestInfo.getHeaders().get(AUTHORIZATION_HEADER))
+    protected boolean callerIsAllowedToPerformAction(APIGatewayCustomAuthorizerEvent requestInfo)
+        throws ForbiddenException {
+        return Optional.ofNullable(requestInfo.getHeaders().get(AUTHORIZATION_HEADER))
             .map(this::validateSecret)
             .filter(this::validationSucceeded)
             .orElseThrow(ForbiddenException::new);
+    }
+
+    private String readPrincipalId() {
+        try {
+            return principalId();
+        } catch (Exception e) {
+            throw new RuntimeException(COULD_NOT_READ_PRINCIPAL_ID_ERROR, e);
+        }
+    }
+
+    private AuthorizerResponse createForbiddenResponse(Exception exception) {
+        logger.warn(ExceptionUtils.stackTraceInSingleLine(exception));
+        return AuthorizerResponse
+            .newBuilder()
+            .withPrincipalId(readPrincipalId())
+            .withPolicyDocument(createDenyAuthPolicy())
+            .build();
     }
 
     private Boolean validationSucceeded(Boolean check) {
@@ -152,24 +123,11 @@ public abstract class RequestAuthorizer extends RestRequestHandler<Void, Authori
         return clientSecret.equals(correctSecret);
     }
 
-    private void writeFailure() throws IOException, ForbiddenException {
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-            String principalId = attempt(this::principalId).orElseThrow(this::logErrorAndThrowException);
-            AuthorizerResponse denyResponse = AuthorizerResponse
-                .newBuilder()
-                .withPrincipalId(principalId)
-                .withPolicyDocument(createDenyAuthPolicy())
-                .build();
-            String response = authorizerObjectMapper.writeValueAsString(denyResponse);
-            writer.write(response);
-        }
-    }
-
-    private AuthorizerResponse createResponse(AuthPolicy authPolicy) throws ForbiddenException {
+    private AuthorizerResponse createResponse(AuthPolicy authPolicy) {
         return AuthorizerResponse.newBuilder()
-                   .withPrincipalId(principalId())
-                   .withPolicyDocument(authPolicy)
-                   .build();
+            .withPrincipalId(readPrincipalId())
+            .withPolicyDocument(authPolicy)
+            .build();
     }
 
     private RuntimeException logErrorAndThrowException(Failure<String> failure) {

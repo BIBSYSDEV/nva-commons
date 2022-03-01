@@ -5,16 +5,17 @@ plugins {
 
 dependencies {
     implementation project(":core")
-    implementation project(":apigateway")
-    implementation project(":logutils")
     implementation project(":secrets")
-    implementation project(":json")
-
     implementation libs.aws.sdk2.secrets
-
+    implementation  libs.aws.lambda.core
+    implementation libs.aws.lambda.events
     implementation libs.bundles.logging
-    implementation libs.jackson.databind
-    implementation libs.guava
+
+
+    testImplementation project(":json")
+    testImplementation libs.bundles.jackson
+    testImplementation libs.guava
+    testImplementation project(":logutils")
 
     testImplementation libs.bundles.testing
     testImplementation project(":nvatestutils")

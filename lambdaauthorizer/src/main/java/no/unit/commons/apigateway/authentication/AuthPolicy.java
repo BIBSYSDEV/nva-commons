@@ -1,6 +1,5 @@
 package no.unit.commons.apigateway.authentication;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -10,11 +9,10 @@ public class AuthPolicy {
 
     public static final String VERSION = "2012-10-17";
 
-    @JsonProperty("Version")
     private String version;
-    @JsonProperty("Statement")
     private List<StatementElement> statement;
 
+    @JacocoGenerated
     public AuthPolicy() {
     }
 
@@ -27,20 +25,30 @@ public class AuthPolicy {
         return new Builder();
     }
 
+    @JacocoGenerated
     public String getVersion() {
         return version;
     }
 
+    @JacocoGenerated
     public void setVersion(String version) {
         this.version = version;
     }
 
+    @JacocoGenerated
     public List<StatementElement> getStatement() {
         return statement;
     }
 
+    @JacocoGenerated
     public void setStatement(List<StatementElement> statement) {
         this.statement = statement;
+    }
+
+    @Override
+    @JacocoGenerated
+    public int hashCode() {
+        return Objects.hash(getVersion(), getStatement());
     }
 
     @Override
@@ -54,13 +62,7 @@ public class AuthPolicy {
         }
         AuthPolicy that = (AuthPolicy) o;
         return equalVersions(that)
-            && equalStatements(that.getStatement());
-    }
-
-    @Override
-    @JacocoGenerated
-    public int hashCode() {
-        return Objects.hash(getVersion(), getStatement());
+               && equalStatements(that.getStatement());
     }
 
     private boolean equalStatements(List<StatementElement> otherStatement) {

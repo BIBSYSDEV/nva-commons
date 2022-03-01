@@ -1,19 +1,13 @@
 package no.unit.commons.apigateway.authentication;
 
-import static no.unit.commons.apigateway.authentication.AuthorizerObjectMapperConfig.authorizerObjectMapper;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
+import nva.commons.core.JacocoGenerated;
 
 public class AuthorizerResponse {
 
-    @JsonProperty("principalId")
     private String principalId;
-
-    @JsonProperty("policyDocument")
     private AuthPolicy policyDocument;
 
+    @JacocoGenerated
     public AuthorizerResponse() {
     }
 
@@ -22,28 +16,26 @@ public class AuthorizerResponse {
         setPolicyDocument(builder.policyDocument);
     }
 
-    public static AuthorizerResponse fromOutputStream(ByteArrayOutputStream outputStream)
-        throws JsonProcessingException {
-        String content = outputStream.toString(StandardCharsets.UTF_8);
-        return authorizerObjectMapper.readValue(content, AuthorizerResponse.class);
-    }
-
     public static Builder newBuilder() {
         return new Builder();
     }
 
+    @JacocoGenerated
     public String getPrincipalId() {
         return principalId;
     }
 
+    @JacocoGenerated
     public void setPrincipalId(String principalId) {
         this.principalId = principalId;
     }
 
+    @JacocoGenerated
     public AuthPolicy getPolicyDocument() {
         return policyDocument;
     }
 
+    @JacocoGenerated
     public void setPolicyDocument(AuthPolicy policyDocument) {
         this.policyDocument = policyDocument;
     }
