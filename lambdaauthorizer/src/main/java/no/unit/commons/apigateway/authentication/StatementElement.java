@@ -1,18 +1,15 @@
 package no.unit.commons.apigateway.authentication;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import nva.commons.core.JacocoGenerated;
 
 public class StatementElement {
 
-    @JsonProperty("Effect")
     private String effect;
-    @JsonProperty("Action")
     private String action;
-    @JsonProperty("Resource")
     private String resource;
 
+    @JacocoGenerated
     public StatementElement() {
     }
 
@@ -26,28 +23,40 @@ public class StatementElement {
         return new Builder();
     }
 
+    @JacocoGenerated
     public String getEffect() {
         return effect;
     }
 
+    @JacocoGenerated
     public void setEffect(String effect) {
         this.effect = effect;
     }
 
+    @JacocoGenerated
     public String getAction() {
         return action;
     }
 
+    @JacocoGenerated
     public void setAction(String action) {
         this.action = action;
     }
 
+    @JacocoGenerated
     public String getResource() {
         return resource;
     }
 
+    @JacocoGenerated
     public void setResource(String resource) {
         this.resource = resource;
+    }
+
+    @Override
+    @JacocoGenerated
+    public int hashCode() {
+        return Objects.hash(getEffect(), getAction(), getResource());
     }
 
     @Override
@@ -61,14 +70,8 @@ public class StatementElement {
         }
         StatementElement that = (StatementElement) o;
         return Objects.equals(getEffect(), that.getEffect())
-            && Objects.equals(getAction(), that.getAction())
-            && Objects.equals(getResource(), that.getResource());
-    }
-
-    @Override
-    @JacocoGenerated
-    public int hashCode() {
-        return Objects.hash(getEffect(), getAction(), getResource());
+               && Objects.equals(getAction(), that.getAction())
+               && Objects.equals(getResource(), that.getResource());
     }
 
     public static final class Builder {
