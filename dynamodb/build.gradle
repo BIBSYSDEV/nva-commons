@@ -14,5 +14,6 @@ dependencies {
     api libs.aws.lambda.events
 
     testImplementation libs.bundles.testing
+    testImplementation libs.bundles.jackson
 
 }
