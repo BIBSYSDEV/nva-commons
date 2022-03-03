@@ -66,8 +66,7 @@ public abstract class ApiGatewayHandlerV2<I, O>
 
     protected abstract Integer getSuccessStatusCode(String body, O output);
 
-    protected abstract O processInput(String body, APIGatewayProxyRequestEvent input, Context context)
-        throws ApiGatewayException;
+    protected abstract O processInput(String body, APIGatewayProxyRequestEvent input, Context context);
 
     protected List<MediaType> listSupportedMediaTypes() {
         return DEFAULT_SUPPORTED_MEDIA_TYPES;
@@ -89,8 +88,7 @@ public abstract class ApiGatewayHandlerV2<I, O>
             .build();
     }
 
-    private MediaType calculateContentTypeHeader(APIGatewayProxyRequestEvent requestEvent)
-        throws UnsupportedAcceptHeaderException {
+    private MediaType calculateContentTypeHeader(APIGatewayProxyRequestEvent requestEvent) {
         return attemptToMatchAcceptHeadersToSupportedHeaders(requestEvent)
             .orElseThrow(fail -> (UnsupportedAcceptHeaderException) fail.getException());
     }
@@ -108,16 +106,14 @@ public abstract class ApiGatewayHandlerV2<I, O>
             .map(headers -> headers.get(HttpHeaders.ACCEPT));
     }
 
-    private APIGatewayProxyResponseEvent createSuccessfulResponse(APIGatewayProxyRequestEvent input,
-                                                                  O output) throws UnsupportedAcceptHeaderException {
+    private APIGatewayProxyResponseEvent createSuccessfulResponse(APIGatewayProxyRequestEvent input, O output) {
         return new APIGatewayProxyResponseEvent()
             .withBody(Optional.ofNullable(output).map(Object::toString).orElse(null))
             .withStatusCode(getSuccessStatusCode(input.getBody(), output))
             .withHeaders(getSuccessHeaders(input));
     }
 
-    private Map<String, String> getSuccessHeaders(APIGatewayProxyRequestEvent input)
-        throws UnsupportedAcceptHeaderException {
+    private Map<String, String> getSuccessHeaders(APIGatewayProxyRequestEvent input) {
         var successHeaders = new ConcurrentHashMap<>(defaultHeaders());
         var contentTypeHeader = calculateContentTypeHeader(input);
         successHeaders.put(HttpHeaders.CONTENT_TYPE, contentTypeHeader.toString());
