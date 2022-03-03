@@ -3,6 +3,7 @@ package nva.commons.apigatewayv2;
 import static com.google.common.net.MediaType.JSON_UTF_8;
 import static nva.commons.core.attempt.Try.attempt;
 import com.google.common.net.MediaType;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -18,24 +19,25 @@ public final class MediaTypes {
         .withCharset(StandardCharsets.UTF_8);
 
     public static final List<MediaType> DEFAULT_SUPPORTED_MEDIA_TYPES = List.of(JSON_UTF_8);
-    public static final int MOST_PREFERRED_DEFAULT_MEDIA_TYPE = 0;
+    public static final int DEFAULT_MEDIA_TYPE = 0;
+    public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
     private MediaTypes() {
     }
 
     public static MediaType parse(List<String> acceptedMediaTypes, List<MediaType> supportedMediaTypes)
         throws UnsupportedAcceptHeaderException {
-        var mostPreferredMediaType = mostPreferredMediaType(supportedMediaTypes);
+        var defaultMediaType = backendDefaultMediaType(supportedMediaTypes);
         var requestedMediaTypes = acceptedMediaTypes.stream()
-            .map(mediaTypeString -> parseHeader(mediaTypeString, mostPreferredMediaType))
+            .map(mediaTypeString -> parseHeader(mediaTypeString, defaultMediaType))
             .flatMap(Optional::stream)
             .collect(Collectors.toList());
         var result = findFirstMatchingHeader(supportedMediaTypes, requestedMediaTypes);
         return result.orElseThrow(() -> new UnsupportedAcceptHeaderException(requestedMediaTypes, supportedMediaTypes));
     }
 
-    private static MediaType mostPreferredMediaType(List<MediaType> supportedMediaTypes) {
-        return supportedMediaTypes.get(MOST_PREFERRED_DEFAULT_MEDIA_TYPE);
+    private static MediaType backendDefaultMediaType(List<MediaType> supportedMediaTypes) {
+        return supportedMediaTypes.get(DEFAULT_MEDIA_TYPE);
     }
 
     private static Optional<MediaType> findFirstMatchingHeader(List<MediaType> supportedMediaTypes,
@@ -44,11 +46,12 @@ public final class MediaTypes {
             .filter(mediaType -> isSupported(mediaType, supportedMediaTypes))
             .filter(MediaTypes::hasSupportedCharSet)
             .findFirst()
-            .map(MediaTypes::setDefaultCharsetIfCharsetNotSpecified);
+            .map(MediaTypes::removeQualityFactorAndSetCharsetIfMissing);
     }
 
-    private static MediaType setDefaultCharsetIfCharsetNotSpecified(MediaType mediaType) {
-        return mediaType.withCharset(mediaType.charset().or(StandardCharsets.UTF_8));
+    private static MediaType removeQualityFactorAndSetCharsetIfMissing(MediaType mediaType) {
+        return MediaType.create(mediaType.type(), mediaType.subtype())
+            .withCharset(mediaType.charset().or(DEFAULT_CHARSET));
     }
 
     private static boolean hasSupportedCharSet(MediaType mediaType) {
@@ -71,7 +74,7 @@ public final class MediaTypes {
     }
 
     private static MediaType mapAnyContentTypeToDefault(MediaType header, MediaType mostPreferredSupportedMediaType) {
-        return MediaType.ANY_TYPE.is(header)
+        return MediaType.ANY_TYPE.is(header.withoutParameters())
                    ? mostPreferredSupportedMediaType
                    : header;
     }
