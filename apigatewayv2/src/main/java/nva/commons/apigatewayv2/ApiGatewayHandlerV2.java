@@ -2,8 +2,8 @@ package nva.commons.apigatewayv2;
 
 import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
+import static nva.commons.apigatewayv2.MediaTypes.DEFAULT_MEDIA_TYPE;
 import static nva.commons.apigatewayv2.MediaTypes.DEFAULT_SUPPORTED_MEDIA_TYPES;
-import static nva.commons.apigatewayv2.MediaTypes.MOST_PREFERRED_DEFAULT_MEDIA_TYPE;
 import static nva.commons.core.attempt.Try.attempt;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -99,7 +99,7 @@ public abstract class ApiGatewayHandlerV2<I, O>
         List<MediaType> supportedMediaTypes = listSupportedMediaTypes();
         return extractAcceptHeaders(requestEvent)
             .map(attempt(acceptedMediaTypes -> MediaTypes.parse(acceptedMediaTypes, supportedMediaTypes)))
-            .orElse(Try.of(supportedMediaTypes.get(MOST_PREFERRED_DEFAULT_MEDIA_TYPE)));
+            .orElse(Try.of(supportedMediaTypes.get(DEFAULT_MEDIA_TYPE)));
     }
 
     private Optional<List<String>> extractAcceptHeaders(APIGatewayProxyRequestEvent requestEvent) {

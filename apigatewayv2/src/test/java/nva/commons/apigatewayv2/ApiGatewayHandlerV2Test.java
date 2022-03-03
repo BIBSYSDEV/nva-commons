@@ -26,6 +26,7 @@ import com.google.common.net.MediaType;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +34,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.management.modelmbean.XMLParseException;
 import no.unit.nva.stubs.FakeContext;
 import nva.commons.apigatewayv2.exceptions.ApiGatewayException;
@@ -47,6 +49,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.zalando.problem.Status;
 
@@ -56,8 +59,9 @@ public class ApiGatewayHandlerV2Test {
     public static final String MIDDLE_EXCEPTION_MESSAGE = "MIDDLE Exception";
     public static final String BOTTOM_EXCEPTION_MESSAGE = "BOTTOM Exception";
     public static final String SOME_REQUEST_ID = "RequestID:123456";
-    private static final String PATH = "path1/path2/path3";
     public static final String MULTIVALUED_HEADERS_VALUE_DELIMITER = ",";
+    private static final String PATH = "path1/path2/path3";
+
     private Context context;
     private HandlerV2 handler;
 
@@ -83,24 +87,8 @@ public class ApiGatewayHandlerV2Test {
     }
 
     @Test
-    @DisplayName("ApiGatewayHandler has a constructor with input class as only parameter")
-    void apiGatewayHandlerHasAConstructorWithInputClassAsOnlyParameter() {
-        ApiGatewayHandlerV2<String, String> handler = new ApiGatewayHandlerV2<>() {
-            @Override
-            protected Integer getSuccessStatusCode(String input, String output) {
-                return HttpURLConnection.HTTP_OK;
-            }
-
-            @Override
-            protected String processInput(String input, APIGatewayProxyRequestEvent requestInfo, Context context) {
-                return null;
-            }
-        };
-    }
-
-    @Test
     @DisplayName("handleRequest should have available the request headers")
-    void handleRequestShouldHaveAvailableTheRequestHeaders() throws IOException {
+    void handleRequestShouldHaveAvailableTheRequestHeaders() {
         var input = requestWithHeaders();
         handler.handleRequest(input, context);
         Map<String, String> headers = handler.getHeaders();
@@ -126,18 +114,46 @@ public class ApiGatewayHandlerV2Test {
     }
 
     @ParameterizedTest(name = "handleRequest should return OK when input is {0}")
-    @ValueSource(strings = {
-        //        "*/*",
-        //        "application/json",
-        //        "application/json; charset=UTF-8",
-        "text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8"
-    })
-    void handleRequestShouldReturnOkOnSupportedAcceptHeader(String mediaType) throws IOException {
-        var input = requestWithAcceptHeader(mediaType);
+    @MethodSource("inputMediaTypeAndExpectedMediaType")
+    void handleRequestShouldReturnOkOnSupportedAcceptHeader(MediaTypeInput mediaTypes) throws IOException {
+        handler = handlerSupportingXml();
+
+        var input = requestWithAcceptHeader(mediaTypes.getInputMediaType());
 
         var response = handler.handleRequest(input, context);
-
         assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
+        var expectedMediaType = MediaType.parse(mediaTypes.getExpectedMediaType());
+        assertThat(expectedMediaType.charset().get(), is(equalTo(StandardCharsets.UTF_8)));
+        assertThat(response.getHeaders().get(CONTENT_TYPE), is(equalTo(expectedMediaType.toString())));
+    }
+
+    @Test
+    void shouldReturnContentTypeWithCharsetUtf8WhenAcceptedHeaderContainsMediaTypeWithoutCharset() {
+        var mediaType = MediaType.JSON_UTF_8.withoutParameters();
+        assertThat(mediaType.toString(), is(equalTo("application/json")));
+        var input = requestWithAcceptHeader(mediaType.toString());
+        var response = handler.handleRequest(input, context);
+        String expectedMediaTypeString = MediaType.JSON_UTF_8.withCharset(StandardCharsets.UTF_8).toString();
+        assertThat(response.getHeaders().get(CONTENT_TYPE), is(equalTo(expectedMediaTypeString)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"application/json; charset=UTF-8",
+        "application/ld+json; charset=UTF-8"
+    })
+    void shouldReturnContentTypeWithCharsetUtf8WhenAcceptedHeaderContainsMediaTypeWithCharsetUtf8(
+        String mediaTypeString) {
+        var mediaType = MediaType.parse(mediaTypeString);
+        handler = new HandlerV2() {
+            @Override
+            protected List<MediaType> listSupportedMediaTypes() {
+                return List.of(MediaType.JSON_UTF_8, MediaTypes.APPLICATION_JSON_LD);
+            }
+        };
+        assertThat(mediaType.charset().get(), is(equalTo(StandardCharsets.UTF_8)));
+        var input = requestWithAcceptHeader(mediaType.toString());
+        var response = handler.handleRequest(input, context);
+        assertThat(response.getHeaders().get(CONTENT_TYPE), is(equalTo(mediaType.toString())));
     }
 
     @Test
@@ -290,6 +306,28 @@ public class ApiGatewayHandlerV2Test {
         assertThat(response.getHeaders(), hasEntry(HttpHeaders.LOCATION, expectedRedirectLocation.toString()));
     }
 
+    private static Stream<MediaTypeInput> inputMediaTypeAndExpectedMediaType() {
+        String defaultMediaType = "application/json; charset=utf-8";
+
+        return Stream.of(
+            new MediaTypeInput("*/*", defaultMediaType),
+            new MediaTypeInput("application/json", defaultMediaType),
+            new MediaTypeInput("application/json;charset=UTF-8", defaultMediaType),
+            new MediaTypeInput("application/xml;charset=UTF-8", "application/xml; charset=utf-8"),
+            new MediaTypeInput("text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8",
+                               "application/xml; charset=utf-8")
+        );
+    }
+
+    private HandlerV2 handlerSupportingXml() {
+        return new HandlerV2() {
+            @Override
+            protected List<MediaType> listSupportedMediaTypes() {
+                return List.of(MediaType.JSON_UTF_8, MediaType.APPLICATION_XML_UTF_8);
+            }
+        };
+    }
+
     private String getUnsupportedMediaTypeErrorMessage(String mediaType) {
         return UnsupportedAcceptHeaderException.createMessage(
             List.of(MediaType.parse(mediaType)),
@@ -421,4 +459,24 @@ public class ApiGatewayHandlerV2Test {
             }
         };
     }
+
+    private static class MediaTypeInput {
+
+        private final String inputMediaType;
+        private final String expectedMediaType;
+
+        public MediaTypeInput(String inputMediaType, String expectedMediaType) {
+            this.inputMediaType = inputMediaType;
+            this.expectedMediaType = expectedMediaType;
+        }
+
+        public String getInputMediaType() {
+            return inputMediaType;
+        }
+
+        public String getExpectedMediaType() {
+            return expectedMediaType;
+        }
+    }
 }
+
