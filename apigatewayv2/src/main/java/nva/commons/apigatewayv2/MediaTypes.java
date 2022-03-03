@@ -3,6 +3,7 @@ package nva.commons.apigatewayv2;
 import static com.google.common.net.MediaType.JSON_UTF_8;
 import static nva.commons.core.attempt.Try.attempt;
 import com.google.common.net.MediaType;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -11,10 +12,12 @@ import nva.commons.core.attempt.Try;
 
 public final class MediaTypes {
 
-    public static final MediaType APPLICATION_JSON_LD = MediaType.create("application", "ld+json");
-    public static final MediaType APPLICATION_PROBLEM_JSON = MediaType.create("application", "problem+json");
-    public static final String ACCEPT_HEADER_VALUES_DELIMITER = ",";
-    public static final List<MediaType> DEFAULT_SUPPORTED_MEDIA_TYPES = List.of(JSON_UTF_8.withoutParameters());
+    public static final MediaType APPLICATION_JSON_LD = MediaType.create("application", "ld+json")
+        .withCharset(StandardCharsets.UTF_8);
+    public static final MediaType APPLICATION_PROBLEM_JSON = MediaType.create("application", "problem+json")
+        .withCharset(StandardCharsets.UTF_8);
+
+    public static final List<MediaType> DEFAULT_SUPPORTED_MEDIA_TYPES = List.of(JSON_UTF_8);
     public static final int MOST_PREFERRED_DEFAULT_MEDIA_TYPE = 0;
 
     private MediaTypes() {
@@ -39,7 +42,17 @@ public final class MediaTypes {
                                                                List<MediaType> requestedMediaTypes) {
         return requestedMediaTypes.stream()
             .filter(mediaType -> isSupported(mediaType, supportedMediaTypes))
-            .findFirst();
+            .filter(MediaTypes::hasSupportedCharSet)
+            .findFirst()
+            .map(MediaTypes::setDefaultCharsetIfCharsetNotSpecified);
+    }
+
+    private static MediaType setDefaultCharsetIfCharsetNotSpecified(MediaType mediaType) {
+        return mediaType.withCharset(mediaType.charset().or(StandardCharsets.UTF_8));
+    }
+
+    private static boolean hasSupportedCharSet(MediaType mediaType) {
+        return mediaType.charset().or(StandardCharsets.UTF_8).equals(StandardCharsets.UTF_8);
     }
 
     private static boolean isSupported(MediaType mediaType, List<MediaType> supportedMediaTypes) {
@@ -49,13 +62,12 @@ public final class MediaTypes {
             .anyMatch(supported -> supported.is(mediaType.withoutParameters()));
     }
 
-    private static Optional<MediaType> parseHeader(String mediaTypeString, MediaType mostPreferedMediaType) {
-        var x = Optional.of(mediaTypeString)
+    private static Optional<MediaType> parseHeader(String mediaTypeString, MediaType mostPreferredMediaType) {
+        return Optional.of(mediaTypeString)
             .map(String::trim)
             .map(attempt(MediaType::parse))
             .flatMap(Try::toOptional)
-            .map(mediaType -> mapAnyContentTypeToDefault(mediaType, mostPreferedMediaType));
-        return x;
+            .map(mediaType -> mapAnyContentTypeToDefault(mediaType, mostPreferredMediaType));
     }
 
     private static MediaType mapAnyContentTypeToDefault(MediaType header, MediaType mostPreferredSupportedMediaType) {
