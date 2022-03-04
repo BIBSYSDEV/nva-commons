@@ -2,7 +2,7 @@ package nva.commons.apigatewayv2.exceptions;
 
 import java.util.Objects;
 
-public abstract class ApiGatewayException extends Exception {
+public abstract class ApiGatewayException extends RuntimeException {
 
     public static final String MISSING_STATUS_CODE = "Status code cannot be null for exception:";
 

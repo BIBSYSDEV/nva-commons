@@ -25,8 +25,7 @@ public final class MediaTypes {
     private MediaTypes() {
     }
 
-    public static MediaType parse(List<String> acceptedMediaTypes, List<MediaType> supportedMediaTypes)
-        throws UnsupportedAcceptHeaderException {
+    public static MediaType parse(List<String> acceptedMediaTypes, List<MediaType> supportedMediaTypes) {
         var defaultMediaType = backendDefaultMediaType(supportedMediaTypes);
         var requestedMediaTypes = acceptedMediaTypes.stream()
             .map(mediaTypeString -> parseHeader(mediaTypeString, defaultMediaType))
