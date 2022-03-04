@@ -1,17 +1,15 @@
 package no.unit.nva.events.models;
 
 import static java.util.Objects.nonNull;
-import static no.unit.nva.events.EventsConfig.objectMapper;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import static no.unit.nva.events.EventsConfig.objectMapperLight;
+import static nva.commons.core.attempt.Try.attempt;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import no.unit.nva.commons.json.JsonSerializable;
 import nva.commons.core.JacocoGenerated;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.eventbridge.model.PutEventsRequestEntry;
@@ -22,7 +20,7 @@ import software.amazon.awssdk.services.eventbridge.model.PutEventsRequestEntry;
  * results the scan will return (max 1000). The {@code topic} is the event topic that the handler is listening for
  * events.
  */
-public class ScanDatabaseRequestV2 implements EventBody, JsonSerializable {
+public class ScanDatabaseRequestV2 implements EventBody {
 
     public static final String START_MARKER = "startMarker";
     public static final String PAGE_SIZE = "pageSize";
@@ -32,32 +30,40 @@ public class ScanDatabaseRequestV2 implements EventBody, JsonSerializable {
     public static final Map<String, AttributeValue> DYNAMODB_EMPTY_MARKER = null;
 
     @JsonProperty(START_MARKER)
-    private final Map<String, String> startMarker;
+    private Map<String, String> startMarker;
     @JsonProperty(PAGE_SIZE)
-    private final int pageSize;
+    private Integer pageSize;
     @JsonProperty(TOPIC)
-    private final String topic;
+    private String topic;
 
-    @JsonCreator
-    public ScanDatabaseRequestV2(@JsonProperty(TOPIC) String topic,
-                                 @JsonProperty(PAGE_SIZE) Integer pageSize,
-                                 @JsonProperty(START_MARKER) Map<String, String> startMarker) {
-        this.pageSize = isValid(pageSize) ? pageSize : DEFAULT_PAGE_SIZE;
-        this.topic = topic;
-        this.startMarker = startMarker;
+    public ScanDatabaseRequestV2() {
+
     }
 
-    public static ScanDatabaseRequestV2 fromJson(String detail)
-        throws JsonProcessingException {
-        return objectMapper.readValue(detail, ScanDatabaseRequestV2.class);
+    public ScanDatabaseRequestV2(String topic, Integer pageSize, Map<String, String> startMarker) {
+        setPageSize(pageSize);
+        setTopic(topic);
+        setStartMarker(startMarker);
+    }
+
+    public static ScanDatabaseRequestV2 fromJson(String detail) {
+        return attempt(() -> objectMapperLight.beanFrom(ScanDatabaseRequestV2.class, detail)).orElseThrow();
     }
 
     public Map<String, String> getStartMarker() {
         return startMarker;
     }
 
+    public final void setStartMarker(Map<String, String> startMarker) {
+        this.startMarker = startMarker;
+    }
+
     public int getPageSize() {
-        return pageSize;
+        return nonNull(pageSize) ? pageSize : DEFAULT_PAGE_SIZE;
+    }
+
+    public final void setPageSize(int pageSize) {
+        this.pageSize = isValid(pageSize) ? pageSize : DEFAULT_PAGE_SIZE;
     }
 
     public ScanDatabaseRequestV2 newScanDatabaseRequest(Map<String, AttributeValue> newStartMarker) {
@@ -67,6 +73,10 @@ public class ScanDatabaseRequestV2 implements EventBody, JsonSerializable {
     @Override
     public String getTopic() {
         return topic;
+    }
+
+    public final void setTopic(String topic) {
+        this.topic = topic;
     }
 
     @JsonIgnore
@@ -85,7 +95,7 @@ public class ScanDatabaseRequestV2 implements EventBody, JsonSerializable {
         return PutEventsRequestEntry
             .builder()
             .eventBusName(eventBusName)
-            .detail(this.toJsonString())
+            .detail(this.toString())
             .detailType(detailType)
             .resources(invokedFunctionArn)
             .time(Instant.now())
@@ -112,6 +122,11 @@ public class ScanDatabaseRequestV2 implements EventBody, JsonSerializable {
         return getPageSize() == that.getPageSize()
                && Objects.equals(getStartMarker(), that.getStartMarker())
                && Objects.equals(getTopic(), that.getTopic());
+    }
+
+    @Override
+    public String toString() {
+        return attempt(() -> objectMapperLight.asString(this)).orElseThrow();
     }
 
     private Map<String, AttributeValue> convertSerializableMarkerToDynamoDbMarker() {

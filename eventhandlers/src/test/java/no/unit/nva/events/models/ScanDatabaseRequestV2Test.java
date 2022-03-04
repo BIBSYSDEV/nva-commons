@@ -33,7 +33,7 @@ class ScanDatabaseRequestV2Test {
     }
 
     @Test
-    void shouldReturnScanRequestFromEventDetail() throws JsonProcessingException {
+    void shouldReturnScanRequestFromEventDetail() {
         var originalRequest = new ScanDatabaseRequestV2(randomString(), randomInteger(), null);
         var event = originalRequest.createNewEventEntry(randomString(), randomString(), randomString());
         var reconstructedRequest =
@@ -53,8 +53,7 @@ class ScanDatabaseRequestV2Test {
 
     @Test
     void shouldDeserializeEmptyObject() throws JsonProcessingException {
-        var deserializedFromEmptyJson = objectMapperWithoutSpecialConfig()
-            .readValue(emptyJson(), ScanDatabaseRequestV2.class);
+        var deserializedFromEmptyJson = ScanDatabaseRequestV2.fromJson(emptyJson());
         var expectedDeserializedObject =
             new ScanDatabaseRequestV2(null, ScanDatabaseRequestV2.DEFAULT_PAGE_SIZE, null);
         assertThat(deserializedFromEmptyJson, is(equalTo(expectedDeserializedObject)));
@@ -74,10 +73,10 @@ class ScanDatabaseRequestV2Test {
     }
 
     @Test
-    void shouldSerializeAndDeserializeWithoutInformationLoss() throws JsonProcessingException {
+    void shouldSerializeAndDeserializeWithoutInformationLoss() {
         var startMarker = randomMarker();
         var sampleRequest = new ScanDatabaseRequestV2(randomString(), randomInteger(), startMarker);
-        var json = sampleRequest.toJsonString();
+        var json = sampleRequest.toString();
         var deserialized = ScanDatabaseRequestV2.fromJson(json);
         assertThat(deserialized, is(equalTo(sampleRequest)));
         assertThatNonSerializableDynamoScanMarkerConstainsSameValuesAsItsEquivalentSerializableRepresentation(

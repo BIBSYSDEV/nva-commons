@@ -1,7 +1,7 @@
 package no.unit.nva.events.handlers;
 
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
-import static no.unit.nva.events.handlers.EventHandlersConfig.defaultEventObjectMapper;
+import static no.unit.nva.events.EventsConfig.objectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -19,7 +19,7 @@ class EventMessageParserTest {
     @Test
     void parseThrowsRuntimeExceptionWhenParsingFails() {
         String invalidJson = "invalidJson";
-        EventParser<SampleEventDetail> eventParser = new EventParser<>(invalidJson, defaultEventObjectMapper);
+        EventParser<SampleEventDetail> eventParser = new EventParser<>(invalidJson, objectMapper);
         Executable action = () -> eventParser.parse(SampleEventDetail.class);
         RuntimeException exception = assertThrows(RuntimeException.class, action);
         assertThat(exception.getCause(), is(instanceOf(JsonParseException.class)));
@@ -32,8 +32,7 @@ class EventMessageParserTest {
 
         String eventJson = dtoObjectMapper.writeValueAsString(event);
 
-        EventParser<OuterClass<MiddleClass<InnerClass<String>>>> parser = new EventParser<>(eventJson,
-                                                                                            defaultEventObjectMapper);
+        EventParser<OuterClass<MiddleClass<InnerClass<String>>>> parser = new EventParser<>(eventJson, objectMapper);
 
         AwsEventBridgeEvent<OuterClass<MiddleClass<InnerClass<String>>>> eventWithNestedTypes =
             parser.parse(OuterClass.class, MiddleClass.class, InnerClass.class, String.class);

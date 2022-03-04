@@ -9,6 +9,7 @@ dependencies {
     implementation project(":core")
     implementation project(":json")
 
+    implementation libs.bundles.jacksonjr
     implementation libs.jackson.databind
     implementation libs.jackson.core
 

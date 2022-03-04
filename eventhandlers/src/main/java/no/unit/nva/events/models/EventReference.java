@@ -1,6 +1,6 @@
 package no.unit.nva.events.models;
 
-import static no.unit.nva.events.handlers.EventHandlersConfig.defaultEventObjectMapper;
+import static no.unit.nva.events.EventsConfig.objectMapper;
 import static nva.commons.core.attempt.Try.attempt;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -40,7 +40,7 @@ public class EventReference implements JsonSerializable, EventBody {
     }
 
     public static EventReference fromJson(String json) {
-        return attempt(() -> defaultEventObjectMapper.readValue(json, EventReference.class)).orElseThrow();
+        return attempt(() -> objectMapper.readValue(json, EventReference.class)).orElseThrow();
     }
 
     @JacocoGenerated
