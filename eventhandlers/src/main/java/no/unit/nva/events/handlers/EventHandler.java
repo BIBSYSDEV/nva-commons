@@ -1,6 +1,5 @@
 package no.unit.nva.events.handlers;
 
-import static no.unit.nva.events.handlers.EventHandlersConfig.defaultEventObjectMapper;
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
@@ -12,6 +11,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import no.unit.nva.events.EventsConfig;
 import no.unit.nva.events.models.AwsEventBridgeEvent;
 import nva.commons.core.ioutils.IoUtils;
 import org.slf4j.Logger;
@@ -41,7 +41,7 @@ public abstract class EventHandler<InputType, OutputType> implements RequestStre
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     protected EventHandler(Class iclass) {
-        this(iclass, defaultEventObjectMapper);
+        this(iclass, EventsConfig.objectMapper);
     }
 
     @Override

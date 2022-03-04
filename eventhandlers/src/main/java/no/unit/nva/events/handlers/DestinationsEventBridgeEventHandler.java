@@ -1,8 +1,8 @@
 package no.unit.nva.events.handlers;
 
-import static no.unit.nva.events.handlers.EventHandlersConfig.defaultEventObjectMapper;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.unit.nva.events.EventsConfig;
 import no.unit.nva.events.models.AwsEventBridgeDetail;
 import no.unit.nva.events.models.AwsEventBridgeEvent;
 
@@ -12,7 +12,7 @@ public abstract class DestinationsEventBridgeEventHandler<InputType, OutputType>
     private final Class<InputType> iclass;
 
     protected DestinationsEventBridgeEventHandler(Class<InputType> iclass) {
-        super(AwsEventBridgeDetail.class, defaultEventObjectMapper);
+        super(AwsEventBridgeDetail.class, EventsConfig.objectMapper);
         this.iclass = iclass;
     }
 

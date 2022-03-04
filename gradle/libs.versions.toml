@@ -84,6 +84,6 @@ apiguardian = { group = 'org.apiguardian', name = 'apiguardian-api', version.ref
 testing = ['mockito-core', 'hamcrest', 'hamcrest-core', 'junit-jupiter', 'junit-jupiter-api',
     'junit-jupiter-params', 'junit-jupiter-engine', 'javaFaker', 'hamcrest-optional', 'commons-lang']
 jackson = ['jackson-core', 'jackson-datatype-jdk8', 'jackson-datatype-jsr310', 'jackson-databind', 'jackson-annotations', 'jackson-module-parameter-names', 'jackson-datatype-problem']
-jackson-jr = ['jackson-jr-objects', 'jackson-jr-annotations']
+jacksonjr = ['jackson-jr-objects', 'jackson-jr-annotations']
 logging = ['log4j-core', 'log4j-api', 'log4j-slf4j18-impl', 'slf4j-api']
 

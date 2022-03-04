@@ -1,6 +1,5 @@
 package no.unit.nva.events.handlers;
 
-import static no.unit.nva.events.handlers.EventHandlersConfig.defaultEventObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -88,7 +87,7 @@ public class EventParser<InputType> {
     }
 
     private JavaType constructAwsEventBridgeDataTypeWithAllNestedTypes(JavaType mostRecentType) {
-        return defaultEventObjectMapper.getTypeFactory()
+        return objectMapper.getTypeFactory()
             .constructParametricType(AwsEventBridgeEvent.class, mostRecentType);
     }
 }

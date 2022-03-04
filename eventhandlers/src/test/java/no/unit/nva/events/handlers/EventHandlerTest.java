@@ -14,7 +14,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.beans.IntrospectionException;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -34,7 +33,6 @@ public class EventHandlerTest extends AbstractEventHandlerTest {
         IoUtils.stringFromResources(Path.of("validEventBridgeEvent.json"));
 
     public static final String EXCEPTION_MESSAGE = "EXCEPTION_MESSAGE";
-    public static final String CLASS_PROPERTY = "class";
 
 
     private ByteArrayOutputStream outputStream;
@@ -77,7 +75,7 @@ public class EventHandlerTest extends AbstractEventHandlerTest {
 
     @Test
     public void handleRequestSerializesObjectsWithoutOmittingEmptyValuesWhenSuchMapperHasBeenSet()
-        throws JsonProcessingException, IntrospectionException {
+        throws JsonProcessingException {
         final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT);
         EventHandlerTestClass handler = new EventHandlerTestClass(dtoObjectMapper);
         ObjectNode objectNode = sendEventAndCollectOutputAsJsonObject(input, handler);
@@ -86,18 +84,9 @@ public class EventHandlerTest extends AbstractEventHandlerTest {
 
     @Test
     public void handleRequestSerializesObjectsOmittingEmptyValuesWhenSuchMapperHasBeenSet()
-        throws JsonProcessingException, IntrospectionException {
+        throws JsonProcessingException {
         final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT);
         EventHandlerTestClass handler = new EventHandlerTestClass(dynamoObjectMapper);
-        ObjectNode objectNode = sendEventAndCollectOutputAsJsonObject(input, handler);
-        assertThatJsonNodeDoesNotContainEmptyFields(objectNode);
-    }
-
-    @Test
-    public void handleRequestSerializesObjectsOmittingEmptyValuesByDefault()
-        throws JsonProcessingException, IntrospectionException {
-        final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT);
-        EventHandlerTestClass handler = new EventHandlerTestClass();
         ObjectNode objectNode = sendEventAndCollectOutputAsJsonObject(input, handler);
         assertThatJsonNodeDoesNotContainEmptyFields(objectNode);
     }
