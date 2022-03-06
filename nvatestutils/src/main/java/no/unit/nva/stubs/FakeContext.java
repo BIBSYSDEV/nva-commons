@@ -11,6 +11,7 @@ import nva.commons.core.JacocoGenerated;
 public class FakeContext implements Context {
 
     private final String awsRequestId = UUID.randomUUID().toString();
+    private final LambdaLogger logger = new TestLogger();
 
     @Override
     public String getAwsRequestId() {
@@ -62,8 +63,9 @@ public class FakeContext implements Context {
         throw new UnsupportedOperationException();
     }
 
+    @JacocoGenerated
     @Override
     public LambdaLogger getLogger() {
-        throw new UnsupportedOperationException();
+        return logger;
     }
 }

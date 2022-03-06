@@ -4,16 +4,16 @@ plugins {
 }
 
 dependencies {
-    api libs.aws.lambda.core
+    implementation libs.aws.lambda.core
 
     implementation project(":core")
-//
+
     implementation libs.guava
-    implementation libs.bundles.logging
     implementation libs.aws.lambda.events
     implementation libs.zalando
     implementation libs.jackson.jr.objects
 
+    testImplementation libs.bundles.logging
     testImplementation libs.jackson.jr.stree
     testImplementation libs.bundles.testing
     testImplementation project(":logutils")

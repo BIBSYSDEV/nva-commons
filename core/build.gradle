@@ -4,13 +4,15 @@ plugins {
 }
 
 dependencies {
-    implementation  libs.bundles.logging
+    implementation  libs.slf4j.api
 
     compileOnly libs.jackson.annotations
+    testImplementation libs.bundles.logging
     testImplementation libs.bundles.testing
     testImplementation libs.bundles.jackson
     testImplementation project (":nvatestutils")
     testImplementation project(":logutils")
+
 }
 
 test {

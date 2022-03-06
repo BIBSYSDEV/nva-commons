@@ -16,6 +16,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.hamcrest.core.StringContains.containsStringIgnoringCase;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import com.amazonaws.services.lambda.runtime.Context;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.management.modelmbean.XMLParseException;
 import no.unit.nva.stubs.FakeContext;
+import no.unit.nva.stubs.TestLogger;
 import nva.commons.apigatewayv2.exceptions.ApiGatewayException;
 import nva.commons.apigatewayv2.exceptions.TestException;
 import nva.commons.apigatewayv2.exceptions.UnsupportedAcceptHeaderException;
@@ -53,7 +55,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.zalando.problem.Status;
 
-public class ApiGatewayHandlerV2Test {
+class ApiGatewayHandlerV2Test {
 
     public static final String TOP_EXCEPTION_MESSAGE = "TOP Exception";
     public static final String MIDDLE_EXCEPTION_MESSAGE = "MIDDLE Exception";
@@ -65,12 +67,15 @@ public class ApiGatewayHandlerV2Test {
     private Context context;
     private HandlerV2 handler;
 
+
     /**
      * Setup.
      */
     @BeforeEach
     public void setup() {
         context = mock(Context.class);
+        TestLogger testLogger = new TestLogger();
+        when(context.getLogger()).thenReturn(testLogger);
         when(context.getAwsRequestId()).thenReturn(SOME_REQUEST_ID);
         handler = new HandlerV2();
     }
@@ -272,11 +277,11 @@ public class ApiGatewayHandlerV2Test {
 
     @Test
     void handlerLogsRequestIdForEveryRequest() {
-        var appender = LogUtils.getTestingAppender(ApiGatewayHandlerV2.class);
+        var appender = LogUtils.getTestingAppenderForRootLogger();
         var contextWithRequestId = new FakeContext();
         var expectedRequestId = contextWithRequestId.getAwsRequestId();
         handler.handleRequest(requestWithHeadersAndPath(), contextWithRequestId);
-        assertThat(appender.getMessages(), containsString(expectedRequestId));
+        assertThat(appender.getMessages(), containsStringIgnoringCase(expectedRequestId));
     }
 
     @Test
