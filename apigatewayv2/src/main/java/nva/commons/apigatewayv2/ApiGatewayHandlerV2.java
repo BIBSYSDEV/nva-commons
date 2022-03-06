@@ -6,6 +6,7 @@ import static nva.commons.apigatewayv2.MediaTypes.DEFAULT_MEDIA_TYPE;
 import static nva.commons.apigatewayv2.MediaTypes.DEFAULT_SUPPORTED_MEDIA_TYPES;
 import static nva.commons.core.attempt.Try.attempt;
 import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
@@ -24,8 +25,6 @@ import nva.commons.apigatewayv2.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
 import nva.commons.core.attempt.Try;
 import nva.commons.core.exceptions.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 import org.zalando.problem.ThrowableProblem;
@@ -36,7 +35,7 @@ public abstract class ApiGatewayHandlerV2<I, O>
     public static final String REQUEST_ID = "RequestId";
     public static final String INTERNAL_ERROR_MESSAGE = "Internal error";
     private static final String ALLOWED_ORIGIN = new Environment().readEnv("ALLOWED_ORIGIN");
-    private static final Logger logger = LoggerFactory.getLogger(ApiGatewayHandlerV2.class);
+
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
 
     protected ApiGatewayHandlerV2() {
@@ -45,19 +44,24 @@ public abstract class ApiGatewayHandlerV2<I, O>
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
+        LambdaLogger logger = context.getLogger();
         try {
-            logger.info("{}:{}", REQUEST_ID, context.getAwsRequestId());
+            logger.log(logRequestId(context));
             var output = processInput(input.getBody(), input, context);
             return createSuccessfulResponse(input, output);
         } catch (ApiGatewayException exception) {
-            logger.error(ExceptionUtils.stackTraceInSingleLine(exception));
+            logger.log(ExceptionUtils.stackTraceInSingleLine(exception));
             var problem = createProblem(exception.getMessage(), exception.getStatusCode(), context);
             return problemToApiGatewayResponse(problem, exception);
         } catch (Exception exception) {
-            logger.error(ExceptionUtils.stackTraceInSingleLine(exception));
+            logger.log(ExceptionUtils.stackTraceInSingleLine(exception));
             var problem = createProblem(INTERNAL_ERROR_MESSAGE, HTTP_INTERNAL_ERROR, context);
             return problemToApiGatewayResponse(problem, exception);
         }
+    }
+
+    private String logRequestId(Context context) {
+        return String.format("%s:%S", REQUEST_ID, context.getAwsRequestId());
     }
 
     protected void addAdditionalSuccessHeaders(Supplier<Map<String, String>> additionalHeaders) {
