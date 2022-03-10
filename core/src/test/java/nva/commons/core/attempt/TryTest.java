@@ -109,7 +109,8 @@ public class TryTest {
     @Test
     public void orElseThrowsSpecifiedExceptionWhenUncheckedExceptionIsThrown() {
         Executable action = () ->
-            attempt(() -> throwUnCheckedException("Some message")).orElseThrow(fail -> new TestException());
+                                attempt(() -> throwUnCheckedException("Some message")).orElseThrow(
+                                    fail -> new TestException());
         assertThrows(TestException.class, action);
     }
 
@@ -139,6 +140,27 @@ public class TryTest {
 
         assertTrue(actual.isFailure());
         assertThat(actual.getException().getMessage(), is(IsEqual.equalTo(EXCEPTION_MESSAGE)));
+    }
+
+    @Test
+    void shouldReturnFistSuccessWhenOrIsCalled() {
+        var firstSucceeds = attempt(() -> divide(1, 1))
+            .or(() -> divide(2, 1))
+            .or(() -> divide(3, 1))
+            .orElseThrow();
+        assertThat(firstSucceeds, is(equalTo(1)));
+
+        var middleSucceeds = attempt(() -> divide(1, 0))
+            .or(() -> divide(2, 1))
+            .or(() -> divide(3, 1))
+            .orElseThrow();
+        assertThat(middleSucceeds, is(equalTo(2)));
+
+        var finalSucceeds = attempt(() -> divide(1, 0))
+            .or(() -> divide(2, 0))
+            .or(() -> divide(3, 1))
+            .orElseThrow();
+        assertThat(finalSucceeds, is(equalTo(3)));
     }
 
     private int divide(int x, int y) throws IllegalArgumentException {
