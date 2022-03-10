@@ -19,11 +19,11 @@ import org.junit.jupiter.api.function.Executable;
 
 public class TryTest {
 
+    public static final int PROVOKE_ERROR = 0;
     private static final String SOME_STRING = "SomeString";
     private static final String EXCEPTION_MESSAGE = "ExceptionMessage";
     private static final ArithmeticException SAMPLE_UNCHECKED_EXCEPTION = new ArithmeticException(EXCEPTION_MESSAGE);
     private static final Map<Integer, String> numbers;
-    public static final int PROVOKE_ERROR = 0;
 
     static {
         numbers = new HashMap<>();
@@ -109,9 +109,8 @@ public class TryTest {
 
     @Test
     public void orElseThrowsSpecifiedExceptionWhenUncheckedExceptionIsThrown() {
-        Executable action = () ->
-                                attempt(() -> throwUnCheckedException("Some message")).orElseThrow(
-                                    fail -> new TestException());
+        Executable action = () -> attempt(() -> throwUnCheckedException("Some message"))
+            .orElseThrow(fail -> new TestException());
         assertThrows(TestException.class, action);
     }
 
