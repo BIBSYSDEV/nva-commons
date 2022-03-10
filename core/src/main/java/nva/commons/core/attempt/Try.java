@@ -85,5 +85,6 @@ public abstract class Try<T> {
 
     public abstract Optional<T> toOptional();
 
+    @SuppressWarnings("PMD.ShortMethodName")
     public abstract Try<T> or(Callable<T> action);
 }
