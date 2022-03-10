@@ -2,6 +2,7 @@ package nva.commons.core.attempt;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -82,9 +83,15 @@ public class Success<T> extends Try<T> {
         return Optional.ofNullable(value);
     }
 
+    @Override
+    @SuppressWarnings("PMD.ShortMethodName")
+    public Try<T> or(Callable<T> action) {
+        return this;
+    }
+
     /**
-     * A wrapper for consumers that throw checked Exceptions.
-     * See "https://www.oreilly.com/content/handling-checked-exceptions-in-java-streams/"
+     * A wrapper for consumers that throw checked Exceptions. See "https://www.oreilly
+     * .com/content/handling-checked-exceptions-in-java-streams/"
      * Try to perform the action. Any exception will be enclosed in a Failure.
      *
      * @param action a {@link Consumer} action that throws or does not throw a checked Exception
