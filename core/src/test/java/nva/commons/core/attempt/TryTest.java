@@ -23,6 +23,7 @@ public class TryTest {
     private static final String EXCEPTION_MESSAGE = "ExceptionMessage";
     private static final ArithmeticException SAMPLE_UNCHECKED_EXCEPTION = new ArithmeticException(EXCEPTION_MESSAGE);
     private static final Map<Integer, String> numbers;
+    public static final int PROVOKE_ERROR = 0;
 
     static {
         numbers = new HashMap<>();
@@ -150,14 +151,14 @@ public class TryTest {
             .orElseThrow();
         assertThat(firstSucceeds, is(equalTo(1)));
 
-        var middleSucceeds = attempt(() -> divide(1, 0))
+        var middleSucceeds = attempt(() -> divide(1, PROVOKE_ERROR))
             .or(() -> divide(2, 1))
             .or(() -> divide(3, 1))
             .orElseThrow();
         assertThat(middleSucceeds, is(equalTo(2)));
 
-        var finalSucceeds = attempt(() -> divide(1, 0))
-            .or(() -> divide(2, 0))
+        var finalSucceeds = attempt(() -> divide(1, PROVOKE_ERROR))
+            .or(() -> divide(2, PROVOKE_ERROR))
             .or(() -> divide(3, 1))
             .orElseThrow();
         assertThat(finalSucceeds, is(equalTo(3)));
