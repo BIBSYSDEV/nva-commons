@@ -150,7 +150,7 @@ class UnixPathTest {
     })
     void getFilenameReturnsTheLastElementOfaUnixPath(String inputPath, String expectedFilename) {
         UnixPath unixPath = UnixPath.of(inputPath);
-        assertThat(unixPath.getFilename(), is(equalTo(expectedFilename)));
+        assertThat(unixPath.getLastPathElement(), is(equalTo(expectedFilename)));
     }
 
     @Test

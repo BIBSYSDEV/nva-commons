@@ -88,7 +88,7 @@ class UriWrapperTest {
         String filePath = String.join(UnixPath.PATH_DELIMITER, "parent1", "parent2", expectedFilename);
         URI s3Uri = URI.create("s3://somebucket" + ROOT + filePath);
         UriWrapper wrapper = new UriWrapper(s3Uri);
-        assertThat(wrapper.getFilename(), is(equalTo(expectedFilename)));
+        assertThat(wrapper.getLastPathElement(), is(equalTo(expectedFilename)));
     }
 
     @Test

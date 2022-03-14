@@ -106,7 +106,7 @@ class DoiTest {
     void shouldReturnExpectedUriWhenCustomHostPrefixAndSuffixAreSupplied() {
         var host = randomString();
         var prefix = UnixPath.of(randomDoi().getPath()).removeRoot().getParent().orElseThrow().toString();
-        var suffix = UnixPath.of(randomDoi().getPath()).getFilename();
+        var suffix = UnixPath.of(randomDoi().getPath()).getLastPathElement();
         var expectedUri = URI.create(String.format("https://%s/%s/%s", host, prefix, suffix));
         var actualUri = Doi.fromPrefixAndSuffix(host, prefix, suffix).getUri();
         assertThat(actualUri, is(equalTo(expectedUri)));

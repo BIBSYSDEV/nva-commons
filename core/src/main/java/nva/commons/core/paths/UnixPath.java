@@ -98,8 +98,14 @@ public final class UnixPath {
         return UnixPath.of(newPathArray.toArray(String[]::new));
     }
 
-    public String getFilename() {
+    public String getLastPathElement() {
         return path.get(lastPathElementIndex());
+    }
+
+    @Deprecated(since = "getLastPathElement was introduced")
+    @JacocoGenerated
+    public String getFilename() {
+        return getLastPathElement();
     }
 
     public UnixPath addRoot() {

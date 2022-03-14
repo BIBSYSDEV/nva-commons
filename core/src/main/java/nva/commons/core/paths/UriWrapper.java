@@ -119,8 +119,18 @@ public class UriWrapper {
             .map(UriWrapper::new);
     }
 
+    public String getLastPathElement() {
+        return getPath().getLastPathElement();
+    }
+
+    /**
+     * @return the last path element of the uri.
+     * @deprecated User getLastPathElement
+     */
+    @Deprecated(since = "getLastPathElement was introduced")
+    @JacocoGenerated
     public String getFilename() {
-        return getPath().getFilename();
+        return getLastPathElement();
     }
 
     public UriWrapper addQueryParameter(String param, String value) {
