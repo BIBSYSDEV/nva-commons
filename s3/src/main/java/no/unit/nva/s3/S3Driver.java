@@ -92,7 +92,7 @@ public class S3Driver {
      * @throws IOException when compression fails.
      */
     public URI insertFile(UnixPath fullPath, String content) throws IOException {
-        if (fullPath.getFilename().endsWith(GZIP_ENDING)) {
+        if (fullPath.getLastPathElement().endsWith(GZIP_ENDING)) {
             insertCompressedFile(fullPath, content);
         } else {
             insertUncompressedFile(fullPath, content);
@@ -206,7 +206,7 @@ public class S3Driver {
     }
 
     public String getFile(UnixPath filename) {
-        if (isCompressed(filename.getFilename())) {
+        if (isCompressed(filename.getLastPathElement())) {
             return attempt(() -> getCompressedFile(filename))
                 .map(this::readCompressedStream)
                 .orElseThrow();
