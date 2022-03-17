@@ -77,7 +77,7 @@ class UriWrapperTest {
     void toS3BucketPathReturnsPathWithoutRoot() {
         String expectedPath = "parent1/parent2/filename.txt";
         URI s3Uri = URI.create("s3://somebucket" + ROOT + expectedPath);
-        UriWrapper wrapper = new UriWrapper(s3Uri);
+        UriWrapper wrapper = UriWrapper.fromUri(s3Uri);
         UnixPath s3Path = wrapper.toS3bucketPath();
         assertThat(s3Path.toString(), is(equalTo(expectedPath)));
     }
@@ -87,7 +87,7 @@ class UriWrapperTest {
         String expectedFilename = "filename.txt";
         String filePath = String.join(UnixPath.PATH_DELIMITER, "parent1", "parent2", expectedFilename);
         URI s3Uri = URI.create("s3://somebucket" + ROOT + filePath);
-        UriWrapper wrapper = new UriWrapper(s3Uri);
+        UriWrapper wrapper = UriWrapper.fromUri(s3Uri);
         assertThat(wrapper.getLastPathElement(), is(equalTo(expectedFilename)));
     }
 
@@ -101,7 +101,7 @@ class UriWrapperTest {
     void shouldReturnUriWithQueryParametersWhenSingleQueryParameterIsPresent() {
         URI expectedUri = URI.create("https://www.example.org/path1/path2?key1=value1");
         URI uri = URI.create("https://www.example.org/");
-        URI actualUri = new UriWrapper(uri)
+        URI actualUri = UriWrapper.fromUri(uri)
             .addChild("path1")
             .addQueryParameter("key1", "value1")
             .addChild("path2")
@@ -113,7 +113,7 @@ class UriWrapperTest {
     void shouldPreservePortWhenAddingPathAndQueryPapametersInUri() {
         var expectedUri = URI.create("https://www.example.org:1234/path1/path2?key1=value1");
         var host = URI.create("https://www.example.org:1234");
-        var actualUri = new UriWrapper(host)
+        var actualUri = UriWrapper.fromUri(host)
             .addChild("path1")
             .addQueryParameter("key1", "value1")
             .addChild("path2")
@@ -125,7 +125,7 @@ class UriWrapperTest {
     void shouldReturnUriWithQueryParametersWhenManyQueryParametersArePresent() {
         URI expectedUri = URI.create("https://www.example.org/path1/path2?key1=value1&key2=value2");
         URI uri = URI.create("https://www.example.org/");
-        URI actualUri = new UriWrapper(uri)
+        URI actualUri = UriWrapper.fromUri(uri)
             .addChild("path1")
             .addQueryParameter("key1", "value1")
             .addQueryParameter("key2", "value2")
@@ -139,7 +139,7 @@ class UriWrapperTest {
         URI expectedUri = URI.create("https://www.example.org/path1/path2?key1=value1&key2=value2&key3=value3");
         URI uri = URI.create("https://www.example.org/");
         final Map<String, String> parameters = getOrderedParametersMap();
-        URI actualUri = new UriWrapper(uri)
+        URI actualUri = UriWrapper.fromUri(uri)
             .addChild("path1")
             .addQueryParameters(parameters)
             .addChild("path2")
