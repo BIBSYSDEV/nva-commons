@@ -25,6 +25,8 @@ public class UriWrapper {
     private static final int DEFAULT_PORT = -1;
     private final URI uri;
 
+    @JacocoGenerated
+    @Deprecated(forRemoval = true)
     public UriWrapper(URI uri) {
         if (isNull(uri)) {
             throw new IllegalArgumentException(NULL_INPUT_ERROR);
@@ -44,6 +46,10 @@ public class UriWrapper {
 
     public UriWrapper(String scheme, String host) {
         this(createUriWithSchemeAndHost(scheme, host, DEFAULT_PORT));
+    }
+
+    public static UriWrapper fromUri(URI uri) {
+        return new UriWrapper(uri);
     }
 
     public static UriWrapper fromUri(String uri) {
