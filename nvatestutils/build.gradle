@@ -7,12 +7,18 @@ dependencies {
     implementation project(":core")
     implementation project(":eventhandlers")
     implementation project(":json")
+    implementation project(":auth")
 
     implementation libs.bundles.testing
     implementation libs.httpmime
 
     implementation libs.aws.sdk2.s3
     implementation libs.aws.sdk2.eventbridge
+    implementation libs.aws.sdk2.cognitoidp
+
+    implementation libs.guava
+    implementation libs.wiremock
+
 
     implementation libs.bundles.jackson
     implementation libs.commons.validator

@@ -1,7 +1,6 @@
 package nva.commons.apigateway;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static java.util.function.Predicate.not;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
@@ -11,20 +10,28 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.net.HttpHeaders;
 import java.net.URI;
+import java.net.http.HttpClient;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import no.unit.nva.auth.FetchUserInfo;
+import no.unit.nva.auth.UserInfo;
 import nva.commons.apigateway.exceptions.BadRequestException;
+import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
+import nva.commons.core.attempt.Try;
 import nva.commons.core.paths.UriWrapper;
 
 public class RequestInfo {
 
+    public static final Environment ENVIRONMENT = new Environment();
     public static final String QUERY_STRING_PARAMETERS_FIELD = "queryStringParameters";
     public static final String PATH_PARAMETERS_FIELD = "pathParameters";
     public static final String PATH_FIELD = "path";
@@ -38,15 +45,21 @@ public class RequestInfo {
     public static final String MISSING_FROM_PATH_PARAMETERS = "Missing from pathParameters: ";
     public static final String MISSING_FROM_REQUEST_CONTEXT = "Missing from requestContext: ";
 
-    public static final String COMMA_DELIMITER = ",";
+    public static final String ENTRIES_DELIMITER = ",";
     public static final String HTTPS = "https"; // Api Gateway only supports HTTPS
     public static final String DOMAIN_NAME_FIELD = "domainName";
+    public static final boolean USER_BY_DEFAULT_IS_DENIED_ACCESS = false;
     private static final String CLAIMS_PATH = "/authorizer/claims/";
     public static final JsonPointer FEIDE_ID = claimToJsonPointer("custom:feideId");
     public static final JsonPointer CUSTOMER_ID = claimToJsonPointer("custom:customerId");
     public static final JsonPointer APPLICATION_ROLES = claimToJsonPointer("custom:applicationRoles");
     public static final JsonPointer ACCESS_RIGHTS = claimToJsonPointer("custom:accessRights");
     public static final JsonPointer CUSTOMER_CRISTIN_ID = claimToJsonPointer("custom:cristinId");
+    private static final HttpClient DEFAULT_HTTP_CLIENT = HttpClient.newBuilder().build();
+    private static final URI DEFAULT_COGNITO_URI = URI.create(ENVIRONMENT.readEnv("COGNITO_URI"));
+    private final transient HttpClient httpClient;
+    private final URI cognitoUri;
+
     @JsonProperty(HEADERS_FIELD)
     private Map<String, String> headers;
     @JsonProperty(PATH_FIELD)
@@ -62,15 +75,19 @@ public class RequestInfo {
     @JsonAnySetter
     private Map<String, Object> otherProperties;
 
-    /**
-     * Default constructor.
-     */
+    public RequestInfo(HttpClient httpClient, URI cognitoUri) {
+        this.httpClient = httpClient;
+        this.cognitoUri = cognitoUri;
+    }
+
     public RequestInfo() {
         this.headers = new HashMap<>();
         this.pathParameters = new HashMap<>();
         this.queryParameters = new HashMap<>();
         this.otherProperties = new LinkedHashMap<>(); // ordinary HashMap and ConcurrentHashMap fail.
         this.requestContext = defaultRestObjectMapper.createObjectNode();
+        this.httpClient = DEFAULT_HTTP_CLIENT;
+        this.cognitoUri = DEFAULT_COGNITO_URI;
     }
 
     @JsonIgnore
@@ -115,7 +132,7 @@ public class RequestInfo {
      */
     public Optional<String> getRequestContextParameterOpt(JsonPointer jsonPointer) {
         return Optional.ofNullable(getRequestContext())
-            .map(requestContext -> requestContext.at(jsonPointer))
+            .map(context -> context.at(jsonPointer))
             .filter(not(JsonNode::isMissingNode))
             .filter(not(JsonNode::isNull))
             .map(JsonNode::asText);
@@ -210,12 +227,19 @@ public class RequestInfo {
 
     @JsonIgnore
     public Optional<String> getFeideId() {
-        return this.getRequestContextParameterOpt(FEIDE_ID);
+        return this.getRequestContextParameterOpt(FEIDE_ID)
+            .or(this::fetchFeideIdFromAuthServer);
+    }
+
+    public boolean userIsAuthorized(String accessRight, URI usersCustomer) {
+        return checkAuthorizationOffline(accessRight, usersCustomer)
+               || checkAuthorizationOnline(accessRight, usersCustomer);
     }
 
     @JsonIgnore
     public Optional<String> getCustomerId() {
-        return getRequestContextParameterOpt(CUSTOMER_ID);
+        return getRequestContextParameterOpt(CUSTOMER_ID)
+            .or(this::fetchCustomerIdFromCognito);
     }
 
     @JsonIgnore
@@ -228,22 +252,56 @@ public class RequestInfo {
         return getRequestContextParameterOpt(APPLICATION_ROLES);
     }
 
+    private static JsonPointer claimToJsonPointer(String claim) {
+        return JsonPointer.compile(CLAIMS_PATH + claim);
+    }
+
+    private boolean checkAuthorizationOffline(String accessRight, URI usersCustomer) {
+        return getCustomerId().stream().anyMatch(customerId -> customerId.equals(usersCustomer.toString()))
+               && getAccessRights().stream()
+                   .anyMatch(assignedAccessRight -> assignedAccessRight.equalsIgnoreCase(accessRight));
+    }
+
+    private Boolean checkAuthorizationOnline(String accessRight, URI usersCustomer) {
+        var requestedAccessRight = accessRight + "@" + usersCustomer.toString();
+        return fetchUserInfoFromCognito()
+            .map(UserInfo::getAccessRights)
+            .map(accessRights -> accessRights.toLowerCase(Locale.getDefault()))
+            .map(accessRights -> accessRights.contains(requestedAccessRight.toLowerCase(Locale.getDefault())))
+            .orElse(fail -> USER_BY_DEFAULT_IS_DENIED_ACCESS);
+    }
+
+    private Optional<String> fetchFeideIdFromAuthServer() {
+        var result = fetchUserInfoFromCognito()
+            .map(UserInfo::getFeideId)
+            .orElseThrow();
+        return Optional.of(result);
+    }
+
+    private Try<UserInfo> fetchUserInfoFromCognito() {
+        return attempt(() -> new FetchUserInfo(httpClient, cognitoUri, extractAuthorizationHeader()))
+            .map(FetchUserInfo::fetch);
+    }
+
+    private String extractAuthorizationHeader() {
+        return this.getHeader(HttpHeaders.AUTHORIZATION);
+    }
+
+    private Optional<String> fetchCustomerIdFromCognito() {
+        return fetchUserInfoFromCognito()
+            .toOptional()
+            .map(UserInfo::getCurrentCustomer)
+            .map(URI::toString);
+    }
+
     @JsonIgnore
-    public Set<String> getAccessRights() {
+    private Set<String> getAccessRights() {
         return getRequestContextParameterOpt(ACCESS_RIGHTS)
             .stream()
             .filter(not(String::isBlank))
-            .map(accessRightsStr -> accessRightsStr.split(COMMA_DELIMITER))
+            .map(accessRightsStr -> accessRightsStr.split(ENTRIES_DELIMITER))
             .flatMap(Arrays::stream)
             .collect(Collectors.toSet());
-    }
-
-    public boolean userHasAccessRight(String accessRight) {
-        return nonNull(getAccessRights()) && this.getAccessRights().contains(accessRight);
-    }
-
-    private static JsonPointer claimToJsonPointer(String claim) {
-        return JsonPointer.compile(CLAIMS_PATH + claim);
     }
 
     private <K, V> Map<K, V> nonNullMap(Map<K, V> map) {
