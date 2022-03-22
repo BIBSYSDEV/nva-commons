@@ -11,7 +11,6 @@ import static nva.commons.apigateway.RequestInfo.REQUEST_CONTEXT_FIELD;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,14 +57,11 @@ class RequestInfoTest {
     public static final int UNNECESSARY_ROOT_NODE = 0;
     public static final int FIRST_NODE = 0;
 
-    public static final URI HARDCODED_URI_IN_RESOURCE_FILE =
-        URI.create("https://example.org/someArbitrayCristinId234567890876545688");
     public static final String DOMAIN_NAME_FOUND_IN_RESOURCE_FILE = "id.execute-api.us-east-1.amazonaws.com";
     public static final String PATH_FOUND_IN_RESOURCE_FILE = "my/path";
     public static final Map<String, String> QUERY_PARAMS_FOUND_IN_RESOURCE_FILE;
     public static final String AT = "@";
     private static final String API_GATEWAY_MESSAGES_FOLDER = "apiGatewayMessages";
-    public static final Path EVENT_WITH_CRISTIN_ID = Path.of(API_GATEWAY_MESSAGES_FOLDER, "event_with_cristin_id.json");
 
     private static final Path NULL_VALUES_FOR_MAPS = Path.of(API_GATEWAY_MESSAGES_FOLDER,
                                                              "mapParametersAreNull.json");
@@ -327,15 +323,6 @@ class RequestInfoTest {
             .getUri();
 
         assertThat(requestUri, is(equalTo(expectedRequestUri)));
-    }
-
-    @Test
-    void shouldReturnCustomerCristinIdFromRequestInfo() throws ApiIoException {
-        var requestInfo = extractRequestInfoFromApiGatewayEvent(EVENT_WITH_CRISTIN_ID);
-        var cristinId = requestInfo.getCustomerCristinId().orElseThrow();
-
-        assertThat(cristinId, is(instanceOf(URI.class)));
-        assertThat(cristinId, is(equalTo(HARDCODED_URI_IN_RESOURCE_FILE)));
     }
 
     private RequestInfo createRequestInfoWithAccessToken() {

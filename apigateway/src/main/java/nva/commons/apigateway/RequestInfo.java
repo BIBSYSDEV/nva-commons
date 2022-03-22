@@ -49,6 +49,7 @@ public class RequestInfo {
     public static final String HTTPS = "https"; // Api Gateway only supports HTTPS
     public static final String DOMAIN_NAME_FIELD = "domainName";
     public static final boolean USER_BY_DEFAULT_IS_DENIED_ACCESS = false;
+    public static final String AT = "@";
     private static final String CLAIMS_PATH = "/authorizer/claims/";
     public static final JsonPointer FEIDE_ID = claimToJsonPointer("custom:feideId");
     public static final JsonPointer CUSTOMER_ID = claimToJsonPointer("custom:customerId");
@@ -57,7 +58,7 @@ public class RequestInfo {
     public static final JsonPointer CUSTOMER_CRISTIN_ID = claimToJsonPointer("custom:cristinId");
     private static final HttpClient DEFAULT_HTTP_CLIENT = HttpClient.newBuilder().build();
     private static final URI DEFAULT_COGNITO_URI = URI.create(ENVIRONMENT.readEnv("COGNITO_URI"));
-    private final transient HttpClient httpClient;
+    private final HttpClient httpClient;
     private final URI cognitoUri;
 
     @JsonProperty(HEADERS_FIELD)
@@ -227,8 +228,11 @@ public class RequestInfo {
 
     @JsonIgnore
     public Optional<String> getFeideId() {
-        return this.getRequestContextParameterOpt(FEIDE_ID)
-            .or(this::fetchFeideIdFromAuthServer);
+        return fetchFeideIdOffline().or(this::fetchFeideIdFromAuthServer);
+    }
+
+    private Optional<String> fetchFeideIdOffline() {
+        return this.getRequestContextParameterOpt(FEIDE_ID);
     }
 
     public boolean userIsAuthorized(String accessRight, URI usersCustomer) {
@@ -240,11 +244,6 @@ public class RequestInfo {
     public Optional<String> getCustomerId() {
         return getRequestContextParameterOpt(CUSTOMER_ID)
             .or(this::fetchCustomerIdFromCognito);
-    }
-
-    @JsonIgnore
-    public Optional<URI> getCustomerCristinId() {
-        return getRequestContextParameterOpt(CUSTOMER_CRISTIN_ID).map(URI::create);
     }
 
     @JsonIgnore
@@ -263,7 +262,7 @@ public class RequestInfo {
     }
 
     private Boolean checkAuthorizationOnline(String accessRight, URI usersCustomer) {
-        var requestedAccessRight = accessRight + "@" + usersCustomer.toString();
+        var requestedAccessRight = accessRight + AT + usersCustomer.toString();
         return fetchUserInfoFromCognito()
             .map(UserInfo::getAccessRights)
             .map(accessRights -> accessRights.toLowerCase(Locale.getDefault()))
