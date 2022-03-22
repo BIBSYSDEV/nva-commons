@@ -195,7 +195,7 @@ class RequestInfoTest {
     @Test
     void shouldReturnCustomerIdWhenRequestDoesNotContainCustomerIdButHasAccessTokenAndCognitoUserHasSelectedCustomer() {
         var expectedCurrentCustomer = randomUri();
-        var cognitoUserEntry = CognitoUserInfo.builder().withCurrentCustomer(expectedCurrentCustomer).build();
+        var cognitoUserEntry = createCognitoUserEntry(expectedCurrentCustomer, null);
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
 
         RequestInfo requestInfo = createRequestInfoWithAccessToken();
@@ -210,13 +210,19 @@ class RequestInfoTest {
         var accessRightsForCustomer = accessRights.stream()
             .map(right -> right + AT + usersCustomer)
             .collect(Collectors.toSet());
-        var cognitoUserEntry = CognitoUserInfo.builder().withAccessRights(accessRightsForCustomer).build();
+        var cognitoUserEntry = createCognitoUserEntry(usersCustomer, accessRightsForCustomer);
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
         var requestInfo = createRequestInfoWithAccessToken();
         for (var accessRight : accessRights) {
-            var userIsAuthorized = requestInfo.userIsAuthorized(accessRight, usersCustomer);
+            var userIsAuthorized = requestInfo.userIsAuthorized(accessRight);
             assertThat(userIsAuthorized, is(true));
         }
+    }
+
+    private CognitoUserInfo createCognitoUserEntry(URI usersCustomer, Set<String> accessRightsForCustomer) {
+        return CognitoUserInfo.builder()
+            .withCurrentCustomer(usersCustomer)
+            .withAccessRights(accessRightsForCustomer).build();
     }
 
     @Test
@@ -231,7 +237,7 @@ class RequestInfoTest {
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
         var requestInfo = createRequestInfoWithAccessToken();
         var requestedAccessRight = randomString();
-        var userIsAuthorized = requestInfo.userIsAuthorized(requestedAccessRight, usersCustomer);
+        var userIsAuthorized = requestInfo.userIsAuthorized(requestedAccessRight);
         assertThat(userIsAuthorized, is(false));
     }
 
@@ -241,7 +247,7 @@ class RequestInfoTest {
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutAccessRights));
         var requestInfo = createRequestInfoWithAccessToken();
         var requestedAccessRight = randomString();
-        var userIsAuthorized = requestInfo.userIsAuthorized(requestedAccessRight, randomUri());
+        var userIsAuthorized = requestInfo.userIsAuthorized(requestedAccessRight);
         assertThat(userIsAuthorized, is(false));
     }
 
@@ -251,7 +257,7 @@ class RequestInfoTest {
         var usersCustomer = randomUri();
         RequestInfo requestInfo = createRequestInfoForOfflineAuthorization(usersAccessRights, usersCustomer);
         for (var accessRight : usersAccessRights) {
-            assertThat(requestInfo.userIsAuthorized(accessRight, usersCustomer), is(true));
+            assertThat(requestInfo.userIsAuthorized(accessRight), is(true));
         }
     }
 
@@ -261,7 +267,7 @@ class RequestInfoTest {
         var usersCustomer = randomUri();
         var requestInfo = createRequestInfoForOfflineAuthorization(usersAccessRights, usersCustomer);
         var notAllocatedAccessRight = randomString();
-        assertThat(requestInfo.userIsAuthorized(notAllocatedAccessRight, usersCustomer), is(false));
+        assertThat(requestInfo.userIsAuthorized(notAllocatedAccessRight), is(false));
     }
 
     @Test
@@ -276,7 +282,7 @@ class RequestInfoTest {
         requestContext.set("authorizer", authorizerNode);
         requestInfo.setRequestContext(requestContext);
         var notAllocatedAccessRight = randomString();
-        assertThat(requestInfo.userIsAuthorized(notAllocatedAccessRight, usersCustomer), is(false));
+        assertThat(requestInfo.userIsAuthorized(notAllocatedAccessRight), is(false));
     }
 
     @Test

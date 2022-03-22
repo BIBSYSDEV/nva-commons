@@ -14,8 +14,10 @@ import com.google.common.net.HttpHeaders;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -231,13 +233,9 @@ public class RequestInfo {
         return fetchFeideIdOffline().or(this::fetchFeideIdFromAuthServer);
     }
 
-    private Optional<String> fetchFeideIdOffline() {
-        return this.getRequestContextParameterOpt(FEIDE_ID);
-    }
-
-    public boolean userIsAuthorized(String accessRight, URI usersCustomer) {
-        return checkAuthorizationOffline(accessRight, usersCustomer)
-               || checkAuthorizationOnline(accessRight, usersCustomer);
+    public boolean userIsAuthorized(String accessRight) {
+        return checkAuthorizationOffline(accessRight)
+               || checkAuthorizationOnline(accessRight);
     }
 
     @JsonIgnore
@@ -255,19 +253,32 @@ public class RequestInfo {
         return JsonPointer.compile(CLAIMS_PATH + claim);
     }
 
-    private boolean checkAuthorizationOffline(String accessRight, URI usersCustomer) {
-        return getCustomerId().stream().anyMatch(customerId -> customerId.equals(usersCustomer.toString()))
-               && getAccessRights().stream()
-                   .anyMatch(assignedAccessRight -> assignedAccessRight.equalsIgnoreCase(accessRight));
+    private Optional<String> fetchFeideIdOffline() {
+        return this.getRequestContextParameterOpt(FEIDE_ID);
     }
 
-    private Boolean checkAuthorizationOnline(String accessRight, URI usersCustomer) {
-        var requestedAccessRight = accessRight + AT + usersCustomer.toString();
+    private boolean checkAuthorizationOffline(String accessRight) {
+        return getAccessRights().stream()
+            .anyMatch(assignedAccessRight -> assignedAccessRight.equalsIgnoreCase(accessRight));
+    }
+
+    private Boolean checkAuthorizationOnline(String accessRight) {
+        var accessRightAtCustomer = fetchCustomerIdFromCognito()
+            .map(customer -> accessRight + AT + customer)
+            .map(requestedRight -> requestedRight.toLowerCase(Locale.getDefault()));
+
+        var availableRights = fetchAvailableRights();
+
+        return accessRightAtCustomer.map(availableRights::contains).orElse(false);
+    }
+
+    private List<String> fetchAvailableRights() {
         return fetchUserInfoFromCognito()
             .map(CognitoUserInfo::getAccessRights)
             .map(accessRights -> accessRights.toLowerCase(Locale.getDefault()))
-            .map(accessRights -> accessRights.contains(requestedAccessRight.toLowerCase(Locale.getDefault())))
-            .orElse(fail -> USER_BY_DEFAULT_IS_DENIED_ACCESS);
+            .map(accessRights -> accessRights.split(ENTRIES_DELIMITER))
+            .map(Arrays::asList)
+            .orElse(fail -> Collections.<String>emptyList());
     }
 
     private Optional<String> fetchFeideIdFromAuthServer() {

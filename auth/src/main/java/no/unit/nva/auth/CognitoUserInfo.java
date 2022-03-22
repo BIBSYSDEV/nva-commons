@@ -99,7 +99,10 @@ public class CognitoUserInfo {
         }
 
         public Builder withAccessRights(Set<String> accessRights) {
-            cognitoUserInfo.setAccessRights(String.join(ELEMENTS_DELIMITER, accessRights));
+            if (nonNull(accessRights)) {
+                cognitoUserInfo.setAccessRights(String.join(ELEMENTS_DELIMITER, accessRights));
+            }
+
             return this;
         }
     }
