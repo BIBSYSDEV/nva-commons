@@ -2,7 +2,6 @@ package nva.commons.apigateway;
 
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -44,9 +43,9 @@ public class GatewayResponse<T> implements Serializable {
     /**
      * Constructor for GatewayResponse.
      *
-     * @param body       body of response
-     * @param headers    http headers for response
-     * @param statusCode status code for response
+     * @param body         body of response
+     * @param headers      http headers for response
+     * @param statusCode   status code for response
      * @param objectMapper desired object mapper
      * @throws GatewayResponseSerializingException when serializing fails
      */
@@ -72,13 +71,13 @@ public class GatewayResponse<T> implements Serializable {
     public static <T> GatewayResponse<T> fromOutputStream(ByteArrayOutputStream outputStream, Class<T> className)
         throws JsonProcessingException {
         String json = outputStream.toString(StandardCharsets.UTF_8);
-        return fromString(json,className);
+        return fromString(json, className);
     }
 
     @Deprecated(forRemoval = true)
     @JacocoGenerated
     public static <T> GatewayResponse<T> fromOutputStream(ByteArrayOutputStream outputStream)
-            throws JsonProcessingException {
+        throws JsonProcessingException {
         String json = outputStream.toString(StandardCharsets.UTF_8);
         return fromString(json);
     }
@@ -94,13 +93,15 @@ public class GatewayResponse<T> implements Serializable {
     public static <T> GatewayResponse<T> fromString(String responseString, Class<T> className)
         throws JsonProcessingException {
 
-        return isString(className) ? constructGatewayResponseWithStringBody(responseString) : constructResponseWithJsonObjectBody(responseString);
+        return isString(className)
+                   ? constructGatewayResponseWithStringBody(responseString)
+                   : constructResponseWithJsonObjectBody(responseString);
     }
 
     @Deprecated(forRemoval = true)
     @JacocoGenerated
     public static <T> GatewayResponse<T> fromString(String responseString)
-            throws JsonProcessingException {
+        throws JsonProcessingException {
         return constructResponseWithJsonObjectBody(responseString);
     }
 
@@ -109,24 +110,24 @@ public class GatewayResponse<T> implements Serializable {
     }
 
     private static <T> GatewayResponse<T> constructResponseWithJsonObjectBody(String responseString)
-            throws JsonProcessingException {
+        throws JsonProcessingException {
         TypeReference<GatewayResponse<T>> typeref = new TypeReference<>() {
         };
         return defaultRestObjectMapper.readValue(responseString, typeref);
     }
 
     private static <T> GatewayResponse<T> constructGatewayResponseWithStringBody(String responseString)
-            throws JsonProcessingException {
+        throws JsonProcessingException {
         JsonNode jsonNode = defaultRestObjectMapper.readTree(responseString);
 
         String body = jsonNode.get("body").asText();
-        TypeReference<Map<String,String>> typeref = new TypeReference<>() {
+        TypeReference<Map<String, String>> typeref = new TypeReference<>() {
         };
         Map<String, String> headers = defaultRestObjectMapper.convertValue(jsonNode.get("headers"), typeref);
         int statusCode = jsonNode.get("statusCode").asInt();
 
         return (GatewayResponse<T>)
-                attempt(() -> new GatewayResponse(body, headers, statusCode, defaultRestObjectMapper)).orElseThrow();
+                   attempt(() -> new GatewayResponse(body, headers, statusCode, defaultRestObjectMapper)).orElseThrow();
     }
 
     public String getBody() {
