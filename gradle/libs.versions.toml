@@ -81,11 +81,7 @@ mockito-core = { group = 'org.mockito', name = 'mockito-core', version.ref = 'mo
 hamcrest-optional = { group = 'com.github.npathai', name = 'hamcrest-optional', version.ref = 'hamcrestOptional' }
 
 apiguardian = { group = 'org.apiguardian', name = 'apiguardian-api', version.ref = 'apiGuardian' }
-
-
 wiremock = { group = 'com.github.tomakehurst', name = 'wiremock', version.ref = 'wiremock' }
-
-
 
 [bundles]
 testing = ['mockito-core', 'hamcrest', 'hamcrest-core', 'junit-jupiter', 'junit-jupiter-api',
