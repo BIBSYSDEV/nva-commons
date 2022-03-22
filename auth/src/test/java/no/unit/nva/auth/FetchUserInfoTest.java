@@ -35,7 +35,7 @@ class FetchUserInfoTest {
     @Test
     void shouldReturnUserInfoWhenForAccessToken() {
         var accessToken = randomString();
-        var expectedUserInfo = UserInfo.builder().withCurrentCustomer(randomUri()).build();
+        var expectedUserInfo = CognitoUserInfo.builder().withCurrentCustomer(randomUri()).build();
         authServer.setUserBase(Map.of(accessToken, expectedUserInfo));
         var fetchUserInfo = new FetchUserInfo(httpClient, authServer.getServerUri(), bearerToken(accessToken));
         var actualUserInfo = fetchUserInfo.fetch();
@@ -45,7 +45,7 @@ class FetchUserInfoTest {
     @Test
     void shouldThrowExceptionWhenFailingToFetchUserInfo() {
         var accessToken = randomString();
-        var expectedUserInfo = UserInfo.builder().withCurrentCustomer(randomUri()).build();
+        var expectedUserInfo = CognitoUserInfo.builder().withCurrentCustomer(randomUri()).build();
         authServer.setUserBase(Map.of(accessToken, expectedUserInfo));
         String unexpectedToken = randomString();
         var fetchUserInfo = new FetchUserInfo(httpClient, authServer.getServerUri(), bearerToken(unexpectedToken));

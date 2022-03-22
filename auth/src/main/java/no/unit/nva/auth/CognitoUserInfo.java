@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.Set;
 import nva.commons.core.JacocoGenerated;
 
-public class UserInfo {
+public class CognitoUserInfo {
 
     public static final String ELEMENTS_DELIMITER = ",";
     public static final String EMPTY_STRING = "";
@@ -21,8 +21,8 @@ public class UserInfo {
         return new Builder();
     }
 
-    public static UserInfo fromString(String json) {
-        return JsonConfig.beanFrom(UserInfo.class, json);
+    public static CognitoUserInfo fromString(String json) {
+        return JsonConfig.beanFrom(CognitoUserInfo.class, json);
     }
 
     @JacocoGenerated
@@ -61,13 +61,13 @@ public class UserInfo {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof UserInfo)) {
+        if (!(o instanceof CognitoUserInfo)) {
             return false;
         }
-        UserInfo userInfo = (UserInfo) o;
-        return Objects.equals(getFeideId(), userInfo.getFeideId()) && Objects.equals(
-            getCurrentCustomer(), userInfo.getCurrentCustomer()) && Objects.equals(getAccessRights(),
-                                                                                   userInfo.getAccessRights());
+        CognitoUserInfo cognitoUserInfo = (CognitoUserInfo) o;
+        return Objects.equals(getFeideId(), cognitoUserInfo.getFeideId()) && Objects.equals(
+            getCurrentCustomer(), cognitoUserInfo.getCurrentCustomer()) && Objects.equals(getAccessRights(),
+                                                                                          cognitoUserInfo.getAccessRights());
     }
 
     @JacocoGenerated
@@ -78,28 +78,28 @@ public class UserInfo {
 
     public static final class Builder {
 
-        private final UserInfo userInfo;
+        private final CognitoUserInfo cognitoUserInfo;
 
         private Builder() {
-            userInfo = new UserInfo();
+            cognitoUserInfo = new CognitoUserInfo();
         }
 
         public Builder withFeideId(String feideId) {
-            userInfo.setFeideId(feideId);
+            cognitoUserInfo.setFeideId(feideId);
             return this;
         }
 
         public Builder withCurrentCustomer(URI currentCustomer) {
-            userInfo.setCurrentCustomer(currentCustomer);
+            cognitoUserInfo.setCurrentCustomer(currentCustomer);
             return this;
         }
 
-        public UserInfo build() {
-            return userInfo;
+        public CognitoUserInfo build() {
+            return cognitoUserInfo;
         }
 
         public Builder withAccessRights(Set<String> accessRights) {
-            userInfo.setAccessRights(String.join(ELEMENTS_DELIMITER, accessRights));
+            cognitoUserInfo.setAccessRights(String.join(ELEMENTS_DELIMITER, accessRights));
             return this;
         }
     }

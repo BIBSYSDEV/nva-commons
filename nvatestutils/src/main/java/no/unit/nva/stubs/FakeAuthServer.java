@@ -13,7 +13,7 @@ import com.google.common.net.HttpHeaders;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.Map;
-import no.unit.nva.auth.UserInfo;
+import no.unit.nva.auth.CognitoUserInfo;
 import no.unit.nva.commons.json.JsonUtils;
 
 public class FakeAuthServer {
@@ -22,7 +22,7 @@ public class FakeAuthServer {
     public static final String HTTPS = "https";
     private WireMockServer httpServer;
     private URI serverUri;
-    private Map<String, UserInfo> accessTokenUserMap;
+    private Map<String, CognitoUserInfo> accessTokenUserMap;
 
     public FakeAuthServer() {
         initialize();
@@ -36,7 +36,7 @@ public class FakeAuthServer {
         return serverUri;
     }
 
-    public void setUserBase(Map<String, UserInfo> accessTokenToUserMap) {
+    public void setUserBase(Map<String, CognitoUserInfo> accessTokenToUserMap) {
         this.accessTokenUserMap = accessTokenToUserMap;
         accessTokenUserMap.keySet().forEach(this::stubEndpointForUserEntry);
     }

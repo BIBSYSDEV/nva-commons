@@ -21,8 +21,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import no.unit.nva.auth.CognitoUserInfo;
 import no.unit.nva.auth.FetchUserInfo;
-import no.unit.nva.auth.UserInfo;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
@@ -264,7 +264,7 @@ public class RequestInfo {
     private Boolean checkAuthorizationOnline(String accessRight, URI usersCustomer) {
         var requestedAccessRight = accessRight + AT + usersCustomer.toString();
         return fetchUserInfoFromCognito()
-            .map(UserInfo::getAccessRights)
+            .map(CognitoUserInfo::getAccessRights)
             .map(accessRights -> accessRights.toLowerCase(Locale.getDefault()))
             .map(accessRights -> accessRights.contains(requestedAccessRight.toLowerCase(Locale.getDefault())))
             .orElse(fail -> USER_BY_DEFAULT_IS_DENIED_ACCESS);
@@ -272,12 +272,12 @@ public class RequestInfo {
 
     private Optional<String> fetchFeideIdFromAuthServer() {
         var result = fetchUserInfoFromCognito()
-            .map(UserInfo::getFeideId)
+            .map(CognitoUserInfo::getFeideId)
             .orElseThrow();
         return Optional.of(result);
     }
 
-    private Try<UserInfo> fetchUserInfoFromCognito() {
+    private Try<CognitoUserInfo> fetchUserInfoFromCognito() {
         return attempt(() -> new FetchUserInfo(httpClient, cognitoUri, extractAuthorizationHeader()))
             .map(FetchUserInfo::fetch);
     }
@@ -289,7 +289,7 @@ public class RequestInfo {
     private Optional<String> fetchCustomerIdFromCognito() {
         return fetchUserInfoFromCognito()
             .toOptional()
-            .map(UserInfo::getCurrentCustomer)
+            .map(CognitoUserInfo::getCurrentCustomer)
             .map(URI::toString);
     }
 

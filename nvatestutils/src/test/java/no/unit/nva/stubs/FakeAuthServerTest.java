@@ -13,7 +13,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import no.unit.nva.auth.UserInfo;
+import no.unit.nva.auth.CognitoUserInfo;
 import nva.commons.core.paths.UriWrapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +38,7 @@ class FakeAuthServerTest {
 
     @Test
     void shouldReturnUserInfoWhenReceivingGetUserInfoRequestWithAccessToken() throws IOException, InterruptedException {
-        var expectedUserInfo = UserInfo.builder().withCurrentCustomer(randomUri()).build();
+        var expectedUserInfo = CognitoUserInfo.builder().withCurrentCustomer(randomUri()).build();
         var userAccessToken = randomString();
         authServer.setUserBase(Map.of(userAccessToken, expectedUserInfo));
         var getUri = UriWrapper.fromUri(authServer.getServerUri()).addChild(OAUTH_USER_INFO_ENDPOINT).getUri();
@@ -47,7 +47,7 @@ class FakeAuthServerTest {
             .build();
         var response = httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
         assertThat(response.statusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
-        var actualUserInfo = UserInfo.fromString(response.body());
+        var actualUserInfo = CognitoUserInfo.fromString(response.body());
         assertThat(actualUserInfo, is(equalTo(expectedUserInfo)));
     }
 

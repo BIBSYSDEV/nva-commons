@@ -11,7 +11,7 @@ class UserInfoTest {
 
     @Test
     void builderContainsAllFields() {
-        var userInfo = UserInfo.builder()
+        var userInfo = CognitoUserInfo.builder()
             .withAccessRights(Set.of(randomString(), randomString()))
             .withFeideId(randomString())
             .withCurrentCustomer(randomUri())

@@ -23,7 +23,7 @@ public class FetchUserInfo {
         this.authorizationHeader = authorizationHeader;
     }
 
-    public UserInfo fetch() {
+    public CognitoUserInfo fetch() {
         var queryUri = UriWrapper.fromUri(cognitoUri).addChild(OAUTH_USER_INFO_ENDPOINT).getUri();
         var request = HttpRequest.newBuilder(queryUri)
             .header(AUTHORIZATION_HEADER, authorizationHeader)
@@ -31,7 +31,7 @@ public class FetchUserInfo {
             .build();
         return attempt(() -> httpClient.send(request, BodyHandlers.ofString()))
             .map(HttpResponse::body)
-            .map(UserInfo::fromString)
+            .map(CognitoUserInfo::fromString)
             .orElseThrow(fail -> handleFailure(fail.getException()));
     }
 

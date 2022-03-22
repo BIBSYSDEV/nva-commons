@@ -32,7 +32,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import no.unit.nva.auth.UserInfo;
+import no.unit.nva.auth.CognitoUserInfo;
 import no.unit.nva.stubs.FakeAuthServer;
 import no.unit.nva.stubs.WiremockHttpClient;
 import nva.commons.apigateway.exceptions.ApiIoException;
@@ -175,7 +175,7 @@ class RequestInfoTest {
     void shouldFetchFeideIdWhenRequestDoesNotContainFeideIdClaimButHasAccessTokenAndCognitoUserContainsFeideIdClaim() {
 
         var expectedFeideId = randomString();
-        var cognitoUserEntry = UserInfo.builder().withFeideId(expectedFeideId).build();
+        var cognitoUserEntry = CognitoUserInfo.builder().withFeideId(expectedFeideId).build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
 
         var requestInfo = createRequestInfoWithAccessToken();
@@ -195,7 +195,7 @@ class RequestInfoTest {
     @Test
     void shouldReturnCustomerIdWhenRequestDoesNotContainCustomerIdButHasAccessTokenAndCognitoUserHasSelectedCustomer() {
         var expectedCurrentCustomer = randomUri();
-        var cognitoUserEntry = UserInfo.builder().withCurrentCustomer(expectedCurrentCustomer).build();
+        var cognitoUserEntry = CognitoUserInfo.builder().withCurrentCustomer(expectedCurrentCustomer).build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
 
         RequestInfo requestInfo = createRequestInfoWithAccessToken();
@@ -210,7 +210,7 @@ class RequestInfoTest {
         var accessRightsForCustomer = accessRights.stream()
             .map(right -> right + AT + usersCustomer)
             .collect(Collectors.toSet());
-        var cognitoUserEntry = UserInfo.builder().withAccessRights(accessRightsForCustomer).build();
+        var cognitoUserEntry = CognitoUserInfo.builder().withAccessRights(accessRightsForCustomer).build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
         var requestInfo = createRequestInfoWithAccessToken();
         for (var accessRight : accessRights) {
@@ -226,7 +226,7 @@ class RequestInfoTest {
         var accessRightsForCustomer = accessRights.stream()
             .map(right -> right + AT + usersCustomer)
             .collect(Collectors.toSet());
-        var cognitoUserEntry = UserInfo.builder().withAccessRights(accessRightsForCustomer).build();
+        var cognitoUserEntry = CognitoUserInfo.builder().withAccessRights(accessRightsForCustomer).build();
 
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
         var requestInfo = createRequestInfoWithAccessToken();
@@ -237,7 +237,7 @@ class RequestInfoTest {
 
     @Test
     void shouldReturnThatUserDoesNotHaveAccessRightForSpecificCustomerWhenUserDoesNotHaveAnyAccessRights() {
-        var cognitoUserEntryWithoutAccessRights = UserInfo.builder().build();
+        var cognitoUserEntryWithoutAccessRights = CognitoUserInfo.builder().build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutAccessRights));
         var requestInfo = createRequestInfoWithAccessToken();
         var requestedAccessRight = randomString();
