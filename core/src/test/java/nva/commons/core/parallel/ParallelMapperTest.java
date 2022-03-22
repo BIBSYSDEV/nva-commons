@@ -60,7 +60,7 @@ class ParallelMapperTest {
     }
 
     @Test
-    public void parallelMapperThrowsNoExceptionForVeryLargeInputs() throws InterruptedException {
+    void parallelMapperThrowsNoExceptionForVeryLargeInputs() throws InterruptedException {
         List<Integer> input = sampleInputs(NUMBER_OF_INPUTS_WITH_TOTAL_FOOTPRINT_LARGER_THAN_AVAILABLE_MEMORY);
         ParallelMapper<Integer, String> mapper =
             new ParallelMapper<>(input, this::processingWithTemporarilyLargeFootPrint, 1);

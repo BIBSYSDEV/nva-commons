@@ -145,7 +145,7 @@ class S3DriverTest {
         String content = randomString();
         UnixPath someFolder = UnixPath.of("parent", "child1", "child2");
         URI fileLocation = s3Driver.insertEvent(someFolder, content);
-        String randomFilename = new UriWrapper(fileLocation).getLastPathElement();
+        String randomFilename = UriWrapper.fromUri(fileLocation).getLastPathElement();
         assertThat(fileLocation.getScheme(), is(equalTo(S3_SCHEME)));
         assertThat(fileLocation.getHost(), is(equalTo(SAMPLE_BUCKET)));
         assertThat(fileLocation.getPath(), is(equalTo("/parent/child1/child2/" + randomFilename)));
@@ -222,7 +222,7 @@ class S3DriverTest {
     }
 
     private UnixPath toS3Path(URI fileLocation) {
-        return new UriWrapper(fileLocation).toS3bucketPath();
+        return UriWrapper.fromUri(fileLocation).toS3bucketPath();
     }
 
     private String longText() {

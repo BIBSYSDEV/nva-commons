@@ -8,27 +8,19 @@ dependencies {
 
     implementation project(":core")
     implementation project(":json")
-    implementation project(":auth")
 
     implementation libs.guava
     implementation libs.bundles.logging
     implementation libs.aws.lambda.events
 
-    implementation libs.jackson.core
-    implementation libs.jackson.databind
-    implementation libs.jackson.annotations
-    implementation libs.jackson.datatype.jdk8
-    implementation libs.jackson.datatype.jsr310
-    implementation libs.jackson.datatype.problem
+    implementation libs.bundles.jacksonjr
 
     testImplementation libs.bundles.testing
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")
-    testImplementation libs.jackson.dataformat.xml
 }
 
 
 test{
-   environment "ALLOWED_ORIGIN", "*"
-    environment "COGNITO_URI", "https://cognito.com"
+
 }

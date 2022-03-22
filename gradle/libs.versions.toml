@@ -3,7 +3,7 @@ zalandoProblem = { strictly = '0.26.0' }
 lambdaLog4j = { strictly = '1.5.0' }
 guava = { strictly = '31.0.1-jre' }
 awsSdk = { strictly = '1.12.129' }
-awsSdk2 = { strictly = '2.17.105' }
+awsSdk2 = { strictly = '2.17.152' }
 awsLambdaEvents = { strictly = '3.11.0' }
 awsLambdaCore = { strictly = '1.2.1' }
 mockito = { strictly = '4.1.0' }
@@ -19,6 +19,7 @@ hamcrestOptional = { strictly = '2.0.0' }
 log4j = { strictly = '2.17.1' }
 slf4j = { strictly = '1.8.0-beta4' }
 apiGuardian = { strictly = '1.1.2' }
+wiremock = { strictly = '2.27.2' }
 
 
 [libraries]
@@ -36,6 +37,8 @@ aws-sdk2-s3 = { group = 'software.amazon.awssdk', name = 's3', version.ref = 'aw
 aws-sdk2-eventbridge = { group = 'software.amazon.awssdk', name = 'eventbridge', version.ref = 'awsSdk2' }
 aws-sdk2-urlconnection = { group = 'software.amazon.awssdk', name = 'url-connection-client', version.ref = 'awsSdk2' }
 aws-sdk2-dynamo = { group = 'software.amazon.awssdk', name = 'dynamodb', version.ref = 'awsSdk2' }
+aws-sdk2-cognitoidp = { group = 'software.amazon.awssdk', name = 'cognitoidentityprovider', version.ref = 'awsSdk2' }
+
 
 aws-http-client-spi = { group = 'software.amazon.awssdk', name = 'http-client-spi', version = 'awsSdk2' }
 aws-apache-client = { group = 'software.amazon.awssdk', name = 'apache-client', version.ref = 'awsSdk2' }
@@ -78,7 +81,7 @@ mockito-core = { group = 'org.mockito', name = 'mockito-core', version.ref = 'mo
 hamcrest-optional = { group = 'com.github.npathai', name = 'hamcrest-optional', version.ref = 'hamcrestOptional' }
 
 apiguardian = { group = 'org.apiguardian', name = 'apiguardian-api', version.ref = 'apiGuardian' }
-
+wiremock = { group = 'com.github.tomakehurst', name = 'wiremock', version.ref = 'wiremock' }
 
 [bundles]
 testing = ['mockito-core', 'hamcrest', 'hamcrest-core', 'junit-jupiter', 'junit-jupiter-api',
