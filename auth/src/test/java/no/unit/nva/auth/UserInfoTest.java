@@ -15,6 +15,7 @@ class UserInfoTest {
             .withAccessRights(Set.of(randomString(), randomString()))
             .withFeideId(randomString())
             .withCurrentCustomer(randomUri())
+            .withNvaUsername(randomString())
             .build();
         assertThat(userInfo, doesNotHaveEmptyValues());
     }
