@@ -31,7 +31,7 @@ public class HandlerRequestBuilder<T> {
     public static final String DELIMITER = System.lineSeparator();
     public static final String AUTHORIZER_NODE = "authorizer";
     public static final String CLAIMS_NODE = "claims";
-    public static final String FEIDE_ID_CLAIM = "custom:feideId";
+    public static final String NVA_USERNAME_CLAIM = "custom:nvaUsername";
     public static final String CUSTOMER_ID_CLAIM = "custom:customerId";
     public static final String APPLICATION_ROLES_CLAIM = "custom:applicationRoles";
     public static final String ACCESS_RIGHTS_CLAIM = "custom:accessRights";
@@ -158,9 +158,9 @@ public class HandlerRequestBuilder<T> {
         this.otherProperties = otherProperties;
     }
 
-    public HandlerRequestBuilder<T> withFeideId(String feideId) {
+    public HandlerRequestBuilder<T> withNvaUsername(String feideId) {
         ObjectNode claims = getOrCreateClaimsNode();
-        claims.put(FEIDE_ID_CLAIM, feideId);
+        claims.put(NVA_USERNAME_CLAIM, feideId);
         return this;
     }
 

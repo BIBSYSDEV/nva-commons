@@ -30,7 +30,8 @@ public class HandlerRequestBuilderTest {
     public static final String SOME_METHOD = "POST";
 
     // copy-pasted values to avoid circular dependencies.
-    public static final JsonPointer FEIDE_ID = JsonPointer.compile("/requestContext/authorizer/claims/custom:feideId");
+    public static final JsonPointer NVA_USERNAME =
+        JsonPointer.compile("/requestContext/authorizer/claims/custom:nvaUsername");
     public static final JsonPointer CUSTOMER_ID = JsonPointer.compile(
         "/requestContext/authorizer/claims/custom:customerId");
     public static final JsonPointer APPLICATION_ROLES =
@@ -118,10 +119,10 @@ public class HandlerRequestBuilderTest {
     public void buildReturnsRequestWithRequestContextWithFeideIdClaimWhenWithFeideId() throws JsonProcessingException {
         var expectedFeideId = "someFeide@id";
         InputStream requestStream = new HandlerRequestBuilder<String>(objectMapper)
-            .withFeideId(expectedFeideId)
+            .withNvaUsername(expectedFeideId)
             .build();
         JsonNode request = toJsonNode(requestStream);
-        String actualFeideId = request.at(FEIDE_ID).textValue();
+        String actualFeideId = request.at(NVA_USERNAME).textValue();
         assertThat(actualFeideId, is(equalTo(expectedFeideId)));
     }
 
@@ -157,13 +158,13 @@ public class HandlerRequestBuilderTest {
         var expectedApplicationRoles = "role1,role2";
 
         InputStream requestStream = new HandlerRequestBuilder<String>(objectMapper)
-            .withFeideId(expectedFeideId)
+            .withNvaUsername(expectedFeideId)
             .withCustomerId(expectedCustomerId)
             .withRoles(expectedApplicationRoles)
             .build();
         JsonNode request = toJsonNode(requestStream);
 
-        String actualFeideId = request.at(FEIDE_ID).textValue();
+        String actualFeideId = request.at(NVA_USERNAME).textValue();
         assertThat(actualFeideId, is(equalTo(expectedFeideId)));
 
         String actualCustomerId = request.at(CUSTOMER_ID).textValue();
