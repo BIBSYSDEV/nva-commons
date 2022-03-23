@@ -12,7 +12,7 @@ public class CognitoUserInfo {
     public static final String ELEMENTS_DELIMITER = ",";
     public static final String EMPTY_STRING = "";
     public static final String FEIDE_ID_CLAIM = "custom:feideId";
-    public static final String SELECTED_CUSTOMER_CLAIM = "custom:currentCustomer";
+    public static final String SELECTED_CUSTOMER_CLAIM = "custom:customerId";
     public static final String ACCESS_RIGHTS_CLAIM = "custom:accessRights";
     public static final String NVA_USERNAME_CLAIM = "custom:nvaUsername";
     @JsonProperty(FEIDE_ID_CLAIM)
