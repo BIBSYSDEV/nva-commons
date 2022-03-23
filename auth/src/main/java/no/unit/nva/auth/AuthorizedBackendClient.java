@@ -47,14 +47,14 @@ public class AuthorizedBackendClient {
         refreshToken();
     }
 
-    public <T> HttpResponse<T> sendRequest(Builder request, BodyHandler<T> responseBodyHandler)
+    public <T> HttpResponse<T> send(HttpRequest.Builder request, BodyHandler<T> responseBodyHandler)
         throws IOException, InterruptedException {
         var authorizedRequest = request.setHeader(AUTHORIZATION_HEADER, bearerToken()).build();
         return httpClient.send(authorizedRequest, responseBodyHandler);
     }
 
-    public <T> CompletableFuture<HttpResponse<T>> sendRequestAsync(Builder request,
-                                                                   BodyHandler<T> responseBodyHandler) {
+    public <T> CompletableFuture<HttpResponse<T>> sendAsync(Builder request,
+                                                            BodyHandler<T> responseBodyHandler) {
         var authorizedRequest = request.setHeader(AUTHORIZATION_HEADER, bearerToken()).build();
         return httpClient.sendAsync(authorizedRequest, responseBodyHandler);
     }

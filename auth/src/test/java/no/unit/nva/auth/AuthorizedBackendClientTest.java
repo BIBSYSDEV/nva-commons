@@ -41,7 +41,7 @@ class AuthorizedBackendClientTest {
         var client = new AuthorizedBackendClient(serverUri, httpClient);
         var resourceUri = UriWrapper.fromUri(serverUri).addChild(EXAMPLE_RESOURCE_PATH).getUri();
         var request = HttpRequest.newBuilder(resourceUri).GET();
-        var response = client.sendRequest(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
+        var response = client.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
         assertThat(response.body(), containsString(protectedContent));
     }
 
@@ -51,7 +51,7 @@ class AuthorizedBackendClientTest {
         var resourceUri = UriWrapper.fromUri(serverUri).addChild(EXAMPLE_RESOURCE_PATH).getUri();
         var request = HttpRequest.newBuilder(resourceUri).GET();
         var response =
-            client.sendRequestAsync(request, BodyHandlers.ofString(StandardCharsets.UTF_8)).join();
+            client.sendAsync(request, BodyHandlers.ofString(StandardCharsets.UTF_8)).join();
         assertThat(response.body(), containsString(protectedContent));
     }
 }
