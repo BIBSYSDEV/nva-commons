@@ -2,6 +2,9 @@ package nva.commons.apigateway;
 
 import static java.util.Objects.isNull;
 import static java.util.function.Predicate.not;
+import static no.unit.nva.auth.CognitoUserInfo.ACCESS_RIGHTS_CLAIM;
+import static no.unit.nva.auth.CognitoUserInfo.NVA_USERNAME_CLAIM;
+import static no.unit.nva.auth.CognitoUserInfo.SELECTED_CUSTOMER_CLAIM;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -50,14 +53,11 @@ public class RequestInfo {
     public static final String ENTRIES_DELIMITER = ",";
     public static final String HTTPS = "https"; // Api Gateway only supports HTTPS
     public static final String DOMAIN_NAME_FIELD = "domainName";
-    public static final boolean USER_BY_DEFAULT_IS_DENIED_ACCESS = false;
     public static final String AT = "@";
     private static final String CLAIMS_PATH = "/authorizer/claims/";
-    public static final JsonPointer FEIDE_ID = claimToJsonPointer("custom:feideId");
-    public static final JsonPointer CUSTOMER_ID = claimToJsonPointer("custom:customerId");
-    public static final JsonPointer APPLICATION_ROLES = claimToJsonPointer("custom:applicationRoles");
-    public static final JsonPointer ACCESS_RIGHTS = claimToJsonPointer("custom:accessRights");
-    public static final JsonPointer CUSTOMER_CRISTIN_ID = claimToJsonPointer("custom:cristinId");
+    public static final JsonPointer CUSTOMER_ID = claimToJsonPointer(SELECTED_CUSTOMER_CLAIM);
+    public static final JsonPointer ACCESS_RIGHTS = claimToJsonPointer(ACCESS_RIGHTS_CLAIM);
+    public static final JsonPointer NVA_USERNAME = claimToJsonPointer(NVA_USERNAME_CLAIM);
     private static final HttpClient DEFAULT_HTTP_CLIENT = HttpClient.newBuilder().build();
     private static final URI DEFAULT_COGNITO_URI = URI.create(ENVIRONMENT.readEnv("COGNITO_URI"));
     private final HttpClient httpClient;
@@ -126,7 +126,7 @@ public class RequestInfo {
     /**
      * Get request context parameter. The root node is the {@link RequestInfo#REQUEST_CONTEXT_FIELD} node of the {@link
      * RequestInfo} class.
-     * <p>Example: {@code JsonPointer.compile("/authorizer/claims/custom:feideId");  }
+     * <p>Example: {@code JsonPointer.compile("/authorizer/claims/custom:currentCustomer");  }
      * </p>
      *
      * @param jsonPointer A {@link JsonPointer}
@@ -228,12 +228,6 @@ public class RequestInfo {
             .orElseThrow();
     }
 
-    @JsonIgnore
-    public Optional<String> getFeideId() {
-        return fetchFeideIdOffline()
-            .or(this::fetchFeideIdFromAuthServer);
-    }
-
     public boolean userIsAuthorized(String accessRight) {
         return checkAuthorizationOffline(accessRight)
                || checkAuthorizationOnline(accessRight);
@@ -246,12 +240,15 @@ public class RequestInfo {
     }
 
     @JsonIgnore
-    public Optional<String> getAssignedRoles() {
-        return getRequestContextParameterOpt(APPLICATION_ROLES);
+    public String getNvaUsername() {
+        return extractNvaUsernameOffline().orElseGet(this::fetchUserNameFromCognito);
     }
 
-    @JsonIgnore
-    public String getNvaUsername() {
+    private Optional<String> extractNvaUsernameOffline() {
+        return getRequestContextParameterOpt(NVA_USERNAME);
+    }
+
+    private String fetchUserNameFromCognito() {
         return fetchUserInfoFromCognito().map(CognitoUserInfo::getNvaUsername).orElseThrow();
     }
 
@@ -259,9 +256,6 @@ public class RequestInfo {
         return JsonPointer.compile(CLAIMS_PATH + claim);
     }
 
-    private Optional<String> fetchFeideIdOffline() {
-        return this.getRequestContextParameterOpt(FEIDE_ID);
-    }
 
     private boolean checkAuthorizationOffline(String accessRight) {
         return getAccessRights().stream()
@@ -274,7 +268,6 @@ public class RequestInfo {
             .map(requestedRight -> requestedRight.toLowerCase(Locale.getDefault()));
 
         var availableRights = fetchAvailableRights();
-
         return accessRightAtCustomer.map(availableRights::contains).orElse(false);
     }
 
@@ -285,13 +278,6 @@ public class RequestInfo {
             .map(accessRights -> accessRights.split(ENTRIES_DELIMITER))
             .map(Arrays::asList)
             .orElse(fail -> Collections.<String>emptyList());
-    }
-
-    private Optional<String> fetchFeideIdFromAuthServer() {
-        var result = fetchUserInfoFromCognito()
-            .map(CognitoUserInfo::getFeideId)
-            .orElseThrow();
-        return Optional.of(result);
     }
 
     private Try<CognitoUserInfo> fetchUserInfoFromCognito() {

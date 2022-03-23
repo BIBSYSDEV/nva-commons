@@ -3,10 +3,8 @@ package nva.commons.apigateway;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
-import static nva.commons.apigateway.RequestInfo.APPLICATION_ROLES;
 import static nva.commons.apigateway.RequestInfo.CUSTOMER_ID;
 import static nva.commons.apigateway.RequestInfo.ENTRIES_DELIMITER;
-import static nva.commons.apigateway.RequestInfo.FEIDE_ID;
 import static nva.commons.apigateway.RequestInfo.REQUEST_CONTEXT_FIELD;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -162,28 +160,6 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnFeideIdWhenRequestContainFeideIdClaim() {
-        RequestInfo requestInfo = new RequestInfo();
-        String expectedUsername = "orestis";
-        requestInfo.setRequestContext(createNestedNodesFromJsonPointer(FEIDE_ID, expectedUsername));
-
-        String actual = requestInfo.getFeideId().orElseThrow();
-        assertEquals(actual, expectedUsername);
-    }
-
-    @Test
-    void shouldFetchFeideIdWhenRequestDoesNotContainFeideIdClaimButHasAccessTokenAndCognitoUserContainsFeideIdClaim() {
-
-        var expectedFeideId = randomString();
-        var cognitoUserEntry = CognitoUserInfo.builder().withFeideId(expectedFeideId).build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-
-        var requestInfo = createRequestInfoWithAccessToken();
-        var actualFeideId = requestInfo.getFeideId().orElseThrow();
-        assertThat(actualFeideId, is(equalTo(expectedFeideId)));
-    }
-
-    @Test
     void requestInfoReturnsCustomerIdWhenRequestContainsCustomerIdClaim() {
         var requestInfo = new RequestInfo();
         var expectedCustomerId = "customerId";
@@ -217,12 +193,6 @@ class RequestInfoTest {
             var userIsAuthorized = requestInfo.userIsAuthorized(accessRight);
             assertThat(userIsAuthorized, is(true));
         }
-    }
-
-    private CognitoUserInfo createCognitoUserEntry(URI usersCustomer, Set<String> accessRightsForCustomer) {
-        return CognitoUserInfo.builder()
-            .withCurrentCustomer(usersCustomer)
-            .withAccessRights(accessRightsForCustomer).build();
     }
 
     @Test
@@ -286,16 +256,6 @@ class RequestInfoTest {
     }
 
     @Test
-    void requestInfoReturnsAssignedRolesForRequestContextWithCredentials() {
-        RequestInfo requestInfo = new RequestInfo();
-        String expectedRoles = "role1,role2";
-        requestInfo.setRequestContext(createNestedNodesFromJsonPointer(APPLICATION_ROLES, expectedRoles));
-
-        String actual = requestInfo.getAssignedRoles().orElseThrow();
-        assertEquals(actual, expectedRoles);
-    }
-
-    @Test
     void canGetValueFromRequestContext() throws JsonProcessingException {
 
         Map<String, Map<String, Map<String, Map<String, String>>>> map = Map.of(
@@ -332,13 +292,42 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnNvaUsernameWhenUserHasSelectedCustomer() {
+    void shouldReturnNvaUsernameFromCognitoWhenUserHasSelectedCustomerAndClaimInNotAvailableOffline() {
         var expectedUsername = randomString();
         var cognitoUserEntry = CognitoUserInfo.builder().withNvaUsername(expectedUsername).build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
         var requestInfo = createRequestInfoWithAccessToken();
         var actualUsername = requestInfo.getNvaUsername();
         assertThat(actualUsername, is(equalTo(expectedUsername)));
+    }
+
+    @Test
+    void shouldReturnNvaUsernameWhenClaimInAvailableOffline() {
+        var cognitoUserEntry = CognitoUserInfo.builder().withNvaUsername(randomString()).build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
+        var requestInfo = createRequestInfoWithAccessToken();
+
+        var expectedUsername = randomString();
+        injectNvaUserNameInRequestInfo(requestInfo, expectedUsername);
+
+        var actualUsername = requestInfo.getNvaUsername();
+        assertThat(actualUsername, is(equalTo(expectedUsername)));
+    }
+
+    private CognitoUserInfo createCognitoUserEntry(URI usersCustomer, Set<String> accessRightsForCustomer) {
+        return CognitoUserInfo.builder()
+            .withCurrentCustomer(usersCustomer)
+            .withAccessRights(accessRightsForCustomer).build();
+    }
+
+    private void injectNvaUserNameInRequestInfo(RequestInfo requestInfo, String expectedUsername) {
+        var claims = dtoObjectMapper.createObjectNode();
+        var authorizer = dtoObjectMapper.createObjectNode();
+        var requestContext = dtoObjectMapper.createObjectNode();
+        claims.put(CognitoUserInfo.NVA_USERNAME_CLAIM, expectedUsername);
+        authorizer.set("claims", claims);
+        requestContext.set("authorizer", authorizer);
+        requestInfo.setRequestContext(requestContext);
     }
 
     private RequestInfo createRequestInfoWithAccessToken() {
@@ -352,10 +341,10 @@ class RequestInfoTest {
         var requestContext = dtoObjectMapper.createObjectNode();
         var authorizerNode = dtoObjectMapper.createObjectNode();
         var claimsNode = dtoObjectMapper.createObjectNode();
-        claimsNode.put("custom:accessRights", String.join(ENTRIES_DELIMITER, usersAccessRights));
-        claimsNode.put("custom:customerId", usersCustomer.toString());
         authorizerNode.set("claims", claimsNode);
         requestContext.set("authorizer", authorizerNode);
+        claimsNode.put("custom:accessRights", String.join(ENTRIES_DELIMITER, usersAccessRights));
+        claimsNode.put("custom:customerId", usersCustomer.toString());
         requestInfo.setRequestContext(requestContext);
         return requestInfo;
     }
