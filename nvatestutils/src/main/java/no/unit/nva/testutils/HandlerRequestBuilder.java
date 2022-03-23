@@ -158,9 +158,9 @@ public class HandlerRequestBuilder<T> {
         this.otherProperties = otherProperties;
     }
 
-    public HandlerRequestBuilder<T> withNvaUsername(String feideId) {
+    public HandlerRequestBuilder<T> withNvaUsername(String nvaUsername) {
         ObjectNode claims = getOrCreateClaimsNode();
-        claims.put(NVA_USERNAME_CLAIM, feideId);
+        claims.put(NVA_USERNAME_CLAIM, nvaUsername);
         return this;
     }
 

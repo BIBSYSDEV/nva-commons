@@ -5,7 +5,6 @@ import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static nva.commons.apigateway.RequestInfo.CUSTOMER_ID;
 import static nva.commons.apigateway.RequestInfo.ENTRIES_DELIMITER;
-import static nva.commons.apigateway.RequestInfo.FEIDE_ID;
 import static nva.commons.apigateway.RequestInfo.REQUEST_CONTEXT_FIELD;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -158,28 +157,6 @@ class RequestInfoTest {
     void requestInfoInitializesRequestContextToEmptyJsonNodeWhenRequestContextIsMissing()
         throws JsonProcessingException {
         checkForNonNullMap(MISSING_MAP_VALUES, RequestInfo::getRequestContext);
-    }
-
-    @Test
-    void shouldReturnFeideIdWhenRequestContainFeideIdClaim() {
-        RequestInfo requestInfo = new RequestInfo();
-        String expectedUsername = "orestis";
-        requestInfo.setRequestContext(createNestedNodesFromJsonPointer(FEIDE_ID, expectedUsername));
-
-        String actual = requestInfo.getFeideId().orElseThrow();
-        assertEquals(actual, expectedUsername);
-    }
-
-    @Test
-    void shouldFetchFeideIdWhenRequestDoesNotContainFeideIdClaimButHasAccessTokenAndCognitoUserContainsFeideIdClaim() {
-
-        var expectedFeideId = randomString();
-        var cognitoUserEntry = CognitoUserInfo.builder().withFeideId(expectedFeideId).build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-
-        var requestInfo = createRequestInfoWithAccessToken();
-        var actualFeideId = requestInfo.getFeideId().orElseThrow();
-        assertThat(actualFeideId, is(equalTo(expectedFeideId)));
     }
 
     @Test

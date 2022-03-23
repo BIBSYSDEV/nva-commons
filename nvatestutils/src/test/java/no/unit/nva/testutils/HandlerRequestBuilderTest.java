@@ -1,5 +1,6 @@
 package no.unit.nva.testutils;
 
+import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -18,7 +19,7 @@ import java.io.InputStream;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-public class HandlerRequestBuilderTest {
+class HandlerRequestBuilderTest {
 
     public static final String KEY = "key";
     public static final String VALUE = "value";
@@ -34,8 +35,6 @@ public class HandlerRequestBuilderTest {
         JsonPointer.compile("/requestContext/authorizer/claims/custom:nvaUsername");
     public static final JsonPointer CUSTOMER_ID = JsonPointer.compile(
         "/requestContext/authorizer/claims/custom:customerId");
-    public static final JsonPointer APPLICATION_ROLES =
-        JsonPointer.compile("/requestContext/authorizer/claims/custom:applicationRoles");
     public static final JsonPointer ACCESS_RIGHTS =
         JsonPointer.compile("/requestContext/authorizer/claims/custom:accessRights");
     public static final JsonPointer CRISTIN_ID =
@@ -96,7 +95,7 @@ public class HandlerRequestBuilderTest {
     }
 
     @Test
-    public void buildReturnsRequestWithPathParametersWhenWithPathParameters() throws Exception {
+    void buildReturnsRequestWithPathParametersWhenWithPathParameters() throws Exception {
         InputStream request = new HandlerRequestBuilder<String>(objectMapper)
             .withPathParameters(Map.of(KEY, VALUE))
             .build();
@@ -106,7 +105,7 @@ public class HandlerRequestBuilderTest {
     }
 
     @Test
-    public void buildReturnsRequestWithRequestContextWhenWithRequestContext() throws Exception {
+    void buildReturnsRequestWithRequestContextWhenWithRequestContext() throws Exception {
         InputStream request = new HandlerRequestBuilder<String>(objectMapper)
             .withRequestContext(Map.of(KEY, VALUE))
             .build();
@@ -116,18 +115,19 @@ public class HandlerRequestBuilderTest {
     }
 
     @Test
-    public void buildReturnsRequestWithRequestContextWithFeideIdClaimWhenWithFeideId() throws JsonProcessingException {
-        var expectedFeideId = "someFeide@id";
+    void buildReturnsRequestWithRequestContextWithNvaUsernameClaimWhenWithNvaUserClaim()
+        throws JsonProcessingException {
+        var expectedUsername = randomString();
         InputStream requestStream = new HandlerRequestBuilder<String>(objectMapper)
-            .withNvaUsername(expectedFeideId)
+            .withNvaUsername(expectedUsername)
             .build();
         JsonNode request = toJsonNode(requestStream);
-        String actualFeideId = request.at(NVA_USERNAME).textValue();
-        assertThat(actualFeideId, is(equalTo(expectedFeideId)));
+        String actualUsername = request.at(NVA_USERNAME).textValue();
+        assertThat(actualUsername, is(equalTo(expectedUsername)));
     }
 
     @Test
-    public void buildReturnsRequestWithRequestContextWithCustomerIdClaimWhenWithCustomerId()
+    void buildReturnsRequestWithRequestContextWithCustomerIdClaimWhenWithCustomerId()
         throws JsonProcessingException {
         var expectedCustomerId = "SomeCustomerId";
         InputStream requestStream = new HandlerRequestBuilder<String>(objectMapper)
@@ -139,43 +139,28 @@ public class HandlerRequestBuilderTest {
     }
 
     @Test
-    public void buildReturnsRequestWithRequestContextWithApplicationRolesClaimWhenWithApplicationRoles()
+    void buildReturnsRequestWithRequestContextWithClaimsWhenWithClaims()
         throws JsonProcessingException {
-        var expectedApplicationRoles = "role1,role2";
-        InputStream requestStream = new HandlerRequestBuilder<String>(objectMapper)
-            .withRoles(expectedApplicationRoles)
-            .build();
-        JsonNode request = toJsonNode(requestStream);
-        String actualRoles = request.at(APPLICATION_ROLES).textValue();
-        assertThat(actualRoles, is(equalTo(expectedApplicationRoles)));
-    }
-
-    @Test
-    public void buildReturnsRequestWithRequestContextWithClaimsWhenWithClaims()
-        throws JsonProcessingException {
-        var expectedFeideId = "SomeFeideId";
+        var expectedUsername = randomString();
         var expectedCustomerId = "SomeCustomerId";
         var expectedApplicationRoles = "role1,role2";
 
         InputStream requestStream = new HandlerRequestBuilder<String>(objectMapper)
-            .withNvaUsername(expectedFeideId)
+            .withNvaUsername(expectedUsername)
             .withCustomerId(expectedCustomerId)
             .withRoles(expectedApplicationRoles)
             .build();
         JsonNode request = toJsonNode(requestStream);
 
-        String actualFeideId = request.at(NVA_USERNAME).textValue();
-        assertThat(actualFeideId, is(equalTo(expectedFeideId)));
+        String actualUsername = request.at(NVA_USERNAME).textValue();
+        assertThat(actualUsername, is(equalTo(expectedUsername)));
 
         String actualCustomerId = request.at(CUSTOMER_ID).textValue();
         assertThat(actualCustomerId, is(equalTo(expectedCustomerId)));
-
-        String actualRoles = request.at(APPLICATION_ROLES).textValue();
-        assertThat(actualRoles, is(equalTo(expectedApplicationRoles)));
     }
 
     @Test
-    public void buildReturnsRequestWithMethodWhenWithMethod() throws Exception {
+    void buildReturnsRequestWithMethodWhenWithMethod() throws Exception {
         InputStream request = new HandlerRequestBuilder<String>(objectMapper)
             .withHttpMethod(SOME_METHOD)
             .build();
@@ -185,7 +170,7 @@ public class HandlerRequestBuilderTest {
     }
 
     @Test
-    public void buildReturnsCustomPropertiesSetInRequest() throws IOException {
+    void buildReturnsCustomPropertiesSetInRequest() throws IOException {
         String expectedKey = "someKey";
         String expectedValue = "someValue";
         InputStream request = new HandlerRequestBuilder<String>(objectMapper)
@@ -198,7 +183,7 @@ public class HandlerRequestBuilderTest {
     }
 
     @Test
-    public void buildReturnsAccessRightsWhenAccessRightsHaveBeenSet() throws JsonProcessingException {
+    void buildReturnsAccessRightsWhenAccessRightsHaveBeenSet() throws JsonProcessingException {
         String accessRight1 = "AccessRight1";
         String accessRight2 = "AccessRight2";
         InputStream inputStream = new HandlerRequestBuilder<String>(objectMapper)
@@ -225,13 +210,13 @@ public class HandlerRequestBuilderTest {
     }
 
     @Test
-    public void shouldReturnRequestContextWithSetValues() throws JsonProcessingException {
+    void shouldReturnRequestContextWithSetValues() throws JsonProcessingException {
         var expectedPath = "/path";
         var expectedDomainName = "localhost";
         var request = new HandlerRequestBuilder<String>(objectMapper)
-                .withRequestContextValue("path", expectedPath)
-                .withRequestContextValue("domainName", expectedDomainName)
-                .build();
+            .withRequestContextValue("path", expectedPath)
+            .withRequestContextValue("domainName", expectedDomainName)
+            .build();
 
         JsonNode requestJson = toJsonNode(request);
         String actualPath = requestJson.at("/requestContext/path").asText();
