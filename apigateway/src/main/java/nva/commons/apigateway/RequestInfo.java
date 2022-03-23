@@ -241,7 +241,7 @@ public class RequestInfo {
 
     @JsonIgnore
     public String getNvaUsername() {
-        return extractNvaUsernameOffline().orElse(fetchUserNameFromCognito());
+        return extractNvaUsernameOffline().orElseGet(this::fetchUserNameFromCognito);
     }
 
     private Optional<String> extractNvaUsernameOffline() {
