@@ -37,11 +37,21 @@ public class AuthorizedBackendClient {
     private String accessToken;
 
     @JacocoGenerated
-    public AuthorizedBackendClient() {
-        this(COGNITO_URI, HttpClient.newHttpClient());
+    public static AuthorizedBackendClient create() {
+        return new AuthorizedBackendClient(COGNITO_URI, HttpClient.newHttpClient());
     }
 
-    public AuthorizedBackendClient(URI serverUri, HttpClient httpClient) {
+    @JacocoGenerated
+    public AuthorizedBackendClient create(HttpClient httpClient) {
+        return new AuthorizedBackendClient(COGNITO_URI, httpClient);
+    }
+
+    @JacocoGenerated
+    public static AuthorizedBackendClient create(URI serverUri, HttpClient httpClient) {
+        return new AuthorizedBackendClient(serverUri, httpClient);
+    }
+
+    private AuthorizedBackendClient(URI serverUri, HttpClient httpClient) {
         this.serverUri = serverUri;
         this.httpClient = httpClient;
         refreshToken();
