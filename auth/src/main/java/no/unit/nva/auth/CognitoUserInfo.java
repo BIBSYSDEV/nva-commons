@@ -15,7 +15,10 @@ public class CognitoUserInfo {
     private String feideId;
     @JsonProperty("custom:currentCustomer")
     private URI currentCustomer;
+    @JsonProperty("custom:accessRights")
     private String accessRights;
+    @JsonProperty("custom:nvaUsername")
+    private String nvaUsername;
 
     public static Builder builder() {
         return new Builder();
@@ -23,6 +26,14 @@ public class CognitoUserInfo {
 
     public static CognitoUserInfo fromString(String json) {
         return JsonConfig.beanFrom(CognitoUserInfo.class, json);
+    }
+
+    public String getNvaUsername() {
+        return nvaUsername;
+    }
+
+    public void setNvaUsername(String nvaUsername) {
+        this.nvaUsername = nvaUsername;
     }
 
     @JacocoGenerated
@@ -46,13 +57,19 @@ public class CognitoUserInfo {
     }
 
     @JacocoGenerated
+    public String getAccessRights() {
+        return nonNull(accessRights) ? accessRights : EMPTY_STRING;
+    }
+
+    @JacocoGenerated
     public void setAccessRights(String accessRights) {
         this.accessRights = accessRights;
     }
 
     @JacocoGenerated
-    public String getAccessRights() {
-        return nonNull(accessRights) ? accessRights : EMPTY_STRING;
+    @Override
+    public int hashCode() {
+        return Objects.hash(getFeideId(), getCurrentCustomer(), getAccessRights(), getNvaUsername());
     }
 
     @JacocoGenerated
@@ -64,16 +81,11 @@ public class CognitoUserInfo {
         if (!(o instanceof CognitoUserInfo)) {
             return false;
         }
-        CognitoUserInfo cognitoUserInfo = (CognitoUserInfo) o;
-        return Objects.equals(getFeideId(), cognitoUserInfo.getFeideId()) && Objects.equals(
-            getCurrentCustomer(), cognitoUserInfo.getCurrentCustomer()) && Objects.equals(getAccessRights(),
-                                                                                          cognitoUserInfo.getAccessRights());
-    }
-
-    @JacocoGenerated
-    @Override
-    public int hashCode() {
-        return Objects.hash(getFeideId(), getCurrentCustomer(), getAccessRights());
+        CognitoUserInfo that = (CognitoUserInfo) o;
+        return Objects.equals(getFeideId(), that.getFeideId())
+               && Objects.equals(getCurrentCustomer(), that.getCurrentCustomer())
+               && Objects.equals(getAccessRights(), that.getAccessRights())
+               && Objects.equals(getNvaUsername(), that.getNvaUsername());
     }
 
     public static final class Builder {
@@ -103,6 +115,11 @@ public class CognitoUserInfo {
                 cognitoUserInfo.setAccessRights(String.join(ELEMENTS_DELIMITER, accessRights));
             }
 
+            return this;
+        }
+
+        public Builder withNvaUsername(String nvaUsername) {
+            cognitoUserInfo.setNvaUsername(nvaUsername);
             return this;
         }
     }

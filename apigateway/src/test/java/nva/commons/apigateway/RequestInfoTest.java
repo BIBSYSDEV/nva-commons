@@ -331,6 +331,16 @@ class RequestInfoTest {
         assertThat(requestUri, is(equalTo(expectedRequestUri)));
     }
 
+    @Test
+    void shouldReturnNvaUsernameWhenUserHasSelectedCustomer() {
+        var expectedUsername = randomString();
+        var cognitoUserEntry = CognitoUserInfo.builder().withNvaUsername(expectedUsername).build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
+        var requestInfo = createRequestInfoWithAccessToken();
+        var actualUsername = requestInfo.getNvaUsername();
+        assertThat(actualUsername, is(equalTo(expectedUsername)));
+    }
+
     private RequestInfo createRequestInfoWithAccessToken() {
         var requestInfo = new RequestInfo(httpClient, cognito.getServerUri());
         requestInfo.setHeaders(Map.of(HttpHeaders.AUTHORIZATION, bearerToken()));
