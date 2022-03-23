@@ -15,6 +15,7 @@ public class CognitoUserInfo {
     public static final String SELECTED_CUSTOMER_CLAIM = "custom:customerId";
     public static final String ACCESS_RIGHTS_CLAIM = "custom:accessRights";
     public static final String NVA_USERNAME_CLAIM = "custom:nvaUsername";
+    public static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
     @JsonProperty(FEIDE_ID_CLAIM)
     private String feideId;
     @JsonProperty(SELECTED_CUSTOMER_CLAIM)
@@ -23,6 +24,8 @@ public class CognitoUserInfo {
     private String accessRights;
     @JsonProperty(NVA_USERNAME_CLAIM)
     private String nvaUsername;
+    @JsonProperty(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM)
+    private URI topOrgCristinid;
 
     public static Builder builder() {
         return new Builder();
@@ -30,6 +33,11 @@ public class CognitoUserInfo {
 
     public static CognitoUserInfo fromString(String json) {
         return JsonConfig.beanFrom(CognitoUserInfo.class, json);
+    }
+
+    @JacocoGenerated
+    public URI getTopOrgCristinid() {
+        return topOrgCristinid;
     }
 
     public String getNvaUsername() {
@@ -92,6 +100,10 @@ public class CognitoUserInfo {
                && Objects.equals(getNvaUsername(), that.getNvaUsername());
     }
 
+    private void setTopOrgCristinId(URI topOrgCristinId) {
+        this.topOrgCristinid = topOrgCristinId;
+    }
+
     public static final class Builder {
 
         private final CognitoUserInfo cognitoUserInfo;
@@ -124,6 +136,11 @@ public class CognitoUserInfo {
 
         public Builder withNvaUsername(String nvaUsername) {
             cognitoUserInfo.setNvaUsername(nvaUsername);
+            return this;
+        }
+
+        public Builder withTopOrgCristinId(URI topOrgCristinId) {
+            cognitoUserInfo.setTopOrgCristinId(topOrgCristinId);
             return this;
         }
     }

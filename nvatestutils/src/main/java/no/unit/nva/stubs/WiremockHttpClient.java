@@ -48,6 +48,12 @@ public final class WiremockHttpClient {
 
             @JacocoGenerated
             @Override
+            public X509Certificate[] getAcceptedIssuers() {
+                return new X509Certificate[0];
+            }
+
+            @JacocoGenerated
+            @Override
             public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
 
             }
@@ -56,12 +62,6 @@ public final class WiremockHttpClient {
             @Override
             public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
 
-            }
-
-            @JacocoGenerated
-            @Override
-            public X509Certificate[] getAcceptedIssuers() {
-                return new X509Certificate[0];
             }
 
             @JacocoGenerated

@@ -5,6 +5,7 @@ import static java.util.function.Predicate.not;
 import static no.unit.nva.auth.CognitoUserInfo.ACCESS_RIGHTS_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.NVA_USERNAME_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.SELECTED_CUSTOMER_CLAIM;
+import static no.unit.nva.auth.CognitoUserInfo.TOP_LEVEL_ORG_CRISTIN_ID_CLAIM;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -58,8 +59,10 @@ public class RequestInfo {
     public static final JsonPointer CUSTOMER_ID = claimToJsonPointer(SELECTED_CUSTOMER_CLAIM);
     public static final JsonPointer ACCESS_RIGHTS = claimToJsonPointer(ACCESS_RIGHTS_CLAIM);
     public static final JsonPointer NVA_USERNAME = claimToJsonPointer(NVA_USERNAME_CLAIM);
+    private static final JsonPointer TOP_LEVEL_ORG_CRISTIN_ID = claimToJsonPointer(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM);
     private static final HttpClient DEFAULT_HTTP_CLIENT = HttpClient.newBuilder().build();
     private static final URI DEFAULT_COGNITO_URI = URI.create(ENVIRONMENT.readEnv("COGNITO_URI"));
+
     private final HttpClient httpClient;
     private final URI cognitoUri;
 
@@ -242,6 +245,19 @@ public class RequestInfo {
     @JsonIgnore
     public String getNvaUsername() {
         return extractNvaUsernameOffline().orElseGet(this::fetchUserNameFromCognito);
+    }
+
+    public URI getTopLevelOrgCristinId() {
+        return
+            getRequestContextParameterOpt(TOP_LEVEL_ORG_CRISTIN_ID)
+                .map(URI::create)
+                .orElseGet(this::fetchTopLevelOrgCristinIdFromCognito);
+    }
+
+    private URI fetchTopLevelOrgCristinIdFromCognito() {
+        return fetchUserInfoFromCognito()
+            .map(CognitoUserInfo::getTopOrgCristinid)
+            .orElseThrow();
     }
 
     private Optional<String> extractNvaUsernameOffline() {

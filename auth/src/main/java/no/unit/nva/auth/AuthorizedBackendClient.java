@@ -36,7 +36,7 @@ public class AuthorizedBackendClient {
     private final HttpClient httpClient;
     private String accessToken;
 
-    private AuthorizedBackendClient(URI serverUri, HttpClient httpClient) {
+    protected AuthorizedBackendClient(URI serverUri, HttpClient httpClient) {
         this.serverUri = serverUri;
         this.httpClient = httpClient;
         refreshToken();
