@@ -36,25 +36,25 @@ public class AuthorizedBackendClient {
     private final HttpClient httpClient;
     private String accessToken;
 
+    private AuthorizedBackendClient(URI serverUri, HttpClient httpClient) {
+        this.serverUri = serverUri;
+        this.httpClient = httpClient;
+        refreshToken();
+    }
+
     @JacocoGenerated
     public static AuthorizedBackendClient create() {
         return new AuthorizedBackendClient(COGNITO_URI, HttpClient.newHttpClient());
     }
 
     @JacocoGenerated
-    public AuthorizedBackendClient create(HttpClient httpClient) {
+    public static AuthorizedBackendClient create(HttpClient httpClient) {
         return new AuthorizedBackendClient(COGNITO_URI, httpClient);
     }
 
     @JacocoGenerated
     public static AuthorizedBackendClient create(URI serverUri, HttpClient httpClient) {
         return new AuthorizedBackendClient(serverUri, httpClient);
-    }
-
-    private AuthorizedBackendClient(URI serverUri, HttpClient httpClient) {
-        this.serverUri = serverUri;
-        this.httpClient = httpClient;
-        refreshToken();
     }
 
     public <T> HttpResponse<T> send(HttpRequest.Builder request, BodyHandler<T> responseBodyHandler)
