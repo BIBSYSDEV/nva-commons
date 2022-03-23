@@ -33,7 +33,7 @@ class FetchUserInfoTest {
     }
 
     @Test
-    void shouldReturnUserInfoWhenForAccessToken() {
+    void shouldReturnUserInfoWhenRequestWithAccessToken() {
         var accessToken = randomString();
         var expectedUserInfo = CognitoUserInfo.builder().withCurrentCustomer(randomUri()).build();
         authServer.setUserBase(Map.of(accessToken, expectedUserInfo));
