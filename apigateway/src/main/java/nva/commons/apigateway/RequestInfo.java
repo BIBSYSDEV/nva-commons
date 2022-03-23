@@ -78,7 +78,6 @@ public class RequestInfo {
     @JsonAnySetter
     private Map<String, Object> otherProperties;
 
-
     public RequestInfo(HttpClient httpClient, URI cognitoUri) {
         this.httpClient = httpClient;
         this.cognitoUri = cognitoUri;
