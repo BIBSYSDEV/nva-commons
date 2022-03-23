@@ -78,6 +78,7 @@ public class RequestInfo {
     @JsonAnySetter
     private Map<String, Object> otherProperties;
 
+
     public RequestInfo(HttpClient httpClient, URI cognitoUri) {
         this.httpClient = httpClient;
         this.cognitoUri = cognitoUri;
@@ -230,7 +231,8 @@ public class RequestInfo {
 
     @JsonIgnore
     public Optional<String> getFeideId() {
-        return fetchFeideIdOffline().or(this::fetchFeideIdFromAuthServer);
+        return fetchFeideIdOffline()
+            .or(this::fetchFeideIdFromAuthServer);
     }
 
     public boolean userIsAuthorized(String accessRight) {
@@ -247,6 +249,11 @@ public class RequestInfo {
     @JsonIgnore
     public Optional<String> getAssignedRoles() {
         return getRequestContextParameterOpt(APPLICATION_ROLES);
+    }
+
+    @JsonIgnore
+    public String getNvaUsername() {
+        return fetchUserInfoFromCognito().map(CognitoUserInfo::getNvaUsername).orElseThrow();
     }
 
     private static JsonPointer claimToJsonPointer(String claim) {
