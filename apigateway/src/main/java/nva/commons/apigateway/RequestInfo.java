@@ -250,20 +250,18 @@ public class RequestInfo {
     }
 
     @JsonIgnore
-    public URI getTopLevelOrgCristinId() {
-        return extractTopLevelOrgIdOffline()
-            .map(URI::create)
-            .orElseGet(this::fetchTopLevelOrgCristinIdFromCognito);
+    public Optional<URI> getTopLevelOrgCristinId() {
+        return extractTopLevelOrgIdOffline().or(this::fetchTopLevelOrgCristinIdFromCognito);
     }
 
-    private Optional<String> extractTopLevelOrgIdOffline() {
-        return getRequestContextParameterOpt(TOP_LEVEL_ORG_CRISTIN_ID);
+    private Optional<URI> extractTopLevelOrgIdOffline() {
+        return getRequestContextParameterOpt(TOP_LEVEL_ORG_CRISTIN_ID).map(URI::create);
     }
 
-    private URI fetchTopLevelOrgCristinIdFromCognito() {
+    private Optional<URI> fetchTopLevelOrgCristinIdFromCognito() {
         return fetchUserInfoFromCognito()
             .map(CognitoUserInfo::getTopOrgCristinid)
-            .orElseThrow();
+            .toOptional();
     }
 
     private Optional<String> extractNvaUsernameOffline() {

@@ -317,7 +317,7 @@ class RequestInfoTest {
             .build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
         var requestInfo = createRequestInfoWithAccessToken();
-        assertThat(requestInfo.getTopLevelOrgCristinId(), is(equalTo(topOrgCristinId)));
+        assertThat(requestInfo.getTopLevelOrgCristinId().orElseThrow(), is(equalTo(topOrgCristinId)));
     }
 
     @Test
@@ -325,7 +325,7 @@ class RequestInfoTest {
         var topOrgCristinId = randomUri();
         var requestInfo = requestInfoWithAuthorizerClaim(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM, topOrgCristinId.toString());
 
-        assertThat(requestInfo.getTopLevelOrgCristinId(), is(equalTo(topOrgCristinId)));
+        assertThat(requestInfo.getTopLevelOrgCristinId().orElseThrow(), is(equalTo(topOrgCristinId)));
     }
 
     private RequestInfo requestInfoWithAuthorizerClaim(String claimKey, String claimValue) {
