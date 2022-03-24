@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -41,12 +42,14 @@ class HandlerRequestBuilderTest {
         JsonPointer.compile("/requestContext/authorizer/claims/custom:cristinId");
 
     private static final String HTTP_METHOD = "httpMethod";
+    public static final String TOP_ORG_CRISTIN_ID_CLAIM_PATH = "/requestContext/authorizer/claims/custom"
+                                                               + ":topOrgCristinId";
 
     // Can not use ObjectMapper from nva-commons because it would create a circular dependency
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    public void buildReturnsEmptyRequestOnNoArguments() throws Exception {
+    void buildReturnsEmptyRequestOnNoArguments() throws Exception {
         InputStream request = new HandlerRequestBuilder<String>(objectMapper)
             .build();
 
@@ -55,7 +58,7 @@ class HandlerRequestBuilderTest {
     }
 
     @Test
-    public void buildReturnsRequestWithBodyWhenStringInput() throws Exception {
+    void buildReturnsRequestWithBodyWhenStringInput() throws Exception {
         InputStream request = new HandlerRequestBuilder<String>(objectMapper)
             .withBody(VALUE)
             .build();
@@ -65,7 +68,7 @@ class HandlerRequestBuilderTest {
     }
 
     @Test
-    public void buildReturnsRequestWithBodyWhenMapInput() throws Exception {
+    void buildReturnsRequestWithBodyWhenMapInput() throws Exception {
         InputStream request = new HandlerRequestBuilder<Map<String, Object>>(objectMapper)
             .withBody(Map.of(KEY, VALUE))
             .build();
@@ -75,7 +78,7 @@ class HandlerRequestBuilderTest {
     }
 
     @Test
-    public void buildReturnsRequestWithHeadersWhenWithHeaders() throws Exception {
+    void buildReturnsRequestWithHeadersWhenWithHeaders() throws Exception {
         InputStream request = new HandlerRequestBuilder<String>(objectMapper)
             .withHeaders(Map.of(KEY, VALUE))
             .build();
@@ -85,7 +88,7 @@ class HandlerRequestBuilderTest {
     }
 
     @Test
-    public void buildReturnsRequestWithQueryParametersWhenWithQueryParameters() throws Exception {
+    void buildReturnsRequestWithQueryParametersWhenWithQueryParameters() throws Exception {
         InputStream request = new HandlerRequestBuilder<String>(objectMapper)
             .withQueryParameters(Map.of(KEY, VALUE))
             .build();
@@ -224,6 +227,17 @@ class HandlerRequestBuilderTest {
 
         String actualDomainName = requestJson.at("/requestContext/domainName").asText();
         assertThat(actualDomainName, is(equalTo(expectedDomainName)));
+    }
+
+    @Test
+    void shouldReturnRequestWithTopLevelOrgCristinId() throws JsonProcessingException {
+        URI expectedUri = randomUri();
+        var request = new HandlerRequestBuilder<String>(objectMapper)
+            .withTopLevelCristinOrgId(expectedUri)
+            .build();
+        var requestJson = toJsonNode(request);
+        var actualClaim = requestJson.at(TOP_ORG_CRISTIN_ID_CLAIM_PATH).textValue();
+        assertThat(URI.create(actualClaim), is(equalTo(expectedUri)));
     }
 
     private Map<String, Object> toMap(InputStream inputStream) throws JsonProcessingException {

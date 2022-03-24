@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,6 +37,7 @@ public class HandlerRequestBuilder<T> {
     public static final String APPLICATION_ROLES_CLAIM = "custom:applicationRoles";
     public static final String ACCESS_RIGHTS_CLAIM = "custom:accessRights";
     private static final String CUSTOMER_CRISTIN_ID_CLAIM = "custom:cristinId";
+    private static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
     public static final String ACCESS_RIGHTS_SEPARATOR = ",";
     public static final String EMPTY_STRING = "";
 
@@ -173,6 +175,12 @@ public class HandlerRequestBuilder<T> {
     public HandlerRequestBuilder<T> withCustomerCristinId(String customerCristinId) {
         ObjectNode claims = getOrCreateClaimsNode();
         claims.put(CUSTOMER_CRISTIN_ID_CLAIM, customerCristinId);
+        return this;
+    }
+
+    public HandlerRequestBuilder<T> withTopLevelCristinOrgId(URI topLevelCristinOrgId) {
+        ObjectNode claims = getOrCreateClaimsNode();
+        claims.put(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM, topLevelCristinOrgId.toString());
         return this;
     }
 
