@@ -57,6 +57,6 @@ task jacocoRootReport(type: JacocoReport, dependsOn: tasks.jacocoMerge) {
     }
 
     reports {
-        xml.required
+        xml.required = true
     }
 }
