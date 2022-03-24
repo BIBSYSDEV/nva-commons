@@ -248,10 +248,13 @@ public class RequestInfo {
     }
 
     public URI getTopLevelOrgCristinId() {
-        return
-            getRequestContextParameterOpt(TOP_LEVEL_ORG_CRISTIN_ID)
-                .map(URI::create)
-                .orElseGet(this::fetchTopLevelOrgCristinIdFromCognito);
+        return extractTopLevelOrgIdOffline()
+            .map(URI::create)
+            .orElseGet(this::fetchTopLevelOrgCristinIdFromCognito);
+    }
+
+    private Optional<String> extractTopLevelOrgIdOffline() {
+        return getRequestContextParameterOpt(TOP_LEVEL_ORG_CRISTIN_ID);
     }
 
     private URI fetchTopLevelOrgCristinIdFromCognito() {
