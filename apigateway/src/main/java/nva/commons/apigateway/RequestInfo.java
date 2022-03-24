@@ -136,6 +136,7 @@ public class RequestInfo {
      * @return a present {@link Optional} if there is a non empty value for the parameter, an empty {@link Optional}
      *     otherwise.
      */
+    @JsonIgnore
     public Optional<String> getRequestContextParameterOpt(JsonPointer jsonPointer) {
         return Optional.ofNullable(getRequestContext())
             .map(context -> context.at(jsonPointer))
@@ -231,6 +232,7 @@ public class RequestInfo {
             .orElseThrow();
     }
 
+    @JsonIgnore
     public boolean userIsAuthorized(String accessRight) {
         return checkAuthorizationOffline(accessRight)
                || checkAuthorizationOnline(accessRight);
@@ -247,6 +249,7 @@ public class RequestInfo {
         return extractNvaUsernameOffline().orElseGet(this::fetchUserNameFromCognito);
     }
 
+    @JsonIgnore
     public URI getTopLevelOrgCristinId() {
         return extractTopLevelOrgIdOffline()
             .map(URI::create)
