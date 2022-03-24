@@ -5,6 +5,7 @@ import static java.util.function.Predicate.not;
 import static no.unit.nva.auth.CognitoUserInfo.ACCESS_RIGHTS_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.NVA_USERNAME_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.SELECTED_CUSTOMER_CLAIM;
+import static no.unit.nva.auth.CognitoUserInfo.TOP_LEVEL_ORG_CRISTIN_ID_CLAIM;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -58,8 +59,10 @@ public class RequestInfo {
     public static final JsonPointer CUSTOMER_ID = claimToJsonPointer(SELECTED_CUSTOMER_CLAIM);
     public static final JsonPointer ACCESS_RIGHTS = claimToJsonPointer(ACCESS_RIGHTS_CLAIM);
     public static final JsonPointer NVA_USERNAME = claimToJsonPointer(NVA_USERNAME_CLAIM);
+    private static final JsonPointer TOP_LEVEL_ORG_CRISTIN_ID = claimToJsonPointer(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM);
     private static final HttpClient DEFAULT_HTTP_CLIENT = HttpClient.newBuilder().build();
     private static final URI DEFAULT_COGNITO_URI = URI.create(ENVIRONMENT.readEnv("COGNITO_URI"));
+
     private final HttpClient httpClient;
     private final URI cognitoUri;
 
@@ -133,6 +136,7 @@ public class RequestInfo {
      * @return a present {@link Optional} if there is a non empty value for the parameter, an empty {@link Optional}
      *     otherwise.
      */
+    @JsonIgnore
     public Optional<String> getRequestContextParameterOpt(JsonPointer jsonPointer) {
         return Optional.ofNullable(getRequestContext())
             .map(context -> context.at(jsonPointer))
@@ -228,6 +232,7 @@ public class RequestInfo {
             .orElseThrow();
     }
 
+    @JsonIgnore
     public boolean userIsAuthorized(String accessRight) {
         return checkAuthorizationOffline(accessRight)
                || checkAuthorizationOnline(accessRight);
@@ -242,6 +247,23 @@ public class RequestInfo {
     @JsonIgnore
     public String getNvaUsername() {
         return extractNvaUsernameOffline().orElseGet(this::fetchUserNameFromCognito);
+    }
+
+    @JsonIgnore
+    public URI getTopLevelOrgCristinId() {
+        return extractTopLevelOrgIdOffline()
+            .map(URI::create)
+            .orElseGet(this::fetchTopLevelOrgCristinIdFromCognito);
+    }
+
+    private Optional<String> extractTopLevelOrgIdOffline() {
+        return getRequestContextParameterOpt(TOP_LEVEL_ORG_CRISTIN_ID);
+    }
+
+    private URI fetchTopLevelOrgCristinIdFromCognito() {
+        return fetchUserInfoFromCognito()
+            .map(CognitoUserInfo::getTopOrgCristinid)
+            .orElseThrow();
     }
 
     private Optional<String> extractNvaUsernameOffline() {

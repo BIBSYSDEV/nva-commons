@@ -1,5 +1,6 @@
 package nva.commons.apigateway;
 
+import static no.unit.nva.auth.CognitoUserInfo.TOP_LEVEL_ORG_CRISTIN_ID_CLAIM;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
@@ -243,14 +244,7 @@ class RequestInfoTest {
     @Test
     void shouldReturnNotAuthorizedWhenRequestInfoDoesNotContainAccessRightsAndCheckIsPerformedOffline() {
         var usersCustomer = randomUri();
-        var requestInfo = new RequestInfo();
-        var requestContext = dtoObjectMapper.createObjectNode();
-        var authorizerNode = dtoObjectMapper.createObjectNode();
-        var claimsNode = dtoObjectMapper.createObjectNode();
-        claimsNode.put("custom:customerId", usersCustomer.toString());
-        authorizerNode.set("claims", claimsNode);
-        requestContext.set("authorizer", authorizerNode);
-        requestInfo.setRequestContext(requestContext);
+        var requestInfo = requestInfoWithAuthorizerClaim("custom:customerId", usersCustomer.toString());
         var notAllocatedAccessRight = randomString();
         assertThat(requestInfo.userIsAuthorized(notAllocatedAccessRight), is(false));
     }
@@ -312,6 +306,38 @@ class RequestInfoTest {
 
         var actualUsername = requestInfo.getNvaUsername();
         assertThat(actualUsername, is(equalTo(expectedUsername)));
+    }
+
+    @Test
+    void shouldReturnTopLevelOrgCristinIdWhenCurrentCustomerHasBeenSelectedForPerson() {
+        var topOrgCristinId = randomUri();
+        var cognitoUserEntry = CognitoUserInfo
+            .builder()
+            .withTopOrgCristinId(topOrgCristinId)
+            .build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
+        var requestInfo = createRequestInfoWithAccessToken();
+        assertThat(requestInfo.getTopLevelOrgCristinId(), is(equalTo(topOrgCristinId)));
+    }
+
+    @Test
+    void shouldReturnTopLevelOrgCristinIdWhenRequestsAuthorizerNodeContainsCorrespondingClaim() {
+        var topOrgCristinId = randomUri();
+        var requestInfo = requestInfoWithAuthorizerClaim(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM, topOrgCristinId.toString());
+
+        assertThat(requestInfo.getTopLevelOrgCristinId(), is(equalTo(topOrgCristinId)));
+    }
+
+    private RequestInfo requestInfoWithAuthorizerClaim(String claimKey, String claimValue) {
+        var requestInfo = new RequestInfo();
+        var requestContext = dtoObjectMapper.createObjectNode();
+        var authorizerNode = dtoObjectMapper.createObjectNode();
+        var claimsNode = dtoObjectMapper.createObjectNode();
+        claimsNode.put(claimKey, claimValue);
+        authorizerNode.set("claims", claimsNode);
+        requestContext.set("authorizer", authorizerNode);
+        requestInfo.setRequestContext(requestContext);
+        return requestInfo;
     }
 
     private CognitoUserInfo createCognitoUserEntry(URI usersCustomer, Set<String> accessRightsForCustomer) {

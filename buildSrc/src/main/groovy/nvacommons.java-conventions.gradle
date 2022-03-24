@@ -9,7 +9,7 @@ plugins {
 }
 
 group 'com.github.bibsysdev'
-version = '1.21.0-alpha3'
+version = '1.21.0-alpha6'
 
 repositories {
     mavenCentral()
@@ -25,7 +25,7 @@ test {
 jacocoTestReport {
     dependsOn(test)
     reports {
-        xml.enabled true
+        xml.required
     }
 }
 
@@ -66,8 +66,8 @@ checkstyle {
 
 tasks.withType(Checkstyle) {
     reports {
-        xml.enabled false
-        html.enabled true
+        xml.required
+        html.required
         html.stylesheet rootProject.resources.text.fromFile('config/checkstyle/checkstyle-simple.xsl')
     }
 }

@@ -36,25 +36,35 @@ public class AuthorizedBackendClient {
     private final HttpClient httpClient;
     private String accessToken;
 
-    @JacocoGenerated
-    public AuthorizedBackendClient() {
-        this(COGNITO_URI, HttpClient.newHttpClient());
-    }
-
-    public AuthorizedBackendClient(URI serverUri, HttpClient httpClient) {
+    protected AuthorizedBackendClient(URI serverUri, HttpClient httpClient) {
         this.serverUri = serverUri;
         this.httpClient = httpClient;
         refreshToken();
     }
 
-    public <T> HttpResponse<T> sendRequest(Builder request, BodyHandler<T> responseBodyHandler)
+    @JacocoGenerated
+    public static AuthorizedBackendClient create() {
+        return new AuthorizedBackendClient(COGNITO_URI, HttpClient.newHttpClient());
+    }
+
+    @JacocoGenerated
+    public static AuthorizedBackendClient create(HttpClient httpClient) {
+        return new AuthorizedBackendClient(COGNITO_URI, httpClient);
+    }
+
+    @JacocoGenerated
+    public static AuthorizedBackendClient create(URI serverUri, HttpClient httpClient) {
+        return new AuthorizedBackendClient(serverUri, httpClient);
+    }
+
+    public <T> HttpResponse<T> send(HttpRequest.Builder request, BodyHandler<T> responseBodyHandler)
         throws IOException, InterruptedException {
         var authorizedRequest = request.setHeader(AUTHORIZATION_HEADER, bearerToken()).build();
         return httpClient.send(authorizedRequest, responseBodyHandler);
     }
 
-    public <T> CompletableFuture<HttpResponse<T>> sendRequestAsync(Builder request,
-                                                                   BodyHandler<T> responseBodyHandler) {
+    public <T> CompletableFuture<HttpResponse<T>> sendAsync(Builder request,
+                                                            BodyHandler<T> responseBodyHandler) {
         var authorizedRequest = request.setHeader(AUTHORIZATION_HEADER, bearerToken()).build();
         return httpClient.sendAsync(authorizedRequest, responseBodyHandler);
     }
