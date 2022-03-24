@@ -35,7 +35,6 @@ public class CognitoUserInfo {
         return JsonConfig.beanFrom(CognitoUserInfo.class, json);
     }
 
-    @JacocoGenerated
     public URI getTopOrgCristinid() {
         return topOrgCristinid;
     }
@@ -48,32 +47,26 @@ public class CognitoUserInfo {
         this.nvaUsername = nvaUsername;
     }
 
-    @JacocoGenerated
     public URI getCurrentCustomer() {
         return currentCustomer;
     }
 
-    @JacocoGenerated
     public void setCurrentCustomer(URI currentCustomer) {
         this.currentCustomer = currentCustomer;
     }
 
-    @JacocoGenerated
     public String getFeideId() {
         return feideId;
     }
 
-    @JacocoGenerated
     public void setFeideId(String feideId) {
         this.feideId = feideId;
     }
 
-    @JacocoGenerated
     public String getAccessRights() {
         return nonNull(accessRights) ? accessRights : EMPTY_STRING;
     }
 
-    @JacocoGenerated
     public void setAccessRights(String accessRights) {
         this.accessRights = accessRights;
     }
