@@ -240,8 +240,9 @@ public class RequestInfo {
     }
 
     @JsonIgnore
-    public String getCustomerId() throws UnauthorizedException {
+    public URI getCustomerId() throws UnauthorizedException {
         return getRequestContextParameterOpt(CUSTOMER_ID)
+            .map(URI::create)
             .or(this::fetchCustomerIdFromCognito)
             .orElseThrow(UnauthorizedException::new);
     }
@@ -314,11 +315,10 @@ public class RequestInfo {
         return this.getHeader(HttpHeaders.AUTHORIZATION);
     }
 
-    private Optional<String> fetchCustomerIdFromCognito() {
+    private Optional<URI> fetchCustomerIdFromCognito() {
         return fetchUserInfoFromCognito()
             .toOptional()
-            .map(CognitoUserInfo::getCurrentCustomer)
-            .map(URI::toString);
+            .map(CognitoUserInfo::getCurrentCustomer);
     }
 
     @JsonIgnore

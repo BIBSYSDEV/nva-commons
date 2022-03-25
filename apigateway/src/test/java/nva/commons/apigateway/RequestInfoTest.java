@@ -165,8 +165,8 @@ class RequestInfoTest {
     @Test
     void requestInfoReturnsCustomerIdWhenRequestContainsCustomerIdClaim() throws UnauthorizedException {
         var requestInfo = new RequestInfo();
-        var expectedCustomerId = "customerId";
-        requestInfo.setRequestContext(createNestedNodesFromJsonPointer(CUSTOMER_ID, expectedCustomerId));
+        var expectedCustomerId = randomUri();
+        requestInfo.setRequestContext(createNestedNodesFromJsonPointer(CUSTOMER_ID, expectedCustomerId.toString()));
         var actual = requestInfo.getCustomerId();
         assertEquals(actual, expectedCustomerId);
     }
@@ -180,7 +180,7 @@ class RequestInfoTest {
 
         RequestInfo requestInfo = createRequestInfoWithAccessToken();
         var actualCustomerId = requestInfo.getCustomerId();
-        assertThat(URI.create(actualCustomerId), is(equalTo(expectedCurrentCustomer)));
+        assertThat(actualCustomerId, is(equalTo(expectedCurrentCustomer)));
     }
 
     @Test
@@ -349,7 +349,7 @@ class RequestInfoTest {
     }
 
     private RequestInfo requestInfoWithAuthorizerClaim(String claimKey, String claimValue) {
-        var requestInfo = new RequestInfo();
+        final var requestInfo = new RequestInfo();
         var requestContext = dtoObjectMapper.createObjectNode();
         var authorizerNode = dtoObjectMapper.createObjectNode();
         var claimsNode = dtoObjectMapper.createObjectNode();
@@ -383,7 +383,7 @@ class RequestInfoTest {
     }
 
     private RequestInfo createRequestInfoForOfflineAuthorization(List<String> usersAccessRights, URI usersCustomer) {
-        var requestInfo = new RequestInfo();
+        final var requestInfo = new RequestInfo();
         var requestContext = dtoObjectMapper.createObjectNode();
         var authorizerNode = dtoObjectMapper.createObjectNode();
         var claimsNode = dtoObjectMapper.createObjectNode();

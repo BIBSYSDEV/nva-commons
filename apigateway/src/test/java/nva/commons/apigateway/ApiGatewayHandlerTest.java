@@ -1,48 +1,5 @@
 package nva.commons.apigateway;
 
-import com.amazonaws.services.lambda.runtime.Context;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.google.common.net.HttpHeaders;
-import com.google.common.net.MediaType;
-import no.unit.nva.stubs.FakeContext;
-import no.unit.nva.testutils.HandlerRequestBuilder;
-import nva.commons.apigateway.exceptions.ApiGatewayException;
-import nva.commons.apigateway.exceptions.TestException;
-import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
-import nva.commons.apigateway.testutils.Handler;
-import nva.commons.apigateway.testutils.RawStringResponseHandler;
-import nva.commons.apigateway.testutils.RedirectHandler;
-import nva.commons.apigateway.testutils.RequestBody;
-import nva.commons.core.ioutils.IoUtils;
-import nva.commons.logutils.LogUtils;
-import nva.commons.logutils.TestAppender;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
-
-import javax.management.modelmbean.XMLParseException;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
@@ -64,6 +21,47 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import com.amazonaws.services.lambda.runtime.Context;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.google.common.net.HttpHeaders;
+import com.google.common.net.MediaType;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.management.modelmbean.XMLParseException;
+import no.unit.nva.stubs.FakeContext;
+import no.unit.nva.testutils.HandlerRequestBuilder;
+import nva.commons.apigateway.exceptions.ApiGatewayException;
+import nva.commons.apigateway.exceptions.TestException;
+import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
+import nva.commons.apigateway.testutils.Handler;
+import nva.commons.apigateway.testutils.RawStringResponseHandler;
+import nva.commons.apigateway.testutils.RedirectHandler;
+import nva.commons.apigateway.testutils.RequestBody;
+import nva.commons.core.ioutils.IoUtils;
+import nva.commons.logutils.LogUtils;
+import nva.commons.logutils.TestAppender;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.zalando.problem.Problem;
+import org.zalando.problem.Status;
 
 public class ApiGatewayHandlerTest {
 
@@ -550,6 +548,14 @@ public class ApiGatewayHandlerTest {
         return jsonNodeToInputStream(request);
     }
 
+    private InputStream requestWithHeaders() throws JsonProcessingException {
+        ObjectNode request = defaultRestObjectMapper.createObjectNode();
+        ObjectNode node = createBody();
+        request.set("body", node);
+        request.set("headers", createHeaders());
+        return jsonNodeToInputStream(request);
+    }
+
     private InputStream requestWithAcceptXmlHeader() throws JsonProcessingException {
         Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(HttpHeaders.ACCEPT, MediaType.XML_UTF_8.toString());
@@ -559,14 +565,6 @@ public class ApiGatewayHandlerTest {
         ObjectNode node = createBody();
         request.set("body", node);
         request.set("headers", createHeaders(headers));
-        return jsonNodeToInputStream(request);
-    }
-
-    private InputStream requestWithHeaders() throws JsonProcessingException {
-        ObjectNode request = defaultRestObjectMapper.createObjectNode();
-        ObjectNode node = createBody();
-        request.set("body", node);
-        request.set("headers", createHeaders());
         return jsonNodeToInputStream(request);
     }
 
