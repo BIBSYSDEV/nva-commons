@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import no.unit.nva.auth.CognitoUserInfo;
 import no.unit.nva.auth.FetchUserInfo;
 import nva.commons.apigateway.exceptions.BadRequestException;
+import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.attempt.Try;
@@ -239,14 +240,17 @@ public class RequestInfo {
     }
 
     @JsonIgnore
-    public Optional<String> getCustomerId() {
+    public String getCustomerId() throws UnauthorizedException {
         return getRequestContextParameterOpt(CUSTOMER_ID)
-            .or(this::fetchCustomerIdFromCognito);
+            .or(this::fetchCustomerIdFromCognito)
+            .orElseThrow(UnauthorizedException::new);
     }
 
     @JsonIgnore
-    public String getNvaUsername() {
-        return extractNvaUsernameOffline().orElseGet(this::fetchUserNameFromCognito);
+    public String getNvaUsername() throws UnauthorizedException {
+        return extractNvaUsernameOffline()
+            .or(this::fetchUserNameFromCognito)
+            .orElseThrow(UnauthorizedException::new);
     }
 
     @JsonIgnore
@@ -268,14 +272,15 @@ public class RequestInfo {
         return getRequestContextParameterOpt(NVA_USERNAME);
     }
 
-    private String fetchUserNameFromCognito() {
-        return fetchUserInfoFromCognito().map(CognitoUserInfo::getNvaUsername).orElseThrow();
+    private Optional<String> fetchUserNameFromCognito() {
+        return fetchUserInfoFromCognito()
+            .map(CognitoUserInfo::getNvaUsername)
+            .toOptional();
     }
 
     private static JsonPointer claimToJsonPointer(String claim) {
         return JsonPointer.compile(CLAIMS_PATH + claim);
     }
-
 
     private boolean checkAuthorizationOffline(String accessRight) {
         return getAccessRights().stream()
