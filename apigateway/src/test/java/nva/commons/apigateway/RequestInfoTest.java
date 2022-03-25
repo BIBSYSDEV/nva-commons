@@ -15,6 +15,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -35,6 +36,7 @@ import no.unit.nva.auth.CognitoUserInfo;
 import no.unit.nva.stubs.FakeAuthServer;
 import no.unit.nva.stubs.WiremockHttpClient;
 import nva.commons.apigateway.exceptions.ApiIoException;
+import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.core.paths.UriWrapper;
 import org.junit.jupiter.api.AfterEach;
@@ -161,22 +163,23 @@ class RequestInfoTest {
     }
 
     @Test
-    void requestInfoReturnsCustomerIdWhenRequestContainsCustomerIdClaim() {
+    void requestInfoReturnsCustomerIdWhenRequestContainsCustomerIdClaim() throws UnauthorizedException {
         var requestInfo = new RequestInfo();
         var expectedCustomerId = "customerId";
         requestInfo.setRequestContext(createNestedNodesFromJsonPointer(CUSTOMER_ID, expectedCustomerId));
-        var actual = requestInfo.getCustomerId().orElseThrow();
+        var actual = requestInfo.getCustomerId();
         assertEquals(actual, expectedCustomerId);
     }
 
     @Test
-    void shouldReturnCustomerIdWhenRequestDoesNotContainCustomerIdButHasAccessTokenAndCognitoUserHasSelectedCustomer() {
+    void shouldReturnCustomerIdWhenRequestDoesNotContainCustomerIdButHasAccessTokenAndCognitoUserHasSelectedCustomer()
+        throws UnauthorizedException {
         var expectedCurrentCustomer = randomUri();
         var cognitoUserEntry = createCognitoUserEntry(expectedCurrentCustomer, null);
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
 
         RequestInfo requestInfo = createRequestInfoWithAccessToken();
-        var actualCustomerId = requestInfo.getCustomerId().orElseThrow();
+        var actualCustomerId = requestInfo.getCustomerId();
         assertThat(URI.create(actualCustomerId), is(equalTo(expectedCurrentCustomer)));
     }
 
@@ -274,7 +277,7 @@ class RequestInfoTest {
 
     @Test
     void shouldReturnRequestUriFromRequestInfo() throws ApiIoException {
-        RequestInfo requestInfo = extractRequestInfoFromApiGatewayEvent(AWS_SAMPLE_PROXY_EVENT);
+        RequestInfo requestInfo = extractAccessRightsFromApiGatewayEvent();
 
         URI requestUri = requestInfo.getRequestUri();
         URI expectedRequestUri = new UriWrapper(RequestInfo.HTTPS, DOMAIN_NAME_FOUND_IN_RESOURCE_FILE)
@@ -286,7 +289,8 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnNvaUsernameFromCognitoWhenUserHasSelectedCustomerAndClaimInNotAvailableOffline() {
+    void shouldReturnNvaUsernameFromCognitoWhenUserHasSelectedCustomerAndClaimInNotAvailableOffline()
+        throws UnauthorizedException {
         var expectedUsername = randomString();
         var cognitoUserEntry = CognitoUserInfo.builder().withNvaUsername(expectedUsername).build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
@@ -296,7 +300,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnNvaUsernameWhenClaimInAvailableOffline() {
+    void shouldReturnNvaUsernameWhenClaimInAvailableOffline() throws UnauthorizedException {
         var cognitoUserEntry = CognitoUserInfo.builder().withNvaUsername(randomString()).build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
         var requestInfo = createRequestInfoWithAccessToken();
@@ -306,6 +310,22 @@ class RequestInfoTest {
 
         var actualUsername = requestInfo.getNvaUsername();
         assertThat(actualUsername, is(equalTo(expectedUsername)));
+    }
+
+    @Test
+    void shouldThrowUnauthorizedExceptionWhenNvaUsernameIsNotAvailable() {
+        var cognitoUserEntryWithoutNvaUsername = CognitoUserInfo.builder().build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutNvaUsername));
+        var requestInfo = createRequestInfoWithAccessToken();
+        assertThrows(UnauthorizedException.class, requestInfo::getNvaUsername);
+    }
+
+    @Test
+    void shouldThrowUnauthorizedExceptionWhenCustomerIdIsNotAvailable() {
+        var cognitoUserEntryWithoutCustomerId = CognitoUserInfo.builder().build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutCustomerId));
+        var requestInfo = createRequestInfoWithAccessToken();
+        assertThrows(UnauthorizedException.class, requestInfo::getCustomerId);
     }
 
     @Test
@@ -358,7 +378,7 @@ class RequestInfoTest {
 
     private RequestInfo createRequestInfoWithAccessToken() {
         var requestInfo = new RequestInfo(httpClient, cognito.getServerUri());
-        requestInfo.setHeaders(Map.of(HttpHeaders.AUTHORIZATION, bearerToken()));
+        requestInfo.setHeaders(Map.of(HttpHeaders.AUTHORIZATION, bearerToken(userAccessToken)));
         return requestInfo;
     }
 
@@ -375,13 +395,13 @@ class RequestInfoTest {
         return requestInfo;
     }
 
-    private String bearerToken() {
+    private String bearerToken(String userAccessToken) {
         return "Bearer " + userAccessToken;
     }
 
-    private RequestInfo extractRequestInfoFromApiGatewayEvent(Path eventWithAccessRights)
+    private RequestInfo extractAccessRightsFromApiGatewayEvent()
         throws ApiIoException {
-        String event = IoUtils.stringFromResources(eventWithAccessRights);
+        String event = IoUtils.stringFromResources(RequestInfoTest.AWS_SAMPLE_PROXY_EVENT);
         ApiMessageParser<String> apiMessageParser = new ApiMessageParser<>();
         return apiMessageParser.getRequestInfo(event);
     }
