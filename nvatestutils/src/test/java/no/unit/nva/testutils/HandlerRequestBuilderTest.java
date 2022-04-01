@@ -38,12 +38,12 @@ class HandlerRequestBuilderTest {
         "/requestContext/authorizer/claims/custom:customerId");
     public static final JsonPointer ACCESS_RIGHTS =
         JsonPointer.compile("/requestContext/authorizer/claims/custom:accessRights");
-    public static final JsonPointer CRISTIN_ID =
+    public static final JsonPointer PERSON_CRISTIN_ID =
         JsonPointer.compile("/requestContext/authorizer/claims/custom:cristinId");
 
     private static final String HTTP_METHOD = "httpMethod";
-    public static final String TOP_ORG_CRISTIN_ID_CLAIM_PATH = "/requestContext/authorizer/claims/custom"
-                                                               + ":topOrgCristinId";
+    public static final String TOP_ORG_CRISTIN_ID_CLAIM_PATH =
+        "/requestContext/authorizer/claims/custom:topOrgCristinId";
 
     // Can not use ObjectMapper from nva-commons because it would create a circular dependency
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -201,15 +201,15 @@ class HandlerRequestBuilderTest {
     }
 
     @Test
-    void shouldInsertCustomersCristinIdWhenSet() throws JsonProcessingException {
-        var expectedCristinId = randomUri().toString();
+    void shouldInsertPersonsCristinIdWhenSet() throws JsonProcessingException {
+        var expectedCristinId = randomUri();
         var request = new HandlerRequestBuilder<String>(objectMapper)
-            .withCustomerCristinId(expectedCristinId)
+            .withPersonCristinId(expectedCristinId)
             .build();
 
         JsonNode requestJson = toJsonNode(request);
-        String actualCristinId = requestJson.at(CRISTIN_ID).asText();
-        assertThat(actualCristinId, is(equalTo(expectedCristinId)));
+        String actualCristinId = requestJson.at(PERSON_CRISTIN_ID).asText();
+        assertThat(actualCristinId, is(equalTo(expectedCristinId.toString())));
     }
 
     @Test

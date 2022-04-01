@@ -36,7 +36,7 @@ public class HandlerRequestBuilder<T> {
     public static final String CUSTOMER_ID_CLAIM = "custom:customerId";
     public static final String APPLICATION_ROLES_CLAIM = "custom:applicationRoles";
     public static final String ACCESS_RIGHTS_CLAIM = "custom:accessRights";
-    private static final String CUSTOMER_CRISTIN_ID_CLAIM = "custom:cristinId";
+    public static final String PERSON_CRISTIN_ID = "custom:cristinId";
     private static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
     public static final String ACCESS_RIGHTS_SEPARATOR = ",";
     public static final String EMPTY_STRING = "";
@@ -172,15 +172,15 @@ public class HandlerRequestBuilder<T> {
         return this;
     }
 
-    public HandlerRequestBuilder<T> withCustomerCristinId(String customerCristinId) {
-        ObjectNode claims = getOrCreateClaimsNode();
-        claims.put(CUSTOMER_CRISTIN_ID_CLAIM, customerCristinId);
-        return this;
-    }
-
     public HandlerRequestBuilder<T> withTopLevelCristinOrgId(URI topLevelCristinOrgId) {
         ObjectNode claims = getOrCreateClaimsNode();
         claims.put(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM, topLevelCristinOrgId.toString());
+        return this;
+    }
+
+    public HandlerRequestBuilder<T> withPersonCristinId(URI personCristinId) {
+        ObjectNode claims = getOrCreateClaimsNode();
+        claims.put(PERSON_CRISTIN_ID, personCristinId.toString());
         return this;
     }
 
