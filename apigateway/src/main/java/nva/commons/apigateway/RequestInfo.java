@@ -104,6 +104,11 @@ public class RequestInfo {
     }
 
     @JsonIgnore
+    public String getAuthHeader() {
+        return getHeader(HttpHeaders.AUTHORIZATION);
+    }
+
+    @JsonIgnore
     public String getQueryParameter(String parameter) throws BadRequestException {
         return getQueryParameterOpt(parameter)
             .orElseThrow(() -> new BadRequestException(MISSING_FROM_QUERY_PARAMETERS + parameter));
