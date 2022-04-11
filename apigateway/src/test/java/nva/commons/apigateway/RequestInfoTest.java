@@ -53,6 +53,9 @@ class RequestInfoTest {
     public static final String JSON_POINTER = "/authorizer/claims/key";
     public static final Path EVENT_WITH_UNKNOWN_REQUEST_INFO = Path.of("apiGatewayMessages",
                                                                        "eventWithUnknownRequestInfo.json");
+    public static final Path EVENT_WITH_AUTH_HEADER = Path.of("apiGatewayMessages",
+                                                              "event_with_auth_header.json");
+
     public static final String UNDEFINED_REQUEST_INFO_PROPERTY = "body";
     public static final String PATH_DELIMITER = "/";
     public static final int UNNECESSARY_ROOT_NODE = 0;
@@ -70,6 +73,7 @@ class RequestInfoTest {
                                                            "missingRequestInfo.json");
     private static final Path AWS_SAMPLE_PROXY_EVENT = Path.of(API_GATEWAY_MESSAGES_FOLDER,
                                                                "awsSampleProxyEvent.json");
+    private static final String HARDCODED_AUTH_HEADER = "Bearer THE_ACCESS_TOKEN";
 
     static {
         QUERY_PARAMS_FOUND_IN_RESOURCE_FILE = new TreeMap<>();
@@ -150,7 +154,7 @@ class RequestInfoTest {
 
     @Test
     @DisplayName("RequestInfo initializes headers to empty map when header parameter is missing")
-    void requestInfoInitializesHeadersToEmptyMapWhenPathParametersParameterIsMissing()
+    void requestInfoInitializesPathsParamsToEmptyMapWhenPathParametersParameterIsMissing()
         throws JsonProcessingException {
         checkForNonNullMap(MISSING_MAP_VALUES, RequestInfo::getPathParameters);
     }
@@ -346,6 +350,13 @@ class RequestInfoTest {
         var requestInfo = requestInfoWithAuthorizerClaim(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM, topOrgCristinId.toString());
 
         assertThat(requestInfo.getTopLevelOrgCristinId().orElseThrow(), is(equalTo(topOrgCristinId)));
+    }
+
+    @Test
+    void shouldReturnAuthHeaderWhenAuthHeaderIsAvailable() throws JsonProcessingException {
+        var requestInfoString = IoUtils.stringFromResources(EVENT_WITH_AUTH_HEADER);
+        var requestInfo = dtoObjectMapper.readValue(requestInfoString, RequestInfo.class);
+        assertThat(requestInfo.getAuthHeader(), is(equalTo(HARDCODED_AUTH_HEADER)));
     }
 
     private RequestInfo requestInfoWithAuthorizerClaim(String claimKey, String claimValue) {
