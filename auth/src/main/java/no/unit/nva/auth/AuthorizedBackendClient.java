@@ -58,6 +58,7 @@ public class AuthorizedBackendClient {
         return client;
     }
 
+    @JacocoGenerated
     public static AuthorizedBackendClient prepareWithUserCredentials(String bearerToken) {
         return prepareWithUserCredentials(HttpClient.newHttpClient(), bearerToken);
     }
