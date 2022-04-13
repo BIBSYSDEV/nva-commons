@@ -34,38 +34,47 @@ public class AuthorizedBackendClient {
     private static final URI COGNITO_URI = URI.create(ENVIRONMENT.readEnv("COGNITO_URI"));
     private final URI serverUri;
     private final HttpClient httpClient;
-    private String accessToken;
+    private String bearerToken;
 
-    protected AuthorizedBackendClient(URI serverUri, HttpClient httpClient) {
+    protected AuthorizedBackendClient(URI serverUri, HttpClient httpClient, String bearerToken) {
         this.serverUri = serverUri;
         this.httpClient = httpClient;
-        refreshToken();
+        this.bearerToken = bearerToken;
     }
 
     @JacocoGenerated
-    public static AuthorizedBackendClient create() {
-        return new AuthorizedBackendClient(COGNITO_URI, HttpClient.newHttpClient());
+    public static AuthorizedBackendClient prepareWithBackendCredentials() {
+        return prepareWithBackendCredentials(HttpClient.newHttpClient());
     }
 
     @JacocoGenerated
-    public static AuthorizedBackendClient create(HttpClient httpClient) {
-        return new AuthorizedBackendClient(COGNITO_URI, httpClient);
+    public static AuthorizedBackendClient prepareWithBackendCredentials(HttpClient httpClient) {
+        return prepareWithBackendCredentials(COGNITO_URI, httpClient);
     }
 
-    @JacocoGenerated
-    public static AuthorizedBackendClient create(URI serverUri, HttpClient httpClient) {
-        return new AuthorizedBackendClient(serverUri, httpClient);
+    public static AuthorizedBackendClient prepareWithBackendCredentials(URI serverUri, HttpClient httpClient) {
+        var client = new AuthorizedBackendClient(serverUri, httpClient, null);
+        client.refreshToken();
+        return client;
+    }
+
+    public static AuthorizedBackendClient prepareWithUserCredentials(String bearerToken) {
+        return prepareWithUserCredentials(HttpClient.newHttpClient(), bearerToken);
+    }
+
+    public static AuthorizedBackendClient prepareWithUserCredentials(HttpClient httpClient, String bearerToken) {
+        return new AuthorizedBackendClient(null, httpClient, bearerToken);
     }
 
     public <T> HttpResponse<T> send(HttpRequest.Builder request, BodyHandler<T> responseBodyHandler)
         throws IOException, InterruptedException {
-        var authorizedRequest = request.setHeader(AUTHORIZATION_HEADER, bearerToken()).build();
+        var authorizedRequest = request.setHeader(AUTHORIZATION_HEADER, bearerToken).build();
         return httpClient.send(authorizedRequest, responseBodyHandler);
     }
 
     public <T> CompletableFuture<HttpResponse<T>> sendAsync(Builder request,
                                                             BodyHandler<T> responseBodyHandler) {
-        var authorizedRequest = request.setHeader(AUTHORIZATION_HEADER, bearerToken()).build();
+        var authorizedRequest = request.setHeader(AUTHORIZATION_HEADER, bearerToken).build();
         return httpClient.sendAsync(authorizedRequest, responseBodyHandler);
     }
 
@@ -89,10 +98,10 @@ public class AuthorizedBackendClient {
     private void refreshToken() {
         var tokenUri = standardOauth2TokenEndpoint(serverUri);
         var request = formatRequestForJwtToken(tokenUri);
-        this.accessToken = sendRequestAndExtractToken(request);
+        this.bearerToken = sendRequestAndExtractToken(request);
     }
 
-    private String bearerToken() {
+    private String bearerToken(String accessToken) {
         return "Bearer " + accessToken;
     }
 
@@ -102,6 +111,7 @@ public class AuthorizedBackendClient {
             .map(JSON.std::mapFrom)
             .map(json -> json.get(JWT_TOKEN_FIELD))
             .map(Objects::toString)
+            .map(this::bearerToken)
             .orElseThrow();
     }
 
