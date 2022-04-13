@@ -15,6 +15,7 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.paths.UriWrapper;
@@ -29,9 +30,9 @@ public class AuthorizedBackendClient {
 
     public static final Map<String, String> GRANT_TYPE_CLIENT_CREDENTIALS = Map.of("grant_type", "client_credentials");
 
-    protected static final String CLIENT_ID = ENVIRONMENT.readEnv("BACKEND_CLIENT_ID");
-    protected static final String CLIENT_SECRET = ENVIRONMENT.readEnv("BACKEND_CLIENT_SECRET");
-    private static final URI COGNITO_URI = URI.create(ENVIRONMENT.readEnv("COGNITO_URI"));
+    protected static final Supplier<String> CLIENT_ID = () -> ENVIRONMENT.readEnv("BACKEND_CLIENT_ID");
+    protected static final Supplier<String> CLIENT_SECRET = () -> ENVIRONMENT.readEnv("BACKEND_CLIENT_SECRET");
+    protected static final Supplier<URI> COGNITO_URI = () -> URI.create(ENVIRONMENT.readEnv("COGNITO_URI"));
     private final URI serverUri;
     private final HttpClient httpClient;
     private String bearerToken;
@@ -49,7 +50,7 @@ public class AuthorizedBackendClient {
 
     @JacocoGenerated
     public static AuthorizedBackendClient prepareWithBackendCredentials(HttpClient httpClient) {
-        return prepareWithBackendCredentials(COGNITO_URI, httpClient);
+        return prepareWithBackendCredentials(COGNITO_URI.get(), httpClient);
     }
 
     public static AuthorizedBackendClient prepareWithBackendCredentials(URI serverUri, HttpClient httpClient) {
@@ -58,6 +59,7 @@ public class AuthorizedBackendClient {
         return client;
     }
 
+    @JacocoGenerated
     public static AuthorizedBackendClient prepareWithUserCredentials(String bearerToken) {
         return prepareWithUserCredentials(HttpClient.newHttpClient(), bearerToken);
     }
@@ -89,7 +91,7 @@ public class AuthorizedBackendClient {
     }
 
     private static String formatBasicAuthenticationHeader() {
-        return attempt(() -> String.format("%s:%s", CLIENT_ID, CLIENT_SECRET))
+        return attempt(() -> String.format("%s:%s", CLIENT_ID.get(), CLIENT_SECRET.get()))
             .map(str -> Base64.getEncoder().encodeToString(str.getBytes(StandardCharsets.UTF_8)))
             .map(credentials -> "Basic " + credentials)
             .orElseThrow();
