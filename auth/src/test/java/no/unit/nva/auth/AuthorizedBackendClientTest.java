@@ -2,20 +2,27 @@ package no.unit.nva.auth;
 
 import static no.unit.nva.auth.AuthorizedBackendClient.CLIENT_ID;
 import static no.unit.nva.auth.AuthorizedBackendClient.CLIENT_SECRET;
+import static no.unit.nva.auth.AuthorizedBackendClient.COGNITO_URI;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Supplier;
 import no.unit.nva.stubs.FakeAuthServer;
 import no.unit.nva.stubs.WiremockHttpClient;
 import nva.commons.core.paths.UriWrapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 class AuthorizedBackendClientTest {
 
@@ -29,10 +36,10 @@ class AuthorizedBackendClientTest {
     public void init() {
         FakeAuthServer authServer = new FakeAuthServer();
         expectedAccessToken = randomString();
-        protectedContent = authServer.addBackendClient(CLIENT_ID,
-                                                       CLIENT_SECRET,
-                                                       expectedAccessToken,
-                                                       EXAMPLE_RESOURCE_PATH);
+        protectedContent = authServer.registerBackendClient(CLIENT_ID.get(),
+                                                            CLIENT_SECRET.get(),
+                                                            expectedAccessToken,
+                                                            EXAMPLE_RESOURCE_PATH);
         serverUri = authServer.getServerUri();
         this.httpClient = WiremockHttpClient.create();
     }
@@ -71,5 +78,23 @@ class AuthorizedBackendClientTest {
         var asyncResponse =
             client.sendAsync(request, BodyHandlers.ofString(StandardCharsets.UTF_8)).join();
         assertThat(asyncResponse.body(), containsString(protectedContent));
+    }
+
+    @Test
+    void shouldNotRequireEnvVariablesForBackendAccessTokenIfUserAccessTokenIsUsed() {
+        assertThat(CLIENT_ID, is(instanceOf(Supplier.class)));
+        assertThat(CLIENT_SECRET, is(instanceOf(Supplier.class)));
+        assertThat(COGNITO_URI, is(instanceOf(Supplier.class)));
+    }
+
+    @Test
+    void shouldReadAllNecessaryInformationFromEnvWhenBackendAccessTokenIsUsed() {
+        Executable action = AuthorizedBackendClient::prepareWithBackendCredentials;
+        assertThatExceptionIsTheExpectedNetworkExceptionAndNotEnvVariableInitException(action);
+    }
+
+    private void assertThatExceptionIsTheExpectedNetworkExceptionAndNotEnvVariableInitException(Executable action) {
+        var exception = assertThrows(RuntimeException.class, action);
+        assertThat(exception.getCause(), is(instanceOf(ConnectException.class)));
     }
 }

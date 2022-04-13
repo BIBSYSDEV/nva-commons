@@ -63,10 +63,10 @@ public class FakeAuthServer {
         );
     }
 
-    public String addBackendClient(String clientId,
-                                   String clientSecret,
-                                   String expectedAccessToken,
-                                   String exampleResourcePath) {
+    public String registerBackendClient(String clientId,
+                                        String clientSecret,
+                                        String expectedAccessToken,
+                                        String exampleResourcePath) {
         stubFor(post(OAUTH_TOKEN)
                     .withBasicAuth(clientId, clientSecret)
                     .withRequestBody(new ContainsPattern("grant_type=client_credentials"))
