@@ -23,11 +23,12 @@ class AuthorizedBackendClientTest {
     private URI serverUri;
     private HttpClient httpClient;
     private String protectedContent;
+    private String expectedAccessToken;
 
     @BeforeEach
     public void init() {
         FakeAuthServer authServer = new FakeAuthServer();
-        var expectedAccessToken = randomString();
+        expectedAccessToken = randomString();
         protectedContent = authServer.addBackendClient(CLIENT_ID,
                                                        CLIENT_SECRET,
                                                        expectedAccessToken,
@@ -37,8 +38,9 @@ class AuthorizedBackendClientTest {
     }
 
     @Test
-    void shouldSendRequestsContainingTheAccessToken() throws IOException, InterruptedException {
-        var client = AuthorizedBackendClient.create(serverUri, httpClient);
+    void shouldSendRequestsContainingTheBackendAccessTokenWhenUserAccessTokenIsNotSubmitted()
+        throws IOException, InterruptedException {
+        var client = AuthorizedBackendClient.prepareWithBackendCredentials(serverUri, httpClient);
         var resourceUri = UriWrapper.fromUri(serverUri).addChild(EXAMPLE_RESOURCE_PATH).getUri();
         var request = HttpRequest.newBuilder(resourceUri).GET();
         var response = client.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
@@ -46,12 +48,28 @@ class AuthorizedBackendClientTest {
     }
 
     @Test
-    void shouldSendAsyncRequestsContainingTheAccessToken() {
-        var client = AuthorizedBackendClient.create(serverUri, httpClient);
+    void shouldSendAsyncRequestsContainingTheAccessTokenWhenUserAccessTokenIsNotSubmitted() {
+        var client = AuthorizedBackendClient.prepareWithBackendCredentials(serverUri, httpClient);
         var resourceUri = UriWrapper.fromUri(serverUri).addChild(EXAMPLE_RESOURCE_PATH).getUri();
         var request = HttpRequest.newBuilder(resourceUri).GET();
         var response =
             client.sendAsync(request, BodyHandlers.ofString(StandardCharsets.UTF_8)).join();
         assertThat(response.body(), containsString(protectedContent));
+    }
+
+    @Test
+    void shouldSendRequestsContainingTheUserAccessTokenWhenUserAccessTokenIsSubmitted()
+        throws IOException, InterruptedException {
+        String bearerToken = "Bearer " + expectedAccessToken;
+        var client = AuthorizedBackendClient.prepareWithUserCredentials(httpClient, bearerToken);
+        var resourceUri = UriWrapper.fromUri(serverUri).addChild(EXAMPLE_RESOURCE_PATH).getUri();
+        var request = HttpRequest.newBuilder(resourceUri).GET();
+
+        var response = client.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
+        assertThat(response.body(), containsString(protectedContent));
+
+        var asyncResponse =
+            client.sendAsync(request, BodyHandlers.ofString(StandardCharsets.UTF_8)).join();
+        assertThat(asyncResponse.body(), containsString(protectedContent));
     }
 }
