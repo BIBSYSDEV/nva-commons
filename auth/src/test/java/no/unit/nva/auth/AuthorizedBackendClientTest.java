@@ -42,8 +42,8 @@ class AuthorizedBackendClientTest {
     }
 
     @Test
-    void shouldSendRequestsContainingTheBackendAccessTokenWhenUserAccessTokenIsNotSubmitted() throws IOException,
-                                                                                                     InterruptedException {
+    void shouldSendRequestsContainingTheBackendAccessTokenWhenUserAccessTokenIsNotSubmitted()
+        throws IOException, InterruptedException {
         var client = AuthorizedBackendClient.prepareWithBackendCredentials(serverUri, httpClient);
         var resourceUri = UriWrapper.fromUri(serverUri).addChild(EXAMPLE_RESOURCE_PATH).getUri();
         var request = HttpRequest.newBuilder(resourceUri).GET();

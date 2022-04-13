@@ -103,7 +103,7 @@ public class AuthorizedBackendClient {
         this.bearerToken = sendRequestAndExtractToken(request);
     }
 
-    private String bearerToken(String accessToken) {
+    private String createBearerToken(String accessToken) {
         return "Bearer " + accessToken;
     }
 
@@ -113,7 +113,7 @@ public class AuthorizedBackendClient {
             .map(JSON.std::mapFrom)
             .map(json -> json.get(JWT_TOKEN_FIELD))
             .map(Objects::toString)
-            .map(this::bearerToken)
+            .map(this::createBearerToken)
             .orElseThrow();
     }
 
