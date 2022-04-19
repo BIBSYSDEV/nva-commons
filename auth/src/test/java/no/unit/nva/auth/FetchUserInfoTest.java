@@ -37,7 +37,8 @@ class FetchUserInfoTest {
         var accessToken = randomString();
         var expectedUserInfo = CognitoUserInfo.builder().withCurrentCustomer(randomUri()).build();
         authServer.setUserBase(Map.of(accessToken, expectedUserInfo));
-        var fetchUserInfo = new FetchUserInfo(httpClient, authServer.getServerUri(), bearerToken(accessToken));
+        var fetchUserInfo =
+            new FetchUserInfo(httpClient, () -> authServer.getServerUri(), bearerToken(accessToken));
         var actualUserInfo = fetchUserInfo.fetch();
         assertThat(actualUserInfo, is(equalTo(expectedUserInfo)));
     }
@@ -48,7 +49,8 @@ class FetchUserInfoTest {
         var expectedUserInfo = CognitoUserInfo.builder().withCurrentCustomer(randomUri()).build();
         authServer.setUserBase(Map.of(accessToken, expectedUserInfo));
         String unexpectedToken = randomString();
-        var fetchUserInfo = new FetchUserInfo(httpClient, authServer.getServerUri(), bearerToken(unexpectedToken));
+        var fetchUserInfo =
+            new FetchUserInfo(httpClient, () -> authServer.getServerUri(), bearerToken(unexpectedToken));
         var exception = assertThrows(RuntimeException.class, fetchUserInfo::fetch);
         assertThat(exception.getMessage(), containsString(FetchUserInfo.AUTHORIZATION_ERROR_MESSAGE));
     }

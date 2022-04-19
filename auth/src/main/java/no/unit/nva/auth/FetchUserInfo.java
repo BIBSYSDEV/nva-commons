@@ -6,6 +6,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.function.Supplier;
 import nva.commons.core.paths.UriWrapper;
 
 public class FetchUserInfo {
@@ -14,17 +15,17 @@ public class FetchUserInfo {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String AUTHORIZATION_ERROR_MESSAGE = "Could not authorizer user";
     private final HttpClient httpClient;
-    private final URI cognitoUri;
+    private final Supplier<URI> cognitoUri;
     private final String authorizationHeader;
 
-    public FetchUserInfo(HttpClient httpClient, URI cognitoUri, String authorizationHeader) {
+    public FetchUserInfo(HttpClient httpClient, Supplier<URI> cognitoUri, String authorizationHeader) {
         this.httpClient = httpClient;
         this.cognitoUri = cognitoUri;
         this.authorizationHeader = authorizationHeader;
     }
 
     public CognitoUserInfo fetch() {
-        var queryUri = UriWrapper.fromUri(cognitoUri).addChild(OAUTH_USER_INFO_ENDPOINT).getUri();
+        var queryUri = UriWrapper.fromUri(cognitoUri.get()).addChild(OAUTH_USER_INFO_ENDPOINT).getUri();
         var request = HttpRequest.newBuilder(queryUri)
             .header(AUTHORIZATION_HEADER, authorizationHeader)
             .GET()
