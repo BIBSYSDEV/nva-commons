@@ -26,6 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import no.unit.nva.auth.CognitoUserInfo;
 import no.unit.nva.auth.FetchUserInfo;
@@ -62,10 +63,10 @@ public class RequestInfo {
     public static final JsonPointer NVA_USERNAME = claimToJsonPointer(NVA_USERNAME_CLAIM);
     private static final JsonPointer TOP_LEVEL_ORG_CRISTIN_ID = claimToJsonPointer(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM);
     private static final HttpClient DEFAULT_HTTP_CLIENT = HttpClient.newBuilder().build();
-    private static final URI DEFAULT_COGNITO_URI = URI.create(ENVIRONMENT.readEnv("COGNITO_URI"));
+    public static final Supplier<URI> DEFAULT_COGNITO_URI = () -> URI.create(ENVIRONMENT.readEnv("COGNITO_URI"));
 
     private final HttpClient httpClient;
-    private final URI cognitoUri;
+    private final Supplier<URI> cognitoUri;
 
     @JsonProperty(HEADERS_FIELD)
     private Map<String, String> headers;
@@ -82,7 +83,7 @@ public class RequestInfo {
     @JsonAnySetter
     private Map<String, Object> otherProperties;
 
-    public RequestInfo(HttpClient httpClient, URI cognitoUri) {
+    public RequestInfo(HttpClient httpClient, Supplier<URI> cognitoUri) {
         this.httpClient = httpClient;
         this.cognitoUri = cognitoUri;
     }

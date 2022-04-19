@@ -359,6 +359,13 @@ class RequestInfoTest {
         assertThat(requestInfo.getAuthHeader(), is(equalTo(HARDCODED_AUTH_HEADER)));
     }
 
+    @Test
+    void shouldReadCognitoUriFromEnvByDefault() throws JsonProcessingException {
+        var requestInfoString = IoUtils.stringFromResources(EVENT_WITH_AUTH_HEADER);
+        var requestInfo = dtoObjectMapper.readValue(requestInfoString, RequestInfo.class);
+        assertThrows(UnauthorizedException.class, () -> requestInfo.getNvaUsername());
+    }
+
     private RequestInfo requestInfoWithAuthorizerClaim(String claimKey, String claimValue) {
         final var requestInfo = new RequestInfo();
         var requestContext = dtoObjectMapper.createObjectNode();
@@ -388,7 +395,7 @@ class RequestInfoTest {
     }
 
     private RequestInfo createRequestInfoWithAccessToken() {
-        var requestInfo = new RequestInfo(httpClient, cognito.getServerUri());
+        var requestInfo = new RequestInfo(httpClient, () -> cognito.getServerUri());
         requestInfo.setHeaders(Map.of(HttpHeaders.AUTHORIZATION, bearerToken(userAccessToken)));
         return requestInfo;
     }
