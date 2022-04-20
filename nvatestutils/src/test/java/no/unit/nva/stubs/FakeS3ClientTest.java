@@ -5,7 +5,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-import com.github.javafaker.Faker;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -29,7 +28,6 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 
 class FakeS3ClientTest {
 
-    public static final Faker FAKER = Faker.instance();
     public static final URI SOME_URI = URI.create("s3://bucket/some/path/file.txt");
     public static final String SOME_BUCKET = "somebucket";
     public static final String SOME_BUCKET_URI = "s3://" + SOME_BUCKET;

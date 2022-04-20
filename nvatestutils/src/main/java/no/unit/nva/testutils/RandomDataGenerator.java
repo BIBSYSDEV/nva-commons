@@ -3,7 +3,6 @@ package no.unit.nva.testutils;
 import static nva.commons.core.attempt.Try.attempt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.javafaker.Faker;
 import java.net.URI;
 import java.sql.Date;
 import java.time.Instant;
@@ -14,6 +13,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.Random;
+import net.datafaker.Faker;
 import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.core.JacocoGenerated;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -24,7 +24,7 @@ public final class RandomDataGenerator {
     public static final int MIN_RANDOM_STRING_LENGTH = 10;
     public static final int MAX_RANDOM_STRING_LENGTH = 20;
     public static final Random RANDOM = new Random();
-    public static final Faker FAKER = Faker.instance();
+    public static final Faker FAKER = new Faker();
     public static final Instant BEGINNING_OF_TIME =
         LocalDateTime.of(1971, Month.JANUARY, 2, 0, 0).toInstant(ZoneOffset.UTC);
     public static final ObjectMapper objectMapper = JsonUtils.dtoObjectMapper;
