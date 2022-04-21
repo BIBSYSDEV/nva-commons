@@ -4,6 +4,7 @@ import static com.google.common.net.MediaType.JSON_UTF_8;
 import static nva.commons.core.attempt.Try.attempt;
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
@@ -20,8 +21,6 @@ import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
 import nva.commons.core.attempt.Failure;
 import nva.commons.core.ioutils.IoUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Template class for implementing Lambda function handlers that get activated through a call to ApiGateway. This class
@@ -35,7 +34,6 @@ import org.slf4j.LoggerFactory;
 public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     public static final String REQUEST_ID = "RequestId:";
-    private static final Logger logger = LoggerFactory.getLogger(RestRequestHandler.class);
     public static final String SPACE = " ";
     public static final String EMPTY_STRING = "";
     public static final String COMMA = ",";
@@ -124,7 +122,8 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
-        logger.info(REQUEST_ID + context.getAwsRequestId());
+        var logger = context.getLogger();
+        logger.log(REQUEST_ID + context.getAwsRequestId());
         I inputObject = null;
         try {
             init(outputStream, context);
@@ -138,9 +137,9 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
             writeOutput(inputObject, response, requestInfo);
         } catch (ApiGatewayException e) {
-            handleExpectedException(context, inputObject, e);
+            handleExpectedException(context, inputObject, logger, e);
         } catch (Exception e) {
-            handleUnexpectedException(context, inputObject, e);
+            handleUnexpectedException(context, inputObject, logger, e);
         }
     }
 
@@ -148,15 +147,17 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
         return new BadRequestException(fail.getException().getMessage(), fail.getException());
     }
 
-    protected void handleUnexpectedException(Context context, I inputObject, Exception e) throws IOException {
-        logger.error(e.getMessage());
-        logger.error(stackTraceInSingleLine(e));
+    protected void handleUnexpectedException(Context context, I inputObject, LambdaLogger logger, Exception e)
+        throws IOException {
+        logger.log(e.getMessage());
+        logger.log(stackTraceInSingleLine(e));
         writeUnexpectedFailure(inputObject, e, context.getAwsRequestId());
     }
 
-    protected void handleExpectedException(Context context, I inputObject, ApiGatewayException e) throws IOException {
-        logger.warn(e.getMessage());
-        logger.warn(stackTraceInSingleLine(e));
+    protected void handleExpectedException(Context context, I inputObject, LambdaLogger logger, ApiGatewayException e)
+        throws IOException {
+        logger.log(e.getMessage());
+        logger.log(stackTraceInSingleLine(e));
         writeExpectedFailure(inputObject, e, context.getAwsRequestId());
     }
 

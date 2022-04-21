@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.nio.file.Path;
+import no.unit.nva.stubs.FakeContext;
 import nva.commons.core.Environment;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +37,7 @@ public class VoidTest {
     @Test
     public void setup() {
         environment = mock(Environment.class);
-        context = mock(Context.class);
+        context = new FakeContext();
         when(environment.readEnv(anyString())).thenReturn(SOME_ENV_VALUE);
     }
 

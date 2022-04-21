@@ -38,7 +38,6 @@ aws-sdk2-urlconnection = { group = 'software.amazon.awssdk', name = 'url-connect
 aws-sdk2-dynamo = { group = 'software.amazon.awssdk', name = 'dynamodb', version.ref = 'awsSdk2' }
 aws-sdk2-cognitoidp = { group = 'software.amazon.awssdk', name = 'cognitoidentityprovider', version.ref = 'awsSdk2' }
 
-
 aws-http-client-spi = { group = 'software.amazon.awssdk', name = 'http-client-spi', version = 'awsSdk2' }
 aws-apache-client = { group = 'software.amazon.awssdk', name = 'apache-client', version.ref = 'awsSdk2' }
 aws-ion = { group = 'software.amazon.ion', name = 'ion-java', version.ref = 'awsIon' }
@@ -87,5 +86,5 @@ testing = ['mockito-core', 'hamcrest', 'hamcrest-core', 'junit-jupiter', 'junit-
     'junit-jupiter-params', 'junit-jupiter-engine', 'datafaker', 'hamcrest-optional', 'commons-lang']
 jackson = ['jackson-core', 'jackson-datatype-jdk8', 'jackson-datatype-jsr310', 'jackson-databind', 'jackson-annotations', 'jackson-module-parameter-names', 'jackson-datatype-problem']
 jacksonjr = ['jackson-jr-objects', 'jackson-jr-annotations']
-logging = ['log4j-core', 'log4j-api', 'log4j-slf4j18-impl', 'slf4j-api']
+logging = ['log4j-core', 'log4j-api', 'log4j-slf4j18-impl', 'slf4j-api', 'lambda-log4j']
 
