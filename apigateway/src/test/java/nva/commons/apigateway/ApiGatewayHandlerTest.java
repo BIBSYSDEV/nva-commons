@@ -17,10 +17,8 @@ import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -63,7 +61,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
-public class ApiGatewayHandlerTest {
+class ApiGatewayHandlerTest {
 
     public static final String TOP_EXCEPTION_MESSAGE = "TOP Exception";
     public static final String MIDDLE_EXCEPTION_MESSAGE = "MIDDLE Exception";
@@ -76,13 +74,10 @@ public class ApiGatewayHandlerTest {
     private Context context;
     private Handler handler;
 
-    /**
-     * Setup.
-     */
+
     @BeforeEach
     public void setup() {
-        context = mock(Context.class);
-        when(context.getAwsRequestId()).thenReturn(SOME_REQUEST_ID);
+        context = new FakeContext();
         handler = new Handler();
     }
 
@@ -266,7 +261,7 @@ public class ApiGatewayHandlerTest {
         assertThat(problem.getDetail(), containsString(TOP_EXCEPTION_MESSAGE));
         assertThat(problem.getTitle(), containsString(Status.NOT_FOUND.getReasonPhrase()));
 
-        assertThat(problem.getParameters().get(REQUEST_ID), is(equalTo(SOME_REQUEST_ID)));
+        assertThat(problem.getParameters().get(REQUEST_ID), is(equalTo(context.getAwsRequestId())));
         assertThat(problem.getStatus(), is(Status.NOT_FOUND));
     }
 
@@ -307,11 +302,10 @@ public class ApiGatewayHandlerTest {
 
     @Test
     public void handlerLogsRequestIdForEveryRequest() throws IOException {
-        var appender = LogUtils.getTestingAppender(RestRequestHandler.class);
+        var appender = LogUtils.getTestingAppenderForRootLogger();
         var output = outputStream();
-        var contextWithRequestId = new FakeContext();
-        var expectedRequestId = contextWithRequestId.getAwsRequestId();
-        handler.handleRequest(requestWithHeadersAndPath(), output, contextWithRequestId);
+        var expectedRequestId = context.getAwsRequestId();
+        handler.handleRequest(requestWithHeadersAndPath(), output, context);
         assertThat(appender.getMessages(), containsString(expectedRequestId));
     }
 
