@@ -1,9 +1,9 @@
 [versions]
 zalandoProblem = { strictly = '0.26.0' }
-lambdaLog4j = { strictly = '1.5.0' }
+lambdaLog4j = { strictly = '1.5.1' }
 guava = { strictly = '31.0.1-jre' }
-awsSdk = { strictly = '1.12.129' }
-awsSdk2 = { strictly = '2.17.152' }
+awsSdk = { strictly = '1.12.204' }
+awsSdk2 = { strictly = '2.17.175' }
 awsLambdaEvents = { strictly = '3.11.0' }
 awsLambdaCore = { strictly = '1.2.1' }
 mockito = { strictly = '4.1.0' }
@@ -58,7 +58,6 @@ jackson-jr-objects = { group = 'com.fasterxml.jackson.jr', name = 'jackson-jr-ob
 jackson-jr-stree = { group = 'com.fasterxml.jackson.jr', name = 'jackson-jr-stree', version.ref = 'jackson' }
 jackson-jr-annotations = { group = 'com.fasterxml.jackson.jr', name = 'jackson-jr-annotation-support', version.ref = 'jackson' }
 
-
 commons-lang = { group = 'org.apache.commons', name = 'commons-lang3', version.ref = 'apacheCommons' }
 commons-validator = { group = 'commons-validator', name = 'commons-validator', version.ref = 'commonsValidator' }
 
@@ -84,7 +83,8 @@ wiremock = { group = 'com.github.tomakehurst', name = 'wiremock', version.ref = 
 [bundles]
 testing = ['mockito-core', 'hamcrest', 'hamcrest-core', 'junit-jupiter', 'junit-jupiter-api',
     'junit-jupiter-params', 'junit-jupiter-engine', 'datafaker', 'hamcrest-optional', 'commons-lang']
-jackson = ['jackson-core', 'jackson-datatype-jdk8', 'jackson-datatype-jsr310', 'jackson-databind', 'jackson-annotations', 'jackson-module-parameter-names', 'jackson-datatype-problem']
+jackson = ['jackson-core', 'jackson-datatype-jdk8', 'jackson-datatype-jsr310', 'jackson-databind',
+    'jackson-annotations', 'jackson-module-parameter-names', 'jackson-datatype-problem', 'jackson-dataformat-xml']
 jacksonjr = ['jackson-jr-objects', 'jackson-jr-annotations']
 logging = ['log4j-core', 'log4j-api', 'log4j-slf4j18-impl', 'slf4j-api', 'lambda-log4j']
 
