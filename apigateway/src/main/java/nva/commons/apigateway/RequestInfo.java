@@ -4,6 +4,7 @@ import static java.util.Objects.isNull;
 import static java.util.function.Predicate.not;
 import static no.unit.nva.auth.CognitoUserInfo.ACCESS_RIGHTS_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.NVA_USERNAME_CLAIM;
+import static no.unit.nva.auth.CognitoUserInfo.PERSON_CRISTIN_ID_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.SELECTED_CUSTOMER_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.TOP_LEVEL_ORG_CRISTIN_ID_CLAIM;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
@@ -37,6 +38,7 @@ import nva.commons.core.JacocoGenerated;
 import nva.commons.core.attempt.Try;
 import nva.commons.core.paths.UriWrapper;
 
+@SuppressWarnings("PMD.GodClass")
 public class RequestInfo {
 
     public static final Environment ENVIRONMENT = new Environment();
@@ -62,6 +64,7 @@ public class RequestInfo {
     public static final JsonPointer ACCESS_RIGHTS = claimToJsonPointer(ACCESS_RIGHTS_CLAIM);
     public static final JsonPointer NVA_USERNAME = claimToJsonPointer(NVA_USERNAME_CLAIM);
     private static final JsonPointer TOP_LEVEL_ORG_CRISTIN_ID = claimToJsonPointer(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM);
+    private static final JsonPointer PERSON_CRISTIN_ID = claimToJsonPointer(PERSON_CRISTIN_ID_CLAIM);
     private static final HttpClient DEFAULT_HTTP_CLIENT = HttpClient.newBuilder().build();
     public static final Supplier<URI> DEFAULT_COGNITO_URI = () -> URI.create(ENVIRONMENT.readEnv("COGNITO_URI"));
 
@@ -101,7 +104,7 @@ public class RequestInfo {
     @JsonIgnore
     public String getHeader(String header) {
         return Optional.ofNullable(getHeaders().get(header))
-            .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_HEADERS + header));
+                   .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_HEADERS + header));
     }
 
     @JsonIgnore
@@ -112,7 +115,7 @@ public class RequestInfo {
     @JsonIgnore
     public String getQueryParameter(String parameter) throws BadRequestException {
         return getQueryParameterOpt(parameter)
-            .orElseThrow(() -> new BadRequestException(MISSING_FROM_QUERY_PARAMETERS + parameter));
+                   .orElseThrow(() -> new BadRequestException(MISSING_FROM_QUERY_PARAMETERS + parameter));
     }
 
     @JsonIgnore
@@ -123,14 +126,14 @@ public class RequestInfo {
     @JsonIgnore
     public String getPathParameter(String parameter) {
         return Optional.ofNullable(getPathParameters().get(parameter))
-            .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_PATH_PARAMETERS + parameter));
+                   .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_PATH_PARAMETERS + parameter));
     }
 
     @JsonIgnore
     public String getRequestContextParameter(JsonPointer jsonPointer) {
         return getRequestContextParameterOpt(jsonPointer)
-            .orElseThrow(
-                () -> new IllegalArgumentException(MISSING_FROM_REQUEST_CONTEXT + jsonPointer.toString()));
+                   .orElseThrow(
+                       () -> new IllegalArgumentException(MISSING_FROM_REQUEST_CONTEXT + jsonPointer.toString()));
     }
 
     /**
@@ -146,10 +149,10 @@ public class RequestInfo {
     @JsonIgnore
     public Optional<String> getRequestContextParameterOpt(JsonPointer jsonPointer) {
         return Optional.ofNullable(getRequestContext())
-            .map(context -> context.at(jsonPointer))
-            .filter(not(JsonNode::isMissingNode))
-            .filter(not(JsonNode::isNull))
-            .map(JsonNode::asText);
+                   .map(context -> context.at(jsonPointer))
+                   .filter(not(JsonNode::isMissingNode))
+                   .filter(not(JsonNode::isNull))
+                   .map(JsonNode::asText);
     }
 
     @JacocoGenerated
@@ -227,16 +230,16 @@ public class RequestInfo {
     @JsonIgnore
     public URI getRequestUri() {
         return new UriWrapper(HTTPS, getDomainName())
-            .addChild(getPath())
-            .addQueryParameters(getQueryParameters())
-            .getUri();
+                   .addChild(getPath())
+                   .addQueryParameters(getQueryParameters())
+                   .getUri();
     }
 
     @JsonIgnore
     public String getDomainName() {
         return attempt(() -> this.getRequestContext()
-            .get(DOMAIN_NAME_FIELD).asText())
-            .orElseThrow();
+                                 .get(DOMAIN_NAME_FIELD).asText())
+                   .orElseThrow();
     }
 
     @JsonIgnore
@@ -248,21 +251,28 @@ public class RequestInfo {
     @JsonIgnore
     public URI getCustomerId() throws UnauthorizedException {
         return getRequestContextParameterOpt(CUSTOMER_ID)
-            .map(URI::create)
-            .or(this::fetchCustomerIdFromCognito)
-            .orElseThrow(UnauthorizedException::new);
+                   .map(URI::create)
+                   .or(this::fetchCustomerIdFromCognito)
+                   .orElseThrow(UnauthorizedException::new);
     }
 
     @JsonIgnore
     public String getNvaUsername() throws UnauthorizedException {
         return extractNvaUsernameOffline()
-            .or(this::fetchUserNameFromCognito)
-            .orElseThrow(UnauthorizedException::new);
+                   .or(this::fetchUserNameFromCognito)
+                   .orElseThrow(UnauthorizedException::new);
     }
 
     @JsonIgnore
     public Optional<URI> getTopLevelOrgCristinId() {
         return extractTopLevelOrgIdOffline().or(this::fetchTopLevelOrgCristinIdFromCognito);
+    }
+
+    @JsonIgnore
+    public URI getPersonCristinId() throws UnauthorizedException {
+        return extractPersonCristinIdOffline()
+                   .or(this::fetchPersonCristinIdFromCognito)
+                   .orElseThrow(UnauthorizedException::new);
     }
 
     private Optional<URI> extractTopLevelOrgIdOffline() {
@@ -271,8 +281,8 @@ public class RequestInfo {
 
     private Optional<URI> fetchTopLevelOrgCristinIdFromCognito() {
         return fetchUserInfoFromCognito()
-            .map(CognitoUserInfo::getTopOrgCristinid)
-            .toOptional();
+                   .map(CognitoUserInfo::getTopOrgCristinId)
+                   .toOptional();
     }
 
     private Optional<String> extractNvaUsernameOffline() {
@@ -281,8 +291,18 @@ public class RequestInfo {
 
     private Optional<String> fetchUserNameFromCognito() {
         return fetchUserInfoFromCognito()
-            .map(CognitoUserInfo::getNvaUsername)
-            .toOptional();
+                   .map(CognitoUserInfo::getNvaUsername)
+                   .toOptional();
+    }
+
+    private Optional<URI> extractPersonCristinIdOffline() {
+        return getRequestContextParameterOpt(PERSON_CRISTIN_ID).map(URI::create);
+    }
+
+    private Optional<URI> fetchPersonCristinIdFromCognito() {
+        return fetchUserInfoFromCognito()
+                   .map(CognitoUserInfo::getPersonCristinId)
+                   .toOptional();
     }
 
     private static JsonPointer claimToJsonPointer(String claim) {
@@ -291,13 +311,13 @@ public class RequestInfo {
 
     private boolean checkAuthorizationOffline(String accessRight) {
         return getAccessRights().stream()
-            .anyMatch(assignedAccessRight -> assignedAccessRight.equalsIgnoreCase(accessRight));
+                   .anyMatch(assignedAccessRight -> assignedAccessRight.equalsIgnoreCase(accessRight));
     }
 
     private Boolean checkAuthorizationOnline(String accessRight) {
         var accessRightAtCustomer = fetchCustomerIdFromCognito()
-            .map(customer -> accessRight + AT + customer)
-            .map(requestedRight -> requestedRight.toLowerCase(Locale.getDefault()));
+                                        .map(customer -> accessRight + AT + customer)
+                                        .map(requestedRight -> requestedRight.toLowerCase(Locale.getDefault()));
 
         var availableRights = fetchAvailableRights();
         return accessRightAtCustomer.map(availableRights::contains).orElse(false);
@@ -305,16 +325,16 @@ public class RequestInfo {
 
     private List<String> fetchAvailableRights() {
         return fetchUserInfoFromCognito()
-            .map(CognitoUserInfo::getAccessRights)
-            .map(accessRights -> accessRights.toLowerCase(Locale.getDefault()))
-            .map(accessRights -> accessRights.split(ENTRIES_DELIMITER))
-            .map(Arrays::asList)
-            .orElse(fail -> Collections.<String>emptyList());
+                   .map(CognitoUserInfo::getAccessRights)
+                   .map(accessRights -> accessRights.toLowerCase(Locale.getDefault()))
+                   .map(accessRights -> accessRights.split(ENTRIES_DELIMITER))
+                   .map(Arrays::asList)
+                   .orElse(fail -> Collections.<String>emptyList());
     }
 
     private Try<CognitoUserInfo> fetchUserInfoFromCognito() {
         return attempt(() -> new FetchUserInfo(httpClient, cognitoUri, extractAuthorizationHeader()))
-            .map(FetchUserInfo::fetch);
+                   .map(FetchUserInfo::fetch);
     }
 
     private String extractAuthorizationHeader() {
@@ -323,18 +343,18 @@ public class RequestInfo {
 
     private Optional<URI> fetchCustomerIdFromCognito() {
         return fetchUserInfoFromCognito()
-            .toOptional()
-            .map(CognitoUserInfo::getCurrentCustomer);
+                   .toOptional()
+                   .map(CognitoUserInfo::getCurrentCustomer);
     }
 
     @JsonIgnore
     private Set<String> getAccessRights() {
         return getRequestContextParameterOpt(ACCESS_RIGHTS)
-            .stream()
-            .filter(not(String::isBlank))
-            .map(accessRightsStr -> accessRightsStr.split(ENTRIES_DELIMITER))
-            .flatMap(Arrays::stream)
-            .collect(Collectors.toSet());
+                   .stream()
+                   .filter(not(String::isBlank))
+                   .map(accessRightsStr -> accessRightsStr.split(ENTRIES_DELIMITER))
+                   .flatMap(Arrays::stream)
+                   .collect(Collectors.toSet());
     }
 
     private <K, V> Map<K, V> nonNullMap(Map<K, V> map) {
