@@ -4,9 +4,11 @@ import static no.unit.nva.auth.CognitoUserInfo.TOP_LEVEL_ORG_CRISTIN_ID_CLAIM;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
+import static nva.commons.apigateway.RequestInfo.AUTHORIZATION_FAILURE_WARNING;
 import static nva.commons.apigateway.RequestInfo.REQUEST_CONTEXT_FIELD;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -38,6 +40,7 @@ import nva.commons.apigateway.exceptions.ApiIoException;
 import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.core.paths.UriWrapper;
+import nva.commons.logutils.LogUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -214,8 +217,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnThatUserDoesNotHaveAccessRightForSpecificCustomerWhenUserDoesNotHaveAnyAccessRights()
-        throws UnauthorizedException {
+    void shouldReturnThatUserDoesNotHaveAccessRightForSpecificCustomerWhenUserDoesNotHaveAnyAccessRights() {
         var cognitoUserEntryWithoutAccessRights =
             CognitoUserInfo.builder().withCurrentCustomer(randomUri()).build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutAccessRights));
@@ -226,7 +228,7 @@ class RequestInfoTest {
 
     @Test
     void shouldReturnThatUserIsAuthorizedWhenRequestInfoContainsACustomerIdAndTheRequestedAccessRight()
-        throws JsonProcessingException, UnauthorizedException {
+        throws JsonProcessingException {
         var usersCustomer = randomUri();
         var usersAccessRights = List.of(randomString(), randomString());
         RequestInfo requestInfo = createRequestInfoForOfflineAuthorization(usersAccessRights, usersCustomer);
@@ -237,7 +239,7 @@ class RequestInfoTest {
 
     @Test
     void shouldReturnNotAuthorizedWhenRequestInfoDoesNotContainTheRequestedAccessRightAndCheckIsPerformedOffline()
-        throws JsonProcessingException, UnauthorizedException {
+        throws JsonProcessingException {
         var userCustomer = randomUri();
         var usersAccessRights = List.of(randomAccessRight(userCustomer), randomAccessRight(userCustomer));
         var requestInfo = createRequestInfoForOfflineAuthorization(usersAccessRights, userCustomer);
@@ -247,7 +249,7 @@ class RequestInfoTest {
 
     @Test
     void shouldReturnNotAuthorizedWhenRequestInfoDoesNotContainAccessRightsAndCheckIsPerformedOffline()
-        throws UnauthorizedException, JsonProcessingException {
+        throws JsonProcessingException {
         var userCustomer = randomUri();
         var requestInfo = requestInfoWithCustomerId(userCustomer);
         var notAllocatedAccessRight = randomAccessRight(userCustomer);
@@ -332,6 +334,45 @@ class RequestInfoTest {
     }
 
     @Test
+    void shouldReturnPersonCristinIdFromCognitoWhenUserHasSelectedCustomerAndClaimInNotAvailableOffline()
+        throws UnauthorizedException {
+        var expectedPersonCristinId = randomUri();
+        var cognitoUserEntry =
+            CognitoUserInfo.builder().withPersonCristinId(expectedPersonCristinId).build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
+        var requestInfo = createRequestInfoWithAccessToken();
+        var actualPersonCristinId = requestInfo.getPersonCristinId();
+        assertThat(actualPersonCristinId, is(equalTo(expectedPersonCristinId)));
+    }
+
+    @Test
+    void shouldReturnPersonCristinIdWhenClaimInAvailableOffline() throws UnauthorizedException {
+        var cognitoUserEntry = CognitoUserInfo.builder().withPersonCristinId(randomUri()).build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
+        var requestInfo = createRequestInfoWithAccessToken();
+        var expectedPersonCristinIdDifferentFromCognito = randomUri();
+        injectPersonCristinIdInRequestInfo(requestInfo, expectedPersonCristinIdDifferentFromCognito);
+        var actualPersonCristinId = requestInfo.getPersonCristinId();
+        assertThat(actualPersonCristinId, is(equalTo(expectedPersonCristinIdDifferentFromCognito)));
+    }
+
+    @Test
+    void shouldThrowUnauthorizedExceptionWhenPersonCristinIdIsNotAvailable() {
+        var cognitoUserEntryWithoutPersonCristinId = CognitoUserInfo.builder().build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutPersonCristinId));
+        var requestInfo = createRequestInfoWithAccessToken();
+        assertThrows(UnauthorizedException.class, requestInfo::getPersonCristinId);
+    }
+
+    @Test
+    void shouldReadCognitoUriFromEnvByDefaultThatContainsValidPersonCristinId()
+        throws JsonProcessingException, UnauthorizedException {
+        var requestInfoString = IoUtils.stringFromResources(EVENT_WITH_AUTH_HEADER);
+        var requestInfo = dtoObjectMapper.readValue(requestInfoString, RequestInfo.class);
+        assertNotNull(requestInfo.getPersonCristinId());
+    }
+
+    @Test
     void shouldThrowUnauthorizedExceptionWhenCustomerIdIsNotAvailable() {
         var cognitoUserEntryWithoutCustomerId = CognitoUserInfo.builder().build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutCustomerId));
@@ -373,6 +414,15 @@ class RequestInfoTest {
         assertThrows(UnauthorizedException.class, requestInfo::getNvaUsername);
     }
 
+    @Test
+    void shouldLogWarningWhenAuthenticationFails() throws JsonProcessingException {
+        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).build();
+        var requestInfo = RequestInfo.fromRequest(request);
+        var logger = LogUtils.getTestingAppenderForRootLogger();
+        requestInfo.userIsAuthorized(randomString());
+        assertThat(logger.getMessages(), containsString(AUTHORIZATION_FAILURE_WARNING));
+    }
+
     private String randomAccessRight(URI usersCustomer) {
         return randomString() + AT + usersCustomer.toString();
     }
@@ -403,6 +453,16 @@ class RequestInfoTest {
         var authorizer = dtoObjectMapper.createObjectNode();
         var requestContext = dtoObjectMapper.createObjectNode();
         claims.put(CognitoUserInfo.NVA_USERNAME_CLAIM, expectedUsername);
+        authorizer.set("claims", claims);
+        requestContext.set("authorizer", authorizer);
+        requestInfo.setRequestContext(requestContext);
+    }
+
+    private void injectPersonCristinIdInRequestInfo(RequestInfo requestInfo, URI expectedPersonCristinId) {
+        var claims = dtoObjectMapper.createObjectNode();
+        var authorizer = dtoObjectMapper.createObjectNode();
+        var requestContext = dtoObjectMapper.createObjectNode();
+        claims.put(CognitoUserInfo.PERSON_CRISTIN_ID_CLAIM, expectedPersonCristinId.toString());
         authorizer.set("claims", claims);
         requestContext.set("authorizer", authorizer);
         requestInfo.setRequestContext(requestContext);

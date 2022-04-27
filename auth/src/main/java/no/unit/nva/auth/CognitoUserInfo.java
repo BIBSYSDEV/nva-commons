@@ -16,6 +16,7 @@ public class CognitoUserInfo {
     public static final String ACCESS_RIGHTS_CLAIM = "custom:accessRights";
     public static final String NVA_USERNAME_CLAIM = "custom:nvaUsername";
     public static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
+    public static final String PERSON_CRISTIN_ID_CLAIM = "custom:cristinId";
     @JsonProperty(FEIDE_ID_CLAIM)
     private String feideId;
     @JsonProperty(SELECTED_CUSTOMER_CLAIM)
@@ -25,7 +26,9 @@ public class CognitoUserInfo {
     @JsonProperty(NVA_USERNAME_CLAIM)
     private String nvaUsername;
     @JsonProperty(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM)
-    private URI topOrgCristinid;
+    private URI topOrgCristinId;
+    @JsonProperty(PERSON_CRISTIN_ID_CLAIM)
+    private URI personCristinId;
 
     public static Builder builder() {
         return new Builder();
@@ -35,8 +38,8 @@ public class CognitoUserInfo {
         return JsonConfig.beanFrom(CognitoUserInfo.class, json);
     }
 
-    public URI getTopOrgCristinid() {
-        return topOrgCristinid;
+    public URI getTopOrgCristinId() {
+        return topOrgCristinId;
     }
 
     public String getNvaUsername() {
@@ -71,10 +74,23 @@ public class CognitoUserInfo {
         this.accessRights = accessRights;
     }
 
+    private void setTopOrgCristinId(URI topOrgCristinId) {
+        this.topOrgCristinId = topOrgCristinId;
+    }
+
+    public URI getPersonCristinId() {
+        return personCristinId;
+    }
+
+    public void setPersonCristinId(URI personCristinId) {
+        this.personCristinId = personCristinId;
+    }
+
     @JacocoGenerated
     @Override
     public int hashCode() {
-        return Objects.hash(getFeideId(), getCurrentCustomer(), getAccessRights(), getNvaUsername());
+        return Objects.hash(getFeideId(), getCurrentCustomer(), getAccessRights(), getNvaUsername(),
+                            getTopOrgCristinId(), getPersonCristinId());
     }
 
     @JacocoGenerated
@@ -90,11 +106,9 @@ public class CognitoUserInfo {
         return Objects.equals(getFeideId(), that.getFeideId())
                && Objects.equals(getCurrentCustomer(), that.getCurrentCustomer())
                && Objects.equals(getAccessRights(), that.getAccessRights())
-               && Objects.equals(getNvaUsername(), that.getNvaUsername());
-    }
-
-    private void setTopOrgCristinId(URI topOrgCristinId) {
-        this.topOrgCristinid = topOrgCristinId;
+               && Objects.equals(getNvaUsername(), that.getNvaUsername())
+               && Objects.equals(getTopOrgCristinId(), that.getTopOrgCristinId())
+               && Objects.equals(getPersonCristinId(), that.getPersonCristinId());
     }
 
     public static final class Builder {
@@ -134,6 +148,11 @@ public class CognitoUserInfo {
 
         public Builder withTopOrgCristinId(URI topOrgCristinId) {
             cognitoUserInfo.setTopOrgCristinId(topOrgCristinId);
+            return this;
+        }
+
+        public Builder withPersonCristinId(URI personCristinId) {
+            cognitoUserInfo.setPersonCristinId(personCristinId);
             return this;
         }
     }

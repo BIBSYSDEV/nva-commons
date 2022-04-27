@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
+import nva.commons.core.JacocoGenerated;
 
 public class PersonGroup {
 
@@ -35,19 +36,27 @@ public class PersonGroup {
             .map(PersonGroup::fromString);
     }
 
+    public static PersonGroup createUserAtCustomerGroup(URI customerId) {
+        return new PersonGroup(USER_AT_CUSTOMER_GROUP, customerId);
+    }
+
+    @JacocoGenerated
     public URI getCustomerId() {
         return customerId;
     }
 
+    @JacocoGenerated
     public String getGroup() {
         return group;
     }
 
+    @JacocoGenerated
     @Override
     public int hashCode() {
         return Objects.hash(group, customerId);
     }
 
+    @JacocoGenerated
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -66,8 +75,8 @@ public class PersonGroup {
         return this.group + AT + customerId.toString();
     }
 
-    public boolean isUserAtCustomerGroup() {
-        return this.group.equalsIgnoreCase(USER_AT_CUSTOMER_GROUP);
+    public boolean describesCustomerUponLogin() {
+        return USER_AT_CUSTOMER_GROUP.equalsIgnoreCase(this.getGroup());
     }
 
     private static String formatAccessRightString(String s) {

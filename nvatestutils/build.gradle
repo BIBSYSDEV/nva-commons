@@ -8,6 +8,7 @@ dependencies {
     implementation project(":eventhandlers")
     implementation project(":json")
     implementation project(":auth")
+    implementation project(":apigateway")
 
     implementation libs.bundles.testing
     implementation libs.httpmime
@@ -24,6 +25,6 @@ dependencies {
     implementation libs.commons.validator
 
     testImplementation project(":doi")
-    testImplementation project(":apigateway")
+
 
 }
