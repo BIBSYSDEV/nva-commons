@@ -8,7 +8,6 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.StringContains.containsString;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -18,6 +17,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
+import no.unit.nva.commons.json.JsonUtils;
+import nva.commons.apigateway.RequestInfo;
+import nva.commons.apigateway.exceptions.UnauthorizedException;
+import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.Test;
 
 class HandlerRequestBuilderTest {
@@ -34,17 +37,11 @@ class HandlerRequestBuilderTest {
     // copy-pasted values to avoid circular dependencies.
     public static final JsonPointer NVA_USERNAME =
         JsonPointer.compile("/requestContext/authorizer/claims/custom:nvaUsername");
-    public static final JsonPointer CUSTOMER_ID = JsonPointer.compile(
-        "/requestContext/authorizer/claims/custom:customerId");
-    public static final JsonPointer ACCESS_RIGHTS =
-        JsonPointer.compile("/requestContext/authorizer/claims/custom:accessRights");
     public static final JsonPointer PERSON_CRISTIN_ID =
         JsonPointer.compile("/requestContext/authorizer/claims/custom:cristinId");
-
-    private static final String HTTP_METHOD = "httpMethod";
     public static final String TOP_ORG_CRISTIN_ID_CLAIM_PATH =
         "/requestContext/authorizer/claims/custom:topOrgCristinId";
-
+    private static final String HTTP_METHOD = "httpMethod";
     // Can not use ObjectMapper from nva-commons because it would create a circular dependency
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -131,21 +128,21 @@ class HandlerRequestBuilderTest {
 
     @Test
     void buildReturnsRequestWithRequestContextWithCustomerIdClaimWhenWithCustomerId()
-        throws JsonProcessingException {
-        var expectedCustomerId = "SomeCustomerId";
-        InputStream requestStream = new HandlerRequestBuilder<String>(objectMapper)
+        throws JsonProcessingException, UnauthorizedException {
+        var expectedCustomerId = randomUri();
+        var requestStream = new HandlerRequestBuilder<String>(objectMapper)
             .withCustomerId(expectedCustomerId)
             .build();
-        JsonNode request = toJsonNode(requestStream);
-        String actualCustomerId = request.at(CUSTOMER_ID).textValue();
-        assertThat(actualCustomerId, is(equalTo(actualCustomerId)));
+        var request = IoUtils.streamToString(requestStream);
+        var requestInfo = JsonUtils.dtoObjectMapper.readValue(request, RequestInfo.class);
+        assertThat(requestInfo.getCurrentCustomer(), is(equalTo(expectedCustomerId)));
     }
 
     @Test
     void buildReturnsRequestWithRequestContextWithClaimsWhenWithClaims()
         throws JsonProcessingException {
         var expectedUsername = randomString();
-        var expectedCustomerId = "SomeCustomerId";
+        var expectedCustomerId = randomUri();
         var expectedApplicationRoles = "role1,role2";
 
         InputStream requestStream = new HandlerRequestBuilder<String>(objectMapper)
@@ -157,9 +154,6 @@ class HandlerRequestBuilderTest {
 
         String actualUsername = request.at(NVA_USERNAME).textValue();
         assertThat(actualUsername, is(equalTo(expectedUsername)));
-
-        String actualCustomerId = request.at(CUSTOMER_ID).textValue();
-        assertThat(actualCustomerId, is(equalTo(expectedCustomerId)));
     }
 
     @Test
@@ -181,24 +175,9 @@ class HandlerRequestBuilderTest {
             .build();
 
         Map<String, Object> mapWithCustomField = toMap(request);
-
         assertThat(mapWithCustomField, hasEntry(expectedKey, expectedValue));
     }
 
-    @Test
-    void buildReturnsAccessRightsWhenAccessRightsHaveBeenSet() throws JsonProcessingException {
-        String accessRight1 = "AccessRight1";
-        String accessRight2 = "AccessRight2";
-        InputStream inputStream = new HandlerRequestBuilder<String>(objectMapper)
-            .withAccessRight(accessRight1)
-            .withAccessRight(accessRight2)
-            .build();
-        JsonNode requestJson = toJsonNode(inputStream);
-
-        String accessRights = requestJson.at(ACCESS_RIGHTS).textValue();
-        assertThat(accessRights, containsString(accessRight1));
-        assertThat(accessRights, containsString(accessRight2));
-    }
 
     @Test
     void shouldInsertPersonsCristinIdWhenSet() throws JsonProcessingException {

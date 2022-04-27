@@ -2,6 +2,7 @@ package no.unit.nva.testutils;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.function.Predicate.not;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,28 +18,31 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import nva.commons.core.JacocoGenerated;
 
 @JacocoGenerated
+@SuppressWarnings("PMD.GodGlass")
 public class HandlerRequestBuilder<T> {
 
     public static final String DELIMITER = System.lineSeparator();
     public static final String AUTHORIZER_NODE = "authorizer";
     public static final String CLAIMS_NODE = "claims";
     public static final String NVA_USERNAME_CLAIM = "custom:nvaUsername";
-    public static final String CUSTOMER_ID_CLAIM = "custom:customerId";
+    public static final String PERSON_GROUP_CLAIMS = "cognito:groups";
     public static final String APPLICATION_ROLES_CLAIM = "custom:applicationRoles";
-    public static final String ACCESS_RIGHTS_CLAIM = "custom:accessRights";
     public static final String PERSON_CRISTIN_ID = "custom:cristinId";
     private static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
-    public static final String ACCESS_RIGHTS_SEPARATOR = ",";
+    public static final String AT = "@";
+    public static final String USER_AT_CUSTOMER_GROUP = "USER";
+    public static final String ENTRIES_DELIMITER = ",";
     public static final String EMPTY_STRING = "";
 
     private final transient ObjectMapper objectMapper;
@@ -161,44 +165,107 @@ public class HandlerRequestBuilder<T> {
     }
 
     public HandlerRequestBuilder<T> withNvaUsername(String nvaUsername) {
-        ObjectNode claims = getOrCreateClaimsNode();
+        ObjectNode claims = getOrCreateAuthorizerClaimsNode();
         claims.put(NVA_USERNAME_CLAIM, nvaUsername);
         return this;
     }
 
-    public HandlerRequestBuilder<T> withCustomerId(String customerId) {
-        ObjectNode claims = getOrCreateClaimsNode();
-        claims.put(CUSTOMER_ID_CLAIM, customerId);
+    public HandlerRequestBuilder<T> withCustomerId(URI customerId) {
+        String customerIdClaim = USER_AT_CUSTOMER_GROUP + AT + customerId.toString();
+        addClaimToPersonGroupClaims(customerId, customerIdClaim);
         return this;
     }
 
+    public HandlerRequestBuilder withAuthorizerClaim(String claimName, String claimValue) {
+        var authorizerClaimsNode = getOrCreateAuthorizerClaimsNode();
+        authorizerClaimsNode.put(claimName, claimValue);
+        return this;
+    }
+
+    private void addClaimToPersonGroupClaims(URI customerId, String accessRight) {
+        var personGroup = accessRight + AT + customerId.toString();
+        ObjectNode claims = getOrCreateAuthorizerClaimsNode();
+        if (isPersonAtCustomerGroupClaim(personGroup)) {
+            String updatedPersonGroups = insertAndOverwriteExistingCustomerId(personGroup, claims);
+            claims.put(PERSON_GROUP_CLAIMS, updatedPersonGroups);
+        } else {
+            appendAccessRightClaimToPersonGroupClaims(claims, personGroup);
+        }
+    }
+
+    private void appendAccessRightClaimToPersonGroupClaims(ObjectNode claims, String accessRightClaim) {
+        extractPersonGroups(claims)
+            .map(personGroupClaims -> appendPersonGroupClaim(accessRightClaim, personGroupClaims))
+            .or(() -> Optional.ofNullable(accessRightClaim))
+            .ifPresent(claim -> claims.put(PERSON_GROUP_CLAIMS, claim));
+    }
+
+    private String appendPersonGroupClaim(String accessRightClaim, String personGroupClaims) {
+        return String.join(ENTRIES_DELIMITER, personGroupClaims, accessRightClaim);
+    }
+
+    private String insertAndOverwriteExistingCustomerId(String customerIdClaim, ObjectNode claims) {
+        var existingPersonGroups = extractExistingPersonGroupsRemovingUserAtCustomerGroup(claims);
+        return Stream.of(existingPersonGroups.stream(), Stream.of(customerIdClaim))
+            .flatMap(Function.identity())
+            .filter(not(String::isBlank))
+            .collect(Collectors.joining(ENTRIES_DELIMITER));
+    }
+
+    private Optional<String> extractExistingPersonGroupsRemovingUserAtCustomerGroup(ObjectNode claims) {
+        var existingPersonGroups = extractPersonGroups(claims).orElse(EMPTY_STRING);
+        if (customerIdHasAlreadyBeenSet(existingPersonGroups)) {
+            existingPersonGroups = removeCustomerIdFromPersonGroups(existingPersonGroups);
+        }
+        return existingPersonGroups.isBlank()
+                   ? Optional.empty()
+                   : Optional.of(existingPersonGroups);
+    }
+
+    private Optional<String> extractPersonGroups(ObjectNode claims) {
+        return claims.has(PERSON_GROUP_CLAIMS)
+                   ? Optional.ofNullable(claims.get(PERSON_GROUP_CLAIMS).textValue())
+                   : Optional.empty();
+    }
+
+    private boolean customerIdHasAlreadyBeenSet(String existingPersonGroups) {
+        return existingPersonGroups.toLowerCase(Locale.getDefault())
+            .contains(USER_AT_CUSTOMER_GROUP.toLowerCase(Locale.getDefault()));
+    }
+
+    private String removeCustomerIdFromPersonGroups(String existingPersonGroups) {
+        return Arrays.stream(existingPersonGroups.split(ENTRIES_DELIMITER))
+            .filter(not(group -> group.startsWith(USER_AT_CUSTOMER_GROUP)))
+            .collect(Collectors.joining(ENTRIES_DELIMITER));
+    }
+
+    private boolean isPersonAtCustomerGroupClaim(String group) {
+        return group.toLowerCase(Locale.getDefault())
+            .startsWith(USER_AT_CUSTOMER_GROUP.toLowerCase(Locale.getDefault()));
+    }
+
     public HandlerRequestBuilder<T> withTopLevelCristinOrgId(URI topLevelCristinOrgId) {
-        ObjectNode claims = getOrCreateClaimsNode();
+        ObjectNode claims = getOrCreateAuthorizerClaimsNode();
         claims.put(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM, topLevelCristinOrgId.toString());
         return this;
     }
 
     public HandlerRequestBuilder<T> withPersonCristinId(URI personCristinId) {
-        ObjectNode claims = getOrCreateClaimsNode();
+        ObjectNode claims = getOrCreateAuthorizerClaimsNode();
         claims.put(PERSON_CRISTIN_ID, personCristinId.toString());
         return this;
     }
 
     public HandlerRequestBuilder<T> withRoles(String roles) {
-        ObjectNode claims = getOrCreateClaimsNode();
+        ObjectNode claims = getOrCreateAuthorizerClaimsNode();
         claims.put(APPLICATION_ROLES_CLAIM, roles);
         return this;
     }
 
-    public HandlerRequestBuilder<T> withAccessRight(String accessRight) {
-        ObjectNode claims = getOrCreateClaimsNode();
-        String accessRights = Optional.ofNullable(claims.get(ACCESS_RIGHTS_CLAIM))
-            .map(JsonNode::textValue)
-            .orElse(EMPTY_STRING);
-        List<String> accessRightsList = toList(accessRights);
-        accessRightsList.add(accessRight);
-        String newAccessRights = toAccessRightsString(accessRightsList);
-        claims.put(ACCESS_RIGHTS_CLAIM, newAccessRights);
+    public HandlerRequestBuilder<T> withAccessRights(URI customerId, String... accessRights) {
+        for (String accessRight : accessRights) {
+            addClaimToPersonGroupClaims(customerId, accessRight);
+        }
         return this;
     }
 
@@ -208,30 +275,18 @@ public class HandlerRequestBuilder<T> {
         return this;
     }
 
-    private String toAccessRightsString(List<String> accessRightsList) {
-        return String.join(ACCESS_RIGHTS_SEPARATOR, accessRightsList);
-    }
-
-    private List<String> toList(String accessRights) {
-        if (isNull(accessRights) || accessRights.isBlank()) {
-            return new ArrayList<>();
-        } else {
-            return new ArrayList<>(Arrays.asList(accessRights.split(ACCESS_RIGHTS_SEPARATOR)));
-        }
-    }
-
-    private ObjectNode getOrCreateClaimsNode() {
+    private ObjectNode getOrCreateAuthorizerClaimsNode() {
         ObjectNode authenticationNode = getOrCreateAuthorizerNode();
-        ObjectNode claimsNode = createChildNode(authenticationNode, CLAIMS_NODE);
+        var claimsNode = getOrCreateChildNode(authenticationNode, CLAIMS_NODE);
         authenticationNode.set(CLAIMS_NODE, claimsNode);
         return claimsNode;
     }
 
-    private ObjectNode createChildNode(ObjectNode parentNode, String childNodeName) {
+    private ObjectNode getOrCreateChildNode(ObjectNode parentNode, String childNodeName) {
         return Optional.ofNullable(parentNode)
             .map(parent -> parent.get(childNodeName))
             .filter(JsonNode::isObject)
-            .map(node -> (ObjectNode) node)
+            .map(ObjectNode.class::cast)
             .orElse(objectMapper.createObjectNode());
     }
 
@@ -243,7 +298,7 @@ public class HandlerRequestBuilder<T> {
 
     private ObjectNode getOrCreateAuthorizerNode() {
         initializeRequestContextIfNotExists();
-        ObjectNode authorizerNode = createChildNode(requestContext, AUTHORIZER_NODE);
+        ObjectNode authorizerNode = getOrCreateChildNode(requestContext, AUTHORIZER_NODE);
         requestContext.set(AUTHORIZER_NODE, authorizerNode);
         return authorizerNode;
     }

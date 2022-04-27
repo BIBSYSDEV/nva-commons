@@ -2,9 +2,7 @@ package nva.commons.apigateway;
 
 import static java.util.Objects.isNull;
 import static java.util.function.Predicate.not;
-import static no.unit.nva.auth.CognitoUserInfo.ACCESS_RIGHTS_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.NVA_USERNAME_CLAIM;
-import static no.unit.nva.auth.CognitoUserInfo.SELECTED_CUSTOMER_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.TOP_LEVEL_ORG_CRISTIN_ID_CLAIM;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
@@ -15,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.net.HttpHeaders;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.util.Arrays;
@@ -25,17 +24,20 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import no.unit.nva.auth.CognitoUserInfo;
 import no.unit.nva.auth.FetchUserInfo;
+import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
+import nva.commons.core.SingletonCollector;
 import nva.commons.core.attempt.Try;
 import nva.commons.core.paths.UriWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RequestInfo {
 
@@ -57,17 +59,19 @@ public class RequestInfo {
     public static final String HTTPS = "https"; // Api Gateway only supports HTTPS
     public static final String DOMAIN_NAME_FIELD = "domainName";
     public static final String AT = "@";
+    public static final String USER_AT_CUSTOMER_GROUP = "USER" + AT;
+    public static final Supplier<URI> DEFAULT_COGNITO_URI = () -> URI.create(ENVIRONMENT.readEnv("COGNITO_URI"));
+    public static final String PERSON_GROUPS_CLAIM = "cognito:groups";
     private static final String CLAIMS_PATH = "/authorizer/claims/";
-    public static final JsonPointer CUSTOMER_ID = claimToJsonPointer(SELECTED_CUSTOMER_CLAIM);
-    public static final JsonPointer ACCESS_RIGHTS = claimToJsonPointer(ACCESS_RIGHTS_CLAIM);
+
+    public static final JsonPointer PERSON_GROUPS = claimToJsonPointer(PERSON_GROUPS_CLAIM);
     public static final JsonPointer NVA_USERNAME = claimToJsonPointer(NVA_USERNAME_CLAIM);
     private static final JsonPointer TOP_LEVEL_ORG_CRISTIN_ID = claimToJsonPointer(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM);
     private static final HttpClient DEFAULT_HTTP_CLIENT = HttpClient.newBuilder().build();
-    public static final Supplier<URI> DEFAULT_COGNITO_URI = () -> URI.create(ENVIRONMENT.readEnv("COGNITO_URI"));
-
+    private static final Logger logger = LoggerFactory.getLogger(RequestInfo.class);
+    public static final boolean USER_IS_NOT_AUTHORIZED = false;
     private final HttpClient httpClient;
     private final Supplier<URI> cognitoUri;
-
     @JsonProperty(HEADERS_FIELD)
     private Map<String, String> headers;
     @JsonProperty(PATH_FIELD)
@@ -96,6 +100,11 @@ public class RequestInfo {
         this.requestContext = defaultRestObjectMapper.createObjectNode();
         this.httpClient = DEFAULT_HTTP_CLIENT;
         this.cognitoUri = DEFAULT_COGNITO_URI;
+    }
+
+    public static RequestInfo fromRequest(InputStream requestStream) {
+        return attempt(() -> JsonUtils.dtoObjectMapper.readValue(requestStream, RequestInfo.class))
+            .orElseThrow();
     }
 
     @JsonIgnore
@@ -241,16 +250,14 @@ public class RequestInfo {
 
     @JsonIgnore
     public boolean userIsAuthorized(String accessRight) {
-        return checkAuthorizationOffline(accessRight)
-               || checkAuthorizationOnline(accessRight);
+        return checkAuthorizationOnline(accessRight)
+               || checkAuthorizationOffline(accessRight);
     }
 
     @JsonIgnore
+    @Deprecated(forRemoval = true)
     public URI getCustomerId() throws UnauthorizedException {
-        return getRequestContextParameterOpt(CUSTOMER_ID)
-            .map(URI::create)
-            .or(this::fetchCustomerIdFromCognito)
-            .orElseThrow(UnauthorizedException::new);
+        return getCurrentCustomer();
     }
 
     @JsonIgnore
@@ -263,6 +270,25 @@ public class RequestInfo {
     @JsonIgnore
     public Optional<URI> getTopLevelOrgCristinId() {
         return extractTopLevelOrgIdOffline().or(this::fetchTopLevelOrgCristinIdFromCognito);
+    }
+
+    public URI getCurrentCustomer() throws UnauthorizedException {
+        return fetchCustomerIdFromCognito()
+            .or(this::fetchCustomerIdOffline)
+            .toOptional()
+            .orElseThrow(UnauthorizedException::new);
+    }
+
+    private static JsonPointer claimToJsonPointer(String claim) {
+        return JsonPointer.compile(CLAIMS_PATH + claim);
+    }
+
+    private URI fetchCustomerIdOffline() {
+        return getRequestContextParameterOpt(PERSON_GROUPS).stream()
+            .flatMap(PersonGroup::fromCsv)
+            .filter(PersonGroup::isUserAtCustomerGroup)
+            .map(PersonGroup::getCustomerId)
+            .collect(SingletonCollector.collect());
     }
 
     private Optional<URI> extractTopLevelOrgIdOffline() {
@@ -285,13 +311,23 @@ public class RequestInfo {
             .toOptional();
     }
 
-    private static JsonPointer claimToJsonPointer(String claim) {
-        return JsonPointer.compile(CLAIMS_PATH + claim);
+    private boolean checkAuthorizationOffline(String requiredAccessRight) {
+        var requiredPersonGroup = attempt(this::getCurrentCustomer)
+            .map(currentCustomer -> new PersonGroup(requiredAccessRight, currentCustomer));
+        return requiredPersonGroup
+            .map(required -> fetchAvailablePersonGroups().anyMatch(required::equals))
+            .orElse(fail -> handleAuthorizationFailure());
     }
 
-    private boolean checkAuthorizationOffline(String accessRight) {
-        return getAccessRights().stream()
-            .anyMatch(assignedAccessRight -> assignedAccessRight.equalsIgnoreCase(accessRight));
+    private boolean handleAuthorizationFailure() {
+        logger.warn("Missing customerId or required access right");
+        return false;
+    }
+
+    private Stream<PersonGroup> fetchAvailablePersonGroups() {
+
+        return getRequestContextParameterOpt(PERSON_GROUPS).stream()
+            .flatMap(PersonGroup::fromCsv);
     }
 
     private Boolean checkAuthorizationOnline(String accessRight) {
@@ -300,7 +336,7 @@ public class RequestInfo {
             .map(requestedRight -> requestedRight.toLowerCase(Locale.getDefault()));
 
         var availableRights = fetchAvailableRights();
-        return accessRightAtCustomer.map(availableRights::contains).orElse(false);
+        return accessRightAtCustomer.map(availableRights::contains).orElse(fail -> false);
     }
 
     private List<String> fetchAvailableRights() {
@@ -321,20 +357,9 @@ public class RequestInfo {
         return this.getHeader(HttpHeaders.AUTHORIZATION);
     }
 
-    private Optional<URI> fetchCustomerIdFromCognito() {
+    private Try<URI> fetchCustomerIdFromCognito() {
         return fetchUserInfoFromCognito()
-            .toOptional()
             .map(CognitoUserInfo::getCurrentCustomer);
-    }
-
-    @JsonIgnore
-    private Set<String> getAccessRights() {
-        return getRequestContextParameterOpt(ACCESS_RIGHTS)
-            .stream()
-            .filter(not(String::isBlank))
-            .map(accessRightsStr -> accessRightsStr.split(ENTRIES_DELIMITER))
-            .flatMap(Arrays::stream)
-            .collect(Collectors.toSet());
     }
 
     private <K, V> Map<K, V> nonNullMap(Map<K, V> map) {
