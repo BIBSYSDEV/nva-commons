@@ -241,7 +241,7 @@ class RequestInfoTest {
     void shouldReturnNotAuthorizedWhenRequestInfoDoesNotContainTheRequestedAccessRightAndCheckIsPerformedOffline()
         throws JsonProcessingException {
         var userCustomer = randomUri();
-        var usersAccessRights = List.of(randomAccessRight(userCustomer), randomAccessRight(userCustomer));
+        var usersAccessRights = List.of(randomPersonGroup(userCustomer), randomPersonGroup(userCustomer));
         var requestInfo = createRequestInfoForOfflineAuthorization(usersAccessRights, userCustomer);
         var notAllocatedAccessRight = randomString();
         assertThat(requestInfo.userIsAuthorized(notAllocatedAccessRight), is(false));
@@ -252,7 +252,7 @@ class RequestInfoTest {
         throws JsonProcessingException {
         var userCustomer = randomUri();
         var requestInfo = requestInfoWithCustomerId(userCustomer);
-        var notAllocatedAccessRight = randomAccessRight(userCustomer);
+        var notAllocatedAccessRight = randomPersonGroup(userCustomer);
         assertThat(requestInfo.userIsAuthorized(notAllocatedAccessRight), is(false));
     }
 
@@ -423,8 +423,8 @@ class RequestInfoTest {
         assertThat(logger.getMessages(), containsString(AUTHORIZATION_FAILURE_WARNING));
     }
 
-    private String randomAccessRight(URI usersCustomer) {
-        return randomString() + AT + usersCustomer.toString();
+    private String randomPersonGroup(URI usersCustomer) {
+        return new PersonGroup(randomString(), usersCustomer).toString();
     }
 
     private RequestInfo requestInfoWithCustomerId(URI userCustomer) throws JsonProcessingException {
