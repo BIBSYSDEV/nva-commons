@@ -32,7 +32,6 @@ import nva.commons.apigateway.PersonGroup;
 import nva.commons.core.JacocoGenerated;
 
 @JacocoGenerated
-@SuppressWarnings("PMD.GodClass")
 public class HandlerRequestBuilder<T> {
 
     public static final String DELIMITER = System.lineSeparator();
@@ -42,10 +41,8 @@ public class HandlerRequestBuilder<T> {
     public static final String PERSON_GROUP_CLAIMS = "cognito:groups";
     public static final String APPLICATION_ROLES_CLAIM = "custom:applicationRoles";
     public static final String PERSON_CRISTIN_ID = "custom:cristinId";
-    private static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
-
     public static final String ENTRIES_DELIMITER = ",";
-
+    private static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
     private final transient ObjectMapper objectMapper;
     @JsonProperty("body")
     private String body;
@@ -183,6 +180,38 @@ public class HandlerRequestBuilder<T> {
         return this;
     }
 
+    public HandlerRequestBuilder<T> withTopLevelCristinOrgId(URI topLevelCristinOrgId) {
+        ObjectNode claims = getOrCreateAuthorizerClaimsNode();
+        claims.put(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM, topLevelCristinOrgId.toString());
+        return this;
+    }
+
+    public HandlerRequestBuilder<T> withPersonCristinId(URI personCristinId) {
+        ObjectNode claims = getOrCreateAuthorizerClaimsNode();
+        claims.put(PERSON_CRISTIN_ID, personCristinId.toString());
+        return this;
+    }
+
+    public HandlerRequestBuilder<T> withRoles(String roles) {
+        ObjectNode claims = getOrCreateAuthorizerClaimsNode();
+        claims.put(APPLICATION_ROLES_CLAIM, roles);
+        return this;
+    }
+
+    public HandlerRequestBuilder<T> withAccessRights(URI customerId, String... accessRights) {
+        for (String accessRight : accessRights) {
+            var personGroup = new PersonGroup(accessRight, customerId);
+            addClaimToPersonGroupClaims(personGroup);
+        }
+        return this;
+    }
+
+    public HandlerRequestBuilder<T> withRequestContextValue(String propertyName, String value) {
+        initializeRequestContextIfNotExists();
+        requestContext.put(propertyName, value);
+        return this;
+    }
+
     private void addClaimToPersonGroupClaims(PersonGroup personGroup) {
         var claims = getOrCreateAuthorizerClaimsNode();
         if (isPersonAtCustomerGroupClaim(personGroup)) {
@@ -237,38 +266,6 @@ public class HandlerRequestBuilder<T> {
 
     private boolean isPersonAtCustomerGroupClaim(PersonGroup group) {
         return group.describesCustomerUponLogin();
-    }
-
-    public HandlerRequestBuilder<T> withTopLevelCristinOrgId(URI topLevelCristinOrgId) {
-        ObjectNode claims = getOrCreateAuthorizerClaimsNode();
-        claims.put(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM, topLevelCristinOrgId.toString());
-        return this;
-    }
-
-    public HandlerRequestBuilder<T> withPersonCristinId(URI personCristinId) {
-        ObjectNode claims = getOrCreateAuthorizerClaimsNode();
-        claims.put(PERSON_CRISTIN_ID, personCristinId.toString());
-        return this;
-    }
-
-    public HandlerRequestBuilder<T> withRoles(String roles) {
-        ObjectNode claims = getOrCreateAuthorizerClaimsNode();
-        claims.put(APPLICATION_ROLES_CLAIM, roles);
-        return this;
-    }
-
-    public HandlerRequestBuilder<T> withAccessRights(URI customerId, String... accessRights) {
-        for (String accessRight : accessRights) {
-            var personGroup = new PersonGroup(accessRight, customerId);
-            addClaimToPersonGroupClaims(personGroup);
-        }
-        return this;
-    }
-
-    public HandlerRequestBuilder<T> withRequestContextValue(String propertyName, String value) {
-        initializeRequestContextIfNotExists();
-        requestContext.put(propertyName, value);
-        return this;
     }
 
     private ObjectNode getOrCreateAuthorizerClaimsNode() {
