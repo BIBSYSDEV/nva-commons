@@ -1,6 +1,6 @@
 package no.unit.nva.auth;
 
-import static no.unit.nva.auth.AuthorizedBackendClient.prepareWithBackendCredentials;
+import static no.unit.nva.auth.AuthorizedBackendClient.prepareWithCognitoCredentials;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
@@ -41,7 +41,7 @@ class AuthorizedBackendClientTest {
     @Test
     void shouldSendRequestsContainingTheBackendAccessTokenWhenUserAccessTokenIsNotSubmitted()
         throws IOException, InterruptedException {
-        var client = prepareWithBackendCredentials(httpClient, cognitoCredentials);
+        var client = prepareWithCognitoCredentials(httpClient, cognitoCredentials);
         var resourceUri = UriWrapper.fromUri(serverUri).addChild(EXAMPLE_RESOURCE_PATH).getUri();
         var request = HttpRequest.newBuilder(resourceUri).GET();
         var response = client.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
@@ -50,7 +50,7 @@ class AuthorizedBackendClientTest {
 
     @Test
     void shouldSendAsyncRequestsContainingTheAccessTokenWhenUserAccessTokenIsNotSubmitted() {
-        var client = prepareWithBackendCredentials(httpClient, cognitoCredentials);
+        var client = prepareWithCognitoCredentials(httpClient, cognitoCredentials);
         var resourceUri = UriWrapper.fromUri(serverUri).addChild(EXAMPLE_RESOURCE_PATH).getUri();
         var request = HttpRequest.newBuilder(resourceUri).GET();
         var response =
@@ -62,7 +62,7 @@ class AuthorizedBackendClientTest {
     void shouldSendRequestsContainingTheUserAccessTokenWhenUserAccessTokenIsSubmitted()
         throws IOException, InterruptedException {
         String bearerToken = "Bearer " + expectedAccessToken;
-        var client = AuthorizedBackendClient.prepareWithUserCredentials(httpClient, bearerToken);
+        var client = AuthorizedBackendClient.prepareWithBearerToken(httpClient, bearerToken);
         var resourceUri = UriWrapper.fromUri(serverUri).addChild(EXAMPLE_RESOURCE_PATH).getUri();
         var request = HttpRequest.newBuilder(resourceUri).GET();
 

@@ -39,11 +39,11 @@ public class AuthorizedBackendClient {
     }
 
     @JacocoGenerated
-    public static AuthorizedBackendClient prepareWithBackendCredentials(CognitoCredentials cognitoCredentials) {
-        return prepareWithBackendCredentials(HttpClient.newHttpClient(), cognitoCredentials);
+    public static AuthorizedBackendClient prepareWithCognitoCredentials(CognitoCredentials cognitoCredentials) {
+        return prepareWithCognitoCredentials(HttpClient.newHttpClient(), cognitoCredentials);
     }
 
-    public static AuthorizedBackendClient prepareWithBackendCredentials(HttpClient httpClient,
+    public static AuthorizedBackendClient prepareWithCognitoCredentials(HttpClient httpClient,
                                                                         CognitoCredentials cognitoApiClientCredentials) {
         var client = new AuthorizedBackendClient(httpClient, null, cognitoApiClientCredentials);
         client.refreshToken();
@@ -51,11 +51,11 @@ public class AuthorizedBackendClient {
     }
 
     @JacocoGenerated
-    public static AuthorizedBackendClient prepareWithUserCredentials(String bearerToken) {
-        return prepareWithUserCredentials(HttpClient.newHttpClient(), bearerToken);
+    public static AuthorizedBackendClient prepareWithBearerToken(String bearerToken) {
+        return prepareWithBearerToken(HttpClient.newHttpClient(), bearerToken);
     }
 
-    public static AuthorizedBackendClient prepareWithUserCredentials(HttpClient httpClient, String bearerToken) {
+    public static AuthorizedBackendClient prepareWithBearerToken(HttpClient httpClient, String bearerToken) {
         return new AuthorizedBackendClient(httpClient, bearerToken, null);
     }
 
