@@ -330,7 +330,7 @@ public class RequestInfo {
     private boolean checkAuthorizationOffline(String accessRight) {
         return attempt(this::getCurrentCustomer)
             .map(currentCustomer -> new AccessRight(accessRight, currentCustomer))
-            .map(requiredAccessRight -> fetchAvailableAccessRgiths().anyMatch(requiredAccessRight::equals))
+            .map(requiredAccessRight -> fetchAvailableAccessRigths().anyMatch(requiredAccessRight::equals))
             .orElse(fail -> handleAuthorizationFailure());
     }
 
@@ -339,7 +339,7 @@ public class RequestInfo {
         return false;
     }
 
-    private Stream<AccessRight> fetchAvailableAccessRgiths() {
+    private Stream<AccessRight> fetchAvailableAccessRigths() {
 
         return getRequestContextParameterOpt(PERSON_GROUPS).stream()
             .flatMap(AccessRight::fromCsv);
