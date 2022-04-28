@@ -8,6 +8,7 @@ dependencies {
     implementation project(":eventhandlers")
     implementation project(":json")
     implementation project(":auth")
+    implementation project(":apigateway")
 
     implementation libs.bundles.testing
     implementation libs.httpmime
@@ -15,14 +16,10 @@ dependencies {
     implementation libs.aws.sdk2.s3
     implementation libs.aws.sdk2.eventbridge
     implementation libs.aws.sdk2.cognitoidp
-
     implementation libs.guava
     implementation libs.wiremock
-
-
     implementation libs.bundles.jackson
     implementation libs.commons.validator
 
     testImplementation project(":doi")
-
 }
