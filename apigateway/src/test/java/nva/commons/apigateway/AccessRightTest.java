@@ -7,14 +7,14 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import org.junit.jupiter.api.Test;
 
-class PersonGroupTest {
+class AccessRightTest {
 
     @Test
     public void toStringReturnsTheSameStringForEquivalentObjects() {
         var accessRight = randomString();
         var customerId = randomUri();
-        var group1 = new PersonGroup(accessRight, customerId);
-        var group2 = new PersonGroup(accessRight, customerId);
+        var group1 = new AccessRight(accessRight, customerId);
+        var group2 = new AccessRight(accessRight, customerId);
         assertThat(group1.toString(), is(equalTo(group2.toString())));
     }
 }

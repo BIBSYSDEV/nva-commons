@@ -284,9 +284,9 @@ public class RequestInfo {
 
     private URI fetchCustomerIdOffline() {
         return getRequestContextParameterOpt(PERSON_GROUPS).stream()
-            .flatMap(PersonGroup::fromCsv)
-            .filter(PersonGroup::describesCustomerUponLogin)
-            .map(PersonGroup::getCustomerId)
+            .flatMap(AccessRight::fromCsv)
+            .filter(AccessRight::describesCustomerUponLogin)
+            .map(AccessRight::getCustomerId)
             .collect(SingletonCollector.collect());
     }
 
@@ -327,11 +327,10 @@ public class RequestInfo {
             .toOptional();
     }
 
-    private boolean checkAuthorizationOffline(String requiredAccessRight) {
-        var requiredPersonGroup = attempt(this::getCurrentCustomer)
-            .map(currentCustomer -> new PersonGroup(requiredAccessRight, currentCustomer));
-        return requiredPersonGroup
-            .map(required -> fetchAvailablePersonGroups().anyMatch(required::equals))
+    private boolean checkAuthorizationOffline(String accessRight) {
+        return attempt(this::getCurrentCustomer)
+            .map(currentCustomer -> new AccessRight(accessRight, currentCustomer))
+            .map(requiredAccessRight -> fetchAvailableAccessRgiths().anyMatch(requiredAccessRight::equals))
             .orElse(fail -> handleAuthorizationFailure());
     }
 
@@ -340,26 +339,26 @@ public class RequestInfo {
         return false;
     }
 
-    private Stream<PersonGroup> fetchAvailablePersonGroups() {
+    private Stream<AccessRight> fetchAvailableAccessRgiths() {
 
         return getRequestContextParameterOpt(PERSON_GROUPS).stream()
-            .flatMap(PersonGroup::fromCsv);
+            .flatMap(AccessRight::fromCsv);
     }
 
     private Boolean checkAuthorizationOnline(String accessRight) {
         var accessRightAtCustomer = fetchCustomerIdFromCognito()
-            .map(customer -> new PersonGroup(accessRight, customer));
+            .map(customer -> new AccessRight(accessRight, customer));
 
         var availableRights = fetchAvailableRights();
         return accessRightAtCustomer.map(availableRights::contains).orElse(fail -> false);
     }
 
-    private List<PersonGroup> fetchAvailableRights() {
+    private List<AccessRight> fetchAvailableRights() {
         return fetchUserInfoFromCognito()
             .map(CognitoUserInfo::getAccessRights)
-            .map(PersonGroup::fromCsv)
+            .map(AccessRight::fromCsv)
             .map(stream -> stream.collect(Collectors.toList()))
-            .orElse(fail -> Collections.<PersonGroup>emptyList());
+            .orElse(fail -> Collections.<AccessRight>emptyList());
     }
 
     private Try<CognitoUserInfo> fetchUserInfoFromCognito() {

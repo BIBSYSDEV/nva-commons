@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import nva.commons.apigateway.PersonGroup;
+import nva.commons.apigateway.AccessRight;
 import nva.commons.core.JacocoGenerated;
 
 @JacocoGenerated
@@ -38,7 +38,7 @@ public class HandlerRequestBuilder<T> {
     public static final String AUTHORIZER_NODE = "authorizer";
     public static final String CLAIMS_NODE = "claims";
     public static final String NVA_USERNAME_CLAIM = "custom:nvaUsername";
-    public static final String PERSON_GROUP_CLAIMS = "cognito:groups";
+    public static final String ACCESS_RIGHTS_CLAIMS = "cognito:groups";
     public static final String APPLICATION_ROLES_CLAIM = "custom:applicationRoles";
     public static final String PERSON_CRISTIN_ID = "custom:cristinId";
     public static final String ENTRIES_DELIMITER = ",";
@@ -163,45 +163,45 @@ public class HandlerRequestBuilder<T> {
     }
 
     public HandlerRequestBuilder<T> withNvaUsername(String nvaUsername) {
-        ObjectNode claims = getOrCreateAuthorizerClaimsNode();
+        ObjectNode claims = getAuthorizerClaimsNode();
         claims.put(NVA_USERNAME_CLAIM, nvaUsername);
         return this;
     }
 
     public HandlerRequestBuilder<T> withCustomerId(URI customerId) {
-        var customerIdClaim = PersonGroup.createUserAtCustomerGroup(customerId);
-        addClaimToPersonGroupClaims(customerIdClaim);
+        var customerIdClaim = AccessRight.createUserAtCustomerGroup(customerId);
+        addAccessRightToCognitoGroups(customerIdClaim);
         return this;
     }
 
     public HandlerRequestBuilder withAuthorizerClaim(String claimName, String claimValue) {
-        var authorizerClaimsNode = getOrCreateAuthorizerClaimsNode();
+        var authorizerClaimsNode = getAuthorizerClaimsNode();
         authorizerClaimsNode.put(claimName, claimValue);
         return this;
     }
 
     public HandlerRequestBuilder<T> withTopLevelCristinOrgId(URI topLevelCristinOrgId) {
-        ObjectNode claims = getOrCreateAuthorizerClaimsNode();
+        ObjectNode claims = getAuthorizerClaimsNode();
         claims.put(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM, topLevelCristinOrgId.toString());
         return this;
     }
 
     public HandlerRequestBuilder<T> withPersonCristinId(URI personCristinId) {
-        ObjectNode claims = getOrCreateAuthorizerClaimsNode();
+        ObjectNode claims = getAuthorizerClaimsNode();
         claims.put(PERSON_CRISTIN_ID, personCristinId.toString());
         return this;
     }
 
     public HandlerRequestBuilder<T> withRoles(String roles) {
-        ObjectNode claims = getOrCreateAuthorizerClaimsNode();
+        ObjectNode claims = getAuthorizerClaimsNode();
         claims.put(APPLICATION_ROLES_CLAIM, roles);
         return this;
     }
 
     public HandlerRequestBuilder<T> withAccessRights(URI customerId, String... accessRights) {
-        for (String accessRight : accessRights) {
-            var personGroup = new PersonGroup(accessRight, customerId);
-            addClaimToPersonGroupClaims(personGroup);
+        for (String accessRightString : accessRights) {
+            var accessRight = new AccessRight(accessRightString, customerId);
+            addAccessRightToCognitoGroups(accessRight);
         }
         return this;
     }
@@ -212,70 +212,70 @@ public class HandlerRequestBuilder<T> {
         return this;
     }
 
-    private void addClaimToPersonGroupClaims(PersonGroup personGroup) {
-        var claims = getOrCreateAuthorizerClaimsNode();
-        if (isPersonAtCustomerGroupClaim(personGroup)) {
-            insertAndOverwriteExistingCustomerId(personGroup, claims);
+    private void addAccessRightToCognitoGroups(AccessRight accessRight) {
+        var claims = getAuthorizerClaimsNode();
+        if (isPersonAtCustomerGroupClaim(accessRight)) {
+            insertAndOverwriteExistingCustomerId(accessRight, claims);
         } else {
-            appendAccessRightClaimToPersonGroupClaims(claims, personGroup);
+            appendAccessRightClaimToAccessRightClaims(claims, accessRight);
         }
     }
 
-    private void appendAccessRightClaimToPersonGroupClaims(ObjectNode claims, PersonGroup accessRight) {
-        var existingGroups = extractPersonGroups(claims);
-        existingGroups.add(accessRight);
-        var newClaim = existingGroups.stream()
-            .map(PersonGroup::toString)
+    private void appendAccessRightClaimToAccessRightClaims(ObjectNode claims, AccessRight accessRight) {
+        var existingAccessRights = extractAccessRights(claims);
+        existingAccessRights.add(accessRight);
+        var newClaim = existingAccessRights.stream()
+            .map(AccessRight::toString)
             .collect(Collectors.joining(ENTRIES_DELIMITER));
-        claims.put(PERSON_GROUP_CLAIMS, newClaim);
+        claims.put(ACCESS_RIGHTS_CLAIMS, newClaim);
     }
 
-    private void insertAndOverwriteExistingCustomerId(PersonGroup personGroup, ObjectNode claims) {
-        var existingPersonGroups = extractExistingPersonGroupsRemovingUserAtCustomerGroup(claims);
-        var updatedPersonGroups = Stream.of(existingPersonGroups.stream(), Stream.of(personGroup))
+    private void insertAndOverwriteExistingCustomerId(AccessRight accessRight, ObjectNode claims) {
+        var existingAccessRights = extractExistingAccessRightsRemovingSpecialUserAtCustomerClaim(claims);
+        var updatedAccessRights = Stream.of(existingAccessRights.stream(), Stream.of(accessRight))
             .flatMap(Function.identity())
             .filter(Objects::nonNull)
-            .map(PersonGroup::toString)
+            .map(AccessRight::toString)
             .collect(Collectors.joining(ENTRIES_DELIMITER));
-        claims.put(PERSON_GROUP_CLAIMS, updatedPersonGroups);
+        claims.put(ACCESS_RIGHTS_CLAIMS, updatedAccessRights);
     }
 
-    private Collection<PersonGroup> extractExistingPersonGroupsRemovingUserAtCustomerGroup(ObjectNode claims) {
-        var existingPersonGroups = extractPersonGroups(claims);
-        if (customerIdHasAlreadyBeenSet(existingPersonGroups)) {
-            existingPersonGroups = removeCustomerIdFromPersonGroups(existingPersonGroups);
+    private Collection<AccessRight> extractExistingAccessRightsRemovingSpecialUserAtCustomerClaim(ObjectNode claims) {
+        var existingAccessRights = extractAccessRights(claims);
+        if (customerIdExists(existingAccessRights)) {
+            existingAccessRights = removeCustomerIdFromAccessRights(existingAccessRights);
         }
-        return existingPersonGroups;
+        return existingAccessRights;
     }
 
-    private Collection<PersonGroup> extractPersonGroups(ObjectNode claims) {
-        return claims.has(PERSON_GROUP_CLAIMS)
-                   ? PersonGroup.fromCsv(claims.get(PERSON_GROUP_CLAIMS).textValue()).collect(Collectors.toList())
+    private Collection<AccessRight> extractAccessRights(ObjectNode claims) {
+        return claims.has(ACCESS_RIGHTS_CLAIMS)
+                   ? AccessRight.fromCsv(claims.get(ACCESS_RIGHTS_CLAIMS).textValue()).collect(Collectors.toList())
                    : Collections.emptyList();
     }
 
-    private boolean customerIdHasAlreadyBeenSet(Collection<PersonGroup> existingPersonGroups) {
-        return existingPersonGroups.stream().anyMatch(PersonGroup::describesCustomerUponLogin);
+    private boolean customerIdExists(Collection<AccessRight> existingAccessRights) {
+        return existingAccessRights.stream().anyMatch(AccessRight::describesCustomerUponLogin);
     }
 
-    private List<PersonGroup> removeCustomerIdFromPersonGroups(Collection<PersonGroup> existingPersonGroups) {
-        return existingPersonGroups.stream()
-            .filter(not(PersonGroup::describesCustomerUponLogin))
+    private List<AccessRight> removeCustomerIdFromAccessRights(Collection<AccessRight> existingAccessRights) {
+        return existingAccessRights.stream()
+            .filter(not(AccessRight::describesCustomerUponLogin))
             .collect(Collectors.toList());
     }
 
-    private boolean isPersonAtCustomerGroupClaim(PersonGroup group) {
+    private boolean isPersonAtCustomerGroupClaim(AccessRight group) {
         return group.describesCustomerUponLogin();
     }
 
-    private ObjectNode getOrCreateAuthorizerClaimsNode() {
-        ObjectNode authenticationNode = getOrCreateAuthorizerNode();
-        var claimsNode = getOrCreateChildNode(authenticationNode, CLAIMS_NODE);
-        authenticationNode.set(CLAIMS_NODE, claimsNode);
+    private ObjectNode getAuthorizerClaimsNode() {
+        ObjectNode authorizerNode = populateAuthorizerNode();
+        var claimsNode = getChildNode(authorizerNode, CLAIMS_NODE);
+        authorizerNode.set(CLAIMS_NODE, claimsNode);
         return claimsNode;
     }
 
-    private ObjectNode getOrCreateChildNode(ObjectNode parentNode, String childNodeName) {
+    private ObjectNode getChildNode(ObjectNode parentNode, String childNodeName) {
         return Optional.ofNullable(parentNode)
             .map(parent -> parent.get(childNodeName))
             .filter(JsonNode::isObject)
@@ -289,9 +289,9 @@ public class HandlerRequestBuilder<T> {
         }
     }
 
-    private ObjectNode getOrCreateAuthorizerNode() {
+    private ObjectNode populateAuthorizerNode() {
         initializeRequestContextIfNotExists();
-        ObjectNode authorizerNode = getOrCreateChildNode(requestContext, AUTHORIZER_NODE);
+        ObjectNode authorizerNode = getChildNode(requestContext, AUTHORIZER_NODE);
         requestContext.set(AUTHORIZER_NODE, authorizerNode);
         return authorizerNode;
     }
