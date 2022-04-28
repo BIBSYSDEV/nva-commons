@@ -15,46 +15,37 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
-import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.paths.UriWrapper;
 
 public class AuthorizedBackendClient {
 
-    public static final Environment ENVIRONMENT = new Environment();
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String JWT_TOKEN_FIELD = "access_token";
 
     public static final Map<String, String> GRANT_TYPE_CLIENT_CREDENTIALS = Map.of("grant_type", "client_credentials");
-
-    protected static final Supplier<String> CLIENT_ID = () -> ENVIRONMENT.readEnv("BACKEND_CLIENT_ID");
-    protected static final Supplier<String> CLIENT_SECRET = () -> ENVIRONMENT.readEnv("BACKEND_CLIENT_SECRET");
-    protected static final Supplier<URI> COGNITO_URI = () -> URI.create(ENVIRONMENT.readEnv("COGNITO_URI"));
-    private final URI serverUri;
     private final HttpClient httpClient;
+    private final CognitoCredentials cognitoCredentials;
     private String bearerToken;
 
-    protected AuthorizedBackendClient(URI serverUri, HttpClient httpClient, String bearerToken) {
-        this.serverUri = serverUri;
+    protected AuthorizedBackendClient(HttpClient httpClient,
+                                      String bearerToken,
+                                      CognitoCredentials cognitoCredentials) {
         this.httpClient = httpClient;
         this.bearerToken = bearerToken;
+        this.cognitoCredentials = cognitoCredentials;
     }
 
     @JacocoGenerated
-    public static AuthorizedBackendClient prepareWithBackendCredentials() {
-        return prepareWithBackendCredentials(HttpClient.newHttpClient());
+    public static AuthorizedBackendClient prepareWithBackendCredentials(CognitoCredentials cognitoCredentials) {
+        return prepareWithBackendCredentials(HttpClient.newHttpClient(), cognitoCredentials);
     }
 
-    @JacocoGenerated
-    public static AuthorizedBackendClient prepareWithBackendCredentials(HttpClient httpClient) {
-        return prepareWithBackendCredentials(COGNITO_URI.get(), httpClient);
-    }
-
-    public static AuthorizedBackendClient prepareWithBackendCredentials(URI serverUri, HttpClient httpClient) {
-        var client = new AuthorizedBackendClient(serverUri, httpClient, null);
+    public static AuthorizedBackendClient prepareWithBackendCredentials(HttpClient httpClient,
+                                                                        CognitoCredentials cognitoApiClientCredentials) {
+        var client = new AuthorizedBackendClient(httpClient, null, cognitoApiClientCredentials);
         client.refreshToken();
         return client;
     }
@@ -65,7 +56,7 @@ public class AuthorizedBackendClient {
     }
 
     public static AuthorizedBackendClient prepareWithUserCredentials(HttpClient httpClient, String bearerToken) {
-        return new AuthorizedBackendClient(null, httpClient, bearerToken);
+        return new AuthorizedBackendClient(httpClient, bearerToken, null);
     }
 
     public <T> HttpResponse<T> send(HttpRequest.Builder request, BodyHandler<T> responseBodyHandler)
@@ -90,15 +81,21 @@ public class AuthorizedBackendClient {
         return HttpRequest.BodyPublishers.ofString(queryParameters);
     }
 
-    private static String formatBasicAuthenticationHeader() {
-        return attempt(() -> String.format("%s:%s", CLIENT_ID.get(), CLIENT_SECRET.get()))
+    private String formatBasicAuthenticationHeader() {
+        return attempt(() -> formatAuthenticationHeaderValue())
             .map(str -> Base64.getEncoder().encodeToString(str.getBytes(StandardCharsets.UTF_8)))
             .map(credentials -> "Basic " + credentials)
             .orElseThrow();
     }
 
+    private String formatAuthenticationHeaderValue() {
+        return String.format("%s:%s",
+                             cognitoCredentials.getCognitoAppClientId(),
+                             cognitoCredentials.getCognitoAppClientSecret());
+    }
+
     private void refreshToken() {
-        var tokenUri = standardOauth2TokenEndpoint(serverUri);
+        var tokenUri = standardOauth2TokenEndpoint(cognitoCredentials.getCognitoOAuthServerUri());
         var request = formatRequestForJwtToken(tokenUri);
         this.bearerToken = sendRequestAndExtractToken(request);
     }

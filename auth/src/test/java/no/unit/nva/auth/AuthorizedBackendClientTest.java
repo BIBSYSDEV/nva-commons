@@ -1,28 +1,20 @@
 package no.unit.nva.auth;
 
-import static no.unit.nva.auth.AuthorizedBackendClient.CLIENT_ID;
-import static no.unit.nva.auth.AuthorizedBackendClient.CLIENT_SECRET;
-import static no.unit.nva.auth.AuthorizedBackendClient.COGNITO_URI;
+import static no.unit.nva.auth.AuthorizedBackendClient.prepareWithBackendCredentials;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
-import java.util.function.Supplier;
 import no.unit.nva.stubs.FakeAuthServer;
 import no.unit.nva.stubs.WiremockHttpClient;
 import nva.commons.core.paths.UriWrapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 
 class AuthorizedBackendClientTest {
 
@@ -31,13 +23,15 @@ class AuthorizedBackendClientTest {
     private HttpClient httpClient;
     private String protectedContent;
     private String expectedAccessToken;
+    private CognitoCredentials cognitoCredentials;
 
     @BeforeEach
     public void init() {
         FakeAuthServer authServer = new FakeAuthServer();
         expectedAccessToken = randomString();
-        protectedContent = authServer.registerBackendClient(CLIENT_ID.get(),
-                                                            CLIENT_SECRET.get(),
+        cognitoCredentials = new CognitoCredentials(randomString(), randomString(), authServer.getServerUri());
+        protectedContent = authServer.registerBackendClient(cognitoCredentials.getCognitoAppClientId(),
+                                                            cognitoCredentials.getCognitoAppClientSecret(),
                                                             expectedAccessToken,
                                                             EXAMPLE_RESOURCE_PATH);
         serverUri = authServer.getServerUri();
@@ -47,7 +41,7 @@ class AuthorizedBackendClientTest {
     @Test
     void shouldSendRequestsContainingTheBackendAccessTokenWhenUserAccessTokenIsNotSubmitted()
         throws IOException, InterruptedException {
-        var client = AuthorizedBackendClient.prepareWithBackendCredentials(serverUri, httpClient);
+        var client = prepareWithBackendCredentials(httpClient, cognitoCredentials);
         var resourceUri = UriWrapper.fromUri(serverUri).addChild(EXAMPLE_RESOURCE_PATH).getUri();
         var request = HttpRequest.newBuilder(resourceUri).GET();
         var response = client.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
@@ -56,7 +50,7 @@ class AuthorizedBackendClientTest {
 
     @Test
     void shouldSendAsyncRequestsContainingTheAccessTokenWhenUserAccessTokenIsNotSubmitted() {
-        var client = AuthorizedBackendClient.prepareWithBackendCredentials(serverUri, httpClient);
+        var client = prepareWithBackendCredentials(httpClient, cognitoCredentials);
         var resourceUri = UriWrapper.fromUri(serverUri).addChild(EXAMPLE_RESOURCE_PATH).getUri();
         var request = HttpRequest.newBuilder(resourceUri).GET();
         var response =
@@ -80,21 +74,5 @@ class AuthorizedBackendClientTest {
         assertThat(asyncResponse.body(), containsString(protectedContent));
     }
 
-    @Test
-    void shouldNotRequireEnvVariablesForBackendAccessTokenIfUserAccessTokenIsUsed() {
-        assertThat(CLIENT_ID, is(instanceOf(Supplier.class)));
-        assertThat(CLIENT_SECRET, is(instanceOf(Supplier.class)));
-        assertThat(COGNITO_URI, is(instanceOf(Supplier.class)));
-    }
 
-    @Test
-    void shouldReadAllNecessaryInformationFromEnvWhenBackendAccessTokenIsUsed() {
-        Executable action = AuthorizedBackendClient::prepareWithBackendCredentials;
-        assertThatExceptionIsTheExpectedNetworkExceptionAndNotEnvVariableInitException(action);
-    }
-
-    private void assertThatExceptionIsTheExpectedNetworkExceptionAndNotEnvVariableInitException(Executable action) {
-        var exception = assertThrows(RuntimeException.class, action);
-        assertThat(exception.getCause(), is(instanceOf(ConnectException.class)));
-    }
 }
