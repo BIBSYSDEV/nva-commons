@@ -1,8 +1,5 @@
 package no.unit.nva.testutils;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.function.Predicate.not;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,14 +9,17 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import nva.commons.apigateway.AccessRight;
+import nva.commons.core.JacocoGenerated;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +28,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import nva.commons.apigateway.AccessRight;
-import nva.commons.core.JacocoGenerated;
+
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.function.Predicate.not;
 
 @JacocoGenerated
 public class HandlerRequestBuilder<T> {
@@ -251,7 +253,7 @@ public class HandlerRequestBuilder<T> {
     private Collection<AccessRight> extractAccessRights(ObjectNode claims) {
         return claims.has(ACCESS_RIGHTS_CLAIMS)
                    ? AccessRight.fromCsv(claims.get(ACCESS_RIGHTS_CLAIMS).textValue()).collect(Collectors.toList())
-                   : Collections.emptyList();
+                   : new ArrayList<>();
     }
 
     private boolean customerIdExists(Collection<AccessRight> existingAccessRights) {
