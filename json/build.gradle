@@ -11,6 +11,7 @@ dependencies {
     compileOnly libs.jackson.annotations
     compileOnly libs.jackson.datatype.jdk8
     compileOnly libs.jackson.datatype.jsr310
+    compileOnly libs.zalando
     compileOnly libs.jackson.datatype.problem
 
 
