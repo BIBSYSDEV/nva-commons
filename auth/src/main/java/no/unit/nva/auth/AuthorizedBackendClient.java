@@ -59,6 +59,11 @@ public class AuthorizedBackendClient {
         return new AuthorizedBackendClient(httpClient, bearerToken, null);
     }
 
+    @JacocoGenerated
+    public String getBearerToken() {
+        return bearerToken;
+    }
+
     public <T> HttpResponse<T> send(HttpRequest.Builder request, BodyHandler<T> responseBodyHandler)
         throws IOException, InterruptedException {
         var authorizedRequest = request.setHeader(AUTHORIZATION_HEADER, bearerToken).build();
