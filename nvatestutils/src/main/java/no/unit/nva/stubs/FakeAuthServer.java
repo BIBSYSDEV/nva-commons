@@ -48,21 +48,6 @@ public class FakeAuthServer {
         accessTokenUserMap.keySet().forEach(this::stubEndpointForUserEntry);
     }
 
-    private FakeAuthServer initialize() {
-        httpServer = new WireMockServer(options().httpDisabled(true).dynamicHttpsPort());
-        httpServer.start();
-        serverUri = URI.create(httpServer.baseUrl());
-        WireMock.configureFor(HTTPS, serverUri.getHost(), httpServer.httpsPort());
-        return this;
-    }
-
-    private void stubEndpointForUserEntry(String accessToken) {
-        stubFor(get(OAUTH_USER_INFO)
-                    .withHeader(HttpHeaders.AUTHORIZATION, equalTo(bearerToken(accessToken)))
-                    .willReturn(createUserInfoResponse(accessToken))
-        );
-    }
-
     public String registerBackendClient(String clientId,
                                         String clientSecret,
                                         String expectedAccessToken,
@@ -77,6 +62,21 @@ public class FakeAuthServer {
                     .withHeader(AUTHORIZATION_HEADER, new EqualToPattern("Bearer " + expectedAccessToken))
                     .willReturn(aResponse().withBody(protectedContent).withStatus(HttpURLConnection.HTTP_OK)));
         return protectedContent;
+    }
+
+    private FakeAuthServer initialize() {
+        httpServer = new WireMockServer(options().httpDisabled(true).dynamicHttpsPort());
+        httpServer.start();
+        serverUri = URI.create(httpServer.baseUrl());
+        WireMock.configureFor(HTTPS, serverUri.getHost(), httpServer.httpsPort());
+        return this;
+    }
+
+    private void stubEndpointForUserEntry(String accessToken) {
+        stubFor(get(OAUTH_USER_INFO)
+                    .withHeader(HttpHeaders.AUTHORIZATION, equalTo(bearerToken(accessToken)))
+                    .willReturn(createUserInfoResponse(accessToken))
+        );
     }
 
     private ResponseDefinitionBuilder createOauthClientResponse(String expectedAccessToken) {

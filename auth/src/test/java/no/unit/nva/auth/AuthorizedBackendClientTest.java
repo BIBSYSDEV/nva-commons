@@ -3,6 +3,8 @@ package no.unit.nva.auth;
 import static no.unit.nva.auth.AuthorizedBackendClient.prepareWithCognitoCredentials;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.hamcrest.core.StringContains.containsString;
 import java.io.IOException;
 import java.net.URI;
@@ -42,6 +44,7 @@ class AuthorizedBackendClientTest {
     void shouldSendRequestsContainingTheBackendAccessTokenWhenUserAccessTokenIsNotSubmitted()
         throws IOException, InterruptedException {
         var client = prepareWithCognitoCredentials(httpClient, cognitoCredentials);
+        assertThatBearerTokenIsNotInittializedBeforeCallingSendOrSendAsync(client);
         var resourceUri = UriWrapper.fromUri(serverUri).addChild(EXAMPLE_RESOURCE_PATH).getUri();
         var request = HttpRequest.newBuilder(resourceUri).GET();
         var response = client.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
@@ -51,6 +54,7 @@ class AuthorizedBackendClientTest {
     @Test
     void shouldSendAsyncRequestsContainingTheAccessTokenWhenUserAccessTokenIsNotSubmitted() {
         var client = prepareWithCognitoCredentials(httpClient, cognitoCredentials);
+        assertThatBearerTokenIsNotInittializedBeforeCallingSendOrSendAsync(client);
         var resourceUri = UriWrapper.fromUri(serverUri).addChild(EXAMPLE_RESOURCE_PATH).getUri();
         var request = HttpRequest.newBuilder(resourceUri).GET();
         var response =
@@ -74,5 +78,7 @@ class AuthorizedBackendClientTest {
         assertThat(asyncResponse.body(), containsString(protectedContent));
     }
 
-
+    private void assertThatBearerTokenIsNotInittializedBeforeCallingSendOrSendAsync(AuthorizedBackendClient client) {
+        assertThat(client.getBearerToken(), is(nullValue()));
+    }
 }
