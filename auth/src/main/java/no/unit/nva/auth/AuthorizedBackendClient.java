@@ -1,5 +1,6 @@
 package no.unit.nva.auth;
 
+import static java.util.Objects.isNull;
 import static nva.commons.core.attempt.Try.attempt;
 import com.fasterxml.jackson.jr.ob.JSON;
 import java.io.IOException;
@@ -28,6 +29,7 @@ public class AuthorizedBackendClient {
     public static final Map<String, String> GRANT_TYPE_CLIENT_CREDENTIALS = Map.of("grant_type", "client_credentials");
     private final HttpClient httpClient;
     private final CognitoCredentials cognitoCredentials;
+    private final boolean bearerTokenIsNotInjectedDirectly;
     private String bearerToken;
 
     protected AuthorizedBackendClient(HttpClient httpClient,
@@ -36,6 +38,7 @@ public class AuthorizedBackendClient {
         this.httpClient = httpClient;
         this.bearerToken = bearerToken;
         this.cognitoCredentials = cognitoCredentials;
+        this.bearerTokenIsNotInjectedDirectly = isNull(bearerToken);
     }
 
     @JacocoGenerated
@@ -45,9 +48,7 @@ public class AuthorizedBackendClient {
 
     public static AuthorizedBackendClient prepareWithCognitoCredentials(HttpClient httpClient,
                                                                         CognitoCredentials cognitoApiClientCredentials) {
-        var client = new AuthorizedBackendClient(httpClient, null, cognitoApiClientCredentials);
-        client.refreshToken();
-        return client;
+        return new AuthorizedBackendClient(httpClient, null, cognitoApiClientCredentials);
     }
 
     @JacocoGenerated
@@ -60,18 +61,24 @@ public class AuthorizedBackendClient {
     }
 
     @JacocoGenerated
-    public String getBearerToken() {
+    protected String getBearerToken() {
         return bearerToken;
     }
 
     public <T> HttpResponse<T> send(HttpRequest.Builder request, BodyHandler<T> responseBodyHandler)
         throws IOException, InterruptedException {
+        if (bearerTokenIsNotInjectedDirectly) {
+            refreshToken();
+        }
         var authorizedRequest = request.setHeader(AUTHORIZATION_HEADER, bearerToken).build();
         return httpClient.send(authorizedRequest, responseBodyHandler);
     }
 
     public <T> CompletableFuture<HttpResponse<T>> sendAsync(Builder request,
                                                             BodyHandler<T> responseBodyHandler) {
+        if (bearerTokenIsNotInjectedDirectly) {
+            refreshToken();
+        }
         var authorizedRequest = request.setHeader(AUTHORIZATION_HEADER, bearerToken).build();
         return httpClient.sendAsync(authorizedRequest, responseBodyHandler);
     }
@@ -87,7 +94,7 @@ public class AuthorizedBackendClient {
     }
 
     private String formatBasicAuthenticationHeader() {
-        return attempt(() -> formatAuthenticationHeaderValue())
+        return attempt(this::formatAuthenticationHeaderValue)
             .map(str -> Base64.getEncoder().encodeToString(str.getBytes(StandardCharsets.UTF_8)))
             .map(credentials -> "Basic " + credentials)
             .orElseThrow();
