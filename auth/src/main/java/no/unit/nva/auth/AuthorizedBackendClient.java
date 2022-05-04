@@ -67,18 +67,14 @@ public class AuthorizedBackendClient {
 
     public <T> HttpResponse<T> send(HttpRequest.Builder request, BodyHandler<T> responseBodyHandler)
         throws IOException, InterruptedException {
-        if (bearerTokenIsNotInjectedDirectly) {
-            refreshToken();
-        }
+        refreshToken();
         var authorizedRequest = request.setHeader(AUTHORIZATION_HEADER, bearerToken).build();
         return httpClient.send(authorizedRequest, responseBodyHandler);
     }
 
     public <T> CompletableFuture<HttpResponse<T>> sendAsync(Builder request,
                                                             BodyHandler<T> responseBodyHandler) {
-        if (bearerTokenIsNotInjectedDirectly) {
-            refreshToken();
-        }
+        refreshToken();
         var authorizedRequest = request.setHeader(AUTHORIZATION_HEADER, bearerToken).build();
         return httpClient.sendAsync(authorizedRequest, responseBodyHandler);
     }
@@ -107,9 +103,11 @@ public class AuthorizedBackendClient {
     }
 
     private void refreshToken() {
-        var tokenUri = standardOauth2TokenEndpoint(cognitoCredentials.getCognitoOAuthServerUri());
-        var request = formatRequestForJwtToken(tokenUri);
-        this.bearerToken = sendRequestAndExtractToken(request);
+        if (bearerTokenIsNotInjectedDirectly) {
+            var tokenUri = standardOauth2TokenEndpoint(cognitoCredentials.getCognitoOAuthServerUri());
+            var request = formatRequestForJwtToken(tokenUri);
+            this.bearerToken = sendRequestAndExtractToken(request);
+        }
     }
 
     private String createBearerToken(String accessToken) {
