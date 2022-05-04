@@ -48,10 +48,10 @@ public class FakeAuthServer {
         accessTokenUserMap.keySet().forEach(this::stubEndpointForUserEntry);
     }
 
-    public String setUpHttpInteractions(String clientId,
-                                        String clientSecret,
-                                        String expectedAccessToken,
-                                        String exampleResourcePath) {
+    public String createHttpInteractions(String clientId,
+                                         String clientSecret,
+                                         String expectedAccessToken,
+                                         String exampleResourcePath) {
         createOAuthAccessTokenResponse(clientId, clientSecret, expectedAccessToken);
         return createResponseForProtectedContent(expectedAccessToken, exampleResourcePath);
     }

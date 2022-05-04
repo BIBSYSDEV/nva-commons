@@ -35,10 +35,10 @@ class AuthorizedBackendClientTest {
         authServer = new FakeAuthServer();
         expectedAccessToken = randomString();
         cognitoCredentials = new CognitoCredentials(randomString(), randomString(), authServer.getServerUri());
-        protectedContent = authServer.setUpHttpInteractions(cognitoCredentials.getCognitoAppClientId(),
-                                                            cognitoCredentials.getCognitoAppClientSecret(),
-                                                            expectedAccessToken,
-                                                            EXAMPLE_RESOURCE_PATH);
+        protectedContent = authServer.createHttpInteractions(cognitoCredentials.getCognitoAppClientId(),
+                                                             cognitoCredentials.getCognitoAppClientSecret(),
+                                                             expectedAccessToken,
+                                                             EXAMPLE_RESOURCE_PATH);
         serverUri = authServer.getServerUri();
         this.httpClient = WiremockHttpClient.create();
     }
@@ -109,10 +109,10 @@ class AuthorizedBackendClientTest {
     }
 
     private void authClientReturnsAnotherAccessTokenOnTheNextCall(String accessToken) {
-        protectedContent = authServer.setUpHttpInteractions(cognitoCredentials.getCognitoAppClientId(),
-                                                            cognitoCredentials.getCognitoAppClientSecret(),
-                                                            accessToken,
-                                                            EXAMPLE_RESOURCE_PATH);
+        protectedContent = authServer.createHttpInteractions(cognitoCredentials.getCognitoAppClientId(),
+                                                             cognitoCredentials.getCognitoAppClientSecret(),
+                                                             accessToken,
+                                                             EXAMPLE_RESOURCE_PATH);
     }
 
     private HttpRequest.Builder buildRequest() {
