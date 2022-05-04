@@ -59,7 +59,7 @@ class FakeAuthServerTest {
         var clientSecret = randomString();
         var accessToken = randomString();
         var exampleResourcePath = "/example";
-        var protectedResource = authServer.registerBackendClient(clientId, clientSecret, accessToken,
+        var protectedResource = authServer.setUpHttpInteractions(clientId, clientSecret, accessToken,
                                                                  exampleResourcePath);
         var requestUri = UriWrapper.fromUri(authServer.getServerUri()).addChild(exampleResourcePath).getUri();
         var request = HttpRequest.newBuilder(requestUri)
@@ -77,7 +77,7 @@ class FakeAuthServerTest {
         var clientId = randomString();
         var clientSecret = randomString();
         var exampleResourcePath = "/example";
-        authServer.registerBackendClient(clientId, clientSecret, randomString(),
+        authServer.setUpHttpInteractions(clientId, clientSecret, randomString(),
                                          exampleResourcePath);
         var requestUri = UriWrapper.fromUri(authServer.getServerUri()).addChild(exampleResourcePath).getUri();
         var request = HttpRequest.newBuilder(requestUri)

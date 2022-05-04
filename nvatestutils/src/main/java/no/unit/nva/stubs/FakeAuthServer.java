@@ -48,20 +48,27 @@ public class FakeAuthServer {
         accessTokenUserMap.keySet().forEach(this::stubEndpointForUserEntry);
     }
 
-    public String registerBackendClient(String clientId,
+    public String setUpHttpInteractions(String clientId,
                                         String clientSecret,
                                         String expectedAccessToken,
                                         String exampleResourcePath) {
-        stubFor(post(OAUTH_TOKEN)
-                    .withBasicAuth(clientId, clientSecret)
-                    .withRequestBody(new ContainsPattern("grant_type=client_credentials"))
-                    .willReturn(createOauthClientResponse(expectedAccessToken)));
+        createOAuthAccessTokenResponse(clientId, clientSecret, expectedAccessToken);
+        return createResponseForProtectedContent(expectedAccessToken, exampleResourcePath);
+    }
 
-        String protectedContent = randomString();
+    private String createResponseForProtectedContent(String expectedAccessToken, String exampleResourcePath) {
+        var protectedContent = randomString();
         stubFor(get(exampleResourcePath)
                     .withHeader(AUTHORIZATION_HEADER, new EqualToPattern("Bearer " + expectedAccessToken))
                     .willReturn(aResponse().withBody(protectedContent).withStatus(HttpURLConnection.HTTP_OK)));
         return protectedContent;
+    }
+
+    private void createOAuthAccessTokenResponse(String clientId, String clientSecret, String expectedAccessToken) {
+        stubFor(post(OAUTH_TOKEN)
+                    .withBasicAuth(clientId, clientSecret)
+                    .withRequestBody(new ContainsPattern("grant_type=client_credentials"))
+                    .willReturn(createOauthClientResponse(expectedAccessToken)));
     }
 
     private FakeAuthServer initialize() {
