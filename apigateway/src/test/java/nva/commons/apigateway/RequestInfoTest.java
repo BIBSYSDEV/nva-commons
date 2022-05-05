@@ -273,7 +273,7 @@ class RequestInfoTest {
             .withAccessRights(customerId, AccessRight.ADMINISTRATE_APPLICATION.toString())
             .build();
         var requestInfo = RequestInfo.fromRequest(request);
-        assertThat(requestInfo.isApplicationAdmin(), is(true));
+        assertThat(requestInfo.userIsApplicationAdmin(), is(true));
     }
 
     @Test
@@ -285,7 +285,7 @@ class RequestInfoTest {
             .withAccessRights(customerId, AccessRight.APPROVE_DOI_REQUEST.toString(), randomString())
             .build();
         var requestInfo = RequestInfo.fromRequest(request);
-        assertThat(requestInfo.isApplicationAdmin(), is(false));
+        assertThat(requestInfo.userIsApplicationAdmin(), is(false));
     }
 
     @Test
