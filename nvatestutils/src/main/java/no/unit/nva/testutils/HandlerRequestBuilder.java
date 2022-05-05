@@ -219,6 +219,12 @@ public class HandlerRequestBuilder<T> {
         return this;
     }
 
+    public HandlerRequestBuilder<T> withScope(String scope) {
+        var authorizerClaims = getAuthorizerClaimsNode();
+        authorizerClaims.put("scope", scope);
+        return this;
+    }
+
     private void addAccessRightToCognitoGroups(AccessRightEntry accessRight) {
         var claims = getAuthorizerClaimsNode();
         if (isPersonAtCustomerGroupClaim(accessRight)) {
