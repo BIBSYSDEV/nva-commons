@@ -60,15 +60,14 @@ public class RequestInfo {
     public static final String DOMAIN_NAME_FIELD = "domainName";
     public static final Supplier<URI> DEFAULT_COGNITO_URI = () -> URI.create(ENVIRONMENT.readEnv("COGNITO_URI"));
     public static final String PERSON_GROUPS_CLAIM = "cognito:groups";
+    public static final String AUTHORIZATION_FAILURE_WARNING = "Missing customerId or required access right";
     private static final String CLAIMS_PATH = "/authorizer/claims/";
-
     public static final JsonPointer PERSON_GROUPS = claimToJsonPointer(PERSON_GROUPS_CLAIM);
     public static final JsonPointer NVA_USERNAME = claimToJsonPointer(NVA_USERNAME_CLAIM);
     private static final JsonPointer TOP_LEVEL_ORG_CRISTIN_ID = claimToJsonPointer(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM);
     private static final JsonPointer PERSON_CRISTIN_ID = claimToJsonPointer(PERSON_CRISTIN_ID_CLAIM);
     private static final HttpClient DEFAULT_HTTP_CLIENT = HttpClient.newBuilder().build();
     private static final Logger logger = LoggerFactory.getLogger(RequestInfo.class);
-    public static final String AUTHORIZATION_FAILURE_WARNING = "Missing customerId or required access right";
     private final HttpClient httpClient;
     private final Supplier<URI> cognitoUri;
     @JsonProperty(HEADERS_FIELD)
@@ -246,7 +245,6 @@ public class RequestInfo {
             .orElseThrow();
     }
 
-    @JsonIgnore
     public boolean userIsAuthorized(String accessRight) {
         return checkAuthorizationOnline(accessRight)
                || checkAuthorizationOffline(accessRight);
@@ -278,16 +276,12 @@ public class RequestInfo {
             .orElseThrow(UnauthorizedException::new);
     }
 
-    private static JsonPointer claimToJsonPointer(String claim) {
-        return JsonPointer.compile(CLAIMS_PATH + claim);
-    }
-
-    private URI fetchCustomerIdOffline() {
-        return getRequestContextParameterOpt(PERSON_GROUPS).stream()
-            .flatMap(AccessRight::fromCsv)
-            .filter(AccessRight::describesCustomerUponLogin)
-            .map(AccessRight::getCustomerId)
-            .collect(SingletonCollector.collect());
+    public boolean isApplicationAdmin() {
+        return fetchAvailableAccessRights()
+            .map(AccessRightEntry::getAccessRight)
+            .map(attempt(AccessRight::fromString))
+            .flatMap(Try::stream)
+            .anyMatch(AccessRight.ADMINISTRATE_APPLICATION::equals);
     }
 
     @JsonIgnore
@@ -295,6 +289,18 @@ public class RequestInfo {
         return extractPersonCristinIdOffline()
             .or(this::fetchPersonCristinIdFromCognito)
             .orElseThrow(UnauthorizedException::new);
+    }
+
+    private static JsonPointer claimToJsonPointer(String claim) {
+        return JsonPointer.compile(CLAIMS_PATH + claim);
+    }
+
+    private URI fetchCustomerIdOffline() {
+        return getRequestContextParameterOpt(PERSON_GROUPS).stream()
+            .flatMap(AccessRightEntry::fromCsv)
+            .filter(AccessRightEntry::describesCustomerUponLogin)
+            .map(AccessRightEntry::getCustomerId)
+            .collect(SingletonCollector.collect());
     }
 
     private Optional<URI> extractTopLevelOrgIdOffline() {
@@ -329,8 +335,8 @@ public class RequestInfo {
 
     private boolean checkAuthorizationOffline(String accessRight) {
         return attempt(this::getCurrentCustomer)
-            .map(currentCustomer -> new AccessRight(accessRight, currentCustomer))
-            .map(requiredAccessRight -> fetchAvailableAccessRigths().anyMatch(requiredAccessRight::equals))
+            .map(currentCustomer -> new AccessRightEntry(accessRight, currentCustomer))
+            .map(requiredAccessRight -> fetchAvailableAccessRights().anyMatch(requiredAccessRight::equals))
             .orElse(fail -> handleAuthorizationFailure());
     }
 
@@ -339,26 +345,25 @@ public class RequestInfo {
         return false;
     }
 
-    private Stream<AccessRight> fetchAvailableAccessRigths() {
-
+    private Stream<AccessRightEntry> fetchAvailableAccessRights() {
         return getRequestContextParameterOpt(PERSON_GROUPS).stream()
-            .flatMap(AccessRight::fromCsv);
+            .flatMap(AccessRightEntry::fromCsv);
     }
 
     private Boolean checkAuthorizationOnline(String accessRight) {
         var accessRightAtCustomer = fetchCustomerIdFromCognito()
-            .map(customer -> new AccessRight(accessRight, customer));
+            .map(customer -> new AccessRightEntry(accessRight, customer));
 
         var availableRights = fetchAvailableRights();
         return accessRightAtCustomer.map(availableRights::contains).orElse(fail -> false);
     }
 
-    private List<AccessRight> fetchAvailableRights() {
+    private List<AccessRightEntry> fetchAvailableRights() {
         return fetchUserInfoFromCognito()
             .map(CognitoUserInfo::getAccessRights)
-            .map(AccessRight::fromCsv)
+            .map(AccessRightEntry::fromCsv)
             .map(stream -> stream.collect(Collectors.toList()))
-            .orElse(fail -> Collections.<AccessRight>emptyList());
+            .orElse(fail -> Collections.<AccessRightEntry>emptyList());
     }
 
     private Try<CognitoUserInfo> fetchUserInfoFromCognito() {
