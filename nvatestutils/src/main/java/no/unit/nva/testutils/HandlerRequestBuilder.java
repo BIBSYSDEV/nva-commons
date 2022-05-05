@@ -29,7 +29,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import nva.commons.apigateway.AccessRight;
+import nva.commons.apigateway.AccessRightEntry;
 import nva.commons.core.JacocoGenerated;
 
 @JacocoGenerated
@@ -176,7 +176,7 @@ public class HandlerRequestBuilder<T> {
     }
 
     public HandlerRequestBuilder<T> withCustomerId(URI customerId) {
-        var customerIdClaim = AccessRight.createUserAtCustomerGroup(customerId);
+        var customerIdClaim = AccessRightEntry.createUserAtCustomerGroup(customerId);
         addAccessRightToCognitoGroups(customerIdClaim);
         return this;
     }
@@ -207,7 +207,7 @@ public class HandlerRequestBuilder<T> {
 
     public HandlerRequestBuilder<T> withAccessRights(URI customerId, String... accessRights) {
         for (String accessRightString : accessRights) {
-            var accessRight = new AccessRight(accessRightString, customerId);
+            var accessRight = new AccessRightEntry(accessRightString, customerId);
             addAccessRightToCognitoGroups(accessRight);
         }
         return this;
@@ -219,7 +219,7 @@ public class HandlerRequestBuilder<T> {
         return this;
     }
 
-    private void addAccessRightToCognitoGroups(AccessRight accessRight) {
+    private void addAccessRightToCognitoGroups(AccessRightEntry accessRight) {
         var claims = getAuthorizerClaimsNode();
         if (isPersonAtCustomerGroupClaim(accessRight)) {
             insertAndOverwriteExistingCustomerId(accessRight, claims);
@@ -228,26 +228,27 @@ public class HandlerRequestBuilder<T> {
         }
     }
 
-    private void appendAccessRightClaimToAccessRightClaims(ObjectNode claims, AccessRight accessRight) {
+    private void appendAccessRightClaimToAccessRightClaims(ObjectNode claims, AccessRightEntry accessRight) {
         var existingAccessRights = extractAccessRights(claims);
         existingAccessRights.add(accessRight);
         var newClaim = existingAccessRights.stream()
-            .map(AccessRight::toString)
+            .map(AccessRightEntry::toString)
             .collect(Collectors.joining(ENTRIES_DELIMITER));
         claims.put(ACCESS_RIGHTS_CLAIMS, newClaim);
     }
 
-    private void insertAndOverwriteExistingCustomerId(AccessRight accessRight, ObjectNode claims) {
+    private void insertAndOverwriteExistingCustomerId(AccessRightEntry accessRight, ObjectNode claims) {
         var existingAccessRights = extractExistingAccessRightsRemovingSpecialUserAtCustomerClaim(claims);
         var updatedAccessRights = Stream.of(existingAccessRights.stream(), Stream.of(accessRight))
             .flatMap(Function.identity())
             .filter(Objects::nonNull)
-            .map(AccessRight::toString)
+            .map(AccessRightEntry::toString)
             .collect(Collectors.joining(ENTRIES_DELIMITER));
         claims.put(ACCESS_RIGHTS_CLAIMS, updatedAccessRights);
     }
 
-    private Collection<AccessRight> extractExistingAccessRightsRemovingSpecialUserAtCustomerClaim(ObjectNode claims) {
+    private Collection<AccessRightEntry> extractExistingAccessRightsRemovingSpecialUserAtCustomerClaim(
+        ObjectNode claims) {
         var existingAccessRights = extractAccessRights(claims);
         if (customerIdExists(existingAccessRights)) {
             existingAccessRights = removeCustomerIdFromAccessRights(existingAccessRights);
@@ -255,23 +256,23 @@ public class HandlerRequestBuilder<T> {
         return existingAccessRights;
     }
 
-    private Collection<AccessRight> extractAccessRights(ObjectNode claims) {
+    private Collection<AccessRightEntry> extractAccessRights(ObjectNode claims) {
         return claims.has(ACCESS_RIGHTS_CLAIMS)
-                   ? AccessRight.fromCsv(claims.get(ACCESS_RIGHTS_CLAIMS).textValue()).collect(Collectors.toList())
+                   ? AccessRightEntry.fromCsv(claims.get(ACCESS_RIGHTS_CLAIMS).textValue()).collect(Collectors.toList())
                    : new ArrayList<>();
     }
 
-    private boolean customerIdExists(Collection<AccessRight> existingAccessRights) {
-        return existingAccessRights.stream().anyMatch(AccessRight::describesCustomerUponLogin);
+    private boolean customerIdExists(Collection<AccessRightEntry> existingAccessRights) {
+        return existingAccessRights.stream().anyMatch(AccessRightEntry::describesCustomerUponLogin);
     }
 
-    private List<AccessRight> removeCustomerIdFromAccessRights(Collection<AccessRight> existingAccessRights) {
+    private List<AccessRightEntry> removeCustomerIdFromAccessRights(Collection<AccessRightEntry> existingAccessRights) {
         return existingAccessRights.stream()
-            .filter(not(AccessRight::describesCustomerUponLogin))
+            .filter(not(AccessRightEntry::describesCustomerUponLogin))
             .collect(Collectors.toList());
     }
 
-    private boolean isPersonAtCustomerGroupClaim(AccessRight group) {
+    private boolean isPersonAtCustomerGroupClaim(AccessRightEntry group) {
         return group.describesCustomerUponLogin();
     }
 

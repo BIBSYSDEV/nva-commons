@@ -266,6 +266,29 @@ class RequestInfoTest {
     }
 
     @Test
+    void shouldReturnThatUserIsApplicationAdminWhenUserHasTheRespectiveAccessRight() throws JsonProcessingException {
+        var customerId = randomUri();
+        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper)
+            .withCustomerId(customerId)
+            .withAccessRights(customerId, AccessRight.ADMINISTRATE_APPLICATION.toString())
+            .build();
+        var requestInfo = RequestInfo.fromRequest(request);
+        assertThat(requestInfo.isApplicationAdmin(), is(true));
+    }
+
+    @Test
+    void shouldReturnThatUserIsNotApplicationAdminWhenUserDoesNotHaveTheRespectiveAccessRight()
+        throws JsonProcessingException {
+        var customerId = randomUri();
+        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper)
+            .withCustomerId(customerId)
+            .withAccessRights(customerId, AccessRight.APPROVE_DOI_REQUEST.toString(), randomString())
+            .build();
+        var requestInfo = RequestInfo.fromRequest(request);
+        assertThat(requestInfo.isApplicationAdmin(), is(false));
+    }
+
+    @Test
     void canGetValueFromRequestContext() throws JsonProcessingException {
 
         Map<String, Map<String, Map<String, Map<String, String>>>> map = Map.of(
@@ -424,7 +447,7 @@ class RequestInfoTest {
     }
 
     private String randomAccessRight(URI usersCustomer) {
-        return new AccessRight(randomString(), usersCustomer).toString();
+        return new AccessRightEntry(randomString(), usersCustomer).toString();
     }
 
     private RequestInfo requestInfoWithCustomerId(URI userCustomer) throws JsonProcessingException {

@@ -1,85 +1,55 @@
 package nva.commons.apigateway;
 
-import static java.util.function.Predicate.not;
-import java.net.URI;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.Objects;
-import java.util.stream.Stream;
-import nva.commons.core.JacocoGenerated;
+import java.util.Map;
+import java.util.stream.Collectors;
+import nva.commons.apigateway.exceptions.InvalidAccessRightException;
 
-public class AccessRight {
+public enum AccessRight {
 
-    public static final int ACCESS_RIGHT_INDEX = 0;
-    public static final String USER_AT_CUSTOMER_GROUP = "USER";
-    public static final String ENTRIIES_DELIMITER = ",";
-    private static final String AT = "@";
-    private static final int CUSTOMER_ID_INDEX = 1;
-    private final String group;
-    private final URI customerId;
+    USER,// pseudo access-right to indicate the customer in cognito groups
+    APPROVE_DOI_REQUEST,
+    REJECT_DOI_REQUEST,
+    READ_DOI_REQUEST,
+    EDIT_OWN_INSTITUTION_RESOURCES,
+    EDIT_OWN_INSTITUTION_USERS,
+    EDIT_OWN_INSTITUTION_PROJECTS,
+    ADMINISTRATE_APPLICATION;
 
-    public AccessRight(String right, URI customerId) {
-        this.group = formatAccessRightString(right.split(AT)[ACCESS_RIGHT_INDEX]);
-        this.customerId = customerId;
-    }
+    private static final Map<String, AccessRight> index = createIndex();
 
-    public static AccessRight fromString(String accessRightAtCustomer) {
-        var list = accessRightAtCustomer.split(AT);
-        var accessRight = formatAccessRightString(list[ACCESS_RIGHT_INDEX]);
-        var customerId = URI.create(list[CUSTOMER_ID_INDEX]);
-        return new AccessRight(accessRight, customerId);
-    }
+    /**
+     * Creates an AccessRight instance from a string (case insensitive).
+     *
+     * @param accessRight string representation of access right
+     * @return an AccessRight instance.
+     */
+    @JsonCreator
+    public static AccessRight fromString(String accessRight) {
 
-    public static Stream<AccessRight> fromCsv(String csv) {
-        return Arrays.stream(csv.split(ENTRIIES_DELIMITER))
-            .filter(not(String::isBlank))
-            .map(AccessRight::fromString);
-    }
-
-    public static AccessRight createUserAtCustomerGroup(URI customerId) {
-        return new AccessRight(USER_AT_CUSTOMER_GROUP, customerId);
-    }
-
-    @JacocoGenerated
-    public URI getCustomerId() {
-        return customerId;
-    }
-
-    @JacocoGenerated
-    public String getGroup() {
-        return group;
-    }
-
-    @JacocoGenerated
-    @Override
-    public int hashCode() {
-        return Objects.hash(group, customerId);
-    }
-
-    @JacocoGenerated
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
+        String formattedString = formatString(accessRight);
+        if (index.containsKey(formattedString)) {
+            return index.get(formattedString);
+        } else {
+            throw new InvalidAccessRightException(accessRight);
         }
-        if (!(o instanceof AccessRight)) {
-            return false;
-        }
-        AccessRight that = (AccessRight) o;
-        return Objects.equals(group, that.group)
-               && Objects.equals(customerId, that.customerId);
     }
 
     @Override
+    @JsonValue
     public String toString() {
-        return this.group + AT + customerId.toString();
+        return formatString(this.name());
     }
 
-    public boolean describesCustomerUponLogin() {
-        return USER_AT_CUSTOMER_GROUP.equalsIgnoreCase(this.getGroup());
+    private static String formatString(String accessRightString) {
+        return accessRightString.toUpperCase(Locale.getDefault());
     }
 
-    private static String formatAccessRightString(String accessRightWithoutCustomerId) {
-        return accessRightWithoutCustomerId.toLowerCase(Locale.getDefault());
+    private static Map<String, AccessRight> createIndex() {
+        return Arrays.stream(AccessRight.values())
+            .collect(Collectors.toMap(AccessRight::toString, v -> v));
     }
 }
