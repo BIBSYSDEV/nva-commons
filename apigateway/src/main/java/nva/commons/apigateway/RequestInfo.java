@@ -277,11 +277,7 @@ public class RequestInfo {
     }
 
     public boolean isApplicationAdmin() {
-        return fetchAvailableAccessRights()
-            .map(AccessRightEntry::getAccessRight)
-            .map(attempt(AccessRight::fromString))
-            .flatMap(Try::stream)
-            .anyMatch(AccessRight.ADMINISTRATE_APPLICATION::equals);
+        return userIsAuthorized(AccessRight.ADMINISTRATE_APPLICATION.toString());
     }
 
     @JsonIgnore

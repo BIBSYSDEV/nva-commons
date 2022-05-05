@@ -267,9 +267,10 @@ class RequestInfoTest {
 
     @Test
     void shouldReturnThatUserIsApplicationAdminWhenUserHasTheRespectiveAccessRight() throws JsonProcessingException {
+        var customerId = randomUri();
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper)
-            .withCustomerId(randomUri())
-            .withAccessRights(randomUri(), AccessRight.ADMINISTRATE_APPLICATION.toString())
+            .withCustomerId(customerId)
+            .withAccessRights(customerId, AccessRight.ADMINISTRATE_APPLICATION.toString())
             .build();
         var requestInfo = RequestInfo.fromRequest(request);
         assertThat(requestInfo.isApplicationAdmin(), is(true));
@@ -278,9 +279,10 @@ class RequestInfoTest {
     @Test
     void shouldReturnThatUserIsNotApplicationAdminWhenUserDoesNotHaveTheRespectiveAccessRight()
         throws JsonProcessingException {
+        var customerId = randomUri();
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper)
-            .withCustomerId(randomUri())
-            .withAccessRights(randomUri(), AccessRight.APPROVE_DOI_REQUEST.toString(), randomString())
+            .withCustomerId(customerId)
+            .withAccessRights(customerId, AccessRight.APPROVE_DOI_REQUEST.toString(), randomString())
             .build();
         var requestInfo = RequestInfo.fromRequest(request);
         assertThat(requestInfo.isApplicationAdmin(), is(false));
