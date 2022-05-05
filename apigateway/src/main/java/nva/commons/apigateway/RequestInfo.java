@@ -245,6 +245,10 @@ public class RequestInfo {
             .orElseThrow();
     }
 
+    public boolean userIsApplicationAdmin() {
+        return userIsAuthorized(AccessRight.ADMINISTRATE_APPLICATION.toString());
+    }
+
     public boolean userIsAuthorized(String accessRight) {
         return checkAuthorizationOnline(accessRight)
                || checkAuthorizationOffline(accessRight);
@@ -274,10 +278,6 @@ public class RequestInfo {
             .or(this::fetchCustomerIdOffline)
             .toOptional()
             .orElseThrow(UnauthorizedException::new);
-    }
-
-    public boolean isApplicationAdmin() {
-        return userIsAuthorized(AccessRight.ADMINISTRATE_APPLICATION.toString());
     }
 
     @JsonIgnore
