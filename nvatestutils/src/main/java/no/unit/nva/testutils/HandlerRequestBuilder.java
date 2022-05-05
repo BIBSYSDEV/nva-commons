@@ -1,5 +1,9 @@
 package no.unit.nva.testutils;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.function.Predicate.not;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,9 +13,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import nva.commons.apigateway.AccessRight;
-import nva.commons.core.JacocoGenerated;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -28,12 +29,11 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.function.Predicate.not;
+import nva.commons.apigateway.AccessRight;
+import nva.commons.core.JacocoGenerated;
 
 @JacocoGenerated
+@SuppressWarnings("PMD.GodClass")
 public class HandlerRequestBuilder<T> {
 
     public static final String DELIMITER = System.lineSeparator();
@@ -127,6 +127,11 @@ public class HandlerRequestBuilder<T> {
         return new ByteArrayInputStream(objectMapper.writeValueAsBytes(this));
     }
 
+    public APIGatewayProxyRequestEvent buildRequestEvent() throws JsonProcessingException {
+        var json = objectMapper.writeValueAsString(this);
+        return objectMapper.readValue(json, APIGatewayProxyRequestEvent.class);
+    }
+
     public T getBody(TypeReference<T> typeRef) throws JsonProcessingException {
         if (nonNull(body)) {
             return objectMapper.readValue(body, typeRef);
@@ -176,7 +181,7 @@ public class HandlerRequestBuilder<T> {
         return this;
     }
 
-    public HandlerRequestBuilder withAuthorizerClaim(String claimName, String claimValue) {
+    public HandlerRequestBuilder<T> withAuthorizerClaim(String claimName, String claimValue) {
         var authorizerClaimsNode = getAuthorizerClaimsNode();
         authorizerClaimsNode.put(claimName, claimValue);
         return this;

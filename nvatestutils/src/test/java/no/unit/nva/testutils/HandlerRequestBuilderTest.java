@@ -1,13 +1,16 @@
 package no.unit.nva.testutils;
 
+import static no.unit.nva.testutils.RandomDataGenerator.randomJson;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -217,6 +220,17 @@ class HandlerRequestBuilderTest {
         var requestJson = toJsonNode(request);
         var actualClaim = requestJson.at(TOP_ORG_CRISTIN_ID_CLAIM_PATH).textValue();
         assertThat(URI.create(actualClaim), is(equalTo(expectedUri)));
+    }
+
+    @Test
+    void shouldReturnApiProxyEventWithAllFieldsFilledIn() throws JsonProcessingException {
+        var request = new HandlerRequestBuilder<String>(objectMapper)
+            .withPersonCristinId(randomUri())
+            .withBody(randomJson())
+            .withAccessRights(randomUri(), randomString(), randomString())
+            .withPathParameters(Map.of(randomString(), randomString()))
+            .buildRequestEvent();
+        assertThat(request.getPathParameters().keySet(), is(not(empty())));
     }
 
     private Map<String, Object> toMap(InputStream inputStream) throws JsonProcessingException {
