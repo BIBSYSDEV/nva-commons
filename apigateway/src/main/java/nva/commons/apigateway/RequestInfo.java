@@ -61,11 +61,14 @@ public class RequestInfo {
     public static final Supplier<URI> DEFAULT_COGNITO_URI = () -> URI.create(ENVIRONMENT.readEnv("COGNITO_URI"));
     public static final String PERSON_GROUPS_CLAIM = "cognito:groups";
     public static final String AUTHORIZATION_FAILURE_WARNING = "Missing customerId or required access right";
+    public static final String BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE = "https://api.nva.unit.no/scopes/backend";
     private static final String CLAIMS_PATH = "/authorizer/claims/";
     public static final JsonPointer PERSON_GROUPS = claimToJsonPointer(PERSON_GROUPS_CLAIM);
     public static final JsonPointer NVA_USERNAME = claimToJsonPointer(NVA_USERNAME_CLAIM);
     private static final JsonPointer TOP_LEVEL_ORG_CRISTIN_ID = claimToJsonPointer(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM);
     private static final JsonPointer PERSON_CRISTIN_ID = claimToJsonPointer(PERSON_CRISTIN_ID_CLAIM);
+    private static final String SCOPE = "scope";
+    private static final JsonPointer SCOPES_CLAIM = claimToJsonPointer(SCOPE);
     private static final HttpClient DEFAULT_HTTP_CLIENT = HttpClient.newBuilder().build();
     private static final Logger logger = LoggerFactory.getLogger(RequestInfo.class);
     private final HttpClient httpClient;
@@ -285,6 +288,12 @@ public class RequestInfo {
         return extractPersonCristinIdOffline()
             .or(this::fetchPersonCristinIdFromCognito)
             .orElseThrow(UnauthorizedException::new);
+    }
+
+    public boolean clientIsInternalBackend() {
+        return getRequestContextParameterOpt(SCOPES_CLAIM)
+            .map(value -> value.contains(BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE))
+            .orElse(false);
     }
 
     private static JsonPointer claimToJsonPointer(String claim) {
