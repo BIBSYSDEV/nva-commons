@@ -266,6 +266,7 @@ public class RequestInfo {
         return extractTopLevelOrgIdOffline().or(this::fetchTopLevelOrgCristinIdFromCognito);
     }
 
+    @JsonIgnore
     public URI getCurrentCustomer() throws UnauthorizedException {
         return fetchCustomerIdFromCognito()
             .or(this::fetchCustomerIdOffline)
