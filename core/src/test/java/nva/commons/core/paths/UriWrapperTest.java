@@ -16,8 +16,8 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 class UriWrapperTest {
 
     public static final String HOST = "http://www.example.org";
-    private static final String ROOT = "/";
     public static final int MAX_PORT_NUMBER = 65535;
+    private static final String ROOT = "/";
 
     @Test
     void getPathRemovesPathDelimiterFromTheEndOfTheUri() {
@@ -161,12 +161,6 @@ class UriWrapperTest {
         assertThat(uri.toString(), is(equalTo(expectedUri.toString())));
     }
 
-    private Map<String, String> getOrderedParametersMap() {
-        final Map<String, String> parameters = new TreeMap<>();
-        parameters.put("key1", "value1");
-        parameters.put("key2", "value2");
-        return parameters;
-    }
 
     @ParameterizedTest(name = "should throw exception when either host is empty")
     @NullAndEmptySource
@@ -175,9 +169,17 @@ class UriWrapperTest {
     }
 
     @Test
-    void shouldCreateAnHttpsUriByDefault() {
+    void shouldCreateAnHttpsUriByDefaultWhenInputIsAHostDomain() {
         var constructedUri = UriWrapper.fromHost("example.org").getUri();
         assertThat(constructedUri.getScheme(), is(equalTo(UriWrapper.HTTPS)));
+    }
+
+    @Test
+    void shouldATolerateInputAsUriWhenCreatingUriFromHost() {
+        var hostAsUri = "http://example.com/hello/world";
+        var actualHostUri = UriWrapper.fromHost(hostAsUri).getUri();
+        var expectedHostUri = URI.create("https://example.com");
+        assertThat(actualHostUri, is(expectedHostUri));
     }
 
     @Test
@@ -185,5 +187,12 @@ class UriWrapperTest {
         var expectedPort = randomInteger(MAX_PORT_NUMBER);
         var actualUri = UriWrapper.fromHost("example.org", expectedPort).getUri();
         assertThat(actualUri, is(equalTo(URI.create("https://example.org:" + expectedPort))));
+    }
+
+    private Map<String, String> getOrderedParametersMap() {
+        final Map<String, String> parameters = new TreeMap<>();
+        parameters.put("key1", "value1");
+        parameters.put("key2", "value2");
+        return parameters;
     }
 }

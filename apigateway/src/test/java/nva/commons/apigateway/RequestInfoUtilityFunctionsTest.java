@@ -1,5 +1,9 @@
 package nva.commons.apigateway;
 
+import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_HEADERS;
+import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_PATH_PARAMETERS;
+import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_QUERY_PARAMETERS;
+import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_REQUEST_CONTEXT;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.spy;
@@ -37,7 +41,7 @@ public class RequestInfoUtilityFunctionsTest {
         when(requestInfo.getHeaders()).thenReturn(Map.of());
         Executable action = () -> requestInfo.getHeader(KEY);
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, action);
-        String expected = RequestInfo.MISSING_FROM_HEADERS + KEY;
+        String expected = MISSING_FROM_HEADERS + KEY;
         assertEquals(expected, exception.getMessage());
     }
 
@@ -53,7 +57,7 @@ public class RequestInfoUtilityFunctionsTest {
         when(requestInfo.getQueryParameters()).thenReturn(Map.of());
         Executable action = () -> requestInfo.getQueryParameter(KEY);
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, action);
-        String expected = RequestInfo.MISSING_FROM_QUERY_PARAMETERS + KEY;
+        String expected = MISSING_FROM_QUERY_PARAMETERS + KEY;
         assertEquals(expected, exception.getMessage());
     }
 
@@ -69,8 +73,8 @@ public class RequestInfoUtilityFunctionsTest {
         when(requestInfo.getPathParameters()).thenReturn(Map.of());
         Executable action = () -> requestInfo.getPathParameter(KEY);
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
-            action);
-        String expected = RequestInfo.MISSING_FROM_PATH_PARAMETERS + KEY;
+                                                                     action);
+        String expected = MISSING_FROM_PATH_PARAMETERS + KEY;
         assertEquals(expected, exception.getMessage());
     }
 
@@ -90,7 +94,7 @@ public class RequestInfoUtilityFunctionsTest {
 
         Executable action = () -> requestInfo.getRequestContextParameter(jsonPointer);
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, action);
-        String expected = RequestInfo.MISSING_FROM_REQUEST_CONTEXT + jsonPointer;
+        String expected = MISSING_FROM_REQUEST_CONTEXT + jsonPointer;
         assertEquals(expected, exception.getMessage());
     }
 }

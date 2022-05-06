@@ -1,6 +1,6 @@
 package nva.commons.apigateway.testutils;
 
-import static nva.commons.apigateway.RequestInfo.PROXY_TAG;
+import static nva.commons.apigateway.RequestInfoConstants.PROXY_TAG;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;

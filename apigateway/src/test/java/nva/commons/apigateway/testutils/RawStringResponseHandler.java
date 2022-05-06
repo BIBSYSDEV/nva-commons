@@ -1,24 +1,22 @@
 package nva.commons.apigateway.testutils;
 
+import static com.google.common.net.MediaType.JSON_UTF_8;
+import static com.google.common.net.MediaType.XML_UTF_8;
+import static nva.commons.apigateway.RequestInfoConstants.PROXY_TAG;
+import static nva.commons.core.attempt.Try.attempt;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
-import nva.commons.apigateway.ApiGatewayHandler;
-import nva.commons.apigateway.RequestInfo;
-import nva.commons.apigateway.exceptions.ApiGatewayException;
-import nva.commons.core.Environment;
-
 import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import static com.google.common.net.MediaType.JSON_UTF_8;
-import static com.google.common.net.MediaType.XML_UTF_8;
-import static nva.commons.apigateway.RequestInfo.PROXY_TAG;
-import static nva.commons.core.attempt.Try.attempt;
+import nva.commons.apigateway.ApiGatewayHandler;
+import nva.commons.apigateway.RequestInfo;
+import nva.commons.apigateway.exceptions.ApiGatewayException;
+import nva.commons.core.Environment;
 
 public class RawStringResponseHandler extends ApiGatewayHandler<RequestBody, String> {
 

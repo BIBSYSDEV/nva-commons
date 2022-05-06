@@ -2,11 +2,28 @@ package nva.commons.apigateway;
 
 import static java.util.Objects.isNull;
 import static java.util.function.Predicate.not;
-import static no.unit.nva.auth.CognitoUserInfo.NVA_USERNAME_CLAIM;
-import static no.unit.nva.auth.CognitoUserInfo.PERSON_CRISTIN_ID_CLAIM;
-import static no.unit.nva.auth.CognitoUserInfo.TOP_LEVEL_ORG_CRISTIN_ID_CLAIM;
+import static nva.commons.apigateway.RequestInfoConstants.AUTHORIZATION_FAILURE_WARNING;
+import static nva.commons.apigateway.RequestInfoConstants.BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE;
+import static nva.commons.apigateway.RequestInfoConstants.DEFAULT_COGNITO_HOST;
+import static nva.commons.apigateway.RequestInfoConstants.DOMAIN_NAME_FIELD;
+import static nva.commons.apigateway.RequestInfoConstants.HEADERS_FIELD;
+import static nva.commons.apigateway.RequestInfoConstants.METHOD_ARN_FIELD;
+import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_HEADERS;
+import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_PATH_PARAMETERS;
+import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_QUERY_PARAMETERS;
+import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_REQUEST_CONTEXT;
+import static nva.commons.apigateway.RequestInfoConstants.NVA_USERNAME;
+import static nva.commons.apigateway.RequestInfoConstants.PATH_FIELD;
+import static nva.commons.apigateway.RequestInfoConstants.PATH_PARAMETERS_FIELD;
+import static nva.commons.apigateway.RequestInfoConstants.PERSON_CRISTIN_ID;
+import static nva.commons.apigateway.RequestInfoConstants.PERSON_GROUPS;
+import static nva.commons.apigateway.RequestInfoConstants.QUERY_STRING_PARAMETERS_FIELD;
+import static nva.commons.apigateway.RequestInfoConstants.REQUEST_CONTEXT_FIELD;
+import static nva.commons.apigateway.RequestInfoConstants.SCOPES_CLAIM;
+import static nva.commons.apigateway.RequestInfoConstants.TOP_LEVEL_ORG_CRISTIN_ID;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
+import static nva.commons.core.paths.UriWrapper.HTTPS;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -31,7 +48,6 @@ import no.unit.nva.auth.FetchUserInfo;
 import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.UnauthorizedException;
-import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.SingletonCollector;
 import nva.commons.core.attempt.Try;
@@ -42,33 +58,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("PMD.GodClass")
 public class RequestInfo {
 
-    public static final Environment ENVIRONMENT = new Environment();
-    public static final String QUERY_STRING_PARAMETERS_FIELD = "queryStringParameters";
-    public static final String PATH_PARAMETERS_FIELD = "pathParameters";
-    public static final String PATH_FIELD = "path";
-    public static final String HEADERS_FIELD = "headers";
-    public static final String METHOD_ARN_FIELD = "methodArn";
-    public static final String REQUEST_CONTEXT_FIELD = "requestContext";
 
-    public static final String PROXY_TAG = "proxy";
-    public static final String MISSING_FROM_HEADERS = "Missing from headers: ";
-    public static final String MISSING_FROM_QUERY_PARAMETERS = "Missing from query parameters: ";
-    public static final String MISSING_FROM_PATH_PARAMETERS = "Missing from pathParameters: ";
-    public static final String MISSING_FROM_REQUEST_CONTEXT = "Missing from requestContext: ";
-
-    public static final String HTTPS = "https"; // Api Gateway only supports HTTPS
-    public static final String DOMAIN_NAME_FIELD = "domainName";
-    public static final Supplier<URI> DEFAULT_COGNITO_URI = () -> URI.create(ENVIRONMENT.readEnv("COGNITO_URI"));
-    public static final String PERSON_GROUPS_CLAIM = "cognito:groups";
-    public static final String AUTHORIZATION_FAILURE_WARNING = "Missing customerId or required access right";
-    public static final String BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE = "https://api.nva.unit.no/scopes/backend";
-    private static final String CLAIMS_PATH = "/authorizer/claims/";
-    public static final JsonPointer PERSON_GROUPS = claimToJsonPointer(PERSON_GROUPS_CLAIM);
-    public static final JsonPointer NVA_USERNAME = claimToJsonPointer(NVA_USERNAME_CLAIM);
-    private static final JsonPointer TOP_LEVEL_ORG_CRISTIN_ID = claimToJsonPointer(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM);
-    private static final JsonPointer PERSON_CRISTIN_ID = claimToJsonPointer(PERSON_CRISTIN_ID_CLAIM);
-    private static final String SCOPE = "scope";
-    private static final JsonPointer SCOPES_CLAIM = claimToJsonPointer(SCOPE);
     private static final HttpClient DEFAULT_HTTP_CLIENT = HttpClient.newBuilder().build();
     private static final Logger logger = LoggerFactory.getLogger(RequestInfo.class);
     private final HttpClient httpClient;
@@ -100,7 +90,7 @@ public class RequestInfo {
         this.otherProperties = new LinkedHashMap<>(); // ordinary HashMap and ConcurrentHashMap fail.
         this.requestContext = defaultRestObjectMapper.createObjectNode();
         this.httpClient = DEFAULT_HTTP_CLIENT;
-        this.cognitoUri = DEFAULT_COGNITO_URI;
+        this.cognitoUri = DEFAULT_COGNITO_HOST;
     }
 
     public static RequestInfo fromRequest(InputStream requestStream) {
@@ -143,8 +133,8 @@ public class RequestInfo {
     }
 
     /**
-     * Get request context parameter. The root node is the {@link RequestInfo#REQUEST_CONTEXT_FIELD} node of the {@link
-     * RequestInfo} class.
+     * Get request context parameter. The root node is the {@link RequestInfoConstants#REQUEST_CONTEXT_FIELD} node of
+     * the {@link RequestInfo} class.
      * <p>Example: {@code JsonPointer.compile("/authorizer/claims/custom:currentCustomer");  }
      * </p>
      *
@@ -294,10 +284,6 @@ public class RequestInfo {
         return getRequestContextParameterOpt(SCOPES_CLAIM)
             .map(value -> value.contains(BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE))
             .orElse(false);
-    }
-
-    private static JsonPointer claimToJsonPointer(String claim) {
-        return JsonPointer.compile(CLAIMS_PATH + claim);
     }
 
     private URI fetchCustomerIdOffline() {
