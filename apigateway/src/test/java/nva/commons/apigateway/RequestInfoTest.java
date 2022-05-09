@@ -4,9 +4,11 @@ import static no.unit.nva.auth.CognitoUserInfo.TOP_LEVEL_ORG_CRISTIN_ID_CLAIM;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
-import static nva.commons.apigateway.RequestInfo.AUTHORIZATION_FAILURE_WARNING;
-import static nva.commons.apigateway.RequestInfo.REQUEST_CONTEXT_FIELD;
+import static nva.commons.apigateway.RequestInfoConstants.AUTHORIZATION_FAILURE_WARNING;
+import static nva.commons.apigateway.RequestInfoConstants.BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE;
+import static nva.commons.apigateway.RequestInfoConstants.REQUEST_CONTEXT_FIELD;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
+import static nva.commons.core.paths.UriWrapper.HTTPS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasKey;
@@ -289,6 +291,24 @@ class RequestInfoTest {
     }
 
     @Test
+    void isBackendClientShouldReturnTrueWhenScopeContainsTheBackendScope() throws JsonProcessingException {
+        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper)
+            .withScope(BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE)
+            .build();
+        var requestInfo = RequestInfo.fromRequest(request);
+        assertThat(requestInfo.clientIsInternalBackend(), is(true));
+    }
+
+    @Test
+    void isBackendClientShouldReturnFalseWhenScopeContainsTheBackendScope() throws JsonProcessingException {
+        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper)
+            .withScope(randomString())
+            .build();
+        var requestInfo = RequestInfo.fromRequest(request);
+        assertThat(requestInfo.clientIsInternalBackend(), is(false));
+    }
+
+    @Test
     void canGetValueFromRequestContext() throws JsonProcessingException {
 
         Map<String, Map<String, Map<String, Map<String, String>>>> map = Map.of(
@@ -316,7 +336,7 @@ class RequestInfoTest {
         RequestInfo requestInfo = extractAccessRightsFromApiGatewayEvent();
 
         URI requestUri = requestInfo.getRequestUri();
-        URI expectedRequestUri = new UriWrapper(RequestInfo.HTTPS, DOMAIN_NAME_FOUND_IN_RESOURCE_FILE)
+        URI expectedRequestUri = new UriWrapper(HTTPS, DOMAIN_NAME_FOUND_IN_RESOURCE_FILE)
             .addChild(PATH_FOUND_IN_RESOURCE_FILE)
             .addQueryParameters(QUERY_PARAMS_FOUND_IN_RESOURCE_FILE)
             .getUri();

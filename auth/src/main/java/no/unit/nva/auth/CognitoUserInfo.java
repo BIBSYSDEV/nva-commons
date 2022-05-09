@@ -17,6 +17,7 @@ public class CognitoUserInfo {
     public static final String NVA_USERNAME_CLAIM = "custom:nvaUsername";
     public static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
     public static final String PERSON_CRISTIN_ID_CLAIM = "custom:cristinId";
+
     @JsonProperty(FEIDE_ID_CLAIM)
     private String feideId;
     @JsonProperty(SELECTED_CUSTOMER_CLAIM)

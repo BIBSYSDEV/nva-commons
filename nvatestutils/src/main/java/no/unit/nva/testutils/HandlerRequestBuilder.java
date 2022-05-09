@@ -45,6 +45,7 @@ public class HandlerRequestBuilder<T> {
     public static final String PERSON_CRISTIN_ID = "custom:cristinId";
     public static final String ENTRIES_DELIMITER = ",";
     private static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
+    public static final String SCOPE_CLAIM = "scope";
     private final transient ObjectMapper objectMapper;
     @JsonProperty("body")
     private String body;
@@ -216,6 +217,12 @@ public class HandlerRequestBuilder<T> {
     public HandlerRequestBuilder<T> withRequestContextValue(String propertyName, String value) {
         initializeRequestContextIfNotExists();
         requestContext.put(propertyName, value);
+        return this;
+    }
+
+    public HandlerRequestBuilder<T> withScope(String scope) {
+        var authorizerClaims = getAuthorizerClaimsNode();
+        authorizerClaims.put(SCOPE_CLAIM, scope);
         return this;
     }
 

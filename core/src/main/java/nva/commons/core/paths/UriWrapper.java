@@ -3,6 +3,7 @@ package nva.commons.core.paths;
 import static java.util.Objects.isNull;
 import static nva.commons.core.attempt.Try.attempt;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
 import nva.commons.core.JacocoGenerated;
@@ -168,7 +169,20 @@ public class UriWrapper {
     }
 
     private static URI createUriWithSchemeAndHost(String scheme, String host, int port) {
-        return attempt(() -> new URI(scheme, EMPTY_USER_INFO, host, port, EMPTY_PATH, EMPTY_QUERY, EMPTY_FRAGMENT))
-            .orElseThrow(fail -> new IllegalArgumentException(MISSING_HOST, fail.getException()));
+
+        return
+            attempt(() -> createUriFromHostUri(scheme, host, port))
+                .or(() -> createUriFromHostDomain(scheme, host, port))
+                .orElseThrow(fail -> new IllegalArgumentException(MISSING_HOST, fail.getException()));
+    }
+
+    private static URI createUriFromHostUri(String scheme, String host, int port) throws URISyntaxException {
+        var hostUri = URI.create(host);
+        var hostString = hostUri.getHost();
+        return createUriFromHostDomain(scheme, hostString, port);
+    }
+
+    private static URI createUriFromHostDomain(String scheme, String host, int port) throws URISyntaxException {
+        return new URI(scheme, EMPTY_USER_INFO, host, port, EMPTY_PATH, EMPTY_QUERY, EMPTY_FRAGMENT);
     }
 }
