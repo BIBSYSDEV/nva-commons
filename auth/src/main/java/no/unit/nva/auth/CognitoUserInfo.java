@@ -17,6 +17,8 @@ public class CognitoUserInfo {
     public static final String NVA_USERNAME_CLAIM = "custom:nvaUsername";
     public static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
     public static final String PERSON_CRISTIN_ID_CLAIM = "custom:cristinId";
+    public static final String PERSON_NIN_ID_CLAIM = "custom:nin";
+    public static final String PERSON_FEIDE_NIN_ID_CLAIM = "custom:feideIdNin";
 
     @JsonProperty(FEIDE_ID_CLAIM)
     private String feideId;
@@ -30,6 +32,10 @@ public class CognitoUserInfo {
     private URI topOrgCristinId;
     @JsonProperty(PERSON_CRISTIN_ID_CLAIM)
     private URI personCristinId;
+    @JsonProperty(PERSON_NIN_ID_CLAIM)
+    private String personNinId;
+    @JsonProperty(PERSON_FEIDE_NIN_ID_CLAIM)
+    private String personFeideNinId;
 
     public static Builder builder() {
         return new Builder();
@@ -87,11 +93,28 @@ public class CognitoUserInfo {
         this.personCristinId = personCristinId;
     }
 
+    public String getPersonNinId() {
+        return personNinId;
+    }
+
+    public void setPersonNinId(String personNinId) {
+        this.personNinId = personNinId;
+    }
+
+    public String getPersonFeideNinId() {
+        return personFeideNinId;
+    }
+
+    public void setPersonFeideNinId(String personFeideNinId) {
+        this.personFeideNinId = personFeideNinId;
+    }
+
     @JacocoGenerated
     @Override
     public int hashCode() {
         return Objects.hash(getFeideId(), getCurrentCustomer(), getAccessRights(), getNvaUsername(),
-                            getTopOrgCristinId(), getPersonCristinId());
+                            getTopOrgCristinId(),
+                            getPersonCristinId(), getPersonNinId(), getPersonFeideNinId());
     }
 
     @JacocoGenerated
@@ -109,7 +132,9 @@ public class CognitoUserInfo {
                && Objects.equals(getAccessRights(), that.getAccessRights())
                && Objects.equals(getNvaUsername(), that.getNvaUsername())
                && Objects.equals(getTopOrgCristinId(), that.getTopOrgCristinId())
-               && Objects.equals(getPersonCristinId(), that.getPersonCristinId());
+               && Objects.equals(getPersonCristinId(), that.getPersonCristinId())
+               && Objects.equals(getPersonNinId(), that.getPersonNinId())
+               && Objects.equals(getPersonFeideNinId(), that.getPersonFeideNinId());
     }
 
     public static final class Builder {
@@ -154,6 +179,16 @@ public class CognitoUserInfo {
 
         public Builder withPersonCristinId(URI personCristinId) {
             cognitoUserInfo.setPersonCristinId(personCristinId);
+            return this;
+        }
+
+        public Builder withPersonNinId(String personNinId) {
+            cognitoUserInfo.setPersonNinId(personNinId);
+            return this;
+        }
+
+        public Builder withPersonFeideNinId(String personFeideNinId) {
+            cognitoUserInfo.setPersonFeideNinId(personFeideNinId);
             return this;
         }
     }
