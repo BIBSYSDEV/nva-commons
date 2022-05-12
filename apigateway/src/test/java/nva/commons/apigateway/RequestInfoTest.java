@@ -466,14 +466,64 @@ class RequestInfoTest {
         assertThat(logger.getMessages(), containsString(AUTHORIZATION_FAILURE_WARNING));
     }
 
+    @Test
+    void shouldReturnPersonNinIdFromCognitoWhenUserHasPersonNinIdInClaimAndIsNotOffline() {
+        var expectedPersonNinId = randomString();
+        var cognitoUserEntry = CognitoUserInfo.builder().withPersonNinId(expectedPersonNinId).build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
+        var requestInfo = createRequestInfoWithAccessToken();
+        var actualPersonCristinId = requestInfo.getPersonNinId();
+        assertThat(actualPersonCristinId, is(equalTo(expectedPersonNinId)));
+    }
+
+    @Test
+    void shouldReturnPersonNinIdWhenUserHasPersonNinIdInClaimAvailableOffline() {
+        var cognitoUserEntry = CognitoUserInfo.builder().withPersonNinId(randomString()).build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
+        var requestInfo = createRequestInfoWithAccessToken();
+        var expectedPersonNinIdDifferentFromCognito = randomString();
+        injectPersonNinIdInRequestInfo(requestInfo, expectedPersonNinIdDifferentFromCognito);
+        var actualPersonNinId = requestInfo.getPersonNinId();
+        assertThat(actualPersonNinId, is(equalTo(expectedPersonNinIdDifferentFromCognito)));
+    }
+
+    @Test
+    void shouldReturnPersonFeideNinIdFromCognitoWhenUserHasPersonFeideNinIdInClaimAndIsNotOffline() {
+        var expectedPersonFeideNinId = randomString();
+        var cognitoUserEntry = CognitoUserInfo.builder().withPersonFeideNinId(expectedPersonFeideNinId).build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
+        var requestInfo = createRequestInfoWithAccessToken();
+        var actualPersonFeideNinId = requestInfo.getPersonNinId();
+        assertThat(actualPersonFeideNinId, is(equalTo(expectedPersonFeideNinId)));
+    }
+
+    @Test
+    void shouldReturnPersonFeideNinIdWhenUserHasPersonFeideNinIdInClaimAvailableOffline() {
+        var cognitoUserEntry = CognitoUserInfo.builder().withPersonFeideNinId(randomString()).build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
+        var requestInfo = createRequestInfoWithAccessToken();
+        var expectedPersonFeideNinIdDifferentFromCognito = randomString();
+        injectPersonFeideNinIdInRequestInfo(requestInfo, expectedPersonFeideNinIdDifferentFromCognito);
+        var actualPersonFeideNinId = requestInfo.getPersonNinId();
+        assertThat(actualPersonFeideNinId, is(equalTo(expectedPersonFeideNinIdDifferentFromCognito)));
+    }
+
+    @Test
+    void shouldThrowIllegalStateExceptionWhenNoTypeOfPersonNinIdIsAvailable() {
+        var cognitoUserEntryWithoutPersonNinId = CognitoUserInfo.builder().build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutPersonNinId));
+        var requestInfo = createRequestInfoWithAccessToken();
+        assertThrows(IllegalStateException.class, requestInfo::getPersonNinId);
+    }
+
     private String randomAccessRight(URI usersCustomer) {
         return new AccessRightEntry(randomString(), usersCustomer).toString();
     }
 
     private RequestInfo requestInfoWithCustomerId(URI userCustomer) throws JsonProcessingException {
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper)
-            .withCustomerId(userCustomer)
-            .build();
+                          .withCustomerId(userCustomer)
+                          .build();
         return RequestInfo.fromRequest(request);
     }
 
@@ -506,6 +556,28 @@ class RequestInfoTest {
         var authorizer = dtoObjectMapper.createObjectNode();
         var requestContext = dtoObjectMapper.createObjectNode();
         claims.put(CognitoUserInfo.PERSON_CRISTIN_ID_CLAIM, expectedPersonCristinId.toString());
+        authorizer.set("claims", claims);
+        requestContext.set("authorizer", authorizer);
+        requestInfo.setRequestContext(requestContext);
+    }
+
+    private void injectPersonNinIdInRequestInfo(RequestInfo requestInfo,
+                                                String expectedPersonNinIdDifferentFromCognito) {
+        var claims = dtoObjectMapper.createObjectNode();
+        var authorizer = dtoObjectMapper.createObjectNode();
+        var requestContext = dtoObjectMapper.createObjectNode();
+        claims.put(CognitoUserInfo.PERSON_NIN_ID_CLAIM, expectedPersonNinIdDifferentFromCognito);
+        authorizer.set("claims", claims);
+        requestContext.set("authorizer", authorizer);
+        requestInfo.setRequestContext(requestContext);
+    }
+
+    private void injectPersonFeideNinIdInRequestInfo(RequestInfo requestInfo,
+                                                     String expectedPersonFeideNinIdDifferentFromCognito) {
+        var claims = dtoObjectMapper.createObjectNode();
+        var authorizer = dtoObjectMapper.createObjectNode();
+        var requestContext = dtoObjectMapper.createObjectNode();
+        claims.put(CognitoUserInfo.PERSON_FEIDE_NIN_ID_CLAIM, expectedPersonFeideNinIdDifferentFromCognito);
         authorizer.set("claims", claims);
         requestContext.set("authorizer", authorizer);
         requestInfo.setRequestContext(requestContext);

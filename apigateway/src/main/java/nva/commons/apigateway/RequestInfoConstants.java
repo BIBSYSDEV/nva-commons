@@ -2,6 +2,8 @@ package nva.commons.apigateway;
 
 import static no.unit.nva.auth.CognitoUserInfo.NVA_USERNAME_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.PERSON_CRISTIN_ID_CLAIM;
+import static no.unit.nva.auth.CognitoUserInfo.PERSON_FEIDE_NIN_ID_CLAIM;
+import static no.unit.nva.auth.CognitoUserInfo.PERSON_NIN_ID_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.TOP_LEVEL_ORG_CRISTIN_ID_CLAIM;
 import com.fasterxml.jackson.core.JsonPointer;
 import java.net.URI;
@@ -38,6 +40,8 @@ public final class RequestInfoConstants {
     public static final JsonPointer TOP_LEVEL_ORG_CRISTIN_ID = claimToJsonPointer(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM);
     public static final JsonPointer PERSON_CRISTIN_ID = claimToJsonPointer(PERSON_CRISTIN_ID_CLAIM);
     public static final JsonPointer SCOPES_CLAIM = claimToJsonPointer(SCOPE);
+    public static final JsonPointer PERSON_NIN_ID = claimToJsonPointer(PERSON_NIN_ID_CLAIM);
+    public static final JsonPointer PERSON_FEIDE_NIN_ID = claimToJsonPointer(PERSON_FEIDE_NIN_ID_CLAIM);
 
     private RequestInfoConstants() {
 
