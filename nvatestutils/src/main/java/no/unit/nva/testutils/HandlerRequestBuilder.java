@@ -46,6 +46,8 @@ public class HandlerRequestBuilder<T> {
     public static final String ENTRIES_DELIMITER = ",";
     private static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
     public static final String SCOPE_CLAIM = "scope";
+    public static final String PERSON_NIN_ID_CLAIM = "custom:nin";
+    public static final String PERSON_FEIDE_NIN_ID_CLAIM = "custom:feideIdNin";
     private final transient ObjectMapper objectMapper;
     @JsonProperty("body")
     private String body;
@@ -197,6 +199,18 @@ public class HandlerRequestBuilder<T> {
     public HandlerRequestBuilder<T> withPersonCristinId(URI personCristinId) {
         ObjectNode claims = getAuthorizerClaimsNode();
         claims.put(PERSON_CRISTIN_ID, personCristinId.toString());
+        return this;
+    }
+
+    public HandlerRequestBuilder<T> withPersonNinId(String personNinId) {
+        ObjectNode claims = getAuthorizerClaimsNode();
+        claims.put(PERSON_NIN_ID_CLAIM, personNinId);
+        return this;
+    }
+
+    public HandlerRequestBuilder<T> withPersonFeideNinId(String personFeideNinId) {
+        ObjectNode claims = getAuthorizerClaimsNode();
+        claims.put(PERSON_FEIDE_NIN_ID_CLAIM, personFeideNinId);
         return this;
     }
 
