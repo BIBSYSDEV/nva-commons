@@ -18,9 +18,8 @@ class UserInfoTest {
                            .withNvaUsername(randomString())
                            .withTopOrgCristinId(randomUri())
                            .withPersonCristinId(randomUri())
-                           .withPersonNinId(randomString())
-                           .withPersonFeideNinId(randomString())
-            .build();
+                           .withPersonNin(randomString())
+                           .build();
         assertThat(userInfo, doesNotHaveEmptyValues());
     }
 }

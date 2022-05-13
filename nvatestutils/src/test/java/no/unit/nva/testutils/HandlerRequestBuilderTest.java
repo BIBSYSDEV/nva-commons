@@ -44,10 +44,8 @@ class HandlerRequestBuilderTest {
         JsonPointer.compile("/requestContext/authorizer/claims/custom:cristinId");
     public static final String TOP_ORG_CRISTIN_ID_CLAIM_PATH =
         "/requestContext/authorizer/claims/custom:topOrgCristinId";
-    public static final JsonPointer PERSON_NIN_ID =
+    public static final JsonPointer PERSON_NIN =
         JsonPointer.compile("/requestContext/authorizer/claims/custom:nin");
-    public static final JsonPointer PERSON_FEIDE_NIN_ID =
-        JsonPointer.compile("/requestContext/authorizer/claims/custom:feideIdNin");
     private static final String HTTP_METHOD = "httpMethod";
     // Can not use ObjectMapper from nva-commons because it would create a circular dependency
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -238,27 +236,15 @@ class HandlerRequestBuilderTest {
     }
 
     @Test
-    void shouldInsertPersonsNinIdWhenSet() throws JsonProcessingException {
-        var expectedPersonNinId = randomString();
+    void shouldInsertPersonsNinWhenSet() throws JsonProcessingException {
+        var expectedPersonNin = randomString();
         var request = new HandlerRequestBuilder<String>(objectMapper)
-                          .withPersonNinId(expectedPersonNinId)
+                          .withPersonNin(expectedPersonNin)
                           .build();
 
         JsonNode requestJson = toJsonNode(request);
-        String actualPersonNinId = requestJson.at(PERSON_NIN_ID).asText();
-        assertThat(actualPersonNinId, is(equalTo(expectedPersonNinId)));
-    }
-
-    @Test
-    void shouldInsertPersonsFeideNinIdWhenSet() throws JsonProcessingException {
-        var expectedPersonFeideNinId = randomString();
-        var request = new HandlerRequestBuilder<String>(objectMapper)
-                          .withPersonFeideNinId(expectedPersonFeideNinId)
-                          .build();
-
-        JsonNode requestJson = toJsonNode(request);
-        String actualPersonFeideNinId = requestJson.at(PERSON_FEIDE_NIN_ID).asText();
-        assertThat(actualPersonFeideNinId, is(equalTo(expectedPersonFeideNinId)));
+        String actualPersonNin = requestJson.at(PERSON_NIN).asText();
+        assertThat(actualPersonNin, is(equalTo(expectedPersonNin)));
     }
 
     private Map<String, Object> toMap(InputStream inputStream) throws JsonProcessingException {

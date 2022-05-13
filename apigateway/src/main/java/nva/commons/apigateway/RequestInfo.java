@@ -16,9 +16,8 @@ import static nva.commons.apigateway.RequestInfoConstants.NVA_USERNAME;
 import static nva.commons.apigateway.RequestInfoConstants.PATH_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.PATH_PARAMETERS_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.PERSON_CRISTIN_ID;
-import static nva.commons.apigateway.RequestInfoConstants.PERSON_FEIDE_NIN_ID;
 import static nva.commons.apigateway.RequestInfoConstants.PERSON_GROUPS;
-import static nva.commons.apigateway.RequestInfoConstants.PERSON_NIN_ID;
+import static nva.commons.apigateway.RequestInfoConstants.PERSON_NIN;
 import static nva.commons.apigateway.RequestInfoConstants.QUERY_STRING_PARAMETERS_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.REQUEST_CONTEXT_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.SCOPES_CLAIM;
@@ -284,11 +283,9 @@ public class RequestInfo {
     }
 
     @JsonIgnore
-    public String getPersonNinId() {
-        return extractPersonNinIdOffline()
-                   .or(this::extractPersonFeideNinIdOffline)
-                   .or(this::fetchPersonNinIdFromCognito)
-                   .or(this::fetchPersonFeideNinIdFromCognito)
+    public String getPersonNin() {
+        return extractPersonNinOffline()
+                   .or(this::fetchPersonNinFromCognito)
                    .orElseThrow(IllegalStateException::new);
     }
 
@@ -336,24 +333,14 @@ public class RequestInfo {
                    .toOptional();
     }
 
-    private Optional<String> fetchPersonFeideNinIdFromCognito() {
+    private Optional<String> extractPersonNinOffline() {
+        return getRequestContextParameterOpt(PERSON_NIN);
+    }
+
+    private Optional<String> fetchPersonNinFromCognito() {
         return fetchUserInfoFromCognito()
-                   .map(CognitoUserInfo::getPersonFeideNinId)
+                   .map(CognitoUserInfo::getPersonNin)
                    .toOptional();
-    }
-
-    private Optional<String> fetchPersonNinIdFromCognito() {
-        return fetchUserInfoFromCognito()
-                   .map(CognitoUserInfo::getPersonNinId)
-                   .toOptional();
-    }
-
-    private Optional<String> extractPersonFeideNinIdOffline() {
-        return getRequestContextParameterOpt(PERSON_FEIDE_NIN_ID);
-    }
-
-    private Optional<String> extractPersonNinIdOffline() {
-        return getRequestContextParameterOpt(PERSON_NIN_ID);
     }
 
     private boolean checkAuthorizationOffline(String accessRight) {

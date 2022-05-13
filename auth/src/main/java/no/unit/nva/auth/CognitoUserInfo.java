@@ -1,6 +1,7 @@
 package no.unit.nva.auth;
 
 import static java.util.Objects.nonNull;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.net.URI;
 import java.util.Objects;
@@ -17,8 +18,8 @@ public class CognitoUserInfo {
     public static final String NVA_USERNAME_CLAIM = "custom:nvaUsername";
     public static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
     public static final String PERSON_CRISTIN_ID_CLAIM = "custom:cristinId";
-    public static final String PERSON_NIN_ID_CLAIM = "custom:nin";
-    public static final String PERSON_FEIDE_NIN_ID_CLAIM = "custom:feideIdNin";
+    public static final String PERSON_NIN_CLAIM = "custom:nin";
+    public static final String PERSON_FEIDE_NIN_CLAIM = "custom:feideIdNin";
 
     @JsonProperty(FEIDE_ID_CLAIM)
     private String feideId;
@@ -32,10 +33,9 @@ public class CognitoUserInfo {
     private URI topOrgCristinId;
     @JsonProperty(PERSON_CRISTIN_ID_CLAIM)
     private URI personCristinId;
-    @JsonProperty(PERSON_NIN_ID_CLAIM)
-    private String personNinId;
-    @JsonProperty(PERSON_FEIDE_NIN_ID_CLAIM)
-    private String personFeideNinId;
+    @JsonAlias({PERSON_NIN_CLAIM, PERSON_FEIDE_NIN_CLAIM})
+    @JsonProperty(PERSON_NIN_CLAIM)
+    private String personNin;
 
     public static Builder builder() {
         return new Builder();
@@ -93,20 +93,12 @@ public class CognitoUserInfo {
         this.personCristinId = personCristinId;
     }
 
-    public String getPersonNinId() {
-        return personNinId;
+    public String getPersonNin() {
+        return personNin;
     }
 
-    public void setPersonNinId(String personNinId) {
-        this.personNinId = personNinId;
-    }
-
-    public String getPersonFeideNinId() {
-        return personFeideNinId;
-    }
-
-    public void setPersonFeideNinId(String personFeideNinId) {
-        this.personFeideNinId = personFeideNinId;
+    public void setPersonNin(String personNin) {
+        this.personNin = personNin;
     }
 
     @JacocoGenerated
@@ -114,7 +106,7 @@ public class CognitoUserInfo {
     public int hashCode() {
         return Objects.hash(getFeideId(), getCurrentCustomer(), getAccessRights(), getNvaUsername(),
                             getTopOrgCristinId(),
-                            getPersonCristinId(), getPersonNinId(), getPersonFeideNinId());
+                            getPersonCristinId(), getPersonNin());
     }
 
     @JacocoGenerated
@@ -133,8 +125,7 @@ public class CognitoUserInfo {
                && Objects.equals(getNvaUsername(), that.getNvaUsername())
                && Objects.equals(getTopOrgCristinId(), that.getTopOrgCristinId())
                && Objects.equals(getPersonCristinId(), that.getPersonCristinId())
-               && Objects.equals(getPersonNinId(), that.getPersonNinId())
-               && Objects.equals(getPersonFeideNinId(), that.getPersonFeideNinId());
+               && Objects.equals(getPersonNin(), that.getPersonNin());
     }
 
     public static final class Builder {
@@ -182,13 +173,8 @@ public class CognitoUserInfo {
             return this;
         }
 
-        public Builder withPersonNinId(String personNinId) {
-            cognitoUserInfo.setPersonNinId(personNinId);
-            return this;
-        }
-
-        public Builder withPersonFeideNinId(String personFeideNinId) {
-            cognitoUserInfo.setPersonFeideNinId(personFeideNinId);
+        public Builder withPersonNin(String personNin) {
+            cognitoUserInfo.setPersonNin(personNin);
             return this;
         }
     }
