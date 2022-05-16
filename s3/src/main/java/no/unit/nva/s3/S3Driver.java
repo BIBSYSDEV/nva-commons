@@ -126,7 +126,7 @@ public class S3Driver {
      * @return the file contents uncompressed.
      */
     public String readEvent(URI uri) {
-        UnixPath filePath = new UriWrapper(uri).toS3bucketPath();
+        UnixPath filePath = UriWrapper.fromUri(uri).toS3bucketPath();
         return getFile(filePath);
     }
 
