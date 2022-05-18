@@ -12,13 +12,14 @@ class UserInfoTest {
     @Test
     void builderContainsAllFields() {
         var userInfo = CognitoUserInfo.builder()
-            .withAccessRights(Set.of(randomString(), randomString()))
-            .withFeideId(randomString())
-            .withCurrentCustomer(randomUri())
-            .withNvaUsername(randomString())
-            .withTopOrgCristinId(randomUri())
-            .withPersonCristinId(randomUri())
-            .build();
+                           .withAccessRights(Set.of(randomString(), randomString()))
+                           .withFeideId(randomString())
+                           .withCurrentCustomer(randomUri())
+                           .withNvaUsername(randomString())
+                           .withTopOrgCristinId(randomUri())
+                           .withPersonCristinId(randomUri())
+                           .withPersonNin(randomString())
+                           .build();
         assertThat(userInfo, doesNotHaveEmptyValues());
     }
 }

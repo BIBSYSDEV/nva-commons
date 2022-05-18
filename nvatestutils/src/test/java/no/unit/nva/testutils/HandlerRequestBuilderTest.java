@@ -44,6 +44,8 @@ class HandlerRequestBuilderTest {
         JsonPointer.compile("/requestContext/authorizer/claims/custom:cristinId");
     public static final String TOP_ORG_CRISTIN_ID_CLAIM_PATH =
         "/requestContext/authorizer/claims/custom:topOrgCristinId";
+    public static final JsonPointer PERSON_NIN =
+        JsonPointer.compile("/requestContext/authorizer/claims/custom:nin");
     private static final String HTTP_METHOD = "httpMethod";
     // Can not use ObjectMapper from nva-commons because it would create a circular dependency
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -51,7 +53,7 @@ class HandlerRequestBuilderTest {
     @Test
     void buildReturnsEmptyRequestOnNoArguments() throws Exception {
         InputStream request = new HandlerRequestBuilder<String>(objectMapper)
-            .build();
+                                  .build();
 
         Map<String, Object> mapWithNullBody = toMap(request);
         assertThat(mapWithNullBody.get(BODY), nullValue());
@@ -225,12 +227,24 @@ class HandlerRequestBuilderTest {
     @Test
     void shouldReturnApiProxyEventWithAllFieldsFilledIn() throws JsonProcessingException {
         var request = new HandlerRequestBuilder<String>(objectMapper)
-            .withPersonCristinId(randomUri())
-            .withBody(randomJson())
-            .withAccessRights(randomUri(), randomString(), randomString())
-            .withPathParameters(Map.of(randomString(), randomString()))
-            .buildRequestEvent();
+                          .withPersonCristinId(randomUri())
+                          .withBody(randomJson())
+                          .withAccessRights(randomUri(), randomString(), randomString())
+                          .withPathParameters(Map.of(randomString(), randomString()))
+                          .buildRequestEvent();
         assertThat(request.getPathParameters().keySet(), is(not(empty())));
+    }
+
+    @Test
+    void shouldInsertPersonsNinWhenSet() throws JsonProcessingException {
+        var expectedPersonNin = randomString();
+        var request = new HandlerRequestBuilder<String>(objectMapper)
+                          .withPersonNin(expectedPersonNin)
+                          .build();
+
+        JsonNode requestJson = toJsonNode(request);
+        String actualPersonNin = requestJson.at(PERSON_NIN).asText();
+        assertThat(actualPersonNin, is(equalTo(expectedPersonNin)));
     }
 
     private Map<String, Object> toMap(InputStream inputStream) throws JsonProcessingException {

@@ -17,6 +17,7 @@ import static nva.commons.apigateway.RequestInfoConstants.PATH_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.PATH_PARAMETERS_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.PERSON_CRISTIN_ID;
 import static nva.commons.apigateway.RequestInfoConstants.PERSON_GROUPS;
+import static nva.commons.apigateway.RequestInfoConstants.PERSON_NIN;
 import static nva.commons.apigateway.RequestInfoConstants.QUERY_STRING_PARAMETERS_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.REQUEST_CONTEXT_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.SCOPES_CLAIM;
@@ -269,27 +270,34 @@ public class RequestInfo {
     @JsonIgnore
     public URI getCurrentCustomer() throws UnauthorizedException {
         return fetchCustomerIdFromCognito()
-            .or(this::fetchCustomerIdOffline)
-            .toOptional()
-            .orElseThrow(UnauthorizedException::new);
+                   .or(this::fetchCustomerIdOffline)
+                   .toOptional()
+                   .orElseThrow(UnauthorizedException::new);
     }
 
     @JsonIgnore
     public URI getPersonCristinId() throws UnauthorizedException {
         return extractPersonCristinIdOffline()
-            .or(this::fetchPersonCristinIdFromCognito)
-            .orElseThrow(UnauthorizedException::new);
+                   .or(this::fetchPersonCristinIdFromCognito)
+                   .orElseThrow(UnauthorizedException::new);
+    }
+
+    @JsonIgnore
+    public String getPersonNin() {
+        return extractPersonNinOffline()
+                   .or(this::fetchPersonNinFromCognito)
+                   .orElseThrow(IllegalStateException::new);
     }
 
     public boolean clientIsInternalBackend() {
         return getRequestContextParameterOpt(SCOPES_CLAIM)
-            .map(value -> value.contains(BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE))
-            .orElse(false);
+                   .map(value -> value.contains(BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE))
+                   .orElse(false);
     }
 
     private URI fetchCustomerIdOffline() {
         return getRequestContextParameterOpt(PERSON_GROUPS).stream()
-            .flatMap(AccessRightEntry::fromCsv)
+                   .flatMap(AccessRightEntry::fromCsv)
             .filter(AccessRightEntry::describesCustomerUponLogin)
             .map(AccessRightEntry::getCustomerId)
             .collect(SingletonCollector.collect());
@@ -321,15 +329,25 @@ public class RequestInfo {
 
     private Optional<URI> fetchPersonCristinIdFromCognito() {
         return fetchUserInfoFromCognito()
-            .map(CognitoUserInfo::getPersonCristinId)
-            .toOptional();
+                   .map(CognitoUserInfo::getPersonCristinId)
+                   .toOptional();
+    }
+
+    private Optional<String> extractPersonNinOffline() {
+        return getRequestContextParameterOpt(PERSON_NIN);
+    }
+
+    private Optional<String> fetchPersonNinFromCognito() {
+        return fetchUserInfoFromCognito()
+                   .map(CognitoUserInfo::getPersonNin)
+                   .toOptional();
     }
 
     private boolean checkAuthorizationOffline(String accessRight) {
         return attempt(this::getCurrentCustomer)
-            .map(currentCustomer -> new AccessRightEntry(accessRight, currentCustomer))
-            .map(requiredAccessRight -> fetchAvailableAccessRights().anyMatch(requiredAccessRight::equals))
-            .orElse(fail -> handleAuthorizationFailure());
+                   .map(currentCustomer -> new AccessRightEntry(accessRight, currentCustomer))
+                   .map(requiredAccessRight -> fetchAvailableAccessRights().anyMatch(requiredAccessRight::equals))
+                   .orElse(fail -> handleAuthorizationFailure());
     }
 
     private boolean handleAuthorizationFailure() {
