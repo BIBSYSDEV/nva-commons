@@ -33,7 +33,7 @@ public class CognitoUserInfo {
     private URI topOrgCristinId;
     @JsonProperty(PERSON_CRISTIN_ID_CLAIM)
     private URI personCristinId;
-    @JsonAlias({PERSON_NIN_CLAIM, PERSON_FEIDE_NIN_CLAIM})
+    @JsonAlias(PERSON_FEIDE_NIN_CLAIM)
     @JsonProperty(PERSON_NIN_CLAIM)
     private String personNin;
 
