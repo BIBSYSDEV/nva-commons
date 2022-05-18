@@ -260,15 +260,6 @@ class RequestInfoTest {
     }
 
     @Test
-    @DisplayName("should return current customer from cognito groups when online cognito information in unavailable")
-    void shouldReturnCurrentCustomerFromCognitoGroupsWhenOnlineCognitoInformationIsUnavailable()
-        throws UnauthorizedException, JsonProcessingException {
-        var currentCustomer = randomUri();
-        var requestInfo = requestInfoWithCustomerId(currentCustomer);
-        assertThat(requestInfo.getCurrentCustomer(), is(equalTo(currentCustomer)));
-    }
-
-    @Test
     void shouldReturnThatUserIsApplicationAdminWhenUserHasTheRespectiveAccessRight() throws JsonProcessingException {
         var customerId = randomUri();
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper)

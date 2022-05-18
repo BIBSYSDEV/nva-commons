@@ -271,7 +271,6 @@ public class RequestInfo {
     public URI getCurrentCustomer() throws UnauthorizedException {
         return fetchCustomerIdFromCognito()
                    .or(this::fetchCustomerIdOffline)
-                   .toOptional()
                    .orElseThrow(UnauthorizedException::new);
     }
 
@@ -295,12 +294,13 @@ public class RequestInfo {
                    .orElse(false);
     }
 
-    private URI fetchCustomerIdOffline() {
+    private Optional<URI> fetchCustomerIdOffline() {
         return getRequestContextParameterOpt(PERSON_GROUPS).stream()
-                   .flatMap(AccessRightEntry::fromCsv)
+            .flatMap(AccessRightEntry::fromCsv)
             .filter(AccessRightEntry::describesCustomerUponLogin)
             .map(AccessRightEntry::getCustomerId)
-            .collect(SingletonCollector.collect());
+            .collect(SingletonCollector.tryCollect())
+            .toOptional();
     }
 
     private Optional<URI> extractTopLevelOrgIdOffline() {
@@ -365,7 +365,7 @@ public class RequestInfo {
             .map(customer -> new AccessRightEntry(accessRight, customer));
 
         var availableRights = fetchAvailableRights();
-        return accessRightAtCustomer.map(availableRights::contains).orElse(fail -> false);
+        return accessRightAtCustomer.map(availableRights::contains).orElse(false);
     }
 
     private List<AccessRightEntry> fetchAvailableRights() {
@@ -385,9 +385,10 @@ public class RequestInfo {
         return this.getHeader(HttpHeaders.AUTHORIZATION);
     }
 
-    private Try<URI> fetchCustomerIdFromCognito() {
+    private Optional<URI> fetchCustomerIdFromCognito() {
         return fetchUserInfoFromCognito()
-            .map(CognitoUserInfo::getCurrentCustomer);
+            .map(CognitoUserInfo::getCurrentCustomer)
+            .toOptional();
     }
 
     private <K, V> Map<K, V> nonNullMap(Map<K, V> map) {
