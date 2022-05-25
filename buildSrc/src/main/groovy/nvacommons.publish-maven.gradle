@@ -3,6 +3,10 @@ plugins {
     id 'signing'
 }
 
+/***********************************ATTENTION*******************************************************
+ Part of the maven publishing configuration has to be in the root project(nvacommons.root.gradle)
+ ************************************ ATTENTION*****************************************************/
+
 java {
     withJavadocJar()
     withSourcesJar()
