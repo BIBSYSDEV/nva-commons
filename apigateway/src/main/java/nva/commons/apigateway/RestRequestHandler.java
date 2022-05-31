@@ -77,6 +77,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     private List<MediaType> parseAcceptHeader(String header) {
         return Arrays.stream(header.replace(SPACE, EMPTY_STRING).split(COMMA))
+            .map(acceptHeader -> acceptHeader.replace("*;q=.2", "*/*;q=.2"))
             .map(MediaType::parse)
             .collect(Collectors.toList());
     }
