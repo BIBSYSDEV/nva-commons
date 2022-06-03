@@ -4,6 +4,7 @@ import static no.unit.nva.auth.CognitoUserInfo.NVA_USERNAME_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.PERSON_CRISTIN_ID_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.PERSON_NIN_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.TOP_LEVEL_ORG_CRISTIN_ID_CLAIM;
+import static no.unit.nva.auth.OAuthConstants.OAUTH_USER_INFO;
 import com.fasterxml.jackson.core.JsonPointer;
 import java.net.URI;
 import java.util.function.Supplier;
@@ -15,7 +16,12 @@ import nva.commons.core.paths.UriWrapper;
 public final class RequestInfoConstants {
 
     public static final Environment ENVIRONMENT = new Environment();
-    public static final Supplier<URI> DEFAULT_COGNITO_HOST = () -> createUri(ENVIRONMENT.readEnv("COGNITO_HOST"));
+    public static final Supplier<URI> DEFAULT_COGNITO_URI =
+        RequestInfoConstants::lazyInitializationForDefaultCognitoUri;
+    public static final String IDENTITY_SERVICE_PATH = "users-roles";
+    public static final String IDENTITY_SERVICE_USER_INFO_PATH = "userinfo";
+    public static final Supplier<URI> E2E_TESTING_USER_INFO_ENDPOINT =
+        RequestInfoConstants::lazyInitializationForE2EUserInfoEndpoint;
     public static final String QUERY_STRING_PARAMETERS_FIELD = "queryStringParameters";
     public static final String PATH_PARAMETERS_FIELD = "pathParameters";
     public static final String PATH_FIELD = "path";
@@ -45,8 +51,21 @@ public final class RequestInfoConstants {
 
     }
 
-    private static URI createUri(String cognitoHost) {
-        return UriWrapper.fromHost(cognitoHost).getUri();
+    private static URI lazyInitializationForE2EUserInfoEndpoint() {
+        var apiHost = ENVIRONMENT.readEnv("API_HOST");
+        return UriWrapper.fromHost(apiHost)
+            .addChild(IDENTITY_SERVICE_PATH)
+            .addChild(IDENTITY_SERVICE_USER_INFO_PATH)
+            .getUri();
+    }
+
+    private static URI lazyInitializationForDefaultCognitoUri() {
+        String cognitoHost = ENVIRONMENT.readEnv("COGNITO_HOST");
+        return createUri(cognitoHost, OAUTH_USER_INFO);
+    }
+
+    private static URI createUri(String cognitoHost, String... path) {
+        return UriWrapper.fromHost(cognitoHost).addChild(path).getUri();
     }
 
     private static JsonPointer claimToJsonPointer(String claim) {
