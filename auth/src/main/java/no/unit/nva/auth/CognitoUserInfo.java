@@ -20,7 +20,11 @@ public class CognitoUserInfo {
     public static final String PERSON_CRISTIN_ID_CLAIM = "custom:cristinId";
     public static final String PERSON_NIN_CLAIM = "custom:nin";
     public static final String PERSON_FEIDE_NIN_CLAIM = "custom:feideIdNin";
-
+    public static final String ROLES = "custom:roles";
+    public static final String SUB = "sub";
+    public static final String PERSON_AFFILIATION = "custom:personAffiliation";
+    public static final String ALLOWED_CUSTOMERS = "custom:allowedCustomers";
+    public static final String COGNITO_USERNAME = "username";
     @JsonProperty(FEIDE_ID_CLAIM)
     private String feideId;
     @JsonProperty(SELECTED_CUSTOMER_CLAIM)
@@ -36,6 +40,16 @@ public class CognitoUserInfo {
     @JsonAlias(PERSON_FEIDE_NIN_CLAIM)
     @JsonProperty(PERSON_NIN_CLAIM)
     private String personNin;
+    @JsonProperty(ROLES)
+    private String roles;
+    @JsonProperty(SUB)
+    private String sub;
+    @JsonProperty(PERSON_AFFILIATION)
+    private String personAffiliation;
+    @JsonProperty(ALLOWED_CUSTOMERS)
+    private String allowedCustomers;
+    @JsonProperty(COGNITO_USERNAME)
+    private String cognitoUsername;
 
     public static Builder builder() {
         return new Builder();
@@ -45,8 +59,52 @@ public class CognitoUserInfo {
         return JsonConfig.beanFrom(CognitoUserInfo.class, json);
     }
 
+    public String getRoles() {
+        return roles;
+    }
+
+    public void setRoles(String roles) {
+        this.roles = roles;
+    }
+
+    public String getSub() {
+        return sub;
+    }
+
+    public void setSub(String sub) {
+        this.sub = sub;
+    }
+
+    public String getPersonAffiliation() {
+        return personAffiliation;
+    }
+
+    public void setPersonAffiliation(String personAffiliation) {
+        this.personAffiliation = personAffiliation;
+    }
+
+    public String getAllowedCustomers() {
+        return allowedCustomers;
+    }
+
+    public void setAllowedCustomers(String allowedCustomers) {
+        this.allowedCustomers = allowedCustomers;
+    }
+
+    public String getCognitoUsername() {
+        return cognitoUsername;
+    }
+
+    public void setCognitoUsername(String cognitoUsername) {
+        this.cognitoUsername = cognitoUsername;
+    }
+
     public URI getTopOrgCristinId() {
         return topOrgCristinId;
+    }
+
+    public void setTopOrgCristinId(URI topOrgCristinId) {
+        this.topOrgCristinId = topOrgCristinId;
     }
 
     public String getNvaUsername() {
@@ -79,10 +137,6 @@ public class CognitoUserInfo {
 
     public void setAccessRights(String accessRights) {
         this.accessRights = accessRights;
-    }
-
-    private void setTopOrgCristinId(URI topOrgCristinId) {
-        this.topOrgCristinId = topOrgCristinId;
     }
 
     public URI getPersonCristinId() {
@@ -146,15 +200,10 @@ public class CognitoUserInfo {
             return this;
         }
 
-        public CognitoUserInfo build() {
-            return cognitoUserInfo;
-        }
-
         public Builder withAccessRights(Set<String> accessRights) {
             if (nonNull(accessRights)) {
                 cognitoUserInfo.setAccessRights(String.join(ELEMENTS_DELIMITER, accessRights));
             }
-
             return this;
         }
 
@@ -176,6 +225,35 @@ public class CognitoUserInfo {
         public Builder withPersonNin(String personNin) {
             cognitoUserInfo.setPersonNin(personNin);
             return this;
+        }
+
+        public Builder withRoles(String roles) {
+            cognitoUserInfo.setRoles(roles);
+            return this;
+        }
+
+        public Builder withSub(String sub) {
+            cognitoUserInfo.setSub(sub);
+            return this;
+        }
+
+        public Builder withPersonAffiliation(String personAffiliation) {
+            cognitoUserInfo.setPersonAffiliation(personAffiliation);
+            return this;
+        }
+
+        public Builder withAllowedCustomers(String allowedCustomers) {
+            cognitoUserInfo.setAllowedCustomers(allowedCustomers);
+            return this;
+        }
+
+        public Builder withCognitoUsername(String cognitoUsername) {
+            cognitoUserInfo.setCognitoUsername(cognitoUsername);
+            return this;
+        }
+
+        public CognitoUserInfo build() {
+            return cognitoUserInfo;
         }
     }
 }
