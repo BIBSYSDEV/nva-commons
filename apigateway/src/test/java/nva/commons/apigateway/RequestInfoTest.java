@@ -6,6 +6,7 @@ import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
+import static nva.commons.apigateway.RequestInfo.ERROR_FETCING_COGNITO_INFO;
 import static nva.commons.apigateway.RequestInfoConstants.AUTHORIZATION_FAILURE_WARNING;
 import static nva.commons.apigateway.RequestInfoConstants.BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE;
 import static nva.commons.apigateway.RequestInfoConstants.REQUEST_CONTEXT_FIELD;
@@ -509,6 +510,16 @@ class RequestInfoTest {
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutPersonNin));
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
         assertThrows(IllegalStateException.class, requestInfo::getPersonNin);
+    }
+
+    @Test
+    void shouldLogFailureWhenFailingToFetchInfoFromCognito() {
+        var cognitoUserEntry = CognitoUserInfo.builder().withPersonNin(randomString()).build();
+        cognito.setUserBase(Map.of(randomString(), cognitoUserEntry));
+        var logger = LogUtils.getTestingAppenderForRootLogger();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        assertThrows(UnauthorizedException.class, requestInfo::getNvaUsername);
+        assertThat(logger.getMessages(), containsString(ERROR_FETCING_COGNITO_INFO));
     }
 
     private String randomAccessRight(URI usersCustomer) {
