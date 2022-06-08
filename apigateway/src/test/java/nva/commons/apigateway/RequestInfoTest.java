@@ -6,7 +6,7 @@ import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
-import static nva.commons.apigateway.RequestInfo.ERROR_FETCING_COGNITO_INFO;
+import static nva.commons.apigateway.RequestInfo.ERROR_FETCHING_COGNITO_INFO;
 import static nva.commons.apigateway.RequestInfoConstants.AUTHORIZATION_FAILURE_WARNING;
 import static nva.commons.apigateway.RequestInfoConstants.BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE;
 import static nva.commons.apigateway.RequestInfoConstants.REQUEST_CONTEXT_FIELD;
@@ -72,8 +72,9 @@ class RequestInfoTest {
     public static final String PATH_FOUND_IN_RESOURCE_FILE = "my/path";
     public static final Map<String, String> QUERY_PARAMS_FOUND_IN_RESOURCE_FILE;
     public static final String AT = "@";
+    public static final String LOG_STRING_INTERPOLATION = "{}";
+    public static final String EMPTY_STRING = "";
     private static final String API_GATEWAY_MESSAGES_FOLDER = "apiGatewayMessages";
-
     private static final Path NULL_VALUES_FOR_MAPS = Path.of(API_GATEWAY_MESSAGES_FOLDER,
                                                              "mapParametersAreNull.json");
     private static final Path MISSING_MAP_VALUES = Path.of(API_GATEWAY_MESSAGES_FOLDER,
@@ -519,7 +520,8 @@ class RequestInfoTest {
         var logger = LogUtils.getTestingAppenderForRootLogger();
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
         assertThrows(UnauthorizedException.class, requestInfo::getNvaUsername);
-        assertThat(logger.getMessages(), containsString(ERROR_FETCING_COGNITO_INFO));
+        assertThat(logger.getMessages(),
+                   containsString(ERROR_FETCHING_COGNITO_INFO.replace(LOG_STRING_INTERPOLATION, EMPTY_STRING)));
     }
 
     private String randomAccessRight(URI usersCustomer) {

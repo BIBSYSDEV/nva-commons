@@ -52,6 +52,7 @@ import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.SingletonCollector;
 import nva.commons.core.attempt.Failure;
+import nva.commons.core.exceptions.ExceptionUtils;
 import nva.commons.core.paths.UriWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,9 +60,9 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("PMD.GodClass")
 public class RequestInfo {
 
+    public static final String ERROR_FETCHING_COGNITO_INFO = "Could not fetch user information from Cognito:{}";
     private static final HttpClient DEFAULT_HTTP_CLIENT = HttpClient.newBuilder().build();
     private static final Logger logger = LoggerFactory.getLogger(RequestInfo.class);
-    public static final String ERROR_FETCING_COGNITO_INFO = "Could not fetch user information from Cognito:";
     private final HttpClient httpClient;
     private final Supplier<URI> cognitoUri;
     private final Supplier<URI> e2eTestsUserInfoUri;
@@ -316,7 +317,7 @@ public class RequestInfo {
     }
 
     private void logOnlineFetchResult(Failure<CognitoUserInfo> fail) {
-        logger.warn(ERROR_FETCING_COGNITO_INFO, fail.getException());
+        logger.warn(ERROR_FETCHING_COGNITO_INFO, ExceptionUtils.stackTraceInSingleLine(fail.getException()));
     }
 
     private Optional<String> extractNvaUsernameOffline() {
