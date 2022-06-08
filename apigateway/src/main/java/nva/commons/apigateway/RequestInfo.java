@@ -51,7 +51,7 @@ import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.SingletonCollector;
-import nva.commons.core.attempt.Try;
+import nva.commons.core.attempt.Failure;
 import nva.commons.core.paths.UriWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +61,7 @@ public class RequestInfo {
 
     private static final HttpClient DEFAULT_HTTP_CLIENT = HttpClient.newBuilder().build();
     private static final Logger logger = LoggerFactory.getLogger(RequestInfo.class);
+    public static final String ERROR_FETCING_COGNITO_INFO = "Could not fetch user information from Cognito:";
     private final HttpClient httpClient;
     private final Supplier<URI> cognitoUri;
     private final Supplier<URI> e2eTestsUserInfoUri;
@@ -311,8 +312,11 @@ public class RequestInfo {
 
     private Optional<URI> fetchTopLevelOrgCristinIdFromCognito() {
         return fetchUserInfoFromCognito()
-            .map(CognitoUserInfo::getTopOrgCristinId)
-            .toOptional();
+            .map(CognitoUserInfo::getTopOrgCristinId);
+    }
+
+    private void logOnlineFetchResult(Failure<CognitoUserInfo> fail) {
+        logger.warn(ERROR_FETCING_COGNITO_INFO, fail.getException());
     }
 
     private Optional<String> extractNvaUsernameOffline() {
@@ -321,8 +325,7 @@ public class RequestInfo {
 
     private Optional<String> fetchUserNameFromCognito() {
         return fetchUserInfoFromCognito()
-            .map(CognitoUserInfo::getNvaUsername)
-            .toOptional();
+            .map(CognitoUserInfo::getNvaUsername);
     }
 
     private Optional<URI> extractPersonCristinIdOffline() {
@@ -331,8 +334,7 @@ public class RequestInfo {
 
     private Optional<URI> fetchPersonCristinIdFromCognito() {
         return fetchUserInfoFromCognito()
-            .map(CognitoUserInfo::getPersonCristinId)
-            .toOptional();
+            .map(CognitoUserInfo::getPersonCristinId);
     }
 
     private Optional<String> extractPersonNinOffline() {
@@ -341,8 +343,7 @@ public class RequestInfo {
 
     private Optional<String> fetchPersonNinFromCognito() {
         return fetchUserInfoFromCognito()
-            .map(CognitoUserInfo::getPersonNin)
-            .toOptional();
+            .map(CognitoUserInfo::getPersonNin);
     }
 
     private boolean checkAuthorizationOffline(String accessRight) {
@@ -375,12 +376,13 @@ public class RequestInfo {
             .map(CognitoUserInfo::getAccessRights)
             .map(AccessRightEntry::fromCsv)
             .map(stream -> stream.collect(Collectors.toList()))
-            .orElse(fail -> Collections.<AccessRightEntry>emptyList());
+            .orElseGet(Collections::emptyList);
     }
 
-    private Try<CognitoUserInfo> fetchUserInfoFromCognito() {
+    private Optional<CognitoUserInfo> fetchUserInfoFromCognito() {
         return attempt(() -> fetchUserInfo(cognitoUri))
-            .or(() -> fetchUserInfo(e2eTestsUserInfoUri));
+            .or(() -> fetchUserInfo(e2eTestsUserInfoUri))
+            .toOptional(this::logOnlineFetchResult);
     }
 
     private CognitoUserInfo fetchUserInfo(Supplier<URI> cognitoUri) {
@@ -394,8 +396,7 @@ public class RequestInfo {
 
     private Optional<URI> fetchCustomerIdFromCognito() {
         return fetchUserInfoFromCognito()
-            .map(CognitoUserInfo::getCurrentCustomer)
-            .toOptional();
+            .map(CognitoUserInfo::getCurrentCustomer);
     }
 
     private <K, V> Map<K, V> nonNullMap(Map<K, V> map) {
