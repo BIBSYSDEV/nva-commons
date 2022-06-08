@@ -4,7 +4,7 @@ import static java.util.Objects.isNull;
 import static java.util.function.Predicate.not;
 import static nva.commons.apigateway.RequestInfoConstants.AUTHORIZATION_FAILURE_WARNING;
 import static nva.commons.apigateway.RequestInfoConstants.BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE;
-import static nva.commons.apigateway.RequestInfoConstants.DEFAULT_COGNITO_HOST;
+import static nva.commons.apigateway.RequestInfoConstants.DEFAULT_COGNITO_URI;
 import static nva.commons.apigateway.RequestInfoConstants.DOMAIN_NAME_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.HEADERS_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.METHOD_ARN_FIELD;
@@ -59,11 +59,11 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("PMD.GodClass")
 public class RequestInfo {
 
-
     private static final HttpClient DEFAULT_HTTP_CLIENT = HttpClient.newBuilder().build();
     private static final Logger logger = LoggerFactory.getLogger(RequestInfo.class);
     private final HttpClient httpClient;
     private final Supplier<URI> cognitoUri;
+    private final Supplier<URI> e2eTestsUserInfoUri;
     @JsonProperty(HEADERS_FIELD)
     private Map<String, String> headers;
     @JsonProperty(PATH_FIELD)
@@ -79,9 +79,10 @@ public class RequestInfo {
     @JsonAnySetter
     private Map<String, Object> otherProperties;
 
-    public RequestInfo(HttpClient httpClient, Supplier<URI> cognitoUri) {
+    public RequestInfo(HttpClient httpClient, Supplier<URI> cognitoUri, Supplier<URI> e2eTestsUserInfoUri) {
         this.httpClient = httpClient;
         this.cognitoUri = cognitoUri;
+        this.e2eTestsUserInfoUri = e2eTestsUserInfoUri;
     }
 
     public RequestInfo() {
@@ -91,7 +92,8 @@ public class RequestInfo {
         this.otherProperties = new LinkedHashMap<>(); // ordinary HashMap and ConcurrentHashMap fail.
         this.requestContext = defaultRestObjectMapper.createObjectNode();
         this.httpClient = DEFAULT_HTTP_CLIENT;
-        this.cognitoUri = DEFAULT_COGNITO_HOST;
+        this.cognitoUri = DEFAULT_COGNITO_URI;
+        this.e2eTestsUserInfoUri = RequestInfoConstants.E2E_TESTING_USER_INFO_ENDPOINT;
     }
 
     public static RequestInfo fromRequest(InputStream requestStream) {
@@ -270,28 +272,28 @@ public class RequestInfo {
     @JsonIgnore
     public URI getCurrentCustomer() throws UnauthorizedException {
         return fetchCustomerIdFromCognito()
-                   .or(this::fetchCustomerIdOffline)
-                   .orElseThrow(UnauthorizedException::new);
+            .or(this::fetchCustomerIdOffline)
+            .orElseThrow(UnauthorizedException::new);
     }
 
     @JsonIgnore
     public URI getPersonCristinId() throws UnauthorizedException {
         return extractPersonCristinIdOffline()
-                   .or(this::fetchPersonCristinIdFromCognito)
-                   .orElseThrow(UnauthorizedException::new);
+            .or(this::fetchPersonCristinIdFromCognito)
+            .orElseThrow(UnauthorizedException::new);
     }
 
     @JsonIgnore
     public String getPersonNin() {
         return extractPersonNinOffline()
-                   .or(this::fetchPersonNinFromCognito)
-                   .orElseThrow(IllegalStateException::new);
+            .or(this::fetchPersonNinFromCognito)
+            .orElseThrow(IllegalStateException::new);
     }
 
     public boolean clientIsInternalBackend() {
         return getRequestContextParameterOpt(SCOPES_CLAIM)
-                   .map(value -> value.contains(BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE))
-                   .orElse(false);
+            .map(value -> value.contains(BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE))
+            .orElse(false);
     }
 
     private Optional<URI> fetchCustomerIdOffline() {
@@ -329,8 +331,8 @@ public class RequestInfo {
 
     private Optional<URI> fetchPersonCristinIdFromCognito() {
         return fetchUserInfoFromCognito()
-                   .map(CognitoUserInfo::getPersonCristinId)
-                   .toOptional();
+            .map(CognitoUserInfo::getPersonCristinId)
+            .toOptional();
     }
 
     private Optional<String> extractPersonNinOffline() {
@@ -339,15 +341,15 @@ public class RequestInfo {
 
     private Optional<String> fetchPersonNinFromCognito() {
         return fetchUserInfoFromCognito()
-                   .map(CognitoUserInfo::getPersonNin)
-                   .toOptional();
+            .map(CognitoUserInfo::getPersonNin)
+            .toOptional();
     }
 
     private boolean checkAuthorizationOffline(String accessRight) {
         return attempt(this::getCurrentCustomer)
-                   .map(currentCustomer -> new AccessRightEntry(accessRight, currentCustomer))
-                   .map(requiredAccessRight -> fetchAvailableAccessRights().anyMatch(requiredAccessRight::equals))
-                   .orElse(fail -> handleAuthorizationFailure());
+            .map(currentCustomer -> new AccessRightEntry(accessRight, currentCustomer))
+            .map(requiredAccessRight -> fetchAvailableAccessRights().anyMatch(requiredAccessRight::equals))
+            .orElse(fail -> handleAuthorizationFailure());
     }
 
     private boolean handleAuthorizationFailure() {
@@ -377,8 +379,13 @@ public class RequestInfo {
     }
 
     private Try<CognitoUserInfo> fetchUserInfoFromCognito() {
-        return attempt(() -> new FetchUserInfo(httpClient, cognitoUri, extractAuthorizationHeader()))
-            .map(FetchUserInfo::fetch);
+        return attempt(() -> fetchUserInfo(cognitoUri))
+            .or(() -> fetchUserInfo(e2eTestsUserInfoUri));
+    }
+
+    private CognitoUserInfo fetchUserInfo(Supplier<URI> cognitoUri) {
+        var userInfo = new FetchUserInfo(httpClient, cognitoUri, extractAuthorizationHeader());
+        return userInfo.fetch();
     }
 
     private String extractAuthorizationHeader() {

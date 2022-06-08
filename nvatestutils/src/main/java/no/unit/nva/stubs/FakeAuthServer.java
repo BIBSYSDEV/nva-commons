@@ -7,6 +7,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static no.unit.nva.auth.AuthorizedBackendClient.AUTHORIZATION_HEADER;
+import static no.unit.nva.auth.OAuthConstants.HTTPS;
+import static no.unit.nva.auth.OAuthConstants.OAUTH_TOKEN;
+import static no.unit.nva.auth.OAuthConstants.OAUTH_USER_INFO;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static nva.commons.core.attempt.Try.attempt;
 import com.github.tomakehurst.wiremock.WireMockServer;
@@ -23,9 +26,6 @@ import no.unit.nva.commons.json.JsonUtils;
 
 public class FakeAuthServer {
 
-    public static final String OAUTH_USER_INFO = "/oauth2/userInfo";
-    public static final String HTTPS = "https";
-    public static final String OAUTH_TOKEN = "/oauth2/token";
     public static final String ACCESS_TOKEN_TEMPLATE = "{\"access_token\": \"%s\"}";
     private WireMockServer httpServer;
     private URI serverUri;
