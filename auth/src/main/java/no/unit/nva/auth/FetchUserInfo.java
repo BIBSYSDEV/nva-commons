@@ -1,6 +1,7 @@
 package no.unit.nva.auth;
 
 import static nva.commons.core.attempt.Try.attempt;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -28,9 +29,17 @@ public class FetchUserInfo {
             .GET()
             .build();
         return attempt(() -> httpClient.send(request, BodyHandlers.ofString()))
+            .map(this::responseIsSuccessful)
             .map(HttpResponse::body)
             .map(CognitoUserInfo::fromString)
             .orElseThrow(fail -> handleFailure(fail.getException()));
+    }
+
+    private HttpResponse<String> responseIsSuccessful(HttpResponse<String> response) {
+        if (HttpURLConnection.HTTP_OK != response.statusCode()) {
+            throw new RuntimeException(AUTHORIZATION_ERROR_MESSAGE);
+        }
+        return response;
     }
 
     private RuntimeException handleFailure(Exception exception) {
