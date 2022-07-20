@@ -34,11 +34,13 @@ class AuthorizedBackendClientTest {
     public void init() {
         authServer = new FakeAuthServer();
         expectedAccessToken = randomString();
-        cognitoCredentials = new CognitoCredentials(randomString(), randomString(), authServer.getServerUri());
+        var clientId = randomString();
+        var clientSecret = randomString();
+        cognitoCredentials = new CognitoCredentials(() -> clientId, () -> clientSecret, authServer.getServerUri());
         protectedContent = authServer.createHttpInteractions(cognitoCredentials.getCognitoAppClientId(),
-                                                             cognitoCredentials.getCognitoAppClientSecret(),
-                                                             expectedAccessToken,
-                                                             EXAMPLE_RESOURCE_PATH);
+            cognitoCredentials.getCognitoAppClientSecret(),
+            expectedAccessToken,
+            EXAMPLE_RESOURCE_PATH);
         serverUri = authServer.getServerUri();
         this.httpClient = WiremockHttpClient.create();
     }
