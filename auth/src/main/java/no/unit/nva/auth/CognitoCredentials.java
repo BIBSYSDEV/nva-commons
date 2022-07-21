@@ -1,30 +1,31 @@
 package no.unit.nva.auth;
 
 import java.net.URI;
+import java.util.function.Supplier;
 
 public class CognitoCredentials {
-
-    private final String cognitoAppClientId;
-    private final String cognitoAppClientSecret;
+    
+    private final Supplier<String> cognitoAppClientId;
+    private final Supplier<String> cognitoAppClientSecret;
     private final URI cognitoOAuthServerUri;
-
-    public CognitoCredentials(String cognitoAppClientId,
-                              String cognitoAppClientSecret,
+    
+    public CognitoCredentials(Supplier<String> cognitoAppClientId,
+                              Supplier<String> cognitoAppClientSecret,
                               URI cognitoOAuthServerUri) {
         this.cognitoAppClientId = cognitoAppClientId;
         this.cognitoAppClientSecret = cognitoAppClientSecret;
         this.cognitoOAuthServerUri = cognitoOAuthServerUri;
     }
-
+    
     public URI getCognitoOAuthServerUri() {
         return cognitoOAuthServerUri;
     }
 
     public String getCognitoAppClientId() {
-        return cognitoAppClientId;
+        return cognitoAppClientId.get();
     }
 
     public String getCognitoAppClientSecret() {
-        return cognitoAppClientSecret;
+        return cognitoAppClientSecret.get();
     }
 }
