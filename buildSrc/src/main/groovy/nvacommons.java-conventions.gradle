@@ -8,8 +8,8 @@ plugins {
     id 'nebula.lint'
 }
 
-group 'com.github.bibsysdev'
-version = '1.25.3'
+group 'com.github.BIBSYSDEV.nva-commons'
+version = '1.25.3-alpha4'
 
 repositories {
     mavenCentral()
