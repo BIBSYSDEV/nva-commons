@@ -97,9 +97,11 @@ public class FakeSecretsManagerClient implements SecretsManagerClient {
             if (this == o) {
                 return true;
             }
-            if (!(o instanceof SecretName that)) {
+            if (!(o instanceof SecretName)) {
                 return false;
             }
+
+            SecretName that = (SecretName) o;
 
             return Objects.equals(value, that.value);
         }
@@ -131,9 +133,11 @@ public class FakeSecretsManagerClient implements SecretsManagerClient {
             if (this == o) {
                 return true;
             }
-            if (!(o instanceof SecretKey secretKey)) {
+            if (!(o instanceof SecretKey)) {
                 return false;
             }
+
+            SecretKey secretKey = (SecretKey) o;
 
             return Objects.equals(value, secretKey.value);
         }
