@@ -111,10 +111,12 @@ class HandlerRequestBuilderTest {
 
     @Test
     void buildReturnsRequestWithRequestContextWhenWithRequestContext() throws Exception {
+        var requestContext = JsonUtils.dtoObjectMapper.createObjectNode();
+        requestContext.put(KEY, VALUE);
         InputStream request = new HandlerRequestBuilder<String>(objectMapper)
-            .withRequestContext(Map.of(KEY, VALUE))
-            .build();
-
+                                  .withRequestContext(requestContext)
+                                  .build();
+    
         Map<String, Object> mapWithRequestContext = toMap(request);
         assertThat(mapWithRequestContext.get(REQUEST_CONTEXT), notNullValue());
     }
@@ -135,7 +137,8 @@ class HandlerRequestBuilderTest {
     void buildReturnsRequestWithRequestContextWithCustomerIdClaimWhenWithCustomerId()
         throws JsonProcessingException, UnauthorizedException {
         var expectedCustomerId = randomUri();
-        var requestStream = new HandlerRequestBuilder<String>(objectMapper).withCurrentCustomer(expectedCustomerId)
+        var requestStream = new HandlerRequestBuilder<String>(objectMapper)
+                                .withCurrentCustomer(expectedCustomerId)
                                 .build();
         var request = IoUtils.streamToString(requestStream);
         var requestInfo = JsonUtils.dtoObjectMapper.readValue(request, RequestInfo.class);

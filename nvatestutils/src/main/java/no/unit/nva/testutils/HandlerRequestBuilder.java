@@ -47,7 +47,7 @@ public class HandlerRequestBuilder<T> {
     private static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
     public static final String SCOPE_CLAIM = "scope";
     public static final String PERSON_NIN_CLAIM = "custom:nin";
-    private final transient ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
     @JsonProperty("body")
     private String body;
     @JsonProperty("headers")
@@ -103,20 +103,19 @@ public class HandlerRequestBuilder<T> {
         return this;
     }
     
-    /**
-     * Use the method that accepts an {@link ObjectNode} as a parameter.
-     *
-     * @param requestContext the requestContext object.
-     * @return the builder.
-     */
-    @Deprecated
-    public HandlerRequestBuilder<T> withRequestContext(Map<String, Object> requestContext) {
-        this.requestContext = objectMapper.convertValue(requestContext, ObjectNode.class);
+    public HandlerRequestBuilder<T> withHttpMethod(String httpMethod) {
+        this.httpMethod = httpMethod;
         return this;
     }
     
-    public HandlerRequestBuilder<T> withHttpMethod(String httpMethod) {
-        this.httpMethod = httpMethod;
+    /**
+     * @param requestContext the requestContext object.
+     * @return the builder.
+     * @deprecated Use the method that accepts an {@link ObjectNode} as a parameter.
+     */
+    @Deprecated(since = "1.25.0")
+    public HandlerRequestBuilder<T> withRequestContext(Map<String, Object> requestContext) {
+        this.requestContext = objectMapper.convertValue(requestContext, ObjectNode.class);
         return this;
     }
     
