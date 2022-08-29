@@ -135,9 +135,8 @@ class HandlerRequestBuilderTest {
     void buildReturnsRequestWithRequestContextWithCustomerIdClaimWhenWithCustomerId()
         throws JsonProcessingException, UnauthorizedException {
         var expectedCustomerId = randomUri();
-        var requestStream = new HandlerRequestBuilder<String>(objectMapper)
-            .withCustomerId(expectedCustomerId)
-            .build();
+        var requestStream = new HandlerRequestBuilder<String>(objectMapper).withCurrentCustomer(expectedCustomerId)
+                                .build();
         var request = IoUtils.streamToString(requestStream);
         var requestInfo = JsonUtils.dtoObjectMapper.readValue(request, RequestInfo.class);
         assertThat(requestInfo.getCurrentCustomer(), is(equalTo(expectedCustomerId)));
@@ -149,10 +148,9 @@ class HandlerRequestBuilderTest {
         var expectedUsername = randomString();
         var expectedCustomerId = randomUri();
         var expectedApplicationRoles = "role1,role2";
-
+    
         InputStream requestStream = new HandlerRequestBuilder<String>(objectMapper)
-            .withNvaUsername(expectedUsername)
-            .withCustomerId(expectedCustomerId)
+                                        .withNvaUsername(expectedUsername).withCurrentCustomer(expectedCustomerId)
             .withRoles(expectedApplicationRoles)
             .build();
         JsonNode request = toJsonNode(requestStream);

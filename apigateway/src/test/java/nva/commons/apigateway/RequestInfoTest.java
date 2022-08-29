@@ -275,10 +275,9 @@ class RequestInfoTest {
     @Test
     void shouldReturnThatUserIsApplicationAdminWhenUserHasTheRespectiveAccessRight() throws JsonProcessingException {
         var customerId = randomUri();
-        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper)
-            .withCustomerId(customerId)
-            .withAccessRights(customerId, AccessRight.ADMINISTRATE_APPLICATION.toString())
-            .build();
+        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withCurrentCustomer(customerId)
+                          .withAccessRights(customerId, AccessRight.ADMINISTRATE_APPLICATION.toString())
+                          .build();
         var requestInfo = RequestInfo.fromRequest(request);
         assertThat(requestInfo.userIsApplicationAdmin(), is(true));
     }
@@ -287,10 +286,9 @@ class RequestInfoTest {
     void shouldReturnThatUserIsNotApplicationAdminWhenUserDoesNotHaveTheRespectiveAccessRight()
         throws JsonProcessingException {
         var customerId = randomUri();
-        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper)
-            .withCustomerId(customerId)
-            .withAccessRights(customerId, AccessRight.APPROVE_DOI_REQUEST.toString(), randomString())
-            .build();
+        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withCurrentCustomer(customerId)
+                          .withAccessRights(customerId, AccessRight.APPROVE_DOI_REQUEST.toString(), randomString())
+                          .build();
         var requestInfo = RequestInfo.fromRequest(request);
         assertThat(requestInfo.userIsApplicationAdmin(), is(false));
     }
@@ -529,9 +527,8 @@ class RequestInfoTest {
     }
 
     private RequestInfo requestInfoWithCustomerId(URI userCustomer) throws JsonProcessingException {
-        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper)
-            .withCustomerId(userCustomer)
-            .build();
+        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withCurrentCustomer(userCustomer)
+                          .build();
         return RequestInfo.fromRequest(request);
     }
 
@@ -606,10 +603,9 @@ class RequestInfoTest {
 
     private RequestInfo createRequestInfoForOfflineAuthorization(List<String> usersAccessRights, URI userCustomer)
         throws JsonProcessingException {
-        var requestStream = new HandlerRequestBuilder<Void>(dtoObjectMapper)
-            .withCustomerId(userCustomer)
-            .withAccessRights(userCustomer, usersAccessRights.toArray(String[]::new))
-            .build();
+        var requestStream = new HandlerRequestBuilder<Void>(dtoObjectMapper).withCurrentCustomer(userCustomer)
+                                .withAccessRights(userCustomer, usersAccessRights.toArray(String[]::new))
+                                .build();
         return RequestInfo.fromRequest(requestStream);
     }
 
