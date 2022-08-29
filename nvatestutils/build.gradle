@@ -9,6 +9,7 @@ dependencies {
     implementation project(":json")
     implementation project(":auth")
     implementation project(":apigateway")
+    implementation project(":secrets")
 
     implementation libs.bundles.testing
     implementation libs.httpmime
@@ -17,6 +18,7 @@ dependencies {
     implementation libs.aws.sdk2.s3
     implementation libs.aws.sdk2.eventbridge
     implementation libs.aws.sdk2.cognitoidp
+    implementation libs.aws.sdk2.secrets
     implementation libs.guava
     implementation libs.wiremock
     implementation libs.bundles.jackson
