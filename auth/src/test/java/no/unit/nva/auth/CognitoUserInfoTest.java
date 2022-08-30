@@ -12,10 +12,10 @@ class CognitoUserInfoTest {
     @Test
     void builderContainsAllFields() {
         var userInfo = CognitoUserInfo.builder()
-            .withAccessRights(Set.of(randomString(), randomString()))
-            .withFeideId(randomString())
-            .withCurrentCustomer(randomUri())
-            .withNvaUsername(randomString())
+                           .withAccessRights(Set.of(randomString(), randomString()))
+                           .withFeideId(randomString())
+                           .withCurrentCustomer(randomUri())
+                           .withUserName(randomString())
             .withTopOrgCristinId(randomUri())
             .withPersonCristinId(randomUri())
             .withPersonNin(randomString())

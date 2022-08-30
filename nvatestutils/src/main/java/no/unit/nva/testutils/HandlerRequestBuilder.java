@@ -39,7 +39,7 @@ public class HandlerRequestBuilder<T> {
     public static final String DELIMITER = System.lineSeparator();
     public static final String AUTHORIZER_NODE = "authorizer";
     public static final String CLAIMS_NODE = "claims";
-    public static final String NVA_USERNAME_CLAIM = "custom:nvaUsername";
+    public static final String USER_NAME_CLAIM = "custom:nvaUsername";
     public static final String ACCESS_RIGHTS_CLAIMS = "cognito:groups";
     public static final String APPLICATION_ROLES_CLAIM = "custom:applicationRoles";
     public static final String PERSON_CRISTIN_ID = "custom:cristinId";
@@ -170,10 +170,16 @@ public class HandlerRequestBuilder<T> {
         this.otherProperties = otherProperties;
     }
     
-    public HandlerRequestBuilder<T> withNvaUsername(String nvaUsername) {
+    public HandlerRequestBuilder<T> withUserName(String userName) {
         ObjectNode claims = getAuthorizerClaimsNode();
-        claims.put(NVA_USERNAME_CLAIM, nvaUsername);
+        claims.put(USER_NAME_CLAIM, userName);
         return this;
+    }
+    
+    @Deprecated(since = "1.25.5")
+    @JacocoGenerated
+    public HandlerRequestBuilder<T> withNvaUsername(String nvaUsername) {
+        return withUserName(nvaUsername);
     }
     
     /**

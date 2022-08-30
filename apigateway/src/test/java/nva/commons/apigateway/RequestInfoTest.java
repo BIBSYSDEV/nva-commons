@@ -345,10 +345,10 @@ class RequestInfoTest {
     }
     
     @Test
-    void shouldReturnNvaUsernameFromCognitoWhenUserHasSelectedCustomerAndClaimInNotAvailableOffline()
+    void shouldReturnUsernameFromCognitoWhenUserHasSelectedCustomerAndClaimInNotAvailableOffline()
         throws UnauthorizedException {
         var expectedUsername = randomString();
-        var cognitoUserEntry = CognitoUserInfo.builder().withNvaUsername(expectedUsername).build();
+        var cognitoUserEntry = CognitoUserInfo.builder().withUserName(expectedUsername).build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
         var actualUsername = requestInfo.getUserName();
@@ -356,22 +356,22 @@ class RequestInfoTest {
     }
     
     @Test
-    void shouldReturnNvaUsernameWhenClaimInAvailableOffline() throws UnauthorizedException {
-        var cognitoUserEntry = CognitoUserInfo.builder().withNvaUsername(randomString()).build();
+    void shouldReturnUsernameWhenClaimInAvailableOffline() throws UnauthorizedException {
+        var cognitoUserEntry = CognitoUserInfo.builder().withUserName(randomString()).build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
-    
+        
         var expectedUsername = randomString();
-        injectNvaUserNameInRequestInfo(requestInfo, expectedUsername);
-    
+        injectUserNameInRequestInfo(requestInfo, expectedUsername);
+        
         var actualUsername = requestInfo.getUserName();
         assertThat(actualUsername, is(equalTo(expectedUsername)));
     }
     
     @Test
-    void shouldThrowUnauthorizedExceptionWhenNvaUsernameIsNotAvailable() {
-        var cognitoUserEntryWithoutNvaUsername = CognitoUserInfo.builder().build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutNvaUsername));
+    void shouldThrowUnauthorizedExceptionWhenUserNameIsNotAvailable() {
+        var cognitoUserEntryWithoutUserName = CognitoUserInfo.builder().build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutUserName));
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
         assertThrows(UnauthorizedException.class, requestInfo::getUserName);
     }
@@ -544,11 +544,11 @@ class RequestInfoTest {
                    .withAccessRights(accessRightsForCustomer).build();
     }
     
-    private void injectNvaUserNameInRequestInfo(RequestInfo requestInfo, String expectedUsername) {
+    private void injectUserNameInRequestInfo(RequestInfo requestInfo, String expectedUsername) {
         var claims = dtoObjectMapper.createObjectNode();
         var authorizer = dtoObjectMapper.createObjectNode();
         var requestContext = dtoObjectMapper.createObjectNode();
-        claims.put(CognitoUserInfo.NVA_USERNAME_CLAIM, expectedUsername);
+        claims.put(CognitoUserInfo.USER_NAME_CLAIM, expectedUsername);
         authorizer.set("claims", claims);
         requestContext.set("authorizer", authorizer);
         requestInfo.setRequestContext(requestContext);

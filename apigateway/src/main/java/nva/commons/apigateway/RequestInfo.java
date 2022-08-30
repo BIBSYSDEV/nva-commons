@@ -12,7 +12,6 @@ import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_HEADERS;
 import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_PATH_PARAMETERS;
 import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_QUERY_PARAMETERS;
 import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_REQUEST_CONTEXT;
-import static nva.commons.apigateway.RequestInfoConstants.NVA_USERNAME;
 import static nva.commons.apigateway.RequestInfoConstants.PATH_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.PATH_PARAMETERS_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.PERSON_CRISTIN_ID;
@@ -22,6 +21,7 @@ import static nva.commons.apigateway.RequestInfoConstants.QUERY_STRING_PARAMETER
 import static nva.commons.apigateway.RequestInfoConstants.REQUEST_CONTEXT_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.SCOPES_CLAIM;
 import static nva.commons.apigateway.RequestInfoConstants.TOP_LEVEL_ORG_CRISTIN_ID;
+import static nva.commons.apigateway.RequestInfoConstants.USER_NAME;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
 import static nva.commons.core.paths.UriWrapper.HTTPS;
@@ -269,7 +269,7 @@ public class RequestInfo {
     
     @JsonIgnore
     public String getUserName() throws UnauthorizedException {
-        return extractNvaUsernameOffline()
+        return extractUserNameOffline()
                    .or(this::fetchUserNameFromCognito)
                    .orElseThrow(UnauthorizedException::new);
     }
@@ -328,13 +328,13 @@ public class RequestInfo {
         logger.warn(ERROR_FETCHING_COGNITO_INFO, ExceptionUtils.stackTraceInSingleLine(fail.getException()));
     }
     
-    private Optional<String> extractNvaUsernameOffline() {
-        return getRequestContextParameterOpt(NVA_USERNAME);
+    private Optional<String> extractUserNameOffline() {
+        return getRequestContextParameterOpt(USER_NAME);
     }
     
     private Optional<String> fetchUserNameFromCognito() {
         return fetchUserInfoFromCognito()
-                   .map(CognitoUserInfo::getNvaUsername);
+                   .map(CognitoUserInfo::getUserName);
     }
     
     private Optional<URI> extractPersonCristinIdOffline() {
