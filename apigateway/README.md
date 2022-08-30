@@ -4,8 +4,11 @@ This library provides Java utilities that provide a uniform way of working with 
 
 #### Install
 
+Since most projects extend the ApiGatewayHandler class and use the ApiGatewayException, use the _implementation_
+configuration.
+
 ```groovy
-runtimeOnly group: 'com.github.bibsysdev', name: 'apigateway', version: '$version'
+implementation group: 'com.github.bibsysdev', name: 'apigateway', version: '$version'
 ```
 
 ### AccessRight
@@ -19,6 +22,7 @@ Should this be an exposed API at all? It is used by RequestInfo, HandlerRequestB
 ### ApiGatewayHandler
 
 When receiving events from API Gateway, there are three basic concerns:
+
 1. receiving and processing input
 2. doing something with the input
 3. returning a response to API Gateway
@@ -64,17 +68,19 @@ public class MyLambdaHandler extends ApiGatewayHandler<InputObject, OutputObject
 
 This should not be a visible API since it is only used internally.
 
-In the current code, we should do something to prevent users observing this class directly. 
+In the current code, we should do something to prevent users observing this class directly.
 Options:
-  - Package private
-  - Using module-info.java
-  - Others? 
+
+- Package private
+- Using module-info.java
+- Others?
 
 ### GatewayResponse
 
 A testing utility for data that is to be _sent to_ API.
 
-*Note:* Here, there is a potential design issue, as this belongs in a separate testing module ApiGatewayTestUtils, but is also used internally by  the ApiGatewayHandler class.
+*Note:* Here, there is a potential design issue, as this belongs in a separate testing module ApiGatewayTestUtils, but
+is also used internally by the ApiGatewayHandler class.
 
 Usage:
 
@@ -85,7 +91,7 @@ import java.io.ByteArrayOutputStream;
 
 class MyTest {
     private ByteArrayOutputStream output;
-    
+
     @Test
     void shouldTestSomething() {
         output = myHandlerCode();
@@ -103,9 +109,9 @@ class MyTest {
 
 Adds com.google.common.net.MediaType compatible constants for the media types:
 
-  - application/ld+json
-  - application/problem+json
-  - application/vnd.datacite.datacite+xml
+- application/ld+json
+- application/problem+json
+- application/vnd.datacite.datacite+xml
 
 #### Usage
 
@@ -129,52 +135,53 @@ class MyClass {
 
 Container class for information about an HTTP request from AWS ApiGateway, including:
 
-  - String getHeader(String header)
+- String getHeader(String header)
     - returns the specified header
-  - String getAuthHeader()
-    - returns the Authorization header 
-  - String getQueryParameter(String parameter)
-    - returns the specified query parameter 
-  - Optional<String> getQueryParameterOpt(String parameter)
-    - returns an optional of a potentially missing query parameter  
-  - String getPathParameter(String parameter)
-    - returns the specified path parameter 
-  - String getRequestContextParameter(JsonPointer jsonPointer)
-    - returns a request context parameter by JSON pointer 
-    - (*note:* is this used outside the class itself?) 
-  - Optional<String> getRequestContextParameterOpt(JsonPointer jsonPointer)
+- String getAuthHeader()
+    - returns the Authorization header
+- String getQueryParameter(String parameter)
+    - returns the specified query parameter
+- Optional<String> getQueryParameterOpt(String parameter)
+    - returns an optional of a potentially missing query parameter
+- String getPathParameter(String parameter)
+    - returns the specified path parameter
+- String getRequestContextParameter(JsonPointer jsonPointer)
+    - returns a request context parameter by JSON pointer
+    - (*note:* is this used outside the class itself?)
+- Optional<String> getRequestContextParameterOpt(JsonPointer jsonPointer)
     - returns an optional of a potentially missing request context parameter by JSON pointer
     - (*note:* is this used outside the class itself?)
-  - String getMethodArn()
+- String getMethodArn()
     - returns the ARN of the invoked method
-  - Map<String, Object> getOtherProperties()
+- Map<String, Object> getOtherProperties()
     - returns a list of properties not covered by direct accessors in this class
-  - Map<String, String> getHeaders()
+- Map<String, String> getHeaders()
     - returns a map of all headers in the request
-  - String getPath()
+- String getPath()
     - returns the relative path of API-Gateway invocation
-  - Map<String, String> getPathParameters()
+- Map<String, String> getPathParameters()
     - returns a map of all path parameters
-  - Map<String, String> getQueryParameters()
-    - returns a map of all query parameters 
-  - JsonNode getRequestContext()
-    - returns a JsonNode containing the request Context object 
-  - URI getRequestUri()
+- Map<String, String> getQueryParameters()
+    - returns a map of all query parameters
+- JsonNode getRequestContext()
+    - returns a JsonNode containing the request Context object
+- URI getRequestUri()
     - returns the originating URI for the request
-  - String getDomainName()
+- String getDomainName()
     - returns the domain name used in the request
-  - URI getCustomerId()
+- URI getCustomerId()
     - returns the Customer URI for the _authorized request_
     - *note:* how does this differ from *getCurrentCustomer()* below?
-  - String getNvaUsername()
-    - returns the requester's username for the _authorized request_ 
-  - Optional<URI> getTopLevelOrgCristinId()
-    - returns the URI representing the top-level Cristin organization associated with the requesting user for an _authorized request_
-  - URI getCurrentCustomer()
-    -  returns the URI of the requester's associated customer for an _authorized request_
-  - URI getPersonCristinId()
+- String getNvaUsername()
+    - returns the requester's username for the _authorized request_
+- Optional<URI> getTopLevelOrgCristinId()
+    - returns the URI representing the top-level Cristin organization associated with the requesting user for an _
+      authorized request_
+- URI getCurrentCustomer()
+    - returns the URI of the requester's associated customer for an _authorized request_
+- URI getPersonCristinId()
     - returns the requester's person ID in the Cristin Person service
-  - String getPersonNin()
+- String getPersonNin()
     - returns the requester's national identity number (NIN) as supplied by the Cristin Person service
 
 The class also provides setters for the information, however, these will typically be used in API-testing.
