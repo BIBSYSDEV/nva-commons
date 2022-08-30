@@ -351,7 +351,7 @@ class RequestInfoTest {
         var cognitoUserEntry = CognitoUserInfo.builder().withNvaUsername(expectedUsername).build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
-        var actualUsername = requestInfo.getNvaUsername();
+        var actualUsername = requestInfo.getUserName();
         assertThat(actualUsername, is(equalTo(expectedUsername)));
     }
     
@@ -360,11 +360,11 @@ class RequestInfoTest {
         var cognitoUserEntry = CognitoUserInfo.builder().withNvaUsername(randomString()).build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
-        
+    
         var expectedUsername = randomString();
         injectNvaUserNameInRequestInfo(requestInfo, expectedUsername);
-        
-        var actualUsername = requestInfo.getNvaUsername();
+    
+        var actualUsername = requestInfo.getUserName();
         assertThat(actualUsername, is(equalTo(expectedUsername)));
     }
     
@@ -373,7 +373,7 @@ class RequestInfoTest {
         var cognitoUserEntryWithoutNvaUsername = CognitoUserInfo.builder().build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutNvaUsername));
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
-        assertThrows(UnauthorizedException.class, requestInfo::getNvaUsername);
+        assertThrows(UnauthorizedException.class, requestInfo::getUserName);
     }
     
     @Test
@@ -454,7 +454,7 @@ class RequestInfoTest {
     void shouldReadCognitoUriFromEnvByDefault() throws JsonProcessingException {
         var requestInfoString = IoUtils.stringFromResources(EVENT_WITH_AUTH_HEADER);
         var requestInfo = dtoObjectMapper.readValue(requestInfoString, RequestInfo.class);
-        assertThrows(UnauthorizedException.class, requestInfo::getNvaUsername);
+        assertThrows(UnauthorizedException.class, requestInfo::getUserName);
     }
     
     @Test
@@ -514,7 +514,7 @@ class RequestInfoTest {
         cognito.setUserBase(Map.of(randomString(), cognitoUserEntry));
         var logger = LogUtils.getTestingAppenderForRootLogger();
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
-        assertThrows(UnauthorizedException.class, requestInfo::getNvaUsername);
+        assertThrows(UnauthorizedException.class, requestInfo::getUserName);
         assertThat(logger.getMessages(),
             containsString(ERROR_FETCHING_COGNITO_INFO.replace(LOG_STRING_INTERPOLATION, EMPTY_STRING)));
     }
