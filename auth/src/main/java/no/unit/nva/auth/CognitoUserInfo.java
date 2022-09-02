@@ -15,7 +15,7 @@ public class CognitoUserInfo {
     public static final String FEIDE_ID_CLAIM = "custom:feideId";
     public static final String SELECTED_CUSTOMER_CLAIM = "custom:customerId";
     public static final String ACCESS_RIGHTS_CLAIM = "custom:accessRights";
-    public static final String NVA_USERNAME_CLAIM = "custom:nvaUsername";
+    public static final String USER_NAME_CLAIM = "custom:nvaUsername";
     public static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
     public static final String PERSON_CRISTIN_ID_CLAIM = "custom:cristinId";
     public static final String PERSON_NIN_CLAIM = "custom:nin";
@@ -24,15 +24,15 @@ public class CognitoUserInfo {
     public static final String SUB = "sub";
     public static final String PERSON_AFFILIATION = "custom:personAffiliation";
     public static final String ALLOWED_CUSTOMERS = "custom:allowedCustomers";
-    public static final String COGNITO_USERNAME = "username";
+    public static final String COGNITO_USER_NAME = "username";
     @JsonProperty(FEIDE_ID_CLAIM)
     private String feideId;
     @JsonProperty(SELECTED_CUSTOMER_CLAIM)
     private URI currentCustomer;
     @JsonProperty(ACCESS_RIGHTS_CLAIM)
     private String accessRights;
-    @JsonProperty(NVA_USERNAME_CLAIM)
-    private String nvaUsername;
+    @JsonProperty(USER_NAME_CLAIM)
+    private String userName;
     @JsonProperty(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM)
     private URI topOrgCristinId;
     @JsonProperty(PERSON_CRISTIN_ID_CLAIM)
@@ -48,7 +48,7 @@ public class CognitoUserInfo {
     private String personAffiliation;
     @JsonProperty(ALLOWED_CUSTOMERS)
     private String allowedCustomers;
-    @JsonProperty(COGNITO_USERNAME)
+    @JsonProperty(COGNITO_USER_NAME)
     private String cognitoUsername;
 
     public static Builder builder() {
@@ -98,27 +98,27 @@ public class CognitoUserInfo {
     public void setCognitoUsername(String cognitoUsername) {
         this.cognitoUsername = cognitoUsername;
     }
-
+    
     public URI getTopOrgCristinId() {
         return topOrgCristinId;
     }
-
+    
     public void setTopOrgCristinId(URI topOrgCristinId) {
         this.topOrgCristinId = topOrgCristinId;
     }
-
-    public String getNvaUsername() {
-        return nvaUsername;
+    
+    public String getUserName() {
+        return userName;
     }
-
-    public void setNvaUsername(String nvaUsername) {
-        this.nvaUsername = nvaUsername;
+    
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
-
+    
     public URI getCurrentCustomer() {
         return currentCustomer;
     }
-
+    
     public void setCurrentCustomer(URI currentCustomer) {
         this.currentCustomer = currentCustomer;
     }
@@ -158,9 +158,9 @@ public class CognitoUserInfo {
     @JacocoGenerated
     @Override
     public int hashCode() {
-        return Objects.hash(getFeideId(), getCurrentCustomer(), getAccessRights(), getNvaUsername(),
-                            getTopOrgCristinId(),
-                            getPersonCristinId(), getPersonNin());
+        return Objects.hash(getFeideId(), getCurrentCustomer(), getAccessRights(), getUserName(),
+            getTopOrgCristinId(),
+            getPersonCristinId(), getPersonNin());
     }
 
     @JacocoGenerated
@@ -176,7 +176,7 @@ public class CognitoUserInfo {
         return Objects.equals(getFeideId(), that.getFeideId())
                && Objects.equals(getCurrentCustomer(), that.getCurrentCustomer())
                && Objects.equals(getAccessRights(), that.getAccessRights())
-               && Objects.equals(getNvaUsername(), that.getNvaUsername())
+               && Objects.equals(getUserName(), that.getUserName())
                && Objects.equals(getTopOrgCristinId(), that.getTopOrgCristinId())
                && Objects.equals(getPersonCristinId(), that.getPersonCristinId())
                && Objects.equals(getPersonNin(), that.getPersonNin());
@@ -199,24 +199,24 @@ public class CognitoUserInfo {
             cognitoUserInfo.setCurrentCustomer(currentCustomer);
             return this;
         }
-
+    
         public Builder withAccessRights(Set<String> accessRights) {
             if (nonNull(accessRights)) {
                 cognitoUserInfo.setAccessRights(String.join(ELEMENTS_DELIMITER, accessRights));
             }
             return this;
         }
-
-        public Builder withNvaUsername(String nvaUsername) {
-            cognitoUserInfo.setNvaUsername(nvaUsername);
+    
+        public Builder withUserName(String userName) {
+            cognitoUserInfo.setUserName(userName);
             return this;
         }
-
+    
         public Builder withTopOrgCristinId(URI topOrgCristinId) {
             cognitoUserInfo.setTopOrgCristinId(topOrgCristinId);
             return this;
         }
-
+    
         public Builder withPersonCristinId(URI personCristinId) {
             cognitoUserInfo.setPersonCristinId(personCristinId);
             return this;

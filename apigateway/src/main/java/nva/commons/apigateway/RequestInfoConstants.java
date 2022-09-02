@@ -1,9 +1,9 @@
 package nva.commons.apigateway;
 
-import static no.unit.nva.auth.CognitoUserInfo.NVA_USERNAME_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.PERSON_CRISTIN_ID_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.PERSON_NIN_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.TOP_LEVEL_ORG_CRISTIN_ID_CLAIM;
+import static no.unit.nva.auth.CognitoUserInfo.USER_NAME_CLAIM;
 import static no.unit.nva.auth.OAuthConstants.OAUTH_USER_INFO;
 import com.fasterxml.jackson.core.JsonPointer;
 import java.net.URI;
@@ -33,7 +33,6 @@ public final class RequestInfoConstants {
     public static final String MISSING_FROM_QUERY_PARAMETERS = "Missing from query parameters: ";
     public static final String MISSING_FROM_PATH_PARAMETERS = "Missing from pathParameters: ";
     public static final String MISSING_FROM_REQUEST_CONTEXT = "Missing from requestContext: ";
-    public static final String HTTPS = "https"; // Api Gateway only supports HTTPS
     public static final String DOMAIN_NAME_FIELD = "domainName";
     public static final String PERSON_GROUPS_CLAIM = "cognito:groups";
     public static final String AUTHORIZATION_FAILURE_WARNING = "Missing customerId or required access right";
@@ -41,7 +40,7 @@ public final class RequestInfoConstants {
     public static final String SCOPE = "scope";
     private static final String CLAIMS_PATH = "/authorizer/claims/";
     public static final JsonPointer PERSON_GROUPS = claimToJsonPointer(PERSON_GROUPS_CLAIM);
-    public static final JsonPointer NVA_USERNAME = claimToJsonPointer(NVA_USERNAME_CLAIM);
+    public static final JsonPointer USER_NAME = claimToJsonPointer(USER_NAME_CLAIM);
     public static final JsonPointer TOP_LEVEL_ORG_CRISTIN_ID = claimToJsonPointer(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM);
     public static final JsonPointer PERSON_CRISTIN_ID = claimToJsonPointer(PERSON_CRISTIN_ID_CLAIM);
     public static final JsonPointer SCOPES_CLAIM = claimToJsonPointer(SCOPE);

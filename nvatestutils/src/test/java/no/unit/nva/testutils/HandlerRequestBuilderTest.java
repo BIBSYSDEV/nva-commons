@@ -38,7 +38,7 @@ class HandlerRequestBuilderTest {
     public static final String SOME_METHOD = "POST";
 
     // copy-pasted values to avoid circular dependencies.
-    public static final JsonPointer NVA_USERNAME =
+    public static final JsonPointer USER_NAME =
         JsonPointer.compile("/requestContext/authorizer/claims/custom:nvaUsername");
     public static final JsonPointer PERSON_CRISTIN_ID =
         JsonPointer.compile("/requestContext/authorizer/claims/custom:cristinId");
@@ -120,16 +120,15 @@ class HandlerRequestBuilderTest {
         Map<String, Object> mapWithRequestContext = toMap(request);
         assertThat(mapWithRequestContext.get(REQUEST_CONTEXT), notNullValue());
     }
-
+    
     @Test
-    void buildReturnsRequestWithRequestContextWithNvaUsernameClaimWhenWithNvaUserClaim()
+    void buildReturnsRequestWithRequestContextWithUserNameClaimWhenWithNvaUserClaim()
         throws JsonProcessingException {
         var expectedUsername = randomString();
-        InputStream requestStream = new HandlerRequestBuilder<String>(objectMapper)
-            .withNvaUsername(expectedUsername)
-            .build();
+        InputStream requestStream = new HandlerRequestBuilder<String>(objectMapper).withUserName(expectedUsername)
+                                        .build();
         JsonNode request = toJsonNode(requestStream);
-        String actualUsername = request.at(NVA_USERNAME).textValue();
+        String actualUsername = request.at(USER_NAME).textValue();
         assertThat(actualUsername, is(equalTo(expectedUsername)));
     }
 
@@ -152,13 +151,13 @@ class HandlerRequestBuilderTest {
         var expectedCustomerId = randomUri();
         var expectedApplicationRoles = "role1,role2";
     
-        InputStream requestStream = new HandlerRequestBuilder<String>(objectMapper)
-                                        .withNvaUsername(expectedUsername).withCurrentCustomer(expectedCustomerId)
-            .withRoles(expectedApplicationRoles)
-            .build();
+        InputStream requestStream = new HandlerRequestBuilder<String>(objectMapper).withUserName(expectedUsername)
+                                        .withCurrentCustomer(expectedCustomerId)
+                                        .withRoles(expectedApplicationRoles)
+                                        .build();
         JsonNode request = toJsonNode(requestStream);
-
-        String actualUsername = request.at(NVA_USERNAME).textValue();
+    
+        String actualUsername = request.at(USER_NAME).textValue();
         assertThat(actualUsername, is(equalTo(expectedUsername)));
     }
 
