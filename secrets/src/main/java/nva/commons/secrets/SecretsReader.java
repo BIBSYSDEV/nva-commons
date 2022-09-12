@@ -49,6 +49,23 @@ public class SecretsReader {
             .orElseThrow(this::logErrorAndThrowException);
     }
 
+    /**
+     * Fetches a plain-text as json secret from AWS Secrets Manager.
+     *
+     * @param secretName the user-friendly id of the secret or the secret ARN
+     * @param clazz  the clazz to deserialize json to.
+     * @param <T> the parameterized type
+     * @return the value for the specified key
+     * @throws ErrorReadingSecretException when any error occurs.
+     */
+    public <T> T fetchPlainTextJsonSecret(String secretName, Class<T> clazz) {
+
+        return attempt(() -> fetchSecretFromAws(secretName))
+                   .map(GetSecretValueResponse::secretString)
+                   .flatMap(secretString -> deserializeJson(secretString, clazz))
+                   .orElseThrow(this::logErrorAndThrowException);
+    }
+
     public String errorReadingSecretMessage(String secretName) {
         return COULD_NOT_READ_SECRET_ERROR + secretName;
     }
@@ -84,6 +101,10 @@ public class SecretsReader {
 
     private Try<JsonNode> readStringAsJsonObject(String secretString) {
         return attempt(() -> dtoObjectMapper.readTree(secretString));
+    }
+
+    private <T> Try<T> deserializeJson(String secretString, Class<T> clazz) {
+        return attempt(() -> dtoObjectMapper.readValue(secretString, clazz));
     }
 
     private <I> ErrorReadingSecretException logErrorAndThrowException(Failure<I> failure) {

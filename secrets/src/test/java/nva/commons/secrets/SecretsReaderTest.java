@@ -12,6 +12,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Map;
+import nva.commons.core.JacocoGenerated;
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,9 @@ public class SecretsReaderTest {
     public static final String SECRET_VALUE = "SECRET_VALUE";
     public static final String SECRET_KEY = "SECRET_KEY";
     public static final String SECRET_NAME = "SECRET_NAME";
+    public static final String JSON_SECRET_NAME = "JSON_SECRET_NAME";
+    public static final String FOO_VALUE = "bar";
+    public static final String JSON_SECRET_VALUE = "{\"foo\": \"" + FOO_VALUE + "\"}";
     public static final String WRONG_SECRET_NAME = "WRONG_SECRET_NAME";
     public static final String WRONG_SECRET_KEY = "WRONG_KEY";
     public static final String ERROR_MESSAGE_FROM_AWS_SECRET_MANAGER = "Secret not found";
@@ -68,6 +72,12 @@ public class SecretsReaderTest {
         assertThat(value, is(equalTo(SECRET_VALUE)));
     }
 
+    @Test
+    public void fetchJsonSecretReturnsDeserializedObjectCorrectly() {
+        FooBar value = secretsReader.fetchPlainTextJsonSecret(JSON_SECRET_NAME, FooBar.class);
+        assertThat(value.getFoo(), is(equalTo(FOO_VALUE)));
+    }
+
     private SecretsReader createSecretsReaderMock() {
         var secretsManager = mock(SecretsManagerClient.class);
         when(secretsManager.getSecretValue(any(GetSecretValueRequest.class)))
@@ -81,6 +91,8 @@ public class SecretsReaderTest {
         if (providedSecretName.equals(SECRET_NAME)) {
             String secretString = createSecretJsonObject();
             return createGetSecretValueResult(secretString);
+        } else if (providedSecretName.equals(JSON_SECRET_NAME)) {
+            return createGetSecretValueResult(JSON_SECRET_VALUE);
         } else {
             throw new RuntimeException(ERROR_MESSAGE_FROM_AWS_SECRET_MANAGER);
         }
@@ -101,5 +113,18 @@ public class SecretsReaderTest {
     private String createSecretJsonObject() throws JsonProcessingException {
         Map<String, String> secret = Map.of(SECRET_KEY, SECRET_VALUE);
         return dtoObjectMapper.writeValueAsString(secret);
+    }
+
+    private static class FooBar {
+        private String foo;
+
+        public String getFoo() {
+            return foo;
+        }
+
+        @JacocoGenerated() // only invoked during deserialization
+        public void setFoo(String foo) {
+            this.foo = foo;
+        }
     }
 }
