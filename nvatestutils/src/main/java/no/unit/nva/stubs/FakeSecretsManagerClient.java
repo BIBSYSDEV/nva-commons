@@ -15,6 +15,7 @@ import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRespon
 
 public class FakeSecretsManagerClient implements SecretsManagerClient {
 
+    private final Map<SecretName, String> plainTextSecrets = new ConcurrentHashMap<>();
     public Map<SecretName, Map<SecretKey, String>> secrets = new ConcurrentHashMap<>();
 
     public FakeSecretsManagerClient putSecret(String name, String key, String value) {
@@ -27,13 +28,29 @@ public class FakeSecretsManagerClient implements SecretsManagerClient {
         return this;
     }
 
+    public FakeSecretsManagerClient putPlainTextSecret(String name, String value) {
+        var secretName = new SecretName(name);
+        plainTextSecrets.put(secretName, value);
+        return this;
+    }
+
     @Override
     public GetSecretValueResponse getSecretValue(GetSecretValueRequest getSecretValueRequest) {
         return Optional.ofNullable(getSecretValueRequest.secretId())
                    .map(SecretName::new)
-                   .map(secretName -> secrets.get(secretName))
+                   .flatMap(this::resolveSecret)
                    .map(secretContents -> addSecretContents(secretContents, getSecretValueRequest))
                    .orElseThrow();
+    }
+
+    private Optional<String> resolveSecret(SecretName secretName) {
+        if (secrets.containsKey(secretName)) {
+            return Optional.of(serializeSecretContents(secrets.get(secretName)));
+        } else if (plainTextSecrets.containsKey(secretName)) {
+            return Optional.of(plainTextSecrets.get(secretName));
+        } else {
+            return Optional.empty();
+        }
     }
 
     @JacocoGenerated
@@ -48,10 +65,10 @@ public class FakeSecretsManagerClient implements SecretsManagerClient {
 
     }
 
-    private static GetSecretValueResponse addSecretContents(Map<SecretKey, String> secretContents,
+    private static GetSecretValueResponse addSecretContents(String secretContents,
                                                             GetSecretValueRequest getSecretValueRequest) {
         return GetSecretValueResponse.builder()
-                   .secretString(serializeSecretContents(secretContents))
+                   .secretString(secretContents)
                    .name(getSecretValueRequest.secretId())
                    .build();
     }
