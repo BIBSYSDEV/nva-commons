@@ -77,6 +77,15 @@ public class SecretsReaderTest {
         assertThat(value, is(equalTo(PLAIN_TEXT_SECRET_VALUE)));
     }
 
+    @Test
+    public void fetchPlainTextSecretLogsErrorWhenWrongSecretNameIsGiven() {
+        final TestAppender appender = LogUtils.getTestingAppender(SecretsReader.class);
+        Executable action = () -> secretsReader.fetchPlainTextSecret(WRONG_SECRET_NAME);
+        assertThrows(ErrorReadingSecretException.class, action);
+
+        assertThat(appender.getMessages(), containsString(ERROR_MESSAGE_FROM_AWS_SECRET_MANAGER));
+    }
+
     private SecretsReader createSecretsReaderMock() {
         var secretsManager = mock(SecretsManagerClient.class);
         when(secretsManager.getSecretValue(any(GetSecretValueRequest.class)))

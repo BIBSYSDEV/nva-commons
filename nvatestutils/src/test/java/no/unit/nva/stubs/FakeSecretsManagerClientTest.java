@@ -29,7 +29,7 @@ public class FakeSecretsManagerClientTest {
     }
 
     @Test
-    void shouldBeUsableWithSecretsReaderUsingPlainTextJson() {
+    void shouldBeUsableWithSecretsReaderUsingPlainText() {
         var plainTextSecretName = randomString();
         var plainTextSecretValue = randomString();
 
