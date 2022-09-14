@@ -4,13 +4,12 @@ import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import nva.commons.core.JacocoGenerated;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import nva.commons.secrets.SecretsReader;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 public class FakeSecretsManagerClientTest {
-
-    private final static String BAR_VALUE = "bar";
 
     @Test
     void shouldBeUsableWithSecretsReader() {
@@ -32,27 +31,41 @@ public class FakeSecretsManagerClientTest {
     @Test
     void shouldBeUsableWithSecretsReaderUsingPlainTextJson() {
         var plainTextSecretName = randomString();
-        var plainTextSecretValue = "{\"bar\":\"" + BAR_VALUE + "\"}";
+        var plainTextSecretValue = randomString();
 
         var secretsClient =
             new FakeSecretsManagerClient().putPlainTextSecret(plainTextSecretName, plainTextSecretValue);
         var secretsReader = new SecretsReader(secretsClient);
 
-        Foo foo = secretsReader.fetchPlainTextJsonSecret(plainTextSecretName, Foo.class);
-        assertThat(foo.getBar(), is(equalTo(BAR_VALUE)));
+        String secretValue = secretsReader.fetchPlainTextSecret(plainTextSecretName);
+        assertThat(secretValue, is(equalTo(plainTextSecretValue)));
     }
 
-    private static final class Foo {
+    @Test
+    void shouldThrowExceptionWhenTryingToAddPlainTextSecretWithSameNameAsExistingKeyValueSecret() {
+        var secretName = randomString();
+        var secretKey = randomString();
+        var secretValue = randomString();
 
-        private String bar;
+        try (var secretsClient = new FakeSecretsManagerClient()) {
+            secretsClient.putSecret(secretName, secretKey, secretValue);
 
-        public String getBar() {
-            return bar;
+            Executable action = () -> secretsClient.putPlainTextSecret(secretName, secretValue);
+            assertThrows(IllegalArgumentException.class, action);
         }
+    }
 
-        @JacocoGenerated
-        public void setBar(String bar) {
-            this.bar = bar;
+    @Test
+    void shouldThrowExceptionWhenTryingToAddKeyValueSecretWithSameNameAsExistingPlainTextSecret() {
+        var secretName = randomString();
+        var secretKey = randomString();
+        var secretValue = randomString();
+
+        try (var secretsClient = new FakeSecretsManagerClient()) {
+            secretsClient.putPlainTextSecret(secretName, secretValue);
+
+            Executable action = () -> secretsClient.putSecret(secretName, secretKey, secretValue);
+            assertThrows(IllegalArgumentException.class, action);
         }
     }
 }

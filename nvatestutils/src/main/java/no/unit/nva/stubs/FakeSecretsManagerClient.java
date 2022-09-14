@@ -20,6 +20,10 @@ public class FakeSecretsManagerClient implements SecretsManagerClient {
 
     public FakeSecretsManagerClient putSecret(String name, String key, String value) {
         var secretName = new SecretName(name);
+        if (plainTextSecrets.containsKey(secretName)) {
+            throw new IllegalArgumentException(String.format("Secret already present as a plain text secret: %s", name));
+        }
+
         if (secrets.containsKey(secretName)) {
             addSecretValueToExistingSecret(key, value, secretName);
         } else {
@@ -30,6 +34,10 @@ public class FakeSecretsManagerClient implements SecretsManagerClient {
 
     public FakeSecretsManagerClient putPlainTextSecret(String name, String value) {
         var secretName = new SecretName(name);
+        if (secrets.containsKey(secretName)) {
+            throw new IllegalArgumentException(String.format("Secret already present as a key/value secret: %s", name));
+        }
+
         plainTextSecrets.put(secretName, value);
         return this;
     }
