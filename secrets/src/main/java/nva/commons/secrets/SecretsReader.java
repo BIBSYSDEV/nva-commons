@@ -49,6 +49,20 @@ public class SecretsReader {
             .orElseThrow(this::logErrorAndThrowException);
     }
 
+    /**
+     * Fetches a plain-text secret from AWS Secrets Manager.
+     *
+     * @param secretName the user-friendly id of the secret or the secret ARN
+     * @return the plain text value for the specified secret name
+     * @throws ErrorReadingSecretException when any error occurs.
+     */
+    public String fetchPlainTextSecret(String secretName) {
+
+        return attempt(() -> fetchSecretFromAws(secretName))
+                   .map(GetSecretValueResponse::secretString)
+                   .orElseThrow(this::logErrorAndThrowException);
+    }
+
     public String errorReadingSecretMessage(String secretName) {
         return COULD_NOT_READ_SECRET_ERROR + secretName;
     }
