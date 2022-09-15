@@ -1,26 +1,5 @@
 package nva.commons.apigateway;
 
-import com.amazonaws.services.lambda.runtime.Context;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.net.HttpHeaders;
-import com.google.common.net.MediaType;
-import no.unit.nva.stubs.FakeContext;
-import nva.commons.apigateway.testutils.ProxyHandler;
-import nva.commons.apigateway.testutils.RequestBody;
-import nva.commons.core.ioutils.IoUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
@@ -29,6 +8,24 @@ import static nva.commons.apigateway.testutils.ProxyHandler.HTTP_STATUS_CODE_TES
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import com.amazonaws.services.lambda.runtime.Context;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.net.HttpHeaders;
+import com.google.common.net.MediaType;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import no.unit.nva.stubs.FakeContext;
+import nva.commons.apigateway.testutils.ProxyHandler;
+import nva.commons.apigateway.testutils.RequestBody;
+import nva.commons.core.ioutils.IoUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 class ApiGatewayProxyHandlerTest {
     private Context context;
@@ -44,9 +41,9 @@ class ApiGatewayProxyHandlerTest {
     @DisplayName("ApiGatewayProxyHandlerTest has a constructor with input class as only parameter")
     public void apiGatewayHandlerHasACostructorWithInputClassAsOnlyParameter() {
         RestRequestHandler<String, String> handler = new ApiGatewayProxyHandler<>(String.class) {
-
+    
             @Override
-            protected Pair<String, Integer> processProxyInput(String input, RequestInfo requestInfo, Context context) {
+            protected ProxyResponse<String> processProxyInput(String input, RequestInfo requestInfo, Context context) {
                 return null;
             }
         };
