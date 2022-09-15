@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An extension of ApiGatewayHandler where you are also able to specify the http status-code.
@@ -18,25 +17,25 @@ public abstract class ApiGatewayProxyHandler<I, O> extends ApiGatewayHandler<I, 
     private Integer statusCode;
 
     @JacocoGenerated
-    public ApiGatewayProxyHandler(Class<I> iclass) {
+    protected ApiGatewayProxyHandler(Class<I> iclass) {
         this(iclass, new Environment());
     }
-
+    
     @JacocoGenerated
-    public ApiGatewayProxyHandler(Class<I> iclass, Environment environment) {
+    protected ApiGatewayProxyHandler(Class<I> iclass, Environment environment) {
         super(iclass, environment);
     }
-
+    
     @JacocoGenerated
-    public ApiGatewayProxyHandler(Class<I> iclass, Environment environment, ObjectMapper objectMapper) {
+    protected ApiGatewayProxyHandler(Class<I> iclass, Environment environment, ObjectMapper objectMapper) {
         super(iclass, environment, objectMapper);
     }
 
     @Override
     protected O processInput(I input, RequestInfo requestInfo, Context context) throws ApiGatewayException {
-        Pair<O, Integer> result = processProxyInput(input, requestInfo, context);
-        statusCode = result.getRight();
-        return result.getLeft();
+        var result = processProxyInput(input, requestInfo, context);
+        statusCode = result.getStatusCode();
+        return result.getBody();
     }
 
     @Override
@@ -61,6 +60,6 @@ public abstract class ApiGatewayProxyHandler<I, O> extends ApiGatewayHandler<I, 
      * @throws ApiGatewayException all exceptions are caught by writeFailure and mapped to error codes through the
      *                             method {@link RestRequestHandler#getFailureStatusCode}
      */
-    protected abstract Pair<O, Integer> processProxyInput(I input, RequestInfo requestInfo, Context context)
-            throws ApiGatewayException;
+    protected abstract ProxyResponse<O> processProxyInput(I input, RequestInfo requestInfo, Context context)
+        throws ApiGatewayException;
 }

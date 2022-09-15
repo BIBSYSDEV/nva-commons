@@ -13,7 +13,6 @@ dependencies {
     implementation libs.guava
     implementation libs.bundles.logging
     implementation libs.aws.lambda.events
-    implementation libs.commons.lang
 
     implementation libs.jackson.core
     implementation libs.jackson.databind

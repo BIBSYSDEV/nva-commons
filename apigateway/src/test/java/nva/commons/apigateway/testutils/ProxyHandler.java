@@ -1,17 +1,16 @@
 package nva.commons.apigateway.testutils;
 
+import static nva.commons.apigateway.RequestInfoConstants.PROXY_TAG;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
+import java.util.Collections;
+import java.util.Map;
 import nva.commons.apigateway.ApiGatewayProxyHandler;
+import nva.commons.apigateway.ProxyResponse;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.core.Environment;
-import org.apache.commons.lang3.tuple.Pair;
-import java.util.Collections;
-import java.util.Map;
-
-import static nva.commons.apigateway.RequestInfoConstants.PROXY_TAG;
 
 public class ProxyHandler extends ApiGatewayProxyHandler<RequestBody, RequestBody> {
 
@@ -33,16 +32,16 @@ public class ProxyHandler extends ApiGatewayProxyHandler<RequestBody, RequestBod
     public ProxyHandler(ObjectMapper mapper) {
         super(RequestBody.class, new Environment(), mapper);
     }
-
+    
     @Override
-    protected Pair<RequestBody, Integer> processProxyInput(RequestBody input, RequestInfo requestInfo, Context context)
+    protected ProxyResponse<RequestBody> processProxyInput(RequestBody input, RequestInfo requestInfo, Context context)
         throws ApiGatewayException {
         this.headers = requestInfo.getHeaders();
         this.proxy = requestInfo.getPathParameters().get(PROXY_TAG);
         this.path = requestInfo.getPath();
         this.body = input;
         this.addAdditionalHeaders(() -> additionalHeaders(body));
-        return Pair.of(this.body, HTTP_STATUS_CODE_TEST);
+        return new ProxyResponse<>(HTTP_STATUS_CODE_TEST, this.body);
     }
 
     private Map<String, String> additionalHeaders(RequestBody input) {
