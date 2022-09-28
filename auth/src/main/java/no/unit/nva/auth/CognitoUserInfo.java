@@ -12,7 +12,7 @@ public class CognitoUserInfo {
 
     public static final String ELEMENTS_DELIMITER = ",";
     public static final String EMPTY_STRING = "";
-    public static final String FEIDE_ID_CLAIM = "custom:feideId";
+    public static final String PERSON_FEIDE_ID_CLAIM = "custom:feideId";
     public static final String SELECTED_CUSTOMER_CLAIM = "custom:customerId";
     public static final String ACCESS_RIGHTS_CLAIM = "custom:accessRights";
     public static final String USER_NAME_CLAIM = "custom:nvaUsername";
@@ -25,7 +25,7 @@ public class CognitoUserInfo {
     public static final String PERSON_AFFILIATION = "custom:personAffiliation";
     public static final String ALLOWED_CUSTOMERS = "custom:allowedCustomers";
     public static final String COGNITO_USER_NAME = "username";
-    @JsonProperty(FEIDE_ID_CLAIM)
+    @JsonProperty(PERSON_FEIDE_ID_CLAIM)
     private String feideId;
     @JsonProperty(SELECTED_CUSTOMER_CLAIM)
     private URI currentCustomer;
@@ -169,9 +169,10 @@ public class CognitoUserInfo {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof CognitoUserInfo that)) {
+        if (!(o instanceof CognitoUserInfo)) {
             return false;
         }
+        CognitoUserInfo that = (CognitoUserInfo) o;
         return Objects.equals(getFeideId(), that.getFeideId())
                && Objects.equals(getCurrentCustomer(), that.getCurrentCustomer())
                && Objects.equals(getAccessRights(), that.getAccessRights())
