@@ -494,7 +494,7 @@ class RequestInfoTest {
         throws JsonProcessingException, UnauthorizedException {
         var expectedFeideId = randomString();
         var claims = dtoObjectMapper.createObjectNode();
-        claims.put(CognitoUserInfo.PERSON_FEIDE_ID_CLAIM, expectedFeideId);
+        claims.put(CognitoUserInfo.FEIDE_ID_CLAIM, expectedFeideId);
         var cognitoUserInfo = objectMapper.readValue(claims.toString(), CognitoUserInfo.class);
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserInfo));
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
@@ -506,7 +506,7 @@ class RequestInfoTest {
         throws JsonProcessingException, UnauthorizedException {
         var expectedFeideId = randomString();
         var claims = dtoObjectMapper.createObjectNode();
-        claims.put(CognitoUserInfo.PERSON_FEIDE_ID_CLAIM, expectedFeideId);
+        claims.put(CognitoUserInfo.FEIDE_ID_CLAIM, expectedFeideId);
         var cognitoUserInfo = objectMapper.readValue(claims.toString(), CognitoUserInfo.class);
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserInfo));
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
