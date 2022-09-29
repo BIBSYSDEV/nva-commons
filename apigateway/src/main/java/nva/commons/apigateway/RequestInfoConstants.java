@@ -45,6 +45,9 @@ public final class RequestInfoConstants {
     public static final JsonPointer PERSON_CRISTIN_ID = claimToJsonPointer(PERSON_CRISTIN_ID_CLAIM);
     public static final JsonPointer SCOPES_CLAIM = claimToJsonPointer(SCOPE);
     public static final JsonPointer PERSON_NIN = claimToJsonPointer(PERSON_NIN_CLAIM);
+    public static final String FEIDE_ID_CLAIM = "custom:feideId";
+    public static final JsonPointer FEIDE_ID = claimToJsonPointer(FEIDE_ID_CLAIM);
+
 
     private RequestInfoConstants() {
 
