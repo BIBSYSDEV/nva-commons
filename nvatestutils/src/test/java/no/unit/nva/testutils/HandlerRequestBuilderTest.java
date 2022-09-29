@@ -152,13 +152,14 @@ class HandlerRequestBuilderTest {
                           .withFeideId(expectedFeideId)
                           .build();
         var requestInfo= RequestInfo.fromRequest(request);
-
-        assertThat(requestInfo.getFeideId().isPresent(),is(true));
-        assertThat(requestInfo.getFeideId().get(),is(equalTo(expectedFeideId)));
+        var s = requestInfo.getFeideId().orElseThrow();
+        var ss = requestInfo.getFeideId().get();
+        assertThat(requestInfo.getFeideId().isPresent(), is(true));
+        assertThat(requestInfo.getFeideId().orElseThrow(), is(equalTo(expectedFeideId)));
     }
 
     @Test
-    void buildReturnsOptionalWhenFeideIdNotSet() throws JsonProcessingException {
+    void buildReturnsEmptyOptionalWhenFeideIdNotSet() throws JsonProcessingException {
         var request = new HandlerRequestBuilder<String>(objectMapper)
                           .build();
         var requestInfo= RequestInfo.fromRequest(request);

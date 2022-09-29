@@ -6,6 +6,7 @@ import static nva.commons.apigateway.RequestInfoConstants.AUTHORIZATION_FAILURE_
 import static nva.commons.apigateway.RequestInfoConstants.BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE;
 import static nva.commons.apigateway.RequestInfoConstants.DEFAULT_COGNITO_URI;
 import static nva.commons.apigateway.RequestInfoConstants.DOMAIN_NAME_FIELD;
+import static nva.commons.apigateway.RequestInfoConstants.FEIDE_ID;
 import static nva.commons.apigateway.RequestInfoConstants.HEADERS_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.METHOD_ARN_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_HEADERS;
@@ -15,7 +16,6 @@ import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_REQUEST_C
 import static nva.commons.apigateway.RequestInfoConstants.PATH_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.PATH_PARAMETERS_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.PERSON_CRISTIN_ID;
-import static nva.commons.apigateway.RequestInfoConstants.FEIDE_ID;
 import static nva.commons.apigateway.RequestInfoConstants.PERSON_GROUPS;
 import static nva.commons.apigateway.RequestInfoConstants.PERSON_NIN;
 import static nva.commons.apigateway.RequestInfoConstants.QUERY_STRING_PARAMETERS_FIELD;
@@ -352,8 +352,8 @@ public class RequestInfo {
     }
 
     private boolean checkAuthorizationOffline(String accessRight) {
-        return attempt(this::getCurrentCustomer).map(
-                currentCustomer -> new AccessRightEntry(accessRight, currentCustomer))
+        return attempt(this::getCurrentCustomer)
+                   .map(currentCustomer -> new AccessRightEntry(accessRight, currentCustomer))
                    .map(requiredAccessRight -> fetchAvailableAccessRights().anyMatch(requiredAccessRight::equals))
                    .orElse(fail -> handleAuthorizationFailure());
     }
