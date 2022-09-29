@@ -21,7 +21,8 @@ public class FakeSecretsManagerClient implements SecretsManagerClient {
     public FakeSecretsManagerClient putSecret(String name, String key, String value) {
         var secretName = new SecretName(name);
         if (plainTextSecrets.containsKey(secretName)) {
-            throw new IllegalArgumentException(String.format("Secret already present as a plain text secret: %s", name));
+            throw new IllegalArgumentException(
+                String.format("Secret already present as a plain text secret: %s", name));
         }
 
         if (secrets.containsKey(secretName)) {

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
+import java.util.Optional;
 import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.UnauthorizedException;
@@ -46,8 +47,6 @@ class HandlerRequestBuilderTest {
         "/requestContext/authorizer/claims/custom:topOrgCristinId";
     public static final JsonPointer PERSON_NIN =
         JsonPointer.compile("/requestContext/authorizer/claims/custom:nin");
-    public static final JsonPointer PERSON_FEIDE_ID =
-        JsonPointer.compile("/requestContext/authorizer/claims/custom:feideId");
     private static final String HTTP_METHOD = "httpMethod";
     // Can not use ObjectMapper from nva-commons because it would create a circular dependency
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -147,15 +146,25 @@ class HandlerRequestBuilderTest {
     }
 
     @Test
-    void buildReturnPersonsFeideIdWhenSet() throws JsonProcessingException {
+    void buildReturnsPersonsFeideIdWhenSet() throws JsonProcessingException {
         var expectedFeideId = randomString();
         var request = new HandlerRequestBuilder<String>(objectMapper)
                           .withFeideId(expectedFeideId)
                           .build();
+        var requestInfo= RequestInfo.fromRequest(request);
 
-        JsonNode requestJson = toJsonNode(request);
-        String actualFeideId = requestJson.at(PERSON_FEIDE_ID).asText();
-        assertThat(actualFeideId, is(equalTo(expectedFeideId)));
+        assertThat(requestInfo.getFeideId().isPresent(),is(true));
+        assertThat(requestInfo.getFeideId().get(),is(equalTo(expectedFeideId)));
+    }
+
+    @Test
+    void buildReturnsOptionalWhenFeideIdNotSet() throws JsonProcessingException {
+        var request = new HandlerRequestBuilder<String>(objectMapper)
+                          .build();
+        var requestInfo= RequestInfo.fromRequest(request);
+
+        assertThat(requestInfo.getFeideId().isPresent(),is(false));
+        assertThat(requestInfo.getFeideId(),is(equalTo(Optional.empty())));
     }
 
     @Test

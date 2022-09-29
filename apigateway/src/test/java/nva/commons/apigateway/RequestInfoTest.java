@@ -30,6 +30,7 @@ import java.net.http.HttpClient;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
@@ -41,7 +42,6 @@ import no.unit.nva.stubs.WiremockHttpClient;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import no.unit.nva.testutils.RandomDataGenerator;
 import nva.commons.apigateway.exceptions.ApiIoException;
-import nva.commons.apigateway.exceptions.NotFoundException;
 import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.core.paths.UriWrapper;
@@ -63,7 +63,6 @@ class RequestInfoTest {
     public static final Path EVENT_WITH_UNKNOWN_REQUEST_INFO = Path.of("apiGatewayMessages",
                                                                        "eventWithUnknownRequestInfo.json");
     public static final Path EVENT_WITH_AUTH_HEADER = Path.of("apiGatewayMessages", "event_with_auth_header.json");
-    public static final String FEIDE_ID_CLAIM = "custom:feideId";
     public static final String UNDEFINED_REQUEST_INFO_PROPERTY = "body";
     public static final String DOMAIN_NAME_FOUND_IN_RESOURCE_FILE = "id.execute-api.us-east-1.amazonaws.com";
     public static final String PATH_FOUND_IN_RESOURCE_FILE = "my/path";
@@ -303,9 +302,9 @@ class RequestInfoTest {
     void canGetValueFromRequestContext() throws JsonProcessingException {
 
         Map<String, Map<String, Map<String, Map<String, String>>>> map = Map.of(REQUEST_CONTEXT_FIELD,
-                                                                                Map.of(AUTHORIZER, Map.of(CLAIMS,
-                                                                                                          Map.of(KEY,
-                                                                                                                 VALUE))));
+                                                                                Map.of(AUTHORIZER,
+                                                                                       Map.of(CLAIMS,
+                                                                                              Map.of(KEY, VALUE))));
 
         RequestInfo requestInfo = defaultRestObjectMapper.readValue(defaultRestObjectMapper.writeValueAsString(map),
                                                                     RequestInfo.class);
@@ -481,19 +480,19 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnFeideIdFromCognitoWhenUserHasFeideIdInClaimAndIsNotOffline()
-        throws NotFoundException {
+    void shouldReturnFeideIdFromCognitoWhenUserHasFeideIdInClaimAndIsNotOffline() {
         var expectedFeideId = randomString();
         var cognitoUserEntry = CognitoUserInfo.builder().withFeideId(expectedFeideId).build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
         var actualFeideId = requestInfo.getFeideId();
-
-        assertThat(actualFeideId, is(equalTo(expectedFeideId)));
+        
+        assertThat(requestInfo.getFeideId().isPresent(), is(true));
+        assertThat(actualFeideId.get(), is(equalTo(expectedFeideId)));
     }
 
     @Test
-    void shouldReturnFeideIdWhenUserHasFeideIdInClaimAvailableOffline() throws NotFoundException {
+    void shouldReturnFeideIdWhenUserHasFeideIdInClaimAvailableOffline() {
         var cognitoUserEntry = CognitoUserInfo.builder().withFeideId(randomString()).build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
@@ -501,11 +500,12 @@ class RequestInfoTest {
         injectFeideIdInRequestInfo(requestInfo, expectedFeideIdDifferentFromCognito);
         var actualFeideId = requestInfo.getFeideId();
 
-        assertThat(actualFeideId, is(equalTo(expectedFeideIdDifferentFromCognito)));
+        assertThat(requestInfo.getFeideId().isPresent(), is(true));
+        assertThat(actualFeideId.get(), is(equalTo(expectedFeideIdDifferentFromCognito)));
     }
+
     @Test
-    void shouldReturnFeideIdFromFeideClaimWhenOnlyFeideIdIsPresentInCognito()
-        throws JsonProcessingException, NotFoundException {
+    void shouldReturnFeideIdFromFeideClaimWhenOnlyFeideIdIsPresentInCognito() throws JsonProcessingException {
         var expectedFeideId = randomString();
         var claims = dtoObjectMapper.createObjectNode();
         claims.put(CognitoUserInfo.PERSON_FEIDE_ID_CLAIM, expectedFeideId);
@@ -514,15 +514,18 @@ class RequestInfoTest {
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
         var actualFeideId = requestInfo.getFeideId();
 
-        assertThat(actualFeideId, is(equalTo(expectedFeideId)));
+        assertThat(requestInfo.getFeideId().isPresent(), is(true));
+        assertThat(actualFeideId.get(), is(equalTo(expectedFeideId)));
     }
 
     @Test
-    void shouldThrowNotFoundExceptionWhenUserDoesNotHaveFeideId() {
+    void shouldReturnOptionalEmptyWhenUserDoesNotHaveFeideId() {
         var cognitoUserEntryWithoutFeideId = CognitoUserInfo.builder().build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutFeideId));
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
-        assertThrows(NotFoundException.class, () -> requestInfo.getFeideId());
+
+        assertThat(requestInfo.getFeideId().isPresent(), is(false));
+        assertThat(requestInfo.getFeideId(), is(Optional.empty()));
     }
 
     @Test
@@ -530,6 +533,7 @@ class RequestInfoTest {
         var cognitoUserEntryWithoutPersonNin = CognitoUserInfo.builder().build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutPersonNin));
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+
         assertThrows(IllegalStateException.class, requestInfo::getPersonNin);
     }
 

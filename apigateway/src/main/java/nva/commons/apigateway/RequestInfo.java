@@ -49,7 +49,6 @@ import no.unit.nva.auth.CognitoUserInfo;
 import no.unit.nva.auth.FetchUserInfo;
 import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.apigateway.exceptions.BadRequestException;
-import nva.commons.apigateway.exceptions.NotFoundException;
 import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.SingletonCollector;
@@ -65,7 +64,6 @@ public class RequestInfo {
     public static final String ERROR_FETCHING_COGNITO_INFO = "Could not fetch user information from Cognito:{}";
     private static final HttpClient DEFAULT_HTTP_CLIENT = HttpClient.newBuilder().build();
     private static final Logger logger = LoggerFactory.getLogger(RequestInfo.class);
-    public static final String FEIDE_ID_NOT_FOUND_MESSAGE = "Feide ID is not found";
     private final HttpClient httpClient;
     private final Supplier<URI> cognitoUri;
     private final Supplier<URI> e2eTestsUserInfoUri;
@@ -135,8 +133,8 @@ public class RequestInfo {
 
     @JsonIgnore
     public String getRequestContextParameter(JsonPointer jsonPointer) {
-        return getRequestContextParameterOpt(jsonPointer)
-                   .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_REQUEST_CONTEXT + jsonPointer.toString()));
+        return getRequestContextParameterOpt(jsonPointer).orElseThrow(
+            () -> new IllegalArgumentException(MISSING_FROM_REQUEST_CONTEXT + jsonPointer.toString()));
     }
 
     /**
@@ -270,10 +268,8 @@ public class RequestInfo {
     }
 
     @JsonIgnore
-    public String getFeideId() throws NotFoundException {
-        return extractFeideIdOffline()
-                   .or(this::fetchFeideIdFromCognito)
-                   .orElseThrow(() -> new NotFoundException(FEIDE_ID_NOT_FOUND_MESSAGE));
+    public Optional<String> getFeideId() {
+        return extractFeideIdOffline().or(this::fetchFeideIdFromCognito);
     }
 
     @JsonIgnore
