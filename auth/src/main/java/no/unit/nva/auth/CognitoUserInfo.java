@@ -98,27 +98,27 @@ public class CognitoUserInfo {
     public void setCognitoUsername(String cognitoUsername) {
         this.cognitoUsername = cognitoUsername;
     }
-    
+
     public URI getTopOrgCristinId() {
         return topOrgCristinId;
     }
-    
+
     public void setTopOrgCristinId(URI topOrgCristinId) {
         this.topOrgCristinId = topOrgCristinId;
     }
-    
+
     public String getUserName() {
         return userName;
     }
-    
+
     public void setUserName(String userName) {
         this.userName = userName;
     }
-    
+
     public URI getCurrentCustomer() {
         return currentCustomer;
     }
-    
+
     public void setCurrentCustomer(URI currentCustomer) {
         this.currentCustomer = currentCustomer;
     }
@@ -159,8 +159,8 @@ public class CognitoUserInfo {
     @Override
     public int hashCode() {
         return Objects.hash(getFeideId(), getCurrentCustomer(), getAccessRights(), getUserName(),
-            getTopOrgCristinId(),
-            getPersonCristinId(), getPersonNin());
+                            getTopOrgCristinId(),
+                            getPersonCristinId(), getPersonNin());
     }
 
     @JacocoGenerated
@@ -200,24 +200,24 @@ public class CognitoUserInfo {
             cognitoUserInfo.setCurrentCustomer(currentCustomer);
             return this;
         }
-    
+
         public Builder withAccessRights(Set<String> accessRights) {
             if (nonNull(accessRights)) {
                 cognitoUserInfo.setAccessRights(String.join(ELEMENTS_DELIMITER, accessRights));
             }
             return this;
         }
-    
+
         public Builder withUserName(String userName) {
             cognitoUserInfo.setUserName(userName);
             return this;
         }
-    
+
         public Builder withTopOrgCristinId(URI topOrgCristinId) {
             cognitoUserInfo.setTopOrgCristinId(topOrgCristinId);
             return this;
         }
-    
+
         public Builder withPersonCristinId(URI personCristinId) {
             cognitoUserInfo.setPersonCristinId(personCristinId);
             return this;

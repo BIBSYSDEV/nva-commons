@@ -15,7 +15,7 @@ import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_REQUEST_C
 import static nva.commons.apigateway.RequestInfoConstants.PATH_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.PATH_PARAMETERS_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.PERSON_CRISTIN_ID;
-import static nva.commons.apigateway.RequestInfoConstants.PERSON_FEIDE_ID;
+import static nva.commons.apigateway.RequestInfoConstants.FEIDE_ID;
 import static nva.commons.apigateway.RequestInfoConstants.PERSON_GROUPS;
 import static nva.commons.apigateway.RequestInfoConstants.PERSON_NIN;
 import static nva.commons.apigateway.RequestInfoConstants.QUERY_STRING_PARAMETERS_FIELD;
@@ -49,6 +49,7 @@ import no.unit.nva.auth.CognitoUserInfo;
 import no.unit.nva.auth.FetchUserInfo;
 import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.apigateway.exceptions.BadRequestException;
+import nva.commons.apigateway.exceptions.NotFoundException;
 import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.SingletonCollector;
@@ -64,6 +65,7 @@ public class RequestInfo {
     public static final String ERROR_FETCHING_COGNITO_INFO = "Could not fetch user information from Cognito:{}";
     private static final HttpClient DEFAULT_HTTP_CLIENT = HttpClient.newBuilder().build();
     private static final Logger logger = LoggerFactory.getLogger(RequestInfo.class);
+    public static final String FEIDE_ID_NOT_FOUND_MESSAGE = "Feide ID is not found";
     private final HttpClient httpClient;
     private final Supplier<URI> cognitoUri;
     private final Supplier<URI> e2eTestsUserInfoUri;
@@ -116,8 +118,8 @@ public class RequestInfo {
 
     @JsonIgnore
     public String getQueryParameter(String parameter) throws BadRequestException {
-        return getQueryParameterOpt(parameter).orElseThrow(
-            () -> new BadRequestException(MISSING_FROM_QUERY_PARAMETERS + parameter));
+        return getQueryParameterOpt(parameter)
+                   .orElseThrow(() -> new BadRequestException(MISSING_FROM_QUERY_PARAMETERS + parameter));
     }
 
     @JsonIgnore
@@ -133,8 +135,8 @@ public class RequestInfo {
 
     @JsonIgnore
     public String getRequestContextParameter(JsonPointer jsonPointer) {
-        return getRequestContextParameterOpt(jsonPointer).orElseThrow(
-            () -> new IllegalArgumentException(MISSING_FROM_REQUEST_CONTEXT + jsonPointer.toString()));
+        return getRequestContextParameterOpt(jsonPointer)
+                   .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_REQUEST_CONTEXT + jsonPointer.toString()));
     }
 
     /**
@@ -268,8 +270,10 @@ public class RequestInfo {
     }
 
     @JsonIgnore
-    public String getFeideId() throws UnauthorizedException {
-        return extractFeideId().or(this::fetchFeideIdFromCognito).orElseThrow(UnauthorizedException::new);
+    public String getFeideId() throws NotFoundException {
+        return extractFeideIdOffline()
+                   .or(this::fetchFeideIdFromCognito)
+                   .orElseThrow(() -> new NotFoundException(FEIDE_ID_NOT_FOUND_MESSAGE));
     }
 
     @JsonIgnore
@@ -298,12 +302,12 @@ public class RequestInfo {
             value -> value.contains(BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE)).orElse(false);
     }
 
-    private Optional<? extends String> fetchFeideIdFromCognito() {
+    private Optional<String> fetchFeideIdFromCognito() {
         return fetchUserInfoFromCognito().map(CognitoUserInfo::getFeideId);
     }
 
-    private Optional<String> extractFeideId() {
-        return getRequestContextParameterOpt(PERSON_FEIDE_ID);
+    private Optional<String> extractFeideIdOffline() {
+        return getRequestContextParameterOpt(FEIDE_ID);
     }
 
     private Optional<URI> fetchCustomerIdOffline() {

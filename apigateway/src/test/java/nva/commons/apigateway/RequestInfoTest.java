@@ -41,6 +41,7 @@ import no.unit.nva.stubs.WiremockHttpClient;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import no.unit.nva.testutils.RandomDataGenerator;
 import nva.commons.apigateway.exceptions.ApiIoException;
+import nva.commons.apigateway.exceptions.NotFoundException;
 import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.core.paths.UriWrapper;
@@ -480,30 +481,31 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnFeideIdFromCognitoWhenUserHasFeideIdInClaimAndIsNotOffline() throws UnauthorizedException {
+    void shouldReturnFeideIdFromCognitoWhenUserHasFeideIdInClaimAndIsNotOffline()
+        throws NotFoundException {
         var expectedFeideId = randomString();
         var cognitoUserEntry = CognitoUserInfo.builder().withFeideId(expectedFeideId).build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
         var actualFeideId = requestInfo.getFeideId();
+
         assertThat(actualFeideId, is(equalTo(expectedFeideId)));
     }
 
     @Test
-    void shouldReturnFeideIdWhenUserHasFeideIdInClaimAvailableOffline()
-        throws JsonProcessingException, UnauthorizedException {
-        var expectedFeideId = randomString();
-        var claims = dtoObjectMapper.createObjectNode();
-        claims.put(CognitoUserInfo.PERSON_FEIDE_ID_CLAIM, expectedFeideId);
-        var cognitoUserInfo = objectMapper.readValue(claims.toString(), CognitoUserInfo.class);
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserInfo));
+    void shouldReturnFeideIdWhenUserHasFeideIdInClaimAvailableOffline() throws NotFoundException {
+        var cognitoUserEntry = CognitoUserInfo.builder().withFeideId(randomString()).build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var expectedFeideIdDifferentFromCognito = randomString();
+        injectFeideIdInRequestInfo(requestInfo, expectedFeideIdDifferentFromCognito);
         var actualFeideId = requestInfo.getFeideId();
-        assertThat(actualFeideId, is(equalTo(expectedFeideId)));
+
+        assertThat(actualFeideId, is(equalTo(expectedFeideIdDifferentFromCognito)));
     }
     @Test
     void shouldReturnFeideIdFromFeideClaimWhenOnlyFeideIdIsPresentInCognito()
-        throws JsonProcessingException, UnauthorizedException {
+        throws JsonProcessingException, NotFoundException {
         var expectedFeideId = randomString();
         var claims = dtoObjectMapper.createObjectNode();
         claims.put(CognitoUserInfo.PERSON_FEIDE_ID_CLAIM, expectedFeideId);
@@ -511,7 +513,16 @@ class RequestInfoTest {
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserInfo));
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
         var actualFeideId = requestInfo.getFeideId();
+
         assertThat(actualFeideId, is(equalTo(expectedFeideId)));
+    }
+
+    @Test
+    void shouldThrowNotFoundExceptionWhenUserDoesNotHaveFeideId() {
+        var cognitoUserEntryWithoutFeideId = CognitoUserInfo.builder().build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutFeideId));
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        assertThrows(NotFoundException.class, () -> requestInfo.getFeideId());
     }
 
     @Test
@@ -580,6 +591,16 @@ class RequestInfoTest {
         var authorizer = dtoObjectMapper.createObjectNode();
         var requestContext = dtoObjectMapper.createObjectNode();
         claims.put(CognitoUserInfo.PERSON_NIN_CLAIM, expectedPersonNinDifferentFromCognito);
+        authorizer.set("claims", claims);
+        requestContext.set("authorizer", authorizer);
+        requestInfo.setRequestContext(requestContext);
+    }
+
+    private void injectFeideIdInRequestInfo(RequestInfo requestInfo, String expectedFeideIdDifferentFromCognito) {
+        var claims = dtoObjectMapper.createObjectNode();
+        var authorizer = dtoObjectMapper.createObjectNode();
+        var requestContext = dtoObjectMapper.createObjectNode();
+        claims.put(CognitoUserInfo.PERSON_FEIDE_ID_CLAIM, expectedFeideIdDifferentFromCognito);
         authorizer.set("claims", claims);
         requestContext.set("authorizer", authorizer);
         requestInfo.setRequestContext(requestContext);

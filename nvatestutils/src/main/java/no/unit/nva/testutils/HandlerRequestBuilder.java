@@ -43,6 +43,7 @@ public class HandlerRequestBuilder<T> {
     public static final String ACCESS_RIGHTS_CLAIMS = "cognito:groups";
     public static final String APPLICATION_ROLES_CLAIM = "custom:applicationRoles";
     public static final String PERSON_CRISTIN_ID = "custom:cristinId";
+    public static final String FEIDE_ID_CLAIM = "custom:feideId";
     public static final String ENTRIES_DELIMITER = ",";
     private static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
     public static final String SCOPE_CLAIM = "scope";
@@ -221,7 +222,12 @@ public class HandlerRequestBuilder<T> {
         claims.put(PERSON_NIN_CLAIM, personNin);
         return this;
     }
-    
+
+    public HandlerRequestBuilder<T> withFeideId(String feideId) {
+        ObjectNode claims = getAuthorizerClaimsNode();
+        claims.put(FEIDE_ID_CLAIM, feideId);
+        return this;
+    }
     public HandlerRequestBuilder<T> withRoles(String roles) {
         ObjectNode claims = getAuthorizerClaimsNode();
         claims.put(APPLICATION_ROLES_CLAIM, roles);

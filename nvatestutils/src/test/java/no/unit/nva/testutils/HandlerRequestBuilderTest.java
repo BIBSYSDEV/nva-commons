@@ -46,6 +46,8 @@ class HandlerRequestBuilderTest {
         "/requestContext/authorizer/claims/custom:topOrgCristinId";
     public static final JsonPointer PERSON_NIN =
         JsonPointer.compile("/requestContext/authorizer/claims/custom:nin");
+    public static final JsonPointer PERSON_FEIDE_ID =
+        JsonPointer.compile("/requestContext/authorizer/claims/custom:feideId");
     private static final String HTTP_METHOD = "httpMethod";
     // Can not use ObjectMapper from nva-commons because it would create a circular dependency
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -142,6 +144,18 @@ class HandlerRequestBuilderTest {
         var request = IoUtils.streamToString(requestStream);
         var requestInfo = JsonUtils.dtoObjectMapper.readValue(request, RequestInfo.class);
         assertThat(requestInfo.getCurrentCustomer(), is(equalTo(expectedCustomerId)));
+    }
+
+    @Test
+    void buildReturnPersonsFeideIdWhenSet() throws JsonProcessingException {
+        var expectedFeideId = randomString();
+        var request = new HandlerRequestBuilder<String>(objectMapper)
+                          .withFeideId(expectedFeideId)
+                          .build();
+
+        JsonNode requestJson = toJsonNode(request);
+        String actualFeideId = requestJson.at(PERSON_FEIDE_ID).asText();
+        assertThat(actualFeideId, is(equalTo(expectedFeideId)));
     }
 
     @Test
