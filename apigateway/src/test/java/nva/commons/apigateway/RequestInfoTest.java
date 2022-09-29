@@ -488,7 +488,7 @@ class RequestInfoTest {
         var actualFeideId = requestInfo.getFeideId();
         
         assertThat(requestInfo.getFeideId().isPresent(), is(true));
-        assertThat(actualFeideId.get(), is(equalTo(expectedFeideId)));
+        assertThat(actualFeideId.orElseThrow(), is(equalTo(expectedFeideId)));
     }
 
     @Test
@@ -501,7 +501,7 @@ class RequestInfoTest {
         var actualFeideId = requestInfo.getFeideId();
 
         assertThat(requestInfo.getFeideId().isPresent(), is(true));
-        assertThat(actualFeideId.get(), is(equalTo(expectedFeideIdDifferentFromCognito)));
+        assertThat(actualFeideId.orElseThrow(), is(equalTo(expectedFeideIdDifferentFromCognito)));
     }
 
     @Test
@@ -515,7 +515,7 @@ class RequestInfoTest {
         var actualFeideId = requestInfo.getFeideId();
 
         assertThat(requestInfo.getFeideId().isPresent(), is(true));
-        assertThat(actualFeideId.get(), is(equalTo(expectedFeideId)));
+        assertThat(actualFeideId.orElseThrow(), is(equalTo(expectedFeideId)));
     }
 
     @Test

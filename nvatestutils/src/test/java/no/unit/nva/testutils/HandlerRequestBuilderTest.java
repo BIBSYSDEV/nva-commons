@@ -11,7 +11,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -21,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.apigateway.RequestInfo;
@@ -154,8 +152,7 @@ class HandlerRequestBuilderTest {
                           .withFeideId(expectedFeideId)
                           .build();
         var requestInfo= RequestInfo.fromRequest(request);
-        var s = requestInfo.getFeideId().orElseThrow();
-        var ss = requestInfo.getFeideId().get();
+
         assertThat(requestInfo.getFeideId().isPresent(), is(true));
         assertThat(requestInfo.getFeideId().orElseThrow(), is(equalTo(expectedFeideId)));
     }
@@ -167,15 +164,6 @@ class HandlerRequestBuilderTest {
 
         assertThat(requestInfo.getFeideId().isPresent(),is(false));
         assertThat(requestInfo.getFeideId(),is(equalTo(Optional.empty())));
-    }
-
-    @Test
-    void buildThrowsExceptionWhenFeideIdNotSet() throws JsonProcessingException {
-        var request = new HandlerRequestBuilder<String>(objectMapper).build();
-        var requestInfo= RequestInfo.fromRequest(request);
-
-        assertThat(requestInfo.getFeideId().isPresent(),is(false));
-        assertThrows(NoSuchElementException.class, () -> requestInfo.getFeideId().orElseThrow());
     }
 
     @Test
