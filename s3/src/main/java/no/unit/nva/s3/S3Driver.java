@@ -151,18 +151,22 @@ public class S3Driver {
         }
         return s3BucketUri().addChild(path).getUri();
     }
-
+    
     public URI insertAndCompressObjects(List<String> content) throws IOException {
         return insertAndCompressObjects(UnixPath.EMPTY_PATH, content);
     }
-
+    
     public List<String> getFiles(UnixPath folder) {
         return listAllFiles(folder)
-            .stream()
-            .map(this::getFile)
-            .collect(Collectors.toList());
+                   .stream()
+                   .map(this::getFile)
+                   .collect(Collectors.toList());
     }
-
+    
+    public List<UnixPath> listAllFiles(URI s3Uri) {
+        return listAllFiles(UriWrapper.fromUri(s3Uri).toS3bucketPath());
+    }
+    
     public List<UnixPath> listAllFiles(UnixPath folder) {
         ListingResult result = ListingResult.emptyResult();
         do {
@@ -170,7 +174,7 @@ public class S3Driver {
             ListingResult newBatch = listFiles(folder, currentStartingPoint, MAX_RESPONSE_SIZE_FOR_S3_LISTING);
             result = result.add(newBatch);
         } while (result.isTruncated());
-
+        
         return result.getFiles();
     }
 
