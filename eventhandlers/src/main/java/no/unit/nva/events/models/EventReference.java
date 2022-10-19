@@ -75,6 +75,10 @@ public class EventReference implements JsonSerializable, EventBody {
         return uri;
     }
     
+    public String extractBucketName() {
+        return uri.getHost();
+    }
+    
     @Override
     @JacocoGenerated
     public boolean equals(Object o) {
