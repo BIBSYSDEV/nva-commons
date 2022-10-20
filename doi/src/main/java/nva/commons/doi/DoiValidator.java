@@ -14,6 +14,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import nva.commons.core.JacocoGenerated;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +62,7 @@ public class DoiValidator {
         }
         Matcher urlMatcher = DOI_URL_PATTERN.matcher(doi);
         Matcher stringMatcher = DOI_STRING_PATTERN.matcher(doi);
-        return urlMatcher.matches() || stringMatcher.matches();
+        return urlMatcher.matches() && isUri(doi) || stringMatcher.matches();
     }
 
     /**
@@ -84,6 +85,10 @@ public class DoiValidator {
         } else {
             throw new UnresolvableDoiException(responseToString(httpResponse));
         }
+    }
+
+    private static boolean isUri(String uri) {
+        return UrlValidator.getInstance().isValid(uri);
     }
 
     private static Boolean doiHasBeenResolved(HttpResponse<String> response) {

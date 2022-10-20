@@ -20,6 +20,8 @@ public class DoiValidatorTest {
     private static final String HTTPS_DX_DOI = "https://dx.doi.org/";
     private static final String INVALID_URL = "https://something.com";
 
+    private static final String ATTACHEMENT = " 02872-6 ";
+
     @ParameterizedTest(name = "validate returns true when doi is {0}")
     @MethodSource("validDois")
     public void validateReturnsTrueWhenDoisHaveExpectedForm(DoiInput doi) {
@@ -65,6 +67,15 @@ public class DoiValidatorTest {
     public void validateReturnsTrueForValidURL() {
         URI input = URI.create(HTTP_DOI + DOI);
         assertThat(DoiValidator.validateOffline(input), is((equalTo(true))));
+    }
+
+    @Test
+    public void shouldReturnFalseForDoiWithPrefixStringOrPostfixString(){
+        String prefixDoi = ATTACHEMENT + HTTPS_DOI + DOI;
+        String postfixDoi = HTTPS_DOI + DOI + ATTACHEMENT;
+        assertThat(DoiValidator.validateOffline(prefixDoi), is((equalTo(false))));
+        assertThat(DoiValidator.validateOffline(postfixDoi), is((equalTo(false))));
+
     }
 
     private static Stream<DoiInput> validDois() throws URISyntaxException {
