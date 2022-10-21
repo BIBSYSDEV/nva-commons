@@ -16,6 +16,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import net.datafaker.Faker;
 import no.unit.nva.stubs.FakeS3Client;
@@ -226,13 +227,27 @@ class S3DriverTest {
     void shouldListFilesForFolder() throws IOException {
         var expectedFile = s3Driver.insertFile(randomPath(), randomString());
         var unexpectedFile = s3Driver.insertFile(randomPath(), randomString());
-        
+    
         var expectedFilepath = UriWrapper.fromUri(expectedFile).getPath().removeRoot();
         var unexpectedFilepath = UriWrapper.fromUri(unexpectedFile).getPath().removeRoot();
         var parentFolder = expectedFilepath.getParent().orElseThrow();
         var files = s3Driver.listAllFiles(parentFolder);
         assertThat(files, contains(expectedFilepath));
         assertThat(files, not(contains(unexpectedFilepath)));
+    }
+    
+    @Test
+    void shouldAcceptEmptyPathAndListAllBucketFilesWhenInputIsEmptyPath() throws IOException {
+        var files = Stream.of(
+                s3Driver.insertFile(randomPath(), randomString()),
+                s3Driver.insertFile(randomPath(), randomString()))
+                        .map(UriWrapper::fromUri)
+                        .map(UriWrapper::getPath)
+                        .map(UnixPath::removeRoot)
+                        .collect(Collectors.toList());
+        
+        var actualFiles = s3Driver.listAllFiles(UnixPath.of(""));
+        assertThat(actualFiles, containsInAnyOrder(files.toArray(UnixPath[]::new)));
     }
     
     private UnixPath randomPath() {

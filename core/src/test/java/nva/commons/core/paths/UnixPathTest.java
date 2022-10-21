@@ -15,209 +15,41 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Optional;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 
 class UnixPathTest {
-
+    
     public static final String EMPTY_STRING = "";
     public static final String NULL_STRING = null;
     private static final ObjectMapper objectMapper = new ObjectMapper();
-
+    
     @Test
-    void ofReturnsPathWithAllPathElementsInOrderWhenInputArrayIsNotEmpty() {
+    void shouldReturnPathWithAllPathElementsInOrderWhenInputArrayIsNotEmpty() {
         UnixPath unixPath = UnixPath.of("first", "second", "third");
         assertThat(unixPath.toString(), is(equalTo("first/second/third")));
     }
-
+    
     @Test
-    void ofReturnsPathWithRootWhenRootIsFirstElement() {
+    void shouldReturnPathWithRootWhenRootIsFirstElement() {
         UnixPath unixPath = UnixPath.of(PATH_DELIMITER, "first", "second", "third");
         assertThat(unixPath.toString(), is(equalTo("/first/second/third")));
     }
-
+    
     @Test
-    void ofReturnsEmptyPathWhenInputIsNull() {
+    void shouldReturnEmptyPathWhenInputIsNull() {
         UnixPath unixPath = UnixPath.of(NULL_STRING);
         System.out.println(unixPath);
         assertThat(unixPath.toString(), is(emptyString()));
     }
-
-    @Test
-    void ofReturnsEmptyPathWhenInputIsEmptyArray() {
-        UnixPath unixPath = UnixPath.of();
-        assertThat(unixPath.toString(), is(emptyString()));
-    }
-
-    @Test
-    void fromStringReturnsPathElementsWhenInputIsPathStringWithElementsDividedWithUnixPathDelimiter() {
-        String originalPathString = "first/second/third";
-        UnixPath unixPath = UnixPath.fromString(originalPathString);
-        assertThat(unixPath.toString(), is(equalTo(originalPathString)));
-    }
-
-    @Test
-    void fromStringReturnsPathWithRootWhenInputContainsRoot() {
-        String originalPathString = "/first/second/third";
-        UnixPath unixPath = UnixPath.fromString(originalPathString);
-        assertThat(unixPath.toString(), is(equalTo(originalPathString)));
-    }
-
-    @Test
-    void addChildReturnsNewUnixPathWithChildPathAppendedToParentPath() {
-        String parentPath = "first/second";
-        String childPath = "third";
-        String grandChildPath = "fourth/fifth";
-        UnixPath actualPath = UnixPath.fromString(parentPath).addChild(childPath).addChild(grandChildPath);
-        String expectedPath = "first/second/third/fourth/fifth";
-        assertThat(actualPath.toString(), is(equalTo(expectedPath)));
-    }
-
-    @Test
-    void getParentReturnsParentUnixPathWhenUnixPathIsNotRootOrEmpty() {
-        String path = "first/second/file.txt";
-        String parent = "first/second";
-        UnixPath originalPath = UnixPath.of(path);
-        Optional<UnixPath> parentPath = originalPath.getParent();
-        assertThat(parentPath.orElseThrow().toString(), is(equalTo(parent)));
-    }
-
-    @ParameterizedTest(name = "getParent returns empty optional when Unix Path is empty : \"{0}\"")
-    @NullAndEmptySource
-    void getParentReturnsEmptyOptionalWhenUnixPathIsEmpty(String path) {
-        UnixPath unixPath = UnixPath.of(path);
-        assertThat(unixPath.getParent(), isEmpty());
-    }
-
-    @Test
-    void equalsReturnsTrueWhenTwoUnixPathsAreGeneratedFromEquivalentDefinitions() {
-        UnixPath left = UnixPath.of("first", "second", "third");
-        UnixPath right = UnixPath.fromString("first/second/third");
-        assertThat(left, is(equalTo(right)));
-        assertThat(left, is(not(sameInstance(right))));
-    }
-
-    @Test
-    void equalsReturnsTrueWhenTwoUnixPathsAreGeneratedFromEquivalentStrings() {
-        UnixPath left = UnixPath.fromString("first/second/third");
-        UnixPath right = UnixPath.fromString("first//second//third");
-        assertThat(left, is(equalTo(right)));
-        assertThat(left, is(not(sameInstance(right))));
-        assertThat(right.toString(), is(equalTo("first/second/third")));
-    }
-
-    @Test
-    void equalsReturnsFalseWhenTwoUnixPathsAreNotEqual() {
-        UnixPath left = UnixPath.fromString("first/second/third");
-        UnixPath right = UnixPath.fromString("first/second");
-        assertThat(left, is(not(equalTo(right))));
-    }
-
-    @Test
-    void ofReturnsPathIgnoringEmptyStrings() {
-        UnixPath left = UnixPath.of("first", EMPTY_STRING, EMPTY_STRING, "second", EMPTY_STRING, "third");
-        UnixPath right = UnixPath.of("first", "second", "third");
-        assertThat(left, is(equalTo(right)));
-        assertThat(left, is(not(sameInstance(right))));
-    }
-
-    @Test
-    void ofReturnsPathSplittingStringElementsOnPathSeparator() {
-        UnixPath path = UnixPath.of("first/second/", "third/fourth", "fifth");
-        assertThat(path.toString(), is(equalTo("first/second/third/fourth/fifth")));
-    }
-
-    @Test
-    void isRootReturnsTrueWhenUnixPathIsRoot() {
-        UnixPath path = UnixPath.of("/");
-        assertThat(path.isRoot(), is(true));
-        assertThat(path, is(equalTo(UnixPath.ROOT_PATH)));
-    }
-
-    @Test
-    void getParentReturnsRootIfPathHasRootAndParentPathIsRoot() {
-        UnixPath path = UnixPath.of("/folder");
-        UnixPath parent = path.getParent().orElseThrow();
-        assertThat(parent.isRoot(), is(true));
-        assertThat(parent, is(equalTo(UnixPath.ROOT_PATH)));
-    }
-
-    @ParameterizedTest(name = "getFilename returns ${1} when input is ${0}")
-    @CsvSource({
-        "/some/existing/folder/, folder",
-        "/some/existing/folder/existingFile.ending, existingFile.ending"
-    })
-    void getFilenameReturnsTheLastElementOfaUnixPath(String inputPath, String expectedFilename) {
-        UnixPath unixPath = UnixPath.of(inputPath);
-        assertThat(unixPath.getLastPathElement(), is(equalTo(expectedFilename)));
-    }
-
-    @Test
-    void objectMapperSerializesUnixPathAsString() throws JsonProcessingException {
-        String unixPath = "/some/folder";
-
-        ClassWithUnixPath classWithUnixPath = new ClassWithUnixPath();
-        classWithUnixPath.setField(UnixPath.of(unixPath));
-        String jsonString = objectMapper.writeValueAsString(classWithUnixPath);
-        JsonNode actualJson = objectMapper.readTree(jsonString);
-
-        ObjectNode expectedJson = objectMapper.createObjectNode();
-        expectedJson.put(ClassWithUnixPath.fieldName(), unixPath);
-
-        assertThat(actualJson, is(equalTo(expectedJson)));
-    }
-
-    @Test
-    void objectMapperReturnsValidUnixPathWhenMappingStringToUnixPath()
-        throws JsonProcessingException {
-        String expectedPath = "/some/folder";
-        ObjectNode json = objectMapper.createObjectNode();
-        json.put(ClassWithUnixPath.fieldName(), expectedPath);
-        String jsonString = objectMapper.writeValueAsString(json);
-        ClassWithUnixPath objectContainingUnixPath =
-            objectMapper.readValue(jsonString, ClassWithUnixPath.class);
-
-        assertThat(objectContainingUnixPath.getField().toString(), is(equalTo(expectedPath)));
-    }
-
-    @Test
-    void addRootAddsRootToNonAbsoluteUnixPath() {
-        String pathString = "some/path";
-        String expectedPathString = UnixPath.ROOT + pathString;
-        String actualPathString = UnixPath.fromString(pathString).addRoot().toString();
-        assertThat(actualPathString, is(equalTo(expectedPathString)));
-    }
-
-    @Test
-    void addRootReturnsSamePathWhenPathIsAbsoluteUnixPath() {
-        String expectedPathString = UnixPath.ROOT + "some/path";
-        String actualPathString = UnixPath.fromString(expectedPathString).addRoot().toString();
-        assertThat(actualPathString, is(equalTo(expectedPathString)));
-    }
-
-    @Test
-    void removeRootRemovesRootToNonAbsoluteUnixPath() {
-        String expectedPathString = "some/path";
-        String actualPathString = UnixPath.fromString(UnixPath.ROOT + expectedPathString).removeRoot().toString();
-        assertThat(actualPathString, is(equalTo(expectedPathString)));
-    }
-
-    @Test
-    void removeRootReturnsSamePathWhenUnixPathIsNotAbsolute() {
-        String expectedPathString = "some/path";
-        String actualPathString = UnixPath.fromString(expectedPathString).removeRoot().toString();
-        assertThat(actualPathString, is(equalTo(expectedPathString)));
-    }
     
     @Test
-    void addChildReturnsPathRemovingRootFromChildThatHasRoot() {
-        String parentFolder = "/some/folder";
-        String childFolder = "/child";
-        String expectedPath = "/some/folder/child";
-        String actualPath = UnixPath.of(parentFolder).addChild(childFolder).toString();
-        assertThat(actualPath, is(equalTo(expectedPath)));
+    void shouldReturnEmptyPathWhenInputIsEmptyArray() {
+        UnixPath unixPath = UnixPath.of();
+        assertThat(unixPath.toString(), is(emptyString()));
     }
     
     @Test
@@ -226,6 +58,7 @@ class UnixPathTest {
         assertThat(empty.isEmptyPath(), is(true));
         var emptyToo = UnixPath.of("");
         assertThat(emptyToo.isEmptyPath(), is(true));
+        assertThat(emptyToo, is(equalTo(UnixPath.EMPTY_PATH)));
     }
     
     @Test
@@ -238,6 +71,188 @@ class UnixPathTest {
         assertThat(nonEmpty3.isEmptyPath(), is(false));
     }
     
+    @Test
+    void shouldRetainEmptyPathAsEmptyWhenRemovingRoot() {
+        var empty = UnixPath.EMPTY_PATH;
+        assertThat(empty.removeRoot(), is(equalTo(empty)));
+    }
+    
+    @Test
+    void shouldReturnEmptyPathWhenInputIsEmptyString() {
+        var emptyStringPath = UnixPath.of("");
+        assertThat(emptyStringPath, is(equalTo(UnixPath.EMPTY_PATH)));
+    }
+    
+    @Test
+    void shouldReturnPathElementsWhenInputIsRelativePathStringWithElementsDividedByUnixPathDelimiter() {
+        String originalPathString = "first/second/third";
+        UnixPath unixPath = UnixPath.fromString(originalPathString);
+        assertThat(unixPath.toString(), is(equalTo(originalPathString)));
+    }
+    
+    @Test
+    void shouldReturnPathWithRootWhenInputIsAbsolutePath() {
+        String originalPathString = "/first/second/third";
+        UnixPath unixPath = UnixPath.fromString(originalPathString);
+        assertThat(unixPath.toString(), is(equalTo(originalPathString)));
+    }
+    
+    @Test
+    void shouldReturnNewUnixPathWithChildPathAppendedToParentPath() {
+        String parentPath = "first/second";
+        String childPath = "third";
+        String grandChildPath = "fourth/fifth";
+        UnixPath actualPath = UnixPath.fromString(parentPath).addChild(childPath).addChild(grandChildPath);
+        String expectedPath = "first/second/third/fourth/fifth";
+        assertThat(actualPath.toString(), is(equalTo(expectedPath)));
+    }
+    
+    @Test
+    void shouldReturnParentUnixPathWhenUnixPathIsNotRootOrEmpty() {
+        String path = "first/second/file.txt";
+        String parent = "first/second";
+        UnixPath originalPath = UnixPath.of(path);
+        Optional<UnixPath> parentPath = originalPath.getParent();
+        assertThat(parentPath.orElseThrow().toString(), is(equalTo(parent)));
+    }
+    
+    @ParameterizedTest(name = "getParent returns empty optional when Unix Path is empty : \"{0}\"")
+    @NullAndEmptySource
+    void shouldReturnEmptyOptionalWhenUnixPathIsEmpty(String path) {
+        UnixPath unixPath = UnixPath.of(path);
+        assertThat(unixPath.getParent(), isEmpty());
+    }
+    
+    @Test
+    void shouldReturnEqualTrueWhenTwoUnixPathsAreGeneratedFromEquivalentDefinitions() {
+        UnixPath left = UnixPath.of("first", "second", "third");
+        UnixPath right = UnixPath.fromString("first/second/third");
+        assertThat(left, is(equalTo(right)));
+        assertThat(left, is(not(sameInstance(right))));
+    }
+    
+    @Test
+    void shouldReturnEqualTrueWhenTwoUnixPathsAreGeneratedFromEquivalentStrings() {
+        UnixPath left = UnixPath.fromString("first/second/third");
+        UnixPath right = UnixPath.fromString("first//second//third");
+        assertThat(left, is(equalTo(right)));
+        assertThat(left, is(not(sameInstance(right))));
+        assertThat(right.toString(), is(equalTo("first/second/third")));
+    }
+    
+    @Test
+    void shouldReturnEqualFalseWhenTwoUnixPathsAreNotEqual() {
+        UnixPath left = UnixPath.fromString("first/second/third");
+        UnixPath right = UnixPath.fromString("first/second");
+        assertThat(left, is(not(equalTo(right))));
+    }
+    
+    @Test
+    void shouldReturnPathIgnoringEmptyStrings() {
+        UnixPath left = UnixPath.of("first", EMPTY_STRING, EMPTY_STRING, "second", EMPTY_STRING, "third");
+        UnixPath right = UnixPath.of("first", "second", "third");
+        assertThat(left, is(equalTo(right)));
+        assertThat(left, is(not(sameInstance(right))));
+    }
+    
+    @Test
+    void shouldReturnPathSplittingStringElementsOnPathSeparator() {
+        UnixPath path = UnixPath.of("first/second/", "third/fourth", "fifth");
+        assertThat(path.toString(), is(equalTo("first/second/third/fourth/fifth")));
+    }
+    
+    @Test
+    void shouldReturnIsRootTrueWhenUnixPathIsRoot() {
+        UnixPath path = UnixPath.of("/");
+        assertThat(path.isRoot(), is(true));
+        assertThat(path, is(equalTo(UnixPath.ROOT_PATH)));
+    }
+    
+    @Test
+    void shouldReturnRootIfPathHasRootAndParentPathIsRoot() {
+        UnixPath path = UnixPath.of("/folder");
+        UnixPath parent = path.getParent().orElseThrow();
+        assertThat(parent.isRoot(), is(true));
+        assertThat(parent, is(equalTo(UnixPath.ROOT_PATH)));
+    }
+    
+    @ParameterizedTest(name = "should return {1} when input is {0}")
+    @DisplayName("should return the last element of the path")
+    @CsvSource({
+        "/some/existing/folder/, folder",
+        "/some/existing/folder/existingFile.ending, existingFile.ending"
+    })
+    void shouldReturnTheLastElementOfaUnixPath(String inputPath, String expectedFilename) {
+        UnixPath unixPath = UnixPath.of(inputPath);
+        assertThat(unixPath.getLastPathElement(), is(equalTo(expectedFilename)));
+    }
+    
+    @Test
+    void shouldSerializesUnixPathAsString() throws JsonProcessingException {
+        String unixPath = "/some/folder";
+        
+        ClassWithUnixPath classWithUnixPath = new ClassWithUnixPath();
+        classWithUnixPath.setField(UnixPath.of(unixPath));
+        String jsonString = objectMapper.writeValueAsString(classWithUnixPath);
+        JsonNode actualJson = objectMapper.readTree(jsonString);
+        
+        ObjectNode expectedJson = objectMapper.createObjectNode();
+        expectedJson.put(ClassWithUnixPath.fieldName(), unixPath);
+        
+        assertThat(actualJson, is(equalTo(expectedJson)));
+    }
+    
+    @Test
+    void shouldDeserializeValidUnixPath()
+        throws JsonProcessingException {
+        String expectedPath = "/some/folder";
+        ObjectNode json = objectMapper.createObjectNode();
+        json.put(ClassWithUnixPath.fieldName(), expectedPath);
+        String jsonString = objectMapper.writeValueAsString(json);
+        ClassWithUnixPath objectContainingUnixPath =
+            objectMapper.readValue(jsonString, ClassWithUnixPath.class);
+        
+        assertThat(objectContainingUnixPath.getField().toString(), is(equalTo(expectedPath)));
+    }
+    
+    @Test
+    void shouldAddRootToNonAbsoluteUnixPath() {
+        String pathString = "some/path";
+        String expectedPathString = UnixPath.ROOT + pathString;
+        String actualPathString = UnixPath.fromString(pathString).addRoot().toString();
+        assertThat(actualPathString, is(equalTo(expectedPathString)));
+    }
+    
+    @Test
+    void shouldReturnSamePathWhenAddingRootAndPathIsAbsolute() {
+        String expectedPathString = UnixPath.ROOT + "some/path";
+        String actualPathString = UnixPath.fromString(expectedPathString).addRoot().toString();
+        assertThat(actualPathString, is(equalTo(expectedPathString)));
+    }
+    
+    @Test
+    void shouldRemoveRootFromAbsolutePath() {
+        String expectedPathString = "some/path";
+        String actualPathString = UnixPath.fromString(UnixPath.ROOT + expectedPathString).removeRoot().toString();
+        assertThat(actualPathString, is(equalTo(expectedPathString)));
+    }
+    
+    @Test
+    void shouldPreserveRelativePathWhenRemovingRootFromRelativePath() {
+        String expectedPathString = "some/path";
+        String actualPathString = UnixPath.fromString(expectedPathString).removeRoot().toString();
+        assertThat(actualPathString, is(equalTo(expectedPathString)));
+    }
+    
+    @Test
+    void shouldRemoveRootFromChildThatHasRootWhenAddingChild() {
+        String parentFolder = "/some/folder";
+        String childFolder = "/child";
+        String expectedPath = "/some/folder/child";
+        String actualPath = UnixPath.of(parentFolder).addChild(childFolder).toString();
+        assertThat(actualPath, is(equalTo(expectedPath)));
+    }
+    
     private static class ClassWithUnixPath {
         
         private UnixPath field;
@@ -246,11 +261,11 @@ class UnixPathTest {
         public static String fieldName() {
             return "field";
         }
-
+    
         public UnixPath getField() {
             return field;
         }
-
+    
         public void setField(UnixPath field) {
             this.field = field;
         }
