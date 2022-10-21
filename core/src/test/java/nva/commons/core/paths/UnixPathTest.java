@@ -209,7 +209,7 @@ class UnixPathTest {
         String actualPathString = UnixPath.fromString(expectedPathString).removeRoot().toString();
         assertThat(actualPathString, is(equalTo(expectedPathString)));
     }
-
+    
     @Test
     void addChildReturnsPathRemovingRootFromChildThatHasRoot() {
         String parentFolder = "/some/folder";
@@ -218,11 +218,19 @@ class UnixPathTest {
         String actualPath = UnixPath.of(parentFolder).addChild(childFolder).toString();
         assertThat(actualPath, is(equalTo(expectedPath)));
     }
-
+    
+    @Test
+    void shouldReturnEmptyTrueWhenInputIsEmptyPath() {
+        var empty = UnixPath.EMPTY_PATH;
+        assertThat(empty.isEmptyPath(), is(true));
+        var emptyToo = UnixPath.of("");
+        assertThat(emptyToo.isEmptyPath(), is(true));
+    }
+    
     private static class ClassWithUnixPath {
-
+        
         private UnixPath field;
-
+        
         @JsonIgnore
         public static String fieldName() {
             return "field";
