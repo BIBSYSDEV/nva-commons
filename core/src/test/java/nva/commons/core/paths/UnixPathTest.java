@@ -1,6 +1,7 @@
 package nva.commons.core.paths;
 
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
+import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static nva.commons.core.paths.UnixPath.PATH_DELIMITER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -225,6 +226,16 @@ class UnixPathTest {
         assertThat(empty.isEmptyPath(), is(true));
         var emptyToo = UnixPath.of("");
         assertThat(emptyToo.isEmptyPath(), is(true));
+    }
+    
+    @Test
+    void shouldReturnEmptyFalseWhenPathIsNotEmptyPath() {
+        var nonEmpty = UnixPath.ROOT_PATH;
+        assertThat(nonEmpty.isEmptyPath(), is(false));
+        var nonEmpty2 = UnixPath.of(randomString());
+        assertThat(nonEmpty2.isEmptyPath(), is(false));
+        var nonEmpty3 = UnixPath.of(UnixPath.ROOT, randomString(), randomString());
+        assertThat(nonEmpty3.isEmptyPath(), is(false));
     }
     
     private static class ClassWithUnixPath {

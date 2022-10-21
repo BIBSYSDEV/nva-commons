@@ -33,8 +33,8 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 @JacocoGenerated
 public class FakeS3Client implements S3Client {
     
-    private static final int START_FROM_BEGINNING = 0;
     public static final boolean LIST_ALL = true;
+    private static final int START_FROM_BEGINNING = 0;
     private final Map<String, ByteBuffer> filesAndContent;
     
     public FakeS3Client(String... filesInBucket) {
@@ -77,26 +77,12 @@ public class FakeS3Client implements S3Client {
         var endIndex = calculateEndIndex(fileKeys, listObjectsRequest.marker(), listObjectsRequest.maxKeys());
         var truncated = endIndex < fileKeys.size();
     
-        List<S3Object> files =
-            fileKeys.subList(startIndex, endIndex).stream()
-                .filter(filePath -> filePathIsInSpecifiedParentFolder(filePath, listObjectsRequest))
-                .map(filename -> S3Object.builder().key(filename).build())
-                .collect(Collectors.toList());
+        var files = fileKeys.subList(startIndex, endIndex).stream()
+                        .filter(filePath -> filePathIsInSpecifiedParentFolder(filePath, listObjectsRequest))
+                        .map(filename -> S3Object.builder().key(filename).build())
+                        .collect(Collectors.toList());
     
         return ListObjectsResponse.builder().contents(files).isTruncated(truncated).build();
-    }
-    
-    private boolean filePathIsInSpecifiedParentFolder(String filePathString, ListObjectsRequest listObjectsRequest) {
-        var filePath = UnixPath.of(filePathString).removeRoot();
-        var parentFolder = Optional.of(listObjectsRequest)
-                               .map(ListObjectsRequest::prefix)
-                               .map(UnixPath::of)
-                               .map(UnixPath::removeRoot)
-                               .orElse(UnixPath.EMPTY_PATH);
-        
-        return parentFolder.isEmptyPath()
-               || parentFolder.isRoot()
-               || filePath.toString().startsWith(parentFolder.toString());
     }
     
     //TODO: fix if necessary
@@ -135,6 +121,27 @@ public class FakeS3Client implements S3Client {
         return ByteBuffer.wrap(readAllBytes(inputStream));
     }
     
+    private static byte[] readAllBytes(InputStream inputStream) {
+        try {
+            return inputStream.readAllBytes();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private boolean filePathIsInSpecifiedParentFolder(String filePathString, ListObjectsRequest listObjectsRequest) {
+        var filePath = UnixPath.of(filePathString).removeRoot();
+        var parentFolder = Optional.of(listObjectsRequest)
+                               .map(ListObjectsRequest::prefix)
+                               .map(UnixPath::of)
+                               .map(UnixPath::removeRoot)
+                               .orElse(UnixPath.EMPTY_PATH);
+        
+        return parentFolder.isEmptyPath()
+               || parentFolder.isRoot()
+               || filePath.toString().startsWith(parentFolder.toString());
+    }
+    
     private int calculateEndIndex(List<String> fileKeys, String marker, Integer pageSize) {
         int startIndex = calculateStartIndex(fileKeys, marker);
         return Math.min(startIndex + pageSize, fileKeys.size());
@@ -150,14 +157,6 @@ public class FakeS3Client implements S3Client {
             }
         }
         throw new IllegalStateException("Start index is out of bounds in FakeS3Client");
-    }
-    
-    private static byte[] readAllBytes(InputStream inputStream) {
-        try {
-            return inputStream.readAllBytes();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
     
     private ByteBuffer extractContent(String filename) {
