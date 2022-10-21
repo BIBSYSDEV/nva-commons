@@ -1,6 +1,7 @@
 package nva.commons.core.paths;
 
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
+import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static nva.commons.core.paths.UnixPath.PATH_DELIMITER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -209,7 +210,7 @@ class UnixPathTest {
         String actualPathString = UnixPath.fromString(expectedPathString).removeRoot().toString();
         assertThat(actualPathString, is(equalTo(expectedPathString)));
     }
-
+    
     @Test
     void addChildReturnsPathRemovingRootFromChildThatHasRoot() {
         String parentFolder = "/some/folder";
@@ -218,11 +219,29 @@ class UnixPathTest {
         String actualPath = UnixPath.of(parentFolder).addChild(childFolder).toString();
         assertThat(actualPath, is(equalTo(expectedPath)));
     }
-
+    
+    @Test
+    void shouldReturnEmptyTrueWhenInputIsEmptyPath() {
+        var empty = UnixPath.EMPTY_PATH;
+        assertThat(empty.isEmptyPath(), is(true));
+        var emptyToo = UnixPath.of("");
+        assertThat(emptyToo.isEmptyPath(), is(true));
+    }
+    
+    @Test
+    void shouldReturnEmptyFalseWhenPathIsNotEmptyPath() {
+        var nonEmpty = UnixPath.ROOT_PATH;
+        assertThat(nonEmpty.isEmptyPath(), is(false));
+        var nonEmpty2 = UnixPath.of(randomString());
+        assertThat(nonEmpty2.isEmptyPath(), is(false));
+        var nonEmpty3 = UnixPath.of(UnixPath.ROOT, randomString(), randomString());
+        assertThat(nonEmpty3.isEmptyPath(), is(false));
+    }
+    
     private static class ClassWithUnixPath {
-
+        
         private UnixPath field;
-
+        
         @JsonIgnore
         public static String fieldName() {
             return "field";
