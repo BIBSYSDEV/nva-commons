@@ -71,7 +71,7 @@ public class FakeS3Client implements S3Client {
      */
     @Override
     public ListObjectsResponse listObjects(ListObjectsRequest listObjectsRequest) {
-        List<String> fileKeys = new ArrayList<>(filesAndContent.keySet());
+        var fileKeys = new ArrayList<>(filesAndContent.keySet());
     
         var startIndex = calculateStartIndex(fileKeys, listObjectsRequest.marker());
         var endIndex = calculateEndIndex(fileKeys, listObjectsRequest.marker(), listObjectsRequest.maxKeys());
