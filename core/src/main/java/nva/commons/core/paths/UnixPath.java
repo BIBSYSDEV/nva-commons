@@ -165,7 +165,7 @@ public final class UnixPath {
     }
 
     private boolean isAbsolute() {
-        return ROOT.equals(path.get(0));
+        return !isEmptyPath() && ROOT.equals(path.get(0));
     }
 
     private String formatPathAsString(List<String> pathArray) {
