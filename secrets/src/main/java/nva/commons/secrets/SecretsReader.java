@@ -63,6 +63,21 @@ public class SecretsReader {
                    .orElseThrow(this::logErrorAndThrowException);
     }
 
+    /**
+     * Fetches a json secret from AWS Secrets Manager as a class.
+     *
+     * @param secretName the user-friendly id of the secret or the secret ARN
+     * @return Class of the object we want to extract the secret to
+     * @throws ErrorReadingSecretException when any error occurs.
+     */
+    public <T> T fetchClassSecret(String secretName, Class<T> tclass) {
+
+        return attempt(() -> fetchSecretFromAws(secretName))
+                .map(GetSecretValueResponse::secretString)
+                .map(str -> dtoObjectMapper.readValue(str, tclass))
+                .orElseThrow((Failure<T> fail) -> errorReadingSecret(fail, secretName));
+    }
+
     public String errorReadingSecretMessage(String secretName) {
         return COULD_NOT_READ_SECRET_ERROR + secretName;
     }
@@ -91,7 +106,7 @@ public class SecretsReader {
             .orElseThrow((Failure<String> fail) -> errorReadingSecret(fail, secretName));
     }
 
-    private ErrorReadingSecretException errorReadingSecret(Failure<String> fail, String secretName) {
+    private <T> ErrorReadingSecretException errorReadingSecret(Failure<T> fail, String secretName) {
         logger.error(errorReadingSecretMessage(secretName), fail.getException());
         return new ErrorReadingSecretException();
     }

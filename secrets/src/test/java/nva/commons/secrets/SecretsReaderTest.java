@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Map;
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
+import nva.commons.secrets.testutils.Credentials;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.invocation.InvocationOnMock;
@@ -28,6 +29,11 @@ public class SecretsReaderTest {
     public static final String SECRET_NAME = "SECRET_NAME";
     public static final String PLAIN_TEXT_SECRET_NAME = "PLAIN_TEXT_SECRET_NAME";
     public static final String PLAIN_TEXT_SECRET_VALUE = "PLAIN_TEXT_SECRET_VALUE";
+
+    public static final String JSON_SECRET_NAME = "JSON_SECRET_NAME";
+    public static final String JSON_SECRET_VALUE = "{\"username\":\"name\", \"password\":\"pass\"}";
+    public static final String JSON_SECRET_VALUE_USERNAME = "name";
+    public static final String JSON_SECRET_VALUE_PASSWORD = "pass";
     public static final String WRONG_SECRET_NAME = "WRONG_SECRET_NAME";
     public static final String WRONG_SECRET_KEY = "WRONG_KEY";
     public static final String ERROR_MESSAGE_FROM_AWS_SECRET_MANAGER = "Secret not found";
@@ -72,6 +78,20 @@ public class SecretsReaderTest {
     }
 
     @Test
+    public void fetchClassSecretReturnsClass() {
+        Credentials credentials = secretsReader.fetchClassSecret(JSON_SECRET_NAME, Credentials.class);
+        assertThat(credentials.username, is(equalTo(JSON_SECRET_VALUE_USERNAME)));
+        assertThat(credentials.password, is(equalTo(JSON_SECRET_VALUE_PASSWORD)));
+    }
+
+    @Test
+    public void fetchClassSecretDoesNotExposeSecretInThrow() {
+        Executable action = () -> secretsReader.fetchClassSecret(PLAIN_TEXT_SECRET_NAME, Credentials.class);
+        var thrown = assertThrows(ErrorReadingSecretException.class, action);
+        assertThat(thrown.getMessage(), not(containsString(PLAIN_TEXT_SECRET_VALUE)));
+    }
+
+    @Test
     public void fetchPlainTextSecretWhenSecretNameIsCorrect() {
         String value = secretsReader.fetchPlainTextSecret(PLAIN_TEXT_SECRET_NAME);
         assertThat(value, is(equalTo(PLAIN_TEXT_SECRET_VALUE)));
@@ -96,14 +116,19 @@ public class SecretsReaderTest {
     private GetSecretValueResponse provideGetSecretValueResult(InvocationOnMock invocation)
         throws JsonProcessingException {
         String providedSecretName = getSecretNameFromRequest(invocation);
-        if (providedSecretName.equals(SECRET_NAME)) {
-            String secretString = createSecretJsonObject();
-            return createGetSecretValueResult(secretString);
-        } else if (providedSecretName.equals(PLAIN_TEXT_SECRET_NAME)) {
-            return createGetSecretValueResult(PLAIN_TEXT_SECRET_VALUE);
-        } else {
-            throw new RuntimeException(ERROR_MESSAGE_FROM_AWS_SECRET_MANAGER);
+
+        switch (providedSecretName) {
+            case SECRET_NAME:
+                String secretString = createSecretJsonObject();
+                return createGetSecretValueResult(secretString);
+            case PLAIN_TEXT_SECRET_NAME:
+                return createGetSecretValueResult(PLAIN_TEXT_SECRET_VALUE);
+            case JSON_SECRET_NAME:
+                return createGetSecretValueResult(JSON_SECRET_VALUE);
+            default:
+                throw new RuntimeException(ERROR_MESSAGE_FROM_AWS_SECRET_MANAGER);
         }
+
     }
 
     private String getSecretNameFromRequest(InvocationOnMock invocation) {
