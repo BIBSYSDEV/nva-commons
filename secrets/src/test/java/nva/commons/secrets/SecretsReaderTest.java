@@ -86,14 +86,14 @@ class SecretsReaderTest {
     }
 
     @Test
-    void shoulNotExposeSecretInThrowWhenInputSecretExistsButIsPlaintext() {
+    void shouldNotExposeSecretInThrowWhenInputSecretExistsButIsPlaintext() {
         Executable action = () -> secretsReader.fetchClassSecret(PLAIN_TEXT_SECRET_NAME, Credentials.class);
         var thrown = assertThrows(ErrorReadingSecretException.class, action);
         assertThat(thrown.getMessage(), not(containsString(PLAIN_TEXT_SECRET_VALUE)));
     }
 
     @Test
-    void shoulNotExposeSecretInThrowWhenInputSecretExistsButIsJsonList() {
+    void shouldNotExposeSecretInThrowWhenInputSecretExistsButIsJsonList() {
         Executable action = () -> secretsReader.fetchClassSecret(JSON_LIST_SECRET_NAME, Credentials.class);
         var thrown = assertThrows(ErrorReadingSecretException.class, action);
         assertThat(thrown.getMessage(), not(containsString(PLAIN_TEXT_SECRET_VALUE)));
