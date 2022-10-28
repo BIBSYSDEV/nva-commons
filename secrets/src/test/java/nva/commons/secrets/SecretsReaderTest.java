@@ -22,29 +22,30 @@ import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse;
 
-public class SecretsReaderTest {
+class SecretsReaderTest {
 
-    public static final String SECRET_VALUE = "SECRET_VALUE";
-    public static final String SECRET_KEY = "SECRET_KEY";
-    public static final String SECRET_NAME = "SECRET_NAME";
-    public static final String PLAIN_TEXT_SECRET_NAME = "PLAIN_TEXT_SECRET_NAME";
-    public static final String PLAIN_TEXT_SECRET_VALUE = "PLAIN_TEXT_SECRET_VALUE";
-
-    public static final String JSON_SECRET_NAME = "JSON_SECRET_NAME";
-    public static final String JSON_SECRET_VALUE = "{\"username\":\"name\", \"password\":\"pass\"}";
-    public static final String JSON_SECRET_VALUE_USERNAME = "name";
-    public static final String JSON_SECRET_VALUE_PASSWORD = "pass";
-    public static final String WRONG_SECRET_NAME = "WRONG_SECRET_NAME";
-    public static final String WRONG_SECRET_KEY = "WRONG_KEY";
-    public static final String ERROR_MESSAGE_FROM_AWS_SECRET_MANAGER = "Secret not found";
+    static final String SECRET_VALUE = "SECRET_VALUE";
+    static final String SECRET_KEY = "SECRET_KEY";
+    static final String SECRET_NAME = "SECRET_NAME";
+    static final String PLAIN_TEXT_SECRET_NAME = "PLAIN_TEXT_SECRET_NAME";
+    static final String PLAIN_TEXT_SECRET_VALUE = "PLAIN_TEXT_SECRET_VALUE";
+    static final String JSON_SECRET_NAME = "JSON_SECRET_NAME";
+    static final String JSON_SECRET_VALUE = "{\"username\":\"name\", \"password\":\"pass\"}";
+    static final String JSON_LIST_SECRET_NAME = "JSON_LIST_SECRET_NAME";
+    static final String JSON_LIST_SECRET_VALUE = "[{\"key1\":\"val1\"},{\"key1\":\"val2\"}]";
+    static final String JSON_SECRET_VALUE_USERNAME = "name";
+    static final String JSON_SECRET_VALUE_PASSWORD = "pass";
+    static final String WRONG_SECRET_NAME = "WRONG_SECRET_NAME";
+    static final String WRONG_SECRET_KEY = "WRONG_KEY";
+    static final String ERROR_MESSAGE_FROM_AWS_SECRET_MANAGER = "Secret not found";
     private final SecretsReader secretsReader;
 
-    public SecretsReaderTest() {
+    SecretsReaderTest() {
         secretsReader = createSecretsReaderMock();
     }
 
     @Test
-    public void fetchSecretLogsErrorWhenWrongSecretNameIsGiven() {
+    void fetchSecretLogsErrorWhenWrongSecretNameIsGiven() {
         final TestAppender appender = LogUtils.getTestingAppender(SecretsReader.class);
         Executable action = () -> secretsReader.fetchSecret(WRONG_SECRET_NAME, SECRET_KEY);
         assertThrows(ErrorReadingSecretException.class, action);
@@ -53,7 +54,7 @@ public class SecretsReaderTest {
     }
 
     @Test
-    public void fetchSecretLogsErrorWhenWrongSecretKeyIsGiven() {
+    void fetchSecretLogsErrorWhenWrongSecretKeyIsGiven() {
         final TestAppender appender = LogUtils.getTestingAppender(SecretsReader.class);
         Executable action = () -> secretsReader.fetchSecret(SECRET_NAME, WRONG_SECRET_KEY);
 
@@ -63,7 +64,7 @@ public class SecretsReaderTest {
     }
 
     @Test
-    public void fetchSecretLogsErrorLogsErrorCauseButMasksErrorCauseToCaller() {
+    void fetchSecretLogsErrorLogsErrorCauseButMasksErrorCauseToCaller() {
         Executable action = () -> secretsReader.fetchSecret(SECRET_NAME, WRONG_SECRET_KEY);
         ErrorReadingSecretException exception = assertThrows(ErrorReadingSecretException.class, action);
 
@@ -72,34 +73,41 @@ public class SecretsReaderTest {
     }
 
     @Test
-    public void fetchSecretReturnsSecretValueWhenSecretNameAndSecretKeyAreCorrect() throws ErrorReadingSecretException {
-        String value = secretsReader.fetchSecret(SECRET_NAME, SECRET_KEY);
+    void fetchSecretReturnsSecretValueWhenSecretNameAndSecretKeyAreCorrect() throws ErrorReadingSecretException {
+        var value = secretsReader.fetchSecret(SECRET_NAME, SECRET_KEY);
         assertThat(value, is(equalTo(SECRET_VALUE)));
     }
 
     @Test
-    public void fetchClassSecretReturnsClass() {
-        Credentials credentials = secretsReader.fetchClassSecret(JSON_SECRET_NAME, Credentials.class);
+    void shouldReturnInputSecretAsInputClassWhenInputSecretExistsAndIsStructuredLikeInputSecretClass() {
+        var credentials = secretsReader.fetchClassSecret(JSON_SECRET_NAME, Credentials.class);
         assertThat(credentials.username, is(equalTo(JSON_SECRET_VALUE_USERNAME)));
         assertThat(credentials.password, is(equalTo(JSON_SECRET_VALUE_PASSWORD)));
     }
 
     @Test
-    public void fetchClassSecretDoesNotExposeSecretInThrow() {
+    void shoulNotExposeSecretInThrowWhenInputSecretExistsButIsPlaintext() {
         Executable action = () -> secretsReader.fetchClassSecret(PLAIN_TEXT_SECRET_NAME, Credentials.class);
         var thrown = assertThrows(ErrorReadingSecretException.class, action);
         assertThat(thrown.getMessage(), not(containsString(PLAIN_TEXT_SECRET_VALUE)));
     }
 
     @Test
-    public void fetchPlainTextSecretWhenSecretNameIsCorrect() {
-        String value = secretsReader.fetchPlainTextSecret(PLAIN_TEXT_SECRET_NAME);
+    void shoulNotExposeSecretInThrowWhenInputSecretExistsButIsJsonList() {
+        Executable action = () -> secretsReader.fetchClassSecret(JSON_LIST_SECRET_NAME, Credentials.class);
+        var thrown = assertThrows(ErrorReadingSecretException.class, action);
+        assertThat(thrown.getMessage(), not(containsString(PLAIN_TEXT_SECRET_VALUE)));
+    }
+
+    @Test
+    void fetchPlainTextSecretWhenSecretNameIsCorrect() {
+        var value = secretsReader.fetchPlainTextSecret(PLAIN_TEXT_SECRET_NAME);
         assertThat(value, is(equalTo(PLAIN_TEXT_SECRET_VALUE)));
     }
 
     @Test
-    public void fetchPlainTextSecretLogsErrorWhenWrongSecretNameIsGiven() {
-        final TestAppender appender = LogUtils.getTestingAppender(SecretsReader.class);
+    void fetchPlainTextSecretLogsErrorWhenWrongSecretNameIsGiven() {
+        final var appender = LogUtils.getTestingAppender(SecretsReader.class);
         Executable action = () -> secretsReader.fetchPlainTextSecret(WRONG_SECRET_NAME);
         assertThrows(ErrorReadingSecretException.class, action);
 
@@ -125,6 +133,8 @@ public class SecretsReaderTest {
                 return createGetSecretValueResult(PLAIN_TEXT_SECRET_VALUE);
             case JSON_SECRET_NAME:
                 return createGetSecretValueResult(JSON_SECRET_VALUE);
+            case JSON_LIST_SECRET_NAME:
+                return createGetSecretValueResult(JSON_LIST_SECRET_VALUE);
             default:
                 throw new RuntimeException(ERROR_MESSAGE_FROM_AWS_SECRET_MANAGER);
         }
@@ -144,7 +154,7 @@ public class SecretsReaderTest {
     }
 
     private String createSecretJsonObject() throws JsonProcessingException {
-        Map<String, String> secret = Map.of(SECRET_KEY, SECRET_VALUE);
+        var secret = Map.of(SECRET_KEY, SECRET_VALUE);
         return dtoObjectMapper.writeValueAsString(secret);
     }
 }
