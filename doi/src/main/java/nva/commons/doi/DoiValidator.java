@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 public class DoiValidator {
 
     public static final Pattern DOI_URL_PATTERN =
-        Pattern.compile("^https?://(?:dx\\.)?doi\\.org/10\\.[\\w\\d][\\w\\d.]+/.+$",
+        Pattern.compile("^https?://(?:dx\\.)?doi\\.org/10\\.\\d{4,9}/\\S+$",
                         Pattern.CASE_INSENSITIVE);
 
     // matches all strings of the form <someScheme>:10.<anything>.<anything>
