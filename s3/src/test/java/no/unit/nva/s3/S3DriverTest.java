@@ -1,7 +1,9 @@
 package no.unit.nva.s3;
 
 import static no.unit.nva.s3.S3Driver.S3_SCHEME;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -14,6 +16,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import net.datafaker.Faker;
 import no.unit.nva.stubs.FakeS3Client;
@@ -25,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.S3Object;
 
 class S3DriverTest {
     
@@ -221,6 +223,37 @@ class S3DriverTest {
         assertThat(actualContent, is(equalTo(input)));
     }
     
+    @Test
+    void shouldListFilesForFolder() throws IOException {
+        var expectedFile = s3Driver.insertFile(randomPath(), randomString());
+        var unexpectedFile = s3Driver.insertFile(randomPath(), randomString());
+    
+        var expectedFilepath = UriWrapper.fromUri(expectedFile).getPath().removeRoot();
+        var unexpectedFilepath = UriWrapper.fromUri(unexpectedFile).getPath().removeRoot();
+        var parentFolder = expectedFilepath.getParent().orElseThrow();
+        var files = s3Driver.listAllFiles(parentFolder);
+        assertThat(files, contains(expectedFilepath));
+        assertThat(files, not(contains(unexpectedFilepath)));
+    }
+    
+    @Test
+    void shouldAcceptEmptyPathAndListAllBucketFilesWhenInputIsEmptyPath() throws IOException {
+        var files = Stream.of(
+                s3Driver.insertFile(randomPath(), randomString()),
+                s3Driver.insertFile(randomPath(), randomString()))
+                        .map(UriWrapper::fromUri)
+                        .map(UriWrapper::getPath)
+                        .map(UnixPath::removeRoot)
+                        .collect(Collectors.toList());
+        
+        var actualFiles = s3Driver.listAllFiles(UnixPath.of(""));
+        assertThat(actualFiles, containsInAnyOrder(files.toArray(UnixPath[]::new)));
+    }
+    
+    private UnixPath randomPath() {
+        return UnixPath.of(randomString(), randomString());
+    }
+    
     private static String randomFileName() {
         return FAKER.file().fileName();
     }
@@ -246,9 +279,5 @@ class S3DriverTest {
     
     private String longText() {
         return FAKER.lorem().paragraph(10);
-    }
-    
-    private S3Object sampleObjectListing(UnixPath firstExpectedObjectKey) {
-        return S3Object.builder().key(firstExpectedObjectKey.toString()).build();
     }
 }

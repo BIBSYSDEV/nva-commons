@@ -113,22 +113,26 @@ public final class UnixPath {
                    ? this
                    : ROOT_PATH.addChild(this);
     }
-
+    
     public UnixPath removeRoot() {
         return isAbsolute()
                    ? new UnixPath(this.path.subList(1, path.size()))
                    : this;
     }
-
+    
+    public boolean isEmptyPath() {
+        return pathIsEmpty(path);
+    }
+    
     private static Stream<String> prependRoot(Stream<String> pathElements) {
         return Stream.concat(Stream.of(ROOT), pathElements);
     }
-
+    
     private static Stream<String> extractAllPathElements(String[] path) {
         Stream<String> nonNullPathElements = discardNullArrayElements(path);
         return splitInputElementsContainingPathDelimiter(nonNullPathElements);
     }
-
+    
     private static Stream<String> splitInputElementsContainingPathDelimiter(Stream<String> pathElements) {
         return pathElements
             .map(UnixPath::splitCompositePathElements)
@@ -161,7 +165,7 @@ public final class UnixPath {
     }
 
     private boolean isAbsolute() {
-        return ROOT.equals(path.get(0));
+        return !isEmptyPath() && ROOT.equals(path.get(0));
     }
 
     private String formatPathAsString(List<String> pathArray) {
