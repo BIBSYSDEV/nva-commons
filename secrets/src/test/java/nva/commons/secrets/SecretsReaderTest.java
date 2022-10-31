@@ -11,10 +11,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.util.List;
 import java.util.Map;
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
 import nva.commons.secrets.testutils.Credentials;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.invocation.InvocationOnMock;
@@ -32,7 +34,8 @@ class SecretsReaderTest {
     static final String JSON_SECRET_NAME = "JSON_SECRET_NAME";
     static final String JSON_SECRET_VALUE = "{\"username\":\"name\", \"password\":\"pass\"}";
     static final String JSON_LIST_SECRET_NAME = "JSON_LIST_SECRET_NAME";
-    static final String JSON_LIST_SECRET_VALUE = "[{\"key1\":\"val1\"},{\"key1\":\"val2\"}]";
+    static final String JSON_LIST_SECRET_VALUE =
+            "[{\"username\":\"name\", \"password\":\"pass\" },{\"username\":\"name\", \"password\":\"pass\"}]";
     static final String JSON_SECRET_VALUE_USERNAME = "name";
     static final String JSON_SECRET_VALUE_PASSWORD = "pass";
     static final String WRONG_SECRET_NAME = "WRONG_SECRET_NAME";
@@ -76,6 +79,22 @@ class SecretsReaderTest {
     void fetchSecretReturnsSecretValueWhenSecretNameAndSecretKeyAreCorrect() throws ErrorReadingSecretException {
         var value = secretsReader.fetchSecret(SECRET_NAME, SECRET_KEY);
         assertThat(value, is(equalTo(SECRET_VALUE)));
+    }
+
+    @Test
+    void shouldReturnInputSecretsAsInputClassesWhenInputSecretExistsAndIsStructuredLikeInputSecretClasses() {
+        var credentials = secretsReader.fetchClassSecretList(JSON_LIST_SECRET_NAME, Credentials.class);
+        assertThat(credentials, IsInstanceOf.instanceOf(List.class));
+        assertThat(credentials.size(), is(equalTo(2)));
+        assertThat(credentials.get(0).username ,is(equalTo(JSON_SECRET_VALUE_USERNAME)));
+        assertThat(credentials.get(0).password ,is(equalTo(JSON_SECRET_VALUE_PASSWORD)));
+    }
+
+    @Test
+    void shouldNotExposeSecretInThrowWhenReadingClassListButDataIsPlaintext() {
+        Executable action = () -> secretsReader.fetchClassSecretList(PLAIN_TEXT_SECRET_NAME, Credentials.class);
+        var thrown = assertThrows(ErrorReadingSecretException.class, action);
+        assertThat(thrown.getMessage(), not(containsString(PLAIN_TEXT_SECRET_VALUE)));
     }
 
     @Test

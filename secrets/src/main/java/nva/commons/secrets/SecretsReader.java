@@ -15,6 +15,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse;
+import java.util.List;
 
 public class SecretsReader {
 
@@ -66,7 +67,9 @@ public class SecretsReader {
     /**
      * Fetches a json secret from AWS Secrets Manager as a class.
      *
+     * @param <T> Class of the object we want to extract from the secret
      * @param secretName the user-friendly id of the secret or the secret ARN
+     * @param tclass The type class of the class we want to extract from the secret
      * @return Class of the object we want to extract the secret to
      * @throws ErrorReadingSecretException when any error occurs.
      */
@@ -76,6 +79,23 @@ public class SecretsReader {
                 .map(GetSecretValueResponse::secretString)
                 .map(str -> dtoObjectMapper.readValue(str, tclass))
                 .orElseThrow((Failure<T> fail) -> errorReadingSecret(fail, secretName));
+    }
+
+    /**
+     * Fetches a json-array secret from AWS Secrets Manager as a list of classes.
+     *
+     * @param <T> Class of the object we want to extract from the secret
+     * @param secretName the user-friendly id of the secret or the secret ARN
+     * @param tclass The type class of the class we want to extract from the secret
+     * @return List of the objects we want to extract the secrets to
+     * @throws ErrorReadingSecretException when any error occurs.
+     */
+    public <T> List<T> fetchClassSecretList(String secretName, Class<T> tclass) {
+
+        return attempt(() -> fetchSecretFromAws(secretName))
+                .map(GetSecretValueResponse::secretString)
+                .map(str -> (List<T>) dtoObjectMapper.readerForListOf(tclass).readValue(str))
+                .orElseThrow((Failure<List<T>> fail) -> errorReadingSecret(fail, secretName));
     }
 
     public String errorReadingSecretMessage(String secretName) {
