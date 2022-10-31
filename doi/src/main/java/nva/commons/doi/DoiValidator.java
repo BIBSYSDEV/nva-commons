@@ -20,14 +20,19 @@ import org.slf4j.LoggerFactory;
 
 public class DoiValidator {
 
+    private static final String DOI_URL_REGEX_START = "^https?://(?:dx\\.)?doi\\.org/";
+    private static final String DOI_STRING_REGEX_START = "^([^/]+:)?";
+
+
+    public static String DOI_SUFFIX_REGEX = "10\\.\\d{4,9}/\\S+$";
     public static final Pattern DOI_URL_PATTERN =
-        Pattern.compile("^https?://(?:dx\\.)?doi\\.org/10\\.\\d{4,9}/\\S+$",
+        Pattern.compile(DOI_URL_REGEX_START + DOI_SUFFIX_REGEX,
                         Pattern.CASE_INSENSITIVE);
 
     // matches all strings of the form <someScheme>:10.<anything>.<anything>
     // Does not match URIs that contain slash, in an effort to not match http(s):// URIs.
     public static final Pattern DOI_STRING_PATTERN =
-        Pattern.compile("^([^/]+:)?10\\.\\d{4,9}/\\S+$", Pattern.CASE_INSENSITIVE);
+        Pattern.compile(DOI_STRING_REGEX_START + DOI_SUFFIX_REGEX, Pattern.CASE_INSENSITIVE);
     public static final String INVALID_DOI_ERROR = "Invalid DOI";
     private static final Logger logger = LoggerFactory.getLogger(DoiValidator.class);
     private final UnitHttpClient httpClient;
