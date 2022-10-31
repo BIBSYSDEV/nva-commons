@@ -24,7 +24,7 @@ public class DoiValidator {
     private static final String DOI_STRING_REGEX_START = "^([^/]+:)?";
 
 
-    public static String DOI_SUFFIX_REGEX = "10\\.\\d{4,9}/\\S+$";
+    public static final String DOI_SUFFIX_REGEX = "10\\.\\d{4,9}/\\S+$";
     public static final Pattern DOI_URL_PATTERN =
         Pattern.compile(DOI_URL_REGEX_START + DOI_SUFFIX_REGEX,
                         Pattern.CASE_INSENSITIVE);
