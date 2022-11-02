@@ -10,7 +10,7 @@ dependencies {
     implementation libs.aws.sdk2.core
     implementation libs.aws.ion
 
-    implementation libs.jackson.databind
+    implementation libs.bundles.jackson
     implementation libs.aws.apache.client
 
     testImplementation libs.bundles.testing
