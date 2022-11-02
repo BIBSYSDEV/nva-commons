@@ -9,6 +9,8 @@ public final class MediaTypes {
         MediaType.create("application", "problem+json");
     public static final MediaType APPLICATION_DATACITE_XML =
         MediaType.create("application", "vnd.datacite.datacite+xml");
+    public static final MediaType SCHEMA_ORG =
+        MediaType.create("application", "vnd.schemaorg.ld+json");
 
     private MediaTypes() {
     }

@@ -40,6 +40,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 import javax.management.modelmbean.XMLParseException;
 import no.unit.nva.stubs.FakeContext;
 import no.unit.nva.testutils.HandlerRequestBuilder;
@@ -57,6 +58,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
@@ -66,13 +68,20 @@ class ApiGatewayHandlerTest {
     public static final String TOP_EXCEPTION_MESSAGE = "TOP Exception";
     public static final String MIDDLE_EXCEPTION_MESSAGE = "MIDDLE Exception";
     public static final String BOTTOM_EXCEPTION_MESSAGE = "BOTTOM Exception";
-    public static final String SOME_REQUEST_ID = "RequestID:123456";
     public static final int OVERRIDDEN_STATUS_CODE = 418;  //I'm a teapot
     public static final Path EVENT_WITH_UNKNOWN_REQUEST_INFO = Path.of("apiGatewayMessages",
                                                                        "eventWithUnknownRequestInfo.json");
     private static final String PATH = "path1/path2/path3";
     private Context context;
     private Handler handler;
+
+    public static Stream<String> mediaTypeProvider() {
+        return Stream.of(
+            MediaTypes.APPLICATION_JSON_LD.toString(),
+            MediaTypes.APPLICATION_DATACITE_XML.toString(),
+            MediaTypes.SCHEMA_ORG.toString()
+        );
+    }
 
 
     @BeforeEach
@@ -111,6 +120,9 @@ class ApiGatewayHandlerTest {
                                                               expectedHeaders.get(expectedHeader).textValue()))));
     }
 
+    // TODO: Should return 415 when the Content-type header of request is unsupported (i.e., the one
+    //  describing the content of the body of a post request)
+    // TODO: Should return 406 when Accept header contains unsupported media type
     @ParameterizedTest(name = "handleRequest should return Unsupported media-type when input is {0}")
     @ValueSource(strings = {
         "application/xml",
@@ -132,7 +144,7 @@ class ApiGatewayHandlerTest {
         "*/*",
         "application/json",
         "application/json; charset=UTF-8",
-        "text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8"
+        "text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8",
     })
     public void handleRequestShouldReturnOkOnSupportedAcceptHeader(String mediaType) throws IOException {
         InputStream input = requestWithAcceptHeader(mediaType);
@@ -155,17 +167,18 @@ class ApiGatewayHandlerTest {
         assertThat(response.getHeaders().get(CONTENT_TYPE), is(equalTo(MediaType.JSON_UTF_8.toString())));
     }
 
-    @Test
-    public void handleRequestReturnsContentTypeJsonLdOnAcceptJsonLd()
+    @ParameterizedTest(name = "Should return supported type {0} when it is requested")
+    @MethodSource("mediaTypeProvider")
+    void shouldReturnContentTypeMatchingSupportedMediaTypeWhenSupportedMediaTypeIsRequested(String mediaType)
         throws IOException {
         Handler handler = handlerThatOverridesListSupportedMediaTypes();
 
-        InputStream input = requestWithAcceptHeader("application/ld+json");
+        InputStream input = requestWithAcceptHeader(mediaType);
 
         GatewayResponse<String> response = getStringResponse(input, handler);
 
         assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
-        assertThat(response.getHeaders().get(CONTENT_TYPE), is(equalTo(MediaTypes.APPLICATION_JSON_LD.toString())));
+        assertThat(response.getHeaders().get(CONTENT_TYPE), is(equalTo(mediaType)));
     }
 
     @Test
@@ -465,7 +478,8 @@ class ApiGatewayHandlerTest {
         return new Handler() {
             @Override
             public List<MediaType> listSupportedMediaTypes() {
-                return List.of(MediaType.JSON_UTF_8, MediaTypes.APPLICATION_JSON_LD);
+                return List.of(MediaType.JSON_UTF_8, MediaTypes.APPLICATION_JSON_LD,
+                    MediaTypes.APPLICATION_DATACITE_XML, MediaTypes.SCHEMA_ORG);
             }
         };
     }
