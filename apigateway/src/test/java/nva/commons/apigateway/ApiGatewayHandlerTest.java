@@ -144,7 +144,7 @@ class ApiGatewayHandlerTest {
         "*/*",
         "application/json",
         "application/json; charset=UTF-8",
-        "text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8",
+        "text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8"
     })
     public void handleRequestShouldReturnOkOnSupportedAcceptHeader(String mediaType) throws IOException {
         InputStream input = requestWithAcceptHeader(mediaType);
