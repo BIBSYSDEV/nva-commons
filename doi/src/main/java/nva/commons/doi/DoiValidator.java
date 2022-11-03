@@ -14,19 +14,25 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import nva.commons.core.JacocoGenerated;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DoiValidator {
 
+    private static final String DOI_URL_REGEX_START = "^https?://(?:dx\\.)?doi\\.org/";
+    private static final String DOI_STRING_REGEX_START = "^([^/]+:)?";
+
+
+    public static final String DOI_SUFFIX_REGEX = "10\\.\\d{4,9}/\\S+$";
     public static final Pattern DOI_URL_PATTERN =
-        Pattern.compile("^https?://(?:dx\\.)?doi\\.org/10\\.[\\w\\d][\\w\\d.]+/.+$",
+        Pattern.compile(DOI_URL_REGEX_START + DOI_SUFFIX_REGEX,
                         Pattern.CASE_INSENSITIVE);
 
     // matches all strings of the form <someScheme>:10.<anything>.<anything>
     // Does not match URIs that contain slash, in an effort to not match http(s):// URIs.
     public static final Pattern DOI_STRING_PATTERN =
-        Pattern.compile("^([^/]+:)?10\\.[\\w\\d][\\w\\d.]+/.+$", Pattern.CASE_INSENSITIVE);
+        Pattern.compile(DOI_STRING_REGEX_START + DOI_SUFFIX_REGEX, Pattern.CASE_INSENSITIVE);
     public static final String INVALID_DOI_ERROR = "Invalid DOI";
     private static final Logger logger = LoggerFactory.getLogger(DoiValidator.class);
     private final UnitHttpClient httpClient;
@@ -61,7 +67,7 @@ public class DoiValidator {
         }
         Matcher urlMatcher = DOI_URL_PATTERN.matcher(doi);
         Matcher stringMatcher = DOI_STRING_PATTERN.matcher(doi);
-        return urlMatcher.matches() || stringMatcher.matches();
+        return urlMatcher.matches() && isUri(doi) || stringMatcher.matches();
     }
 
     /**
@@ -84,6 +90,10 @@ public class DoiValidator {
         } else {
             throw new UnresolvableDoiException(responseToString(httpResponse));
         }
+    }
+
+    private static boolean isUri(String uri) {
+        return UrlValidator.getInstance().isValid(uri);
     }
 
     private static Boolean doiHasBeenResolved(HttpResponse<String> response) {
