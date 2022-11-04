@@ -67,6 +67,8 @@ public class SecretsReader {
      * Fetches a json secret from AWS Secrets Manager as a class.
      *
      * @param secretName the user-friendly id of the secret or the secret ARN
+     * @param tclass the class or interface of the class to be returned
+     * @param <T> the type of the class or interface of the class to be returned
      * @return Class of the object we want to extract the secret to
      * @throws ErrorReadingSecretException when any error occurs.
      */
