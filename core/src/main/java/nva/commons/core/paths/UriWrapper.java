@@ -36,6 +36,7 @@ public class UriWrapper {
     }
 
     /**
+     * Utility for working with URIs in a consistent manner.
      * @param uri the URI string
      * @deprecated Use the static call {@link UriWrapper#fromUri(String)} instead.
      */
@@ -131,7 +132,9 @@ public class UriWrapper {
     }
 
     /**
-     * @return the last path element of the uri.
+     * Returns the last element from the URI path.
+     *
+     * @return element.
      * @deprecated User getLastPathElement
      */
     @Deprecated(since = "getLastPathElement was introduced")

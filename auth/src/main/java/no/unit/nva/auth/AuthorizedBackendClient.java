@@ -46,8 +46,8 @@ public class AuthorizedBackendClient {
         return prepareWithCognitoCredentials(HttpClient.newHttpClient(), cognitoCredentials);
     }
 
-    public static AuthorizedBackendClient prepareWithCognitoCredentials(HttpClient httpClient,
-                                                                        CognitoCredentials cognitoApiClientCredentials) {
+    public static AuthorizedBackendClient prepareWithCognitoCredentials(
+        HttpClient httpClient, CognitoCredentials cognitoApiClientCredentials) {
         return new AuthorizedBackendClient(httpClient, null, cognitoApiClientCredentials);
     }
 
