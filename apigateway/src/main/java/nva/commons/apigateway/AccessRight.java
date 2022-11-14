@@ -11,6 +11,8 @@ import nva.commons.apigateway.exceptions.InvalidAccessRightException;
 public enum AccessRight {
 
     USER,// pseudo access-right to indicate the customer in cognito groups
+    PUBLISH_FILES,
+    PUBLISH_METADATA,
     APPROVE_DOI_REQUEST,
     REJECT_DOI_REQUEST,
     READ_DOI_REQUEST,
