@@ -15,6 +15,8 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse;
+import software.amazon.awssdk.services.secretsmanager.model.PutSecretValueRequest;
+import software.amazon.awssdk.services.secretsmanager.model.PutSecretValueResponse;
 
 public class SecretsReader {
 
@@ -96,6 +98,14 @@ public class SecretsReader {
     private GetSecretValueResponse fetchSecretFromAws(String secretName) {
         return awsSecretsManager
             .getSecretValue(GetSecretValueRequest.builder().secretId(secretName).build());
+    }
+
+    private PutSecretValueResponse updateSecretFromAws(String secretName, String value){
+        return  awsSecretsManager.putSecretValue(
+            PutSecretValueRequest.builder()
+                .secretId(secretName)
+                .secretString(value)
+            .build());
     }
 
     private String extractApiKey(GetSecretValueResponse getSecretResult, String secretKey, String secretName) {
