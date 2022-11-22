@@ -14,8 +14,6 @@ import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
-import software.amazon.awssdk.services.secretsmanager.model.InvalidParameterException;
-import software.amazon.awssdk.services.secretsmanager.model.InvalidRequestException;
 import software.amazon.awssdk.services.secretsmanager.model.PutSecretValueRequest;
 import software.amazon.awssdk.services.secretsmanager.model.PutSecretValueResponse;
 
@@ -23,8 +21,9 @@ public class SecretsWriter {
 
     public static final String COULD_NOT_WRITE_SECRET_ERROR = "Could not write secret: ";
     private static final Logger logger = LoggerFactory.getLogger(SecretsWriter.class);
-    private static final String AWS_REGION = new Environment().readEnvOpt("AWS_REGION")
-                                                 .orElse(Region.EU_WEST_1.id());
+    private static final String AWS_REGION =
+        new Environment().readEnvOpt("AWS_REGION")
+            .orElse(Region.EU_WEST_1.id());
     private static final String EMPTY_STRING = "";
 
     private final SecretsManagerClient awsSecretsManager;
@@ -49,8 +48,7 @@ public class SecretsWriter {
      * @return PutSecretValueResponse
      * @throws ErrorReadingSecretException when any error occurs.
      */
-    public PutSecretValueResponse updateSecret(String secretName, String jsonSecretValue)
-        throws ErrorWritingSecretException {
+    public PutSecretValueResponse updateSecret(String secretName, String jsonSecretValue) {
 
         return attempt(() -> updateSecretFromAws(secretName, jsonSecretValue))
                    .map(response -> response)
@@ -66,8 +64,7 @@ public class SecretsWriter {
      * @return PutSecretValueResponse
      * @throws ErrorReadingSecretException when any error occurs.
      */
-    public <T> PutSecretValueResponse updateClassSecret(String secretName, T tObjectJsonSecretValue)
-        throws ErrorWritingSecretException {
+    public <T> PutSecretValueResponse updateClassSecret(String secretName, T tObjectJsonSecretValue) {
 
         return attempt(() -> updateSecretFromAws(secretName, toJsonCompact(tObjectJsonSecretValue)))
                    .map(response -> response)
@@ -83,8 +80,7 @@ public class SecretsWriter {
                    .build();
     }
 
-    private PutSecretValueResponse updateSecretFromAws(String secretName, String value)
-        throws InvalidParameterException, InvalidRequestException {
+    private PutSecretValueResponse updateSecretFromAws(String secretName, String value) {
         return awsSecretsManager.putSecretValue(
             PutSecretValueRequest.builder()
                 .secretId(secretName)

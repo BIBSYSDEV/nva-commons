@@ -23,6 +23,7 @@ import software.amazon.awssdk.services.secretsmanager.model.PutSecretValueReques
 import software.amazon.awssdk.services.secretsmanager.model.PutSecretValueResponse;
 
 class SecretsWriterTest {
+
     static final String SECRET_NAME = "secret_id";
     static final String SECRET_VALUE = "secret_value";
     static final String JSON_SECRET_NAME = "json_secret_id";
@@ -33,14 +34,13 @@ class SecretsWriterTest {
     private final SecretsWriter secretsWriter;
     private final Credentials credentials;
 
-
     public SecretsWriterTest() {
         secretsWriter = createSecretsWriterMock();
         credentials = createCredentialsMock();
     }
 
     private Credentials createCredentialsMock() {
-        return new Credentials(JSON_SECRET_VALUE_USERNAME,JSON_SECRET_VALUE_PASSWORD);
+        return new Credentials(JSON_SECRET_VALUE_USERNAME, JSON_SECRET_VALUE_PASSWORD);
     }
 
     @Test
@@ -96,11 +96,11 @@ class SecretsWriterTest {
 
     private PutSecretValueResponse providePutSecretValueResult(InvocationOnMock invocation) {
         PutSecretValueRequest request = invocation.getArgument(0);
-        if (isNull(request.secretId()))  {
-            throw InvalidParameterException.create( COULD_NOT_WRITE_SECRET_ERROR,null);
+        if (isNull(request.secretId())) {
+            throw InvalidParameterException.create(COULD_NOT_WRITE_SECRET_ERROR, null);
         }
-        if (isNull(request.secretString()))  {
-            throw InvalidParameterException.create( COULD_NOT_WRITE_SECRET_ERROR,null);
+        if (isNull(request.secretString())) {
+            throw InvalidParameterException.create(COULD_NOT_WRITE_SECRET_ERROR, null);
         }
 
         return createPutSecretValueResult(request.secretId());
@@ -112,5 +112,4 @@ class SecretsWriterTest {
                    .name(secretName)
                    .build();
     }
-
 }
