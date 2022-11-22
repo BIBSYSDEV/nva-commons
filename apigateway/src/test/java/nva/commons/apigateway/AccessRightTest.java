@@ -23,7 +23,7 @@ class AccessRightTest {
     }
 
     @Test
-    void fromStringThrowsExceptoinWhenInputIsInvalidAccessRight() {
+    void fromStringThrowsExceptionWhenInputIsInvalidAccessRight() {
         String invalidAccessRight = "invalidAccessRight";
         Executable action = () -> AccessRight.fromString(invalidAccessRight);
         InvalidAccessRightException exception = assertThrows(InvalidAccessRightException.class, action);
