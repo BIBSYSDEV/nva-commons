@@ -3,19 +3,23 @@ package nva.commons.secrets;
 import static java.util.Objects.isNull;
 import static nva.commons.secrets.SecretsWriter.COULD_NOT_WRITE_SECRET_ERROR;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import java.util.stream.Stream;
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
 import nva.commons.secrets.testutils.Credentials;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.invocation.InvocationOnMock;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.model.InvalidParameterException;
@@ -30,9 +34,24 @@ class SecretsWriterTest {
     static final String JSON_SECRET_VALUE = "{\"username\":\"name\", \"password\":\"pass\"}";
     static final String JSON_SECRET_VALUE_USERNAME = "name";
     static final String JSON_SECRET_VALUE_PASSWORD = "pass";
-
     private final SecretsWriter secretsWriter;
     private final Credentials credentials;
+
+    private static Stream<Arguments> invalidArgumentProvider() {
+        return Stream.of(
+            Arguments.of(SECRET_NAME, null),
+            Arguments.of(null, SECRET_VALUE),
+            Arguments.of(null, null)
+        );
+    }
+
+    private static Stream<Arguments> argumentProvider() {
+        return Stream.of(
+            Arguments.of(SECRET_NAME, SECRET_VALUE),
+            Arguments.of(JSON_SECRET_NAME, JSON_SECRET_VALUE)
+        );
+    }
+
 
     public SecretsWriterTest() {
         secretsWriter = createSecretsWriterMock();
@@ -44,47 +63,32 @@ class SecretsWriterTest {
     }
 
     @Test
-    @DisplayName("Update Secret String successfully")
-    void assertUpdateSecretOK() {
-
-        var putResponse = secretsWriter.updateSecret(SECRET_NAME, SECRET_VALUE);
-        assertEquals(putResponse.name(), SECRET_NAME);
-    }
-
-    @Test
-    @DisplayName("Update Secret JsonString successfully")
-    void assertUpdateSecretJsonOK() {
-
-        var putResponse = secretsWriter.updateSecret(JSON_SECRET_NAME, JSON_SECRET_VALUE);
-        assertEquals(putResponse.name(), JSON_SECRET_NAME);
-    }
-
-    @Test
     @DisplayName("Update Secret Object successfully")
     void assertUpdateSecretObjectOK() {
 
         var putResponse = secretsWriter.updateClassSecret(JSON_SECRET_NAME, credentials);
-        assertEquals(putResponse.name(), JSON_SECRET_NAME);
+        assertThat(putResponse.name(), is(equalTo(JSON_SECRET_NAME)));
     }
 
-    @Test
-    @DisplayName("Update Secret Logs Error When Wrong Secret Name Is Given")
-    void errorWhenWrongSecretNameIsGiven() {
+    @DisplayName("Update Secret String successfully")
+    @MethodSource("argumentProvider")
+    @ParameterizedTest(name = "Good {index} -> k:{0}, v:{1}")
+    void assertUpdateSecretOK(String name, String value) {
+
+        var putResponse = secretsWriter.updateSecret(name, value);
+        assertThat(putResponse.name(), is(equalTo(name)));
+    }
+
+
+    @DisplayName("Update Secret, logs error when wrong input is given")
+    @MethodSource("invalidArgumentProvider")
+    @ParameterizedTest(name = "Bad {index} -> k:{0}, v:{1}")
+    void errorWhenWrongSecretNameIsGiven(String name, String value) {
         final TestAppender appender = LogUtils.getTestingAppender(SecretsWriter.class);
-        Executable action = () -> secretsWriter.updateSecret(null, SECRET_VALUE);
+        Executable action = () -> secretsWriter.updateSecret(name, value);
 
         assertThrows(ErrorWritingSecretException.class, action);
         assertThat(appender.getMessages(), containsString(COULD_NOT_WRITE_SECRET_ERROR));
-    }
-
-    @Test
-    @DisplayName("Update Secret Logs Error When Wrong Secret Value Is Given")
-    void errorWhenWrongSecretValueIsGiven() {
-        Executable action = () -> secretsWriter.updateSecret(SECRET_NAME, null);
-        ErrorWritingSecretException exception = assertThrows(ErrorWritingSecretException.class, action);
-
-        assertThat(exception.getMessage(), not(containsString(SECRET_NAME)));
-        assertThat(exception.getMessage(), not(containsString(SECRET_VALUE)));
     }
 
     private SecretsWriter createSecretsWriterMock() {

@@ -50,7 +50,7 @@ public class SecretsWriter {
      */
     public PutSecretValueResponse updateSecret(String secretName, String jsonSecretValue) {
 
-        return attempt(() -> updateSecretFromAws(secretName, jsonSecretValue))
+        return attempt(() -> updateSecretToAws(secretName, jsonSecretValue))
                    .map(response -> response)
                    .orElseThrow(this::logErrorAndThrowException);
     }
@@ -58,15 +58,15 @@ public class SecretsWriter {
     /**
      * Updates a secret object (json) in AWS Secrets Manager as tObjectJsonSecretValue.
      *
-     * @param secretName             the user-friendly id of the secret or the secret ARN
-     * @param tObjectJsonSecretValue the class or interface of the class to be persisted
-     * @param <T>                    the type of the class or interface of the class to be persisted
+     * @param secretName          the user-friendly id of the secret or the secret ARN
+     * @param secretClassInstance the class or interface of the class to be persisted
+     * @param <T>                 the type of the class or interface of the class to be persisted
      * @return PutSecretValueResponse
      * @throws ErrorReadingSecretException when any error occurs.
      */
-    public <T> PutSecretValueResponse updateClassSecret(String secretName, T tObjectJsonSecretValue) {
+    public <T> PutSecretValueResponse updateClassSecret(String secretName, T secretClassInstance) {
 
-        return attempt(() -> updateSecretFromAws(secretName, toJsonCompact(tObjectJsonSecretValue)))
+        return attempt(() -> updateSecretJsonToAws(secretName, secretClassInstance))
                    .map(response -> response)
                    .orElseThrow(this::logErrorAndThrowException);
     }
@@ -80,7 +80,7 @@ public class SecretsWriter {
                    .build();
     }
 
-    private PutSecretValueResponse updateSecretFromAws(String secretName, String value) {
+    private PutSecretValueResponse updateSecretToAws(String secretName, String value) {
         return awsSecretsManager.putSecretValue(
             PutSecretValueRequest.builder()
                 .secretId(secretName)
@@ -88,22 +88,32 @@ public class SecretsWriter {
                 .build());
     }
 
+    private <T> PutSecretValueResponse updateSecretJsonToAws(String secretName, T node) {
+        return awsSecretsManager.putSecretValue(
+            PutSecretValueRequest.builder()
+                .secretId(secretName)
+                .secretString(toJsonCompact(node))
+                .build());
+    }
+
     private DefaultPrettyPrinter getPrettyPrinterCompact() {
-        DefaultPrettyPrinter p = new DefaultPrettyPrinter();
-        DefaultPrettyPrinter.Indenter i = new DefaultIndenter(EMPTY_STRING, EMPTY_STRING);
-        p.indentArraysWith(i);
-        p.indentObjectsWith(i);
-        return p;
+        var prettyPrinter = new DefaultPrettyPrinter();
+        var indenter = new DefaultIndenter(EMPTY_STRING, EMPTY_STRING);
+        prettyPrinter.indentArraysWith(indenter);
+        prettyPrinter.indentObjectsWith(indenter);
+        return prettyPrinter;
     }
 
     public <T> String toJsonCompact(T toJsonObject) {
-        return attempt(() -> objectMapper
-                                 .writer(getPrettyPrinterCompact())
-                                 .writeValueAsString(toJsonObject)).orElseThrow();
+        return
+            attempt(() -> objectMapper
+                              .writer(getPrettyPrinterCompact())
+                              .writeValueAsString(toJsonObject)
+            ).orElseThrow();
     }
 
     private <I> ErrorWritingSecretException logErrorAndThrowException(Failure<I> failure) {
         logger.error(failure.getException().getMessage(), failure.getException());
-        return new ErrorWritingSecretException(failure.getException().getMessage());
+        return new ErrorWritingSecretException();
     }
 }
