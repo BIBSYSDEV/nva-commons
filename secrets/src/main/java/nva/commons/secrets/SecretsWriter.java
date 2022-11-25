@@ -5,15 +5,19 @@ import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.attempt.Failure;
+import nva.commons.core.attempt.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse;
 import software.amazon.awssdk.services.secretsmanager.model.PutSecretValueRequest;
 import software.amazon.awssdk.services.secretsmanager.model.PutSecretValueResponse;
 
@@ -43,14 +47,19 @@ public class SecretsWriter {
     /**
      * Updates a secret object (json) in AWS Secrets Manager as tObjectJsonSecretValue.
      *
-     * @param secretName      the user-friendly id of the secret or the secret ARN
-     * @param jsonSecretValue the secretValue that you want to persist in the encrypted key-value map.
+     * @param secretName   the user-friendly id of the secret or the secret ARN
+     * @param secretKey    the user-friendly Key in the key-value map.
+     * @param secretValue  the secretValue that you want to persist in the encrypted key-value map.
      * @return PutSecretValueResponse
      * @throws ErrorReadingSecretException when any error occurs.
      */
-    public PutSecretValueResponse updateSecret(String secretName, String jsonSecretValue) {
+    public PutSecretValueResponse updateSecretKey(String secretName, String secretKey, String secretValue) {
+        var valueResponse =
+            awsSecretsManager.getSecretValue(
+                GetSecretValueRequest.builder().secretId(secretName).build()
+            );
 
-        return attempt(() -> updateSecretToAws(secretName, jsonSecretValue))
+        return attempt(() -> upsertValueResponse(valueResponse, secretKey, secretValue))
                    .map(response -> response)
                    .orElseThrow(this::logErrorAndThrowException);
     }
@@ -64,7 +73,7 @@ public class SecretsWriter {
      * @return PutSecretValueResponse
      * @throws ErrorReadingSecretException when any error occurs.
      */
-    public <T> PutSecretValueResponse updateClassSecret(String secretName, T secretClassInstance) {
+    public <T> PutSecretValueResponse updateSecretObject(String secretName, T secretClassInstance) {
 
         return attempt(() -> updateSecretJsonToAws(secretName, secretClassInstance))
                    .map(response -> response)
@@ -80,18 +89,26 @@ public class SecretsWriter {
                    .build();
     }
 
-    private PutSecretValueResponse updateSecretToAws(String secretName, String value) {
-        return awsSecretsManager.putSecretValue(
-            PutSecretValueRequest.builder()
-                .secretId(secretName)
-                .secretString(value)
-                .build());
+    private PutSecretValueResponse upsertValueResponse(
+        GetSecretValueResponse secretValueResponse,
+        String secretKey,
+        String secretValue) {
+
+        return Try.of(secretValueResponse)
+                   .map(GetSecretValueResponse::secretString)
+                   .map(objectMapper::readTree)
+                   .map(secretJson -> {
+
+                       ((ObjectNode) secretJson).put(secretKey, secretValue);
+                       return updateSecretJsonToAws(secretValueResponse.name(), secretJson);
+
+                   }).orElseThrow(this::logErrorAndThrowException);
     }
 
-    private <T> PutSecretValueResponse updateSecretJsonToAws(String secretName, T node) {
+    private <T> PutSecretValueResponse updateSecretJsonToAws(String secretVaultId, T node) {
         return awsSecretsManager.putSecretValue(
             PutSecretValueRequest.builder()
-                .secretId(secretName)
+                .secretId(secretVaultId)
                 .secretString(toJsonCompact(node))
                 .build());
     }
