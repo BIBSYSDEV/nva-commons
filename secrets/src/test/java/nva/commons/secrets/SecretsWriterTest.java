@@ -47,7 +47,6 @@ class SecretsWriterTest {
 
     private static Stream<Arguments> invalidArgumentProvider() {
         return Stream.of(
-      //      Arguments.of(SECRET_NAME, null),
             Arguments.of(null, SECRET_VALUE),
             Arguments.of(null, null)
         );

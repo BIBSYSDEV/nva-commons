@@ -105,10 +105,10 @@ public class SecretsWriter {
                    }).orElseThrow(this::logErrorAndThrowException);
     }
 
-    private <T> PutSecretValueResponse updateSecretJsonToAws(String secretVaultId, T node) {
+    private <T> PutSecretValueResponse updateSecretJsonToAws(String secreName, T node) {
         return awsSecretsManager.putSecretValue(
             PutSecretValueRequest.builder()
-                .secretId(secretVaultId)
+                .secretId(secreName)
                 .secretString(toJsonCompact(node))
                 .build());
     }
