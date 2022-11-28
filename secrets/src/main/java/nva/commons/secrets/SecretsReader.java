@@ -98,6 +98,7 @@ public class SecretsReader {
             .getSecretValue(GetSecretValueRequest.builder().secretId(secretName).build());
     }
 
+
     private String extractApiKey(GetSecretValueResponse getSecretResult, String secretKey, String secretName) {
 
         return Try.of(getSecretResult)
