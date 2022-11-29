@@ -45,38 +45,39 @@ public class SecretsWriter {
     }
 
     /**
-     * Updates a secret object (json) in AWS Secrets Manager as tObjectJsonSecretValue.
+     * Updates a secret key with secretValue in AWS Secrets Manager .
      *
      * @param secretName   the user-friendly id of the secret or the secret ARN
      * @param secretKey    the user-friendly Key in the key-value map.
      * @param secretValue  the secretValue that you want to persist in the encrypted key-value map.
-     * @return PutSecretValueResponse
-     * @throws ErrorReadingSecretException when any error occurs.
+     * @return secretName
+     * @throws ErrorWritingSecretException when any error occurs.
      */
-    public PutSecretValueResponse updateSecretKey(String secretName, String secretKey, String secretValue) {
+    public String updateSecretKey(String secretName, String secretKey, String secretValue) {
         var valueResponse =
             awsSecretsManager.getSecretValue(
                 GetSecretValueRequest.builder().secretId(secretName).build()
             );
 
         return attempt(() -> upsertValueResponse(valueResponse, secretKey, secretValue))
-                   .map(response -> response)
+                   .map(PutSecretValueResponse::name)
                    .orElseThrow(this::logErrorAndThrowException);
     }
 
-    /**
-     * Updates a secret object (json) in AWS Secrets Manager as tObjectJsonSecretValue.
+
+        /**
+     * Updates a secret object (json) in AWS Secrets Manager as secretClassInstance.
      *
      * @param secretName          the user-friendly id of the secret or the secret ARN
      * @param secretClassInstance the class or interface of the class to be persisted
      * @param <T>                 the type of the class or interface of the class to be persisted
-     * @return PutSecretValueResponse
-     * @throws ErrorReadingSecretException when any error occurs.
+     * @return secretName
+     * @throws ErrorWritingSecretException when any error occurs.
      */
-    public <T> PutSecretValueResponse updateSecretObject(String secretName, T secretClassInstance) {
+    public <T> String updateSecretObject(String secretName, T secretClassInstance) {
 
         return attempt(() -> updateSecretJsonToAws(secretName, secretClassInstance))
-                   .map(response -> response)
+                   .map(PutSecretValueResponse::name)
                    .orElseThrow(this::logErrorAndThrowException);
     }
 

@@ -73,7 +73,7 @@ class SecretsWriterTest {
     void assertUpdateSecretObjectOK() {
 
         var putResponse = secretsWriter.updateSecretObject(SECRET_VAULT_ID, credentials);
-        assertThat(putResponse.name(), is(equalTo(SECRET_VAULT_ID)));
+        assertThat(putResponse, is(equalTo(SECRET_VAULT_ID)));
     }
 
     @DisplayName("Update Secret String successfully")
@@ -82,7 +82,7 @@ class SecretsWriterTest {
     void assertUpdateSecretOK(String name, String value) {
 
         var putResponse = secretsWriter.updateSecretKey(SECRET_VAULT_ID,name, value);
-        assertThat(putResponse.name(), is(equalTo(SECRET_VAULT_ID)));
+        assertThat(putResponse, is(equalTo(SECRET_VAULT_ID)));
     }
 
 
