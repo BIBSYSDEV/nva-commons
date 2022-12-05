@@ -8,7 +8,7 @@ awsLambdaEvents = { strictly = '3.11.0' }
 awsLambdaCore = { strictly = '1.2.1' }
 mockito = { strictly = '4.5.1' }
 httpmime = { strictly = '4.5.13' }
-jackson = { strictly = '2.13.3' }
+jackson = { strictly = '2.14.1' }
 hamcrest = { strictly = '2.2' }
 apacheCommons = { strictly = '3.12.0' }
 commonsValidator = { strictly = '1.7' }
