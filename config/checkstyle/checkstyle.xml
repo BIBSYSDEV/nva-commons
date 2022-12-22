@@ -286,7 +286,7 @@
     </module>
 
     <module name="JavadocMethod">
-      <property name="accessModifiers" value="public"/>
+      <property name="scope" value="public"/>
       <property name="allowMissingParamTags" value="true"/>
       <property name="allowMissingReturnTag" value="true"/>
       <property name="allowedAnnotations" value="Override, Test, Given, When, Then"/>
