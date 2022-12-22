@@ -2,8 +2,8 @@
 zalandoProblem = { strictly = '0.27.1' }
 lambdaLog4j = { strictly = '1.5.1' }
 guava = { strictly = '31.1-jre' }
-awsSdk = { strictly = '1.12.220' }
-awsSdk2 = { strictly = '2.17.191' }
+awsSdk = { strictly = '1.12.369' }
+awsSdk2 = { strictly = '2.19.1' }
 awsLambdaEvents = { strictly = '3.11.0' }
 awsLambdaCore = { strictly = '1.2.1' }
 mockito = { strictly = '4.5.1' }
