@@ -1,8 +1,10 @@
 package nva.commons.core.paths;
 
 import static java.util.Objects.nonNull;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,6 +13,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.StringUtils;
 
@@ -36,10 +39,10 @@ public final class UnixPath {
     public static UnixPath of(String... path) {
         Stream<String> pathElements = extractAllPathElements(path);
         List<String> pathElementsList = addRootIfPresentInOriginalPath(pathElements, path)
-            .collect(Collectors.toList());
+                .collect(Collectors.toList());
         return pathIsEmpty(pathElementsList)
-                   ? EMPTY_PATH
-                   : new UnixPath(pathElementsList);
+                ? EMPTY_PATH
+                : new UnixPath(pathElementsList);
     }
 
     @JsonCreator
@@ -47,14 +50,55 @@ public final class UnixPath {
         return UnixPath.of(childPath);
     }
 
+    private static Stream<String> prependRoot(Stream<String> pathElements) {
+        return Stream.concat(Stream.of(ROOT), pathElements);
+    }
+
+    private static Stream<String> extractAllPathElements(String[] path) {
+        Stream<String> nonNullPathElements = discardNullArrayElements(path);
+        return splitInputElementsContainingPathDelimiter(nonNullPathElements);
+    }
+
+    private static Stream<String> splitInputElementsContainingPathDelimiter(Stream<String> pathElements) {
+        return pathElements
+                .map(UnixPath::splitCompositePathElements)
+                .flatMap(Arrays::stream)
+                .filter(StringUtils::isNotBlank);
+    }
+
+    private static Stream<String> discardNullArrayElements(String[] path) {
+        return Optional.ofNullable(path)
+                .stream()
+                .flatMap(Arrays::stream)
+                .filter(Objects::nonNull);
+    }
+
+    //composite path element is an element of the form /folder1/folder2
+    private static String[] splitCompositePathElements(String pathElement) {
+        return pathElement.split(PATH_DELIMITER);
+    }
+
+    private static Stream<String> addRootIfPresentInOriginalPath(Stream<String> pathElements, String[] path) {
+        return pathBeginsWithRoot(path) ? prependRoot(pathElements) : pathElements;
+    }
+
+    private static boolean pathBeginsWithRoot(String[] path) {
+        return nonNull(path) && path.length > 0 && nonNull(path[0]) && path[0].startsWith(ROOT);
+    }
+
+    private static boolean pathIsEmpty(List<String> path) {
+        return Objects.isNull(path) || path.isEmpty();
+    }
+
+
     public boolean isRoot() {
         return this.equals(ROOT_PATH);
     }
 
     public Optional<UnixPath> getParent() {
         return path.size() > 1
-                   ? Optional.of(new UnixPath(path.subList(0, lastPathElementIndex())))
-                   : Optional.empty();
+                ? Optional.of(new UnixPath(path.subList(0, lastPathElementIndex())))
+                : Optional.empty();
     }
 
     @JacocoGenerated
@@ -110,58 +154,18 @@ public final class UnixPath {
 
     public UnixPath addRoot() {
         return isAbsolute()
-                   ? this
-                   : ROOT_PATH.addChild(this);
+                ? this
+                : ROOT_PATH.addChild(this);
     }
-    
+
     public UnixPath removeRoot() {
         return isAbsolute()
-                   ? new UnixPath(this.path.subList(1, path.size()))
-                   : this;
+                ? new UnixPath(this.path.subList(1, path.size()))
+                : this;
     }
-    
+
     public boolean isEmptyPath() {
         return pathIsEmpty(path);
-    }
-    
-    private static Stream<String> prependRoot(Stream<String> pathElements) {
-        return Stream.concat(Stream.of(ROOT), pathElements);
-    }
-    
-    private static Stream<String> extractAllPathElements(String[] path) {
-        Stream<String> nonNullPathElements = discardNullArrayElements(path);
-        return splitInputElementsContainingPathDelimiter(nonNullPathElements);
-    }
-    
-    private static Stream<String> splitInputElementsContainingPathDelimiter(Stream<String> pathElements) {
-        return pathElements
-            .map(UnixPath::splitCompositePathElements)
-            .flatMap(Arrays::stream)
-            .filter(StringUtils::isNotBlank);
-    }
-
-    private static Stream<String> discardNullArrayElements(String[] path) {
-        return Optional.ofNullable(path)
-            .stream()
-            .flatMap(Arrays::stream)
-            .filter(Objects::nonNull);
-    }
-
-    //composite path element is an element of the form /folder1/folder2
-    private static String[] splitCompositePathElements(String pathElement) {
-        return pathElement.split(PATH_DELIMITER);
-    }
-
-    private static Stream<String> addRootIfPresentInOriginalPath(Stream<String> pathElements, String[] path) {
-        return pathBeginsWithRoot(path) ? prependRoot(pathElements) : pathElements;
-    }
-
-    private static boolean pathBeginsWithRoot(String[] path) {
-        return nonNull(path) && path.length > 0 && nonNull(path[0]) && path[0].startsWith(ROOT);
-    }
-
-    private static boolean pathIsEmpty(List<String> path) {
-        return Objects.isNull(path) || path.isEmpty();
     }
 
     private boolean isAbsolute() {
@@ -179,4 +183,15 @@ public final class UnixPath {
     private String avoidWritingRootPathTwice() {
         return ROOT + formatPathAsString(path.subList(1, path.size()));
     }
+
+    public boolean startsWith(UnixPath ancestor) {
+        var currentPath = this;
+        var foundAncestor = currentPath.equals(ancestor);
+        while (!foundAncestor && !currentPath.isEmptyPath()) {
+            currentPath = currentPath.getParent().orElse(UnixPath.EMPTY_PATH);
+            foundAncestor = currentPath.equals(ancestor);
+        }
+        return foundAncestor;
+    }
+
 }

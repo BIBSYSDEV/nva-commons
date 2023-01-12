@@ -1,25 +1,27 @@
 package nva.commons.core.paths;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+
+import java.util.Optional;
+
 import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
-import static nva.commons.core.paths.UnixPath.PATH_DELIMITER;
+import static nva.commons.core.paths.UnixPath.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsSame.sameInstance;
 import static org.hamcrest.text.IsEmptyString.emptyString;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Optional;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
 
 class UnixPathTest {
     
@@ -252,7 +254,39 @@ class UnixPathTest {
         String actualPath = UnixPath.of(parentFolder).addChild(childFolder).toString();
         assertThat(actualPath, is(equalTo(expectedPath)));
     }
-    
+
+    @Test
+    void shouldReturnStartsWithTrueWhenOnePathIsAncestorOfOther(){
+        var grandparent = UnixPath.of("/some");
+        var parent = grandparent.addChild("parent");
+        var child = parent.addChild("child");
+        assertThatAllAncestorRelationsAreRecognized(grandparent, parent, child);
+        assertThatNonAncestorRelationsAreNotRecognizedAsAncestorRelations(parent, child);
+        assertThatAncestorRelationsBetweenDefaultPathsAreRecognizedAsTheyShould();
+    }
+
+    private static void assertThatAncestorRelationsBetweenDefaultPathsAreRecognizedAsTheyShould() {
+
+        assertThat(EMPTY_PATH.startsWith(EMPTY_PATH),is(true));
+        assertThat(ROOT_PATH.startsWith(EMPTY_PATH),is(true));
+    }
+
+    private static void assertThatNonAncestorRelationsAreNotRecognizedAsAncestorRelations(UnixPath parent,
+                                                                                          UnixPath child) {
+        assertThat(parent.startsWith(child),is(false));
+        assertThat(EMPTY_PATH.startsWith(ROOT_PATH),is(false));
+
+    }
+
+    private static void assertThatAllAncestorRelationsAreRecognized(UnixPath grandparent, UnixPath parent, UnixPath child) {
+        assertThat(parent.startsWith(grandparent),is(true));
+        assertThat(child.startsWith(grandparent),is(true));
+        assertThat(child.startsWith(parent),is(true));
+        assertThat(child.startsWith(UnixPath.ROOT_PATH),is(true));
+        assertThat(child.startsWith(UnixPath.EMPTY_PATH),is(true));
+
+    }
+
     private static class ClassWithUnixPath {
         
         private UnixPath field;

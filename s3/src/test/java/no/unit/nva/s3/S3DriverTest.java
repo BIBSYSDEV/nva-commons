@@ -1,13 +1,18 @@
 package no.unit.nva.s3;
 
-import static no.unit.nva.s3.S3Driver.S3_SCHEME;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.StringStartsWith.startsWith;
+import net.datafaker.Faker;
+import no.unit.nva.stubs.FakeS3Client;
+import nva.commons.core.ioutils.IoUtils;
+import nva.commons.core.paths.UnixPath;
+import nva.commons.core.paths.UriWrapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import software.amazon.awssdk.services.s3.S3Client;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,16 +23,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
-import net.datafaker.Faker;
-import no.unit.nva.stubs.FakeS3Client;
-import nva.commons.core.ioutils.IoUtils;
-import nva.commons.core.paths.UnixPath;
-import nva.commons.core.paths.UriWrapper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import software.amazon.awssdk.services.s3.S3Client;
+
+import static no.unit.nva.s3.S3Driver.S3_SCHEME;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.StringStartsWith.startsWith;
 
 class S3DriverTest {
     
@@ -223,10 +227,13 @@ class S3DriverTest {
         assertThat(actualContent, is(equalTo(input)));
     }
     
-    @Test
-    void shouldListFilesForFolder() throws IOException {
-        var expectedFile = s3Driver.insertFile(randomPath(), randomString());
-        var unexpectedFile = s3Driver.insertFile(randomPath(), randomString());
+    @ParameterizedTest(name = "when selected folder is {0} and irrelevant folder is {1}")
+    @DisplayName("should list files for folder")
+    @CsvSource({"folder, folder-not-wanted", //unwanted folder name starts with the wanted folder name
+                "folder, not-wanted-folder"    })
+    void shouldListFilesForFolder(String wantedFolder, String unwantedFolder) throws IOException {
+        var expectedFile = s3Driver.insertFile(UnixPath.of(wantedFolder).addChild(randomString()), randomString());
+        var unexpectedFile = s3Driver.insertFile(UnixPath.of(unwantedFolder).addChild(randomString()), randomString());
     
         var expectedFilepath = UriWrapper.fromUri(expectedFile).getPath().removeRoot();
         var unexpectedFilepath = UriWrapper.fromUri(unexpectedFile).getPath().removeRoot();
@@ -235,7 +242,8 @@ class S3DriverTest {
         assertThat(files, contains(expectedFilepath));
         assertThat(files, not(contains(unexpectedFilepath)));
     }
-    
+
+
     @Test
     void shouldAcceptEmptyPathAndListAllBucketFilesWhenInputIsEmptyPath() throws IOException {
         var files = Stream.of(

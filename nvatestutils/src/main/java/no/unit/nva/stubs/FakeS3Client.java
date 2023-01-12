@@ -139,7 +139,7 @@ public class FakeS3Client implements S3Client {
         
         return parentFolder.isEmptyPath()
                || parentFolder.isRoot()
-               || filePath.toString().startsWith(parentFolder.toString());
+               || filePath.startsWith(parentFolder);
     }
     
     private int calculateEndIndex(List<String> fileKeys, String marker, Integer pageSize) {
