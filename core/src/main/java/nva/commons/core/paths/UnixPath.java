@@ -1,21 +1,15 @@
 package nva.commons.core.paths;
 
-import static java.util.Objects.nonNull;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import nva.commons.core.JacocoGenerated;
+import nva.commons.core.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import nva.commons.core.JacocoGenerated;
-import nva.commons.core.StringUtils;
+import static java.util.Objects.nonNull;
 
 /**
  * Class for manipulating Unix-like paths. Provides a standard way to add children to the paths so that we do not have
@@ -168,6 +162,16 @@ public final class UnixPath {
         return pathIsEmpty(path);
     }
 
+    public boolean startsWith(UnixPath ancestor) {
+        var currentPath = this;
+        var foundAncestor = currentPath.equals(ancestor);
+        while (!foundAncestor && !currentPath.isEmptyPath()) {
+            currentPath = currentPath.getParent().orElse(UnixPath.EMPTY_PATH);
+            foundAncestor = currentPath.equals(ancestor);
+        }
+        return foundAncestor;
+    }
+
     private boolean isAbsolute() {
         return !isEmptyPath() && ROOT.equals(path.get(0));
     }
@@ -184,14 +188,6 @@ public final class UnixPath {
         return ROOT + formatPathAsString(path.subList(1, path.size()));
     }
 
-    public boolean startsWith(UnixPath ancestor) {
-        var currentPath = this;
-        var foundAncestor = currentPath.equals(ancestor);
-        while (!foundAncestor && !currentPath.isEmptyPath()) {
-            currentPath = currentPath.getParent().orElse(UnixPath.EMPTY_PATH);
-            foundAncestor = currentPath.equals(ancestor);
-        }
-        return foundAncestor;
-    }
+
 
 }
