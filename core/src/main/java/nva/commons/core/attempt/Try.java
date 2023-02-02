@@ -5,6 +5,8 @@ import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static java.util.Objects.isNull;
+
 /**
  * Utility class for handling checked exceptions in map functions. Check tests for examples
  *
@@ -76,6 +78,13 @@ public abstract class Try<T> {
     public abstract <E extends Exception> Try<Void> forEach(ConsumerWithException<T, E> consumer);
 
     public abstract <E extends Exception> T orElseThrow(Function<Failure<T>, E> action) throws E;
+
+    public T orElseThrow(RuntimeException e)  {
+        if(isNull(e)){
+            throw new IllegalStateException("Supplied exception is null");
+        }
+        return orElseThrow(fail -> e);
+    }
 
     public abstract T orElseThrow();
 

@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
@@ -34,7 +35,7 @@ public class FailureTest {
         Executable action =
             () -> Try.of(sample)
                 .map(i -> throwCheckedException(NOT_EXPECTED_MESSAGE))
-                .orElseThrow(null);
+                .orElseThrow((Function<Failure<Integer>, ? extends Exception>) null);
         IllegalStateException exception = assertThrows(IllegalStateException.class, action);
         assertThat(exception.getMessage(), is(equalTo(Failure.NULL_ACTION_MESSAGE)));
     }
