@@ -77,6 +77,10 @@ public abstract class Try<T> {
 
     public abstract <E extends Exception> T orElseThrow(Function<Failure<T>, E> action) throws E;
 
+    public T orElseThrow(RuntimeException e)  {
+        return orElseThrow(fail -> e);
+    }
+
     public abstract T orElseThrow();
 
     public abstract <E extends Exception> T orElse(FunctionWithException<Failure<T>, T, E> action) throws E;

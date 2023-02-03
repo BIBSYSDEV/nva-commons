@@ -75,7 +75,6 @@ public class Failure<T> extends Try<T> {
             throw new IllegalStateException(NULL_ACTION_MESSAGE);
         }
     }
-
     @Override
     public <E extends Exception> Optional<T> toOptional(ConsumerWithException<Failure<T>, E> action) throws E {
         action.consume(this);
