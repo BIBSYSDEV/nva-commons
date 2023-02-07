@@ -13,6 +13,7 @@ include 'identifiers'
 include 'dynamodb'
 include 's3'
 include 'nvatestutils'
+include 'pagination'
 
 
 

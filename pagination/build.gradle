@@ -1,0 +1,27 @@
+plugins {
+    id 'nvacommons.java-conventions'
+    id 'nvacommons.publish-maven'
+}
+
+dependencies {
+
+    implementation project (":core")
+    compileOnly libs.jackson.core
+    compileOnly libs.jackson.databind
+    compileOnly libs.jackson.annotations
+    compileOnly libs.jackson.datatype.jdk8
+    compileOnly libs.jackson.datatype.jsr310
+    compileOnly libs.zalando
+    implementation libs.jackson.datatype.problem
+
+    testImplementation project (":nvatestutils")
+    testImplementation libs.jackson.core
+    testImplementation libs.jackson.databind
+    testImplementation libs.jackson.annotations
+    testImplementation libs.jackson.datatype.jdk8
+    testImplementation libs.jackson.datatype.jsr310
+    testImplementation libs.jackson.datatype.problem
+
+
+    testImplementation libs.bundles.testing
+}
