@@ -41,71 +41,7 @@ class FakeS3ClientTest {
     public static final int SOME_PAGE_SIZE = 10;
     public static final String LIST_FROM_BEGINNING = null;
 
-    private static ListObjectsRequest createListObjectsRequest(String bucket,
-                                                               UnixPath folder,
-                                                               int pageSize,
-                                                               String listingStartPoint) {
-        return ListObjectsRequest.builder()
-                .bucket(bucket)
-                .prefix(folder.toString())
-                .maxKeys(pageSize)
-                .marker(listingStartPoint)
-                .build();
-    }
 
-    private static ListObjectsRequest createListObjectsRequest(String bucket, UnixPath folder) {
-        return createListObjectsRequest(bucket, folder, SOME_PAGE_SIZE,LIST_FROM_BEGINNING);
-    }
-
-
-    private static UnixPath insertFileToS3UnderSubfolder(S3Client s3Client,
-                                                         String bucket,
-                                                         UnixPath subfolder) {
-        var filePath = subfolder.addChild(randomString()).addChild(randomString());
-        var putRequest = insertFileToS3(bucket, filePath);
-        s3Client.putObject(putRequest, RequestBody.fromBytes(randomString().getBytes()));
-        return filePath;
-    }
-
-    private static UnixPath insertRandomFileToS3(S3Client s3Client, String bucket) {
-        var filePath = UnixPath.of(randomString(), randomString(), randomString());
-        var putRequest = insertFileToS3(bucket, filePath);
-        s3Client.putObject(putRequest, RequestBody.fromBytes(randomString().getBytes()));
-        return filePath;
-    }
-
-    private static PutObjectRequest insertFileToS3(String bucket, UnixPath filePath) {
-        return PutObjectRequest.builder()
-                .bucket(bucket)
-                .key(filePath.toString())
-                .build();
-    }
-
-    private static ArrayList<String> fetchAllExpectedFilesUsingPagination(FakeS3Client s3Client,
-                                                                          String bucket,
-                                                                          UnixPath expectedFolder) {
-        final int smallPage = 3;
-
-        var listObjectRequest =
-                createListObjectsRequest(bucket, expectedFolder, smallPage, LIST_FROM_BEGINNING);
-        var listingResult = s3Client.listObjects(listObjectRequest);
-        var allListedKeys = new ArrayList<>(extractListedKeys(listingResult));
-
-        while (listingResult.isTruncated()) {
-            listObjectRequest =
-                    createListObjectsRequest(bucket, expectedFolder, smallPage, listingResult.marker());
-            listingResult = s3Client.listObjects(listObjectRequest);
-            allListedKeys.addAll(extractListedKeys(listingResult));
-        }
-        return allListedKeys;
-    }
-
-    private static List<String> extractListedKeys(ListObjectsResponse listingResult) {
-        return listingResult.contents()
-                .stream()
-                .map(S3Object::key)
-                .collect(Collectors.toList());
-    }
 
     @Test
     void putObjectMakesContentAvailableForGetting() {
@@ -180,6 +116,73 @@ class FakeS3ClientTest {
         assertThat(listedFiles, everyItem(containsString(expectedFolder.toString())));
         assertThat(listedFiles.size(), is(equalTo(numberOfExpectedFiles)));
 
+    }
+
+
+    private static ListObjectsRequest createListObjectsRequest(String bucket,
+                                                               UnixPath folder,
+                                                               int pageSize,
+                                                               String listingStartPoint) {
+        return ListObjectsRequest.builder()
+                .bucket(bucket)
+                .prefix(folder.toString())
+                .maxKeys(pageSize)
+                .marker(listingStartPoint)
+                .build();
+    }
+
+    private static ListObjectsRequest createListObjectsRequest(String bucket, UnixPath folder) {
+        return createListObjectsRequest(bucket, folder, SOME_PAGE_SIZE,LIST_FROM_BEGINNING);
+    }
+
+
+    private static UnixPath insertFileToS3UnderSubfolder(S3Client s3Client,
+                                                         String bucket,
+                                                         UnixPath subfolder) {
+        var filePath = subfolder.addChild(randomString()).addChild(randomString());
+        var putRequest = insertFileToS3(bucket, filePath);
+        s3Client.putObject(putRequest, RequestBody.fromBytes(randomString().getBytes()));
+        return filePath;
+    }
+
+    private static UnixPath insertRandomFileToS3(S3Client s3Client, String bucket) {
+        var filePath = UnixPath.of(randomString(), randomString(), randomString());
+        var putRequest = insertFileToS3(bucket, filePath);
+        s3Client.putObject(putRequest, RequestBody.fromBytes(randomString().getBytes()));
+        return filePath;
+    }
+
+    private static PutObjectRequest insertFileToS3(String bucket, UnixPath filePath) {
+        return PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(filePath.toString())
+                .build();
+    }
+
+    private static ArrayList<String> fetchAllExpectedFilesUsingPagination(FakeS3Client s3Client,
+                                                                          String bucket,
+                                                                          UnixPath expectedFolder) {
+        final int smallPage = 3;
+
+        var listObjectRequest =
+                createListObjectsRequest(bucket, expectedFolder, smallPage, LIST_FROM_BEGINNING);
+        var listingResult = s3Client.listObjects(listObjectRequest);
+        var allListedKeys = new ArrayList<>(extractListedKeys(listingResult));
+
+        while (listingResult.isTruncated()) {
+            listObjectRequest =
+                    createListObjectsRequest(bucket, expectedFolder, smallPage, listingResult.marker());
+            listingResult = s3Client.listObjects(listObjectRequest);
+            allListedKeys.addAll(extractListedKeys(listingResult));
+        }
+        return allListedKeys;
+    }
+
+    private static List<String> extractListedKeys(ListObjectsResponse listingResult) {
+        return listingResult.contents()
+                .stream()
+                .map(S3Object::key)
+                .collect(Collectors.toList());
     }
 
     private void createAMixOfExpectedAndUnexpectedFiles(FakeS3Client s3Client,
