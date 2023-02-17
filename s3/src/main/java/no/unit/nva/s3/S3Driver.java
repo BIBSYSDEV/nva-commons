@@ -205,8 +205,7 @@ public class S3Driver {
     public ListingResult listFiles(UnixPath folder, String listingStartingPoint, int responseSize) {
         ListObjectsResponse listingResult = fetchNewResultsBatch(folder, listingStartingPoint, responseSize);
         List<UnixPath> files = extractResultsFromResponse(listingResult);
-        String newListingStartingPoint = extractNextListingStartingPoint(listingResult);
-        return new ListingResult(files, newListingStartingPoint, listingResult.isTruncated());
+        return new ListingResult(files, listingResult.marker(), listingResult.isTruncated());
     }
     
     public Optional<String> getUncompressedFile(UnixPath file) {
@@ -305,12 +304,7 @@ public class S3Driver {
         return filename.endsWith(GZIP_ENDING);
     }
     
-    private String extractNextListingStartingPoint(ListObjectsResponse resultSet) {
-        if (!resultSet.contents().isEmpty()) {
-            return lastObjectKeyInReturnedResults(resultSet);
-        }
-        return null;
-    }
+
     
     private GetObjectRequest createGetObjectRequest(UnixPath file) {
         return GetObjectRequest.builder()
@@ -318,11 +312,7 @@ public class S3Driver {
                    .key(file.toString())
                    .build();
     }
-    
-    private String lastObjectKeyInReturnedResults(ListObjectsResponse result) {
-        return result.contents().get(result.contents().size() - 1).key();
-    }
-    
+
     private List<UnixPath> extractResultsFromResponse(ListObjectsResponse result) {
         return result.contents().stream()
                    .map(S3Object::key)

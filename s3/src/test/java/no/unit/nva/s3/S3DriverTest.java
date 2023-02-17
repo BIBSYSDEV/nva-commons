@@ -37,6 +37,7 @@ class S3DriverTest {
     private static final Faker FAKER = Faker.instance();
     private static final String SAMPLE_BUCKET = "sampleBucket";
     private static final String SOME_PATH = randomString();
+    public static final String MARKER_INDICATING_END_OF_LISTING = null;
     private S3Driver s3Driver;
     private S3Client s3Client;
     
@@ -71,7 +72,7 @@ class S3DriverTest {
         assertThat(firstBatch.isTruncated(), is(true));
         
         ListingResult secondBatch = s3Driver.listFiles(UnixPath.of(SOME_PATH), firstFilePath.toString(), 1);
-        assertThat(secondBatch.getListingStartingPoint(), is(equalTo(secondFilePath.toString())));
+        assertThat(secondBatch.getListingStartingPoint(), is(equalTo(MARKER_INDICATING_END_OF_LISTING)));
         assertThat(secondBatch.isTruncated(), is(false));
     }
     
