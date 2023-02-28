@@ -1,7 +1,22 @@
 package no.unit.nva.stubs;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
+import nva.commons.core.JacocoGenerated;
+import nva.commons.core.ioutils.IoUtils;
+import nva.commons.core.paths.UnixPath;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.core.sync.ResponseTransformer;
+import software.amazon.awssdk.http.AbortableInputStream;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
+import software.amazon.awssdk.services.s3.model.ListObjectsResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -17,27 +32,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import nva.commons.core.JacocoGenerated;
-import nva.commons.core.ioutils.IoUtils;
-import nva.commons.core.paths.UnixPath;
-import software.amazon.awssdk.awscore.exception.AwsServiceException;
-import software.amazon.awssdk.core.exception.SdkClientException;
-import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.core.sync.ResponseTransformer;
-import software.amazon.awssdk.http.AbortableInputStream;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
-import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
-import software.amazon.awssdk.services.s3.model.ListObjectsResponse;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
-import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
-import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectResponse;
-import software.amazon.awssdk.services.s3.model.S3Exception;
-import software.amazon.awssdk.services.s3.model.S3Object;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @JacocoGenerated
 public class FakeS3Client implements S3Client {
@@ -122,18 +118,19 @@ public class FakeS3Client implements S3Client {
     }
 
     @Override
-    public ListObjectsV2Response listObjectsV2(ListObjectsV2Request v2Request)
-            throws NoSuchBucketException, AwsServiceException, SdkClientException, S3Exception {
+    public ListObjectsV2Response listObjectsV2(ListObjectsV2Request v2Request){
         var oldRequest = ListObjectsRequest.builder()
                 .bucket(v2Request.bucket())
                 .marker(v2Request.continuationToken())
                 .maxKeys(v2Request.maxKeys())
+                .prefix(v2Request.prefix())
                 .build();
         var oldResponse= listObjects(oldRequest);
         return ListObjectsV2Response
                 .builder()
                 .contents(oldResponse.contents())
                 .isTruncated(oldResponse.isTruncated())
+                .continuationToken(v2Request.continuationToken())
                 .nextContinuationToken(oldResponse.nextMarker())
                 .build();
     }
