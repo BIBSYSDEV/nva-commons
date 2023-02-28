@@ -64,22 +64,7 @@ public class FakeS3Client implements S3Client {
                 .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
     }
 
-    private static ByteBuffer readFileFromResources(String filename) {
-        final var inputStream = IoUtils.inputStreamFromResources(filename);
-        return inputSteamToByteBuffer(inputStream);
-    }
 
-    private static ByteBuffer inputSteamToByteBuffer(InputStream inputStream) {
-        return ByteBuffer.wrap(readAllBytes(inputStream));
-    }
-
-    private static byte[] readAllBytes(InputStream inputStream) {
-        try {
-            return inputStream.readAllBytes();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     //TODO: fix if necessary
     @SuppressWarnings("PMD.CloseResource")
@@ -135,12 +120,6 @@ public class FakeS3Client implements S3Client {
                 .build();
     }
 
-    private String calculateNestStartListingPoint(List<String> fileKeys,
-                                                  int excludedEndIndex) {
-        return excludedEndIndex >= fileKeys.size()
-                ? null
-                : fileKeys.get(excludedEndIndex-1);
-    }
 
     //TODO: fix if necessary
     @SuppressWarnings("PMD.CloseResource")
@@ -160,6 +139,28 @@ public class FakeS3Client implements S3Client {
     @Override
     public void close() {
 
+    }
+    private static ByteBuffer readFileFromResources(String filename) {
+        final var inputStream = IoUtils.inputStreamFromResources(filename);
+        return inputSteamToByteBuffer(inputStream);
+    }
+
+    private static ByteBuffer inputSteamToByteBuffer(InputStream inputStream) {
+        return ByteBuffer.wrap(readAllBytes(inputStream));
+    }
+
+    private static byte[] readAllBytes(InputStream inputStream) {
+        try {
+            return inputStream.readAllBytes();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    private String calculateNestStartListingPoint(List<String> fileKeys,
+      int excludedEndIndex) {
+        return excludedEndIndex >= fileKeys.size()
+          ? null
+          : fileKeys.get(excludedEndIndex-1);
     }
 
     private boolean filePathIsInSpecifiedParentFolder(String filePathString, ListObjectsRequest listObjectsRequest) {
