@@ -61,8 +61,8 @@ public class PropertyValuePair {
     public List<PropertyValuePair> children() {
         List<PropertyDescriptor> properties = collectPropertyDescriptors();
         return properties.stream()
-            .map(this::extractFieldValue)
-            .collect(Collectors.toList());
+                   .map(this::extractFieldValue)
+                   .collect(Collectors.toList());
     }
 
     public boolean isBaseType() {
@@ -116,8 +116,8 @@ public class PropertyValuePair {
 
     private boolean classShouldBeChecked(Set<Class<?>> stopRecursionClasses) {
         return stopRecursionClasses
-            .stream()
-            .noneMatch(stopRecursionClass -> stopRecursionClass.isInstance(value));
+                   .stream()
+                   .noneMatch(stopRecursionClass -> stopRecursionClass.isInstance(value));
     }
 
     private boolean fieldShouldBeChecked(Set<String> ignoreFields) {
@@ -143,7 +143,7 @@ public class PropertyValuePair {
     private List<PropertyDescriptor> collectPropertyDescriptors() {
         BeanInfo beanInfo = getBeanInfo(value);
         return Arrays.stream(beanInfo.getPropertyDescriptors())
-            .collect(Collectors.toList());
+                   .collect(Collectors.toList());
     }
 
     private BeanInfo getBeanInfo(Object actual) {

@@ -45,8 +45,8 @@ class FakeAuthServerTest {
         authServer.setUserBase(Map.of(userAccessToken, expectedUserInfo));
         var getUri = UriWrapper.fromUri(authServer.getServerUri()).addChild(OAUTH_USER_INFO_ENDPOINT).getUri();
         var request = HttpRequest.newBuilder(getUri)
-            .header(HttpHeaders.AUTHORIZATION, bearerToken(userAccessToken))
-            .build();
+                          .header(HttpHeaders.AUTHORIZATION, bearerToken(userAccessToken))
+                          .build();
         var response = httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
         assertThat(response.statusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
         var actualUserInfo = CognitoUserInfo.fromString(response.body());
@@ -63,9 +63,9 @@ class FakeAuthServerTest {
                                                                   exampleResourcePath);
         var requestUri = UriWrapper.fromUri(authServer.getServerUri()).addChild(exampleResourcePath).getUri();
         var request = HttpRequest.newBuilder(requestUri)
-            .header(HttpHeaders.AUTHORIZATION, bearerToken(accessToken))
-            .GET()
-            .build();
+                          .header(HttpHeaders.AUTHORIZATION, bearerToken(accessToken))
+                          .GET()
+                          .build();
         var response = httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
         assertThat(response.statusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
         assertThat(response.body(), containsString(protectedResource));
@@ -81,9 +81,9 @@ class FakeAuthServerTest {
                                           exampleResourcePath);
         var requestUri = UriWrapper.fromUri(authServer.getServerUri()).addChild(exampleResourcePath).getUri();
         var request = HttpRequest.newBuilder(requestUri)
-            .header(HttpHeaders.AUTHORIZATION, bearerToken(randomString()))
-            .GET()
-            .build();
+                          .header(HttpHeaders.AUTHORIZATION, bearerToken(randomString()))
+                          .GET()
+                          .build();
         var response = httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
         assertThat(response.statusCode(), is(equalTo(WIREMOCK_DEFAULT_FAILURE_STATUS_CODE)));
     }

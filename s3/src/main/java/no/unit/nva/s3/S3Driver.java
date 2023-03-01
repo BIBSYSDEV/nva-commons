@@ -38,7 +38,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 //TODO: Address God Class issue
 @SuppressWarnings("PMD.GodClass")
 public class S3Driver {
-    
+
     public static final String GZIP_ENDING = ".gz";
     public static final String AWS_ACCESS_KEY_ID_ENV_VARIABLE_NAME = "AWS_ACCESS_KEY_ID";
     public static final String AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME = "AWS_SECRET_ACCESS_KEY";
@@ -56,17 +56,17 @@ public class S3Driver {
     private static final Environment ENVIRONMENT = new Environment();
     private final S3Client client;
     private final String bucketName;
-    
+
     @JacocoGenerated
     public S3Driver(String bucketName) {
         this(defaultS3Client().build(), bucketName);
     }
-    
+
     public S3Driver(S3Client s3Client, String bucketName) {
         this.client = s3Client;
         this.bucketName = bucketName;
     }
-    
+
     @JacocoGenerated
     public static S3Driver fromPermanentCredentialsInEnvironment(String bucketName) {
         verifyThatRequiredEnvVariablesAreInPlace();
@@ -75,17 +75,17 @@ public class S3Driver {
                                 .build();
         return new S3Driver(s3Client, bucketName);
     }
-    
+
     @JacocoGenerated
-    private static SdkHttpClient httpClientForConcurrentQueries() {
-        return ApacheHttpClient.builder()
-                   .useIdleConnectionReaper(true)
-                   .maxConnections(MAX_CONNECTIONS)
-                   .connectionMaxIdleTime(Duration.ofMinutes(IDLE_TIME))
-                   .connectionTimeout(Duration.ofMinutes(TIMEOUT_TIME))
-                   .build();
+    public static S3ClientBuilder defaultS3Client() {
+        Region region = ENVIRONMENT.readEnvOpt(AWS_REGION_ENV_VARIABLE)
+                            .map(Region::of)
+                            .orElse(Region.EU_WEST_1);
+        return S3Client.builder()
+                   .region(region)
+                   .httpClient(httpClientForConcurrentQueries());
     }
-    
+
     /**
      * Inserts the content of the string in the specified location.If the filename is gz, it compresses the contents.
      *
@@ -102,12 +102,12 @@ public class S3Driver {
         }
         return s3BucketUri().addChild(fullPath).getUri();
     }
-    
+
     public URI insertFile(UnixPath fullPath, InputStream content) throws IOException {
         client.putObject(newPutObjectRequest(fullPath), createRequestBody(content));
         return s3BucketUri().addChild(fullPath).getUri();
     }
-    
+
     /**
      * Method for creating event bodies in S3 bucket.
      *
@@ -121,7 +121,7 @@ public class S3Driver {
         insertCompressedFile(filePath, content);
         return s3BucketUri().addChild(filePath).getUri();
     }
-    
+
     /**
      * Method for reading event bodies from S3 bucket.
      *
@@ -132,19 +132,19 @@ public class S3Driver {
         UnixPath filePath = UriWrapper.fromUri(uri).toS3bucketPath();
         return getFile(filePath);
     }
-    
+
     @JacocoGenerated
     @Deprecated
     public URI insertAndCompressFiles(UnixPath s3Folder, List<String> content) throws IOException {
         return insertAndCompressObjects(s3Folder, content);
     }
-    
+
     @JacocoGenerated
     @Deprecated
     public URI insertAndCompressFiles(List<String> content) throws IOException {
         return insertAndCompressObjects(content);
     }
-    
+
     public URI insertAndCompressObjects(UnixPath s3Folder, List<String> content) throws IOException {
         UnixPath path = filenameForZippedFile(s3Folder);
         PutObjectRequest putObjectRequest = newPutObjectRequest(path);
@@ -154,42 +154,36 @@ public class S3Driver {
         }
         return s3BucketUri().addChild(path).getUri();
     }
-    
+
     public URI insertAndCompressObjects(List<String> content) throws IOException {
         return insertAndCompressObjects(UnixPath.EMPTY_PATH, content);
     }
-    
+
     public List<String> getFiles(UnixPath folder) {
         return listAllFiles(folder)
                    .stream()
                    .map(this::getFile)
                    .collect(Collectors.toList());
     }
-    
+
     public List<UnixPath> listAllFiles(URI s3Uri) {
         return listAllFiles(UriWrapper.fromUri(s3Uri).toS3bucketPath());
     }
-    
+
     public List<UnixPath> listAllFiles(UnixPath folder) {
-    
+
         ListingResult result = ListingResult.emptyResult();
         do {
             var currentStartingPoint = result.getListingStartingPoint();
             var newBatch = listFiles(calculateListingFolder(folder),
-                currentStartingPoint,
-                MAX_RESPONSE_SIZE_FOR_S3_LISTING);
+                                     currentStartingPoint,
+                                     MAX_RESPONSE_SIZE_FOR_S3_LISTING);
             result = result.add(newBatch);
         } while (result.isTruncated());
-    
+
         return result.getFiles();
     }
-    
-    private UnixPath calculateListingFolder(UnixPath folder) {
-        return isNull(folder) || folder.isEmptyPath() || folder.isRoot()
-                   ? UnixPath.EMPTY_PATH
-                   : folder;
-    }
-    
+
     /**
      * Returns a partial result of the files contained in the specified folder. The listing starts from the
      * {@code listingStartingPoint}  if is not null or from the beginning if it is null. After a call the next starting
@@ -207,19 +201,19 @@ public class S3Driver {
         List<UnixPath> files = extractResultsFromResponse(listingResult);
         return new ListingResult(files, listingResult.marker(), listingResult.isTruncated());
     }
-    
+
     public Optional<String> getUncompressedFile(UnixPath file) {
         GetObjectRequest getObjectRequest = createGetObjectRequest(file);
         ResponseBytes<GetObjectResponse> response = fetchObject(getObjectRequest);
         return attempt(response::asUtf8String).toOptional();
     }
-    
+
     public GZIPInputStream getCompressedFile(UnixPath file) throws IOException {
         GetObjectRequest getObjectRequest = createGetObjectRequest(file);
         ResponseInputStream<GetObjectResponse> response = client.getObject(getObjectRequest);
         return new GZIPInputStream(response);
     }
-    
+
     public String getFile(UnixPath filename) {
         if (isCompressed(filename.getLastPathElement())) {
             return attempt(() -> getCompressedFile(filename))
@@ -229,44 +223,50 @@ public class S3Driver {
             return getUncompressedFile(filename).orElseThrow();
         }
     }
-    
+
     @JacocoGenerated
-    public static S3ClientBuilder defaultS3Client() {
-        Region region = ENVIRONMENT.readEnvOpt(AWS_REGION_ENV_VARIABLE)
-                            .map(Region::of)
-                            .orElse(Region.EU_WEST_1);
-        return S3Client.builder()
-                   .region(region)
-                   .httpClient(httpClientForConcurrentQueries());
+    private static SdkHttpClient httpClientForConcurrentQueries() {
+        return ApacheHttpClient.builder()
+                   .useIdleConnectionReaper(true)
+                   .maxConnections(MAX_CONNECTIONS)
+                   .connectionMaxIdleTime(Duration.ofMinutes(IDLE_TIME))
+                   .connectionTimeout(Duration.ofMinutes(TIMEOUT_TIME))
+                   .build();
     }
-    
+
     @JacocoGenerated
     private static void verifyThatRequiredEnvVariablesAreInPlace() {
         ENVIRONMENT.readEnv(AWS_ACCESS_KEY_ID_ENV_VARIABLE_NAME);
         ENVIRONMENT.readEnv(AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME);
     }
-    
+
+    private UnixPath calculateListingFolder(UnixPath folder) {
+        return isNull(folder) || folder.isEmptyPath() || folder.isRoot()
+                   ? UnixPath.EMPTY_PATH
+                   : folder;
+    }
+
     private UriWrapper s3BucketUri() {
         return new UriWrapper(S3_SCHEME, bucketName);
     }
-    
+
     private void insertUncompressedFile(UnixPath fullPath, String content) throws IOException {
         try (InputStream inputStream = IoUtils.stringToStream(content)) {
             client.putObject(newPutObjectRequest(fullPath), createRequestBody(inputStream));
         }
     }
-    
+
     private void insertCompressedFile(UnixPath fullPath, String content) throws IOException {
         try (InputStream inputStream = compressContent(List.of(content))) {
             insertFile(fullPath, inputStream);
         }
     }
-    
+
     private UnixPath filenameForZippedFile(UnixPath s3Folder) {
         String folderPath = processPath(s3Folder);
         return UnixPath.of(folderPath, UUID.randomUUID() + GZIP_ENDING);
     }
-    
+
     private String processPath(UnixPath s3Folder) {
         String unixPath = s3Folder.toString()
                               .replaceAll(DOUBLE_BACKSLASH, UNIX_SEPARATOR)
@@ -275,37 +275,35 @@ public class S3Driver {
                    ? unixPath.substring(REMOVE_ROOT)
                    : unixPath;
     }
-    
+
     private RequestBody createRequestBody(InputStream input) throws IOException {
         var bytes = IoUtils.inputStreamToBytes(input);
         return RequestBody.fromBytes(bytes);
     }
-    
+
     private InputStream compressContent(List<String> content) throws IOException {
         return new StringCompressor(content).gzippedData();
     }
-    
+
     private ListObjectsResponse fetchNewResultsBatch(UnixPath folder, String listingStartingPoint, int responseSize) {
         ListObjectsRequest request = requestForListingFiles(folder, listingStartingPoint, responseSize);
         return client.listObjects(request);
     }
-    
+
     private ResponseBytes<GetObjectResponse> fetchObject(GetObjectRequest getObjectRequest) {
         return client.getObject(getObjectRequest, ResponseTransformer.toBytes());
     }
-    
+
     private String readCompressedStream(GZIPInputStream gzipInputStream) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(gzipInputStream))) {
             return reader.lines().collect(Collectors.joining(LINE_SEPARATOR));
         }
     }
-    
+
     private boolean isCompressed(String filename) {
         return filename.endsWith(GZIP_ENDING);
     }
-    
 
-    
     private GetObjectRequest createGetObjectRequest(UnixPath file) {
         return GetObjectRequest.builder()
                    .bucket(bucketName)
@@ -319,7 +317,7 @@ public class S3Driver {
                    .map(UnixPath::of)
                    .collect(Collectors.toList());
     }
-    
+
     private ListObjectsRequest requestForListingFiles(UnixPath folder, String startingPoint, int responseSize) {
         return ListObjectsRequest.builder()
                    .bucket(bucketName)
@@ -328,7 +326,7 @@ public class S3Driver {
                    .maxKeys(responseSize)
                    .build();
     }
-    
+
     private PutObjectRequest newPutObjectRequest(UnixPath fullPath) {
         return PutObjectRequest.builder()
                    .bucket(bucketName)

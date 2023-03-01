@@ -22,7 +22,7 @@ public class RequestBodyReader {
     @JacocoGenerated
     public static String requestBody(HttpRequest request) {
         BodyPublisher bodyPublisher = request.bodyPublisher()
-            .orElseThrow(() -> new IllegalStateException(NO_BODY_PUBLISHER_ERROR));
+                                          .orElseThrow(() -> new IllegalStateException(NO_BODY_PUBLISHER_ERROR));
         RequestBodySubscriber subscriber = new RequestBodySubscriber();
         bodyPublisher.subscribe(subscriber);
         return subscriber.getBody();

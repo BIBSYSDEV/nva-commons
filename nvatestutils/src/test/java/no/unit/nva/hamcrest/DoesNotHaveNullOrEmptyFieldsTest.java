@@ -40,13 +40,13 @@ public class DoesNotHaveNullOrEmptyFieldsTest {
     @Test
     public void matchesReturnsTrueWhenAllFieldsAreNotEmpty() {
         TestClass testObject = TestClass.newBuilder()
-            .withBoxedField(SOME_BOXED_VALUE)
-            .withStringField(SOME_STRING_VALUE)
-            .withCollectionField(NON_EMPTY_COLLECTION)
-            .withMapField(NON_EMPTY_MAP)
-            .withClassObject(SOME_OBJECT)
-            .withJsonNodeField(NON_EMPTY_JSON_NODE)
-            .build();
+                                   .withBoxedField(SOME_BOXED_VALUE)
+                                   .withStringField(SOME_STRING_VALUE)
+                                   .withCollectionField(NON_EMPTY_COLLECTION)
+                                   .withMapField(NON_EMPTY_MAP)
+                                   .withClassObject(SOME_OBJECT)
+                                   .withJsonNodeField(NON_EMPTY_JSON_NODE)
+                                   .build();
         assertTrue(matcher.matches(testObject));
         assertThat(testObject, doesNotHaveNullOrEmptyFields());
     }
@@ -55,13 +55,13 @@ public class DoesNotHaveNullOrEmptyFieldsTest {
     @NullAndEmptySource
     public void matchesReturnsFalseWhenStringFieldIsEmpty(String input) {
         TestClass testObject = TestClass.newBuilder()
-            .withBoxedField(SOME_BOXED_VALUE)
-            .withStringField(input)
-            .withCollectionField(NON_EMPTY_COLLECTION)
-            .withMapField(NON_EMPTY_MAP)
-            .withClassObject(SOME_OBJECT)
-            .withJsonNodeField(NON_EMPTY_JSON_NODE)
-            .build();
+                                   .withBoxedField(SOME_BOXED_VALUE)
+                                   .withStringField(input)
+                                   .withCollectionField(NON_EMPTY_COLLECTION)
+                                   .withMapField(NON_EMPTY_MAP)
+                                   .withClassObject(SOME_OBJECT)
+                                   .withJsonNodeField(NON_EMPTY_JSON_NODE)
+                                   .build();
         assertFalse(matcher.matches(testObject));
         assertErrorMessageContainsField(testObject, "stringField");
     }
@@ -70,13 +70,13 @@ public class DoesNotHaveNullOrEmptyFieldsTest {
     @NullAndEmptySource
     public void matchesReturnsFalseWhenCollectionFieldIsEmpty(List<String> input) {
         TestClass testObject = TestClass.newBuilder()
-            .withBoxedField(SOME_BOXED_VALUE)
-            .withStringField(SOME_STRING_VALUE)
-            .withCollectionField(input)
-            .withMapField(NON_EMPTY_MAP)
-            .withClassObject(SOME_OBJECT)
-            .withJsonNodeField(NON_EMPTY_JSON_NODE)
-            .build();
+                                   .withBoxedField(SOME_BOXED_VALUE)
+                                   .withStringField(SOME_STRING_VALUE)
+                                   .withCollectionField(input)
+                                   .withMapField(NON_EMPTY_MAP)
+                                   .withClassObject(SOME_OBJECT)
+                                   .withJsonNodeField(NON_EMPTY_JSON_NODE)
+                                   .build();
         assertFalse(matcher.matches(testObject));
         assertErrorMessageContainsField(testObject, "collectionField");
     }
@@ -85,13 +85,13 @@ public class DoesNotHaveNullOrEmptyFieldsTest {
     @NullAndEmptySource
     public void matchesReturnsFalseWhenCollectionFieldIsEmpty(Map<String, String> input) {
         TestClass testObject = TestClass.newBuilder()
-            .withBoxedField(SOME_BOXED_VALUE)
-            .withStringField(SOME_STRING_VALUE)
-            .withCollectionField(NON_EMPTY_COLLECTION)
-            .withMapField(input)
-            .withClassObject(SOME_OBJECT)
-            .withJsonNodeField(NON_EMPTY_JSON_NODE)
-            .build();
+                                   .withBoxedField(SOME_BOXED_VALUE)
+                                   .withStringField(SOME_STRING_VALUE)
+                                   .withCollectionField(NON_EMPTY_COLLECTION)
+                                   .withMapField(input)
+                                   .withClassObject(SOME_OBJECT)
+                                   .withJsonNodeField(NON_EMPTY_JSON_NODE)
+                                   .build();
         assertFalse(matcher.matches(testObject));
         assertErrorMessageContainsField(testObject, "mapField");
     }
@@ -99,14 +99,14 @@ public class DoesNotHaveNullOrEmptyFieldsTest {
     @Test
     public void matchesReturnsFalseWhenJsonNodeFieldIsNull() {
         TestClass testObject = TestClass.newBuilder()
-            .withBoxedField(SOME_BOXED_VALUE)
-            .withStringField(SOME_STRING_VALUE)
-            .withCollectionField(NON_EMPTY_COLLECTION)
-            .withMapField(NON_EMPTY_MAP)
-            .withJsonNodeField(NON_EMPTY_JSON_NODE)
-            .withClassObject(SOME_OBJECT)
-            .withJsonNodeField(null)
-            .build();
+                                   .withBoxedField(SOME_BOXED_VALUE)
+                                   .withStringField(SOME_STRING_VALUE)
+                                   .withCollectionField(NON_EMPTY_COLLECTION)
+                                   .withMapField(NON_EMPTY_MAP)
+                                   .withJsonNodeField(NON_EMPTY_JSON_NODE)
+                                   .withClassObject(SOME_OBJECT)
+                                   .withJsonNodeField(null)
+                                   .build();
         assertFalse(matcher.matches(testObject));
         assertErrorMessageContainsField(testObject, "jsonNodeField");
     }
@@ -114,14 +114,14 @@ public class DoesNotHaveNullOrEmptyFieldsTest {
     @Test
     public void matchesReturnsFalseWhenJsonNodeFieldIsEmpty() {
         TestClass testObject = TestClass.newBuilder()
-            .withBoxedField(SOME_BOXED_VALUE)
-            .withStringField(SOME_STRING_VALUE)
-            .withCollectionField(NON_EMPTY_COLLECTION)
-            .withMapField(NON_EMPTY_MAP)
-            .withJsonNodeField(NON_EMPTY_JSON_NODE)
-            .withClassObject(SOME_OBJECT)
-            .withJsonNodeField(new ObjectMapper().createObjectNode())
-            .build();
+                                   .withBoxedField(SOME_BOXED_VALUE)
+                                   .withStringField(SOME_STRING_VALUE)
+                                   .withCollectionField(NON_EMPTY_COLLECTION)
+                                   .withMapField(NON_EMPTY_MAP)
+                                   .withJsonNodeField(NON_EMPTY_JSON_NODE)
+                                   .withClassObject(SOME_OBJECT)
+                                   .withJsonNodeField(new ObjectMapper().createObjectNode())
+                                   .build();
         assertFalse(matcher.matches(testObject));
         assertErrorMessageContainsField(testObject, "jsonNodeField");
     }
@@ -129,13 +129,13 @@ public class DoesNotHaveNullOrEmptyFieldsTest {
     @Test
     public void matchesReturnsFalseWhenBoxedFieldIsEmpty() {
         TestClass testObject = TestClass.newBuilder()
-            .withBoxedField(null)
-            .withStringField(SOME_STRING_VALUE)
-            .withCollectionField(NON_EMPTY_COLLECTION)
-            .withMapField(NON_EMPTY_MAP)
-            .withClassObject(SOME_OBJECT)
-            .withJsonNodeField(NON_EMPTY_JSON_NODE)
-            .build();
+                                   .withBoxedField(null)
+                                   .withStringField(SOME_STRING_VALUE)
+                                   .withCollectionField(NON_EMPTY_COLLECTION)
+                                   .withMapField(NON_EMPTY_MAP)
+                                   .withClassObject(SOME_OBJECT)
+                                   .withJsonNodeField(NON_EMPTY_JSON_NODE)
+                                   .build();
         assertFalse(matcher.matches(testObject));
         assertErrorMessageContainsField(testObject, "boxedField");
     }
@@ -143,13 +143,13 @@ public class DoesNotHaveNullOrEmptyFieldsTest {
     @Test
     public void matchesReturnsFalseWhenClassFieldIsEmpty() {
         TestClass testObject = TestClass.newBuilder()
-            .withBoxedField(SOME_BOXED_VALUE)
-            .withStringField(SOME_STRING_VALUE)
-            .withCollectionField(NON_EMPTY_COLLECTION)
-            .withMapField(NON_EMPTY_MAP)
-            .withClassObject(null)
-            .withJsonNodeField(NON_EMPTY_JSON_NODE)
-            .build();
+                                   .withBoxedField(SOME_BOXED_VALUE)
+                                   .withStringField(SOME_STRING_VALUE)
+                                   .withCollectionField(NON_EMPTY_COLLECTION)
+                                   .withMapField(NON_EMPTY_MAP)
+                                   .withClassObject(null)
+                                   .withJsonNodeField(NON_EMPTY_JSON_NODE)
+                                   .build();
         assertFalse(matcher.matches(testObject));
         assertErrorMessageContainsField(testObject, "classObject");
     }
