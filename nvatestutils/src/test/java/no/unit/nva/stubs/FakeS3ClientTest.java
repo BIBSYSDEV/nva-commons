@@ -8,6 +8,8 @@ import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -28,6 +30,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectsResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
@@ -79,7 +82,8 @@ class FakeS3ClientTest {
         var expectedFile = insertRandomFileToS3(s3Client, bucket);
         var unexpectedFile = insertRandomFileToS3(s3Client, bucket);
 
-        var listObjectRequest = createListObjectsRequest(bucket, expectedFile.getParent().orElseThrow());
+        var listObjectRequest = createListObjectsRequest(bucket,
+                                                         expectedFile.getParent().orElseThrow());
         var result = s3Client.listObjects(listObjectRequest);
         var actualFilename = extractListedKeys(result);
         assertThat(actualFilename, contains(expectedFile.toString()));
@@ -91,13 +95,29 @@ class FakeS3ClientTest {
         var s3Client = new FakeS3Client();
         var bucket = randomString();
         var expectedFile1 = insertRandomFileToS3(s3Client, bucket);
-        var expectedFile2 = insertRandomFileToS3(s3Client, bucket);
+        var otherFile = insertRandomFileToS3(s3Client, bucket);
 
         var listObjectRequest = createListObjectsRequest(bucket,
                                                          expectedFile1.getParent().orElseThrow(), 1,
                                                          LIST_FROM_BEGINNING);
         var result = s3Client.listObjects(listObjectRequest);
-        assertThat(result.marker(), is(equalTo(expectedFile1.toString())));
+        assertThat(result.nextMarker(), is(equalTo(expectedFile1.toString())));
+    }
+
+    @Test
+    void shouldReturnNextListingStartPointWhenReturningAPageOfResultsWithVersion2Request() {
+        var s3Client = new FakeS3Client();
+        var bucket = randomString();
+        var expectedFile1 = insertRandomFileToS3(s3Client, bucket);
+        var otherFile = insertRandomFileToS3(s3Client, bucket);
+
+        var listObjectRequest = ListObjectsV2Request.builder()
+                                    .bucket(bucket)
+                                    .prefix(expectedFile1.getParent().orElseThrow().toString())
+                                    .maxKeys(1)
+                                    .build();
+        var result = s3Client.listObjectsV2(listObjectRequest);
+        assertThat(result.nextContinuationToken(), is(equalTo(expectedFile1.toString())));
     }
 
     @Test
@@ -113,6 +133,21 @@ class FakeS3ClientTest {
 
         assertThat(listedFiles, everyItem(containsString(expectedFolder.toString())));
         assertThat(listedFiles.size(), is(equalTo(numberOfExpectedFiles)));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenNextMarkerDoesNotExist() {
+        var s3Client = new FakeS3Client();
+        var bucket = randomString();
+        var expectedFile1 = insertRandomFileToS3(s3Client, bucket);
+
+        var listObjectRequest = ListObjectsV2Request.builder()
+                                    .bucket(bucket)
+                                    .prefix(expectedFile1.getParent().orElseThrow().toString())
+                                    .continuationToken(randomString())
+                                    .maxKeys(1)
+                                    .build();
+        assertThrows(IllegalArgumentException.class, () -> s3Client.listObjectsV2(listObjectRequest));
     }
 
     private static ListObjectsRequest createListObjectsRequest(String bucket,
@@ -166,7 +201,7 @@ class FakeS3ClientTest {
 
         while (listingResult.isTruncated()) {
             listObjectRequest =
-                createListObjectsRequest(bucket, expectedFolder, smallPage, listingResult.marker());
+                createListObjectsRequest(bucket, expectedFolder, smallPage, listingResult.nextMarker());
             listingResult = s3Client.listObjects(listObjectRequest);
             allListedKeys.addAll(extractListedKeys(listingResult));
         }
@@ -206,11 +241,10 @@ class FakeS3ClientTest {
         for (var filename : sampleFilenames) {
             putObject(s3Client, URI.create(SOME_BUCKET_URI + "/" + filename), randomString());
         }
-        var listObjectsRequest = ListObjectsRequest.builder()
-                                     .bucket(SOME_BUCKET)
-                                     .maxKeys(sampleFilenames.size())
-                                     .build();
-        return listObjectsRequest;
+        return ListObjectsRequest.builder()
+                   .bucket(SOME_BUCKET)
+                   .maxKeys(sampleFilenames.size())
+                   .build();
     }
 
     private List<String> createLargeSetOfRandomFilenames() {

@@ -1,7 +1,9 @@
 package no.unit.nva.stubs;
 
+
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,10 +28,13 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectsResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.services.s3.model.S3Object;
+
 
 @JacocoGenerated
 public class FakeS3Client implements S3Client {
@@ -84,9 +89,28 @@ public class FakeS3Client implements S3Client {
         var nextStartListingPoint = calculateNestStartListingPoint(fileKeys, excludedEndIndex);
 
         return ListObjectsResponse.builder().contents(files)
-                   .marker(nextStartListingPoint)
-                   .isTruncated(nonNull(nextStartListingPoint)).build();
+                .nextMarker(nextStartListingPoint)
+                .isTruncated(nonNull(nextStartListingPoint)).build();
     }
+
+    @Override
+    public ListObjectsV2Response listObjectsV2(ListObjectsV2Request v2Request){
+        var oldRequest = ListObjectsRequest.builder()
+                .bucket(v2Request.bucket())
+                .marker(v2Request.continuationToken())
+                .maxKeys(v2Request.maxKeys())
+                .prefix(v2Request.prefix())
+                .build();
+        var oldResponse= listObjects(oldRequest);
+        return ListObjectsV2Response
+                .builder()
+                .contents(oldResponse.contents())
+                .isTruncated(oldResponse.isTruncated())
+                .continuationToken(v2Request.continuationToken())
+                .nextContinuationToken(oldResponse.nextMarker())
+                .build();
+    }
+
 
     //TODO: fix if necessary
     @SuppressWarnings("PMD.CloseResource")
@@ -106,6 +130,13 @@ public class FakeS3Client implements S3Client {
     @Override
     public void close() {
 
+    }
+
+    private String calculateNestStartListingPoint(List<String> fileKeys,
+      int excludedEndIndex) {
+        return excludedEndIndex >= fileKeys.size()
+          ? null
+          : fileKeys.get(excludedEndIndex-1);
     }
 
     private static Map<String, ByteBuffer> readResourceFiles(String[] filesInBucket) {
@@ -132,12 +163,7 @@ public class FakeS3Client implements S3Client {
         }
     }
 
-    private String calculateNestStartListingPoint(List<String> fileKeys,
-                                                  int excludedEndIndex) {
-        return excludedEndIndex >= fileKeys.size()
-                   ? null
-                   : fileKeys.get(excludedEndIndex - 1);
-    }
+
 
     private boolean filePathIsInSpecifiedParentFolder(String filePathString, ListObjectsRequest listObjectsRequest) {
         var filePath = UnixPath.of(filePathString).removeRoot();
@@ -161,12 +187,20 @@ public class FakeS3Client implements S3Client {
         if (isNull(marker)) {
             return START_FROM_BEGINNING;
         } else {
-            var calculatedStartIndex = fileKeys.indexOf(marker) + 1;
+            var calculatedStartIndex = indexOfLastReadFile(fileKeys, marker) + 1;
             if (calculatedStartIndex < fileKeys.size()) {
                 return calculatedStartIndex;
             }
         }
         throw new IllegalStateException("Start index is out of bounds in FakeS3Client");
+    }
+
+    private static int indexOfLastReadFile(List<String> fileKeys, String marker) {
+        int indexOfLastFileRead = fileKeys.indexOf(marker);
+        if(indexOfLastFileRead<0){
+            throw new IllegalArgumentException("Marker/ContinuationToken is not valid");
+        }
+        return indexOfLastFileRead;
     }
 
     private ByteBuffer extractContent(String filename) {
