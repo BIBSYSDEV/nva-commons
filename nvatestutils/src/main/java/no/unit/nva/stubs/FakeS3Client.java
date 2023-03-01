@@ -2,7 +2,6 @@ package no.unit.nva.stubs;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +15,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.core.paths.UnixPath;
@@ -50,33 +48,9 @@ public class FakeS3Client implements S3Client {
 
     public static FakeS3Client fromContentsMap(Map<String, InputStream> filesAndContent) {
         var toByteBuffer = filesAndContent.entrySet().stream()
-                .collect(
-                        Collectors.toMap(Entry::getKey, entry -> inputSteamToByteBuffer(entry.getValue())));
+                               .collect(
+                                   Collectors.toMap(Entry::getKey, entry -> inputSteamToByteBuffer(entry.getValue())));
         return new FakeS3Client(toByteBuffer);
-    }
-
-    private static Map<String, ByteBuffer> readResourceFiles(String[] filesInBucket) {
-        List<String> suppliedFilenames = Arrays.asList(filesInBucket);
-        return suppliedFilenames.stream()
-                .map(filename -> new SimpleEntry<>(filename, readFileFromResources(filename)))
-                .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
-    }
-
-    private static ByteBuffer readFileFromResources(String filename) {
-        final var inputStream = IoUtils.inputStreamFromResources(filename);
-        return inputSteamToByteBuffer(inputStream);
-    }
-
-    private static ByteBuffer inputSteamToByteBuffer(InputStream inputStream) {
-        return ByteBuffer.wrap(readAllBytes(inputStream));
-    }
-
-    private static byte[] readAllBytes(InputStream inputStream) {
-        try {
-            return inputStream.readAllBytes();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     //TODO: fix if necessary
@@ -104,22 +78,14 @@ public class FakeS3Client implements S3Client {
         var excludedEndIndex = calculateEndIndex(fileKeys, listObjectsRequest.marker(), listObjectsRequest.maxKeys());
 
         var files = fileKeys.subList(startIndex, excludedEndIndex).stream()
-                .filter(filePath -> filePathIsInSpecifiedParentFolder(filePath, listObjectsRequest))
-                .map(filename -> S3Object.builder().key(filename).build())
-                .collect(Collectors.toList());
+                        .filter(filePath -> filePathIsInSpecifiedParentFolder(filePath, listObjectsRequest))
+                        .map(filename -> S3Object.builder().key(filename).build())
+                        .collect(Collectors.toList());
         var nextStartListingPoint = calculateNestStartListingPoint(fileKeys, excludedEndIndex);
 
-
         return ListObjectsResponse.builder().contents(files)
-                .marker(nextStartListingPoint)
-                .isTruncated(nonNull(nextStartListingPoint)).build();
-    }
-
-    private String calculateNestStartListingPoint(List<String> fileKeys,
-                                                  int excludedEndIndex) {
-        return excludedEndIndex >= fileKeys.size()
-                ? null
-                : fileKeys.get(excludedEndIndex-1);
+                   .marker(nextStartListingPoint)
+                   .isTruncated(nonNull(nextStartListingPoint)).build();
     }
 
     //TODO: fix if necessary
@@ -142,17 +108,48 @@ public class FakeS3Client implements S3Client {
 
     }
 
+    private static Map<String, ByteBuffer> readResourceFiles(String[] filesInBucket) {
+        List<String> suppliedFilenames = Arrays.asList(filesInBucket);
+        return suppliedFilenames.stream()
+                   .map(filename -> new SimpleEntry<>(filename, readFileFromResources(filename)))
+                   .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
+    }
+
+    private static ByteBuffer readFileFromResources(String filename) {
+        final var inputStream = IoUtils.inputStreamFromResources(filename);
+        return inputSteamToByteBuffer(inputStream);
+    }
+
+    private static ByteBuffer inputSteamToByteBuffer(InputStream inputStream) {
+        return ByteBuffer.wrap(readAllBytes(inputStream));
+    }
+
+    private static byte[] readAllBytes(InputStream inputStream) {
+        try {
+            return inputStream.readAllBytes();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String calculateNestStartListingPoint(List<String> fileKeys,
+                                                  int excludedEndIndex) {
+        return excludedEndIndex >= fileKeys.size()
+                   ? null
+                   : fileKeys.get(excludedEndIndex - 1);
+    }
+
     private boolean filePathIsInSpecifiedParentFolder(String filePathString, ListObjectsRequest listObjectsRequest) {
         var filePath = UnixPath.of(filePathString).removeRoot();
         var parentFolder = Optional.of(listObjectsRequest)
-                .map(ListObjectsRequest::prefix)
-                .map(UnixPath::of)
-                .map(UnixPath::removeRoot)
-                .orElse(UnixPath.EMPTY_PATH);
+                               .map(ListObjectsRequest::prefix)
+                               .map(UnixPath::of)
+                               .map(UnixPath::removeRoot)
+                               .orElse(UnixPath.EMPTY_PATH);
 
         return parentFolder.isEmptyPath()
-                || parentFolder.isRoot()
-                || filePath.toString().startsWith(parentFolder.toString());
+               || parentFolder.isRoot()
+               || filePath.toString().startsWith(parentFolder.toString());
     }
 
     private int calculateEndIndex(List<String> fileKeys, String marker, Integer pageSize) {

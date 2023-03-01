@@ -87,9 +87,9 @@ public class DoesNotHaveEmptyValues<T> extends BaseMatcher<T> {
     @Override
     public void describeMismatch(Object item, Description description) {
         String emptyFieldNames = emptyFields.stream()
-            .map(PropertyValuePair::getFieldPath)
-            .collect(Collectors.joining(
-                FIELD_DELIMITER));
+                                     .map(PropertyValuePair::getFieldPath)
+                                     .collect(Collectors.joining(
+                                         FIELD_DELIMITER));
 
         description.appendText(EMPTY_FIELD_ERROR)
             .appendText(emptyFieldNames);
@@ -110,8 +110,8 @@ public class DoesNotHaveEmptyValues<T> extends BaseMatcher<T> {
 
     private static Set<String> addFieldPathDelimiterToRootField(Set<String> ignoreList) {
         return ignoreList.stream()
-            .map(DoesNotHaveEmptyValues::addPathDelimiterToTopLevelFields)
-            .collect(Collectors.toSet());
+                   .map(DoesNotHaveEmptyValues::addPathDelimiterToTopLevelFields)
+                   .collect(Collectors.toSet());
     }
 
     private static String addPathDelimiterToTopLevelFields(String f) {
@@ -166,8 +166,8 @@ public class DoesNotHaveEmptyValues<T> extends BaseMatcher<T> {
 
     private List<PropertyValuePair> collectEmptyFields(List<PropertyValuePair> propertyValuePairs) {
         return propertyValuePairs.stream()
-            .filter(propertyValue -> isEmpty(propertyValue.getValue()))
-            .collect(Collectors.toList());
+                   .filter(propertyValue -> isEmpty(propertyValue.getValue()))
+                   .collect(Collectors.toList());
     }
 
     private boolean isEmpty(Object value) {
