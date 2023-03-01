@@ -30,17 +30,17 @@ public final class EventBridgeEventBuilder {
         var detail = createDestinationsEventDetailBody(eventBody);
         var event = sampleEventObject(detail);
         return Try.of(event)
-            .map(AwsEventBridgeEvent::toJsonString)
-            .map(IoUtils::stringToStream)
-            .orElseThrow();
+                   .map(AwsEventBridgeEvent::toJsonString)
+                   .map(IoUtils::stringToStream)
+                   .orElseThrow();
     }
 
     @JacocoGenerated
     public static <T> InputStream sampleEvent(T detail) {
         return Try.of(sampleEventObject(detail))
-            .map(JsonSerializable::toJsonString)
-            .map(IoUtils::stringToStream)
-            .orElseThrow();
+                   .map(JsonSerializable::toJsonString)
+                   .map(IoUtils::stringToStream)
+                   .orElseThrow();
     }
 
     @JacocoGenerated
@@ -60,10 +60,10 @@ public final class EventBridgeEventBuilder {
     @JacocoGenerated
     private static <T> AwsEventBridgeDetail<T> createDestinationsEventDetailBody(T eventBody) {
         return AwsEventBridgeDetail.<T>newBuilder()
-            .withRequestPayload(EMPTY_OBJECT)
-            .withTimestamp(randomInstant().toString())
-            .withVersion(randomString())
-            .withResponsePayload(eventBody)
-            .build();
+                   .withRequestPayload(EMPTY_OBJECT)
+                   .withTimestamp(randomInstant().toString())
+                   .withVersion(randomString())
+                   .withResponsePayload(eventBody)
+                   .build();
     }
 }

@@ -88,14 +88,14 @@ public class FakeAuthServer {
 
     private ResponseDefinitionBuilder createOauthClientResponse(String expectedAccessToken) {
         return aResponse()
-            .withStatus(HttpURLConnection.HTTP_OK)
-            .withBody(String.format(ACCESS_TOKEN_TEMPLATE, expectedAccessToken));
+                   .withStatus(HttpURLConnection.HTTP_OK)
+                   .withBody(String.format(ACCESS_TOKEN_TEMPLATE, expectedAccessToken));
     }
 
     private ResponseDefinitionBuilder createUserInfoResponse(String accessToken) {
         return aResponse()
-            .withBody(userInfoString(accessToken))
-            .withStatus(HttpURLConnection.HTTP_OK);
+                   .withBody(userInfoString(accessToken))
+                   .withStatus(HttpURLConnection.HTTP_OK);
     }
 
     private String userInfoString(String accessToken) {

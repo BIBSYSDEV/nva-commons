@@ -52,16 +52,6 @@ public class FakeSecretsManagerClient implements SecretsManagerClient {
                    .orElseThrow();
     }
 
-    private Optional<String> resolveSecret(SecretName secretName) {
-        if (secrets.containsKey(secretName)) {
-            return Optional.of(serializeSecretContents(secrets.get(secretName)));
-        } else if (plainTextSecrets.containsKey(secretName)) {
-            return Optional.of(plainTextSecrets.get(secretName));
-        } else {
-            return Optional.empty();
-        }
-    }
-
     @JacocoGenerated
     @Override
     public String serviceName() {
@@ -84,6 +74,16 @@ public class FakeSecretsManagerClient implements SecretsManagerClient {
 
     private static String serializeSecretContents(Map<SecretKey, String> secretContents) {
         return attempt(() -> JsonUtils.dtoObjectMapper.writeValueAsString(secretContents)).orElseThrow();
+    }
+
+    private Optional<String> resolveSecret(SecretName secretName) {
+        if (secrets.containsKey(secretName)) {
+            return Optional.of(serializeSecretContents(secrets.get(secretName)));
+        } else if (plainTextSecrets.containsKey(secretName)) {
+            return Optional.of(plainTextSecrets.get(secretName));
+        } else {
+            return Optional.empty();
+        }
     }
 
     private void createNewSecret(String key, String value, SecretName secretName) {

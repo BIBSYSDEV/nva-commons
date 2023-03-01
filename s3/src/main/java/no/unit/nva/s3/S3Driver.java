@@ -79,29 +79,13 @@ public class S3Driver {
     }
 
     @JacocoGenerated
-    private static SdkHttpClient httpClientForConcurrentQueries() {
-        return ApacheHttpClient.builder()
-                .useIdleConnectionReaper(true)
-                .maxConnections(MAX_CONNECTIONS)
-                .connectionMaxIdleTime(Duration.ofMinutes(IDLE_TIME))
-                .connectionTimeout(Duration.ofMinutes(TIMEOUT_TIME))
-                .build();
-    }
-
-    @JacocoGenerated
     public static S3ClientBuilder defaultS3Client() {
         Region region = ENVIRONMENT.readEnvOpt(AWS_REGION_ENV_VARIABLE)
-                .map(Region::of)
-                .orElse(Region.EU_WEST_1);
+                            .map(Region::of)
+                            .orElse(Region.EU_WEST_1);
         return S3Client.builder()
-                .region(region)
-                .httpClient(httpClientForConcurrentQueries());
-    }
-
-    @JacocoGenerated
-    private static void verifyThatRequiredEnvVariablesAreInPlace() {
-        ENVIRONMENT.readEnv(AWS_ACCESS_KEY_ID_ENV_VARIABLE_NAME);
-        ENVIRONMENT.readEnv(AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME);
+                   .region(region)
+                   .httpClient(httpClientForConcurrentQueries());
     }
 
     /**
@@ -196,16 +180,11 @@ public class S3Driver {
             var newBatch = listFiles(calculateListingFolder(folder),
                     currentStartingPoint,
                     MAX_RESPONSE_SIZE_FOR_S3_LISTING);
+
             result = result.add(newBatch);
         } while (result.isTruncated());
 
         return result.getFiles();
-    }
-
-    private UnixPath calculateListingFolder(UnixPath folder) {
-        return isNull(folder) || folder.isEmptyPath() || folder.isRoot()
-                ? UnixPath.EMPTY_PATH
-                : folder;
     }
 
     /**
@@ -246,6 +225,28 @@ public class S3Driver {
         } else {
             return getUncompressedFile(filename).orElseThrow();
         }
+    }
+
+    @JacocoGenerated
+    private static SdkHttpClient httpClientForConcurrentQueries() {
+        return ApacheHttpClient.builder()
+                   .useIdleConnectionReaper(true)
+                   .maxConnections(MAX_CONNECTIONS)
+                   .connectionMaxIdleTime(Duration.ofMinutes(IDLE_TIME))
+                   .connectionTimeout(Duration.ofMinutes(TIMEOUT_TIME))
+                   .build();
+    }
+
+    @JacocoGenerated
+    private static void verifyThatRequiredEnvVariablesAreInPlace() {
+        ENVIRONMENT.readEnv(AWS_ACCESS_KEY_ID_ENV_VARIABLE_NAME);
+        ENVIRONMENT.readEnv(AWS_SECRET_ACCESS_KEY_ENV_VARIABLE_NAME);
+    }
+
+    private UnixPath calculateListingFolder(UnixPath folder) {
+        return isNull(folder) || folder.isEmptyPath() || folder.isRoot()
+                   ? UnixPath.EMPTY_PATH
+                   : folder;
     }
 
     private UriWrapper s3BucketUri() {
@@ -305,7 +306,6 @@ public class S3Driver {
     private boolean isCompressed(String filename) {
         return filename.endsWith(GZIP_ENDING);
     }
-
 
     private GetObjectRequest createGetObjectRequest(UnixPath file) {
         return GetObjectRequest.builder()
