@@ -185,12 +185,20 @@ public class FakeS3Client implements S3Client {
         if (isNull(marker)) {
             return START_FROM_BEGINNING;
         } else {
-            var calculatedStartIndex = fileKeys.indexOf(marker) + 1;
+            var calculatedStartIndex = indexOfLastReadFile(fileKeys, marker) + 1;
             if (calculatedStartIndex < fileKeys.size()) {
                 return calculatedStartIndex;
             }
         }
         throw new IllegalStateException("Start index is out of bounds in FakeS3Client");
+    }
+
+    private static int indexOfLastReadFile(List<String> fileKeys, String marker) {
+        int indexOfLastFileRead = fileKeys.indexOf(marker);
+        if(indexOfLastFileRead<0){
+            throw new IllegalArgumentException("Marker/ContinuationToken is not valid");
+        }
+        return indexOfLastFileRead;
     }
 
     private ByteBuffer extractContent(String filename) {
