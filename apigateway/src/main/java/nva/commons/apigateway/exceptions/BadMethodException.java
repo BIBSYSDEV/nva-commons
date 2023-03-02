@@ -2,17 +2,17 @@ package nva.commons.apigateway.exceptions;
 
 import java.net.HttpURLConnection;
 
-public class UnsupportedOperationException extends ApiGatewayException {
+public class BadMethodException extends ApiGatewayException {
 
-    public UnsupportedOperationException(String message) {
+    public BadMethodException(String message) {
         super(message);
     }
 
-    public UnsupportedOperationException(Exception exception) {
+    public BadMethodException(Exception exception) {
         super(exception);
     }
 
-    public UnsupportedOperationException(Exception exception, String message) {
+    public BadMethodException(Exception exception, String message) {
         super(exception, message);
     }
 
