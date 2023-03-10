@@ -24,6 +24,10 @@ public class HttpRequestUtils {
         return mockResponse(body, headers);
     }
 
+    protected HttpHeaders mockHeaders(HttpRequest request) {
+        return request.headers();
+    }
+
     @SuppressWarnings("unchecked")
     private HttpResponse<String> mockResponse(String body, HttpHeaders headers) {
         HttpResponse<String> response = mock(HttpResponse.class);
@@ -31,9 +35,5 @@ public class HttpRequestUtils {
         when(response.body()).thenReturn(body);
         when(response.headers()).thenReturn(headers);
         return response;
-    }
-
-    protected HttpHeaders mockHeaders(HttpRequest request) {
-        return request.headers();
     }
 }

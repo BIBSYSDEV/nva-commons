@@ -79,7 +79,7 @@ public class UriWrapper {
     public UriWrapper addChild(String... path) {
         return addChild(UnixPath.of(path));
     }
-
+    
     /**
      * Appends a path to the URI.
      *

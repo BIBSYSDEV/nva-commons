@@ -16,7 +16,7 @@ import software.amazon.awssdk.services.eventbridge.model.PutEventsRequest;
 import software.amazon.awssdk.services.eventbridge.model.PutEventsRequestEntry;
 
 class FakeEventBridgeClientTest {
-    
+
     @Test
     void shouldStoreEventsInternally() {
         FakeEventBridgeClient fakeEventBridgeClient = new FakeEventBridgeClient();
@@ -26,7 +26,7 @@ class FakeEventBridgeClientTest {
         fakeEventBridgeClient.putEvents(request);
         assertThat(fakeEventBridgeClient.getRequestEntries(), contains(entry));
     }
-    
+
     @Test
     void shouldListSuppliedEventBuses() {
         var busNames = new String[]{randomString(), randomString()};
@@ -38,7 +38,7 @@ class FakeEventBridgeClientTest {
                                  .collect(Collectors.toList());
         assertThat(actualBusNames, containsInAnyOrder(busNames));
     }
-    
+
     @Test
     void shouldReturnNonZeroNumberOfFailuresWhenNonZeroNumberOfFailuresIsSupplied() {
         var busNames = new String[]{randomString(), randomString()};
@@ -50,7 +50,7 @@ class FakeEventBridgeClientTest {
         var putEventsResponse = client.putEvents(putEventsRequest);
         assertThat(putEventsResponse.failedEntryCount(), is(equalTo(failures)));
     }
-    
+
     private PutEventsRequestEntry randomEvent() {
         return PutEventsRequestEntry.builder()
                    .detail(randomString())
@@ -60,7 +60,7 @@ class FakeEventBridgeClientTest {
                    .time(randomInstant())
                    .build();
     }
-    
+
     private PutEventsRequestEntry sampleRequestEntry() {
         return PutEventsRequestEntry.builder()
                    .resources(randomString())
