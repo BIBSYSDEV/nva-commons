@@ -6,7 +6,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.paths.UriWrapper;
 
@@ -49,13 +51,22 @@ public class PagedSearchResult<T> {
                              int querySize,
                              int totalSize,
                              List<T> hits) {
+        this(context, baseUri, queryOffset, querySize, totalSize, hits, Collections.emptyMap());
+    }
+
+    public PagedSearchResult(URI context,
+                             URI baseUri,
+                             int queryOffset,
+                             int querySize,
+                             int totalSize,
+                             List<T> hits,
+                             Map<String, String> queryParameters) {
         this.context = context;
-        this.id = UriWrapper.fromUri(baseUri)
-                      .addQueryParameter(OFFSET_QUERY_PARAM_NAME, Integer.toString(queryOffset))
-                      .addQueryParameter(SIZE_QUERY_PARAM_NAME, Integer.toString(querySize))
-                      .getUri();
-        this.nextResults = calculateNextResults(queryOffset, querySize, totalSize, hits.size(), baseUri);
-        this.previousResults = calculatePreviousResults(queryOffset, querySize, baseUri);
+        this.id = generateSelfUri(baseUri, queryOffset, querySize, queryParameters);
+
+        this.nextResults = calculateNextResults(queryOffset, querySize, totalSize, hits.size(), baseUri,
+                                                queryParameters);
+        this.previousResults = calculatePreviousResults(queryOffset, querySize, baseUri, queryParameters);
         this.totalSize = totalSize;
         this.hits = hits;
     }
@@ -100,9 +111,14 @@ public class PagedSearchResult<T> {
         return hits;
     }
 
-    private static URI calculateNextResults(int queryOffset, int querySize, int totalSize, int noHits, URI baseUri) {
+    private static URI calculateNextResults(int queryOffset,
+                                            int querySize,
+                                            int totalSize,
+                                            int noHits,
+                                            URI baseUri,
+                                            Map<String, String> queryParams) {
         if ((queryOffset + noHits) < totalSize) {
-            return generateSelfUri(baseUri, queryOffset + querySize, querySize);
+            return generateSelfUri(baseUri, queryOffset + querySize, querySize, queryParams);
         } else {
             return null;
         }
@@ -110,20 +126,22 @@ public class PagedSearchResult<T> {
 
     private static URI calculatePreviousResults(int queryOffset,
                                                 int querySize,
-                                                URI baseUri) {
+                                                URI baseUri,
+                                                Map<String, String> queryParams) {
         if (queryOffset > 0) {
             var previousOffset = Math.max(0, queryOffset - querySize);
             int previousSize = Math.min(querySize, queryOffset);
-            return generateSelfUri(baseUri, previousOffset, previousSize);
+            return generateSelfUri(baseUri, previousOffset, previousSize, queryParams);
         } else {
             return null;
         }
     }
 
-    private static URI generateSelfUri(URI baseUri, int queryOffset, int querySize) {
+    private static URI generateSelfUri(URI baseUri, int queryOffset, int querySize, Map<String, String> queryParams) {
         return UriWrapper.fromUri(baseUri)
-                   .addQueryParameter(OFFSET_QUERY_PARAM_NAME, Integer.toString(queryOffset))
-                   .addQueryParameter(SIZE_QUERY_PARAM_NAME, Integer.toString(querySize))
-                   .getUri();
+            .addQueryParameters(queryParams)
+            .addQueryParameter(OFFSET_QUERY_PARAM_NAME, Integer.toString(queryOffset))
+            .addQueryParameter(SIZE_QUERY_PARAM_NAME, Integer.toString(querySize))
+            .getUri();
     }
 }
