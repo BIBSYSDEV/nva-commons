@@ -46,6 +46,8 @@ public class HandlerRequestBuilder<T> {
     public static final String FEIDE_ID_CLAIM = "custom:feideId";
     public static final String ENTRIES_DELIMITER = ",";
     public static final String SCOPE_CLAIM = "scope";
+    public static final String ISS_CLAIM = "iss";
+    public static final String CLIENT_ID_CLAIM = "client_id";
     public static final String PERSON_NIN_CLAIM = "custom:nin";
     private static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
     private final ObjectMapper objectMapper;
@@ -252,6 +254,18 @@ public class HandlerRequestBuilder<T> {
     public HandlerRequestBuilder<T> withScope(String scope) {
         var authorizerClaims = getAuthorizerClaimsNode();
         authorizerClaims.put(SCOPE_CLAIM, scope);
+        return this;
+    }
+
+    public HandlerRequestBuilder<T> withIssuer(String issuer) {
+        var authorizerClaims = getAuthorizerClaimsNode();
+        authorizerClaims.put(ISS_CLAIM, issuer);
+        return this;
+    }
+
+    public HandlerRequestBuilder<T> withClientId(String clientId) {
+        var authorizerClaims = getAuthorizerClaimsNode();
+        authorizerClaims.put(CLIENT_ID_CLAIM, clientId);
         return this;
     }
 
