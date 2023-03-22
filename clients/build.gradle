@@ -1,0 +1,39 @@
+plugins {
+    id 'nvacommons.java-conventions'
+    id 'nvacommons.publish-maven'
+}
+dependencies {
+    api libs.aws.lambda.core
+
+    implementation project(":core")
+    implementation project(":json")
+    implementation project(":secrets")
+    implementation project(":apigateway")
+    implementation project(":auth")
+
+    implementation libs.jackson.core
+    implementation libs.jackson.databind
+    implementation libs.jackson.annotations
+    implementation libs.jackson.datatype.jdk8
+    implementation libs.jackson.datatype.jsr310
+    implementation libs.jackson.datatype.problem
+
+    implementation libs.guava
+    implementation libs.bundles.logging
+    implementation libs.aws.lambda.events
+    implementation libs.aws.sdk2.secrets
+
+    implementation libs.bundles.jacksonjr
+
+    testImplementation libs.bundles.testing
+    testImplementation project(":logutils")
+    testImplementation project(":nvatestutils")
+
+    test {
+        environment "BACKEND_CLIENT_ID", "backendClientId"
+        environment "BACKEND_CLIENT_SECRET", "backendClientSecret"
+        environment "COGNITO_URI", "https://notused.org"
+        environment "BACKEND_CLIENT_AUTH_URL", "https://backend-auth/"
+        environment "API_HOST", "https://backend-host/"
+    }
+}

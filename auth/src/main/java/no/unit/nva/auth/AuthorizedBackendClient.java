@@ -61,6 +61,13 @@ public class AuthorizedBackendClient {
     }
 
     @JacocoGenerated
+    public static AuthorizedBackendClient prepareWithBearerTokenAndCredentials(HttpClient httpClient,
+                                                                               String bearerToken,
+                                                                               CognitoCredentials cognitoCredentials) {
+        return new AuthorizedBackendClient(httpClient, bearerToken, cognitoCredentials);
+    }
+
+    @JacocoGenerated
     protected String getBearerToken() {
         return bearerToken;
     }
