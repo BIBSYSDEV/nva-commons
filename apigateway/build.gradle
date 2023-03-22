@@ -29,6 +29,7 @@ dependencies {
 
 
 test{
-   environment "ALLOWED_ORIGIN", "*"
+    environment "ALLOWED_ORIGIN", "*"
     environment "COGNITO_URI", "https://cognito.com"
+    environment "EXTERNAL_USER_POOL_URI", "https//user-pool.example.com/123"
 }
