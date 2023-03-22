@@ -9,7 +9,6 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import nva.commons.core.JacocoGenerated;
 import nva.commons.core.paths.UriWrapper;
 
 @JsonInclude(ALWAYS)
@@ -45,34 +44,7 @@ public class PagedSearchResult<T> {
     @JsonProperty(HITS_FIELD_NAME)
     private final List<T> hits;
 
-    public PagedSearchResult(URI context,
-                             URI baseUri,
-                             int queryOffset,
-                             int querySize,
-                             int totalSize,
-                             List<T> hits) {
-        this(context, baseUri, queryOffset, querySize, totalSize, hits, Collections.emptyMap());
-    }
-
-    public PagedSearchResult(URI context,
-                             URI baseUri,
-                             int queryOffset,
-                             int querySize,
-                             int totalSize,
-                             List<T> hits,
-                             Map<String, String> queryParameters) {
-        this.context = context;
-        this.id = generateSelfUri(baseUri, queryOffset, querySize, queryParameters);
-
-        this.nextResults = calculateNextResults(queryOffset, querySize, totalSize, hits.size(), baseUri,
-                                                queryParameters);
-        this.previousResults = calculatePreviousResults(queryOffset, querySize, baseUri, queryParameters);
-        this.totalSize = totalSize;
-        this.hits = hits;
-    }
-
     @JsonCreator
-    @JacocoGenerated
     public PagedSearchResult(@JsonProperty(CONTEXT_FIELD_NAME) URI context,
                              @JsonProperty(ID_FIELD_NAME) URI id,
                              @JsonProperty(SIZE_FIELD_NAME) int totalSize,
@@ -85,6 +57,35 @@ public class PagedSearchResult<T> {
         this.nextResults = nextResults;
         this.previousResults = previousResults;
         this.hits = hits;
+    }
+
+    public static <T> PagedSearchResult<T> create(URI context,
+                             URI baseUri,
+                             int queryOffset,
+                             int querySize,
+                             int totalSize,
+                             List<T> hits) {
+        return create(context, baseUri, queryOffset, querySize, totalSize, hits, Collections.emptyMap());
+    }
+
+    public static <T> PagedSearchResult<T> create(URI context,
+                             URI baseUri,
+                             int queryOffset,
+                             int querySize,
+                             int totalSize,
+                             List<T> hits,
+                             Map<String, String> queryParameters) {
+
+        URI selfUri = generateSelfUri(baseUri, queryOffset, querySize, queryParameters);
+        URI nextResults = calculateNextResults(queryOffset, querySize, totalSize, hits.size(), baseUri,
+                                               queryParameters);
+        URI previousResults = calculatePreviousResults(queryOffset, querySize, baseUri, queryParameters);
+
+        return new PagedSearchResult<>(context, selfUri,
+                                       totalSize,
+                                       nextResults,
+                                       previousResults,
+                                       hits);
     }
 
     public URI getContext() {
