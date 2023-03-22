@@ -29,7 +29,7 @@ class PagedSearchResultTest {
 
         assertThat(result.getContext(), is(equalTo(CONTEXT)));
         assertThat(result.getId(), is(URI.create("https://localhost?offset=0&size=5")));
-        assertThat(result.getTotalSize(), is(equalTo(0)));
+        assertThat(result.getTotalHits(), is(equalTo(0)));
         assertThat(result.getHits(), emptyIterable());
     }
 

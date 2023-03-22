@@ -15,7 +15,7 @@ import nva.commons.core.paths.UriWrapper;
 @JsonPropertyOrder({
     PagedSearchResult.CONTEXT_FIELD_NAME,
     PagedSearchResult.ID_FIELD_NAME,
-    PagedSearchResult.SIZE_FIELD_NAME,
+    PagedSearchResult.TOTAL_HITS_FIELD_NAME,
     PagedSearchResult.NEXT_RESULTS_FIELD_NAME,
     PagedSearchResult.PREVIOUS_RESULTS_FIELD_NAME,
     PagedSearchResult.HITS_FIELD_NAME})
@@ -23,7 +23,7 @@ public class PagedSearchResult<T> {
 
     protected static final String CONTEXT_FIELD_NAME = "@context";
     protected static final String ID_FIELD_NAME = "id";
-    protected static final String SIZE_FIELD_NAME = "size";
+    protected static final String TOTAL_HITS_FIELD_NAME = "totalHits";
     protected static final String NEXT_RESULTS_FIELD_NAME = "nextResults";
     protected static final String PREVIOUS_RESULTS_FIELD_NAME = "previousResults";
     protected static final String HITS_FIELD_NAME = "hits";
@@ -35,8 +35,8 @@ public class PagedSearchResult<T> {
     private final URI context;
     @JsonProperty(ID_FIELD_NAME)
     private final URI id;
-    @JsonProperty(SIZE_FIELD_NAME)
-    private final int totalSize;
+    @JsonProperty(TOTAL_HITS_FIELD_NAME)
+    private final int totalHits;
     @JsonProperty(NEXT_RESULTS_FIELD_NAME)
     private final URI nextResults;
     @JsonProperty(PREVIOUS_RESULTS_FIELD_NAME)
@@ -47,13 +47,13 @@ public class PagedSearchResult<T> {
     @JsonCreator
     public PagedSearchResult(@JsonProperty(CONTEXT_FIELD_NAME) URI context,
                              @JsonProperty(ID_FIELD_NAME) URI id,
-                             @JsonProperty(SIZE_FIELD_NAME) int totalSize,
+                             @JsonProperty(TOTAL_HITS_FIELD_NAME) int totalHits,
                              @JsonProperty(NEXT_RESULTS_FIELD_NAME) URI nextResults,
                              @JsonProperty(PREVIOUS_RESULTS_FIELD_NAME) URI previousResults,
                              @JsonProperty(HITS_FIELD_NAME) List<T> hits) {
         this.context = context;
         this.id = id;
-        this.totalSize = totalSize;
+        this.totalHits = totalHits;
         this.nextResults = nextResults;
         this.previousResults = previousResults;
         this.hits = hits;
@@ -63,26 +63,26 @@ public class PagedSearchResult<T> {
                              URI baseUri,
                              int queryOffset,
                              int querySize,
-                             int totalSize,
+                             int totalHits,
                              List<T> hits) {
-        return create(context, baseUri, queryOffset, querySize, totalSize, hits, Collections.emptyMap());
+        return create(context, baseUri, queryOffset, querySize, totalHits, hits, Collections.emptyMap());
     }
 
     public static <T> PagedSearchResult<T> create(URI context,
                              URI baseUri,
                              int queryOffset,
                              int querySize,
-                             int totalSize,
+                             int totalHits,
                              List<T> hits,
                              Map<String, String> queryParameters) {
 
         URI selfUri = generateSelfUri(baseUri, queryOffset, querySize, queryParameters);
-        URI nextResults = calculateNextResults(queryOffset, querySize, totalSize, hits.size(), baseUri,
+        URI nextResults = calculateNextResults(queryOffset, querySize, totalHits, hits.size(), baseUri,
                                                queryParameters);
         URI previousResults = calculatePreviousResults(queryOffset, querySize, baseUri, queryParameters);
 
         return new PagedSearchResult<>(context, selfUri,
-                                       totalSize,
+                                       totalHits,
                                        nextResults,
                                        previousResults,
                                        hits);
@@ -96,8 +96,8 @@ public class PagedSearchResult<T> {
         return id;
     }
 
-    public int getTotalSize() {
-        return totalSize;
+    public int getTotalHits() {
+        return totalHits;
     }
 
     public URI getNextResults() {
@@ -114,11 +114,11 @@ public class PagedSearchResult<T> {
 
     private static URI calculateNextResults(int queryOffset,
                                             int querySize,
-                                            int totalSize,
+                                            int totalHits,
                                             int noHits,
                                             URI baseUri,
                                             Map<String, String> queryParams) {
-        if ((queryOffset + noHits) < totalSize) {
+        if ((queryOffset + noHits) < totalHits) {
             return generateSelfUri(baseUri, queryOffset + querySize, querySize, queryParams);
         } else {
             return null;
