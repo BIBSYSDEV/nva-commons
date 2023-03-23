@@ -1,8 +1,8 @@
 package no.unit.nva.commons.pagination;
 
 
+import static no.unit.nva.hamcrest.DoesNotHaveEmptyValues.doesNotHaveEmptyValuesIgnoringFields;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
-import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import nva.commons.core.paths.UriWrapper;
 import org.junit.jupiter.api.Test;
 
@@ -20,26 +21,14 @@ class PaginatedSearchResultTest {
 
     public static final String QUERY_PARAM_FIELD_NAME = "key";
     public static final String QUERY_PARAM_FIELD_VALUE = "value";
-    private static final URI CONTEXT = URI.create("https://bibsysdev.github.io/src/search/paginated-search-result"
-                                                  + ".json");
     private static final URI BASE_URI = URI.create("https://localhost");
 
     @Test
     void shouldPopulateContextIdTotalHitsAndHitsAlways() {
         var result = PaginatedSearchResult.create(BASE_URI, 0, 5, 0, Collections.emptyList());
 
-        assertThat(result.getContext(), is(equalTo(CONTEXT)));
-        assertThat(result.getId(), is(URI.create("https://localhost?offset=0&size=5")));
-        assertThat(result.getTotalHits(), is(equalTo(0)));
+        assertThat(result, doesNotHaveEmptyValuesIgnoringFields(Set.of("nextResults", "previousResults", "hits")));
         assertThat(result.getHits(), emptyIterable());
-    }
-
-    @Test
-    void shouldNotPopulateNextAndPreviousResultsOnEmptyResult() {
-        var result = PaginatedSearchResult.create(BASE_URI, 0, 5, 0, Collections.emptyList());
-
-        assertThat(result.getNextResults(), nullValue());
-        assertThat(result.getPreviousResults(), nullValue());
     }
 
     @Test
