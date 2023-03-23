@@ -4,10 +4,13 @@ import static java.util.Objects.isNull;
 import static java.util.function.Predicate.not;
 import static nva.commons.apigateway.RequestInfoConstants.AUTHORIZATION_FAILURE_WARNING;
 import static nva.commons.apigateway.RequestInfoConstants.BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE;
+import static nva.commons.apigateway.RequestInfoConstants.CLIENT_ID;
 import static nva.commons.apigateway.RequestInfoConstants.DEFAULT_COGNITO_URI;
 import static nva.commons.apigateway.RequestInfoConstants.DOMAIN_NAME_FIELD;
+import static nva.commons.apigateway.RequestInfoConstants.EXTERNAL_USER_POOL_URI;
 import static nva.commons.apigateway.RequestInfoConstants.FEIDE_ID;
 import static nva.commons.apigateway.RequestInfoConstants.HEADERS_FIELD;
+import static nva.commons.apigateway.RequestInfoConstants.ISS;
 import static nva.commons.apigateway.RequestInfoConstants.METHOD_ARN_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_HEADERS;
 import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_PATH_PARAMETERS;
@@ -278,6 +281,11 @@ public class RequestInfo {
     }
 
     @JsonIgnore
+    public Optional<String> getClientId() {
+        return getRequestContextParameterOpt(CLIENT_ID);
+    }
+
+    @JsonIgnore
     public URI getCurrentCustomer() throws UnauthorizedException {
         return fetchCustomerIdFromCognito().or(this::fetchCustomerIdOffline).orElseThrow(UnauthorizedException::new);
     }
@@ -296,6 +304,12 @@ public class RequestInfo {
     public boolean clientIsInternalBackend() {
         return getRequestContextParameterOpt(SCOPES_CLAIM).map(
             value -> value.contains(BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE)).orElse(false);
+    }
+
+    public boolean clientIsThirdParty() {
+        return getRequestContextParameterOpt(ISS).map(
+            value -> value.equals(EXTERNAL_USER_POOL_URI.get())
+        ).orElse(false);
     }
 
     private Optional<String> fetchFeideIdFromCognito() {
