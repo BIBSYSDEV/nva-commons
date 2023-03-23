@@ -27,7 +27,9 @@ class IdentityServiceClientTest {
 
     public static final String BEARER_TOKEN = "Bearer 123";
     public static final String clientId = randomString();
+    public static final String actingUser = randomString();
     public static final URI customer = randomUri();
+    public static final URI cristinOrgUri = randomUri();
     HttpClient httpClient = mock(HttpClient.class);
     CognitoCredentials cognitoCredentials;
     HttpResponse<String> okResponseWithBody = mock(HttpResponse.class);
@@ -45,8 +47,9 @@ class IdentityServiceClientTest {
         when(notFoundResponse.statusCode()).thenReturn(404);
         when(notFoundResponse.body()).thenReturn("");
 
+        var response = new GetExternalClientResponse(clientId, actingUser, customer, cristinOrgUri);
         when(okResponseWithBody.statusCode()).thenReturn(200);
-        when(okResponseWithBody.body()).thenReturn(new GetExternalClientResponse(clientId, customer).toString());
+        when(okResponseWithBody.body()).thenReturn(response.toString());
 
         when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(okResponseWithBody);
 
@@ -77,7 +80,9 @@ class IdentityServiceClientTest {
         var externalClient = authorizedIdentityServiceClient.getExternalClient(clientId);
 
         assertThat(externalClient.getClientId(), is(equalTo(clientId)));
+        assertThat(externalClient.getActingUser(), is(equalTo(actingUser)));
         assertThat(externalClient.getCustomer(), is(equalTo(customer)));
+        assertThat(externalClient.getCristinUrgUri(), is(equalTo(cristinOrgUri)));
     }
 
     @Test
