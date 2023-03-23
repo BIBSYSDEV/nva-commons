@@ -60,26 +60,26 @@ public class PagedSearchResult<T> {
     }
 
     public static <T> PagedSearchResult<T> create(URI context,
-                             URI baseUri,
-                             int queryOffset,
-                             int querySize,
-                             int totalHits,
-                             List<T> hits) {
+                                                  URI baseUri,
+                                                  int queryOffset,
+                                                  int querySize,
+                                                  int totalHits,
+                                                  List<T> hits) {
         return create(context, baseUri, queryOffset, querySize, totalHits, hits, Collections.emptyMap());
     }
 
     public static <T> PagedSearchResult<T> create(URI context,
-                             URI baseUri,
-                             int queryOffset,
-                             int querySize,
-                             int totalHits,
-                             List<T> hits,
-                             Map<String, String> queryParameters) {
+                                                  URI baseUri,
+                                                  int queryOffset,
+                                                  int querySize,
+                                                  int totalHits,
+                                                  List<T> hits,
+                                                  Map<String, String> queryParameters) {
 
-        URI selfUri = generateSelfUri(baseUri, queryOffset, querySize, queryParameters);
-        URI nextResults = calculateNextResults(queryOffset, querySize, totalHits, hits.size(), baseUri,
+        var selfUri = generateSelfUri(baseUri, queryOffset, querySize, queryParameters);
+        var nextResults = calculateNextResults(queryOffset, querySize, totalHits, hits.size(), baseUri,
                                                queryParameters);
-        URI previousResults = calculatePreviousResults(queryOffset, querySize, baseUri, queryParameters);
+        var previousResults = calculatePreviousResults(queryOffset, querySize, baseUri, queryParameters);
 
         return new PagedSearchResult<>(context, selfUri,
                                        totalHits,
@@ -115,10 +115,10 @@ public class PagedSearchResult<T> {
     private static URI calculateNextResults(int queryOffset,
                                             int querySize,
                                             int totalHits,
-                                            int noHits,
+                                            int numberOfHits,
                                             URI baseUri,
                                             Map<String, String> queryParams) {
-        if ((queryOffset + noHits) < totalHits) {
+        if ((queryOffset + numberOfHits) < totalHits) {
             return generateSelfUri(baseUri, queryOffset + querySize, querySize, queryParams);
         } else {
             return null;
