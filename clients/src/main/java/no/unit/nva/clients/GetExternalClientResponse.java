@@ -10,24 +10,40 @@ public class GetExternalClientResponse {
     @JsonProperty("clientId")
     public String clientId;
 
+    @JsonProperty("actingUser")
+    public String actingUser;
+
     @JsonProperty("customer")
     public URI customer;
+
+    @JsonProperty("cristinOrgUri")
+    public URI cristinUrgUri;
 
     @JacocoGenerated
     public GetExternalClientResponse() {
     }
 
-    public GetExternalClientResponse(String clientId, URI customer) {
+    public GetExternalClientResponse(String clientId, String actingUser, URI customer, URI cristinUrgUri) {
         this.clientId = clientId;
+        this.actingUser = actingUser;
         this.customer = customer;
+        this.cristinUrgUri = cristinUrgUri;
     }
 
     public String getClientId() {
         return clientId;
     }
 
+    public String getActingUser() {
+        return actingUser;
+    }
+
     public URI getCustomer() {
         return customer;
+    }
+
+    public URI getCristinUrgUri() {
+        return cristinUrgUri;
     }
 
     @Override
