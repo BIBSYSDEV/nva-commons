@@ -16,16 +16,17 @@ import java.util.Map;
 import nva.commons.core.paths.UriWrapper;
 import org.junit.jupiter.api.Test;
 
-class PagedSearchResultTest {
+class PaginatedSearchResultTest {
 
     public static final String QUERY_PARAM_FIELD_NAME = "key";
     public static final String QUERY_PARAM_FIELD_VALUE = "value";
-    private static final URI CONTEXT = randomUri();
+    private static final URI CONTEXT = URI.create("https://bibsysdev.github.io/src/search/paginated-search-result"
+                                                  + ".json");
     private static final URI BASE_URI = URI.create("https://localhost");
 
     @Test
     void shouldPopulateContextIdTotalHitsAndHitsAlways() {
-        var result = PagedSearchResult.create(CONTEXT, BASE_URI, 0, 5, 0, Collections.emptyList());
+        var result = PaginatedSearchResult.create(BASE_URI, 0, 5, 0, Collections.emptyList());
 
         assertThat(result.getContext(), is(equalTo(CONTEXT)));
         assertThat(result.getId(), is(URI.create("https://localhost?offset=0&size=5")));
@@ -35,7 +36,7 @@ class PagedSearchResultTest {
 
     @Test
     void shouldNotPopulateNextAndPreviousResultsOnEmptyResult() {
-        var result = PagedSearchResult.create(CONTEXT, BASE_URI, 0, 5, 0, Collections.emptyList());
+        var result = PaginatedSearchResult.create(BASE_URI, 0, 5, 0, Collections.emptyList());
 
         assertThat(result.getNextResults(), nullValue());
         assertThat(result.getPreviousResults(), nullValue());
@@ -43,7 +44,7 @@ class PagedSearchResultTest {
 
     @Test
     void shouldPopulateNextResultsWhenMoreHitsAreAvailable() {
-        var result = PagedSearchResult.create(CONTEXT, BASE_URI, 0, 1, 2, List.of(randomString()));
+        var result = PaginatedSearchResult.create(BASE_URI, 0, 1, 2, List.of(randomString()));
 
         var expectedNextResults = URI.create("https://localhost?offset=1&size=1");
         assertThat(result.getNextResults(), is(equalTo(expectedNextResults)));
@@ -52,7 +53,7 @@ class PagedSearchResultTest {
 
     @Test
     void shouldPopulatePreviousResultWhenThereArePreviousResults() {
-        var result = PagedSearchResult.create(CONTEXT, BASE_URI, 1, 1, 2, List.of(randomString()));
+        var result = PaginatedSearchResult.create(BASE_URI, 1, 1, 2, List.of(randomString()));
 
         assertThat(result.getNextResults(), nullValue());
 
@@ -64,7 +65,7 @@ class PagedSearchResultTest {
     void shouldPopulateBothNextAndPreviousResultWhenApplicable() {
         var querySize = 5;
         var hits = generateRandomHits(querySize);
-        var result = PagedSearchResult.create(CONTEXT, BASE_URI, 10, 5, 50, hits);
+        var result = PaginatedSearchResult.create(BASE_URI, 10, 5, 50, hits);
 
         var expectedNextResults = URI.create("https://localhost?offset=15&size=5");
         assertThat("nextResults should be at offset 15 with size 5",
@@ -79,7 +80,7 @@ class PagedSearchResultTest {
     @Test
     void shouldSupportOffsetThatIsNotFullPageSizes() {
         var hits = List.of(randomString(), randomString());
-        var result = PagedSearchResult.create(CONTEXT, BASE_URI, 1, 3, 3, hits);
+        var result = PaginatedSearchResult.create(BASE_URI, 1, 3, 3, hits);
 
         assertThat(result.getNextResults(), nullValue());
 
@@ -90,7 +91,7 @@ class PagedSearchResultTest {
     @Test
     void shouldPopulateNextResultsWithQueryParamsWhenQueryParamsAndMoreHitsAreAvailable() {
         var queryParams = Map.of(QUERY_PARAM_FIELD_NAME, QUERY_PARAM_FIELD_VALUE, "key2", "value2");
-        var result = PagedSearchResult.create(CONTEXT, BASE_URI, 0, 1, 2, List.of(randomString()), queryParams);
+        var result = PaginatedSearchResult.create(BASE_URI, 0, 1, 2, List.of(randomString()), queryParams);
 
         var expectedNextResults = getUri(queryParams, "1", "1");
 
@@ -103,7 +104,7 @@ class PagedSearchResultTest {
         var querySize = 5;
         var hits = generateRandomHits(querySize);
         var queryParams = Map.of(QUERY_PARAM_FIELD_NAME, QUERY_PARAM_FIELD_VALUE);
-        var result = PagedSearchResult.create(CONTEXT, BASE_URI, 10, 5, 50, hits, queryParams);
+        var result = PaginatedSearchResult.create(BASE_URI, 10, 5, 50, hits, queryParams);
 
         var expectedNextResults = getUri(Map.of(QUERY_PARAM_FIELD_NAME, QUERY_PARAM_FIELD_VALUE), "15","5");
 

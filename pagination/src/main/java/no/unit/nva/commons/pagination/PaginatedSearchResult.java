@@ -13,13 +13,13 @@ import nva.commons.core.paths.UriWrapper;
 
 @JsonInclude(ALWAYS)
 @JsonPropertyOrder({
-    PagedSearchResult.CONTEXT_FIELD_NAME,
-    PagedSearchResult.ID_FIELD_NAME,
-    PagedSearchResult.TOTAL_HITS_FIELD_NAME,
-    PagedSearchResult.NEXT_RESULTS_FIELD_NAME,
-    PagedSearchResult.PREVIOUS_RESULTS_FIELD_NAME,
-    PagedSearchResult.HITS_FIELD_NAME})
-public class PagedSearchResult<T> {
+    PaginatedSearchResult.CONTEXT_FIELD_NAME,
+    PaginatedSearchResult.ID_FIELD_NAME,
+    PaginatedSearchResult.TOTAL_HITS_FIELD_NAME,
+    PaginatedSearchResult.NEXT_RESULTS_FIELD_NAME,
+    PaginatedSearchResult.PREVIOUS_RESULTS_FIELD_NAME,
+    PaginatedSearchResult.HITS_FIELD_NAME})
+public class PaginatedSearchResult<T> {
 
     protected static final String CONTEXT_FIELD_NAME = "@context";
     protected static final String ID_FIELD_NAME = "id";
@@ -28,11 +28,14 @@ public class PagedSearchResult<T> {
     protected static final String PREVIOUS_RESULTS_FIELD_NAME = "previousResults";
     protected static final String HITS_FIELD_NAME = "hits";
 
+    private static final String PAGINATED_SEARCH_RESULT_CONTEXT
+        = "https://bibsysdev.github.io/src/search/paginated-search-result.json";
+
     public static final String OFFSET_QUERY_PARAM_NAME = "offset";
     public static final String SIZE_QUERY_PARAM_NAME = "size";
 
     @JsonProperty(CONTEXT_FIELD_NAME)
-    private final URI context;
+    private final URI context = URI.create(PAGINATED_SEARCH_RESULT_CONTEXT);
     @JsonProperty(ID_FIELD_NAME)
     private final URI id;
     @JsonProperty(TOTAL_HITS_FIELD_NAME)
@@ -45,13 +48,11 @@ public class PagedSearchResult<T> {
     private final List<T> hits;
 
     @JsonCreator
-    public PagedSearchResult(@JsonProperty(CONTEXT_FIELD_NAME) URI context,
-                             @JsonProperty(ID_FIELD_NAME) URI id,
-                             @JsonProperty(TOTAL_HITS_FIELD_NAME) int totalHits,
-                             @JsonProperty(NEXT_RESULTS_FIELD_NAME) URI nextResults,
-                             @JsonProperty(PREVIOUS_RESULTS_FIELD_NAME) URI previousResults,
-                             @JsonProperty(HITS_FIELD_NAME) List<T> hits) {
-        this.context = context;
+    public PaginatedSearchResult(@JsonProperty(ID_FIELD_NAME) URI id,
+                                 @JsonProperty(TOTAL_HITS_FIELD_NAME) int totalHits,
+                                 @JsonProperty(NEXT_RESULTS_FIELD_NAME) URI nextResults,
+                                 @JsonProperty(PREVIOUS_RESULTS_FIELD_NAME) URI previousResults,
+                                 @JsonProperty(HITS_FIELD_NAME) List<T> hits) {
         this.id = id;
         this.totalHits = totalHits;
         this.nextResults = nextResults;
@@ -59,33 +60,31 @@ public class PagedSearchResult<T> {
         this.hits = hits;
     }
 
-    public static <T> PagedSearchResult<T> create(URI context,
-                                                  URI baseUri,
-                                                  int queryOffset,
-                                                  int querySize,
-                                                  int totalHits,
-                                                  List<T> hits) {
-        return create(context, baseUri, queryOffset, querySize, totalHits, hits, Collections.emptyMap());
+    public static <T> PaginatedSearchResult<T> create(URI baseUri,
+                                                      int queryOffset,
+                                                      int querySize,
+                                                      int totalHits,
+                                                      List<T> hits) {
+        return create(baseUri, queryOffset, querySize, totalHits, hits, Collections.emptyMap());
     }
 
-    public static <T> PagedSearchResult<T> create(URI context,
-                                                  URI baseUri,
-                                                  int queryOffset,
-                                                  int querySize,
-                                                  int totalHits,
-                                                  List<T> hits,
-                                                  Map<String, String> queryParameters) {
+    public static <T> PaginatedSearchResult<T> create(URI baseUri,
+                                                      int queryOffset,
+                                                      int querySize,
+                                                      int totalHits,
+                                                      List<T> hits,
+                                                      Map<String, String> queryParameters) {
 
         var selfUri = generateSelfUri(baseUri, queryOffset, querySize, queryParameters);
         var nextResults = calculateNextResults(queryOffset, querySize, totalHits, hits.size(), baseUri,
                                                queryParameters);
         var previousResults = calculatePreviousResults(queryOffset, querySize, baseUri, queryParameters);
 
-        return new PagedSearchResult<>(context, selfUri,
-                                       totalHits,
-                                       nextResults,
-                                       previousResults,
-                                       hits);
+        return new PaginatedSearchResult<>(selfUri,
+                                           totalHits,
+                                           nextResults,
+                                           previousResults,
+                                           hits);
     }
 
     public URI getContext() {
