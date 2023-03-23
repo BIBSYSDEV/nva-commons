@@ -88,17 +88,6 @@ class PagedSearchResultTest {
     }
 
     @Test
-    void shouldPopulateNextResultsWithQueryParamWhenQueryParamAndMoreHitsAreAvailable() {
-        var queryParams = Map.of(QUERY_PARAM_FIELD_NAME, QUERY_PARAM_FIELD_VALUE);
-        var result = PagedSearchResult.create(CONTEXT, BASE_URI, 0, 1, 2, List.of(randomString()), queryParams);
-
-        var expectedNextResults = getUri(Map.of(QUERY_PARAM_FIELD_NAME, QUERY_PARAM_FIELD_VALUE), "1", "1");
-
-        assertThat(result.getNextResults(), is(equalTo(expectedNextResults)));
-        assertThat(result.getPreviousResults(), nullValue());
-    }
-
-    @Test
     void shouldPopulateNextResultsWithQueryParamsWhenQueryParamsAndMoreHitsAreAvailable() {
         var queryParams = Map.of(QUERY_PARAM_FIELD_NAME, QUERY_PARAM_FIELD_VALUE, "key2", "value2");
         var result = PagedSearchResult.create(CONTEXT, BASE_URI, 0, 1, 2, List.of(randomString()), queryParams);
@@ -107,17 +96,6 @@ class PagedSearchResultTest {
 
         assertThat(result.getNextResults(), is(equalTo(expectedNextResults)));
         assertThat(result.getPreviousResults(), nullValue());
-    }
-
-    @Test
-    void shouldPopulatePeviousResultsWithQueryParamWhenQueryParamAndThereArePreviousResults() {
-        var queryParams = Map.of(QUERY_PARAM_FIELD_NAME, QUERY_PARAM_FIELD_VALUE);
-        var result = PagedSearchResult.create(CONTEXT, BASE_URI, 1, 1, 2, List.of(randomString()), queryParams);
-
-        assertThat(result.getNextResults(), nullValue());
-
-        var expectedPreviousResults = getUri(Map.of(QUERY_PARAM_FIELD_NAME, QUERY_PARAM_FIELD_VALUE), "0", "1");
-        assertThat(result.getPreviousResults(), is(equalTo(expectedPreviousResults)));
     }
 
     @Test
