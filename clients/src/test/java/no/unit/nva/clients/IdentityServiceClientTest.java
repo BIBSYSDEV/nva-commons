@@ -81,7 +81,7 @@ class IdentityServiceClientTest {
 
         assertThat(externalClient.getClientId(), is(equalTo(clientId)));
         assertThat(externalClient.getActingUser(), is(equalTo(actingUser)));
-        assertThat(externalClient.getCustomer(), is(equalTo(customer)));
+        assertThat(externalClient.getCustomerUri(), is(equalTo(customer)));
         assertThat(externalClient.getCristinUrgUri(), is(equalTo(cristinOrgUri)));
     }
 
