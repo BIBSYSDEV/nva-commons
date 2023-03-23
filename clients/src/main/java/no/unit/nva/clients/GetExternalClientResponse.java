@@ -13,8 +13,8 @@ public class GetExternalClientResponse {
     @JsonProperty("actingUser")
     public String actingUser;
 
-    @JsonProperty("customer")
-    public URI customer;
+    @JsonProperty("customerUri")
+    public URI customerUri;
 
     @JsonProperty("cristinOrgUri")
     public URI cristinUrgUri;
@@ -23,10 +23,10 @@ public class GetExternalClientResponse {
     public GetExternalClientResponse() {
     }
 
-    public GetExternalClientResponse(String clientId, String actingUser, URI customer, URI cristinUrgUri) {
+    public GetExternalClientResponse(String clientId, String actingUser, URI customerUri, URI cristinUrgUri) {
         this.clientId = clientId;
         this.actingUser = actingUser;
-        this.customer = customer;
+        this.customerUri = customerUri;
         this.cristinUrgUri = cristinUrgUri;
     }
 
@@ -38,8 +38,8 @@ public class GetExternalClientResponse {
         return actingUser;
     }
 
-    public URI getCustomer() {
-        return customer;
+    public URI getCustomerUri() {
+        return customerUri;
     }
 
     public URI getCristinUrgUri() {
