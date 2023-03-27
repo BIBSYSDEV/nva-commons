@@ -75,6 +75,7 @@ class RequestInfoTest {
     private static final Path MISSING_MAP_VALUES = Path.of(API_GATEWAY_MESSAGES_FOLDER, "missingRequestInfo.json");
     private static final Path AWS_SAMPLE_PROXY_EVENT = Path.of(API_GATEWAY_MESSAGES_FOLDER, "awsSampleProxyEvent.json");
     private static final String HARDCODED_AUTH_HEADER = "Bearer THE_ACCESS_TOKEN";
+    public static final String EXTERNAL_USER_POOL_URL = "https//user-pool.example.com/123";
 
     static {
         QUERY_PARAMS_FOUND_IN_RESOURCE_FILE = new TreeMap<>();
@@ -297,6 +298,37 @@ class RequestInfoTest {
         var requestInfo = RequestInfo.fromRequest(request);
         assertThat(requestInfo.clientIsInternalBackend(), is(false));
     }
+
+    @Test
+    void isThirdPartyShouldReturnTrueWhenScopeContainsTheExternalIssuedUserPool() throws JsonProcessingException {
+        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withIssuer(EXTERNAL_USER_POOL_URL).build();
+        var requestInfo = RequestInfo.fromRequest(request);
+        assertThat(requestInfo.clientIsThirdParty(), is(true));
+    }
+
+    @Test
+    void isThirdPartyShouldReturnFalseWhenScopeContainsOtherUserPool() throws JsonProcessingException {
+        var issuer = RandomDataGenerator.randomUri().toString();
+        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withIssuer(issuer).build();
+        var requestInfo = RequestInfo.fromRequest(request);
+        assertThat(requestInfo.clientIsThirdParty(), is(false));
+    }
+
+    @Test
+    void getClientIdShouldReturnEmptyOptionalWhenClientIdIsNotInClaim() throws JsonProcessingException {
+        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).build();
+        var requestInfo = RequestInfo.fromRequest(request);
+        assertThat(requestInfo.getClientId().isEmpty(), is(true));
+    }
+
+    @Test
+    void getClientIdShouldReturnTheClientIdFromClaim() throws JsonProcessingException {
+        var clientId = RandomDataGenerator.randomString();
+        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withClientId(clientId).build();
+        var requestInfo = RequestInfo.fromRequest(request);
+        assertThat(requestInfo.getClientId().get(), is(equalTo(clientId)));
+    }
+
 
     @Test
     void canGetValueFromRequestContext() throws JsonProcessingException {
