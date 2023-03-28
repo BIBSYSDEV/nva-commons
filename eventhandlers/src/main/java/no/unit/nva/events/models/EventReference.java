@@ -8,6 +8,7 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.Objects;
 import no.unit.nva.commons.json.JsonSerializable;
+import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.core.JacocoGenerated;
 
 /**
@@ -16,7 +17,7 @@ import nva.commons.core.JacocoGenerated;
  * of the event
  */
 public class EventReference implements JsonSerializable, EventBody {
-    
+
     public static final String TOPIC = "topic";
     public static final String URI = "uri";
     public static final String SUBTOPIC = "subtopic";
@@ -29,7 +30,7 @@ public class EventReference implements JsonSerializable, EventBody {
     private final URI uri;
     @JsonProperty(TIMESTAMP)
     private final Instant timestamp;
-    
+
     @JsonCreator
     public EventReference(@JsonProperty(TOPIC) String topic,
                           @JsonProperty(SUBTOPIC) String subtopic,
@@ -40,45 +41,55 @@ public class EventReference implements JsonSerializable, EventBody {
         this.uri = uri;
         this.timestamp = timestamp;
     }
-    
+
     public EventReference(String topic,
                           String subtopic,
                           URI uri) {
         this(topic, subtopic, uri, Instant.now());
     }
-    
+
     public EventReference(String topic, URI uri) {
         this(topic, null, uri);
     }
-    
+
     public static EventReference fromJson(String json) {
         return attempt(() -> objectMapper.readValue(json, EventReference.class)).orElseThrow();
     }
-    
+
     public Instant getTimestamp() {
         return timestamp;
     }
-    
+
     @JacocoGenerated
     public String getSubtopic() {
         return subtopic;
     }
-    
+
     @Override
     @JacocoGenerated
     public String getTopic() {
         return topic;
     }
-    
+
     @JacocoGenerated
     public URI getUri() {
         return uri;
     }
-    
+
     public String extractBucketName() {
         return uri.getHost();
     }
-    
+
+
+    @Override
+    public String toJsonString() {
+        try {
+            return JsonUtils.singleLineObjectMapper.writeValueAsString(this);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     @JacocoGenerated
     public boolean equals(Object o) {
@@ -93,7 +104,7 @@ public class EventReference implements JsonSerializable, EventBody {
             that.getSubtopic()) && Objects.equals(getUri(), that.getUri()) && Objects.equals(
             getTimestamp(), that.getTimestamp());
     }
-    
+
     @Override
     @JacocoGenerated
     public int hashCode() {
