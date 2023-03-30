@@ -8,6 +8,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import nva.commons.apigateway.exceptions.UnprocessableContentException;
 import nva.commons.core.paths.UriWrapper;
 
 @JsonInclude(ALWAYS)
@@ -56,7 +57,7 @@ public final class PaginatedSearchResult<T> {
                                                       int queryOffset,
                                                       int querySize,
                                                       int totalHits,
-                                                      List<T> hits) {
+                                                      List<T> hits) throws UnprocessableContentException {
         return create(baseUri, queryOffset, querySize, totalHits, hits, Collections.emptyMap());
     }
 
@@ -65,7 +66,10 @@ public final class PaginatedSearchResult<T> {
                                                       int querySize,
                                                       int totalHits,
                                                       List<T> hits,
-                                                      Map<String, String> queryParameters) {
+                                                      Map<String, String> queryParameters)
+        throws UnprocessableContentException {
+
+        validateOffsetAndSize(queryOffset, querySize);
 
         var selfUri = generateSelfUri(baseUri, queryOffset, querySize, queryParameters);
         var nextResults = calculateNextResults(queryOffset, querySize, totalHits, hits.size(), baseUri,
@@ -151,5 +155,22 @@ public final class PaginatedSearchResult<T> {
             .addQueryParameter(OFFSET_QUERY_PARAM_NAME, Integer.toString(queryOffset))
             .addQueryParameter(SIZE_QUERY_PARAM_NAME, Integer.toString(querySize))
             .getUri();
+    }
+
+    private static void validateOffsetAndSize(int offset, int size) throws UnprocessableContentException {
+        if (isLessThanZero(offset)) {
+            throw new UnprocessableContentException("Unable to process negative offset");
+        }
+        if (isLessThanOrEqualToZero(size)) {
+            throw new UnprocessableContentException("Unable to process size equal to or less than zero");
+        }
+    }
+
+    private static boolean isLessThanOrEqualToZero(int number) {
+        return isLessThanZero(number) || number == 0;
+    }
+
+    private static boolean isLessThanZero(int number) {
+        return number < 0;
     }
 }

@@ -6,6 +6,7 @@ plugins {
 dependencies {
 
     implementation project (":core")
+    implementation project (":apigateway")
     compileOnly libs.jackson.core
     compileOnly libs.jackson.databind
     compileOnly libs.jackson.annotations
@@ -21,7 +22,5 @@ dependencies {
     testImplementation libs.jackson.datatype.jdk8
     testImplementation libs.jackson.datatype.jsr310
     testImplementation libs.jackson.datatype.problem
-
-
     testImplementation libs.bundles.testing
 }

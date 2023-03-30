@@ -1,6 +1,5 @@
 package no.unit.nva.commons.pagination;
 
-
 import static no.unit.nva.hamcrest.DoesNotHaveEmptyValues.doesNotHaveEmptyValuesIgnoringFields;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -8,14 +7,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsEmptyIterable.emptyIterable;
 import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import nva.commons.apigateway.exceptions.UnprocessableContentException;
 import nva.commons.core.paths.UriWrapper;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class PaginatedSearchResultTest {
 
@@ -24,7 +27,7 @@ class PaginatedSearchResultTest {
     private static final URI BASE_URI = URI.create("https://localhost");
 
     @Test
-    void shouldPopulateContextIdTotalHitsAndHitsAlways() {
+    void shouldPopulateContextIdTotalHitsAndHitsAlways() throws UnprocessableContentException {
         var result = PaginatedSearchResult.create(BASE_URI, 0, 5, 0, Collections.emptyList());
 
         assertThat(result, doesNotHaveEmptyValuesIgnoringFields(Set.of("nextResults", "previousResults", "hits")));
@@ -32,7 +35,7 @@ class PaginatedSearchResultTest {
     }
 
     @Test
-    void shouldPopulateNextResultsWhenMoreHitsAreAvailable() {
+    void shouldPopulateNextResultsWhenMoreHitsAreAvailable() throws UnprocessableContentException {
         var result = PaginatedSearchResult.create(BASE_URI, 0, 1, 2, List.of(randomString()));
 
         var expectedNextResults = URI.create("https://localhost?offset=1&size=1");
@@ -41,7 +44,7 @@ class PaginatedSearchResultTest {
     }
 
     @Test
-    void shouldPopulatePreviousResultWhenThereArePreviousResults() {
+    void shouldPopulatePreviousResultWhenThereArePreviousResults() throws UnprocessableContentException {
         var result = PaginatedSearchResult.create(BASE_URI, 1, 1, 2, List.of(randomString()));
 
         assertThat(result.getNextResults(), nullValue());
@@ -51,7 +54,7 @@ class PaginatedSearchResultTest {
     }
 
     @Test
-    void shouldPopulateBothNextAndPreviousResultWhenApplicable() {
+    void shouldPopulateBothNextAndPreviousResultWhenApplicable() throws UnprocessableContentException {
         var querySize = 5;
         var hits = generateRandomHits(querySize);
         var result = PaginatedSearchResult.create(BASE_URI, 10, 5, 50, hits);
@@ -67,7 +70,7 @@ class PaginatedSearchResultTest {
     }
 
     @Test
-    void shouldSupportOffsetThatIsNotFullPageSizes() {
+    void shouldSupportOffsetThatIsNotFullPageSizes() throws UnprocessableContentException {
         var hits = List.of(randomString(), randomString());
         var result = PaginatedSearchResult.create(BASE_URI, 1, 3, 3, hits);
 
@@ -78,7 +81,8 @@ class PaginatedSearchResultTest {
     }
 
     @Test
-    void shouldPopulateNextResultsWithQueryParamsWhenQueryParamsAndMoreHitsAreAvailable() {
+    void shouldPopulateNextResultsWithQueryParamsWhenQueryParamsAndMoreHitsAreAvailable()
+        throws UnprocessableContentException {
         var queryParams = Map.of(QUERY_PARAM_FIELD_NAME, QUERY_PARAM_FIELD_VALUE, "key2", "value2");
         var result = PaginatedSearchResult.create(BASE_URI, 0, 1, 2, List.of(randomString()), queryParams);
 
@@ -89,23 +93,25 @@ class PaginatedSearchResultTest {
     }
 
     @Test
-    void shouldPopulateBothNextAndPreviousResultWithQueryParamWhenQueryParamWhenApplicable() {
+    void shouldPopulateBothNextAndPreviousResultWithQueryParamWhenQueryParamWhenApplicable()
+        throws UnprocessableContentException {
         var querySize = 5;
         var hits = generateRandomHits(querySize);
         var queryParams = Map.of(QUERY_PARAM_FIELD_NAME, QUERY_PARAM_FIELD_VALUE);
         var result = PaginatedSearchResult.create(BASE_URI, 10, 5, 50, hits, queryParams);
 
-        var expectedNextResults = getUri(Map.of(QUERY_PARAM_FIELD_NAME, QUERY_PARAM_FIELD_VALUE), "15","5");
+        var expectedNextResults = getUri(Map.of(QUERY_PARAM_FIELD_NAME, QUERY_PARAM_FIELD_VALUE), "15", "5");
 
         assertThat(result.getNextResults(), is(equalTo(expectedNextResults)));
 
-        var expectedPreviousResults = getUri(Map.of(QUERY_PARAM_FIELD_NAME, QUERY_PARAM_FIELD_VALUE), "5","5");
+        var expectedPreviousResults = getUri(Map.of(QUERY_PARAM_FIELD_NAME, QUERY_PARAM_FIELD_VALUE), "5", "5");
 
         assertThat(result.getPreviousResults(), is(equalTo(expectedPreviousResults)));
     }
 
     @Test
-    void shouldReturnActualLastPageWhenSpecifiedOffsetIsGreaterThanTotalResultPages() {
+    void shouldReturnActualLastPageWhenSpecifiedOffsetIsGreaterThanTotalResultPages()
+        throws UnprocessableContentException {
         var querySize = 5;
         var hits = generateRandomHits(querySize);
         var queryParams = Map.of(QUERY_PARAM_FIELD_NAME, QUERY_PARAM_FIELD_VALUE);
@@ -113,9 +119,17 @@ class PaginatedSearchResultTest {
 
         assertThat(result.getNextResults(), is(nullValue()));
 
-        var expectedPreviousResults = getUri(Map.of(QUERY_PARAM_FIELD_NAME, QUERY_PARAM_FIELD_VALUE), "45","5");
+        var expectedPreviousResults = getUri(Map.of(QUERY_PARAM_FIELD_NAME, QUERY_PARAM_FIELD_VALUE), "45", "5");
 
         assertThat(result.getPreviousResults(), is(equalTo(expectedPreviousResults)));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"10,0", "-1,10", "10,-1"})
+    void shouldThrowUnprocessableContentExceptionOnNonsenseRequest(int offset, int size) {
+        assertThrows(UnprocessableContentException.class,
+                     () -> PaginatedSearchResult.create(BASE_URI, offset, size, 50, Collections.emptyList(),
+                                                        Collections.emptyMap()));
     }
 
     private URI getUri(Map<String, String> queryParams, String offset, String size) {
