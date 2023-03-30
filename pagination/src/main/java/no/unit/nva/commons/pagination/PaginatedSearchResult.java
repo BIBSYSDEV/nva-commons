@@ -4,7 +4,6 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.ALWAYS;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
@@ -12,21 +11,14 @@ import java.util.Map;
 import nva.commons.core.paths.UriWrapper;
 
 @JsonInclude(ALWAYS)
-@JsonPropertyOrder({
-    PaginatedSearchResult.CONTEXT_FIELD_NAME,
-    PaginatedSearchResult.ID_FIELD_NAME,
-    PaginatedSearchResult.TOTAL_HITS_FIELD_NAME,
-    PaginatedSearchResult.NEXT_RESULTS_FIELD_NAME,
-    PaginatedSearchResult.PREVIOUS_RESULTS_FIELD_NAME,
-    PaginatedSearchResult.HITS_FIELD_NAME})
 public final class PaginatedSearchResult<T> {
 
-    /* default */ static final String CONTEXT_FIELD_NAME = "@context";
-    /* default */ static final String ID_FIELD_NAME = "id";
-    /* default */ static final String TOTAL_HITS_FIELD_NAME = "totalHits";
-    /* default */ static final String NEXT_RESULTS_FIELD_NAME = "nextResults";
-    /* default */ static final String PREVIOUS_RESULTS_FIELD_NAME = "previousResults";
-    /* default */ static final String HITS_FIELD_NAME = "hits";
+    private static final String CONTEXT_FIELD_NAME = "@context";
+    private static final String ID_FIELD_NAME = "id";
+    private static final String TOTAL_HITS_FIELD_NAME = "totalHits";
+    private static final String NEXT_RESULTS_FIELD_NAME = "nextResults";
+    private static final String PREVIOUS_RESULTS_FIELD_NAME = "previousResults";
+    private static final String HITS_FIELD_NAME = "hits";
 
     private static final String PAGINATED_SEARCH_RESULT_CONTEXT
         = "https://bibsysdev.github.io/src/search/paginated-search-result.json";
