@@ -78,7 +78,7 @@ public final class PaginatedSearchResult<T> {
         var selfUri = generateSelfUri(baseUri, queryOffset, querySize, queryParameters);
         var nextResults = calculateNextResults(queryOffset, querySize, totalHits, hits.size(), baseUri,
                                                queryParameters);
-        var previousResults = calculatePreviousResults(queryOffset, querySize, baseUri, queryParameters);
+        var previousResults = calculatePreviousResults(queryOffset, totalHits, querySize, baseUri, queryParameters);
 
         return new PaginatedSearchResult<>(selfUri,
                                            totalHits,
@@ -117,24 +117,40 @@ public final class PaginatedSearchResult<T> {
                                             int numberOfHits,
                                             URI baseUri,
                                             Map<String, String> queryParams) {
-        if ((queryOffset + numberOfHits) < totalHits) {
-            return generateSelfUri(baseUri, queryOffset + querySize, querySize, queryParams);
-        } else {
-            return null;
-        }
+        return isLastPage(queryOffset, totalHits, numberOfHits)
+                   ? null
+                   : generateSelfUri(baseUri, queryOffset + querySize, querySize, queryParams);
+    }
+
+    private static boolean isLastPage(int queryOffset, int totalHits, int numberOfHits) {
+        return (queryOffset + numberOfHits) >= totalHits;
     }
 
     private static URI calculatePreviousResults(int queryOffset,
+                                                int totalHits,
                                                 int querySize,
                                                 URI baseUri,
                                                 Map<String, String> queryParams) {
-        if (queryOffset > 0) {
-            var previousOffset = Math.max(0, queryOffset - querySize);
-            int previousSize = Math.min(querySize, queryOffset);
-            return generateSelfUri(baseUri, previousOffset, previousSize, queryParams);
-        } else {
-            return null;
-        }
+        return isFirstPage(queryOffset)
+                   ? null
+                   : generatePreviousResult(queryOffset, totalHits, querySize, baseUri, queryParams);
+    }
+
+    private static URI generatePreviousResult(int queryOffset, int totalHits, int querySize, URI baseUri,
+                                              Map<String, String> queryParams) {
+        var previousOffset = queryOffset < totalHits
+                                 ? Math.max(0, queryOffset - querySize)
+                                 : calculateActualLastPage(totalHits, querySize);
+        var previousSize = Math.min(querySize, queryOffset);
+        return generateSelfUri(baseUri, previousOffset, previousSize, queryParams);
+    }
+
+    private static int calculateActualLastPage(int totalHits, int querySize) {
+        return (totalHits / querySize - 1) * querySize;
+    }
+
+    private static boolean isFirstPage(int queryOffset) {
+        return queryOffset == 0;
     }
 
     private static URI generateSelfUri(URI baseUri, int queryOffset, int querySize, Map<String, String> queryParams) {

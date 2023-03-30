@@ -104,6 +104,20 @@ class PaginatedSearchResultTest {
         assertThat(result.getPreviousResults(), is(equalTo(expectedPreviousResults)));
     }
 
+    @Test
+    void shouldReturnActualLastPageWhenSpecifiedOffsetIsGreaterThanTotalResultPages() {
+        var querySize = 5;
+        var hits = generateRandomHits(querySize);
+        var queryParams = Map.of(QUERY_PARAM_FIELD_NAME, QUERY_PARAM_FIELD_VALUE);
+        var result = PaginatedSearchResult.create(BASE_URI, 100, 5, 50, hits, queryParams);
+
+        assertThat(result.getNextResults(), is(nullValue()));
+
+        var expectedPreviousResults = getUri(Map.of(QUERY_PARAM_FIELD_NAME, QUERY_PARAM_FIELD_VALUE), "45","5");
+
+        assertThat(result.getPreviousResults(), is(equalTo(expectedPreviousResults)));
+    }
+
     private URI getUri(Map<String, String> queryParams, String offset, String size) {
         return UriWrapper.fromUri("https://localhost")
             .addQueryParameters(queryParams)
