@@ -8,7 +8,7 @@ import static org.hamcrest.core.Is.is;
 
 class UnprocessableContentExceptionTest {
 
-    public static final int HTTP_UNPROCESSABLE_CONTENT = 422;
+    private static final int HTTP_UNPROCESSABLE_CONTENT = 422;
 
     @Test
     void statusCodeReturnsUnprocessableContent() {
