@@ -19,14 +19,14 @@ import nva.commons.core.paths.UriWrapper;
     PaginatedSearchResult.NEXT_RESULTS_FIELD_NAME,
     PaginatedSearchResult.PREVIOUS_RESULTS_FIELD_NAME,
     PaginatedSearchResult.HITS_FIELD_NAME})
-public class PaginatedSearchResult<T> {
+public final class PaginatedSearchResult<T> {
 
-    protected static final String CONTEXT_FIELD_NAME = "@context";
-    protected static final String ID_FIELD_NAME = "id";
-    protected static final String TOTAL_HITS_FIELD_NAME = "totalHits";
-    protected static final String NEXT_RESULTS_FIELD_NAME = "nextResults";
-    protected static final String PREVIOUS_RESULTS_FIELD_NAME = "previousResults";
-    protected static final String HITS_FIELD_NAME = "hits";
+    /* default */ static final String CONTEXT_FIELD_NAME = "@context";
+    /* default */ static final String ID_FIELD_NAME = "id";
+    /* default */ static final String TOTAL_HITS_FIELD_NAME = "totalHits";
+    /* default */ static final String NEXT_RESULTS_FIELD_NAME = "nextResults";
+    /* default */ static final String PREVIOUS_RESULTS_FIELD_NAME = "previousResults";
+    /* default */ static final String HITS_FIELD_NAME = "hits";
 
     private static final String PAGINATED_SEARCH_RESULT_CONTEXT
         = "https://bibsysdev.github.io/src/search/paginated-search-result.json";
@@ -48,7 +48,7 @@ public class PaginatedSearchResult<T> {
     private final List<T> hits;
 
     @JsonCreator
-    public PaginatedSearchResult(@JsonProperty(ID_FIELD_NAME) URI id,
+    private PaginatedSearchResult(@JsonProperty(ID_FIELD_NAME) URI id,
                                  @JsonProperty(TOTAL_HITS_FIELD_NAME) int totalHits,
                                  @JsonProperty(NEXT_RESULTS_FIELD_NAME) URI nextResults,
                                  @JsonProperty(PREVIOUS_RESULTS_FIELD_NAME) URI previousResults,
