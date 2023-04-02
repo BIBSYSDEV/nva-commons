@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import nva.commons.core.JacocoGenerated;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
@@ -33,17 +34,25 @@ public class ScanDatabaseRequestV2 implements EventBody {
     private Map<String, String> startMarker;
     @JsonProperty(PAGE_SIZE)
     private Integer pageSize;
-    @JsonProperty(TOPIC)
+    @JsonProperty(TOPIC_FIELD)
     private String topic;
+    @JsonProperty(IDENTIFIER_FIELD)
+    private UUID identifier;
 
     public ScanDatabaseRequestV2() {
 
     }
 
-    public ScanDatabaseRequestV2(String topic, Integer pageSize, Map<String, String> startMarker) {
+    public ScanDatabaseRequestV2(String topic, Integer pageSize, Map<String, String> startMarker, UUID identifier) {
         setPageSize(pageSize);
         setTopic(topic);
         setStartMarker(startMarker);
+        setIdentifier(identifier);
+    }
+
+    @Deprecated
+    public ScanDatabaseRequestV2(String topic, Integer pageSize, Map<String, String> startMarker) {
+        this(topic, pageSize, startMarker, UUID.randomUUID());
     }
 
     public static ScanDatabaseRequestV2 fromJson(String detail) {
@@ -67,12 +76,21 @@ public class ScanDatabaseRequestV2 implements EventBody {
     }
 
     public ScanDatabaseRequestV2 newScanDatabaseRequest(Map<String, AttributeValue> newStartMarker) {
-        return new ScanDatabaseRequestV2(getTopic(), getPageSize(), toSerializableForm(newStartMarker));
+        return new ScanDatabaseRequestV2(getTopic(), getPageSize(), toSerializableForm(newStartMarker), getIdentifier());
     }
 
     @Override
     public String getTopic() {
         return topic;
+    }
+
+    @Override
+    public UUID getIdentifier() {
+        return identifier;
+    }
+
+    private void setIdentifier(UUID identifier) {
+        this.identifier = identifier;
     }
 
     public final void setTopic(String topic) {
@@ -103,14 +121,8 @@ public class ScanDatabaseRequestV2 implements EventBody {
             .build();
     }
 
-    @JacocoGenerated
     @Override
-    public int hashCode() {
-        return Objects.hash(getStartMarker(), getPageSize(), getTopic());
-    }
-
     @JacocoGenerated
-    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -119,9 +131,16 @@ public class ScanDatabaseRequestV2 implements EventBody {
             return false;
         }
         ScanDatabaseRequestV2 that = (ScanDatabaseRequestV2) o;
-        return getPageSize() == that.getPageSize()
-               && Objects.equals(getStartMarker(), that.getStartMarker())
-               && Objects.equals(getTopic(), that.getTopic());
+        return Objects.equals(getStartMarker(), that.getStartMarker())
+               && Objects.equals(getPageSize(), that.getPageSize())
+               && Objects.equals(getTopic(), that.getTopic())
+               && Objects.equals(getIdentifier(), that.getIdentifier());
+    }
+
+    @Override
+    @JacocoGenerated
+    public int hashCode() {
+        return Objects.hash(getStartMarker(), getPageSize(), getTopic(), getIdentifier());
     }
 
     @Override

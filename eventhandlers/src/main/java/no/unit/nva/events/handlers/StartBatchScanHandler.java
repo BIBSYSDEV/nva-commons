@@ -42,7 +42,8 @@ public abstract class StartBatchScanHandler implements RequestStreamHandler {
     private ScanDatabaseRequest createEventAsExpectedByEventListener(ScanDatabaseRequest input) {
         return new ScanDatabaseRequest(getScanEventTopic(),
                                        input.getPageSize(),
-                                       input.getStartMarker());
+                                       input.getStartMarker(),
+                                       input.getIdentifier());
     }
 
     private void emitEvent(Context context, ScanDatabaseRequest requestWithTopic) {

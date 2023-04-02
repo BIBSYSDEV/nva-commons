@@ -8,9 +8,10 @@ import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
+import java.util.UUID;
 import no.unit.nva.commons.json.JsonUtils;
 import no.unit.nva.events.EventsConfig;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ class ScanDatabaseRequestV2Test {
     @Test
     void shouldReturnAnEventBridgeEventWhereTheTopicIsSetInTheDetailBody() throws JsonProcessingException {
         String expectedTopic = randomString();
-        var request = new ScanDatabaseRequestV2(expectedTopic, 100, null);
+        var request = new ScanDatabaseRequestV2(expectedTopic, 100, null, UUID.randomUUID());
         var event = request.createNewEventEntry(randomString(), randomString(), randomString());
         var eventAsJson = EventsConfig.objectMapper.readTree(event.detail());
         assertThat(eventAsJson.get(EVENT_TOPIC).textValue(), is(equalTo(expectedTopic)));
@@ -34,7 +35,7 @@ class ScanDatabaseRequestV2Test {
 
     @Test
     void shouldReturnScanRequestFromEventDetail() {
-        var originalRequest = new ScanDatabaseRequestV2(randomString(), randomInteger(), null);
+        var originalRequest = new ScanDatabaseRequestV2(randomString(), randomInteger(), null, UUID.randomUUID());
         var event = originalRequest.createNewEventEntry(randomString(), randomString(), randomString());
         var reconstructedRequest =
             ScanDatabaseRequestV2.fromJson(event.detail());
@@ -44,7 +45,7 @@ class ScanDatabaseRequestV2Test {
     @Test
     void shouldGenerateNewEventWithSameTopicAndPageSize() {
         var originalRequest =
-            new ScanDatabaseRequestV2(randomString(), randomInteger(MAX_PAGE_SIZE), null);
+            new ScanDatabaseRequestV2(randomString(), randomInteger(MAX_PAGE_SIZE), null, UUID.randomUUID());
         var expectedStartMarker = Map.of(randomString(), randomStringAttribute(),
                                          randomString(), randomStringAttribute());
         var newRequest = originalRequest.newScanDatabaseRequest(expectedStartMarker);
@@ -52,10 +53,10 @@ class ScanDatabaseRequestV2Test {
     }
 
     @Test
-    void shouldDeserializeEmptyObject() throws JsonProcessingException {
+    void shouldDeserializeEmptyObject() {
         var deserializedFromEmptyJson = ScanDatabaseRequestV2.fromJson(emptyJson());
         var expectedDeserializedObject =
-            new ScanDatabaseRequestV2(null, ScanDatabaseRequestV2.DEFAULT_PAGE_SIZE, null);
+            new ScanDatabaseRequestV2(null, ScanDatabaseRequestV2.DEFAULT_PAGE_SIZE, null, null);
         assertThat(deserializedFromEmptyJson, is(equalTo(expectedDeserializedObject)));
     }
 
@@ -65,9 +66,11 @@ class ScanDatabaseRequestV2Test {
         var expectedStartMarker = Map.of(randomString(), randomString(),
                                          randomString(), randomString());
         var expectedTopic = randomString();
+        var identifier = UUID.randomUUID();
         var actualRequest =
-            new ScanDatabaseRequestV2(expectedTopic, pageSize, expectedStartMarker);
-        var expectedRequest = new ScanDatabaseRequestV2(expectedTopic, DEFAULT_PAGE_SIZE, expectedStartMarker);
+            new ScanDatabaseRequestV2(expectedTopic, pageSize, expectedStartMarker, identifier);
+        var expectedRequest =
+            new ScanDatabaseRequestV2(expectedTopic, DEFAULT_PAGE_SIZE, expectedStartMarker, identifier);
 
         assertThat(actualRequest, is(equalTo(expectedRequest)));
     }
@@ -75,21 +78,27 @@ class ScanDatabaseRequestV2Test {
     @Test
     void shouldSerializeAndDeserializeWithoutInformationLoss() {
         var startMarker = randomMarker();
-        var sampleRequest = new ScanDatabaseRequestV2(randomString(), randomInteger(), startMarker);
+        var sampleRequest = new ScanDatabaseRequestV2(randomString(), randomInteger(), startMarker, UUID.randomUUID());
         var json = sampleRequest.toString();
         var deserialized = ScanDatabaseRequestV2.fromJson(json);
         assertThat(deserialized, is(equalTo(sampleRequest)));
-        assertThatNonSerializableDynamoScanMarkerConstainsSameValuesAsItsEquivalentSerializableRepresentation(
+        assertThatNonSerializableDynamoScanMarkerContainsSameValuesAsItsEquivalentSerializableRepresentation(
             startMarker, deserialized);
     }
 
     @Test
     void shouldProduceDynamoCompatibleEmptyMarkerWhenSerializableVersionOfMarkerIsNull() {
-        var sampleRequest = new ScanDatabaseRequestV2(randomString(), randomInteger(), EMPTY_MARKER);
+        var sampleRequest = new ScanDatabaseRequestV2(randomString(), randomInteger(), EMPTY_MARKER, UUID.randomUUID());
         assertThat(sampleRequest.toDynamoScanMarker(), is(equalTo(DYNAMODB_EMPTY_MARKER)));
     }
 
-    private void assertThatNonSerializableDynamoScanMarkerConstainsSameValuesAsItsEquivalentSerializableRepresentation(
+    @Deprecated
+    @Test
+    void shouldAllowCreationOfDeprecatedScanDatabaseRequestV2() {
+        assertDoesNotThrow(() -> new ScanDatabaseRequestV2(randomString(), randomInteger(), randomMarker()));
+    }
+
+    private void assertThatNonSerializableDynamoScanMarkerContainsSameValuesAsItsEquivalentSerializableRepresentation(
         Map<String, String> startMarker, ScanDatabaseRequestV2 deserialized) {
         for (var key : startMarker.keySet()) {
             var expectedAttributeValue = startMarker.get(key);
@@ -109,9 +118,5 @@ class ScanDatabaseRequestV2Test {
 
     private String emptyJson() {
         return JsonUtils.dtoObjectMapper.createObjectNode().toString();
-    }
-
-    private ObjectMapper objectMapperWithoutSpecialConfig() {
-        return new ObjectMapper();
     }
 }
