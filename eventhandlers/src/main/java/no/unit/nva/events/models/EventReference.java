@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.UUID;
 import no.unit.nva.commons.json.JsonSerializable;
 import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.core.JacocoGenerated;
@@ -30,24 +31,42 @@ public class EventReference implements JsonSerializable, EventBody {
     private final URI uri;
     @JsonProperty(TIMESTAMP)
     private final Instant timestamp;
+    @JsonProperty(IDENTIFIER_FIELD)
+    private final UUID identifier;
 
     @JsonCreator
     public EventReference(@JsonProperty(TOPIC) String topic,
                           @JsonProperty(SUBTOPIC) String subtopic,
                           @JsonProperty(URI) URI uri,
-                          @JsonProperty(TIMESTAMP) Instant timestamp) {
+                          @JsonProperty(TIMESTAMP) Instant timestamp,
+                          @JsonProperty(IDENTIFIER_FIELD) UUID identifier) {
         this.topic = topic;
         this.subtopic = subtopic;
         this.uri = uri;
         this.timestamp = timestamp;
+        this.identifier = identifier;
     }
 
+    @Deprecated
+    public EventReference(String topic,
+                          String subtopic,
+                          URI uri,
+                          Instant timestamp) {
+        this(topic, subtopic, uri, timestamp, UUID.randomUUID());
+    }
+
+    @Deprecated
     public EventReference(String topic,
                           String subtopic,
                           URI uri) {
-        this(topic, subtopic, uri, Instant.now());
+        this(topic, subtopic, uri, Instant.now(), UUID.randomUUID());
     }
 
+    public EventReference(String topic, URI uri, UUID identifier) {
+        this(topic, null, uri, Instant.now(), identifier);
+    }
+
+    @Deprecated
     public EventReference(String topic, URI uri) {
         this(topic, null, uri);
     }
@@ -69,6 +88,11 @@ public class EventReference implements JsonSerializable, EventBody {
     @JacocoGenerated
     public String getTopic() {
         return topic;
+    }
+
+    @Override
+    public UUID getIdentifier() {
+        return identifier;
     }
 
     @JacocoGenerated
@@ -100,14 +124,16 @@ public class EventReference implements JsonSerializable, EventBody {
             return false;
         }
         EventReference that = (EventReference) o;
-        return Objects.equals(getTopic(), that.getTopic()) && Objects.equals(getSubtopic(),
-            that.getSubtopic()) && Objects.equals(getUri(), that.getUri()) && Objects.equals(
-            getTimestamp(), that.getTimestamp());
+        return Objects.equals(getTopic(), that.getTopic())
+               && Objects.equals(getSubtopic(), that.getSubtopic())
+               && Objects.equals(getUri(), that.getUri())
+               && Objects.equals(getTimestamp(), that.getTimestamp())
+               && Objects.equals(getIdentifier(), that.getIdentifier());
     }
 
     @Override
     @JacocoGenerated
     public int hashCode() {
-        return Objects.hash(getTopic(), getSubtopic(), getUri(), getTimestamp());
+        return Objects.hash(getTopic(), getSubtopic(), getUri(), getTimestamp(), getIdentifier());
     }
 }

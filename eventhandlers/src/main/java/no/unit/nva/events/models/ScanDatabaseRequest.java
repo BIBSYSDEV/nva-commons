@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import no.unit.nva.commons.json.JsonSerializable;
 import nva.commons.core.JacocoGenerated;
 import software.amazon.awssdk.services.eventbridge.model.PutEventsRequestEntry;
@@ -31,19 +32,29 @@ public class ScanDatabaseRequest implements EventBody, JsonSerializable {
     private final Map<String, AttributeValue> startMarker;
     @JsonProperty(PAGE_SIZE)
     private final int pageSize;
-    @JsonProperty(TOPIC)
+    @JsonProperty(TOPIC_FIELD)
     private final String topic;
+    @JsonProperty(IDENTIFIER_FIELD)
+    private final UUID identifier;
 
     @JsonCreator
     public ScanDatabaseRequest(
-        @JsonProperty(TOPIC) String topic,
+        @JsonProperty(TOPIC_FIELD) String topic,
         @JsonProperty(PAGE_SIZE) Integer pageSize,
-        @JsonProperty(START_MARKER) Map<String, AttributeValue> startMarker) {
+        @JsonProperty(START_MARKER) Map<String, AttributeValue> startMarker,
+        @JsonProperty(IDENTIFIER_FIELD) UUID identifier) {
         this.pageSize = Optional.ofNullable(pageSize).orElse(DEFAULT_PAGE_SIZE);
         this.startMarker = startMarker;
         this.topic = topic;
+        this.identifier = identifier;
     }
 
+    @Deprecated
+    public ScanDatabaseRequest(String topic,
+                               Integer pageSize,
+                               Map<String, AttributeValue> startMarker) {
+        this(topic, pageSize, startMarker, UUID.randomUUID());
+    }
     public static ScanDatabaseRequest fromJson(String detail)
         throws JsonProcessingException {
         return objectMapper.readValue(detail, ScanDatabaseRequest.class);
@@ -53,6 +64,11 @@ public class ScanDatabaseRequest implements EventBody, JsonSerializable {
     @Override
     public String getTopic() {
         return topic;
+    }
+
+    @Override
+    public UUID getIdentifier() {
+        return identifier;
     }
 
     public int getPageSize() {
@@ -73,7 +89,7 @@ public class ScanDatabaseRequest implements EventBody, JsonSerializable {
      * @return a new ScanDatabaseRequest containing the the {@code newStartMarker}
      */
     public ScanDatabaseRequest newScanDatabaseRequest(Map<String, AttributeValue> newStartMarker) {
-        return new ScanDatabaseRequest(getTopic(), getPageSize(), newStartMarker);
+        return new ScanDatabaseRequest(getTopic(), getPageSize(), newStartMarker, getIdentifier());
     }
 
     public PutEventsRequestEntry createNewEventEntry(
@@ -94,12 +110,6 @@ public class ScanDatabaseRequest implements EventBody, JsonSerializable {
 
     @Override
     @JacocoGenerated
-    public int hashCode() {
-        return Objects.hash(getStartMarker(), getPageSize(), getTopic());
-    }
-
-    @Override
-    @JacocoGenerated
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -110,7 +120,14 @@ public class ScanDatabaseRequest implements EventBody, JsonSerializable {
         ScanDatabaseRequest that = (ScanDatabaseRequest) o;
         return getPageSize() == that.getPageSize()
                && Objects.equals(getStartMarker(), that.getStartMarker())
-               && Objects.equals(getTopic(), that.getTopic());
+               && Objects.equals(getTopic(), that.getTopic())
+               && Objects.equals(getIdentifier(), that.getIdentifier());
+    }
+
+    @Override
+    @JacocoGenerated
+    public int hashCode() {
+        return Objects.hash(getStartMarker(), getPageSize(), getTopic(), getIdentifier());
     }
 
     private boolean pageSizeWithinLimits(int pageSize) {

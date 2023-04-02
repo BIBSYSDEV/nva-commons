@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.UUID;
 import no.unit.nva.events.models.ScanDatabaseRequest;
 import no.unit.nva.stubs.FakeEventBridgeClient;
 import nva.commons.core.SingletonCollector;
@@ -99,17 +100,17 @@ class StartBatchScanHandlerTest {
     }
 
     private InputStream scanDatabaseRequestWithCustomTopic(String userDefinedTopic) {
-        var request = new ScanDatabaseRequest(userDefinedTopic, NO_PAGE_SIZE, NO_START_MARKER);
+        var request = new ScanDatabaseRequest(userDefinedTopic, NO_PAGE_SIZE, NO_START_MARKER, UUID.randomUUID());
         return IoUtils.stringToStream(request.toJsonString());
     }
 
     private InputStream scanDatabaseRequestWithStartMarker() {
-        var request = new ScanDatabaseRequest(randomString(), randomPageSize, randomStartMarker);
+        var request = new ScanDatabaseRequest(randomString(), randomPageSize, randomStartMarker, UUID.randomUUID());
         return IoUtils.stringToStream(request.toJsonString());
     }
 
     private InputStream scanDatabaseRequestWithPageSize() {
-        var request = new ScanDatabaseRequest(randomString(), randomPageSize, null);
+        var request = new ScanDatabaseRequest(randomString(), randomPageSize, null, UUID.randomUUID());
         return IoUtils.stringToStream(request.toJsonString());
     }
 
