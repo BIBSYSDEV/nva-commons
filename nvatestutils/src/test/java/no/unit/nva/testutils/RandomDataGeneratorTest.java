@@ -34,10 +34,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 class RandomDataGeneratorTest {
 
     public static final int BIG_ENOUGH_NUMBER_TO_PRODUCE_ALl_POSSIBLE_VALUES = 100;
-    //Java returns by default a random double between 0 and 1.
-    public static final double VALUE_MUCH_LOWER_THAN_DEFAULT_MAX_VALUE_OF_STANDARD_JAVA_RANDOM_VALUE = 0.001;
-    public static final double ZERO = 0;
+    private static final double VALUE_MUCH_LOWER_THAN_DEFAULT_MAX_VALUE_OF_STANDARD_JAVA_RANDOM_VALUE = 0.001;
+    private static final double DEFAULT_MAX_RANDOM_VALUE_FOR_DOUBLES = 1;
     private static final double VALUE_MUCH_HIGHER_THAN_STANDARD_MAX_VALUE_OF_JAVA_RANDOM_DOUBLE = 1000;
+    private static final double ZERO = 0;
 
     @Test
     void shouldReturnRandomString() {
@@ -175,8 +175,8 @@ class RandomDataGeneratorTest {
     }
 
     @Test
-    void shouldRejectNegativeCeilingNumber(){
-        assertThrows(IllegalArgumentException.class,()->randomDouble(-1));
+    void shouldRejectNegativeCeilingNumber() {
+        assertThrows(IllegalArgumentException.class, () -> randomDouble(-1));
     }
 
     @Test
@@ -184,6 +184,6 @@ class RandomDataGeneratorTest {
         var ceiling = VALUE_MUCH_HIGHER_THAN_STANDARD_MAX_VALUE_OF_JAVA_RANDOM_DOUBLE;
         var randomDouble = RandomDataGenerator.randomDouble(ceiling);
         assertThat(randomDouble, is(lessThan(ceiling)));
-        assertThat(randomDouble, is(greaterThan(ZERO)));
+        assertThat(randomDouble, is(greaterThan(DEFAULT_MAX_RANDOM_VALUE_FOR_DOUBLES)));
     }
 }
