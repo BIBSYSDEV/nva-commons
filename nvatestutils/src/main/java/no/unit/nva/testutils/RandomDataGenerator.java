@@ -32,6 +32,7 @@ public final class RandomDataGenerator {
     private static final int ARBITRARY_FIELDS_NUMBER = 5;
     private static final ZoneId ZONE_ID = ZoneId.systemDefault();
     private static final ZoneOffset CURRENT_ZONE_OFFSET = ZONE_ID.getRules().getOffset(Instant.now());
+    public static final String ILLEGAL_CEILING_VALUE = "Cannot have a negative ceiling";
 
     private RandomDataGenerator() {
 
@@ -119,6 +120,22 @@ public final class RandomDataGenerator {
 
     public static String randomInvalidIssn() {
         return IssnGenerator.randomInvalidIssn();
+    }
+
+    public static double randomDouble(double ceiling) {
+        if (ceilingIsValidCeilingValue(ceiling)) {
+            return ceiling * randomDoubleBetweenZeroAndOne();
+        }
+        throw new IllegalArgumentException(ILLEGAL_CEILING_VALUE);
+    }
+
+    // negative ceiling would mean that we are expected to return a value between (-Inf, ceiling).
+    private static boolean ceilingIsValidCeilingValue(double ceiling) {
+        return ceiling >= 0;
+    }
+
+    private static double randomDoubleBetweenZeroAndOne() {
+        return RANDOM.nextDouble();
     }
 
     private static ObjectNode randomFlatJson() {

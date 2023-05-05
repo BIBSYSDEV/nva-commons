@@ -3,17 +3,21 @@ package no.unit.nva.testutils;
 import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomBoolean;
 import static no.unit.nva.testutils.RandomDataGenerator.randomDoi;
+import static no.unit.nva.testutils.RandomDataGenerator.randomDouble;
 import static no.unit.nva.testutils.RandomDataGenerator.randomInstant;
+import static no.unit.nva.testutils.RandomDataGenerator.randomInteger;
 import static no.unit.nva.testutils.RandomDataGenerator.randomJson;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.collection.IsIn.in;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
@@ -25,10 +29,15 @@ import org.apache.commons.validator.routines.ISBNValidator;
 import org.apache.commons.validator.routines.ISSNValidator;
 import org.hamcrest.number.OrderingComparison;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
 
 class RandomDataGeneratorTest {
 
     public static final int BIG_ENOUGH_NUMBER_TO_PRODUCE_ALl_POSSIBLE_VALUES = 100;
+    //Java returns by default a random double between 0 and 1.
+    public static final double VALUE_MUCH_LOWER_THAN_DEFAULT_MAX_VALUE_OF_STANDARD_JAVA_RANDOM_VALUE = 0.001;
+    public static final double ZERO = 0;
+    private static final double VALUE_MUCH_HIGHER_THAN_STANDARD_MAX_VALUE_OF_JAVA_RANDOM_DOUBLE = 1000;
 
     @Test
     void shouldReturnRandomString() {
@@ -155,5 +164,26 @@ class RandomDataGeneratorTest {
         var issnValidator = new ISSNValidator();
         var isValidIssn = issnValidator.isValid(issn);
         assertThat(isValidIssn, is(false));
+    }
+
+    @Test
+    void shouldReturnRandomDoubleUpToSpecifiedCeiling() {
+        var ceiling = VALUE_MUCH_LOWER_THAN_DEFAULT_MAX_VALUE_OF_STANDARD_JAVA_RANDOM_VALUE;
+        var randomDouble = RandomDataGenerator.randomDouble(ceiling);
+        assertThat(randomDouble, is(lessThan(ceiling)));
+        assertThat(randomDouble, is(greaterThan(ZERO)));
+    }
+
+    @Test
+    void shouldRejectNegativeCeilingNumber(){
+        assertThrows(IllegalArgumentException.class,()->randomDouble(-1));
+    }
+
+    @Test
+    void shouldReturnRandomDoubleSpreadingToWholeSpaceBetweenZeroAndCeiling() {
+        var ceiling = VALUE_MUCH_HIGHER_THAN_STANDARD_MAX_VALUE_OF_JAVA_RANDOM_DOUBLE;
+        var randomDouble = RandomDataGenerator.randomDouble(ceiling);
+        assertThat(randomDouble, is(lessThan(ceiling)));
+        assertThat(randomDouble, is(greaterThan(ZERO)));
     }
 }
