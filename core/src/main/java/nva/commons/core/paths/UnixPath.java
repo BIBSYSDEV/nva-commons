@@ -156,6 +156,7 @@ public final class UnixPath {
     private static String[] splitCompositePathElements(String pathElement) {
         return pathElement.split(PATH_DELIMITER);
     }
+
     private static Stream<String> addRootIfPresentInOriginalPath(Stream<String> pathElements, String[] path) {
         return pathBeginsWithRoot(path) ? prependRoot(pathElements) : pathElements;
     }
