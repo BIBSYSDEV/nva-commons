@@ -1,11 +1,8 @@
 package nva.commons.apigateway;
 
+import static nva.commons.core.attempt.Try.attempt;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
 import nva.commons.apigateway.exceptions.InvalidAccessRightException;
 
 public enum AccessRight {
@@ -13,6 +10,8 @@ public enum AccessRight {
     USER,// pseudo access-right to indicate the customer in cognito groups
     PUBLISH_FILES,
     PUBLISH_METADATA,
+    PUBLISH_THESIS,
+    PUBLISH_THESIS_EMBARGO_READ,
     PROCESS_IMPORT_CANDIDATE,
     APPROVE_DOI_REQUEST,
     REJECT_DOI_REQUEST,
@@ -24,8 +23,6 @@ public enum AccessRight {
     EDIT_OWN_INSTITUTION_PUBLICATION_WORKFLOW,
     ADMINISTRATE_APPLICATION;
 
-    private static final Map<String, AccessRight> index = createIndex();
-
     /**
      * Creates an AccessRight instance from a string (case insensitive).
      *
@@ -34,27 +31,13 @@ public enum AccessRight {
      */
     @JsonCreator
     public static AccessRight fromString(String accessRight) {
-
-        String formattedString = formatString(accessRight);
-        if (index.containsKey(formattedString)) {
-            return index.get(formattedString);
-        } else {
-            throw new InvalidAccessRightException(accessRight);
-        }
+        var upperCaseAccessRight = toUpper(accessRight);
+        return
+            attempt(() -> AccessRight.valueOf(upperCaseAccessRight))
+                .orElseThrow(new InvalidAccessRightException(accessRight));
     }
 
-    @Override
-    @JsonValue
-    public String toString() {
-        return formatString(this.name());
-    }
-
-    private static String formatString(String accessRightString) {
+    private static String toUpper(String accessRightString) {
         return accessRightString.toUpperCase(Locale.getDefault());
-    }
-
-    private static Map<String, AccessRight> createIndex() {
-        return Arrays.stream(AccessRight.values())
-            .collect(Collectors.toMap(AccessRight::toString, v -> v));
     }
 }
