@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -188,9 +189,13 @@ class UnixPathTest {
     }
 
     @Test
-    void shouldReturnTheSecondToLastElementOfaUnixPath() {
-        UnixPath unixPath = UnixPath.of("first/second/", "third/fourth", "fifth");
-        assertThat(unixPath.getSecondToLastPathElement(), is(equalTo("fourth")));
+    void shouldReturnPathElementByIndexFromEndOfaUnixPath() {
+        var pathElements = List.of("first", "second", "third", "fourth", "fifth").toArray(new String[0]);
+        var unixPath = UnixPath.of(pathElements);
+
+        for (int i = 0; i < pathElements.length; i++) {
+            assertThat(unixPath.getPathElementByIndexFromEnd(pathElements.length - i), is(equalTo(pathElements[i])));
+        }
     }
 
     @Test

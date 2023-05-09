@@ -102,8 +102,8 @@ public final class UnixPath {
         return path.get(lastPathElementIndex());
     }
 
-    public String getSecondToLastPathElement() {
-        return path.get(secondToLastPathElementIndex());
+    public String getPathElementByIndexFromEnd(int index) {
+        return getPathElementByIndex(path.size() - index);
     }
 
     @Deprecated(since = "getLastPathElement was introduced")
@@ -151,11 +151,11 @@ public final class UnixPath {
             .filter(Objects::nonNull);
     }
 
-    //composite path element is an element of the form /folder1/folder2
-
     private static String[] splitCompositePathElements(String pathElement) {
         return pathElement.split(PATH_DELIMITER);
     }
+
+    //composite path element is an element of the form /folder1/folder2
 
     private static Stream<String> addRootIfPresentInOriginalPath(Stream<String> pathElements, String[] path) {
         return pathBeginsWithRoot(path) ? prependRoot(pathElements) : pathElements;
@@ -169,6 +169,10 @@ public final class UnixPath {
         return Objects.isNull(path) || path.isEmpty();
     }
 
+    private String getPathElementByIndex(int index) {
+        return path.get(index);
+    }
+
     private boolean isAbsolute() {
         return !isEmptyPath() && ROOT.equals(path.get(0));
     }
@@ -179,10 +183,6 @@ public final class UnixPath {
 
     private int lastPathElementIndex() {
         return path.size() - 1;
-    }
-
-    private int secondToLastPathElementIndex() {
-        return lastPathElementIndex() - 1;
     }
 
     private String avoidWritingRootPathTwice() {
