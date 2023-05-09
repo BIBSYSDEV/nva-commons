@@ -41,4 +41,11 @@ class AccessRightTest {
         AccessRight accessRight = JsonUtils.dtoObjectMapper.readValue(APPROVE_DOI_REQUEST_STRING, AccessRight.class);
         assertThat(accessRight, is(equalTo(AccessRight.APPROVE_DOI_REQUEST)));
     }
+
+    @Test
+    void enumNameAndToStringIsEqual() {
+        var name = AccessRight.APPROVE_PUBLISH_REQUEST.name();
+        var toString = AccessRight.APPROVE_PUBLISH_REQUEST.toString();
+        assertThat(name, is(equalTo(toString)));
+    }
 }
