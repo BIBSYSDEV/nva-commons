@@ -14,13 +14,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class UnixPathTest {
 
@@ -188,14 +190,14 @@ class UnixPathTest {
         assertThat(unixPath.getLastPathElement(), is(equalTo(expectedFilename)));
     }
 
-    @Test
-    void shouldReturnPathElementByIndexFromEndOfaUnixPath() {
-        var pathElements = List.of("first", "second", "third", "fourth", "fifth").toArray(new String[0]);
-        var unixPath = UnixPath.of(pathElements);
-
-        for (int i = 0; i < pathElements.length; i++) {
-            assertThat(unixPath.getPathElementByIndexFromEnd(pathElements.length - i), is(equalTo(pathElements[i])));
-        }
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2, 3, 4})
+    void shouldReturnPathElementByIndexFromEndOfaUnixPath(int value) {
+        var pathElements = Arrays.asList("first", "second", "third", "fourth", "fifth");
+        var unixPath = UnixPath.of(pathElements.toArray(new String[0]));
+        Collections.reverse(pathElements);
+        var expected = pathElements.get(value);
+        assertThat(unixPath.getPathElementByIndexFromEnd(value + 1), is(equalTo(expected)));
     }
 
     @Test
