@@ -103,7 +103,7 @@ public final class UnixPath {
     }
 
     public String getSecondToLastPathElement() {
-        return path.get(secondToLastPathElement());
+        return path.get(secondToLastPathElementIndex());
     }
 
     @Deprecated(since = "getLastPathElement was introduced")
@@ -181,7 +181,7 @@ public final class UnixPath {
         return path.size() - 1;
     }
 
-    private int secondToLastPathElement() {
+    private int secondToLastPathElementIndex() {
         return lastPathElementIndex() - 1;
     }
 
