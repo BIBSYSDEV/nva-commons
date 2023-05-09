@@ -102,6 +102,10 @@ public final class UnixPath {
         return path.get(lastPathElementIndex());
     }
 
+    public String getSecondToLastPathElement() {
+        return path.get(secondToLastPathElement());
+    }
+
     @Deprecated(since = "getLastPathElement was introduced")
     @JacocoGenerated
     public String getFilename() {
@@ -113,26 +117,26 @@ public final class UnixPath {
                    ? this
                    : ROOT_PATH.addChild(this);
     }
-    
+
     public UnixPath removeRoot() {
         return isAbsolute()
                    ? new UnixPath(this.path.subList(1, path.size()))
                    : this;
     }
-    
+
     public boolean isEmptyPath() {
         return pathIsEmpty(path);
     }
-    
+
     private static Stream<String> prependRoot(Stream<String> pathElements) {
         return Stream.concat(Stream.of(ROOT), pathElements);
     }
-    
+
     private static Stream<String> extractAllPathElements(String[] path) {
         Stream<String> nonNullPathElements = discardNullArrayElements(path);
         return splitInputElementsContainingPathDelimiter(nonNullPathElements);
     }
-    
+
     private static Stream<String> splitInputElementsContainingPathDelimiter(Stream<String> pathElements) {
         return pathElements
             .map(UnixPath::splitCompositePathElements)
@@ -148,10 +152,10 @@ public final class UnixPath {
     }
 
     //composite path element is an element of the form /folder1/folder2
+
     private static String[] splitCompositePathElements(String pathElement) {
         return pathElement.split(PATH_DELIMITER);
     }
-
     private static Stream<String> addRootIfPresentInOriginalPath(Stream<String> pathElements, String[] path) {
         return pathBeginsWithRoot(path) ? prependRoot(pathElements) : pathElements;
     }
@@ -174,6 +178,10 @@ public final class UnixPath {
 
     private int lastPathElementIndex() {
         return path.size() - 1;
+    }
+
+    private int secondToLastPathElement() {
+        return lastPathElementIndex() - 1;
     }
 
     private String avoidWritingRootPathTwice() {

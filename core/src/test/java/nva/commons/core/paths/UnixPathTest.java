@@ -186,6 +186,12 @@ class UnixPathTest {
         UnixPath unixPath = UnixPath.of(inputPath);
         assertThat(unixPath.getLastPathElement(), is(equalTo(expectedFilename)));
     }
+
+    @Test
+    void shouldReturnTheSecondToLastElementOfaUnixPath() {
+        UnixPath unixPath = UnixPath.of("first/second/", "third/fourth", "fifth");
+        assertThat(unixPath.getSecondToLastPathElement(), is(equalTo("fourth")));
+    }
     
     @Test
     void shouldSerializesUnixPathAsString() throws JsonProcessingException {
