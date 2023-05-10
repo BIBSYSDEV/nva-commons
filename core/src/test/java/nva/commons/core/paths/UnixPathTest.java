@@ -197,7 +197,7 @@ class UnixPathTest {
         var unixPath = UnixPath.of(pathElements.toArray(new String[0]));
         Collections.reverse(pathElements);
         var expected = pathElements.get(value);
-        assertThat(unixPath.getPathElementByIndexFromEnd(value + 1), is(equalTo(expected)));
+        assertThat(unixPath.getPathElementByIndexFromEnd(value), is(equalTo(expected)));
     }
 
     @Test

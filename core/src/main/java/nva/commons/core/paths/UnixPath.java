@@ -103,7 +103,7 @@ public final class UnixPath {
     }
 
     public String getPathElementByIndexFromEnd(int index) {
-        return getPathElementByIndex(path.size() - index);
+        return getPathElementByIndex(lastPathElementIndex() - index);
     }
 
     @Deprecated(since = "getLastPathElement was introduced")
