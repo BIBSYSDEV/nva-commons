@@ -244,7 +244,11 @@ public class RequestInfo {
     }
 
     public boolean userIsApplicationAdmin() {
-        return userIsAuthorized(AccessRight.ADMINISTRATE_APPLICATION.toString());
+        return userIsAuthorized(AccessRight.ADMINISTRATE_APPLICATION);
+    }
+
+    public boolean userIsAuthorized(AccessRight accessRight) {
+        return checkAuthorizationOnline(accessRight.toString()) || checkAuthorizationOffline(accessRight.toString());
     }
 
     public boolean userIsAuthorized(String accessRight) {
