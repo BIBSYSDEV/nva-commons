@@ -37,7 +37,7 @@ public class FakeFirehoseClientTest {
     void shouldReturnAllRecordsWhenPushingABatchOfRecords() {
         var expectedRecords = List.of(randomRecord(), randomRecord());
 
-        PutRecordBatchRequest request = PutRecordBatchRequest.builder()
+        var request = PutRecordBatchRequest.builder()
                                             .records(expectedRecords)
                                             .build();
         client.putRecordBatch(request);
