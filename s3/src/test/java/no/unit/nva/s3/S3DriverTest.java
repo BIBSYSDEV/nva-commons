@@ -267,7 +267,7 @@ class S3DriverTest {
                           .key(filename)
                           .build();
         var response = s3Client.putObject(request, RequestBody.fromBytes(utf16));
-        var actualContent = s3Driver.getFile(UnixPath.of(filename), StandardCharsets.UTF_8);
+        var actualContent = s3Driver.getFile(UnixPath.of(filename), StandardCharsets.UTF_16);
         assertThat(actualContent, is(equalTo(expectedContent)));
     }
 
