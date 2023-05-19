@@ -8,11 +8,14 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringStartsWith.startsWith;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,9 +28,12 @@ import nva.commons.core.paths.UnixPath;
 import nva.commons.core.paths.UriWrapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 class S3DriverTest {
 
@@ -117,7 +123,7 @@ class S3DriverTest {
         UnixPath somePath = UnixPath.of(SOME_PATH);
         String expectedContent = randomString();
         URI fileLocation = s3Driver.insertFile(somePath, expectedContent);
-        String actualContent = s3Driver.getUncompressedFile(toS3Path(fileLocation)).orElseThrow();
+        String actualContent = s3Driver.getUncompressedFile(toS3Path(fileLocation));
         assertThat(actualContent, is(equalTo(expectedContent)));
     }
 
@@ -249,6 +255,35 @@ class S3DriverTest {
 
         var actualFiles = s3Driver.listAllFiles(UnixPath.of(""));
         assertThat(actualFiles, containsInAnyOrder(files.toArray(UnixPath[]::new)));
+    }
+
+    @Test
+    void shouldBeAbleToDecodeStringInEncodingOtherThanUtf8() {
+        var expectedContent = randomString();
+        var filename = randomFileName();
+        var utf16 = expectedContent.getBytes(StandardCharsets.UTF_16);
+        var request = PutObjectRequest.builder()
+                          .bucket(SAMPLE_BUCKET)
+                          .key(filename)
+                          .build();
+        var response = s3Client.putObject(request, RequestBody.fromBytes(utf16));
+        var actualContent = s3Driver.getFile(UnixPath.of(filename), StandardCharsets.UTF_8);
+        assertThat(actualContent, is(equalTo(expectedContent)));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenWrongEncodingHasBeenUsed() {
+        var expectedContent = randomString();
+        var filename = randomFileName();
+        var utf16 = expectedContent.getBytes(StandardCharsets.UTF_16);
+        var request = PutObjectRequest.builder()
+                          .bucket(SAMPLE_BUCKET)
+                          .key(filename)
+                          .build();
+        s3Client.putObject(request, RequestBody.fromBytes(utf16));
+
+        Executable action = () -> s3Driver.getFile(UnixPath.of(filename), StandardCharsets.UTF_8);
+        assertThrows(UncheckedIOException.class, action);
     }
 
     private static String randomFileName() {
