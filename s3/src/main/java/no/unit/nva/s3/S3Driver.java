@@ -1,5 +1,19 @@
 package no.unit.nva.s3;
 
+import static java.util.Objects.isNull;
+import static nva.commons.core.attempt.Try.attempt;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.ioutils.IoUtils;
@@ -21,21 +35,6 @@ import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Object;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.time.Duration;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
-
-import static java.util.Objects.isNull;
-import static nva.commons.core.attempt.Try.attempt;
 
 //TODO: Address God Class issue
 @SuppressWarnings("PMD.GodClass")
@@ -73,8 +72,8 @@ public class S3Driver {
     public static S3Driver fromPermanentCredentialsInEnvironment(String bucketName) {
         verifyThatRequiredEnvVariablesAreInPlace();
         S3Client s3Client = defaultS3Client()
-                .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
-                .build();
+                                .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
+                                .build();
         return new S3Driver(s3Client, bucketName);
     }
 
@@ -163,9 +162,9 @@ public class S3Driver {
 
     public List<String> getFiles(UnixPath folder) {
         return listAllFiles(folder)
-                .stream()
-                .map(this::getFile)
-                .collect(Collectors.toList());
+                   .stream()
+                   .map(this::getFile)
+                   .collect(Collectors.toList());
     }
 
     public List<UnixPath> listAllFiles(URI s3Uri) {
@@ -178,8 +177,8 @@ public class S3Driver {
         do {
             var currentStartingPoint = result.getListingStartingPoint();
             var newBatch = listFiles(calculateListingFolder(folder),
-                    currentStartingPoint,
-                    MAX_RESPONSE_SIZE_FOR_S3_LISTING);
+                                     currentStartingPoint,
+                                     MAX_RESPONSE_SIZE_FOR_S3_LISTING);
 
             result = result.add(newBatch);
         } while (result.isTruncated());
@@ -197,7 +196,7 @@ public class S3Driver {
      *                             beginning of the listing.
      * @param responseSize         The number of filenames returned in each batch. Max size determined by S3 is 1000.
      * @return a result containing the returned filenames, the next {@code listingStartingPoint} and whether there are
-     * more files to list.
+     *     more files to list.
      */
     public ListingResult listFiles(UnixPath folder, String listingStartingPoint, int responseSize) {
         var listingResult = fetchNewResultsBatch(folder, listingStartingPoint, responseSize);
@@ -205,10 +204,14 @@ public class S3Driver {
         return new ListingResult(files, listingResult.nextContinuationToken(), listingResult.isTruncated());
     }
 
-    public Optional<String> getUncompressedFile(UnixPath file) {
+    public String getUncompressedFile(UnixPath file) {
+        return getUncompressedFile(file, StandardCharsets.UTF_8);
+    }
+
+    public String getUncompressedFile(UnixPath file, Charset charset) {
         GetObjectRequest getObjectRequest = createGetObjectRequest(file);
         ResponseBytes<GetObjectResponse> response = fetchObject(getObjectRequest);
-        return attempt(response::asUtf8String).toOptional();
+        return response.asString(charset);
     }
 
     public GZIPInputStream getCompressedFile(UnixPath file) throws IOException {
@@ -217,14 +220,18 @@ public class S3Driver {
         return new GZIPInputStream(response);
     }
 
-    public String getFile(UnixPath filename) {
+    public String getFile(UnixPath filename, Charset charset) {
         if (isCompressed(filename.getLastPathElement())) {
             return attempt(() -> getCompressedFile(filename))
-                    .map(this::readCompressedStream)
-                    .orElseThrow();
+                       .map(stream -> readCompressedStream(stream, charset))
+                       .orElseThrow();
         } else {
-            return getUncompressedFile(filename).orElseThrow();
+            return getUncompressedFile(filename, charset);
         }
+    }
+
+    public String getFile(UnixPath filename) {
+        return getFile(filename, StandardCharsets.UTF_8);
     }
 
     @JacocoGenerated
@@ -272,11 +279,11 @@ public class S3Driver {
 
     private String processPath(UnixPath s3Folder) {
         String unixPath = s3Folder.toString()
-                .replaceAll(DOUBLE_BACKSLASH, UNIX_SEPARATOR)
-                .replaceAll(SINGLE_BACKSLASH, UNIX_SEPARATOR);
+                              .replaceAll(DOUBLE_BACKSLASH, UNIX_SEPARATOR)
+                              .replaceAll(SINGLE_BACKSLASH, UNIX_SEPARATOR);
         return unixPath.startsWith(UNIX_SEPARATOR)
-                ? unixPath.substring(REMOVE_ROOT)
-                : unixPath;
+                   ? unixPath.substring(REMOVE_ROOT)
+                   : unixPath;
     }
 
     private RequestBody createRequestBody(InputStream input) throws IOException {
@@ -297,8 +304,8 @@ public class S3Driver {
         return client.getObject(getObjectRequest, ResponseTransformer.toBytes());
     }
 
-    private String readCompressedStream(GZIPInputStream gzipInputStream) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(gzipInputStream))) {
+    private String readCompressedStream(GZIPInputStream gzipInputStream, Charset charset) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(gzipInputStream, charset))) {
             return reader.lines().collect(Collectors.joining(LINE_SEPARATOR));
         }
     }
@@ -309,31 +316,31 @@ public class S3Driver {
 
     private GetObjectRequest createGetObjectRequest(UnixPath file) {
         return GetObjectRequest.builder()
-                .bucket(bucketName)
-                .key(file.toString())
-                .build();
+                   .bucket(bucketName)
+                   .key(file.toString())
+                   .build();
     }
 
     private List<UnixPath> extractResultsFromResponse(ListObjectsV2Response result) {
         return result.contents().stream()
-                .map(S3Object::key)
-                .map(UnixPath::of)
-                .collect(Collectors.toList());
+                   .map(S3Object::key)
+                   .map(UnixPath::of)
+                   .collect(Collectors.toList());
     }
 
     private ListObjectsV2Request requestForListingFiles(UnixPath folder, String startingPoint, int responseSize) {
         return ListObjectsV2Request.builder()
-                .bucket(bucketName)
-                .prefix(folder.toString())
-                .continuationToken(startingPoint)
-                .maxKeys(responseSize)
-                .build();
+                   .bucket(bucketName)
+                   .prefix(folder.toString())
+                   .continuationToken(startingPoint)
+                   .maxKeys(responseSize)
+                   .build();
     }
 
     private PutObjectRequest newPutObjectRequest(UnixPath fullPath) {
         return PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(fullPath.toString())
-                .build();
+                   .bucket(bucketName)
+                   .key(fullPath.toString())
+                   .build();
     }
 }
