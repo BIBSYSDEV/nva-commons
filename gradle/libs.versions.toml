@@ -37,6 +37,7 @@ aws-sdk2-eventbridge = { group = 'software.amazon.awssdk', name = 'eventbridge',
 aws-sdk2-urlconnection = { group = 'software.amazon.awssdk', name = 'url-connection-client', version.ref = 'awsSdk2' }
 aws-sdk2-dynamo = { group = 'software.amazon.awssdk', name = 'dynamodb', version.ref = 'awsSdk2' }
 aws-sdk2-cognitoidp = { group = 'software.amazon.awssdk', name = 'cognitoidentityprovider', version.ref = 'awsSdk2' }
+aws-sdk2-firehose = { group = 'software.amazon.awssdk', name = 'firehose', version.ref = 'awsSdk2'}
 
 aws-http-client-spi = { group = 'software.amazon.awssdk', name = 'http-client-spi', version = 'awsSdk2' }
 aws-apache-client = { group = 'software.amazon.awssdk', name = 'apache-client', version.ref = 'awsSdk2' }
