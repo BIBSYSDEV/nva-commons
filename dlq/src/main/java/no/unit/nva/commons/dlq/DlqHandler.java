@@ -16,11 +16,25 @@ import software.amazon.awssdk.services.firehose.model.PutRecordBatchRequest;
 import software.amazon.awssdk.services.firehose.model.Record;
 
 /**
+ * Dlq handler for using with Lambda Destinations: Example setup:
+ * <pre>{@code
+ *   SomeLambda:
+ *     Type: AWS::Serverless::Function
+ *     Properties:
+ *       CodeUri: some-lambda
+ *       Handler: no.sikt.nva.something.SomeHandler::handleRequest
+ *       PackageType: Zip
+ *       EventInvokeConfig:
+ *         DestinationConfig:
+ *           OnFailure:
+ *             Type: SQS
+ *             Destination: !GetAtt DlqStack.Outputs.DlqArn
+ *       Role: !GetAtt SomeLambdaRole.Arn
+ * }
  *
- * Dlq handler for using with Lambda Destinations:
  *
- *
- *
+ * </pre>
+ * See more detailed example in the test resources.
  */
 public class DlqHandler implements RequestHandler<SQSEvent, Void> {
 

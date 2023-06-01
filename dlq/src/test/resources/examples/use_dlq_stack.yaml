@@ -21,11 +21,11 @@ Parameters:
 
 Resources:
 
-  AriaValidator:
+  SomeLambda:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: some-lambda
-      Handler: com.github.axthosarouris.lambda.SomeHandler::handleRequest
+      Handler: no.sikt.nva.lambda.SomeHandler::handleRequest
       PackageType: Zip
       EventInvokeConfig:
         DestinationConfig:
