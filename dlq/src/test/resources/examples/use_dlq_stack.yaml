@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform:
+  - AWS::Serverless-2016-10-31
+  - AWS::LanguageExtensions
+Description: Aria Events Validation
+
+Globals:
+  Function:
+    MemorySize: 1792
+    Tracing: Active
+    Timeout: 60
+    Runtime: java11
+    Architectures:
+      - arm64
+
+Parameters:
+
+  Suffix:
+    Type: String
+
+
+Resources:
+
+  AriaValidator:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: some-lambda
+      Handler: com.github.axthosarouris.lambda.SomeHandler::handleRequest
+      PackageType: Zip
+      EventInvokeConfig:
+        DestinationConfig:
+          OnFailure:
+            Type: SQS
+            Destination: !GetAtt DlqStack.Outputs.DlqArn
+      Role: !GetAtt SomeLambdaRole.Arn
+
+
+
+  SomeLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      ManagedPolicyArns:
+        - !GetAtt DlqStack.Outputs.PushToDlqPolicy
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+
+
+  SomeLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${AriaValidator}"
+      RetentionInDays: 5
+
+  AriaEventHandlerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${AriaEventHandler}"
+      RetentionInDays: 5
+
+  DlqStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: dlq-stack.yaml
+      Parameters:
+        Suffix: !Ref Suffix

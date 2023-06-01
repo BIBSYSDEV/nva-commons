@@ -1,0 +1,25 @@
+plugins {
+    id 'nvacommons.java-conventions'
+    id 'nvacommons.publish-maven'
+}
+
+dependencies {
+    implementation project (":core")
+    implementation  libs.slf4j.api
+    implementation libs.aws.lambda.core
+    implementation libs.aws.lambda.events
+    implementation libs.aws.sdk2.firehose
+    implementation libs.guava
+    compileOnly libs.jackson.annotations
+    testImplementation libs.bundles.logging
+    testImplementation libs.bundles.testing
+    testImplementation libs.bundles.jackson
+    testImplementation project (":nvatestutils")
+    testImplementation project(":logutils")
+
+}
+
+test {
+    environment "DELIVERY_STREAM_NAME", "SomeFirehose"
+
+}
