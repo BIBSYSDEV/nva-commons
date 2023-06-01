@@ -16,7 +16,12 @@ import software.amazon.awssdk.services.firehose.model.PutRecordBatchRequest;
 import software.amazon.awssdk.services.firehose.model.Record;
 
 /**
- * Dlq handler for using with Lambda Destinations: Example setup:
+ *
+ * This DLQ handler pushes the failed events to an S3 bucket through a firehose for automatically organizing
+ * the events by time.
+ * The DLQ handler is agnostic to the kind of event that has failed. It only stores the event to a bucket.
+ *
+ * Example setup:
  * <pre>{@code
  *   SomeLambda:
  *     Type: AWS::Serverless::Function
