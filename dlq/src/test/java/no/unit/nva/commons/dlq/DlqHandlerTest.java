@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import software.amazon.awssdk.services.firehose.FirehoseClient;
 
 public class DlqHandlerTest {
 
@@ -29,7 +30,7 @@ public class DlqHandlerTest {
     private static final String DLQ_ARN = randomString();
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private FakeFirehoseClient firehoseClient;
-    private DlqHandler handler;
+    private SampleDlqHandler handler;
 
     public static Stream<Arguments> eventProvider() {
         return IntStream.of(1, 2, 10, 245).boxed()
@@ -39,7 +40,7 @@ public class DlqHandlerTest {
     @BeforeEach
     public void init() {
         this.firehoseClient = new FakeFirehoseClient();
-        this.handler = new DlqHandler(firehoseClient);
+        this.handler = new SampleDlqHandler(firehoseClient);
     }
 
     @ParameterizedTest(name = "number of messages:{1}")
@@ -82,5 +83,12 @@ public class DlqHandlerTest {
         sqsMessage.setMd5OfBody(randomString());
         sqsMessage.setMessageId(randomString());
         return sqsMessage;
+    }
+
+    private static class SampleDlqHandler extends DlqHandler {
+
+        public SampleDlqHandler(FirehoseClient firehoseClient) {
+            super(DlqHandler.defaultService(firehoseClient));
+        }
     }
 }
