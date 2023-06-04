@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import no.unit.nva.stubs.FakeFirehoseClient;
 import nva.commons.core.attempt.Try;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -32,9 +33,13 @@ public class DlqHandlerTest {
     private FakeFirehoseClient firehoseClient;
     private SampleDlqHandler handler;
 
+
+
     public static Stream<Arguments> eventProvider() {
-        return IntStream.of(1, 2, 10, 245).boxed()
-                   .map(numberOfMessages -> Arguments.of(randomJsons(numberOfMessages), numberOfMessages));
+        return IntStream.of(1, 2, 10, 245)
+                   .boxed()
+                   .map(numberOfMessages -> Arguments.of(
+                       Named.of(numberOfMessages + " messages", randomJsons(numberOfMessages))));
     }
 
     @BeforeEach
@@ -43,10 +48,10 @@ public class DlqHandlerTest {
         this.handler = new SampleDlqHandler(firehoseClient);
     }
 
-    @ParameterizedTest(name = "number of messages:{1}")
+    @ParameterizedTest
     @MethodSource("eventProvider")
     void shouldPushFailedEventsToFirehoseForAutomaticallyStoringThemInS3AndOrganizeThemByTime(
-        Set<JsonNode> failedEvents, int numberOfEvents) {
+        Set<JsonNode> failedEvents) {
 
         var dlqEvent = createDlqEventContainingFailedEvents(failedEvents);
         handler.handleRequest(dlqEvent, EMPTY_CONTEXT);
