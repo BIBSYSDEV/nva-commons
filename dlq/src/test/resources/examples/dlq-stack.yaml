@@ -1,0 +1,189 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform:
+  - AWS::Serverless-2016-10-31
+  - AWS::LanguageExtensions
+Description: DLQ resources
+
+
+Parameters:
+  Suffix:
+    Type: String
+
+
+Globals:
+  Function:
+    MemorySize: 1792
+    Tracing: Active
+    Timeout: 60
+    Runtime: java11
+    Architectures:
+      - arm64
+
+Resources:
+  DlqHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../dlq
+      PackageType: Zip
+      Handler: no.unit.nva.commons.dlq.DlqHandler::handleRequest
+      Role: !GetAtt DlqHandlerRole.Arn
+      Runtime: java11
+      Timeout: 30
+      Environment:
+        Variables:
+          DELIVERY_STREAM_NAME: !Ref DlqFirehose
+      Events:
+        DLQ:
+          Properties:
+            Queue: !GetAtt Dlq.Arn
+          Type: SQS
+
+  DlqHandlerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns:
+        - !Ref DefaultLambdaPolicy
+        - !Ref PushToDlqPolicy
+        - !Ref AccessDlqBucketPolicy
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: HandleSQSDLQMessages
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              Effect: Allow
+              Action:
+                - sqs:GetMessage
+                - sqs:DeleteMessage
+                - sqs:SendMessage
+                - sqs:ReceiveMessage
+                - sqs:GetQueueAttributes
+                - s3:PutObject
+              Resource: "*"
+
+  DlqLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${DlqHandler}"
+      RetentionInDays: 5
+
+  DlqFirehoseRole:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns:
+        - !Ref AccessDlqBucketPolicy
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - firehose.amazonaws.com
+            Action: sts:AssumeRole
+
+  DefaultLambdaPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub DefaultLambdaPermissions-${AWS::StackName}-${Suffix}
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+              - cloudwatch:PutMetricData
+            Resource: "*"
+
+  AccessDlqBucketPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub AccessDlqBucketPolicy-${AWS::StackName}-${Suffix}
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:PutObject
+              - s3:ListBucket
+              - s3:GetBucketAcl
+              - s3:GetObject
+              - s3:GetObjectAttributes
+              - s3:GetObjectTagging
+              - s3:GetObjectVersion
+            Resource:
+              - !GetAtt DlqBucket.Arn
+              - !Sub '${DlqBucket.Arn}/*'
+
+  PushToDlqPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: Policy allowing lambda to push to the DLQ.
+      ManagedPolicyName: !Sub PushToDlqPolicy-${AWS::StackName}-${Suffix}
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - sqs:GetMessage
+              - sqs:DeleteMessage
+              - sqs:SendMessage
+              - sqs:ReceiveMessage
+              - sqs:GetQueueAttributes
+            Resource:
+              - !GetAtt Dlq.Arn
+          - Effect: Allow
+            Action:
+             - firehose:PutRecord
+             - firehose:PutRecordBatch
+            Resource:
+              - !GetAtt DlqFirehose.Arn
+
+  Dlq:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub 'Dlq-${Suffix}'
+
+  DlqBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'dlq-bucket-${Suffix}-${AWS::AccountId}'
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpirationRule
+            ExpirationInDays: 3
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 3
+            Status: Enabled
+
+  DlqFirehose:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamName: !Sub "DlqFirehose-${Suffix}"
+      DeliveryStreamType: DirectPut
+      ExtendedS3DestinationConfiguration:
+        BufferingHints:
+          IntervalInSeconds: 60
+          SizeInMBs: 20
+        BucketARN: !GetAtt DlqBucket.Arn
+        CompressionFormat: GZIP
+        RoleARN: !GetAtt DlqFirehoseRole.Arn
+
+Outputs:
+  DlqArn:
+    Description: DQL SQS Queue Arn
+    Value: !GetAtt Dlq.Arn
+    Export:
+      Name: !Sub "DlqArn-${Suffix}"
+  PushToDlqPolicy:
+    Value: !Ref PushToDlqPolicy
+    Export:
+      Name: !Sub 'PushToDlqPolicy-${Suffix}'
