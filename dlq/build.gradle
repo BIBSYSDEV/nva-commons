@@ -16,10 +16,4 @@ dependencies {
     testImplementation libs.bundles.jackson
     testImplementation project (":nvatestutils")
     testImplementation project(":logutils")
-
-}
-
-test {
-    environment "DELIVERY_STREAM_NAME", "SomeFirehose"
-
 }

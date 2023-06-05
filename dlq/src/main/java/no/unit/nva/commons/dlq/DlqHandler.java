@@ -1,6 +1,5 @@
 package no.unit.nva.commons.dlq;
 
-import static no.unit.nva.commons.dlq.Configuration.NUMBER_OF_GROUPS;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
@@ -8,7 +7,6 @@ import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.stream.Collectors;
-import software.amazon.awssdk.services.firehose.FirehoseClient;
 
 /**
  * This DLQ handler pushes the failed events to an S3 bucket through a firehose for automatically organizing the events
@@ -35,20 +33,16 @@ import software.amazon.awssdk.services.firehose.FirehoseClient;
  * </pre>
  * See more detailed example in the test resources.
  * <p>
- * This class cannot be instantiated on purpose. You can use the default implementation (i.e. pushing to a Firehose) by
- * extending this class and calling the factory method {@link  DlqHandler#defaultService(FirehoseClient)} in the default
- * constructor. This will force developers to create an explicit trace of the logic they are using in their code.
+ * This class cannot be instantiated on purpose. This will force developers to create an explicit trace of the logic
+ * they are using in their code. Example implementation can be found in tests.
  */
 public class DlqHandler implements RequestHandler<SQSEvent, Void> {
-
+    //TODO: Make number of groups configurable.
+    public static final int NUMBER_OF_GROUPS = 10;
     private final FailedEventHandlingService failedEventsHandlingService;
 
     protected DlqHandler(FailedEventHandlingService failedEventsHandlingService) {
         this.failedEventsHandlingService = failedEventsHandlingService;
-    }
-
-    public static PushToFirehoseService defaultService(FirehoseClient firehoseClient) {
-        return new PushToFirehoseService(firehoseClient);
     }
 
     @Override

@@ -28,12 +28,11 @@ public class DlqHandlerTest {
 
     public static final String DLQ_IS_SOURCE = "aws:sqs";
     public static final Context EMPTY_CONTEXT = null;
+    public static final String SOME_FIREHOSE = "someFirehose";
     private static final String DLQ_ARN = randomString();
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private FakeFirehoseClient firehoseClient;
     private SampleDlqHandler handler;
-
-
 
     public static Stream<Arguments> eventProvider() {
         return IntStream.of(1, 2, 10, 245)
@@ -45,7 +44,7 @@ public class DlqHandlerTest {
     @BeforeEach
     public void init() {
         this.firehoseClient = new FakeFirehoseClient();
-        this.handler = new SampleDlqHandler(firehoseClient);
+        this.handler = new SampleDlqHandler(firehoseClient, SOME_FIREHOSE);
     }
 
     @ParameterizedTest
@@ -92,8 +91,8 @@ public class DlqHandlerTest {
 
     private static class SampleDlqHandler extends DlqHandler {
 
-        public SampleDlqHandler(FirehoseClient firehoseClient) {
-            super(DlqHandler.defaultService(firehoseClient));
+        public SampleDlqHandler(FirehoseClient firehoseClient, String deliveryStreamName) {
+            super(new PushToFirehoseService(firehoseClient, deliveryStreamName));
         }
     }
 }
