@@ -1,5 +1,6 @@
 package no.unit.nva.commons.dlq;
 
+import static no.unit.nva.commons.dlq.Configuration.NUMBER_OF_GROUPS;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
@@ -33,27 +34,19 @@ import software.amazon.awssdk.services.firehose.FirehoseClient;
  *
  * </pre>
  * See more detailed example in the test resources.
- *
+ * <p>
  * This class cannot be instantiated on purpose. You can use the default implementation (i.e. pushing to a Firehose) by
- * extending this class and calling the factory method {@link  DlqHandler#defaultService(FirehoseClient)}
- * in the default constructor. This will force developers to create an explicit trace of the logic they are using in
- * their code.
- *
+ * extending this class and calling the factory method {@link  DlqHandler#defaultService(FirehoseClient)} in the default
+ * constructor. This will force developers to create an explicit trace of the logic they are using in their code.
  */
 public class DlqHandler implements RequestHandler<SQSEvent, Void> {
 
-    //TODO: Make number of groups configurable.
-    public static final int NUMBER_OF_GROUPS = 10;
     private final FailedEventHandlingService failedEventsHandlingService;
 
     protected DlqHandler(FailedEventHandlingService failedEventsHandlingService) {
         this.failedEventsHandlingService = failedEventsHandlingService;
     }
 
-    /**
-     * @param firehoseClient
-     * @return
-     */
     public static PushToFirehoseService defaultService(FirehoseClient firehoseClient) {
         return new PushToFirehoseService(firehoseClient);
     }

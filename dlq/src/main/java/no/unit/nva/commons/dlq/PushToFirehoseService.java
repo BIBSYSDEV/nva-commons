@@ -1,5 +1,6 @@
 package no.unit.nva.commons.dlq;
 
+import static no.unit.nva.commons.dlq.Configuration.DELIVERY_STREAM_NAME;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
@@ -12,8 +13,6 @@ import software.amazon.awssdk.services.firehose.model.Record;
 
 public class PushToFirehoseService implements FailedEventHandlingService {
 
-    public static final Environment ENVIRONMENT = new Environment();
-    public static final String DELIVERY_STREAM_NAME = ENVIRONMENT.readEnv("DELIVERY_STREAM_NAME");
 
     private final FirehoseClient firehoseClient;
 
