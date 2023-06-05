@@ -57,7 +57,7 @@ public class FakeFirehoseClientTest {
     @Test
     void shouldProvideParsedEmittedContent() {
         var expectedContent = randomJsons();
-        var records = crateRecords(expectedContent);
+        var records = createRecords(expectedContent);
 
         var request = PutRecordBatchRequest.builder().records(records).build();
         client.putRecordBatch(request);
@@ -66,7 +66,7 @@ public class FakeFirehoseClientTest {
         assertThat(actualContent, contains(expectedContent.toArray(JsonNode[]::new)));
     }
 
-    private List<Record> crateRecords(List<JsonNode> expectedContent) {
+    private List<Record> createRecords(List<JsonNode> expectedContent) {
         return expectedContent.stream()
                    .map(attempt(OBJECT_MAPPER::writeValueAsString))
                    .flatMap(Try::stream)
