@@ -54,10 +54,7 @@ public class DlqHandlerTest {
 
         var dlqEvent = createDlqEventContainingFailedEvents(failedEvents);
         handler.handleRequest(dlqEvent, EMPTY_CONTEXT);
-        var pushedRecords = firehoseClient.getRecords().stream()
-                                .map(record -> record.data().asUtf8String())
-                                .map(attempt(OBJECT_MAPPER::readTree))
-                                .map(Try::orElseThrow)
+        var pushedRecords = firehoseClient.extractPushedContent(this::parseJsonString)
                                 .collect(Collectors.toSet());
 
         assertThat(failedEvents, is(equalTo(pushedRecords)));
@@ -87,6 +84,10 @@ public class DlqHandlerTest {
         sqsMessage.setMd5OfBody(randomString());
         sqsMessage.setMessageId(randomString());
         return sqsMessage;
+    }
+
+    private JsonNode parseJsonString(String jsonString) {
+        return attempt(() -> OBJECT_MAPPER.readTree(jsonString)).orElseThrow();
     }
 
     private static class SampleDlqHandler extends DlqHandler {
