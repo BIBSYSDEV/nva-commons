@@ -1,25 +1,25 @@
 [versions]
 zalandoProblem = { strictly = '0.27.1' }
 lambdaLog4j = { strictly = '1.5.1' }
-guava = { strictly = '31.1-jre' }
-awsSdk = { strictly = '1.12.462' }
-awsSdk2 = { strictly = '2.20.60' }
-awsLambdaEvents = { strictly = '3.11.1' }
+guava = { strictly = '32.0.0-jre' }
+awsSdk = { strictly = '1.12.483' }
+awsSdk2 = { strictly = '2.20.80' }
+awsLambdaEvents = { strictly = '3.11.2' }
 awsLambdaCore = { strictly = '1.2.2' }
-mockito = { strictly = '4.5.1' }
-httpmime = { strictly = '4.5.13' }
-jackson = { strictly = '2.14.1' }
+mockito = { strictly = '5.3.1' }
+httpmime = { strictly = '4.5.14' }
+jackson = { strictly = '2.15.2' }
 hamcrest = { strictly = '2.2' }
 apacheCommons = { strictly = '3.12.0' }
 commonsValidator = { strictly = '1.7' }
-jupiter = { strictly = '5.8.2' }
+jupiter = { strictly = '5.9.3' }
 awsIon = { strictly = '1.5.1' }
 hamcrestOptional = { strictly = '2.0.0' }
-log4j = { strictly = '2.17.2' }
-slf4j = { strictly = '1.8.0-beta4' }
+log4j = { strictly = '2.18.0' }
+slf4j = { strictly = '2.0.7' }
 apiGuardian = { strictly = '1.1.2' }
-wiremock = { strictly = '2.33.2' }
-datafaker = { strictly = '1.3.0' }
+wiremock = { strictly = '2.35.0' }
+datafaker = { strictly = '1.9.0' }
 
 [libraries]
 zalando = { group = 'org.zalando', name = 'problem', version.ref = 'zalandoProblem' }

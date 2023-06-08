@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
-import net.datafaker.Faker;
+import net.datafaker.providers.base.BaseFaker;
 import no.unit.nva.stubs.FakeS3Client;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.core.paths.UnixPath;
@@ -41,7 +41,7 @@ class S3DriverTest {
     public static final String EMPTY_STRING = "";
     public static final String ROOT = "/";
     public static final String MARKER_INDICATING_END_OF_LISTING = null;
-    private static final Faker FAKER = Faker.instance();
+    private static final BaseFaker FAKER = new BaseFaker();
     private static final String SAMPLE_BUCKET = "sampleBucket";
     private static final String SOME_PATH = randomString();
     private S3Driver s3Driver;
