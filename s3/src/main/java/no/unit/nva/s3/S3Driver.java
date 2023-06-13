@@ -130,6 +130,16 @@ public class S3Driver {
      * @return the file contents uncompressed.
      */
     public String readEvent(URI uri) {
+        return readFile(uri);
+    }
+
+    /**
+     * Method for reading files from S3 bucket.
+     *
+     * @param uri the S3 URI to the file. The host must be equal to the bucket name of the S3 driver
+     * @return the file contents uncompressed.
+     */
+    public String readFile(URI uri) {
         UnixPath filePath = UriWrapper.fromUri(uri).toS3bucketPath();
         return getFile(filePath);
     }
