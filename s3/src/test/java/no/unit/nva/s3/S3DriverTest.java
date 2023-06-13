@@ -185,8 +185,19 @@ class S3DriverTest {
         String content = randomString();
         UnixPath someFolder = UnixPath.of("parent", "child1", "child2");
         URI fileLocation = s3Driver.insertEvent(someFolder, content);
-        String retrievedContent = s3Driver.readEvent(fileLocation);
+        String retrievedContent = s3Driver.readFile(fileLocation);
         assertThat(retrievedContent, is(equalTo(content)));
+    }
+
+    @Test
+    void shouldReadFileWhenReadingEvent() throws IOException {
+        s3Driver = new S3Driver(new FakeS3Client(), "ignoredBucketName");
+        String content = randomString();
+        UnixPath someFolder = UnixPath.of("parent", "child1", "child2");
+        URI fileLocation = s3Driver.insertEvent(someFolder, content);
+        String retrievedContentAsEvent = s3Driver.readEvent(fileLocation);
+        String retrievedContentAsFile = s3Driver.readFile(fileLocation);
+        assertThat(retrievedContentAsEvent, is(equalTo(retrievedContentAsFile)));
     }
 
     @Test
