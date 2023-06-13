@@ -17,7 +17,7 @@ jupiter = { strictly = '5.9.3' }
 awsIon = { strictly = '1.5.1' }
 hamcrestOptional = { strictly = '2.0.0' }
 log4j = { strictly = '2.17.2' }
-log4jslfimpl = { strictly = '2.17.2' }
+#slf4j version should be compatible with wiremock
 slf4j = { strictly = '1.8.0-beta4' }
 apiGuardian = { strictly = '1.1.2' }
 wiremock = { strictly = '2.35.0' }
@@ -67,7 +67,7 @@ commons-validator = { group = 'commons-validator', name = 'commons-validator', v
 
 log4j-core = { group = 'org.apache.logging.log4j', name = 'log4j-core', version.ref = 'log4j' }
 log4j-api = { group = 'org.apache.logging.log4j', name = 'log4j-api', version.ref = 'log4j' }
-log4j-slf4j-impl = { group = 'org.apache.logging.log4j', name = 'log4j-slf4j18-impl', version.ref = 'log4jslfimpl' }
+log4j-slf4j-impl = { group = 'org.apache.logging.log4j', name = 'log4j-slf4j18-impl', version.ref = 'log4j' }
 slf4j-api = { group = 'org.slf4j', name = 'slf4j-api', version.ref = 'slf4j' }
 lambda-log4j = { group = 'com.amazonaws', name = 'aws-lambda-java-log4j2', version.ref = 'lambdaLog4j' }
 
