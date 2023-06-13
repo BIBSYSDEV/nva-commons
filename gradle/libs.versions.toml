@@ -1,4 +1,5 @@
 [versions]
+
 zalandoProblem = { strictly = '0.27.1' }
 lambdaLog4j = { strictly = '1.5.1' }
 guava = { strictly = '32.0.0-jre' }
@@ -15,8 +16,9 @@ commonsValidator = { strictly = '1.7' }
 jupiter = { strictly = '5.9.3' }
 awsIon = { strictly = '1.5.1' }
 hamcrestOptional = { strictly = '2.0.0' }
-log4j = { strictly = '2.18.0' }
-slf4j = { strictly = '2.0.7' }
+log4j = { strictly = '2.17.2' }
+log4jslfimpl = {strictly='2.17.2'}
+slf4j = { strictly = '1.8.0-beta4' }
 apiGuardian = { strictly = '1.1.2' }
 wiremock = { strictly = '2.35.0' }
 datafaker = { strictly = '1.9.0' }
@@ -62,9 +64,10 @@ jackson-jr-annotations = { group = 'com.fasterxml.jackson.jr', name = 'jackson-j
 commons-lang = { group = 'org.apache.commons', name = 'commons-lang3', version.ref = 'apacheCommons' }
 commons-validator = { group = 'commons-validator', name = 'commons-validator', version.ref = 'commonsValidator' }
 
+
 log4j-core = { group = 'org.apache.logging.log4j', name = 'log4j-core', version.ref = 'log4j' }
 log4j-api = { group = 'org.apache.logging.log4j', name = 'log4j-api', version.ref = 'log4j' }
-log4j-slf4j18-impl = { group = 'org.apache.logging.log4j', name = 'log4j-slf4j18-impl', version.ref = 'log4j' }
+log4j-slf4j-impl = { group = 'org.apache.logging.log4j', name = 'log4j-slf4j18-impl', version.ref = 'log4jslfimpl' }
 slf4j-api = { group = 'org.slf4j', name = 'slf4j-api', version.ref = 'slf4j' }
 lambda-log4j = { group = 'com.amazonaws', name = 'aws-lambda-java-log4j2', version.ref = 'lambdaLog4j' }
 
@@ -87,5 +90,5 @@ testing = ['mockito-core', 'hamcrest', 'hamcrest-core', 'junit-jupiter', 'junit-
 jackson = ['jackson-core', 'jackson-datatype-jdk8', 'jackson-datatype-jsr310', 'jackson-databind',
     'jackson-annotations', 'jackson-module-parameter-names', 'jackson-datatype-problem', 'jackson-dataformat-xml']
 jacksonjr = ['jackson-jr-objects', 'jackson-jr-annotations']
-logging = ['log4j-core', 'log4j-api', 'log4j-slf4j18-impl', 'slf4j-api', 'lambda-log4j']
+logging = ['log4j-core', 'log4j-api', 'log4j-slf4j-impl', 'slf4j-api', 'lambda-log4j']
 
