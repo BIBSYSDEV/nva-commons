@@ -17,7 +17,7 @@ jupiter = { strictly = '5.9.3' }
 awsIon = { strictly = '1.5.1' }
 hamcrestOptional = { strictly = '2.0.0' }
 log4j = { strictly = '2.17.2' }
-log4jslfimpl = {strictly='2.17.2'}
+log4jslfimpl = { strictly = '2.17.2' }
 slf4j = { strictly = '1.8.0-beta4' }
 apiGuardian = { strictly = '1.1.2' }
 wiremock = { strictly = '2.35.0' }
@@ -39,7 +39,7 @@ aws-sdk2-eventbridge = { group = 'software.amazon.awssdk', name = 'eventbridge',
 aws-sdk2-urlconnection = { group = 'software.amazon.awssdk', name = 'url-connection-client', version.ref = 'awsSdk2' }
 aws-sdk2-dynamo = { group = 'software.amazon.awssdk', name = 'dynamodb', version.ref = 'awsSdk2' }
 aws-sdk2-cognitoidp = { group = 'software.amazon.awssdk', name = 'cognitoidentityprovider', version.ref = 'awsSdk2' }
-aws-sdk2-firehose = { group = 'software.amazon.awssdk', name = 'firehose', version.ref = 'awsSdk2'}
+aws-sdk2-firehose = { group = 'software.amazon.awssdk', name = 'firehose', version.ref = 'awsSdk2' }
 
 aws-http-client-spi = { group = 'software.amazon.awssdk', name = 'http-client-spi', version = 'awsSdk2' }
 aws-apache-client = { group = 'software.amazon.awssdk', name = 'apache-client', version.ref = 'awsSdk2' }
