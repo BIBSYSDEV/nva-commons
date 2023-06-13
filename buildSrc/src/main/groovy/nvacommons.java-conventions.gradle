@@ -9,11 +9,11 @@ plugins {
 }
 
 group 'com.github.bibsysdev'
-version = '1.29.4'
+version = '1.30.0'
+
 
 
 repositories {
-
     mavenCentral()
     maven { url "https://jitpack.io" }
 }
