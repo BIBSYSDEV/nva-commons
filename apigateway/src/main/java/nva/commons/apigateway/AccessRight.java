@@ -22,7 +22,8 @@ public enum AccessRight {
     EDIT_OWN_INSTITUTION_USERS,
     EDIT_OWN_INSTITUTION_PROJECTS,
     EDIT_OWN_INSTITUTION_PUBLICATION_WORKFLOW,
-    ADMINISTRATE_APPLICATION;
+    ADMINISTRATE_APPLICATION,
+    MANAGE_OWN_PROJECTS;
 
     /**
      * Creates an AccessRight instance from a string (case insensitive).
