@@ -15,6 +15,10 @@ dependencies {
 
     implementation libs.bundles.jacksonjr
 
+    implementation libs.com.auth0.jwt
+
+    implementation libs.aws.java.sdk.core
+
     testImplementation libs.bundles.testing
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")
