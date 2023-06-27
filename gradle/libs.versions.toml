@@ -22,6 +22,7 @@ slf4j = { strictly = '1.8.0-beta4' }
 apiGuardian = { strictly = '1.1.2' }
 wiremock = { strictly = '2.35.0' }
 datafaker = { strictly = '1.9.0' }
+com-auth0-jwt = { strictly = '3.18.3' }
 
 [libraries]
 zalando = { group = 'org.zalando', name = 'problem', version.ref = 'zalandoProblem' }
@@ -29,6 +30,7 @@ zalando = { group = 'org.zalando', name = 'problem', version.ref = 'zalandoProbl
 guava = { group = 'com.google.guava', name = 'guava', version.ref = 'guava' }
 
 aws-sdk-dynamo = { group = 'com.amazonaws', name = 'aws-java-sdk-dynamodb', version.ref = 'awsSdk' }
+aws-java-sdk-core = { group = 'com.amazonaws', name = 'aws-java-sdk-core', version.ref = 'awsSdk' }
 aws-lambda-events = { group = 'com.amazonaws', name = 'aws-lambda-java-events', version.ref = 'awsLambdaEvents' }
 aws-lambda-core = { group = 'com.amazonaws', name = 'aws-lambda-java-core', version.ref = 'awsLambdaCore' }
 
@@ -83,6 +85,8 @@ hamcrest-optional = { group = 'com.github.npathai', name = 'hamcrest-optional', 
 
 apiguardian = { group = 'org.apiguardian', name = 'apiguardian-api', version.ref = 'apiGuardian' }
 wiremock = { group = 'com.github.tomakehurst', name = 'wiremock-jre8', version.ref = 'wiremock' }
+
+com-auth0-jwt = { group = 'com.auth0', name =  'java-jwt', version.ref = 'com-auth0-jwt' }
 
 [bundles]
 testing = ['mockito-core', 'hamcrest', 'hamcrest-core', 'junit-jupiter', 'junit-jupiter-api',
