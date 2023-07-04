@@ -59,6 +59,7 @@ public class AuthorizedBackendUriRetriever implements RawContentRetriever {
                    .toOptional();
     }
 
+    @Override
     public Optional<HttpResponse<String>> fetchResponse(URI uri, String mediaType) {
         return attempt(this::getAuthorizedBackendClient)
                    .map(authorizedBackendClient -> getHttpResponse(authorizedBackendClient, uri, mediaType))
