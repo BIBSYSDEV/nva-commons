@@ -70,9 +70,17 @@ public class FakeFirehoseClientTest {
     }
 
     @Test
-    void shouldNotAcceptEmptyBatch(){
-        var request=  PutRecordBatchRequest.builder().records(Collections.emptyList()).build();
-        assertThrows(FirehoseException.class, ()->client.putRecordBatch(request));
+    void shouldNotAcceptEmptyBatch() {
+        var request = PutRecordBatchRequest.builder().records(Collections.emptyList()).build();
+        assertThrows(FirehoseException.class, () -> client.putRecordBatch(request));
+    }
+
+    private static Record toRecord(String content) {
+        return Record.builder().data(SdkBytes.fromString(content, StandardCharsets.UTF_8)).build();
+    }
+
+    private static Record randomRecord() {
+        return toRecord(randomString());
     }
 
     private List<Record> createRecords(List<JsonNode> expectedContent) {
@@ -87,14 +95,6 @@ public class FakeFirehoseClientTest {
         return Stream.of(randomJson(), randomJson())
                    .map(this::parseString)
                    .collect(Collectors.toList());
-    }
-
-    private static Record toRecord(String content) {
-        return Record.builder().data(SdkBytes.fromString(content, StandardCharsets.UTF_8)).build();
-    }
-
-    private static Record randomRecord() {
-        return toRecord(randomString());
     }
 
     private JsonNode parseString(String jsonString) {

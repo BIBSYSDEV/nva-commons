@@ -36,15 +36,11 @@ public class FakeFirehoseClient implements FirehoseClient {
 
     @Override
     public PutRecordBatchResponse putRecordBatch(PutRecordBatchRequest putRecordBatchRequest) {
-        if(records.isEmpty()){
+        if (putRecordBatchRequest.records().isEmpty()) {
             throw emptyBatchException();
         }
         records.addAll(putRecordBatchRequest.records());
         return PutRecordBatchResponse.builder().build();
-    }
-
-    private AwsServiceException emptyBatchException() {
-        return FirehoseException.builder().message(String.format(EMPTY_RECORDS_MESSAGE_TEMPLATE, records)).build();
     }
 
     @JacocoGenerated
@@ -71,5 +67,9 @@ public class FakeFirehoseClient implements FirehoseClient {
 
     public <T> Stream<T> extractPushedContent(Function<String, T> parser) {
         return extractPushedContent().map(parser::apply);
+    }
+
+    private AwsServiceException emptyBatchException() {
+        return FirehoseException.builder().message(String.format(EMPTY_RECORDS_MESSAGE_TEMPLATE, records)).build();
     }
 }
