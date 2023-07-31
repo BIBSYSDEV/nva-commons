@@ -19,6 +19,7 @@ class ParallelMapperTest {
         List<Integer> inputs = sampleInputs(1_000);
 
         ParallelMapper<Integer, String> mapper = new ParallelMapper<>(inputs, this::integerToString).map();
+
         verifyParallelMapperTransformsInputObjects(mapper, inputs);
     }
 

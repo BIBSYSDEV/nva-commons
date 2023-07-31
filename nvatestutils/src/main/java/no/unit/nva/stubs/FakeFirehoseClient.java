@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import nva.commons.core.JacocoGenerated;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.firehose.FirehoseClient;
+import software.amazon.awssdk.services.firehose.model.FirehoseException;
 import software.amazon.awssdk.services.firehose.model.PutRecordBatchRequest;
 import software.amazon.awssdk.services.firehose.model.PutRecordBatchResponse;
 import software.amazon.awssdk.services.firehose.model.PutRecordRequest;
@@ -21,6 +23,9 @@ import software.amazon.awssdk.services.firehose.model.Record;
  */
 public class FakeFirehoseClient implements FirehoseClient {
 
+    public static final String EMPTY_RECORDS_MESSAGE_TEMPLATE =
+        "Value %s at 'records' failed to satisfy constraint: Member must have length greater "
+        + "than or equal to 1";
     private final List<Record> records = new ArrayList<>();
 
     @Override
@@ -31,8 +36,15 @@ public class FakeFirehoseClient implements FirehoseClient {
 
     @Override
     public PutRecordBatchResponse putRecordBatch(PutRecordBatchRequest putRecordBatchRequest) {
+        if(records.isEmpty()){
+            throw emptyBatchException();
+        }
         records.addAll(putRecordBatchRequest.records());
         return PutRecordBatchResponse.builder().build();
+    }
+
+    private AwsServiceException emptyBatchException() {
+        return FirehoseException.builder().message(String.format(EMPTY_RECORDS_MESSAGE_TEMPLATE, records)).build();
     }
 
     @JacocoGenerated
