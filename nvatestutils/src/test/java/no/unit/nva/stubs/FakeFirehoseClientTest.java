@@ -8,9 +8,11 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,6 +21,7 @@ import nva.commons.core.attempt.Try;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.services.firehose.model.FirehoseException;
 import software.amazon.awssdk.services.firehose.model.PutRecordBatchRequest;
 import software.amazon.awssdk.services.firehose.model.PutRecordRequest;
 import software.amazon.awssdk.services.firehose.model.Record;
@@ -66,6 +69,20 @@ public class FakeFirehoseClientTest {
         assertThat(actualContent, contains(expectedContent.toArray(JsonNode[]::new)));
     }
 
+    @Test
+    void shouldNotAcceptEmptyBatch() {
+        var request = PutRecordBatchRequest.builder().records(Collections.emptyList()).build();
+        assertThrows(FirehoseException.class, () -> client.putRecordBatch(request));
+    }
+
+    private static Record toRecord(String content) {
+        return Record.builder().data(SdkBytes.fromString(content, StandardCharsets.UTF_8)).build();
+    }
+
+    private static Record randomRecord() {
+        return toRecord(randomString());
+    }
+
     private List<Record> createRecords(List<JsonNode> expectedContent) {
         return expectedContent.stream()
                    .map(attempt(OBJECT_MAPPER::writeValueAsString))
@@ -78,14 +95,6 @@ public class FakeFirehoseClientTest {
         return Stream.of(randomJson(), randomJson())
                    .map(this::parseString)
                    .collect(Collectors.toList());
-    }
-
-    private static Record toRecord(String content) {
-        return Record.builder().data(SdkBytes.fromString(content, StandardCharsets.UTF_8)).build();
-    }
-
-    private static Record randomRecord() {
-        return toRecord(randomString());
     }
 
     private JsonNode parseString(String jsonString) {
