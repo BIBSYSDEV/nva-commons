@@ -132,7 +132,7 @@ public final class UnixPath {
         return Stream.concat(Stream.of(ROOT), pathElements);
     }
 
-    private static Stream<String> extractAllPathElements(String[] path) {
+    private static Stream<String> extractAllPathElements(String... path) {
         Stream<String> nonNullPathElements = discardNullArrayElements(path);
         return splitInputElementsContainingPathDelimiter(nonNullPathElements);
     }
@@ -144,7 +144,7 @@ public final class UnixPath {
             .filter(StringUtils::isNotBlank);
     }
 
-    private static Stream<String> discardNullArrayElements(String[] path) {
+    private static Stream<String> discardNullArrayElements(String... path) {
         return Optional.ofNullable(path)
             .stream()
             .flatMap(Arrays::stream)
@@ -157,11 +157,11 @@ public final class UnixPath {
 
     //composite path element is an element of the form /folder1/folder2
 
-    private static Stream<String> addRootIfPresentInOriginalPath(Stream<String> pathElements, String[] path) {
+    private static Stream<String> addRootIfPresentInOriginalPath(Stream<String> pathElements, String... path) {
         return pathBeginsWithRoot(path) ? prependRoot(pathElements) : pathElements;
     }
 
-    private static boolean pathBeginsWithRoot(String[] path) {
+    private static boolean pathBeginsWithRoot(String... path) {
         return nonNull(path) && path.length > 0 && nonNull(path[0]) && path[0].startsWith(ROOT);
     }
 

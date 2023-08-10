@@ -139,7 +139,7 @@ public class FakeS3Client implements S3Client {
           : fileKeys.get(excludedEndIndex-1);
     }
 
-    private static Map<String, ByteBuffer> readResourceFiles(String[] filesInBucket) {
+    private static Map<String, ByteBuffer> readResourceFiles(String... filesInBucket) {
         List<String> suppliedFilenames = Arrays.asList(filesInBucket);
         return suppliedFilenames.stream()
                    .map(filename -> new SimpleEntry<>(filename, readFileFromResources(filename)))

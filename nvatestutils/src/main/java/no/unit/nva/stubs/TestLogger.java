@@ -5,6 +5,7 @@ import nva.commons.core.JacocoGenerated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
 @JacocoGenerated
 public class TestLogger implements LambdaLogger {
 
