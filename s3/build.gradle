@@ -16,5 +16,7 @@ dependencies {
     testImplementation libs.bundles.testing
     testImplementation libs.aws.http.client.spi
     testImplementation project(":nvatestutils")
+    testImplementation ('net.datafaker:datafaker:1.9.0') { exclude module: 'org.yaml' } //Hacky workaround for build problems.
+    testImplementation group: 'org.yaml', name: 'snakeyaml', version: '1.17' // Hacky workaround for build problems. Once this project is on java 17 this should be fixed
 
 }

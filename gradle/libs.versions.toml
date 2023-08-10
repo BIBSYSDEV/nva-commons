@@ -21,7 +21,6 @@ log4j = { strictly = '2.17.2' }
 slf4j = { strictly = '1.8.0-beta4' }
 apiGuardian = { strictly = '1.1.2' }
 wiremock = { strictly = '2.35.0' }
-datafaker = { strictly = '1.9.0' }
 com-auth0-jwt = { strictly = '3.18.3' }
 
 [libraries]
@@ -79,7 +78,6 @@ junit-jupiter-params = { group = 'org.junit.jupiter', name = 'junit-jupiter-para
 junit-jupiter-engine = { group = 'org.junit.jupiter', name = 'junit-jupiter-engine', version.ref = 'jupiter' }
 hamcrest = { group = 'org.hamcrest', name = 'hamcrest', version.ref = 'hamcrest' }
 hamcrest-core = { group = 'org.hamcrest', name = 'hamcrest-core', version.ref = 'hamcrest' }
-datafaker = { group = 'net.datafaker', name = 'datafaker', version.ref = 'datafaker' }
 mockito-core = { group = 'org.mockito', name = 'mockito-core', version.ref = 'mockito' }
 hamcrest-optional = { group = 'com.github.npathai', name = 'hamcrest-optional', version.ref = 'hamcrestOptional' }
 
@@ -90,7 +88,7 @@ com-auth0-jwt = { group = 'com.auth0', name =  'java-jwt', version.ref = 'com-au
 
 [bundles]
 testing = ['mockito-core', 'hamcrest', 'hamcrest-core', 'junit-jupiter', 'junit-jupiter-api',
-    'junit-jupiter-params', 'junit-jupiter-engine', 'datafaker', 'hamcrest-optional', 'commons-lang']
+    'junit-jupiter-params', 'junit-jupiter-engine', 'hamcrest-optional', 'commons-lang']
 jackson = ['jackson-core', 'jackson-datatype-jdk8', 'jackson-datatype-jsr310', 'jackson-databind',
     'jackson-annotations', 'jackson-module-parameter-names', 'jackson-datatype-problem', 'jackson-dataformat-xml']
 jacksonjr = ['jackson-jr-objects', 'jackson-jr-annotations']
