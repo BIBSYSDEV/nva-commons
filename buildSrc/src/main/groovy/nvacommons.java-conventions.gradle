@@ -24,7 +24,7 @@ repositories {
 testCodeCoverageReport {
     reports {
         csv.required = true
-        xml.required = false
+        xml.required = true
     }
 }
 
