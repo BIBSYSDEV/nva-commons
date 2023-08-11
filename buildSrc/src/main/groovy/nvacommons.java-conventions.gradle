@@ -3,6 +3,7 @@ plugins {
     id 'java-library'
     id 'jacoco'
     id 'checkstyle'
+    id 'jacoco-report-aggregation'
     id 'pmd'
     id 'idea'
 }
@@ -20,16 +21,18 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
-test {
-    useJUnitPlatform {}
-    failFast = true
-    finalizedBy(jacocoTestReport)
+testCodeCoverageReport {
+    reports {
+        csv.required = true
+        xml.required = false
+    }
 }
 
-jacocoTestReport {
-    dependsOn(test)
-    reports {
-        xml.required
+tasks.named('test') {
+    useJUnitPlatform()
+    failFast = true
+    testLogging {
+        events 'skipped', 'passed', 'failed'
     }
 }
 
@@ -64,12 +67,25 @@ jacocoTestCoverageVerification {
     }
 }
 
+test {
+    useJUnitPlatform {}
+    failFast = true
+    finalizedBy(jacocoTestReport)
+}
+
+jacocoTestReport {
+    dependsOn(test)
+    reports {
+        xml.required
+    }
+}
+
 checkstyle {
     configFile = rootProject.resources.text.fromFile('config/checkstyle/checkstyle.xml').asFile()
     showViolations = true
 }
 
-tasks.withType(Checkstyle) {
+tasks.withType(Checkstyle) .configureEach{
     reports {
         xml.required
         html.required
@@ -83,7 +99,6 @@ dependencies {
         exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
         exclude group: "com.amazonaws", module: "aws-lambda-java-core"
         exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
-
     }
 
     compileOnly libs.apiguardian

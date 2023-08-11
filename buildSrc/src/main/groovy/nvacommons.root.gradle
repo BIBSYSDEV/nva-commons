@@ -3,7 +3,6 @@ plugins {
     id 'nvacommons.gradlelint'
     id 'nvacommons.java-conventions'
     id 'jacoco-report-aggregation'
-
 }
 
 //workaround for jacoco-merge to work
@@ -26,6 +25,12 @@ nexusPublishing {
     connectTimeout = Duration.ofSeconds(60)
 }
 
+dependencies {
+    subprojects.forEach {
+        jacocoAggregation it
+    }
+}
+
 reporting {
     reports {
         testCodeCoverageReport(JacocoCoverageReport) {
@@ -41,4 +46,3 @@ tasks.named('check') {
     dependsOn tasks.named('testCodeCoverageReport', JacocoReport)
     dependsOn tasks.named('integrationTestCodeCoverageReport', JacocoReport)
 }
-
