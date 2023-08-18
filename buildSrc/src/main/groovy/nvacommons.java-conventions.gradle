@@ -3,14 +3,17 @@ plugins {
     id 'java-library'
     id 'jacoco'
     id 'checkstyle'
+    id 'jacoco-report-aggregation'
     id 'pmd'
     id 'idea'
-    id 'nebula.lint'
 }
 
 group 'com.github.bibsysdev'
 version = '1.31.2'
 
+
+sourceCompatibility = JavaVersion.VERSION_17  // source-code version and must be <= targetCompatibility
+targetCompatibility = JavaVersion.VERSION_17 // bytecode target version
 
 
 repositories {
@@ -18,16 +21,18 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
-test {
-    useJUnitPlatform {}
-    failFast = true
-    finalizedBy(jacocoTestReport)
+testCodeCoverageReport {
+    reports {
+        csv.required = true
+        xml.required = true
+    }
 }
 
-jacocoTestReport {
-    dependsOn(test)
-    reports {
-        xml.required
+tasks.named('test') {
+    useJUnitPlatform()
+    failFast = true
+    testLogging {
+        events 'skipped', 'passed', 'failed'
     }
 }
 
@@ -38,7 +43,11 @@ pmd {
     pmdMain {}
 }
 
+check.dependsOn jacocoTestCoverageVerification
+jacocoTestCoverageVerification.dependsOn(jacocoTestReport)
+
 jacocoTestCoverageVerification {
+
     violationRules {
         rule {
             limit {
@@ -58,15 +67,25 @@ jacocoTestCoverageVerification {
     }
 }
 
-check.dependsOn jacocoTestCoverageVerification
-jacocoTestCoverageVerification.dependsOn(jacocoTestReport)
+test {
+    useJUnitPlatform {}
+    failFast = true
+    finalizedBy(jacocoTestReport)
+}
+
+jacocoTestReport {
+    dependsOn(test)
+    reports {
+        xml.required
+    }
+}
 
 checkstyle {
     configFile = rootProject.resources.text.fromFile('config/checkstyle/checkstyle.xml').asFile()
     showViolations = true
 }
 
-tasks.withType(Checkstyle) {
+tasks.withType(Checkstyle) .configureEach{
     reports {
         xml.required
         html.required
@@ -80,7 +99,6 @@ dependencies {
         exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
         exclude group: "com.amazonaws", module: "aws-lambda-java-core"
         exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
-
     }
 
     compileOnly libs.apiguardian

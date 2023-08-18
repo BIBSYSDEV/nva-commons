@@ -6,36 +6,36 @@ import no.unit.nva.events.EventsConfig;
 import no.unit.nva.events.models.AwsEventBridgeDetail;
 import no.unit.nva.events.models.AwsEventBridgeEvent;
 
-public abstract class DestinationsEventBridgeEventHandler<InputType, OutputType>
-    extends EventHandler<AwsEventBridgeDetail<InputType>, OutputType> {
+public abstract class DestinationsEventBridgeEventHandler<I, O>
+    extends EventHandler<AwsEventBridgeDetail<I>, O> {
 
-    private final Class<InputType> iclass;
+    private final Class<I> iclass;
 
-    protected DestinationsEventBridgeEventHandler(Class<InputType> iclass) {
+    protected DestinationsEventBridgeEventHandler(Class<I> iclass) {
         super(AwsEventBridgeDetail.class, EventsConfig.objectMapper);
         this.iclass = iclass;
     }
 
-    protected DestinationsEventBridgeEventHandler(Class<InputType> iclass, ObjectMapper objectMapper) {
+    protected DestinationsEventBridgeEventHandler(Class<I> iclass, ObjectMapper objectMapper) {
         super(AwsEventBridgeDetail.class, objectMapper);
         this.iclass = iclass;
     }
 
     @Override
-    protected final OutputType processInput(AwsEventBridgeDetail<InputType> input,
-                                            AwsEventBridgeEvent<AwsEventBridgeDetail<InputType>> event,
-                                            Context context) {
+    protected final O processInput(AwsEventBridgeDetail<I> input,
+                                   AwsEventBridgeEvent<AwsEventBridgeDetail<I>> event,
+                                   Context context) {
         return processInputPayload(input.getResponsePayload(), event, context);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    protected AwsEventBridgeEvent<AwsEventBridgeDetail<InputType>> parseEvent(String input) {
-        return new EventParser<AwsEventBridgeDetail<InputType>>(input, objectMapper)
+    protected AwsEventBridgeEvent<AwsEventBridgeDetail<I>> parseEvent(String input) {
+        return new EventParser<AwsEventBridgeDetail<I>>(input, objectMapper)
             .parse(AwsEventBridgeDetail.class, iclass);
     }
 
-    protected abstract OutputType processInputPayload(InputType input,
-                                                      AwsEventBridgeEvent<AwsEventBridgeDetail<InputType>> event,
-                                                      Context context);
+    protected abstract O processInputPayload(I input,
+                                             AwsEventBridgeEvent<AwsEventBridgeDetail<I>> event,
+                                             Context context);
 }

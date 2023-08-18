@@ -5,6 +5,7 @@ import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import java.util.Map;
 import nva.commons.core.JacocoGenerated;
 
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
 @JacocoGenerated
 public final class TestHeaders {
 

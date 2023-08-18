@@ -6,27 +6,27 @@
     Coding Style Check Results
     --------------------------
     Total files checked:
-    <xsl:number level="any" value="count(descendant::file)"/>
+    <xsl:apply-templates/>
     Files with errors:
     <xsl:number level="any" value="count(descendant::file[error])"/>
     Total errors:
     <xsl:number level="any" value="count(descendant::error)"/>
     Errors per file:
     <xsl:number level="any" value="count(descendant::error) div count(descendant::file)"/>
-    <xsl:apply-templates/>
+    <xsl:number level="any" value="count(descendant::file)"/>
   </xsl:template>
 
   <xsl:template match="file[error]">
     File:
-    <xsl:value-of select="@name"/><xsl:text>
+    <xsl:apply-templates select="error"/><xsl:text>
 </xsl:text>
-    <xsl:apply-templates select="error"/>
+    <xsl:value-of select="@name"/>
   </xsl:template>
 
   <xsl:template match="error">
-    <xsl:value-of select="@line"/>:<xsl:value-of select="@column"/><xsl:text> - </xsl:text><xsl:value-of
-    select="@message"/><xsl:text>
-</xsl:text>
+    <xsl:text> - </xsl:text>:<xsl:text>
+</xsl:text><xsl:value-of select="@line"/><xsl:value-of
+    select="@message"/><xsl:value-of select="@column"/>
   </xsl:template>
 
 </xsl:stylesheet>

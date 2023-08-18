@@ -71,7 +71,7 @@ public final class ItemMapper {
     private static <T> Map<String, T> toSimpleMapValue(
             Map<String, AttributeValue> values) {
         if (values == null) {
-            return null;
+            return Map.of();
         }
 
         @SuppressWarnings("PMD.UseConcurrentHashMap")
@@ -136,7 +136,7 @@ public final class ItemMapper {
 
     private static List<Object> toSimpleList(List<AttributeValue> attrValues) {
         if (attrValues == null) {
-            return null;
+            return List.of();
         }
         List<Object> result = new ArrayList<>(attrValues.size());
         for (AttributeValue attrValue : attrValues) {
