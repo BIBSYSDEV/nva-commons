@@ -81,7 +81,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
             var statusCode = getSuccessStatusCode(input, output);
             var serializedOutput = getSerializedOutput(output);
             var gatewayResponse = new GatewayResponse<String>(serializedOutput, headers, statusCode);
-            String responseJson = objectMapper.writeValueAsString(gatewayResponse);
+            var responseJson = objectMapper.writeValueAsString(gatewayResponse);
             writer.write(responseJson);
         }
     }
