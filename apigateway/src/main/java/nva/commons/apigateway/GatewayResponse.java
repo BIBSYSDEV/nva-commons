@@ -3,6 +3,7 @@ package nva.commons.apigateway;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -171,6 +172,7 @@ public class GatewayResponse<T> implements Serializable {
         return body;
     }
 
+    @JsonIgnore
     public T getBodyAsInstance() throws JsonProcessingException {
         return defaultRestObjectMapper.readValue(body, new TypeReference<>() {
         });
