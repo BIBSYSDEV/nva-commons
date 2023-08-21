@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -52,9 +53,11 @@ public class GatewayResponseTest {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream(
             sampleResponse.getBytes(StandardCharsets.UTF_8).length);
         outputStream.write(sampleResponse.getBytes(StandardCharsets.UTF_8));
-        GatewayResponse<Map> response = GatewayResponse.fromOutputStream(outputStream, Map.class);
+        var response = GatewayResponse.fromOutputStream(outputStream, Map.class);
+        var responseOf = GatewayResponse.<Map<String,String>>of(outputStream);
         Map<String, String> body = response.getBodyObject(Map.class);
         assertFalse(body.isEmpty());
+        assertThat(responseOf.getBodyAsInstance(), is(equalTo(body)));
     }
 
     @Test
@@ -64,6 +67,45 @@ public class GatewayResponseTest {
         GatewayResponse<Map> response = GatewayResponse.fromString(sampleResponse,Map.class);
         Map<String, String> body = response.getBodyObject(Map.class);
         assertFalse(body.isEmpty());
+    }
+
+
+    @Test
+    @DisplayName("returns a GatewayResponse with body instance for a valid json string")
+    void returnsGatewayResponseWhenInputIsValidInputStream() throws JsonProcessingException {
+        var jsonString =
+            IoUtils.stringFromResources(Path.of(API_GATEWAY_RESOURCES, SAMPLE_RESPONSE_JSON));
+
+        var gatewayResponse = GatewayResponse.<Map<String,String>>of(jsonString);
+        var bodyAsInstance = gatewayResponse.getBodyAsInstance();
+
+        assertFalse(bodyAsInstance.isEmpty());
+    }
+    @Test
+    @DisplayName("returns a GatewayResponse with body instance for a valid json inputStream")
+    void returnsGatewayResponseWhenInputIsValidOutputStream() throws IOException {
+        var inputStream =
+            IoUtils.inputStreamFromResources(Path.of(API_GATEWAY_RESOURCES, SAMPLE_RESPONSE_JSON).toString());
+
+        var gatewayResponse = GatewayResponse.<Map<String,String>>of(inputStream);
+        var bodyAsInstance = gatewayResponse.getBodyAsInstance();
+
+        assertFalse(bodyAsInstance.isEmpty());
+    }
+    @Test
+    @DisplayName("returns a GatewayResponse with body instance for a valid json byteArrayOutputStream")
+    void returnsGatewayResponseWhenInputIsValidJsonString() throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream;
+        try (var inputStream = IoUtils.inputStreamFromResources(
+            Path.of(API_GATEWAY_RESOURCES, SAMPLE_RESPONSE_JSON).toString())) {
+            byteArrayOutputStream = new ByteArrayOutputStream();
+            inputStream.transferTo(byteArrayOutputStream);
+        }
+
+        var gatewayResponse = GatewayResponse.<Map<String,String>>of(byteArrayOutputStream);
+        var bodyAsInstance = gatewayResponse.getBodyAsInstance();
+
+        assertFalse(bodyAsInstance.isEmpty());
     }
 
     private GatewayResponse<RequestBody> sampleGatewayResponse()

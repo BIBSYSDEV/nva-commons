@@ -9,11 +9,11 @@ plugins {
 }
 
 group 'com.github.bibsysdev'
-version = '1.31.3'
+version = '1.31.4'
 
 
-sourceCompatibility = JavaVersion.VERSION_17  // source-code version and must be <= targetCompatibility
-targetCompatibility = JavaVersion.VERSION_17 // bytecode target version
+java.sourceCompatibility = JavaVersion.VERSION_17  // source-code version and must be <= targetCompatibility
+java.targetCompatibility = JavaVersion.VERSION_17 // bytecode target version
 
 
 repositories {

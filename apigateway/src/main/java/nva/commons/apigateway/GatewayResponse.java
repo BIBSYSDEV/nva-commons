@@ -9,9 +9,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
@@ -54,11 +55,46 @@ public class GatewayResponse<T> implements Serializable {
         try {
             this.statusCode = statusCode;
             this.body = body instanceof String ? (String) body : objectMapper.writeValueAsString(body);
-            this.headers = Collections.unmodifiableMap(Map.copyOf(headers));
+            this.headers = Map.copyOf(headers);
         } catch (JsonProcessingException e) {
             throw new GatewayResponseSerializingException(e);
         }
     }
+
+    /**
+     * Builder for GatewayResponse.
+     *
+     * @param outputStream       content of response
+     * @throws JsonProcessingException when serializing fails
+     */
+    public static <T> GatewayResponse<T> of(ByteArrayOutputStream outputStream) throws JsonProcessingException {
+        var typeReference =  new TypeReference<GatewayResponse<T>>() { };
+        var json = outputStream.toString(StandardCharsets.UTF_8);
+        return defaultRestObjectMapper.readValue(json,typeReference);
+    }
+
+    /**
+     * Builder for GatewayResponse.
+     *
+     * @param inputStream       content of response
+     * @throws JsonProcessingException when serializing fails
+     */
+    public static <T> GatewayResponse<T> of(InputStream inputStream) throws IOException {
+        var typeReference =  new TypeReference<GatewayResponse<T>>() { };
+        return defaultRestObjectMapper.readValue(inputStream,typeReference);
+    }
+
+    /**
+     * Builder for GatewayResponse.
+     *
+     * @param jsonString       content of response
+     * @throws JsonProcessingException when serializing fails
+     */
+    public static <T> GatewayResponse<T> of(String jsonString) throws JsonProcessingException {
+        var typeReference = new TypeReference<GatewayResponse<T>>() { };
+        return defaultRestObjectMapper.readValue(jsonString,typeReference);
+    }
+
 
     /**
      * Create GatewayResponse object from an output stream. Used when we call the method {@code handleRequest()} of a
@@ -134,6 +170,12 @@ public class GatewayResponse<T> implements Serializable {
     public String getBody() {
         return body;
     }
+
+    public T getBodyAsInstance() throws JsonProcessingException {
+        return defaultRestObjectMapper.readValue(body, new TypeReference<>() {
+        });
+    }
+
 
     /**
      * Parses the JSON body to an object.
