@@ -69,7 +69,6 @@ public class GatewayResponseTest {
         assertFalse(body.isEmpty());
     }
 
-
     @Test
     @DisplayName("returns a GatewayResponse with body instance for a valid json string")
     void returnsGatewayResponseWhenInputIsValidInputStream() throws JsonProcessingException {
@@ -81,6 +80,7 @@ public class GatewayResponseTest {
 
         assertFalse(bodyAsInstance.isEmpty());
     }
+
     @Test
     @DisplayName("returns a GatewayResponse with body instance for a valid json inputStream")
     void returnsGatewayResponseWhenInputIsValidOutputStream() throws IOException {
@@ -92,6 +92,7 @@ public class GatewayResponseTest {
 
         assertFalse(bodyAsInstance.isEmpty());
     }
+
     @Test
     @DisplayName("returns a GatewayResponse with body instance for a valid json byteArrayOutputStream")
     void returnsGatewayResponseWhenInputIsValidJsonString() throws IOException {

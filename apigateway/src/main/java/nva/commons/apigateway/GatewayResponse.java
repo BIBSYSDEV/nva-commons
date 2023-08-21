@@ -68,6 +68,7 @@ public class GatewayResponse<T> implements Serializable {
      * @param outputStream       content of response
      * @throws JsonProcessingException when serializing fails
      */
+    @SuppressWarnings("PMD.ShortVariable")
     public static <T> GatewayResponse<T> of(ByteArrayOutputStream outputStream) throws JsonProcessingException {
         var typeReference =  new TypeReference<GatewayResponse<T>>() { };
         var json = outputStream.toString(StandardCharsets.UTF_8);
@@ -80,6 +81,7 @@ public class GatewayResponse<T> implements Serializable {
      * @param inputStream       content of response
      * @throws JsonProcessingException when serializing fails
      */
+    @SuppressWarnings("PMD.ShortVariable")
     public static <T> GatewayResponse<T> of(InputStream inputStream) throws IOException {
         var typeReference =  new TypeReference<GatewayResponse<T>>() { };
         return defaultRestObjectMapper.readValue(inputStream,typeReference);
@@ -91,6 +93,7 @@ public class GatewayResponse<T> implements Serializable {
      * @param jsonString       content of response
      * @throws JsonProcessingException when serializing fails
      */
+    @SuppressWarnings("PMD.ShortVariable")
     public static <T> GatewayResponse<T> of(String jsonString) throws JsonProcessingException {
         var typeReference = new TypeReference<GatewayResponse<T>>() { };
         return defaultRestObjectMapper.readValue(jsonString,typeReference);
