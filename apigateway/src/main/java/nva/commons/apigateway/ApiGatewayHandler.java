@@ -75,14 +75,13 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
      */
     @Override
     protected void writeOutput(I input, O output, RequestInfo requestInfo)
-        throws IOException, GatewayResponseSerializingException, UnsupportedAcceptHeaderException {
+        throws IOException, UnsupportedAcceptHeaderException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-            Map<String, String> headers = getSuccessHeaders(requestInfo);
-            Integer statusCode = getSuccessStatusCode(input, output);
-            String serializedOutput = getSerializedOutput(output);
-            GatewayResponse<String> gatewayResponse = new GatewayResponse<>(serializedOutput, headers, statusCode,
-                                                                            objectMapper);
-            String responseJson = objectMapper.writeValueAsString(gatewayResponse);
+            var headers = getSuccessHeaders(requestInfo);
+            var statusCode = getSuccessStatusCode(input, output);
+            var serializedOutput = getSerializedOutput(output);
+            var gatewayResponse = new GatewayResponse<String>(serializedOutput, headers, statusCode);
+            var responseJson = objectMapper.writeValueAsString(gatewayResponse);
             writer.write(responseJson);
         }
     }
