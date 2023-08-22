@@ -148,7 +148,7 @@ class FakeS3ClientTest {
     }
 
     @Test
-    void shouldAcceptListObjectsV2RequestWithOnlyRequiredArguments(){
+    void shouldAcceptListObjectsV2RequestWithOnlyRequiredArguments() {
         var s3Client = new FakeS3Client();
         var bucket = randomString();
         var expectedFiles = insertRandomFilesToS3(s3Client, bucket);
@@ -183,8 +183,9 @@ class FakeS3ClientTest {
         var listedFiles = s3Client.listObjects(listingRequestWithOnlyTheRequiredArguments);
         return extractListedKeys(listedFiles);
     }
+
     private static List<String> FetchAllExpectedFilesWithOnlyRequiredArgumentsUsingV2Request(FakeS3Client s3Client,
-                                                                                  String bucket) {
+                                                                                             String bucket) {
         var listingRequestWithOnlyTheRequiredArguments = ListObjectsV2Request.builder().bucket(bucket).build();
         var listedFiles = s3Client.listObjectsV2(listingRequestWithOnlyTheRequiredArguments);
         return extractListedKeysForV2Request(listedFiles);
@@ -254,6 +255,7 @@ class FakeS3ClientTest {
                    .map(S3Object::key)
                    .collect(Collectors.toList());
     }
+
     private static List<String> extractListedKeysForV2Request(ListObjectsV2Response listingResult) {
         return listingResult.contents()
                    .stream()
