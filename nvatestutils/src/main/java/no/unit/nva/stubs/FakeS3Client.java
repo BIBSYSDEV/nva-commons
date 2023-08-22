@@ -41,6 +41,7 @@ public class FakeS3Client implements S3Client {
 
     public static final boolean LIST_ALL = true;
     private static final int START_FROM_BEGINNING = 0;
+    public static final int DEFAULT_PAGE_SIZE = 1000;
     private final Map<String, ByteBuffer> filesAndContent;
 
     public FakeS3Client(String... filesInBucket) {
@@ -180,6 +181,9 @@ public class FakeS3Client implements S3Client {
 
     private int calculateEndIndex(List<String> fileKeys, String marker, Integer pageSize) {
         int startIndex = calculateStartIndex(fileKeys, marker);
+        if (isNull(pageSize)){
+            pageSize = DEFAULT_PAGE_SIZE;
+        }
         return Math.min(startIndex + pageSize, fileKeys.size());
     }
 

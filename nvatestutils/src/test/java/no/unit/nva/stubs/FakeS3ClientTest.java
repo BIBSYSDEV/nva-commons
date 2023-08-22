@@ -31,6 +31,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectsResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
@@ -136,6 +137,28 @@ class FakeS3ClientTest {
     }
 
     @Test
+    void shouldAcceptListObjectsRequestWithOnlyRequiredArguments() {
+        var s3Client = new FakeS3Client();
+        var bucket = randomString();
+        var expectedFiles = insertRandomFilesToS3(s3Client, bucket);
+
+        var allS3ObjectKeys = FetchAllExpectedFilesWithOnlyRequiredArguments(s3Client, bucket);
+
+        assertThat(allS3ObjectKeys, contains(expectedFiles.toArray(String[]::new)));
+    }
+
+    @Test
+    void shouldAcceptListObjectsV2RequestWithOnlyRequiredArguments(){
+        var s3Client = new FakeS3Client();
+        var bucket = randomString();
+        var expectedFiles = insertRandomFilesToS3(s3Client, bucket);
+
+        var allS3ObjectKeys = FetchAllExpectedFilesWithOnlyRequiredArgumentsUsingV2Request(s3Client, bucket);
+
+        assertThat(allS3ObjectKeys, contains(expectedFiles.toArray(String[]::new)));
+    }
+
+    @Test
     void shouldThrowExceptionWhenNextMarkerDoesNotExist() {
         var s3Client = new FakeS3Client();
         var bucket = randomString();
@@ -148,6 +171,23 @@ class FakeS3ClientTest {
                                     .maxKeys(1)
                                     .build();
         assertThrows(IllegalArgumentException.class, () -> s3Client.listObjectsV2(listObjectRequest));
+    }
+
+    private static List<String> insertRandomFilesToS3(FakeS3Client s3Client, String bucket) {
+        return List.of(insertRandomFileToS3(s3Client, bucket).toString(),
+                       insertRandomFileToS3(s3Client, bucket).toString());
+    }
+
+    private static List<String> FetchAllExpectedFilesWithOnlyRequiredArguments(FakeS3Client s3Client, String bucket) {
+        var listingRequestWithOnlyTheRequiredArguments = ListObjectsRequest.builder().bucket(bucket).build();
+        var listedFiles = s3Client.listObjects(listingRequestWithOnlyTheRequiredArguments);
+        return extractListedKeys(listedFiles);
+    }
+    private static List<String> FetchAllExpectedFilesWithOnlyRequiredArgumentsUsingV2Request(FakeS3Client s3Client,
+                                                                                  String bucket) {
+        var listingRequestWithOnlyTheRequiredArguments = ListObjectsV2Request.builder().bucket(bucket).build();
+        var listedFiles = s3Client.listObjectsV2(listingRequestWithOnlyTheRequiredArguments);
+        return extractListedKeysForV2Request(listedFiles);
     }
 
     private static ListObjectsRequest createListObjectsRequest(String bucket,
@@ -209,6 +249,12 @@ class FakeS3ClientTest {
     }
 
     private static List<String> extractListedKeys(ListObjectsResponse listingResult) {
+        return listingResult.contents()
+                   .stream()
+                   .map(S3Object::key)
+                   .collect(Collectors.toList());
+    }
+    private static List<String> extractListedKeysForV2Request(ListObjectsV2Response listingResult) {
         return listingResult.contents()
                    .stream()
                    .map(S3Object::key)
