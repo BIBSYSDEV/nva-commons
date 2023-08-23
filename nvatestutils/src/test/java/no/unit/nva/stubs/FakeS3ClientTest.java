@@ -137,23 +137,23 @@ class FakeS3ClientTest {
     }
 
     @Test
-    void shouldAcceptListObjectsRequestWithOnlyRequiredArguments() {
+    void shouldReturnDefaultSizeListObjectResponseWhenRequestDoesNotSpecifySize() {
         var s3Client = new FakeS3Client();
         var bucket = randomString();
         var expectedFiles = insertRandomFilesToS3(s3Client, bucket);
 
-        var allS3ObjectKeys = FetchAllExpectedFilesWithOnlyRequiredArguments(s3Client, bucket);
+        var allS3ObjectKeys = fetchDefaultSizeFilesListUsingBucketNameOnlyV1(s3Client, bucket);
 
         assertThat(allS3ObjectKeys, contains(expectedFiles.toArray(String[]::new)));
     }
 
     @Test
-    void shouldAcceptListObjectsV2RequestWithOnlyRequiredArguments() {
+    void shouldGetDefault() {
         var s3Client = new FakeS3Client();
         var bucket = randomString();
         var expectedFiles = insertRandomFilesToS3(s3Client, bucket);
 
-        var allS3ObjectKeys = FetchAllExpectedFilesWithOnlyRequiredArgumentsUsingV2Request(s3Client, bucket);
+        var allS3ObjectKeys = fetchDefaultSizeFilesListUsingBucketNameOnlyV2(s3Client, bucket);
 
         assertThat(allS3ObjectKeys, contains(expectedFiles.toArray(String[]::new)));
     }
@@ -178,14 +178,14 @@ class FakeS3ClientTest {
                        insertRandomFileToS3(s3Client, bucket).toString());
     }
 
-    private static List<String> FetchAllExpectedFilesWithOnlyRequiredArguments(FakeS3Client s3Client, String bucket) {
+    private static List<String> fetchDefaultSizeFilesListUsingBucketNameOnlyV1(FakeS3Client s3Client, String bucket) {
         var listingRequestWithOnlyTheRequiredArguments = ListObjectsRequest.builder().bucket(bucket).build();
         var listedFiles = s3Client.listObjects(listingRequestWithOnlyTheRequiredArguments);
         return extractListedKeys(listedFiles);
     }
 
-    private static List<String> FetchAllExpectedFilesWithOnlyRequiredArgumentsUsingV2Request(FakeS3Client s3Client,
-                                                                                             String bucket) {
+    private static List<String> fetchDefaultSizeFilesListUsingBucketNameOnlyV2(FakeS3Client s3Client,
+                                                                               String bucket) {
         var listingRequestWithOnlyTheRequiredArguments = ListObjectsV2Request.builder().bucket(bucket).build();
         var listedFiles = s3Client.listObjectsV2(listingRequestWithOnlyTheRequiredArguments);
         return extractListedKeysForV2Request(listedFiles);
