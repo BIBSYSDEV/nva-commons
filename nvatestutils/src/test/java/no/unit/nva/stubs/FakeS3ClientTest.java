@@ -2,6 +2,7 @@ package no.unit.nva.stubs;
 
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
@@ -137,25 +138,25 @@ class FakeS3ClientTest {
     }
 
     @Test
-    void shouldReturnDefaultSizeListObjectResponseWhenRequestDoesNotSpecifySize() {
+    void shouldReturnDefaultSizeListObjectResponseWhenV1RequestDoesNotSpecifySize() {
         var s3Client = new FakeS3Client();
         var bucket = randomString();
         var expectedFiles = insertRandomFilesToS3(s3Client, bucket);
 
         var allS3ObjectKeys = fetchDefaultSizeFilesListUsingBucketNameOnlyV1(s3Client, bucket);
 
-        assertThat(allS3ObjectKeys, contains(expectedFiles.toArray(String[]::new)));
+        assertThat(allS3ObjectKeys, containsInAnyOrder(expectedFiles.toArray(String[]::new)));
     }
 
     @Test
-    void shouldGetDefault() {
+    void shouldReturnDefaultSizeListObjectResponseWhenV2RequestDoesNotSpecifySize() {
         var s3Client = new FakeS3Client();
         var bucket = randomString();
         var expectedFiles = insertRandomFilesToS3(s3Client, bucket);
 
         var allS3ObjectKeys = fetchDefaultSizeFilesListUsingBucketNameOnlyV2(s3Client, bucket);
 
-        assertThat(allS3ObjectKeys, contains(expectedFiles.toArray(String[]::new)));
+        assertThat(allS3ObjectKeys, containsInAnyOrder(expectedFiles.toArray(String[]::new)));
     }
 
     @Test
