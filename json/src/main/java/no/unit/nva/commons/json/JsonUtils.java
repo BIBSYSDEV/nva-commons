@@ -33,6 +33,9 @@ public final class JsonUtils {
         JsonFactory jsonFactory =
             new JsonFactory().configure(Feature.ALLOW_SINGLE_QUOTES, true);
 
+        var jsonLdContextModule = new SimpleModule();
+        jsonLdContextModule.addDeserializer(JsonLdContext.class, new JsonLdContextDeserializer());
+
         ObjectMapper objectMapper =
 
             new ObjectMapper(jsonFactory)
@@ -41,6 +44,7 @@ public final class JsonUtils {
                 .registerModule(new JavaTimeModule())
                 .registerModule(new Jdk8Module())
                 .registerModule(emptyStringAsNullModule())
+                .registerModule(jsonLdContextModule)
                 .enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
                 .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
