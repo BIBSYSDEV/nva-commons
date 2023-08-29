@@ -1,4 +1,4 @@
-package no.unit.nva.commons.json.deserialization;
+package no.unit.nva.commons.json.ld;
 
 import static nva.commons.core.attempt.Try.attempt;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -26,28 +26,30 @@ class JsonLdContextDeserializerTest {
     @DisplayName("Should deserialize context used in class")
     @MethodSource("jsonLdProvider")
     void shouldRoundTripJsonLdContext(String json) {
-        var deserialized = attempt(() -> DTO_OBJECT_MAPPER.readValue(json, Thing.class)).orElseThrow();
+        var deserialized = attempt(() -> DTO_OBJECT_MAPPER.readValue(json, JsonLdTestObject.class)).orElseThrow();
         var serialized = asString(deserialized);
         assertThat(serialized, is(equalTo(json)));
     }
 
     private static String generateWrappedJsonLdUriContext() {
-        return "{\n"
-               + "  \"type\" : \"Thing\",\n"
-               + "  \"@context\" : \"https://example.org/jsonld\"\n"
-               + "}";
+        return """
+            {
+              "type" : "JsonLdTestObject",
+              "@context" : "https://example.org/jsonld"
+            }""";
     }
 
     private static String generateWrappedJsonLdInlineContext() {
-        return "{\n"
-               + "  \"type\" : \"Thing\",\n"
-               + "  \"@context\" : {\n"
-               + "    \"@vocab\" : \"https://example.org/vocab\"\n"
-               + "  }\n"
-               + "}";
+        return """
+            {
+              "type" : "JsonLdTestObject",
+              "@context" : {
+                "@vocab" : "https://example.org/vocab"
+              }
+            }""";
     }
 
-    private static String asString(Thing value) {
+    private static String asString(JsonLdTestObject value) {
         return attempt(() -> DTO_OBJECT_MAPPER.writeValueAsString(value)).orElseThrow();
     }
 }

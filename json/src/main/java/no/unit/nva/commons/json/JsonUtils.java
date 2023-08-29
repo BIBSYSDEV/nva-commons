@@ -16,6 +16,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
+import no.unit.nva.commons.json.ld.deserialization.JsonLdContextDeserializer;
+import no.unit.nva.commons.json.ld.JsonLdContext;
 import org.zalando.problem.jackson.ProblemModule;
 
 public final class JsonUtils {

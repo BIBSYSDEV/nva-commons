@@ -1,19 +1,18 @@
-package no.unit.nva.commons.json.deserialization;
+package no.unit.nva.commons.json.ld;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import no.unit.nva.commons.json.JsonLdContext;
 
 @JsonTypeInfo(use = Id.NAME, property = "type")
-public class Thing {
+public class JsonLdTestObject {
 
     @JsonProperty("@context")
     private JsonLdContext context;
 
     @JsonCreator
-    public Thing(JsonLdContext context) {
+    public JsonLdTestObject(JsonLdContext context) {
         this.context = context;
     }
 

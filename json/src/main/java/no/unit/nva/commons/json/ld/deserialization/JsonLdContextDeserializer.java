@@ -1,4 +1,4 @@
-package no.unit.nva.commons.json;
+package no.unit.nva.commons.json.ld.deserialization;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -6,6 +6,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import java.io.IOException;
 import java.net.URI;
+import no.unit.nva.commons.json.ld.JsonLdContext;
+import no.unit.nva.commons.json.ld.JsonLdContextUri;
+import no.unit.nva.commons.json.ld.JsonLdInlineContext;
 
 /**
  * This deserializer allows the deserialization of JSON-LD contexts, which occur
