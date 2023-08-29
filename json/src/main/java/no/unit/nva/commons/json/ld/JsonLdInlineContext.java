@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Record to allow representation of a JSON-LD inline context such as:
+ * Record to allow representation of a JSON-LD inline context (see example).
  *
  * <pre>
  *     {

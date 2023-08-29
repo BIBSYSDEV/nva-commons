@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.net.URI;
 
 /**
- * Record to allow representation of a JSON-LD remote context such as:
+ * Record to allow representation of a JSON-LD remote context (see example).
  *
  * <pre>
  *     {
