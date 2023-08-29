@@ -1,12 +1,13 @@
 package no.unit.nva.commons.json;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.JsonNode;
+import nva.commons.core.JacocoGenerated;
 
 public class JsonLdInlineContext implements JsonLdContext {
 
-    @JsonProperty("@context")
+    @JsonValue
     private final JsonNode context;
 
     @JsonCreator
@@ -14,6 +15,7 @@ public class JsonLdInlineContext implements JsonLdContext {
         this.context = context;
     }
 
+    @JacocoGenerated
     public JsonNode getContext() {
         return context;
     }

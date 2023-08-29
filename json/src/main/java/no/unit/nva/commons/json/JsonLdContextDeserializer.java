@@ -19,9 +19,9 @@ public class JsonLdContextDeserializer extends StdDeserializer<JsonLdContext> {
 
     @Override
     public JsonLdContext deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
-        var node = jp.getCodec().readTree(jp);
-        return jp.isExpectedStartObjectToken()
-                   ? new JsonLdContextUri(jp.readValueAs(URI.class))
-                   : new JsonLdInlineContext((JsonNode) node);
+        var node = (JsonNode) jp.getCodec().readTree(jp).get("@context");
+        return node.isObject()
+                   ? new JsonLdInlineContext(node)
+                   : new JsonLdContextUri(URI.create(node.textValue()));
     }
 }

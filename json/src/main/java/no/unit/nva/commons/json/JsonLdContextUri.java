@@ -1,16 +1,11 @@
 package no.unit.nva.commons.json;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.net.URI;
 
 public class JsonLdContextUri implements JsonLdContext {
 
-    @JsonIgnore
-    private String type;
-
-    @JsonProperty("@context")
     private final URI context;
 
     @JsonCreator
@@ -18,6 +13,7 @@ public class JsonLdContextUri implements JsonLdContext {
         this.context = context;
     }
 
+    @JsonValue
     public URI getContext() {
         return context;
     }
