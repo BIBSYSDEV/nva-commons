@@ -11,7 +11,7 @@ import java.net.URI;
  *         "@context" : "https://example.org/jsonldcontext.jsonld"
  *     }
  * </pre>
- * @param context
+ * @param context The URI for the remote JSON-LD context.
  */
 public record JsonLdContextUri(@JsonValue URI context) implements JsonLdContext {
 
