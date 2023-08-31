@@ -38,6 +38,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     public static final String SPACE = " ";
     public static final String EMPTY_STRING = "";
     public static final String COMMA = ",";
+    public static final String PREFIX_SINGLE_WILDCARD_TYPE = "*/";
     protected final Environment environment;
     private static final Logger logger = LoggerFactory.getLogger(RestRequestHandler.class);
     private final transient Class<I> iclass;
@@ -47,6 +48,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     protected transient String allowedOrigin;
 
     private static final List<MediaType> DEFAULT_SUPPORTED_MEDIA_TYPES = List.of(JSON_UTF_8);
+    private static final String WILDCARD_TYPE = "*";
 
     /**
      * Calculates the Content MediaType of the response based on the supported Media Types and the requested Media
@@ -77,20 +79,30 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     private List<MediaType> parseAcceptHeader(String header) {
         return Arrays.stream(header.replace(SPACE, EMPTY_STRING).split(COMMA))
-            .map(MediaType::parse)
-            .collect(Collectors.toList());
+                   .map(this::sanitizeMimeType)
+                   .map(MediaType::parse)
+                   .collect(Collectors.toList());
+    }
+
+    private String sanitizeMimeType(String mimeType) {
+        int index = mimeType.indexOf(';');
+        String fullType = (index >= 0 ? mimeType.substring(0, index) : mimeType).trim();
+        if (!fullType.isEmpty() && WILDCARD_TYPE.equals(fullType)) {
+            return PREFIX_SINGLE_WILDCARD_TYPE + mimeType;
+        }
+        return mimeType;
     }
 
     protected List<MediaType> findMediaTypeMatches(List<MediaType> acceptMediaTypes) {
         return listSupportedMediaTypes().stream()
-            .filter(mediaType -> inAcceptedMediaTypeRange(mediaType, acceptMediaTypes))
-            .collect(Collectors.toList());
+                   .filter(mediaType -> inAcceptedMediaTypeRange(mediaType, acceptMediaTypes))
+                   .collect(Collectors.toList());
     }
 
     private boolean inAcceptedMediaTypeRange(MediaType mediaType, List<MediaType> acceptMediaTypes) {
         return acceptMediaTypes.stream()
-                .map(MediaType::withoutParameters)
-                .anyMatch(mediaType::is);
+                   .map(MediaType::withoutParameters)
+                   .anyMatch(mediaType::is);
     }
 
     /**
@@ -110,7 +122,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     private MediaType defaultResponseContentTypeWhenNotSpecifiedByClientRequest() {
         return listSupportedMediaTypes().get(0);
     }
-    
+
     /**
      * The input class should be set explicitly by the inheriting class.
      *
@@ -130,7 +142,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
             init(outputStream, context);
             String inputString = IoUtils.streamToString(inputStream);
             inputObject = attempt(() -> parseInput(inputString))
-                .orElseThrow(this::parsingExceptionToBadRequestException);
+                              .orElseThrow(this::parsingExceptionToBadRequestException);
 
             RequestInfo requestInfo = inputParser.getRequestInfo(inputString);
 
@@ -167,8 +179,8 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     }
 
     /**
-     * Implements the main logic of the handler. Any exception thrown by this method will be handled by {@link
-     * RestRequestHandler#handleExpectedException} method.
+     * Implements the main logic of the handler. Any exception thrown by this method will be handled by
+     * {@link RestRequestHandler#handleExpectedException} method.
      *
      * @param input       The input object to the method. Usually a deserialized json.
      * @param requestInfo Request headers and path.
