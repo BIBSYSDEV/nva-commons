@@ -16,7 +16,7 @@ import nva.commons.core.paths.UriWrapper;
 @JsonInclude(ALWAYS)
 public final class PaginatedSearchResult<T> {
 
-    public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String OFFSET_QUERY_PARAM_NAME = "offset";
     private static final String SIZE_QUERY_PARAM_NAME = "size";
     private static final String AGGREGATIONS_FIELD_NAME = "aggregations";
