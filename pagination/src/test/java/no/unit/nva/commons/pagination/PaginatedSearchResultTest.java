@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsEmptyIterable.emptyIterable;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,13 +25,15 @@ class PaginatedSearchResultTest {
 
     public static final String QUERY_PARAM_FIELD_NAME = "key";
     public static final String QUERY_PARAM_FIELD_VALUE = "value";
+    public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final URI BASE_URI = URI.create("https://localhost");
 
     @Test
     void shouldPopulateContextIdTotalHitsAndHitsAlways() throws UnprocessableContentException {
         var result = PaginatedSearchResult.create(BASE_URI, 0, 5, 0, Collections.emptyList());
 
-        assertThat(result, doesNotHaveEmptyValuesIgnoringFields(Set.of("nextResults", "previousResults", "hits")));
+        assertThat(result, doesNotHaveEmptyValuesIgnoringFields(Set.of("nextResults", "previousResults", "hits",
+                                                                       "aggregations")));
         assertThat(result.getHits(), emptyIterable());
     }
 
@@ -124,6 +127,15 @@ class PaginatedSearchResultTest {
         assertThat(result.getPreviousResults(), is(equalTo(expectedPreviousResults)));
     }
 
+    @Test
+    void shouldAddAggregations() throws UnprocessableContentException {
+        var aggregations = OBJECT_MAPPER.createObjectNode().put(randomString(), randomString());
+        var result = PaginatedSearchResult.create(BASE_URI, 1, 3, 3, List.of(randomString()),
+                                                  Collections.emptyMap(), aggregations);
+
+        assertThat(result.getAggregations(), is(equalTo(aggregations)));
+    }
+
     @ParameterizedTest
     @CsvSource({"10,0", "-1,10", "10,-1"})
     void shouldThrowUnprocessableContentExceptionOnNonsenseRequest(int offset, int size) {
@@ -134,10 +146,10 @@ class PaginatedSearchResultTest {
 
     private URI getUri(Map<String, String> queryParams, String offset, String size) {
         return UriWrapper.fromUri("https://localhost")
-            .addQueryParameters(queryParams)
-            .addQueryParameter("offset", offset)
-            .addQueryParameter("size", size)
-            .getUri();
+                   .addQueryParameters(queryParams)
+                   .addQueryParameter("offset", offset)
+                   .addQueryParameter("size", size)
+                   .getUri();
     }
 
     private List<String> generateRandomHits(int size) {
