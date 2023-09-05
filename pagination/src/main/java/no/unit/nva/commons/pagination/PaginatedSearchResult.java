@@ -4,6 +4,8 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.ALWAYS;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
@@ -14,19 +16,18 @@ import nva.commons.core.paths.UriWrapper;
 @JsonInclude(ALWAYS)
 public final class PaginatedSearchResult<T> {
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final String OFFSET_QUERY_PARAM_NAME = "offset";
+    private static final String SIZE_QUERY_PARAM_NAME = "size";
+    private static final String AGGREGATIONS_FIELD_NAME = "aggregations";
     private static final String CONTEXT_FIELD_NAME = "@context";
     private static final String ID_FIELD_NAME = "id";
     private static final String TOTAL_HITS_FIELD_NAME = "totalHits";
     private static final String NEXT_RESULTS_FIELD_NAME = "nextResults";
     private static final String PREVIOUS_RESULTS_FIELD_NAME = "previousResults";
     private static final String HITS_FIELD_NAME = "hits";
-
     private static final String PAGINATED_SEARCH_RESULT_CONTEXT
         = "https://bibsysdev.github.io/src/search/paginated-search-result.json";
-
-    public static final String OFFSET_QUERY_PARAM_NAME = "offset";
-    public static final String SIZE_QUERY_PARAM_NAME = "size";
-
     @JsonProperty(CONTEXT_FIELD_NAME)
     private final URI context = URI.create(PAGINATED_SEARCH_RESULT_CONTEXT);
     @JsonProperty(ID_FIELD_NAME)
@@ -40,17 +41,22 @@ public final class PaginatedSearchResult<T> {
     @JsonProperty(HITS_FIELD_NAME)
     private final List<T> hits;
 
+    @JsonProperty(AGGREGATIONS_FIELD_NAME)
+    private final JsonNode aggregations;
+
     @JsonCreator
     private PaginatedSearchResult(@JsonProperty(ID_FIELD_NAME) URI id,
-                                 @JsonProperty(TOTAL_HITS_FIELD_NAME) int totalHits,
-                                 @JsonProperty(NEXT_RESULTS_FIELD_NAME) URI nextResults,
-                                 @JsonProperty(PREVIOUS_RESULTS_FIELD_NAME) URI previousResults,
-                                 @JsonProperty(HITS_FIELD_NAME) List<T> hits) {
+                                  @JsonProperty(TOTAL_HITS_FIELD_NAME) int totalHits,
+                                  @JsonProperty(NEXT_RESULTS_FIELD_NAME) URI nextResults,
+                                  @JsonProperty(PREVIOUS_RESULTS_FIELD_NAME) URI previousResults,
+                                  @JsonProperty(HITS_FIELD_NAME) List<T> hits,
+                                  @JsonProperty(AGGREGATIONS_FIELD_NAME) JsonNode aggregations) {
         this.id = id;
         this.totalHits = totalHits;
         this.nextResults = nextResults;
         this.previousResults = previousResults;
         this.hits = hits;
+        this.aggregations = aggregations;
     }
 
     public static <T> PaginatedSearchResult<T> create(URI baseUri,
@@ -69,6 +75,19 @@ public final class PaginatedSearchResult<T> {
                                                       Map<String, String> queryParameters)
         throws UnprocessableContentException {
 
+        return create(baseUri, queryOffset, querySize, totalHits, hits, queryParameters,
+                      OBJECT_MAPPER.createObjectNode());
+    }
+
+    public static <T> PaginatedSearchResult<T> create(URI baseUri,
+                                                      int queryOffset,
+                                                      int querySize,
+                                                      int totalHits,
+                                                      List<T> hits,
+                                                      Map<String, String> queryParameters,
+                                                      JsonNode aggregations)
+        throws UnprocessableContentException {
+
         validateOffsetAndSize(queryOffset, querySize);
 
         var selfUri = generateSelfUri(baseUri, queryOffset, querySize, queryParameters);
@@ -80,7 +99,8 @@ public final class PaginatedSearchResult<T> {
                                            totalHits,
                                            nextResults,
                                            previousResults,
-                                           hits);
+                                           hits,
+                                           aggregations);
     }
 
     public URI getContext() {
@@ -105,6 +125,10 @@ public final class PaginatedSearchResult<T> {
 
     public List<T> getHits() {
         return hits;
+    }
+
+    public JsonNode getAggregations() {
+        return aggregations;
     }
 
     private static URI calculateNextResults(int queryOffset,
@@ -151,10 +175,10 @@ public final class PaginatedSearchResult<T> {
 
     private static URI generateSelfUri(URI baseUri, int queryOffset, int querySize, Map<String, String> queryParams) {
         return UriWrapper.fromUri(baseUri)
-            .addQueryParameters(queryParams)
-            .addQueryParameter(OFFSET_QUERY_PARAM_NAME, Integer.toString(queryOffset))
-            .addQueryParameter(SIZE_QUERY_PARAM_NAME, Integer.toString(querySize))
-            .getUri();
+                   .addQueryParameters(queryParams)
+                   .addQueryParameter(OFFSET_QUERY_PARAM_NAME, Integer.toString(queryOffset))
+                   .addQueryParameter(SIZE_QUERY_PARAM_NAME, Integer.toString(querySize))
+                   .getUri();
     }
 
     private static void validateOffsetAndSize(int offset, int size) throws UnprocessableContentException {
