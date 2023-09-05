@@ -21,7 +21,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,7 +34,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +81,6 @@ class ApiGatewayHandlerTest {
         );
     }
 
-
     @BeforeEach
     public void setup() {
         context = new FakeContext();
@@ -92,7 +89,7 @@ class ApiGatewayHandlerTest {
 
     @Test
     @DisplayName("ApiGatewayHandler has a constructor with input class as only parameter")
-    public void apiGatewayHandlerHasACostructorWithInputClassAsOnlyParameter() {
+    public void apiGatewayHandlerHasAConstructorWithInputClassAsOnlyParameter() {
         RestRequestHandler<String, String> handler = new ApiGatewayHandler<>(String.class) {
             @Override
             protected String processInput(String input, RequestInfo requestInfo, Context context) {
@@ -144,7 +141,8 @@ class ApiGatewayHandlerTest {
         "*/*",
         "application/json",
         "application/json; charset=UTF-8",
-        "text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8"
+        "text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8",
+        "*; q=.2" // java.net.HttpURLConnection uses this Accept header
     })
     public void handleRequestShouldReturnOkOnSupportedAcceptHeader(String mediaType) throws IOException {
         InputStream input = requestWithAcceptHeader(mediaType);
@@ -434,34 +432,15 @@ class ApiGatewayHandlerTest {
         requestBody.setField2(null);
 
         return new HandlerRequestBuilder<RequestBody>(defaultRestObjectMapper)
-            .withBody(requestBody)
-            .build();
-    }
-
-    private InputStream requestWithBodyWithoutType() throws JsonProcessingException {
-        RequestBody requestBody = new RequestBody();
-        requestBody.setField1("Some value");
-        requestBody.setField2("Some value");
-        ObjectNode objectWithoutType = defaultRestObjectMapper.convertValue(requestBody, ObjectNode.class);
-        objectWithoutType.remove(RequestBody.TYPE_ATTRIBUTE);
-
-        return new HandlerRequestBuilder<ObjectNode>(defaultRestObjectMapper)
-            .withBody(objectWithoutType)
-            .build();
+                   .withBody(requestBody)
+                   .build();
     }
 
     private Problem getProblemFromFailureResponse(ByteArrayOutputStream outputStream) throws JsonProcessingException {
         JavaType javaType = defaultRestObjectMapper.getTypeFactory()
-            .constructParametricType(GatewayResponse.class, Problem.class);
+                                .constructParametricType(GatewayResponse.class, Problem.class);
         GatewayResponse<Problem> response = defaultRestObjectMapper.readValue(outputStream.toString(), javaType);
         return response.getBodyObject(Problem.class);
-    }
-
-    private GatewayResponse<Problem> getApiGatewayResponse(ByteArrayOutputStream outputStream)
-        throws JsonProcessingException {
-        TypeReference<GatewayResponse<Problem>> tr = new TypeReference<>() {
-        };
-        return defaultRestObjectMapper.readValue(outputStream.toString(StandardCharsets.UTF_8), tr);
     }
 
     private Handler handlerThatThrowsUncheckedExceptions() {
@@ -479,7 +458,7 @@ class ApiGatewayHandlerTest {
             @Override
             public List<MediaType> listSupportedMediaTypes() {
                 return List.of(MediaType.JSON_UTF_8, MediaTypes.APPLICATION_JSON_LD,
-                    MediaTypes.APPLICATION_DATACITE_XML, MediaTypes.SCHEMA_ORG);
+                               MediaTypes.APPLICATION_DATACITE_XML, MediaTypes.SCHEMA_ORG);
             }
         };
     }
