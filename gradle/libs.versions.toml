@@ -11,17 +11,17 @@ mockito = { strictly = '5.3.1' }
 httpmime = { strictly = '4.5.14' }
 jackson = { strictly = '2.15.2' }
 hamcrest = { strictly = '2.2' }
-apacheCommons = { strictly = '3.12.0' }
+apacheCommons = { require = '3.13.0' }
 commonsValidator = { strictly = '1.7' }
-jupiter = { strictly = '5.9.3' }
+jupiter = { strictly = '5.10.0' }
 awsIon = { strictly = '1.5.1' }
 hamcrestOptional = { strictly = '2.0.0' }
-log4j = { strictly = '2.17.2' }
+log4j = { strictly = '2.18.0' }
 #wiremock 3.0.2 has multiple versions of  slf4j
-slf4j = { require= '2.0.5' }
+slf4j = { require = '2.0.5' }
 apiGuardian = { strictly = '1.1.2' }
 wiremock = { strictly = '3.0.2' }
-datafaker = { strictly = '1.9.0' }
+datafaker = { strictly = '2.0.1' }
 com-auth0-jwt = { strictly = '3.18.3' }
 
 [libraries]
