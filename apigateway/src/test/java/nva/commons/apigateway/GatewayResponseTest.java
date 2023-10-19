@@ -31,8 +31,8 @@ public class GatewayResponseTest {
     @Test
     @DisplayName("hashCode is the same for equivalent GatewayResponses")
     public void hashCodeIsTheSameForEquivalentGatewayResponses() throws GatewayResponseSerializingException {
-        GatewayResponse<RequestBody> leftResponse = sampleGatewayResponse();
-        GatewayResponse<RequestBody> rightResponse = sampleGatewayResponse();
+        var leftResponse = sampleGatewayResponse();
+        var rightResponse = sampleGatewayResponse();
 
         assertThat(leftResponse.hashCode(), is(equalTo(rightResponse.hashCode())));
     }
@@ -40,8 +40,8 @@ public class GatewayResponseTest {
     @Test
     @DisplayName("equals returns true for equivalent Gateway responses")
     public void equalsReturnsTrueForEquivalentGatewayResponses() throws GatewayResponseSerializingException {
-        GatewayResponse<RequestBody> leftResponse = sampleGatewayResponse();
-        GatewayResponse<RequestBody> rightResponse = sampleGatewayResponse();
+        var leftResponse = sampleGatewayResponse();
+        var rightResponse = sampleGatewayResponse();
 
         assertThat(leftResponse, is(equalTo(rightResponse)));
     }
@@ -49,12 +49,12 @@ public class GatewayResponseTest {
     @Test
     @DisplayName("fromOutputStream returns a GatewayResponse object for a valid json input")
     public void fromOutputStreamReturnsGatewayResponseWhenInputIsOutputStreamContainingValidJson() throws IOException {
-        String sampleResponse = IoUtils.stringFromResources(Path.of(API_GATEWAY_RESOURCES, SAMPLE_RESPONSE_JSON));
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(
+        var sampleResponse = IoUtils.stringFromResources(Path.of(API_GATEWAY_RESOURCES, SAMPLE_RESPONSE_JSON));
+        var outputStream = new ByteArrayOutputStream(
             sampleResponse.getBytes(StandardCharsets.UTF_8).length);
         outputStream.write(sampleResponse.getBytes(StandardCharsets.UTF_8));
         var response = GatewayResponse.fromOutputStream(outputStream, Map.class);
-        var responseOf = GatewayResponse.<Map<String,String>>of(outputStream);
+        var responseOf = GatewayResponse.<Map<String, String>>of(outputStream);
         Map<String, String> body = response.getBodyObject(Map.class);
         assertFalse(body.isEmpty());
         assertThat(responseOf.getBodyAsInstance(), is(equalTo(body)));
@@ -63,8 +63,8 @@ public class GatewayResponseTest {
     @Test
     @DisplayName("fromOutputStream returns a GatewayResponse object for a valid json input")
     public void fromOutputStreamReturnsGatewayResponseWhenInputIsValidJsonString() throws IOException {
-        String sampleResponse = IoUtils.stringFromResources(Path.of(API_GATEWAY_RESOURCES, SAMPLE_RESPONSE_JSON));
-        GatewayResponse<Map> response = GatewayResponse.fromString(sampleResponse,Map.class);
+        var sampleResponse = IoUtils.stringFromResources(Path.of(API_GATEWAY_RESOURCES, SAMPLE_RESPONSE_JSON));
+        var response = GatewayResponse.fromString(sampleResponse, Map.class);
         Map<String, String> body = response.getBodyObject(Map.class);
         assertFalse(body.isEmpty());
     }
@@ -75,7 +75,7 @@ public class GatewayResponseTest {
         var jsonString =
             IoUtils.stringFromResources(Path.of(API_GATEWAY_RESOURCES, SAMPLE_RESPONSE_JSON));
 
-        var gatewayResponse = GatewayResponse.<Map<String,String>>of(jsonString);
+        var gatewayResponse = GatewayResponse.<Map<String, String>>of(jsonString);
         var bodyAsInstance = gatewayResponse.getBodyAsInstance();
 
         assertFalse(bodyAsInstance.isEmpty());
@@ -87,7 +87,7 @@ public class GatewayResponseTest {
         var inputStream =
             IoUtils.inputStreamFromResources(Path.of(API_GATEWAY_RESOURCES, SAMPLE_RESPONSE_JSON).toString());
 
-        var gatewayResponse = GatewayResponse.<Map<String,String>>of(inputStream);
+        var gatewayResponse = GatewayResponse.<Map<String, String>>of(inputStream);
         var bodyAsInstance = gatewayResponse.getBodyAsInstance();
 
         assertFalse(bodyAsInstance.isEmpty());
@@ -103,10 +103,25 @@ public class GatewayResponseTest {
             inputStream.transferTo(byteArrayOutputStream);
         }
 
-        var gatewayResponse = GatewayResponse.<Map<String,String>>of(byteArrayOutputStream);
+        var gatewayResponse = GatewayResponse.<Map<String, String>>of(byteArrayOutputStream);
         var bodyAsInstance = gatewayResponse.getBodyAsInstance();
 
         assertFalse(bodyAsInstance.isEmpty());
+    }
+
+    @Test
+    void returnsGatewayResponseWithIsBase64EncodedIsDefaultFalse() throws JsonProcessingException {
+        var sampleResponse = IoUtils.stringFromResources(Path.of(API_GATEWAY_RESOURCES, SAMPLE_RESPONSE_JSON));
+        var response = GatewayResponse.fromString(sampleResponse, Map.class);
+        assertThat(response.getIsBase64Encoded(), is(false));
+    }
+
+    @Test
+    void returnsGatewayResponseWithIsBase64EncodedWhenSet() throws JsonProcessingException {
+        var sampleResponse = IoUtils.stringFromResources(
+            Path.of(API_GATEWAY_RESOURCES, "sampleResponseWithIsBase64Encoded.json"));
+        var response = GatewayResponse.fromString(sampleResponse, Map.class);
+        assertThat(response.getIsBase64Encoded(), is(true));
     }
 
     private GatewayResponse<RequestBody> sampleGatewayResponse()
@@ -114,6 +129,7 @@ public class GatewayResponseTest {
         return new GatewayResponse<>(sampleRequestBody(),
                                      sampleHeaders(),
                                      HttpURLConnection.HTTP_OK,
+                                     false,
                                      defaultRestObjectMapper);
     }
 
@@ -125,7 +141,7 @@ public class GatewayResponseTest {
     }
 
     private RequestBody sampleRequestBody() {
-        RequestBody leftBody = new RequestBody();
+        var leftBody = new RequestBody();
         leftBody.setField1(SOME_VALUE);
         leftBody.setField1(SOME_OTHER_VALUE);
         return leftBody;

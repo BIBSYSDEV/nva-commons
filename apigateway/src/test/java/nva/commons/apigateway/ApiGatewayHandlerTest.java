@@ -45,6 +45,7 @@ import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.TestException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
+import nva.commons.apigateway.testutils.Base64Handler;
 import nva.commons.apigateway.testutils.Handler;
 import nva.commons.apigateway.testutils.RawStringResponseHandler;
 import nva.commons.apigateway.testutils.RedirectHandler;
@@ -355,6 +356,16 @@ class ApiGatewayHandlerTest {
         var outputStream = outputStream();
         handler.handleRequest(inputStream, outputStream, context);
         verify(spiedMapper, atLeast(1)).writeValueAsString(any());
+    }
+
+    @Test
+    void handlerSerializesWithIsBase64Encoded() throws IOException {
+        var output = outputStream();
+        InputStream input = requestWithBodyWithEmptyFields();
+        var isBase64EncodedHandler = new Base64Handler();
+        isBase64EncodedHandler.handleRequest(input, output, context);
+        GatewayResponse<Void> response = GatewayResponse.fromOutputStream(output, Void.class);
+        assertThat(response.getIsBase64Encoded(), is(true));
     }
 
     @Test

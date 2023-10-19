@@ -1,0 +1,9 @@
+{
+  "body": "{\n  \"field\" : \"value\"\n}",
+  "headers": {
+    "Access-Control-Allow-Origin": "*",
+    "Content-Type": "application/json"
+  },
+  "statusCode": 200,
+  "isBase64Encoded": true
+}

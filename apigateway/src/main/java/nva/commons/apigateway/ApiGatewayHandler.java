@@ -43,6 +43,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     private final ObjectMapper objectMapper;
 
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
+    private boolean isBase64Encoded;
 
     public ApiGatewayHandler(Class<I> iclass) {
         this(iclass, new Environment());
@@ -80,7 +81,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
             var headers = getSuccessHeaders(requestInfo);
             var statusCode = getSuccessStatusCode(input, output);
             var serializedOutput = getSerializedOutput(output);
-            var gatewayResponse = new GatewayResponse<String>(serializedOutput, headers, statusCode);
+            var gatewayResponse = new GatewayResponse<String>(serializedOutput, headers, statusCode, isBase64Encoded);
             var responseJson = objectMapper.writeValueAsString(gatewayResponse);
             writer.write(responseJson);
         }
@@ -131,6 +132,10 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         }
     }
 
+    protected void setIsBase64Encoded(boolean value) {
+        isBase64Encoded = value;
+    }
+
     /**
      * Get the ObjectMapper to use for the given MediaType. Defaults to defaultRestObjectMapper if no other ObjectMapper
      * is found.
@@ -166,8 +171,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
 
     /**
      * If you want to override this method, maybe better to override the
-     * {@link ApiGatewayHandler#defaultHeaders(RequestInfo
-     * requestInfo)}.
+     * {@link ApiGatewayHandler#defaultHeaders(RequestInfo requestInfo)}.
      *
      * @param requestInfo Request Info object.
      * @return a map with the response headers in case of success.
@@ -199,7 +203,8 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     private GatewayResponse<Void> createRedirectResponse(RedirectException exception)
         throws GatewayResponseSerializingException {
         var responseHeaders = Map.of(HttpHeaders.LOCATION, exception.getLocation().toString());
-        return new GatewayResponse<>(EMPTY_BODY, responseHeaders, exception.getStatusCode(), objectMapper);
+        return new GatewayResponse<>(EMPTY_BODY, responseHeaders, exception.getStatusCode(), isBase64Encoded,
+                                     objectMapper);
     }
 
     private boolean failureIsARedirection(ApiGatewayException exception) {
@@ -223,7 +228,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
                                                                                      String requestId)
         throws GatewayResponseSerializingException {
         ThrowableProblem problem = createProblemDescription(exception, statusCode, requestId);
-        return new GatewayResponse<>(problem, getFailureHeaders(), statusCode, objectMapper);
+        return new GatewayResponse<>(problem, getFailureHeaders(), statusCode, isBase64Encoded, objectMapper);
     }
 
     private <T> void writeGatewayResponse(GatewayResponse<T> gatewayResponse)
@@ -238,16 +243,15 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         String errorMessage = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
         Status status = Status.valueOf(statusCode);
         return Problem.builder().withStatus(status)
-            .withTitle(status.getReasonPhrase())
-            .withDetail(errorMessage)
-            .with(REQUEST_ID, requestId)
-            .build();
+                   .withTitle(status.getReasonPhrase())
+                   .withDetail(errorMessage)
+                   .with(REQUEST_ID, requestId)
+                   .build();
     }
 
     /**
      * If you want to override this method, maybe better to override the
-     * {@link ApiGatewayHandler#defaultHeaders(RequestInfo
-     * requestInfo)}.
+     * {@link ApiGatewayHandler#defaultHeaders(RequestInfo requestInfo)}.
      *
      * @return a map with the response headers in case of failure.
      */
