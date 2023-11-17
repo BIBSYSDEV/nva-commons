@@ -60,7 +60,8 @@
         "name": "Orestis Stylianos Gkorgkas",
         "custom:commonName": "Orestis Stylianos Gkorgkas",
         "family_name": "Gkorgkas",
-        "custom:affiliation": "[member, employee, staff]"
+        "custom:affiliation": "[member, employee, staff]",
+        "custom:personAffiliation": "https://example.org/someArbitrayPersonAffiliation234567890876545699"
       }
     },
     "resourcePath": "/",

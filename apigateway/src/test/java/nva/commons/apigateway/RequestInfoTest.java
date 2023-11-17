@@ -430,6 +430,44 @@ class RequestInfoTest {
     }
 
     @Test
+    void shouldReturnPersonAffiliationFromCognitoWhenUserHasSelectedCustomerAndClaimInNotAvailableOffline()
+        throws UnauthorizedException {
+        var expectedPersonAffiliation = randomUri();
+        var cognitoUserEntry = CognitoUserInfo.builder().withPersonAffiliation(expectedPersonAffiliation).build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var actualPersonAffiliation = requestInfo.getPersonAffiliation();
+        assertThat(actualPersonAffiliation, is(equalTo(expectedPersonAffiliation)));
+    }
+
+    @Test
+    void shouldReturnPersonAffiliationWhenClaimInAvailableOffline() throws UnauthorizedException {
+        var cognitoUserEntry = CognitoUserInfo.builder().withPersonAffiliation(randomUri()).build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var expectedPersonAffiliationDifferentFromCognito = randomUri();
+        injectPersonAffiliationInRequestInfo(requestInfo, expectedPersonAffiliationDifferentFromCognito);
+        var actualPersonAffiliation = requestInfo.getPersonAffiliation();
+        assertThat(actualPersonAffiliation, is(equalTo(expectedPersonAffiliationDifferentFromCognito)));
+    }
+
+    @Test
+    void shouldThrowUnauthorizedExceptionWhenPersonAffiliationIsNotAvailable() {
+        var cognitoUserEntryWithoutPersonAffiliation = CognitoUserInfo.builder().build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutPersonAffiliation));
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        assertThrows(UnauthorizedException.class, requestInfo::getPersonAffiliation);
+    }
+
+    @Test
+    void shouldReadCognitoUriFromEnvByDefaultThatContainsValidPersonAffiliation()
+        throws JsonProcessingException, UnauthorizedException {
+        var requestInfoString = IoUtils.stringFromResources(EVENT_WITH_AUTH_HEADER);
+        var requestInfo = dtoObjectMapper.readValue(requestInfoString, RequestInfo.class);
+        assertNotNull(requestInfo.getPersonAffiliation());
+    }
+
+    @Test
     void shouldThrowUnauthorizedExceptionWhenCustomerIdIsNotAvailable() {
         var cognitoUserEntryWithoutCustomerId = CognitoUserInfo.builder().build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutCustomerId));
@@ -617,6 +655,16 @@ class RequestInfoTest {
         var authorizer = dtoObjectMapper.createObjectNode();
         var requestContext = dtoObjectMapper.createObjectNode();
         claims.put(CognitoUserInfo.PERSON_CRISTIN_ID_CLAIM, expectedPersonCristinId.toString());
+        authorizer.set("claims", claims);
+        requestContext.set("authorizer", authorizer);
+        requestInfo.setRequestContext(requestContext);
+    }
+
+    private void injectPersonAffiliationInRequestInfo(RequestInfo requestInfo, URI expectedPersonAffiliation) {
+        var claims = dtoObjectMapper.createObjectNode();
+        var authorizer = dtoObjectMapper.createObjectNode();
+        var requestContext = dtoObjectMapper.createObjectNode();
+        claims.put(CognitoUserInfo.PERSON_AFFILIATION_CLAIM, expectedPersonAffiliation.toString());
         authorizer.set("claims", claims);
         requestContext.set("authorizer", authorizer);
         requestInfo.setRequestContext(requestContext);
