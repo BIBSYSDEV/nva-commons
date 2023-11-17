@@ -18,6 +18,7 @@ import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_QUERY_PAR
 import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_REQUEST_CONTEXT;
 import static nva.commons.apigateway.RequestInfoConstants.PATH_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.PATH_PARAMETERS_FIELD;
+import static nva.commons.apigateway.RequestInfoConstants.PERSON_AFFILIATION;
 import static nva.commons.apigateway.RequestInfoConstants.PERSON_CRISTIN_ID;
 import static nva.commons.apigateway.RequestInfoConstants.PERSON_GROUPS;
 import static nva.commons.apigateway.RequestInfoConstants.PERSON_NIN;
@@ -297,6 +298,12 @@ public class RequestInfo {
     }
 
     @JsonIgnore
+    public URI getPersonAffiliation() throws UnauthorizedException {
+        return extractPersonAffiliationOffline().or(this::fetchPersonAffiliationFromCognito)
+            .orElseThrow(UnauthorizedException::new);
+    }
+
+    @JsonIgnore
     public String getPersonNin() {
         return extractPersonNinOffline().or(this::fetchPersonNinFromCognito).orElseThrow(IllegalStateException::new);
     }
@@ -353,8 +360,16 @@ public class RequestInfo {
         return getRequestContextParameterOpt(PERSON_CRISTIN_ID).map(URI::create);
     }
 
+    private Optional<URI> extractPersonAffiliationOffline() {
+        return getRequestContextParameterOpt(PERSON_AFFILIATION).map(URI::create);
+    }
+
     private Optional<URI> fetchPersonCristinIdFromCognito() {
         return fetchUserInfoFromCognito().map(CognitoUserInfo::getPersonCristinId);
+    }
+
+    private Optional<URI> fetchPersonAffiliationFromCognito() {
+        return fetchUserInfoFromCognito().map(CognitoUserInfo::getPersonAffiliation);
     }
 
     private Optional<String> extractPersonNinOffline() {

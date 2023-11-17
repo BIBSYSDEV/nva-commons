@@ -22,7 +22,7 @@ class CognitoUserInfoTest {
             .withCognitoUsername(randomString())
             .withAllowedCustomers(randomString())
             .withRoles(randomString())
-            .withPersonAffiliation(randomString())
+            .withPersonAffiliation(randomUri())
             .withSub(randomString())
             .build();
         assertThat(userInfo, doesNotHaveEmptyValues());

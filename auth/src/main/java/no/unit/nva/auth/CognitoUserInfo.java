@@ -22,7 +22,7 @@ public class CognitoUserInfo {
     public static final String PERSON_FEIDE_NIN_CLAIM = "custom:feideIdNin";
     public static final String ROLES = "custom:roles";
     public static final String SUB = "sub";
-    public static final String PERSON_AFFILIATION = "custom:personAffiliation";
+    public static final String PERSON_AFFILIATION_CLAIM = "custom:personAffiliation";
     public static final String ALLOWED_CUSTOMERS = "custom:allowedCustomers";
     public static final String COGNITO_USER_NAME = "username";
     @JsonProperty(PERSON_FEIDE_ID_CLAIM)
@@ -44,8 +44,8 @@ public class CognitoUserInfo {
     private String roles;
     @JsonProperty(SUB)
     private String sub;
-    @JsonProperty(PERSON_AFFILIATION)
-    private String personAffiliation;
+    @JsonProperty(PERSON_AFFILIATION_CLAIM)
+    private URI personAffiliation;
     @JsonProperty(ALLOWED_CUSTOMERS)
     private String allowedCustomers;
     @JsonProperty(COGNITO_USER_NAME)
@@ -75,11 +75,11 @@ public class CognitoUserInfo {
         this.sub = sub;
     }
 
-    public String getPersonAffiliation() {
+    public URI getPersonAffiliation() {
         return personAffiliation;
     }
 
-    public void setPersonAffiliation(String personAffiliation) {
+    public void setPersonAffiliation(URI personAffiliation) {
         this.personAffiliation = personAffiliation;
     }
 
@@ -160,7 +160,7 @@ public class CognitoUserInfo {
     public int hashCode() {
         return Objects.hash(getFeideId(), getCurrentCustomer(), getAccessRights(), getUserName(),
                             getTopOrgCristinId(),
-                            getPersonCristinId(), getPersonNin());
+                            getPersonCristinId(), getPersonAffiliation(), getPersonNin());
     }
 
     @JacocoGenerated
@@ -179,6 +179,7 @@ public class CognitoUserInfo {
                && Objects.equals(getUserName(), that.getUserName())
                && Objects.equals(getTopOrgCristinId(), that.getTopOrgCristinId())
                && Objects.equals(getPersonCristinId(), that.getPersonCristinId())
+               && Objects.equals(getPersonAffiliation(), that.getPersonAffiliation())
                && Objects.equals(getPersonNin(), that.getPersonNin())
                && Objects.equals(getFeideId(), that.getFeideId());
     }
@@ -238,7 +239,7 @@ public class CognitoUserInfo {
             return this;
         }
 
-        public Builder withPersonAffiliation(String personAffiliation) {
+        public Builder withPersonAffiliation(URI personAffiliation) {
             cognitoUserInfo.setPersonAffiliation(personAffiliation);
             return this;
         }
