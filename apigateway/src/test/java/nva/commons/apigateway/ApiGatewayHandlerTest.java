@@ -273,7 +273,8 @@ class ApiGatewayHandlerTest {
         handler.handleRequest(requestWithHeaders(), outputStream, context);
         var problem = getProblemFromFailureResponse(outputStream);
 
-        assertThat(problem.getParameters().get("resource"), is(equalTo(customProblemObject.toJsonString())));
+        var resource = problem.getParameters().get("resource");
+        assertThat(resource, is(equalTo(customProblemObject.toJsonString())));
     }
 
     @Test

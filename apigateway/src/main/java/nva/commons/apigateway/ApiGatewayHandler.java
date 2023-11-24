@@ -22,7 +22,6 @@ import java.util.function.Supplier;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.ApiGatewayUncheckedException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
-import nva.commons.apigateway.exceptions.GoneException;
 import nva.commons.apigateway.exceptions.RedirectException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
@@ -248,10 +247,14 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
                    .withTitle(status.getReasonPhrase())
                    .withDetail(errorMessage)
                    .with(REQUEST_ID, requestId)
-                   .with(RESOURCE, exception instanceof ApiGatewayException apiGatewayException
-                                         ? apiGatewayException.getInstance()
-                                         : null)
+                   .with(RESOURCE, getResource(exception))
                    .build();
+    }
+
+    private Object getResource(Exception exception) {
+        return exception instanceof ApiGatewayException apiGatewayException
+                   ? Optional.ofNullable(apiGatewayException.getInstance()).map(Object::toString).orElse(null)
+                   : null;
     }
 
     /**
