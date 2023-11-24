@@ -12,6 +12,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
@@ -273,6 +274,16 @@ class ApiGatewayHandlerTest {
         var problem = getProblemFromFailureResponse(outputStream);
 
         assertThat(problem.getParameters().get("resource"), is(equalTo(customProblemObject.toJsonString())));
+    }
+
+    @Test
+    public void problemShouldNotContainCustomResourceWhenResourceIsNull() throws IOException {
+        var handler = handlerThatThrowsGoneExceptionsWithCustomObject(null);
+        var outputStream = outputStream();
+        handler.handleRequest(requestWithHeaders(), outputStream, context);
+        var problem = getProblemFromFailureResponse(outputStream);
+
+        assertThat(problem.getParameters().get("resource"), is(nullValue()));
     }
 
     @Test

@@ -40,6 +40,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     public static final String DEFAULT_ERROR_MESSAGE = "Unknown error in handler";
     public static final String REQUEST_ID = "requestId";
     public static final Void EMPTY_BODY = null;
+    public static final String RESOURCE = "resource";
 
     private final ObjectMapper objectMapper;
 
@@ -241,22 +242,15 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     }
 
     private ThrowableProblem createProblemDescription(Exception exception, Integer statusCode, String requestId) {
-        if (exception instanceof GoneException goneException) {
-            String errorMessage = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
-            Status status = Status.valueOf(statusCode);
-            return Problem.builder().withStatus(status)
-                       .withTitle(status.getReasonPhrase())
-                       .withDetail(errorMessage)
-                       .with(REQUEST_ID, requestId)
-                       .with("resource", goneException.getInstance().toString())
-                       .build();
-        }
         String errorMessage = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
         Status status = Status.valueOf(statusCode);
         return Problem.builder().withStatus(status)
                    .withTitle(status.getReasonPhrase())
                    .withDetail(errorMessage)
                    .with(REQUEST_ID, requestId)
+                   .with(RESOURCE, exception instanceof ApiGatewayException apiGatewayException
+                                         ? apiGatewayException.getInstance()
+                                         : null)
                    .build();
     }
 
