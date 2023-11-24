@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.ApiGatewayUncheckedException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
+import nva.commons.apigateway.exceptions.GoneException;
 import nva.commons.apigateway.exceptions.RedirectException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
@@ -240,6 +241,16 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     }
 
     private ThrowableProblem createProblemDescription(Exception exception, Integer statusCode, String requestId) {
+        if (exception instanceof GoneException goneException) {
+            String errorMessage = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
+            Status status = Status.valueOf(statusCode);
+            return Problem.builder().withStatus(status)
+                       .withTitle(status.getReasonPhrase())
+                       .withDetail(errorMessage)
+                       .with(REQUEST_ID, requestId)
+                       .with("resource", goneException.getInstance().toString())
+                       .build();
+        }
         String errorMessage = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
         Status status = Status.valueOf(statusCode);
         return Problem.builder().withStatus(status)

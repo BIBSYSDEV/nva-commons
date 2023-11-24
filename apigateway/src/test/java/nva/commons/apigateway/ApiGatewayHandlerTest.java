@@ -3,6 +3,7 @@ package nva.commons.apigateway;
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
+import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static nva.commons.apigateway.ApiGatewayHandler.REQUEST_ID;
 import static nva.commons.apigateway.MediaTypes.APPLICATION_PROBLEM_JSON;
@@ -40,9 +41,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import javax.management.modelmbean.XMLParseException;
+import no.unit.nva.commons.json.JsonSerializable;
 import no.unit.nva.stubs.FakeContext;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
+import nva.commons.apigateway.exceptions.GoneException;
 import nva.commons.apigateway.exceptions.TestException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.apigateway.testutils.Base64Handler;
@@ -262,6 +265,17 @@ class ApiGatewayHandlerTest {
     }
 
     @Test
+    public void shouldReturnProblemContainingCustomResource() throws IOException {
+        var customProblemObject = new CustomObject(randomString(), randomString());
+        var handler = handlerThatThrowsGoneExceptionsWithCustomObject(customProblemObject);
+        var outputStream = outputStream();
+        handler.handleRequest(requestWithHeaders(), outputStream, context);
+        var problem = getProblemFromFailureResponse(outputStream);
+
+        assertThat(problem.getParameters().get("resource"), is(equalTo(customProblemObject.toJsonString())));
+    }
+
+    @Test
     @DisplayName("Failure message contains exception message and status code when an Exception is thrown")
     public void failureMessageContainsExceptionMessageAndStatusCodeWhenAnExceptionIsThrown()
         throws IOException {
@@ -464,6 +478,21 @@ class ApiGatewayHandlerTest {
         };
     }
 
+    private Handler handlerThatThrowsGoneExceptionsWithCustomObject(CustomObject customObject) {
+        return new Handler() {
+            @Override
+            protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
+                throws GoneException {
+                throwGoneExceptionWithInstance();
+                return null;
+            }
+
+            private void throwGoneExceptionWithInstance() throws GoneException {
+                throw new GoneException("some message", customObject);
+            }
+        };
+    }
+
     private Handler handlerThatOverridesListSupportedMediaTypes() {
         return new Handler() {
             @Override
@@ -597,5 +626,11 @@ class ApiGatewayHandlerTest {
                 return null;
             }
         };
+    }
+
+    private record CustomObject(String firstValue, String secondValue) implements JsonSerializable {
+        public String toString() {
+        return this.toJsonString();
+        }
     }
 }
