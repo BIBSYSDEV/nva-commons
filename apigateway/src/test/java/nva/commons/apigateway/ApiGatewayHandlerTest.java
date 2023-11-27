@@ -3,6 +3,7 @@ package nva.commons.apigateway;
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
+import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static nva.commons.apigateway.ApiGatewayHandler.REQUEST_ID;
 import static nva.commons.apigateway.MediaTypes.APPLICATION_PROBLEM_JSON;
@@ -11,6 +12,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
@@ -40,9 +42,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import javax.management.modelmbean.XMLParseException;
+import no.unit.nva.commons.json.JsonSerializable;
 import no.unit.nva.stubs.FakeContext;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
+import nva.commons.apigateway.exceptions.GoneException;
 import nva.commons.apigateway.exceptions.TestException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.apigateway.testutils.Base64Handler;
@@ -75,11 +79,8 @@ class ApiGatewayHandlerTest {
     private Handler handler;
 
     public static Stream<String> mediaTypeProvider() {
-        return Stream.of(
-            MediaTypes.APPLICATION_JSON_LD.toString(),
-            MediaTypes.APPLICATION_DATACITE_XML.toString(),
-            MediaTypes.SCHEMA_ORG.toString()
-        );
+        return Stream.of(MediaTypes.APPLICATION_JSON_LD.toString(), MediaTypes.APPLICATION_DATACITE_XML.toString(),
+                         MediaTypes.SCHEMA_ORG.toString());
     }
 
     @BeforeEach
@@ -113,19 +114,16 @@ class ApiGatewayHandlerTest {
 
         Map<String, String> headers = handler.getHeaders();
         JsonNode expectedHeaders = createHeaders();
-        expectedHeaders.fieldNames().forEachRemaining(expectedHeader ->
-                                                          assertThat(headers.get(expectedHeader), is(equalTo(
-                                                              expectedHeaders.get(expectedHeader).textValue()))));
+        expectedHeaders.fieldNames()
+            .forEachRemaining(expectedHeader -> assertThat(headers.get(expectedHeader), is(equalTo(
+                expectedHeaders.get(expectedHeader).textValue()))));
     }
 
     // TODO: Should return 415 when the Content-type header of request is unsupported (i.e., the one
     //  describing the content of the body of a post request)
     // TODO: Should return 406 when Accept header contains unsupported media type
     @ParameterizedTest(name = "handleRequest should return Unsupported media-type when input is {0}")
-    @ValueSource(strings = {
-        "application/xml",
-        "text/plain; charset=UTF-8"
-    })
+    @ValueSource(strings = {"application/xml", "text/plain; charset=UTF-8"})
     public void handleRequestShouldReturnUnsupportedMediaTypeOnUnsupportedAcceptHeader(String mediaType)
         throws IOException {
         InputStream input = requestWithAcceptHeader(mediaType);
@@ -138,12 +136,9 @@ class ApiGatewayHandlerTest {
     }
 
     @ParameterizedTest(name = "handleRequest should return OK when input is {0}")
-    @ValueSource(strings = {
-        "*/*",
-        "application/json",
-        "application/json; charset=UTF-8",
-        "text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8",
-        "*; q=.2" // java.net.HttpURLConnection uses this Accept header
+    @ValueSource(strings = {"*/*", "application/json", "application/json; charset=UTF-8",
+        "text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8", "*; q=.2"
+        // java.net.HttpURLConnection uses this Accept header
     })
     public void handleRequestShouldReturnOkOnSupportedAcceptHeader(String mediaType) throws IOException {
         InputStream input = requestWithAcceptHeader(mediaType);
@@ -154,8 +149,7 @@ class ApiGatewayHandlerTest {
     }
 
     @Test
-    public void handleRequestReturnsContentTypeJsonOnAcceptWildcard()
-        throws IOException {
+    public void handleRequestReturnsContentTypeJsonOnAcceptWildcard() throws IOException {
         Handler handler = handlerThatOverridesListSupportedMediaTypes();
 
         InputStream input = requestWithAcceptHeader(MediaType.ANY_TYPE.toString());
@@ -164,20 +158,6 @@ class ApiGatewayHandlerTest {
 
         assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
         assertThat(response.getHeaders().get(CONTENT_TYPE), is(equalTo(MediaType.JSON_UTF_8.toString())));
-    }
-
-    @ParameterizedTest(name = "Should return supported type {0} when it is requested")
-    @MethodSource("mediaTypeProvider")
-    void shouldReturnContentTypeMatchingSupportedMediaTypeWhenSupportedMediaTypeIsRequested(String mediaType)
-        throws IOException {
-        Handler handler = handlerThatOverridesListSupportedMediaTypes();
-
-        InputStream input = requestWithAcceptHeader(mediaType);
-
-        GatewayResponse<String> response = getStringResponse(input, handler);
-
-        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
-        assertThat(response.getHeaders().get(CONTENT_TYPE), is(equalTo(mediaType)));
     }
 
     @Test
@@ -262,9 +242,30 @@ class ApiGatewayHandlerTest {
     }
 
     @Test
+    public void shouldReturnProblemContainingCustomResource() throws IOException {
+        var customProblemObject = new CustomObject(randomString(), randomString());
+        var handler = handlerThatThrowsGoneExceptionsWithCustomObject(customProblemObject);
+        var outputStream = outputStream();
+        handler.handleRequest(requestWithHeaders(), outputStream, context);
+        var problem = getProblemFromFailureResponse(outputStream);
+
+        var resource = problem.getParameters().get("resource");
+        assertThat(resource, is(equalTo(customProblemObject.toJsonString())));
+    }
+
+    @Test
+    public void problemShouldNotContainCustomResourceWhenResourceIsNull() throws IOException {
+        var handler = handlerThatThrowsGoneExceptionsWithCustomObject(null);
+        var outputStream = outputStream();
+        handler.handleRequest(requestWithHeaders(), outputStream, context);
+        var problem = getProblemFromFailureResponse(outputStream);
+
+        assertThat(problem.getParameters().get("resource"), is(nullValue()));
+    }
+
+    @Test
     @DisplayName("Failure message contains exception message and status code when an Exception is thrown")
-    public void failureMessageContainsExceptionMessageAndStatusCodeWhenAnExceptionIsThrown()
-        throws IOException {
+    public void failureMessageContainsExceptionMessageAndStatusCodeWhenAnExceptionIsThrown() throws IOException {
         Handler handler = handlerThatThrowsExceptions();
 
         GatewayResponse<Problem> responseParsing = getProblemResponse(requestWithHeadersAndPath(), handler);
@@ -279,8 +280,7 @@ class ApiGatewayHandlerTest {
 
     @Test
     @DisplayName("Failure message contains application/problem+json ContentType when an Exception is thrown")
-    public void failureMessageContainsApplicationProblemJsonContentTypeWhenExceptionIsThrown()
-        throws IOException {
+    public void failureMessageContainsApplicationProblemJsonContentTypeWhenExceptionIsThrown() throws IOException {
         Handler handler = handlerThatThrowsExceptions();
 
         GatewayResponse<Problem> responseParsing = getProblemResponse(requestWithHeadersAndPath(), handler);
@@ -348,6 +348,20 @@ class ApiGatewayHandlerTest {
         assertThat(problem.getDetail(), containsString(expectedMessage));
     }
 
+    @ParameterizedTest(name = "Should return supported type {0} when it is requested")
+    @MethodSource("mediaTypeProvider")
+    void shouldReturnContentTypeMatchingSupportedMediaTypeWhenSupportedMediaTypeIsRequested(String mediaType)
+        throws IOException {
+        Handler handler = handlerThatOverridesListSupportedMediaTypes();
+
+        InputStream input = requestWithAcceptHeader(mediaType);
+
+        GatewayResponse<String> response = getStringResponse(input, handler);
+
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
+        assertThat(response.getHeaders().get(CONTENT_TYPE), is(equalTo(mediaType)));
+    }
+
     @Test
     void handlerSerializesBodyWithNonDefaultSerializationWhenDefaultSerializerIsOverridden() throws IOException {
         ObjectMapper spiedMapper = spy(defaultRestObjectMapper);
@@ -409,9 +423,8 @@ class ApiGatewayHandlerTest {
     }
 
     private String getUnsupportedMediaTypeErrorMessage(String mediaType) {
-        return UnsupportedAcceptHeaderException.createMessage(
-            List.of(MediaType.parse(mediaType)),
-            handler.listSupportedMediaTypes());
+        return UnsupportedAcceptHeaderException.createMessage(List.of(MediaType.parse(mediaType)),
+                                                              handler.listSupportedMediaTypes());
     }
 
     private <T> GatewayResponse<T> getResponse(Class<T> type, InputStream input, Handler handler) throws IOException {
@@ -442,9 +455,7 @@ class ApiGatewayHandlerTest {
         requestBody.setField1("Some value");
         requestBody.setField2(null);
 
-        return new HandlerRequestBuilder<RequestBody>(defaultRestObjectMapper)
-                   .withBody(requestBody)
-                   .build();
+        return new HandlerRequestBuilder<RequestBody>(defaultRestObjectMapper).withBody(requestBody).build();
     }
 
     private Problem getProblemFromFailureResponse(ByteArrayOutputStream outputStream) throws JsonProcessingException {
@@ -460,6 +471,21 @@ class ApiGatewayHandlerTest {
             protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context) {
                 throwUncheckedExceptions();
                 return null;
+            }
+        };
+    }
+
+    private Handler handlerThatThrowsGoneExceptionsWithCustomObject(CustomObject customObject) {
+        return new Handler() {
+            @Override
+            protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
+                throws GoneException {
+                throwGoneExceptionWithInstance();
+                return null;
+            }
+
+            private void throwGoneExceptionWithInstance() throws GoneException {
+                throw new GoneException("some message", customObject);
             }
         };
     }
@@ -597,5 +623,12 @@ class ApiGatewayHandlerTest {
                 return null;
             }
         };
+    }
+
+    private record CustomObject(String firstValue, String secondValue) implements JsonSerializable {
+
+        public String toString() {
+            return this.toJsonString();
+        }
     }
 }

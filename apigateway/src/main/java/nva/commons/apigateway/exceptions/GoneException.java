@@ -16,6 +16,10 @@ public class GoneException extends ApiGatewayException {
         super(exception, message);
     }
 
+    public GoneException(String message, Object tombstone) {
+        super(message, tombstone);
+    }
+
     @Override
     protected Integer statusCode() {
         return HttpURLConnection.HTTP_GONE;

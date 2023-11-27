@@ -39,6 +39,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     public static final String DEFAULT_ERROR_MESSAGE = "Unknown error in handler";
     public static final String REQUEST_ID = "requestId";
     public static final Void EMPTY_BODY = null;
+    public static final String RESOURCE = "resource";
 
     private final ObjectMapper objectMapper;
 
@@ -246,7 +247,14 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
                    .withTitle(status.getReasonPhrase())
                    .withDetail(errorMessage)
                    .with(REQUEST_ID, requestId)
+                   .with(RESOURCE, getResource(exception))
                    .build();
+    }
+
+    private Object getResource(Exception exception) {
+        return exception instanceof ApiGatewayException apiGatewayException
+                   ? Optional.ofNullable(apiGatewayException.getInstance()).map(Object::toString).orElse(null)
+                   : null;
     }
 
     /**
