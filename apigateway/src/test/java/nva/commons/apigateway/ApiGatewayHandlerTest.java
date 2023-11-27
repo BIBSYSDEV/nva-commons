@@ -79,11 +79,8 @@ class ApiGatewayHandlerTest {
     private Handler handler;
 
     public static Stream<String> mediaTypeProvider() {
-        return Stream.of(
-            MediaTypes.APPLICATION_JSON_LD.toString(),
-            MediaTypes.APPLICATION_DATACITE_XML.toString(),
-            MediaTypes.SCHEMA_ORG.toString()
-        );
+        return Stream.of(MediaTypes.APPLICATION_JSON_LD.toString(), MediaTypes.APPLICATION_DATACITE_XML.toString(),
+                         MediaTypes.SCHEMA_ORG.toString());
     }
 
     @BeforeEach
@@ -117,19 +114,16 @@ class ApiGatewayHandlerTest {
 
         Map<String, String> headers = handler.getHeaders();
         JsonNode expectedHeaders = createHeaders();
-        expectedHeaders.fieldNames().forEachRemaining(expectedHeader ->
-                                                          assertThat(headers.get(expectedHeader), is(equalTo(
-                                                              expectedHeaders.get(expectedHeader).textValue()))));
+        expectedHeaders.fieldNames()
+            .forEachRemaining(expectedHeader -> assertThat(headers.get(expectedHeader), is(equalTo(
+                expectedHeaders.get(expectedHeader).textValue()))));
     }
 
     // TODO: Should return 415 when the Content-type header of request is unsupported (i.e., the one
     //  describing the content of the body of a post request)
     // TODO: Should return 406 when Accept header contains unsupported media type
     @ParameterizedTest(name = "handleRequest should return Unsupported media-type when input is {0}")
-    @ValueSource(strings = {
-        "application/xml",
-        "text/plain; charset=UTF-8"
-    })
+    @ValueSource(strings = {"application/xml", "text/plain; charset=UTF-8"})
     public void handleRequestShouldReturnUnsupportedMediaTypeOnUnsupportedAcceptHeader(String mediaType)
         throws IOException {
         InputStream input = requestWithAcceptHeader(mediaType);
@@ -142,12 +136,9 @@ class ApiGatewayHandlerTest {
     }
 
     @ParameterizedTest(name = "handleRequest should return OK when input is {0}")
-    @ValueSource(strings = {
-        "*/*",
-        "application/json",
-        "application/json; charset=UTF-8",
-        "text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8",
-        "*; q=.2" // java.net.HttpURLConnection uses this Accept header
+    @ValueSource(strings = {"*/*", "application/json", "application/json; charset=UTF-8",
+        "text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8", "*; q=.2"
+        // java.net.HttpURLConnection uses this Accept header
     })
     public void handleRequestShouldReturnOkOnSupportedAcceptHeader(String mediaType) throws IOException {
         InputStream input = requestWithAcceptHeader(mediaType);
@@ -158,8 +149,7 @@ class ApiGatewayHandlerTest {
     }
 
     @Test
-    public void handleRequestReturnsContentTypeJsonOnAcceptWildcard()
-        throws IOException {
+    public void handleRequestReturnsContentTypeJsonOnAcceptWildcard() throws IOException {
         Handler handler = handlerThatOverridesListSupportedMediaTypes();
 
         InputStream input = requestWithAcceptHeader(MediaType.ANY_TYPE.toString());
@@ -168,20 +158,6 @@ class ApiGatewayHandlerTest {
 
         assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
         assertThat(response.getHeaders().get(CONTENT_TYPE), is(equalTo(MediaType.JSON_UTF_8.toString())));
-    }
-
-    @ParameterizedTest(name = "Should return supported type {0} when it is requested")
-    @MethodSource("mediaTypeProvider")
-    void shouldReturnContentTypeMatchingSupportedMediaTypeWhenSupportedMediaTypeIsRequested(String mediaType)
-        throws IOException {
-        Handler handler = handlerThatOverridesListSupportedMediaTypes();
-
-        InputStream input = requestWithAcceptHeader(mediaType);
-
-        GatewayResponse<String> response = getStringResponse(input, handler);
-
-        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
-        assertThat(response.getHeaders().get(CONTENT_TYPE), is(equalTo(mediaType)));
     }
 
     @Test
@@ -289,8 +265,7 @@ class ApiGatewayHandlerTest {
 
     @Test
     @DisplayName("Failure message contains exception message and status code when an Exception is thrown")
-    public void failureMessageContainsExceptionMessageAndStatusCodeWhenAnExceptionIsThrown()
-        throws IOException {
+    public void failureMessageContainsExceptionMessageAndStatusCodeWhenAnExceptionIsThrown() throws IOException {
         Handler handler = handlerThatThrowsExceptions();
 
         GatewayResponse<Problem> responseParsing = getProblemResponse(requestWithHeadersAndPath(), handler);
@@ -305,8 +280,7 @@ class ApiGatewayHandlerTest {
 
     @Test
     @DisplayName("Failure message contains application/problem+json ContentType when an Exception is thrown")
-    public void failureMessageContainsApplicationProblemJsonContentTypeWhenExceptionIsThrown()
-        throws IOException {
+    public void failureMessageContainsApplicationProblemJsonContentTypeWhenExceptionIsThrown() throws IOException {
         Handler handler = handlerThatThrowsExceptions();
 
         GatewayResponse<Problem> responseParsing = getProblemResponse(requestWithHeadersAndPath(), handler);
@@ -374,6 +348,20 @@ class ApiGatewayHandlerTest {
         assertThat(problem.getDetail(), containsString(expectedMessage));
     }
 
+    @ParameterizedTest(name = "Should return supported type {0} when it is requested")
+    @MethodSource("mediaTypeProvider")
+    void shouldReturnContentTypeMatchingSupportedMediaTypeWhenSupportedMediaTypeIsRequested(String mediaType)
+        throws IOException {
+        Handler handler = handlerThatOverridesListSupportedMediaTypes();
+
+        InputStream input = requestWithAcceptHeader(mediaType);
+
+        GatewayResponse<String> response = getStringResponse(input, handler);
+
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
+        assertThat(response.getHeaders().get(CONTENT_TYPE), is(equalTo(mediaType)));
+    }
+
     @Test
     void handlerSerializesBodyWithNonDefaultSerializationWhenDefaultSerializerIsOverridden() throws IOException {
         ObjectMapper spiedMapper = spy(defaultRestObjectMapper);
@@ -435,9 +423,8 @@ class ApiGatewayHandlerTest {
     }
 
     private String getUnsupportedMediaTypeErrorMessage(String mediaType) {
-        return UnsupportedAcceptHeaderException.createMessage(
-            List.of(MediaType.parse(mediaType)),
-            handler.listSupportedMediaTypes());
+        return UnsupportedAcceptHeaderException.createMessage(List.of(MediaType.parse(mediaType)),
+                                                              handler.listSupportedMediaTypes());
     }
 
     private <T> GatewayResponse<T> getResponse(Class<T> type, InputStream input, Handler handler) throws IOException {
@@ -468,9 +455,7 @@ class ApiGatewayHandlerTest {
         requestBody.setField1("Some value");
         requestBody.setField2(null);
 
-        return new HandlerRequestBuilder<RequestBody>(defaultRestObjectMapper)
-                   .withBody(requestBody)
-                   .build();
+        return new HandlerRequestBuilder<RequestBody>(defaultRestObjectMapper).withBody(requestBody).build();
     }
 
     private Problem getProblemFromFailureResponse(ByteArrayOutputStream outputStream) throws JsonProcessingException {
@@ -641,8 +626,9 @@ class ApiGatewayHandlerTest {
     }
 
     private record CustomObject(String firstValue, String secondValue) implements JsonSerializable {
+
         public String toString() {
-        return this.toJsonString();
+            return this.toJsonString();
         }
     }
 }

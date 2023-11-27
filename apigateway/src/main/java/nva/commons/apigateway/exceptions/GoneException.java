@@ -15,6 +15,7 @@ public class GoneException extends ApiGatewayException {
     public GoneException(Exception exception, String message) {
         super(exception, message);
     }
+
     public GoneException(String message, Object tombstone) {
         super(message, tombstone);
     }
