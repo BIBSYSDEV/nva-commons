@@ -16,7 +16,7 @@ commonsValidator = { strictly = '1.7' }
 jupiter = { strictly = '5.10.0' }
 awsIon = { strictly = '1.5.1' }
 hamcrestOptional = { strictly = '2.0.0' }
-log4j = { strictly = '2.18.0' }
+log4j = { strictly = '2.22.0' }
 #wiremock 3.0.2 has multiple versions of  slf4j
 slf4j = { require = '2.0.5' }
 apiGuardian = { strictly = '1.1.2' }
@@ -69,7 +69,7 @@ commons-validator = { group = 'commons-validator', name = 'commons-validator', v
 
 log4j-core = { group = 'org.apache.logging.log4j', name = 'log4j-core', version.ref = 'log4j' }
 log4j-api = { group = 'org.apache.logging.log4j', name = 'log4j-api', version.ref = 'log4j' }
-log4j-slf4j-impl = { group = 'org.apache.logging.log4j', name = 'log4j-slf4j18-impl', version.ref = 'log4j' }
+log4j-slf4j-impl = { group = 'org.apache.logging.log4j', name = 'log4j-slf4j2-impl', version.ref = 'log4j' }
 slf4j-api = { group = 'org.slf4j', name = 'slf4j-api', version.ref = 'slf4j' }
 lambda-log4j = { group = 'com.amazonaws', name = 'aws-lambda-java-log4j2', version.ref = 'lambdaLog4j' }
 
