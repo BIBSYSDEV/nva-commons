@@ -245,7 +245,7 @@ public class RequestInfo {
     }
 
     public boolean userIsApplicationAdmin() {
-        return userIsAuthorized(AccessRight.ADMINISTRATE_APPLICATION.toString());
+        return userIsAuthorized(AccessRight.ADMINISTRATE_APPLICATION.toPersistedString());
     }
 
     public boolean userIsAuthorized(String accessRight) {

@@ -5,47 +5,29 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import java.io.IOException;
-import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.apigateway.exceptions.InvalidAccessRightException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 class AccessRightTest {
-
-    public static final String APPROVE_DOI_REQUEST_STRING = "\"APPROVE_DOI_REQUEST\"";
-
-    @Test
-    void fromStringParsesStringCaseInsensitive() {
-        String variableCase = "apProve_DOi_reQueST";
-        AccessRight actualValue = AccessRight.fromString(variableCase);
-        assertThat(actualValue, is(equalTo(AccessRight.APPROVE_DOI_REQUEST)));
-    }
 
     @Test
     void fromStringThrowsExceptionWhenInputIsInvalidAccessRight() {
         String invalidAccessRight = "invalidAccessRight";
-        Executable action = () -> AccessRight.fromString(invalidAccessRight);
+        Executable action = () -> AccessRight.fromPersistedString(invalidAccessRight);
         InvalidAccessRightException exception = assertThrows(InvalidAccessRightException.class, action);
         assertThat(exception.getMessage(), containsString(invalidAccessRight));
     }
 
-    @Test
-    void accessRightIsSerializedUpperCase() throws IOException {
-        String value = JsonUtils.dtoObjectMapper.writeValueAsString(AccessRight.APPROVE_DOI_REQUEST);
-        assertThat(value, is(equalTo(APPROVE_DOI_REQUEST_STRING)));
-    }
+    @ParameterizedTest
+    @EnumSource(AccessRight.class)
+    void shouldPersistBackAndForthToSameEnum(AccessRight accessRight) {
+        var string = accessRight.toPersistedString();
+        var backAsEnum = AccessRight.fromPersistedString(string);
 
-    @Test
-    void accessRightIsDeserializedFromString() throws IOException {
-        AccessRight accessRight = JsonUtils.dtoObjectMapper.readValue(APPROVE_DOI_REQUEST_STRING, AccessRight.class);
-        assertThat(accessRight, is(equalTo(AccessRight.APPROVE_DOI_REQUEST)));
-    }
+        assertThat(backAsEnum, is(equalTo(accessRight)));
 
-    @Test
-    void enumNameAndToStringIsEqual() {
-        var name = AccessRight.APPROVE_PUBLISH_REQUEST.name();
-        var toString = AccessRight.APPROVE_PUBLISH_REQUEST.toString();
-        assertThat(name, is(equalTo(toString)));
     }
 }

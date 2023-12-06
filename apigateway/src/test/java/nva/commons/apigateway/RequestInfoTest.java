@@ -5,6 +5,7 @@ import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
+import static nva.commons.apigateway.AccessRight.APPROVE_DOI_REQUEST;
 import static nva.commons.apigateway.RequestInfo.ERROR_FETCHING_COGNITO_INFO;
 import static nva.commons.apigateway.RequestInfoConstants.AUTHORIZATION_FAILURE_WARNING;
 import static nva.commons.apigateway.RequestInfoConstants.BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE;
@@ -267,7 +268,7 @@ class RequestInfoTest {
     void shouldReturnThatUserIsApplicationAdminWhenUserHasTheRespectiveAccessRight() throws JsonProcessingException {
         var customerId = randomUri();
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withCurrentCustomer(customerId)
-                          .withAccessRights(customerId, AccessRight.ADMINISTRATE_APPLICATION.toString())
+                          .withAccessRights(customerId, AccessRight.ADMINISTRATE_APPLICATION.toPersistedString())
                           .build();
         var requestInfo = RequestInfo.fromRequest(request);
         assertThat(requestInfo.userIsApplicationAdmin(), is(true));
@@ -278,7 +279,7 @@ class RequestInfoTest {
         throws JsonProcessingException {
         var customerId = randomUri();
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withCurrentCustomer(customerId)
-                          .withAccessRights(customerId, AccessRight.APPROVE_DOI_REQUEST.toString(), randomString())
+                          .withAccessRights(customerId, APPROVE_DOI_REQUEST.toPersistedString(), randomString())
                           .build();
         var requestInfo = RequestInfo.fromRequest(request);
         assertThat(requestInfo.userIsApplicationAdmin(), is(false));
