@@ -38,7 +38,7 @@ public class AccessRightEntry {
     }
 
     public static AccessRightEntry createUserAtCustomerGroup(URI customerId) {
-        return new AccessRightEntry(USER.toString(), customerId);
+        return new AccessRightEntry(USER.toPersistedString(), customerId);
     }
 
     @JacocoGenerated
@@ -77,7 +77,7 @@ public class AccessRightEntry {
     }
 
     public boolean describesCustomerUponLogin() {
-        return USER.toString().equalsIgnoreCase(this.getAccessRight());
+        return USER.toPersistedString().equalsIgnoreCase(this.getAccessRight());
     }
 
     private static String formatAccessRightString(String accessRightWithoutCustomerId) {

@@ -80,7 +80,7 @@ public enum AccessRight {
     EDIT_ALL_NON_DEGREE_RESOURCES("EDIT_ALL_NON_DEGREE_RESOURCES"),
 
     /**
-     * @deprecated Use MANAGE_OWN_AFFILIATIONS instead.
+     * @deprecated Use MANAGE_OWN_AFFILIATION instead.
      */
     @Deprecated(forRemoval = true)
     EDIT_OWN_INSTITUTION_USERS("EDIT_OWN_INSTITUTION_USERS"),
@@ -92,7 +92,7 @@ public enum AccessRight {
     EDIT_OWN_INSTITUTION_PROJECTS("EDIT_OWN_INSTITUTION_PROJECTS"),
 
     /**
-     * @deprecated Use MANAGE_OWN_INSTITUTION_PUBLICATION_WORKFLOW instead.
+     * @deprecated Use MANAGE_OWN_AFFILIATION instead.
      */
     @Deprecated(forRemoval = true)
     EDIT_OWN_INSTITUTION_PUBLICATION_WORKFLOW("EDIT_OWN_INSTITUTION_PUBLICATION_WORKFLOW"),
@@ -133,7 +133,6 @@ public enum AccessRight {
     MANAGE_RESOURCES_STANDARD("resource"),
     MANAGE_RESOURCES_ALL("resource-all"),
     MANAGE_OWN_AFFILIATION("own-affiliation"),
-    MANAGE_OWN_INSTITUTION_PUBLICATION_WORKFLOW("own-inst-pub-workflow"),
     MANAGE_CUSTOMERS("customers"),
     MANAGE_OWN_RESOURCES("resources"),
     MANAGE_NVI("nvi-admin"),
@@ -143,9 +142,7 @@ public enum AccessRight {
     SUPPORT("support"),
     MANAGE_KBS("kbs"),
     ACT_AS("act-as"),
-    MANAGE_EXTERNAL_CLIENTS("external-clients")
-    ;
-
+    MANAGE_EXTERNAL_CLIENTS("external-clients");
 
     private static final Map<String, AccessRight> LOOKUP = Maps.uniqueIndex(
         Arrays.asList(AccessRight.values()),
@@ -164,6 +161,12 @@ public enum AccessRight {
 
     public String toPersistedString() {
         return persistedValue;
+    }
+
+    @Override
+    @Deprecated
+    public String toString() {
+        throw new IllegalStateException("Use toPersistedString() instead");
     }
 
     /**
