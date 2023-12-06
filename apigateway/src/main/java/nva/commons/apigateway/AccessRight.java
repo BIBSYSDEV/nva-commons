@@ -1,17 +1,15 @@
 package nva.commons.apigateway;
 
+import static java.util.Optional.ofNullable;
 import com.google.common.collect.Maps;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
 import nva.commons.apigateway.exceptions.InvalidAccessRightException;
 
 public enum AccessRight {
 
     USER("USER"),// pseudo access-right to indicate the customer in cognito groups
-        /*
-    Old Access Rights
-     */
+    // Old Access Rights:
 
     /**
      * @deprecated Use MANAGE_PUBLISHING_REQUEST instead.
@@ -121,9 +119,7 @@ public enum AccessRight {
     @Deprecated(forRemoval = true)
     MANAGE_NVI_CANDIDATE("MANAGE_NVI_CANDIDATE"),
 
-    /*
-    New Access Rights
-     */
+    // New Access Rights:
 
     MANAGE_PUBLISHING_REQUESTS("publishing"),
     MANAGE_DEGREE("degree"),
@@ -177,7 +173,7 @@ public enum AccessRight {
      */
 
     public static AccessRight fromPersistedString(String accessRight) {
-        return Optional.ofNullable(LOOKUP.get(accessRight)).orElseThrow(() -> new InvalidAccessRightException(accessRight));
+        return ofNullable(LOOKUP.get(accessRight)).orElseThrow(() -> new InvalidAccessRightException(accessRight));
     }
 
 }
