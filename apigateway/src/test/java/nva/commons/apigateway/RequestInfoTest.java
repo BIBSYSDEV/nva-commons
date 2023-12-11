@@ -621,6 +621,10 @@ class RequestInfoTest {
                    containsString(ERROR_FETCHING_COGNITO_INFO.replace(LOG_STRING_INTERPOLATION, EMPTY_STRING)));
     }
 
+    private AccessRight randomAccessRight() {
+        return randomElement(AccessRight.values());
+    }
+
     private String randomAccessRight(URI usersCustomer) {
         return new AccessRightEntry(randomAccessRight().toPersistedString(), usersCustomer).toString();
     }
@@ -736,10 +740,6 @@ class RequestInfoTest {
         String apiGatewayEvent = IoUtils.stringFromResources(resourceFile);
         RequestInfo requestInfo = defaultRestObjectMapper.readValue(apiGatewayEvent, RequestInfo.class);
         assertNotNull(getObject.apply(requestInfo));
-    }
-
-    private AccessRight randomAccessRight() {
-        return randomElement(AccessRight.values());
     }
 }
 

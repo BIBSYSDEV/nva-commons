@@ -245,9 +245,8 @@ public class RequestInfo {
     }
 
     /**
-     * @deprecated use {@link #userIsAuthorized(AccessRight)} instead. New AccessRights for appadmin
-     * are MANAGE_EXTERNAL_CLIENTS, ACT_AS, MANAGE_CUSTOMERS
-     *
+     * @deprecated use {@link #userIsAuthorized(AccessRight)} instead. New AccessRights for appadmin are
+     *     MANAGE_EXTERNAL_CLIENTS, ACT_AS, MANAGE_CUSTOMERS
      */
     @Deprecated
     public boolean userIsApplicationAdmin() {
