@@ -3,9 +3,10 @@ package nva.commons.apigateway;
 import static no.unit.nva.auth.OAuthConstants.OAUTH_USER_INFO;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
+import static no.unit.nva.testutils.RandomDataGenerator.randomElement;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
-import static nva.commons.apigateway.AccessRight.APPROVE_DOI_REQUEST;
+import static nva.commons.apigateway.AccessRight.MANAGE_PUBLISHING_REQUESTS;
 import static nva.commons.apigateway.RequestInfo.ERROR_FETCHING_COGNITO_INFO;
 import static nva.commons.apigateway.RequestInfoConstants.AUTHORIZATION_FAILURE_WARNING;
 import static nva.commons.apigateway.RequestInfoConstants.BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE;
@@ -193,8 +194,9 @@ class RequestInfoTest {
     @Test
     void shouldReturnThatUserHasAccessRightForSpecificCustomerWhenCognitoHasRespectiveEntry() {
         var usersCustomer = randomUri();
-        var accessRights = Set.of(randomString(), randomString(), randomString());
+        var accessRights = Set.of(randomAccessRight(), randomAccessRight(), randomAccessRight());
         var accessRightsForCustomer = accessRights.stream()
+                                          .map(AccessRight::toPersistedString)
                                           .map(right -> right + AT + usersCustomer)
                                           .collect(Collectors.toSet());
         var cognitoUserEntry = createCognitoUserEntry(usersCustomer, accessRightsForCustomer);
@@ -279,7 +281,7 @@ class RequestInfoTest {
         throws JsonProcessingException {
         var customerId = randomUri();
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withCurrentCustomer(customerId)
-                          .withAccessRights(customerId, APPROVE_DOI_REQUEST.toPersistedString(), randomString())
+                          .withAccessRights(customerId, MANAGE_PUBLISHING_REQUESTS.toPersistedString(), randomString())
                           .build();
         var requestInfo = RequestInfo.fromRequest(request);
         assertThat(requestInfo.userIsApplicationAdmin(), is(false));
@@ -619,8 +621,12 @@ class RequestInfoTest {
                    containsString(ERROR_FETCHING_COGNITO_INFO.replace(LOG_STRING_INTERPOLATION, EMPTY_STRING)));
     }
 
+    private AccessRight randomAccessRight() {
+        return randomElement(AccessRight.values());
+    }
+
     private String randomAccessRight(URI usersCustomer) {
-        return new AccessRightEntry(randomString(), usersCustomer).toString();
+        return new AccessRightEntry(randomAccessRight().toPersistedString(), usersCustomer).toString();
     }
 
     private RequestInfo requestInfoWithCustomerId(URI userCustomer) throws JsonProcessingException {

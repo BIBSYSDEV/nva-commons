@@ -244,12 +244,26 @@ public class RequestInfo {
         return attempt(() -> this.getRequestContext().get(DOMAIN_NAME_FIELD).asText()).orElseThrow();
     }
 
+    /**
+     * @deprecated use {@link #userIsAuthorized(AccessRight)} instead. New AccessRights for appadmin are
+     *     MANAGE_EXTERNAL_CLIENTS, ACT_AS, MANAGE_CUSTOMERS
+     */
+    @Deprecated
     public boolean userIsApplicationAdmin() {
-        return userIsAuthorized(AccessRight.ADMINISTRATE_APPLICATION.toPersistedString());
+        return userIsAuthorized(AccessRight.ADMINISTRATE_APPLICATION);
     }
 
+    /**
+     * @deprecated use {@link #userIsAuthorized(AccessRight)} instead.
+     */
+    @Deprecated
     public boolean userIsAuthorized(String accessRight) {
         return checkAuthorizationOnline(accessRight) || checkAuthorizationOffline(accessRight);
+    }
+
+    public boolean userIsAuthorized(AccessRight accessRight) {
+        return checkAuthorizationOnline(accessRight.toPersistedString())
+               || checkAuthorizationOffline(accessRight.toPersistedString());
     }
 
     @JacocoGenerated
