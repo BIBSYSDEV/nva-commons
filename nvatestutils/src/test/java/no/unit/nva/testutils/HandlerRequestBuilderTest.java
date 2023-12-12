@@ -1,5 +1,6 @@
 package no.unit.nva.testutils;
 
+import static no.unit.nva.testutils.RandomDataGenerator.randomAccessRight;
 import static no.unit.nva.testutils.RandomDataGenerator.randomJson;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
@@ -250,7 +251,7 @@ class HandlerRequestBuilderTest {
         var request = new HandlerRequestBuilder<String>(objectMapper)
                           .withPersonCristinId(randomUri())
                           .withBody(randomJson())
-                          .withAccessRights(randomUri(), randomString(), randomString())
+                          .withAccessRights(randomUri(), randomAccessRight(), randomAccessRight())
                           .withPathParameters(Map.of(randomString(), randomString()))
                           .buildRequestEvent();
         assertThat(request.getPathParameters().keySet(), is(not(empty())));
