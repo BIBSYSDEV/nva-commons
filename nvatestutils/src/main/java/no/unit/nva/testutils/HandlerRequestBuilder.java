@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import nva.commons.apigateway.AccessRight;
 import nva.commons.apigateway.AccessRightEntry;
 import nva.commons.core.JacocoGenerated;
 
@@ -237,10 +238,10 @@ public class HandlerRequestBuilder<T> {
         return this;
     }
 
-    public HandlerRequestBuilder<T> withAccessRights(URI customerId, String... accessRights) {
-        for (String accessRightString : accessRights) {
-            var accessRight = new AccessRightEntry(accessRightString, customerId);
-            addAccessRightToCognitoGroups(accessRight);
+    public HandlerRequestBuilder<T> withAccessRights(URI customerId, AccessRight... accessRights) {
+        for (AccessRight accessRight : accessRights) {
+            var accessRightEntry = new AccessRightEntry(accessRight.toPersistedString(), customerId);
+            addAccessRightToCognitoGroups(accessRightEntry);
         }
         return this;
     }

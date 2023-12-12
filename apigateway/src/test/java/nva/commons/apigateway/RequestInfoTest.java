@@ -3,7 +3,7 @@ package nva.commons.apigateway;
 import static no.unit.nva.auth.OAuthConstants.OAUTH_USER_INFO;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
-import static no.unit.nva.testutils.RandomDataGenerator.randomElement;
+import static no.unit.nva.testutils.RandomDataGenerator.randomAccessRight;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static nva.commons.apigateway.AccessRight.MANAGE_PUBLISHING_REQUESTS;
@@ -51,6 +51,7 @@ import nva.commons.logutils.LogUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
@@ -211,9 +212,11 @@ class RequestInfoTest {
     @Test
     void shouldReturnThatUserDoesNotHaveAccessRightForSpecificCustomerWhenCognitoDoesNotHaveRespectiveAccessRight() {
         var usersCustomer = randomUri();
-        var accessRights = Set.of(randomString(), randomString(), randomString());
+        var accessRights = Set.of(randomAccessRight(), randomAccessRight(), randomAccessRight());
         var accessRightsForCustomer = accessRights.stream()
-                                          .map(right -> right + AT + usersCustomer)
+                                          .map(accessEntry -> new AccessRightEntry(accessEntry.toPersistedString(),
+                                                                                  usersCustomer))
+                                          .map(AccessRightEntry::toString)
                                           .collect(Collectors.toSet());
         var cognitoUserEntry = CognitoUserInfo.builder()
                                    .withCurrentCustomer(usersCustomer)
@@ -240,7 +243,7 @@ class RequestInfoTest {
     void shouldReturnThatUserIsAuthorizedWhenRequestInfoContainsACustomerIdAndTheRequestedAccessRight()
         throws JsonProcessingException {
         var usersCustomer = randomUri();
-        var usersAccessRights = List.of(randomString(), randomString());
+        var usersAccessRights = List.of(randomAccessRight(), randomAccessRight());
         RequestInfo requestInfo = createRequestInfoForOfflineAuthorization(usersAccessRights, usersCustomer);
         for (var accessRight : usersAccessRights) {
             assertThat(requestInfo.userIsAuthorized(accessRight), is(true));
@@ -251,8 +254,9 @@ class RequestInfoTest {
     void shouldReturnNotAuthorizedWhenRequestInfoDoesNotContainTheRequestedAccessRightAndCheckIsPerformedOffline()
         throws JsonProcessingException {
         var userCustomer = randomUri();
-        var usersAccessRights = List.of(randomAccessRight(userCustomer), randomAccessRight(userCustomer));
-        var requestInfo = createRequestInfoForOfflineAuthorization(usersAccessRights, userCustomer);
+        var usersAccessRights = List.of(randomAccessRight(), randomAccessRight());
+        var requestInfo =
+            createRequestInfoForOfflineAuthorization(usersAccessRights, userCustomer);
         var notAllocatedAccessRight = randomString();
         assertThat(requestInfo.userIsAuthorized(notAllocatedAccessRight), is(false));
     }
@@ -262,15 +266,15 @@ class RequestInfoTest {
         throws JsonProcessingException {
         var userCustomer = randomUri();
         var requestInfo = requestInfoWithCustomerId(userCustomer);
-        var notAllocatedAccessRight = randomAccessRight(userCustomer);
-        assertThat(requestInfo.userIsAuthorized(notAllocatedAccessRight), is(false));
+        var notAllocatedAccessRight = randomAccessRightEntry(userCustomer);
+        assertThat(requestInfo.userIsAuthorized(notAllocatedAccessRight.toString()), is(false));
     }
 
     @Test
     void shouldReturnThatUserIsApplicationAdminWhenUserHasTheRespectiveAccessRight() throws JsonProcessingException {
         var customerId = randomUri();
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withCurrentCustomer(customerId)
-                          .withAccessRights(customerId, AccessRight.ADMINISTRATE_APPLICATION.toPersistedString())
+                          .withAccessRights(customerId, AccessRight.ADMINISTRATE_APPLICATION)
                           .build();
         var requestInfo = RequestInfo.fromRequest(request);
         assertThat(requestInfo.userIsApplicationAdmin(), is(true));
@@ -281,7 +285,7 @@ class RequestInfoTest {
         throws JsonProcessingException {
         var customerId = randomUri();
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withCurrentCustomer(customerId)
-                          .withAccessRights(customerId, MANAGE_PUBLISHING_REQUESTS.toPersistedString(), randomString())
+                          .withAccessRights(customerId, MANAGE_PUBLISHING_REQUESTS)
                           .build();
         var requestInfo = RequestInfo.fromRequest(request);
         assertThat(requestInfo.userIsApplicationAdmin(), is(false));
@@ -621,12 +625,8 @@ class RequestInfoTest {
                    containsString(ERROR_FETCHING_COGNITO_INFO.replace(LOG_STRING_INTERPOLATION, EMPTY_STRING)));
     }
 
-    private AccessRight randomAccessRight() {
-        return randomElement(AccessRight.values());
-    }
-
-    private String randomAccessRight(URI usersCustomer) {
-        return new AccessRightEntry(randomAccessRight().toPersistedString(), usersCustomer).toString();
+    private AccessRightEntry randomAccessRightEntry(URI usersCustomer) {
+        return new AccessRightEntry(randomAccessRight().toPersistedString(), usersCustomer);
     }
 
     private RequestInfo requestInfoWithCustomerId(URI userCustomer) throws JsonProcessingException {
@@ -717,10 +717,10 @@ class RequestInfoTest {
         return RandomDataGenerator::randomUri;
     }
 
-    private RequestInfo createRequestInfoForOfflineAuthorization(List<String> usersAccessRights, URI userCustomer)
+    private RequestInfo createRequestInfoForOfflineAuthorization(List<AccessRight> accessRights, URI userCustomer)
         throws JsonProcessingException {
         var requestStream = new HandlerRequestBuilder<Void>(dtoObjectMapper).withCurrentCustomer(userCustomer)
-                                .withAccessRights(userCustomer, usersAccessRights.toArray(String[]::new))
+                                .withAccessRights(userCustomer, accessRights.toArray(AccessRight[]::new))
                                 .build();
         return RequestInfo.fromRequest(requestStream);
     }
