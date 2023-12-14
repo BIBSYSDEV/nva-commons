@@ -55,7 +55,6 @@ import nva.commons.logutils.LogUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
@@ -216,7 +215,7 @@ class RequestInfoTest {
     @Test
     void shouldReturnThatUserDoesNotHaveAccessRightForSpecificCustomerWhenCognitoDoesNotHaveRespectiveAccessRight() {
         var usersCustomer = randomUri();
-        var accessRightsForCustomer =  Set.of(new AccessRightEntry(MANAGE_PUBLISHING_REQUESTS, usersCustomer)
+        var accessRightsForCustomer = Set.of(new AccessRightEntry(MANAGE_PUBLISHING_REQUESTS, usersCustomer)
                                           .toString());
         var cognitoUserEntry = CognitoUserInfo.builder()
                                    .withCurrentCustomer(usersCustomer)
@@ -270,7 +269,7 @@ class RequestInfoTest {
         throws JsonProcessingException {
         var userCustomer = randomUri();
         var requestInfo = requestInfoWithCustomerId(userCustomer);
-        var notAllocatedAccessRight = randomAccessRightEntry(userCustomer);
+        var notAllocatedAccessRight = new AccessRightEntry(MANAGE_DEGREE, userCustomer);
         var accessRight = AccessRight.fromPersistedString(notAllocatedAccessRight.getAccessRight());
         assertThat(requestInfo.userIsAuthorized(accessRight), is(false));
     }
@@ -628,10 +627,6 @@ class RequestInfoTest {
         assertThrows(UnauthorizedException.class, requestInfo::getUserName);
         assertThat(logger.getMessages(),
                    containsString(ERROR_FETCHING_COGNITO_INFO.replace(LOG_STRING_INTERPOLATION, EMPTY_STRING)));
-    }
-
-    private AccessRightEntry randomAccessRightEntry(URI usersCustomer) {
-        return new AccessRightEntry(randomAccessRight().toPersistedString(), usersCustomer);
     }
 
     private RequestInfo requestInfoWithCustomerId(URI userCustomer) throws JsonProcessingException {
