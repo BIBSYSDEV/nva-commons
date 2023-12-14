@@ -6,6 +6,9 @@ import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomAccessRight;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
+import static nva.commons.apigateway.AccessRight.MANAGE_DEGREE;
+import static nva.commons.apigateway.AccessRight.MANAGE_DOI;
+import static nva.commons.apigateway.AccessRight.MANAGE_IMPORT;
 import static nva.commons.apigateway.AccessRight.MANAGE_PUBLISHING_REQUESTS;
 import static nva.commons.apigateway.RequestInfo.ERROR_FETCHING_COGNITO_INFO;
 import static nva.commons.apigateway.RequestInfoConstants.AUTHORIZATION_FAILURE_WARNING;
@@ -30,6 +33,7 @@ import com.google.common.net.HttpHeaders;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,7 +55,6 @@ import nva.commons.logutils.LogUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
@@ -195,7 +198,7 @@ class RequestInfoTest {
     @Test
     void shouldReturnThatUserHasAccessRightForSpecificCustomerWhenCognitoHasRespectiveEntry() {
         var usersCustomer = randomUri();
-        var accessRights = Set.of(randomAccessRight(), randomAccessRight(), randomAccessRight());
+        var accessRights = randomAccessRights();
         var accessRightsForCustomer = accessRights.stream()
                                           .map(AccessRight::toPersistedString)
                                           .map(right -> right + AT + usersCustomer)
@@ -212,12 +215,8 @@ class RequestInfoTest {
     @Test
     void shouldReturnThatUserDoesNotHaveAccessRightForSpecificCustomerWhenCognitoDoesNotHaveRespectiveAccessRight() {
         var usersCustomer = randomUri();
-        var accessRights = Set.of(randomAccessRight(), randomAccessRight(), randomAccessRight());
-        var accessRightsForCustomer = accessRights.stream()
-                                          .map(accessEntry -> new AccessRightEntry(accessEntry.toPersistedString(),
-                                                                                  usersCustomer))
-                                          .map(AccessRightEntry::toString)
-                                          .collect(Collectors.toSet());
+        var accessRightsForCustomer = Set.of(new AccessRightEntry(MANAGE_PUBLISHING_REQUESTS, usersCustomer)
+                                          .toString());
         var cognitoUserEntry = CognitoUserInfo.builder()
                                    .withCurrentCustomer(usersCustomer)
                                    .withAccessRights(accessRightsForCustomer)
@@ -225,9 +224,13 @@ class RequestInfoTest {
 
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
-        var requestedAccessRight = randomString();
+        var requestedAccessRight = MANAGE_DOI;
         var userIsAuthorized = requestInfo.userIsAuthorized(requestedAccessRight);
         assertThat(userIsAuthorized, is(false));
+    }
+
+    private static Set<AccessRight> randomAccessRights() {
+        return new HashSet<>(List.of(randomAccessRight(), randomAccessRight(), randomAccessRight()));
     }
 
     @Test
@@ -235,7 +238,7 @@ class RequestInfoTest {
         var cognitoUserEntryWithoutAccessRights = CognitoUserInfo.builder().withCurrentCustomer(randomUri()).build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutAccessRights));
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
-        var requestedAccessRight = randomString();
+        var requestedAccessRight = randomAccessRight();
         assertThat(requestInfo.userIsAuthorized(requestedAccessRight), is(false));
     }
 
@@ -254,10 +257,10 @@ class RequestInfoTest {
     void shouldReturnNotAuthorizedWhenRequestInfoDoesNotContainTheRequestedAccessRightAndCheckIsPerformedOffline()
         throws JsonProcessingException {
         var userCustomer = randomUri();
-        var usersAccessRights = List.of(randomAccessRight(), randomAccessRight());
+        var usersAccessRights = List.of(MANAGE_DEGREE, MANAGE_IMPORT);
         var requestInfo =
             createRequestInfoForOfflineAuthorization(usersAccessRights, userCustomer);
-        var notAllocatedAccessRight = randomString();
+        var notAllocatedAccessRight = MANAGE_PUBLISHING_REQUESTS;
         assertThat(requestInfo.userIsAuthorized(notAllocatedAccessRight), is(false));
     }
 
@@ -266,8 +269,9 @@ class RequestInfoTest {
         throws JsonProcessingException {
         var userCustomer = randomUri();
         var requestInfo = requestInfoWithCustomerId(userCustomer);
-        var notAllocatedAccessRight = randomAccessRightEntry(userCustomer);
-        assertThat(requestInfo.userIsAuthorized(notAllocatedAccessRight.toString()), is(false));
+        var notAllocatedAccessRight = new AccessRightEntry(MANAGE_DEGREE, userCustomer);
+        var accessRight = AccessRight.fromPersistedString(notAllocatedAccessRight.getAccessRight());
+        assertThat(requestInfo.userIsAuthorized(accessRight), is(false));
     }
 
     @Test
@@ -518,7 +522,7 @@ class RequestInfoTest {
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).build();
         var requestInfo = RequestInfo.fromRequest(request);
         var logger = LogUtils.getTestingAppenderForRootLogger();
-        requestInfo.userIsAuthorized(randomString());
+        requestInfo.userIsAuthorized(randomAccessRight());
         assertThat(logger.getMessages(), containsString(AUTHORIZATION_FAILURE_WARNING));
     }
 
@@ -623,10 +627,6 @@ class RequestInfoTest {
         assertThrows(UnauthorizedException.class, requestInfo::getUserName);
         assertThat(logger.getMessages(),
                    containsString(ERROR_FETCHING_COGNITO_INFO.replace(LOG_STRING_INTERPOLATION, EMPTY_STRING)));
-    }
-
-    private AccessRightEntry randomAccessRightEntry(URI usersCustomer) {
-        return new AccessRightEntry(randomAccessRight().toPersistedString(), usersCustomer);
     }
 
     private RequestInfo requestInfoWithCustomerId(URI userCustomer) throws JsonProcessingException {

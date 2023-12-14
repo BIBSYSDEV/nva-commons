@@ -256,7 +256,8 @@ public class RequestInfo {
     /**
      * @deprecated use {@link #userIsAuthorized(AccessRight)} instead.
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
+    @JacocoGenerated
     public boolean userIsAuthorized(String accessRight) {
         return checkAuthorizationOnline(accessRight) || checkAuthorizationOffline(accessRight);
     }

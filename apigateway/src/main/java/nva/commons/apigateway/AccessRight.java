@@ -20,13 +20,13 @@ public enum AccessRight {
     /**
      * @deprecated Use MANAGE_PUBLISHING_REQUEST instead.
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     PUBLISH_METADATA("PUBLISH_METADATA"),
 
     /**
      * @deprecated Use MANAGE_PUBLISHING_REQUEST instead.
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     PUBLISH_DEGREE("PUBLISH_DEGREE"),
 
     /**
@@ -145,9 +145,9 @@ public enum AccessRight {
         AccessRight::getPersistedValue
     );
 
-    public final String persistedValue;
+    private final String persistedValue;
 
-    public String getPersistedValue() {
+    private String getPersistedValue() {
         return persistedValue;
     }
 
@@ -157,12 +157,6 @@ public enum AccessRight {
 
     public String toPersistedString() {
         return persistedValue;
-    }
-
-    @Override
-    @Deprecated
-    public String toString() {
-        throw new IllegalStateException("Use toPersistedString() instead");
     }
 
     /**

@@ -24,6 +24,11 @@ public class AccessRightEntry {
         this.customerId = customerId;
     }
 
+    public AccessRightEntry(AccessRight right, URI customerId) {
+        this.group = right.toPersistedString();
+        this.customerId = customerId;
+    }
+
     public static AccessRightEntry fromString(String accessRightAtCustomer) {
         var list = accessRightAtCustomer.split(AT);
         var accessRight = formatAccessRightString(list[ACCESS_RIGHT_INDEX]);
@@ -38,7 +43,7 @@ public class AccessRightEntry {
     }
 
     public static AccessRightEntry createUserAtCustomerGroup(URI customerId) {
-        return new AccessRightEntry(USER.toPersistedString(), customerId);
+        return new AccessRightEntry(USER, customerId);
     }
 
     @JacocoGenerated
