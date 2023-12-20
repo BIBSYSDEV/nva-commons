@@ -2,6 +2,7 @@ package no.unit.nva.stubs;
 
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
@@ -31,6 +32,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectsResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
@@ -136,6 +138,28 @@ class FakeS3ClientTest {
     }
 
     @Test
+    void shouldReturnDefaultSizeListObjectResponseWhenV1RequestDoesNotSpecifySize() {
+        var s3Client = new FakeS3Client();
+        var bucket = randomString();
+        var expectedFiles = insertRandomFilesToS3(s3Client, bucket);
+
+        var allS3ObjectKeys = fetchDefaultSizeFilesListUsingBucketNameOnlyV1(s3Client, bucket);
+
+        assertThat(allS3ObjectKeys, containsInAnyOrder(expectedFiles.toArray(String[]::new)));
+    }
+
+    @Test
+    void shouldReturnDefaultSizeListObjectResponseWhenV2RequestDoesNotSpecifySize() {
+        var s3Client = new FakeS3Client();
+        var bucket = randomString();
+        var expectedFiles = insertRandomFilesToS3(s3Client, bucket);
+
+        var allS3ObjectKeys = fetchDefaultSizeFilesListUsingBucketNameOnlyV2(s3Client, bucket);
+
+        assertThat(allS3ObjectKeys, containsInAnyOrder(expectedFiles.toArray(String[]::new)));
+    }
+
+    @Test
     void shouldThrowExceptionWhenNextMarkerDoesNotExist() {
         var s3Client = new FakeS3Client();
         var bucket = randomString();
@@ -148,6 +172,24 @@ class FakeS3ClientTest {
                                     .maxKeys(1)
                                     .build();
         assertThrows(IllegalArgumentException.class, () -> s3Client.listObjectsV2(listObjectRequest));
+    }
+
+    private static List<String> insertRandomFilesToS3(FakeS3Client s3Client, String bucket) {
+        return List.of(insertRandomFileToS3(s3Client, bucket).toString(),
+                       insertRandomFileToS3(s3Client, bucket).toString());
+    }
+
+    private static List<String> fetchDefaultSizeFilesListUsingBucketNameOnlyV1(FakeS3Client s3Client, String bucket) {
+        var listingRequestWithOnlyTheRequiredArguments = ListObjectsRequest.builder().bucket(bucket).build();
+        var listedFiles = s3Client.listObjects(listingRequestWithOnlyTheRequiredArguments);
+        return extractListedKeys(listedFiles);
+    }
+
+    private static List<String> fetchDefaultSizeFilesListUsingBucketNameOnlyV2(FakeS3Client s3Client,
+                                                                               String bucket) {
+        var listingRequestWithOnlyTheRequiredArguments = ListObjectsV2Request.builder().bucket(bucket).build();
+        var listedFiles = s3Client.listObjectsV2(listingRequestWithOnlyTheRequiredArguments);
+        return extractListedKeysForV2Request(listedFiles);
     }
 
     private static ListObjectsRequest createListObjectsRequest(String bucket,
@@ -209,6 +251,13 @@ class FakeS3ClientTest {
     }
 
     private static List<String> extractListedKeys(ListObjectsResponse listingResult) {
+        return listingResult.contents()
+                   .stream()
+                   .map(S3Object::key)
+                   .collect(Collectors.toList());
+    }
+
+    private static List<String> extractListedKeysForV2Request(ListObjectsV2Response listingResult) {
         return listingResult.contents()
                    .stream()
                    .map(S3Object::key)
