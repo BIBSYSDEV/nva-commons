@@ -196,7 +196,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnThatUserHasAccessRightForSpecificCustomerWhenCognitoHasRespectiveEntrAndUsesLegacyFormat() {
+    void shouldReturnThatUserHasAccessRightForSpecificCustomerWhenCognitoHasRespectiveEntryAndUsesLegacyFormat() {
         var usersCustomer = randomUri();
         var accessRights = randomAccessRights();
         var accessRightsForCustomer = accessRights.stream()
