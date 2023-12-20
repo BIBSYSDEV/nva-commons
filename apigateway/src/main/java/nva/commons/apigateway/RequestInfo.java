@@ -398,7 +398,8 @@ public class RequestInfo {
     private boolean checkAuthorizationOffline(String accessRight) {
         return attempt(this::getCurrentCustomer)
                    .map(currentCustomer -> new AccessRightEntry(accessRight, currentCustomer))
-                   .map(requiredAccessRight -> fetchAvailableAccessRightsOffline().anyMatch(requiredAccessRight::equals))
+                   .map(
+                       requiredAccessRight -> fetchAvailableAccessRightsOffline().anyMatch(requiredAccessRight::equals))
                    .orElse(fail -> handleAuthorizationFailure());
     }
 
