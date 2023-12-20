@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.SingletonCollector;
 import nva.commons.core.StringUtils;
@@ -24,6 +25,9 @@ public class DoiConverter {
     private static final String ERROR_WHEN_SETTING_DOI_HOST = "Unexpected error while setting host for DOI URI:";
     private static final Logger logger = LoggerFactory.getLogger(DoiConverter.class);
     private static final String NOT_HTTP_URI_REGEX = "([^/]+:)";
+    public static final Pattern CONTAINS_BASE_PATH_BUT_NOT_PROTOCOL = Pattern.compile(
+        "(?<!https?://)(?:dx\\.)?doi\\.org/.*", Pattern.CASE_INSENSITIVE);
+    public static final String PROTOCOL = "https://";
 
     private final Function<URI, Boolean> onlineValidationFunction;
 
@@ -42,13 +46,22 @@ public class DoiConverter {
 
     public URI toUri(String doi) {
         return Optional.ofNullable(doi)
-            .stream()
-            .map(StringUtils::removeWhiteSpaces)
-            .map(this::removeGarbageCharacters)
-            .filter(DoiValidator::validateOrThrow)
-            .map(this::createUri)
-            .filter(onlineValidationFunction::apply)
-            .collect(SingletonCollector.collectOrElse(null));
+                   .stream()
+                   .map(StringUtils::removeWhiteSpaces)
+                   .map(this::removeGarbageCharacters)
+                   .map(this::addHttpsIfNecessary)
+                   .filter(DoiValidator::validateOrThrow)
+                   .map(this::createUri)
+                   .filter(onlineValidationFunction::apply)
+                   .collect(SingletonCollector.collectOrElse(null));
+    }
+
+    private String addHttpsIfNecessary(String doi) {
+        var matcher = CONTAINS_BASE_PATH_BUT_NOT_PROTOCOL.matcher(doi);
+        if (matcher.matches()) {
+            return PROTOCOL + doi;
+        }
+        return doi;
     }
 
     private String removeGarbageCharacters(String doi) {
