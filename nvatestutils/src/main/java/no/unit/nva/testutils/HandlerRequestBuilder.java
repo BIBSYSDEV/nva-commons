@@ -41,7 +41,7 @@ public class HandlerRequestBuilder<T> {
     public static final String AUTHORIZER_NODE = "authorizer";
     public static final String CLAIMS_NODE = "claims";
     public static final String USER_NAME_CLAIM = "custom:nvaUsername";
-    public static final String ACCESS_RIGHTS_CLAIMS = "cognito:groups";
+    public static final String GROUPS_CLAIM = "cognito:groups";
     public static final String APPLICATION_ROLES_CLAIM = "custom:applicationRoles";
     public static final String PERSON_CRISTIN_ID = "custom:cristinId";
     public static final String FEIDE_ID_CLAIM = "custom:feideId";
@@ -285,7 +285,7 @@ public class HandlerRequestBuilder<T> {
         var newClaim = existingAccessRights.stream()
                            .map(AccessRightEntry::toString)
                            .collect(Collectors.joining(ENTRIES_DELIMITER));
-        claims.put(ACCESS_RIGHTS_CLAIMS, newClaim);
+        claims.put(GROUPS_CLAIM, newClaim);
     }
 
     private void insertAndOverwriteExistingCustomerId(AccessRightEntry accessRight, ObjectNode claims) {
@@ -295,7 +295,7 @@ public class HandlerRequestBuilder<T> {
                                       .filter(Objects::nonNull)
                                       .map(AccessRightEntry::toString)
                                       .collect(Collectors.joining(ENTRIES_DELIMITER));
-        claims.put(ACCESS_RIGHTS_CLAIMS, updatedAccessRights);
+        claims.put(GROUPS_CLAIM, updatedAccessRights);
     }
 
     private Collection<AccessRightEntry> extractExistingAccessRightsRemovingSpecialUserAtCustomerClaim(
@@ -308,8 +308,8 @@ public class HandlerRequestBuilder<T> {
     }
 
     private Collection<AccessRightEntry> extractAccessRights(ObjectNode claims) {
-        return claims.has(ACCESS_RIGHTS_CLAIMS)
-                   ? AccessRightEntry.fromCsv(claims.get(ACCESS_RIGHTS_CLAIMS).textValue()).collect(Collectors.toList())
+        return claims.has(GROUPS_CLAIM)
+                   ? AccessRightEntry.fromCsv(claims.get(GROUPS_CLAIM).textValue()).collect(Collectors.toList())
                    : new ArrayList<>();
     }
 

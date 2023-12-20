@@ -398,7 +398,8 @@ public class RequestInfo {
     private boolean checkAuthorizationOffline(String accessRight) {
         return attempt(this::getCurrentCustomer)
                    .map(currentCustomer -> new AccessRightEntry(accessRight, currentCustomer))
-                   .map(requiredAccessRight -> fetchAvailableAccessRights().anyMatch(requiredAccessRight::equals))
+                   .map(
+                       requiredAccessRight -> fetchAvailableAccessRightsOffline().anyMatch(requiredAccessRight::equals))
                    .orElse(fail -> handleAuthorizationFailure());
     }
 
@@ -407,7 +408,7 @@ public class RequestInfo {
         return false;
     }
 
-    private Stream<AccessRightEntry> fetchAvailableAccessRights() {
+    private Stream<AccessRightEntry> fetchAvailableAccessRightsOffline() {
         return getRequestContextParameterOpt(PERSON_GROUPS).stream().flatMap(AccessRightEntry::fromCsv);
     }
 
@@ -420,8 +421,11 @@ public class RequestInfo {
     }
 
     private List<AccessRightEntry> fetchAvailableRights() {
-        return fetchUserInfoFromCognito().map(CognitoUserInfo::getAccessRights)
-                   .map(AccessRightEntry::fromCsv)
+        var userInfo = fetchUserInfoFromCognito();
+        return userInfo
+                   .map(CognitoUserInfo::getAccessRights)
+                   .map(accessRightEntryStr -> AccessRightEntry.fromCsvForCustomer(accessRightEntryStr, userInfo.get()
+                                                                                                 .getCurrentCustomer()))
                    .map(stream -> stream.collect(Collectors.toList()))
                    .orElseGet(Collections::emptyList);
     }

@@ -36,10 +36,22 @@ public class AccessRightEntry {
         return new AccessRightEntry(accessRight, customerId);
     }
 
+    public static AccessRightEntry fromStringForCustomer(String accessRightAtCustomer, URI customerId) {
+        var list = accessRightAtCustomer.split(AT);
+        var accessRight = formatAccessRightString(list[ACCESS_RIGHT_INDEX]);
+        return new AccessRightEntry(accessRight, customerId);
+    }
+
     public static Stream<AccessRightEntry> fromCsv(String csv) {
         return Arrays.stream(csv.split(ENTRIIES_DELIMITER))
             .filter(not(String::isBlank))
             .map(AccessRightEntry::fromString);
+    }
+
+    public static Stream<AccessRightEntry> fromCsvForCustomer(String csv, URI customerId) {
+        return Arrays.stream(csv.split(ENTRIIES_DELIMITER))
+                   .filter(not(String::isBlank))
+                   .map(accessRightEntryStr -> fromStringForCustomer(accessRightEntryStr, customerId));
     }
 
     public static AccessRightEntry createUserAtCustomerGroup(URI customerId) {
