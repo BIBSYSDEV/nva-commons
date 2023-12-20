@@ -196,12 +196,28 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnThatUserHasAccessRightForSpecificCustomerWhenCognitoHasRespectiveEntry() {
+    void shouldReturnThatUserHasAccessRightForSpecificCustomerWhenCognitoHasRespectiveEntrAndUsesLegacyFormat() {
         var usersCustomer = randomUri();
         var accessRights = randomAccessRights();
         var accessRightsForCustomer = accessRights.stream()
                                           .map(AccessRight::toPersistedString)
                                           .map(right -> right + AT + usersCustomer)
+                                          .collect(Collectors.toSet());
+        var cognitoUserEntry = createCognitoUserEntry(usersCustomer, accessRightsForCustomer);
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        for (var accessRight : accessRights) {
+            var userIsAuthorized = requestInfo.userIsAuthorized(accessRight);
+            assertThat(userIsAuthorized, is(true));
+        }
+    }
+
+    @Test
+    void shouldReturnThatUserHasAccessRightForSpecificCustomerWhenCognitoHasRespectiveEntry() {
+        var usersCustomer = randomUri();
+        var accessRights = randomAccessRights();
+        var accessRightsForCustomer = accessRights.stream()
+                                          .map(AccessRight::toPersistedString)
                                           .collect(Collectors.toSet());
         var cognitoUserEntry = createCognitoUserEntry(usersCustomer, accessRightsForCustomer);
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
