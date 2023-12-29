@@ -24,7 +24,7 @@ public enum AccessRight {
     PUBLISH_METADATA("PUBLISH_METADATA"),
 
     /**
-     * @deprecated Use MANAGE_PUBLISHING_REQUEST instead.
+     * @deprecated Use MANAGE_DEGREE instead.
      */
     @Deprecated(forRemoval = true)
     PUBLISH_DEGREE("PUBLISH_DEGREE"),
@@ -108,13 +108,13 @@ public enum AccessRight {
     MANAGE_OWN_PROJECTS("MANAGE_OWN_PROJECTS"),
 
     /**
-     * @deprecated Use MANGAE_NVI instead.
+     * @deprecated Use MANAGE_NVI instead.
      */
     @Deprecated(forRemoval = true)
     MANAGE_NVI_PERIODS("MANAGE_NVI_PERIODS"),
 
     /**
-     * @deprecated Use MANAGE_NVI instead.
+     * @deprecated Use MANAGE_NVI_CANDIDATES instead.
      */
     @Deprecated(forRemoval = true)
     MANAGE_NVI_CANDIDATE("MANAGE_NVI_CANDIDATE"),
