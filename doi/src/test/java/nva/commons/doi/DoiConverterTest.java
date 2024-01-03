@@ -37,7 +37,7 @@ public class DoiConverterTest {
     private static final String EXPECTED = "https://doi.org/" + DOI;
     private static final String DOI_ORG_DOMAIN = "doi.org/";
     private static final String OLD_DOI_DOMAIN = "dx.doi.org/";
-    private static final String PROTOCOL = "https://";
+    private static final String SCHEME = "https://";
     DoiConverter doiConverterImpl = new DoiConverter((uri) -> DO_NOT_VALIDATE_ONLINE);
 
     @Tag("RemoteTest")
@@ -115,12 +115,12 @@ public class DoiConverterTest {
         assertThat(appender.getMessages(), containsString(input));
     }
 
-    @ParameterizedTest(name = "should add https for doi missing protocol:{0}")
-    @MethodSource("doiMissingProtocol")
-    public void shouldAddHttpsWhenInputContainsDomainNameButNotProtocol(String inputDoi) {
+    @ParameterizedTest(name = "should add https for doi missing scheme:{0}")
+    @MethodSource("doiMissingScheme")
+    public void shouldAddHttpsWhenInputContainsDomainNameButNotScheme(String inputDoi) {
         var doi = assertDoesNotThrow(() -> doiConverterImpl.toUri(inputDoi));
         assertThat(doi, is(not(nullValue())));
-        assertThat(doi, is(equalTo(UriWrapper.fromUri(PROTOCOL + DOI_ORG_DOMAIN + DOI).getUri())));
+        assertThat(doi, is(equalTo(UriWrapper.fromUri(SCHEME + DOI_ORG_DOMAIN + DOI).getUri())));
     }
 
     private static Stream<DoiInput> validDois() throws URISyntaxException {
@@ -131,7 +131,7 @@ public class DoiConverterTest {
         return DoiSuppliers.resolvableDois();
     }
 
-    private static Stream<String> doiMissingProtocol() {
+    private static Stream<String> doiMissingScheme() {
         return Stream.of(DOI_ORG_DOMAIN + DOI, OLD_DOI_DOMAIN + DOI);
     }
 

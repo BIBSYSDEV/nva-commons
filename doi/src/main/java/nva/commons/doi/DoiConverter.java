@@ -25,9 +25,9 @@ public class DoiConverter {
     private static final String ERROR_WHEN_SETTING_DOI_HOST = "Unexpected error while setting host for DOI URI:";
     private static final Logger logger = LoggerFactory.getLogger(DoiConverter.class);
     private static final String NOT_HTTP_URI_REGEX = "([^/]+:)";
-    public static final Pattern CONTAINS_BASE_PATH_BUT_NOT_PROTOCOL = Pattern.compile(
+    public static final Pattern CONTAINS_BASE_PATH_BUT_NOT_SCHEME = Pattern.compile(
         "(?<!https?://)(?:dx\\.)?doi\\.org/.*", Pattern.CASE_INSENSITIVE);
-    public static final String PROTOCOL = "https://";
+    public static final String SCHEME = "https://";
 
     private final Function<URI, Boolean> onlineValidationFunction;
 
@@ -57,9 +57,9 @@ public class DoiConverter {
     }
 
     private String addHttpsIfNecessary(String doi) {
-        var matcher = CONTAINS_BASE_PATH_BUT_NOT_PROTOCOL.matcher(doi);
+        var matcher = CONTAINS_BASE_PATH_BUT_NOT_SCHEME.matcher(doi);
         if (matcher.matches()) {
-            return PROTOCOL + doi;
+            return SCHEME + doi;
         }
         return doi;
     }
