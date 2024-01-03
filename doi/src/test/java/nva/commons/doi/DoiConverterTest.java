@@ -6,6 +6,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -17,6 +18,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
+import nva.commons.core.paths.UriWrapper;
 import nva.commons.doi.DoiSuppliers.DoiInput;
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
@@ -33,6 +35,9 @@ public class DoiConverterTest {
     public static final boolean DO_NOT_VALIDATE_ONLINE = true;
     private static final String DOI = "10.1000/182";
     private static final String EXPECTED = "https://doi.org/" + DOI;
+    private static final String DOI_ORG_DOMAIN = "doi.org/";
+    private static final String OLD_DOI_DOMAIN = "dx.doi.org/";
+    private static final String SCHEME = "https://";
     DoiConverter doiConverterImpl = new DoiConverter((uri) -> DO_NOT_VALIDATE_ONLINE);
 
     @Tag("RemoteTest")
@@ -110,12 +115,24 @@ public class DoiConverterTest {
         assertThat(appender.getMessages(), containsString(input));
     }
 
+    @ParameterizedTest(name = "should add https for doi missing scheme:{0}")
+    @MethodSource("doiMissingScheme")
+    public void shouldAddHttpsWhenInputContainsDomainNameButNotScheme(String inputDoi) {
+        var doi = assertDoesNotThrow(() -> doiConverterImpl.toUri(inputDoi));
+        assertThat(doi, is(not(nullValue())));
+        assertThat(doi, is(equalTo(UriWrapper.fromUri(SCHEME + DOI_ORG_DOMAIN + DOI).getUri())));
+    }
+
     private static Stream<DoiInput> validDois() throws URISyntaxException {
         return DoiSuppliers.validDois();
     }
 
     private static Stream<String> resolvableDois() {
         return DoiSuppliers.resolvableDois();
+    }
+
+    private static Stream<String> doiMissingScheme() {
+        return Stream.of(DOI_ORG_DOMAIN + DOI, OLD_DOI_DOMAIN + DOI);
     }
 
     private CompletableFuture<HttpResponse<String>> failedResponse(InvocationOnMock invocation) {
