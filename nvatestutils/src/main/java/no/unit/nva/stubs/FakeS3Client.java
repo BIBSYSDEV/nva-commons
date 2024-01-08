@@ -124,7 +124,7 @@ public class FakeS3Client implements S3Client {
     }
 
     @Override
-    public DeleteObjectResponse deleteObject(DeleteObjectRequest deleteObjectRequest){
+    public DeleteObjectResponse deleteObject(DeleteObjectRequest deleteObjectRequest) {
         var path = deleteObjectRequest.key();
         this.filesAndContent.remove(path);
         return DeleteObjectResponse.builder().build();
