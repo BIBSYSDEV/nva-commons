@@ -29,6 +29,7 @@ import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
@@ -244,6 +245,10 @@ public class S3Driver {
         return getFile(filename, StandardCharsets.UTF_8);
     }
 
+    public void deleteFile(UnixPath filename) {
+        client.deleteObject(createDeleteObjectRequest(filename));
+    }
+
     @JacocoGenerated
     private static SdkHttpClient httpClientForConcurrentQueries() {
         return ApacheHttpClient.builder()
@@ -328,6 +333,13 @@ public class S3Driver {
         return GetObjectRequest.builder()
                    .bucket(bucketName)
                    .key(file.toString())
+                   .build();
+    }
+
+    private DeleteObjectRequest createDeleteObjectRequest(UnixPath filename) {
+        return DeleteObjectRequest.builder()
+                   .bucket(bucketName)
+                   .key(filename.toString())
                    .build();
     }
 

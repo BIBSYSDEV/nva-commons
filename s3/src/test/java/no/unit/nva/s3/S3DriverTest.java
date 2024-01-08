@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringStartsWith.startsWith;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,6 +34,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 class S3DriverTest {
@@ -262,7 +264,7 @@ class S3DriverTest {
                         .map(UriWrapper::fromUri)
                         .map(UriWrapper::getPath)
                         .map(UnixPath::removeRoot)
-                        .collect(Collectors.toList());
+                        .toList();
 
         var actualFiles = s3Driver.listAllFiles(UnixPath.of(""));
         assertThat(actualFiles, containsInAnyOrder(files.toArray(UnixPath[]::new)));
@@ -277,7 +279,7 @@ class S3DriverTest {
                           .bucket(SAMPLE_BUCKET)
                           .key(filename)
                           .build();
-        var response = s3Client.putObject(request, RequestBody.fromBytes(utf16));
+        s3Client.putObject(request, RequestBody.fromBytes(utf16));
         var actualContent = s3Driver.getFile(UnixPath.of(filename), StandardCharsets.UTF_16);
         assertThat(actualContent, is(equalTo(expectedContent)));
     }
@@ -295,6 +297,21 @@ class S3DriverTest {
 
         Executable action = () -> s3Driver.getFile(UnixPath.of(filename), StandardCharsets.UTF_8);
         assertThrows(UncheckedIOException.class, action);
+    }
+
+    @Test
+    void shouldDeleteFileWhenFileExists() throws IOException {
+        var somePath = UnixPath.of(SOME_PATH);
+        var expectedContent = randomString();
+        var fileLocation = s3Driver.insertFile(somePath, expectedContent);
+        s3Driver.deleteFile(toS3Path(fileLocation));
+        assertThrows(NoSuchKeyException.class, () -> s3Driver.getFile(somePath));
+    }
+
+    @Test
+    void shouldDoNothingWhenDeletingFileThatDoesNotExist() {
+        var somePath = UnixPath.of(SOME_PATH);
+        assertDoesNotThrow(() -> s3Driver.deleteFile(somePath));
     }
 
     private static String randomFileName() {

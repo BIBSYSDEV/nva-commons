@@ -24,6 +24,8 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.http.AbortableInputStream;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectResponse;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
@@ -39,7 +41,6 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 @JacocoGenerated
 public class FakeS3Client implements S3Client {
 
-    public static final boolean LIST_ALL = true;
     private static final int START_FROM_BEGINNING = 0;
     private final Map<String, ByteBuffer> filesAndContent;
 
@@ -116,10 +117,17 @@ public class FakeS3Client implements S3Client {
     @SuppressWarnings("PMD.CloseResource")
     @Override
     public PutObjectResponse putObject(PutObjectRequest putObjectRequest, RequestBody requestBody) {
-        String path = putObjectRequest.key();
-        InputStream inputStream = requestBody.contentStreamProvider().newStream();
+        var path = putObjectRequest.key();
+        var inputStream = requestBody.contentStreamProvider().newStream();
         this.filesAndContent.put(path, inputSteamToByteBuffer(inputStream));
         return PutObjectResponse.builder().build();
+    }
+
+    @Override
+    public DeleteObjectResponse deleteObject(DeleteObjectRequest deleteObjectRequest) {
+        var path = deleteObjectRequest.key();
+        this.filesAndContent.remove(path);
+        return DeleteObjectResponse.builder().build();
     }
 
     @Override
