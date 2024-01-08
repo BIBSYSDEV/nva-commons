@@ -105,9 +105,9 @@ public class S3Driver {
         return s3BucketUri().addChild(fullPath).getUri();
     }
 
-    public void insertFile(UnixPath fullPath, InputStream content) throws IOException {
+    public URI insertFile(UnixPath fullPath, InputStream content) throws IOException {
         client.putObject(newPutObjectRequest(fullPath), createRequestBody(content));
-        s3BucketUri().addChild(fullPath);
+        return s3BucketUri().addChild(fullPath).getUri();
     }
 
     /**
