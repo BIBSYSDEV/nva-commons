@@ -10,6 +10,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.List;
 import java.util.Map;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import org.junit.jupiter.api.Assertions;
@@ -60,6 +61,21 @@ public class RequestInfoUtilityFunctionsTest {
         String expected = MISSING_FROM_QUERY_PARAMETERS + KEY;
         assertEquals(expected, exception.getMessage());
     }
+
+    @Test
+    public void getMultiValueParameterReturnsValueOnValidKey() {
+        when(requestInfo.getMultiValueQueryStringParameters()).thenReturn(Map.of(KEY, List.of(VALUE)));
+        var values = requestInfo.getMultiValueQueryParameter(KEY);
+        assertEquals(VALUE, values.get(0));
+    }
+
+    @Test
+    public void getMultiValueParameterReturnsEmptyListOnUnknownKey() {
+        when(requestInfo.getMultiValueQueryStringParameters()).thenReturn(Map.of());
+        var values = requestInfo.getMultiValueQueryParameter(KEY);
+        assertEquals(0, values.size());
+    }
+
 
     @Test
     public void getPathParameterReturnsValueOnValidKey() {

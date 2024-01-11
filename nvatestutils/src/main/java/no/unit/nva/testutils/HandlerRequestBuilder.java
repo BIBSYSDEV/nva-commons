@@ -58,6 +58,8 @@ public class HandlerRequestBuilder<T> {
     private Map<String, String> headers;
     @JsonProperty("queryStringParameters")
     private Map<String, String> queryParameters;
+    @JsonProperty("multiValueQueryStringParameters")
+    private Map<String, List<String>> multiValueQueryParameters;
     @JsonProperty("pathParameters")
     private Map<String, String> pathParameters;
     @JsonProperty("requestContext")
@@ -94,6 +96,11 @@ public class HandlerRequestBuilder<T> {
 
     public HandlerRequestBuilder<T> withQueryParameters(Map<String, String> queryParameters) {
         this.queryParameters = queryParameters;
+        return this;
+    }
+
+    public HandlerRequestBuilder<T> withMultiValueQueryParameters(Map<String, List<String>> multiValueQueryParameters) {
+        this.multiValueQueryParameters = multiValueQueryParameters;
         return this;
     }
 
@@ -150,6 +157,10 @@ public class HandlerRequestBuilder<T> {
 
     public Map<String, String> getQueryParameters() {
         return queryParameters;
+    }
+
+    public Map<String, List<String>> getMultiValueQueryParameters() {
+        return multiValueQueryParameters;
     }
 
     public Map<String, String> getPathParameters() {

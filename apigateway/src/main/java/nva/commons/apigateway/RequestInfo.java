@@ -16,6 +16,7 @@ import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_HEADERS;
 import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_PATH_PARAMETERS;
 import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_QUERY_PARAMETERS;
 import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_REQUEST_CONTEXT;
+import static nva.commons.apigateway.RequestInfoConstants.MULTI_VALUE_QUERY_STRING_PARAMETERS_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.PATH_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.PATH_PARAMETERS_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.PERSON_AFFILIATION;
@@ -79,6 +80,8 @@ public class RequestInfo {
     private Map<String, String> pathParameters;
     @JsonProperty(QUERY_STRING_PARAMETERS_FIELD)
     private Map<String, String> queryParameters;
+    @JsonProperty(MULTI_VALUE_QUERY_STRING_PARAMETERS_FIELD)
+    private Map<String, List<String>> multiValueQueryStringParameters;
     @JsonProperty(REQUEST_CONTEXT_FIELD)
     private JsonNode requestContext;
     @JsonProperty(METHOD_ARN_FIELD)
@@ -96,6 +99,7 @@ public class RequestInfo {
         this.headers = new HashMap<>();
         this.pathParameters = new HashMap<>();
         this.queryParameters = new HashMap<>();
+        this.multiValueQueryStringParameters = new HashMap<>();
         this.otherProperties = new LinkedHashMap<>(); // ordinary HashMap and ConcurrentHashMap fail.
         this.requestContext = defaultRestObjectMapper.createObjectNode();
         this.httpClient = DEFAULT_HTTP_CLIENT;
@@ -122,6 +126,12 @@ public class RequestInfo {
     public String getQueryParameter(String parameter) throws BadRequestException {
         return getQueryParameterOpt(parameter)
                    .orElseThrow(() -> new BadRequestException(MISSING_FROM_QUERY_PARAMETERS + parameter));
+    }
+
+    @JsonIgnore
+    public List<String> getMultiValueQueryParameter(String parameter) {
+        return Optional.ofNullable(getMultiValueQueryStringParameters().get(parameter))
+                   .orElse(List.of());
     }
 
     @JsonIgnore
@@ -209,8 +219,16 @@ public class RequestInfo {
         return queryParameters;
     }
 
+    public Map<String, List<String>> getMultiValueQueryStringParameters() {
+        return multiValueQueryStringParameters;
+    }
+
     public void setQueryParameters(Map<String, String> queryParameters) {
         this.queryParameters = nonNullMap(queryParameters);
+    }
+
+    public void setMultiValueQueryStringParameters(Map<String, List<String>> multiValueQueryStringParameters) {
+        this.multiValueQueryStringParameters = nonNullMap(multiValueQueryStringParameters);
     }
 
     @JacocoGenerated
