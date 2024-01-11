@@ -26,6 +26,7 @@ public final class RequestInfoConstants {
     public static final Supplier<URI> E2E_TESTING_USER_INFO_ENDPOINT =
         RequestInfoConstants::lazyInitializationForE2EUserInfoEndpoint;
     public static final String QUERY_STRING_PARAMETERS_FIELD = "queryStringParameters";
+    public static final String MULTI_VALUE_QUERY_STRING_PARAMETERS_FIELD = "multiValueQueryStringParameters";
     public static final String PATH_PARAMETERS_FIELD = "pathParameters";
     public static final String PATH_FIELD = "path";
     public static final String HEADERS_FIELD = "headers";

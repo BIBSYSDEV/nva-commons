@@ -19,6 +19,7 @@ import static nva.commons.core.paths.UriWrapper.HTTPS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -120,6 +121,14 @@ class RequestInfoTest {
     void requestInfoInitializesQueryParametersToEmptyMapWhenJsonObjectsSetsQueryStringParametersToNull()
         throws JsonProcessingException {
         checkForNonNullMap(NULL_VALUES_FOR_MAPS, RequestInfo::getQueryParameters);
+    }
+
+    @Test
+    @DisplayName("RequestInfo initializes multiValueQueryParameters to empty map when JSON object sets "
+                 + "multiValueQueryStringParameters to null")
+    void requestInfoInitializesMultiValueQueryParametersToEmptyMapWhenJsonObjectsSetsQueryStringParametersToNull()
+        throws JsonProcessingException {
+        checkForNonNullMap(NULL_VALUES_FOR_MAPS, RequestInfo::getMultiValueQueryStringParameters);
     }
 
     @Test
@@ -298,6 +307,19 @@ class RequestInfoTest {
                           .build();
         var requestInfo = RequestInfo.fromRequest(request);
         assertThat(requestInfo.userIsApplicationAdmin(), is(true));
+    }
+
+    @Test
+    void shouldReturnMultiValueQueryValuesWhenProvided() throws JsonProcessingException {
+        var key = randomString();
+        var value1 = randomString();
+        var value2 = randomString();
+
+        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withMultiValueQueryParameters(
+            Map.of(key, List.of(value1, value2))).build();
+
+        var requestInfo = RequestInfo.fromRequest(request);
+        assertThat(requestInfo.getMultiValueQueryParameter(key), is(equalTo(List.of(value1, value2))));
     }
 
     @Test
@@ -531,6 +553,13 @@ class RequestInfoTest {
         var requestInfoString = IoUtils.stringFromResources(EVENT_WITH_AUTH_HEADER);
         var requestInfo = dtoObjectMapper.readValue(requestInfoString, RequestInfo.class);
         assertThrows(UnauthorizedException.class, requestInfo::getUserName);
+    }
+
+    @Test
+    void shouldReadMultiValueQueryParameters() throws JsonProcessingException {
+        var requestInfoString = IoUtils.stringFromResources(EVENT_WITH_AUTH_HEADER);
+        var requestInfo = dtoObjectMapper.readValue(requestInfoString, RequestInfo.class);
+        assertThat(requestInfo.getMultiValueQueryStringParameters(), is(notNullValue()));
     }
 
     @Test
