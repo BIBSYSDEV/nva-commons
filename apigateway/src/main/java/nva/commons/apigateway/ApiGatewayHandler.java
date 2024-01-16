@@ -253,7 +253,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
 
     private Object getResource(Exception exception) {
         return exception instanceof ApiGatewayException apiGatewayException
-                   ? Optional.ofNullable(apiGatewayException.getInstance()).map(Object::toString).orElse(null)
+                   ? apiGatewayException.getInstance()
                    : null;
     }
 

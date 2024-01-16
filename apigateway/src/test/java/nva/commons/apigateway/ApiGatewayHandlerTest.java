@@ -250,7 +250,7 @@ class ApiGatewayHandlerTest {
         var problem = getProblemFromFailureResponse(outputStream);
 
         var resource = problem.getParameters().get("resource");
-        assertThat(resource, is(equalTo(customProblemObject.toJsonString())));
+        assertThat(dtoObjectMapper.convertValue(resource, CustomObject.class), is(equalTo(customProblemObject)));
     }
 
     @Test
