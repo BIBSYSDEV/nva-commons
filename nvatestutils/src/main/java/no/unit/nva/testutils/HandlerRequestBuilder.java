@@ -251,7 +251,7 @@ public class HandlerRequestBuilder<T> {
 
     public HandlerRequestBuilder<T> withAccessRights(URI customerId, AccessRight... accessRights) {
         for (AccessRight accessRight : accessRights) {
-            var accessRightEntry = new AccessRightEntry(accessRight.toPersistedString(), customerId);
+            var accessRightEntry = new AccessRightEntry(accessRight, customerId);
             addAccessRightToCognitoGroups(accessRightEntry);
         }
         return this;
@@ -325,17 +325,17 @@ public class HandlerRequestBuilder<T> {
     }
 
     private boolean customerIdExists(Collection<AccessRightEntry> existingAccessRights) {
-        return existingAccessRights.stream().anyMatch(AccessRightEntry::describesCustomerUponLogin);
+        return existingAccessRights.stream().anyMatch(AccessRightEntry::isUserAccessRight);
     }
 
     private List<AccessRightEntry> removeCustomerIdFromAccessRights(Collection<AccessRightEntry> existingAccessRights) {
         return existingAccessRights.stream()
-                   .filter(not(AccessRightEntry::describesCustomerUponLogin))
+                   .filter(not(AccessRightEntry::isUserAccessRight))
                    .collect(Collectors.toList());
     }
 
     private boolean isPersonAtCustomerGroupClaim(AccessRightEntry group) {
-        return group.describesCustomerUponLogin();
+        return group.isUserAccessRight();
     }
 
     private ObjectNode getAuthorizerClaimsNode() {

@@ -56,6 +56,7 @@ import nva.commons.logutils.LogUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
@@ -295,18 +296,8 @@ class RequestInfoTest {
         var userCustomer = randomUri();
         var requestInfo = requestInfoWithCustomerId(userCustomer);
         var notAllocatedAccessRight = new AccessRightEntry(MANAGE_DEGREE, userCustomer);
-        var accessRight = AccessRight.fromPersistedString(notAllocatedAccessRight.getAccessRight());
+        var accessRight = notAllocatedAccessRight.getAccessRight();
         assertThat(requestInfo.userIsAuthorized(accessRight), is(false));
-    }
-
-    @Test
-    void shouldReturnThatUserIsApplicationAdminWhenUserHasTheRespectiveAccessRight() throws JsonProcessingException {
-        var customerId = randomUri();
-        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withCurrentCustomer(customerId)
-                          .withAccessRights(customerId, AccessRight.ADMINISTRATE_APPLICATION)
-                          .build();
-        var requestInfo = RequestInfo.fromRequest(request);
-        assertThat(requestInfo.userIsApplicationAdmin(), is(true));
     }
 
     @Test
@@ -320,17 +311,6 @@ class RequestInfoTest {
 
         var requestInfo = RequestInfo.fromRequest(request);
         assertThat(requestInfo.getMultiValueQueryParameter(key), is(equalTo(List.of(value1, value2))));
-    }
-
-    @Test
-    void shouldReturnThatUserIsNotApplicationAdminWhenUserDoesNotHaveTheRespectiveAccessRight()
-        throws JsonProcessingException {
-        var customerId = randomUri();
-        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withCurrentCustomer(customerId)
-                          .withAccessRights(customerId, MANAGE_PUBLISHING_REQUESTS)
-                          .build();
-        var requestInfo = RequestInfo.fromRequest(request);
-        assertThat(requestInfo.userIsApplicationAdmin(), is(false));
     }
 
     @Test
