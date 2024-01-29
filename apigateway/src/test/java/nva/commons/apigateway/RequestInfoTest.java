@@ -11,6 +11,7 @@ import static nva.commons.apigateway.AccessRight.MANAGE_DOI;
 import static nva.commons.apigateway.AccessRight.MANAGE_IMPORT;
 import static nva.commons.apigateway.AccessRight.MANAGE_NVI;
 import static nva.commons.apigateway.AccessRight.MANAGE_PUBLISHING_REQUESTS;
+import static nva.commons.apigateway.AccessRight.USER;
 import static nva.commons.apigateway.RequestInfo.ERROR_FETCHING_COGNITO_INFO;
 import static nva.commons.apigateway.RequestInfoConstants.AUTHORIZATION_FAILURE_WARNING;
 import static nva.commons.apigateway.RequestInfoConstants.BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE;
@@ -658,16 +659,16 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnListOfAccessRightsAvailableForUser() {
+    void shouldReturnListOfAccessRightsAvailableForUser() throws JsonProcessingException {
         var usersCustomer = randomUri();
-        var accessRights = List.of(MANAGE_DEGREE, MANAGE_IMPORT, MANAGE_NVI);
+        var accessRights = List.of(USER, MANAGE_DEGREE, MANAGE_IMPORT, MANAGE_NVI);
         var accessRightsForCustomer = accessRights.stream()
                                           .map(AccessRight::toPersistedString)
                                           .map(right -> right + AT + usersCustomer)
                                           .collect(Collectors.toSet());
         var cognitoUserEntry = createCognitoUserEntry(usersCustomer, accessRightsForCustomer);
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoForOfflineAuthorization(accessRights, usersCustomer);
         var rights = requestInfo.getAccessRights();
 
         assertThat(rights, containsInAnyOrder(accessRights.toArray()));
