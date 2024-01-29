@@ -262,27 +262,9 @@ public class RequestInfo {
         return attempt(() -> this.getRequestContext().get(DOMAIN_NAME_FIELD).asText()).orElseThrow();
     }
 
-    /**
-     * @deprecated use {@link #userIsAuthorized(AccessRight)} instead. New AccessRights for appadmin are
-     *     MANAGE_EXTERNAL_CLIENTS, ACT_AS, MANAGE_CUSTOMERS
-     */
-    @Deprecated
-    public boolean userIsApplicationAdmin() {
-        return userIsAuthorized(AccessRight.ADMINISTRATE_APPLICATION);
-    }
-
-    /**
-     * @deprecated use {@link #userIsAuthorized(AccessRight)} instead.
-     */
-    @Deprecated(forRemoval = true)
-    @JacocoGenerated
-    public boolean userIsAuthorized(String accessRight) {
-        return checkAuthorizationOnline(accessRight) || checkAuthorizationOffline(accessRight);
-    }
-
     public boolean userIsAuthorized(AccessRight accessRight) {
-        return checkAuthorizationOnline(accessRight.toPersistedString())
-               || checkAuthorizationOffline(accessRight.toPersistedString());
+        return checkAuthorizationOnline(accessRight)
+               || checkAuthorizationOffline(accessRight);
     }
 
     public List<AccessRight> getAccessRights() {
@@ -370,7 +352,7 @@ public class RequestInfo {
     private Optional<URI> fetchCustomerIdOffline() {
         return getRequestContextParameterOpt(PERSON_GROUPS).stream()
                    .flatMap(AccessRightEntry::fromCsv)
-                   .filter(AccessRightEntry::describesCustomerUponLogin)
+                   .filter(AccessRightEntry::isUserAccessRight)
                    .map(AccessRightEntry::getCustomerId)
                    .collect(SingletonCollector.tryCollect())
                    .toOptional();
@@ -420,7 +402,7 @@ public class RequestInfo {
         return fetchUserInfoFromCognito().map(CognitoUserInfo::getPersonNin);
     }
 
-    private boolean checkAuthorizationOffline(String accessRight) {
+    private boolean checkAuthorizationOffline(AccessRight accessRight) {
         return attempt(this::getCurrentCustomer)
                    .map(currentCustomer -> new AccessRightEntry(accessRight, currentCustomer))
                    .map(
@@ -437,7 +419,7 @@ public class RequestInfo {
         return getRequestContextParameterOpt(PERSON_GROUPS).stream().flatMap(AccessRightEntry::fromCsv);
     }
 
-    private Boolean checkAuthorizationOnline(String accessRight) {
+    private Boolean checkAuthorizationOnline(AccessRight accessRight) {
         var accessRightAtCustomer = fetchCustomerIdFromCognito().map(
             customer -> new AccessRightEntry(accessRight, customer));
 
