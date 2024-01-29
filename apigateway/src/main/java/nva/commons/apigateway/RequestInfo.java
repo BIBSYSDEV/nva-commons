@@ -268,9 +268,8 @@ public class RequestInfo {
     }
 
     public List<AccessRight> getAccessRights() {
-        return fetchAvailableRights().stream()
+        return fetchAvailableAccessRightsOffline()
                    .map(AccessRightEntry::getAccessRight)
-                   .map(AccessRight::fromPersistedString)
                    .toList();
     }
 
