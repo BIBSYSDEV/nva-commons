@@ -285,6 +285,13 @@ public class RequestInfo {
                || checkAuthorizationOffline(accessRight.toPersistedString());
     }
 
+    public List<AccessRight> getAccessRights() {
+        return fetchAvailableRights().stream()
+                   .map(AccessRightEntry::getAccessRight)
+                   .map(AccessRight::fromPersistedString)
+                   .toList();
+    }
+
     @JacocoGenerated
     @JsonIgnore
     @Deprecated(forRemoval = true)
