@@ -1,5 +1,6 @@
 package nva.commons.apigateway;
 
+import static no.unit.nva.testutils.RandomDataGenerator.randomAccessRight;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -11,7 +12,7 @@ class AccessRightEntryTest {
 
     @Test
     public void toStringReturnsTheSameStringForEquivalentObjects() {
-        var accessRight = randomString();
+        var accessRight = randomAccessRight();
         var customerId = randomUri();
         var group1 = new AccessRightEntry(accessRight, customerId);
         var group2 = new AccessRightEntry(accessRight, customerId);
