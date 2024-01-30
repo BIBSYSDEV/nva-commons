@@ -345,8 +345,8 @@ public class RequestInfo {
     private Optional<URI> fetchCustomerIdOffline() {
         return getRequestContextParameterOpt(PERSON_GROUPS).stream()
                    .flatMap(AccessRightEntry::fromCsv)
-                   .filter(AccessRightEntry::isUserAccessRight)
                    .map(AccessRightEntry::getCustomerId)
+                   .distinct()
                    .collect(SingletonCollector.tryCollect())
                    .toOptional();
     }
