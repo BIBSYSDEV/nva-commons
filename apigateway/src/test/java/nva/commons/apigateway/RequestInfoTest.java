@@ -9,7 +9,9 @@ import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static nva.commons.apigateway.AccessRight.MANAGE_DEGREE;
 import static nva.commons.apigateway.AccessRight.MANAGE_DOI;
 import static nva.commons.apigateway.AccessRight.MANAGE_IMPORT;
+import static nva.commons.apigateway.AccessRight.MANAGE_NVI;
 import static nva.commons.apigateway.AccessRight.MANAGE_PUBLISHING_REQUESTS;
+import static nva.commons.apigateway.AccessRight.USER;
 import static nva.commons.apigateway.RequestInfo.ERROR_FETCHING_COGNITO_INFO;
 import static nva.commons.apigateway.RequestInfoConstants.AUTHORIZATION_FAILURE_WARNING;
 import static nva.commons.apigateway.RequestInfoConstants.BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE;
@@ -17,6 +19,8 @@ import static nva.commons.apigateway.RequestInfoConstants.REQUEST_CONTEXT_FIELD;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static nva.commons.core.paths.UriWrapper.HTTPS;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.notNullValue;
@@ -652,6 +656,22 @@ class RequestInfoTest {
         assertThrows(UnauthorizedException.class, requestInfo::getUserName);
         assertThat(logger.getMessages(),
                    containsString(ERROR_FETCHING_COGNITO_INFO.replace(LOG_STRING_INTERPOLATION, EMPTY_STRING)));
+    }
+
+    @Test
+    void shouldReturnListOfAccessRightsAvailableForUser() throws JsonProcessingException {
+        var usersCustomer = randomUri();
+        var accessRights = List.of(USER, MANAGE_DEGREE, MANAGE_IMPORT, MANAGE_NVI);
+        var accessRightsForCustomer = accessRights.stream()
+                                          .map(AccessRight::toPersistedString)
+                                          .map(right -> right + AT + usersCustomer)
+                                          .collect(Collectors.toSet());
+        var cognitoUserEntry = createCognitoUserEntry(usersCustomer, accessRightsForCustomer);
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
+        var requestInfo = createRequestInfoForOfflineAuthorization(accessRights, usersCustomer);
+        var rights = requestInfo.getAccessRights();
+
+        assertThat(rights, containsInAnyOrder(accessRights.toArray()));
     }
 
     private RequestInfo requestInfoWithCustomerId(URI userCustomer) throws JsonProcessingException {

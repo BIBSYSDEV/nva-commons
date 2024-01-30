@@ -3,26 +3,26 @@
 zalandoProblem = { strictly = '0.27.1' }
 lambdaLog4j = { strictly = '1.5.1' }
 guava = { strictly = '32.1.2-jre' }
-awsSdk = { strictly = '1.12.544' }
-awsSdk2 = { strictly = '2.20.141' }
+awsSdk = { strictly = '1.12.646' }
+awsSdk2 = { strictly = '2.23.12' }
 awsLambdaEvents = { strictly = '3.11.4' }
-awsLambdaCore = { strictly = '1.2.2' }
-mockito = { strictly = '5.3.1' }
+awsLambdaCore = { strictly = '1.2.3' }
+mockito = { strictly = '5.10.0' }
 httpmime = { strictly = '4.5.14' }
-jackson = { strictly = '2.15.3' }
+jackson = { strictly = '2.16.1' }
 hamcrest = { strictly = '2.2' }
-apacheCommons = { require = '3.13.0' }
-commonsValidator = { strictly = '1.7' }
-jupiter = { strictly = '5.10.0' }
+apacheCommons = { require = '3.14.0' }
+commonsValidator = { strictly = '1.8.0' }
+jupiter = { strictly = '5.10.1' }
 awsIon = { strictly = '1.5.1' }
 hamcrestOptional = { strictly = '2.0.0' }
-log4j = { strictly = '2.22.0' }
+log4j = { strictly = '2.22.1' }
 #wiremock 3.0.2 has multiple versions of  slf4j
-slf4j = { require = '2.0.5' }
+slf4j = { require = '2.0.11' }
 apiGuardian = { strictly = '1.1.2' }
-wiremock = { strictly = '3.0.2' }
-datafaker = { strictly = '2.0.1' }
-com-auth0-jwt = { strictly = '3.18.3' }
+wiremock = { strictly = '3.3.1' }
+datafaker = { strictly = '2.1.0' }
+com-auth0-jwt = { strictly = '4.4.0' }
 
 [libraries]
 zalando = { group = 'org.zalando', name = 'problem', version.ref = 'zalandoProblem' }
