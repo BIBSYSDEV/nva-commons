@@ -2,6 +2,7 @@ package nva.commons.apigateway;
 
 import static java.util.Objects.isNull;
 import static java.util.function.Predicate.not;
+import static no.unit.nva.auth.CognitoUserInfo.ELEMENTS_DELIMITER;
 import static nva.commons.apigateway.RequestInfoConstants.AUTHORIZATION_FAILURE_WARNING;
 import static nva.commons.apigateway.RequestInfoConstants.BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE;
 import static nva.commons.apigateway.RequestInfoConstants.CLIENT_ID;
@@ -41,6 +42,7 @@ import com.google.common.net.HttpHeaders;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -86,6 +88,7 @@ public class RequestInfo {
     private JsonNode requestContext;
     @JsonProperty(METHOD_ARN_FIELD)
     private String methodArn;
+
     @JsonAnySetter
     private Map<String, Object> otherProperties;
 
@@ -264,13 +267,18 @@ public class RequestInfo {
 
     public boolean userIsAuthorized(AccessRight accessRight) {
         return checkAuthorizationOnline(accessRight)
-               || checkAuthorizationOffline(accessRight);
+               || checkAuthorizationFromContext(accessRight);
     }
 
     public List<AccessRight> getAccessRights() {
-        return fetchAvailableAccessRightsOffline()
-                   .map(AccessRightEntry::getAccessRight)
-                   .toList();
+        return extractAccessRightsForTests().or(this::fetchAccessRights).orElseThrow();
+    }
+
+    private Optional<List<AccessRight>> fetchAccessRights() {
+        return fetchUserInfo().map(CognitoUserInfo::getAccessRights)
+                   .map(accessRights -> Arrays.stream(accessRights.split(ELEMENTS_DELIMITER)))
+                   .map(
+                       accessRights -> accessRights.map(AccessRight::fromPersistedString).collect(Collectors.toList()));
     }
 
     @JacocoGenerated
@@ -289,17 +297,17 @@ public class RequestInfo {
 
     @JsonIgnore
     public String getUserName() throws UnauthorizedException {
-        return extractUserNameOffline().or(this::fetchUserNameFromCognito).orElseThrow(UnauthorizedException::new);
+        return extractUserNameForTests().or(this::fetchUserName).orElseThrow(UnauthorizedException::new);
     }
 
     @JsonIgnore
     public Optional<String> getFeideId() {
-        return extractFeideIdOffline().or(this::fetchFeideIdFromCognito);
+        return extractFeideIdForTests().or(this::fetchFeideId);
     }
 
     @JsonIgnore
     public Optional<URI> getTopLevelOrgCristinId() {
-        return extractTopLevelOrgIdOffline().or(this::fetchTopLevelOrgCristinIdFromCognito);
+        return extractTopLevelOrgForTests().or(this::fetchTopLevelOrgCristinId);
     }
 
     @JsonIgnore
@@ -309,24 +317,24 @@ public class RequestInfo {
 
     @JsonIgnore
     public URI getCurrentCustomer() throws UnauthorizedException {
-        return fetchCustomerIdFromCognito().or(this::fetchCustomerIdOffline).orElseThrow(UnauthorizedException::new);
+        return fetchCustomerId().or(this::fetchCustomerIdFromContext).orElseThrow(UnauthorizedException::new);
     }
 
     @JsonIgnore
     public URI getPersonCristinId() throws UnauthorizedException {
-        return extractPersonCristinIdOffline().or(this::fetchPersonCristinIdFromCognito)
+        return extractPersonCristinIdForTests().or(this::fetchPersonCristinId)
                    .orElseThrow(UnauthorizedException::new);
     }
 
     @JsonIgnore
     public URI getPersonAffiliation() throws UnauthorizedException {
-        return extractPersonAffiliationOffline().or(this::fetchPersonAffiliationFromCognito)
+        return extractPersonAffiliationForTests().or(this::fetchPersonAffiliation)
             .orElseThrow(UnauthorizedException::new);
     }
 
     @JsonIgnore
     public String getPersonNin() {
-        return extractPersonNinOffline().or(this::fetchPersonNinFromCognito).orElseThrow(IllegalStateException::new);
+        return extractPersonNinForTests().or(this::fetchPersonNin).orElseThrow(IllegalStateException::new);
     }
 
     public boolean clientIsInternalBackend() {
@@ -340,15 +348,15 @@ public class RequestInfo {
         ).orElse(false);
     }
 
-    private Optional<String> fetchFeideIdFromCognito() {
-        return fetchUserInfoFromCognito().map(CognitoUserInfo::getFeideId);
+    private Optional<String> fetchFeideId() {
+        return fetchUserInfo().map(CognitoUserInfo::getFeideId);
     }
 
-    private Optional<String> extractFeideIdOffline() {
+    private Optional<String> extractFeideIdForTests() {
         return getRequestContextParameterOpt(FEIDE_ID);
     }
 
-    private Optional<URI> fetchCustomerIdOffline() {
+    private Optional<URI> fetchCustomerIdFromContext() {
         return getRequestContextParameterOpt(PERSON_GROUPS).stream()
                    .flatMap(AccessRightEntry::fromCsv)
                    .map(AccessRightEntry::getCustomerId)
@@ -357,55 +365,55 @@ public class RequestInfo {
                    .toOptional();
     }
 
-    private Optional<URI> extractTopLevelOrgIdOffline() {
+    private Optional<URI> extractTopLevelOrgForTests() {
         return getRequestContextParameterOpt(TOP_LEVEL_ORG_CRISTIN_ID).map(URI::create);
     }
 
-    private Optional<URI> fetchTopLevelOrgCristinIdFromCognito() {
-        return fetchUserInfoFromCognito().map(CognitoUserInfo::getTopOrgCristinId);
+    private Optional<URI> fetchTopLevelOrgCristinId() {
+        return fetchUserInfo().map(CognitoUserInfo::getTopOrgCristinId);
     }
 
     private void logOnlineFetchResult(Failure<CognitoUserInfo> fail) {
         logger.warn(ERROR_FETCHING_COGNITO_INFO, ExceptionUtils.stackTraceInSingleLine(fail.getException()));
     }
 
-    private Optional<String> extractUserNameOffline() {
+    private Optional<String> extractUserNameForTests() {
         return getRequestContextParameterOpt(USER_NAME);
     }
 
-    private Optional<String> fetchUserNameFromCognito() {
-        return fetchUserInfoFromCognito().map(CognitoUserInfo::getUserName);
+    private Optional<String> fetchUserName() {
+        return fetchUserInfo().map(CognitoUserInfo::getUserName);
     }
 
-    private Optional<URI> extractPersonCristinIdOffline() {
+    private Optional<URI> extractPersonCristinIdForTests() {
         return getRequestContextParameterOpt(PERSON_CRISTIN_ID).map(URI::create);
     }
 
-    private Optional<URI> extractPersonAffiliationOffline() {
+    private Optional<URI> extractPersonAffiliationForTests() {
         return getRequestContextParameterOpt(PERSON_AFFILIATION).map(URI::create);
     }
 
-    private Optional<URI> fetchPersonCristinIdFromCognito() {
-        return fetchUserInfoFromCognito().map(CognitoUserInfo::getPersonCristinId);
+    private Optional<URI> fetchPersonCristinId() {
+        return fetchUserInfo().map(CognitoUserInfo::getPersonCristinId);
     }
 
-    private Optional<URI> fetchPersonAffiliationFromCognito() {
-        return fetchUserInfoFromCognito().map(CognitoUserInfo::getPersonAffiliation);
+    private Optional<URI> fetchPersonAffiliation() {
+        return fetchUserInfo().map(CognitoUserInfo::getPersonAffiliation);
     }
 
-    private Optional<String> extractPersonNinOffline() {
+    private Optional<String> extractPersonNinForTests() {
         return getRequestContextParameterOpt(PERSON_NIN);
     }
 
-    private Optional<String> fetchPersonNinFromCognito() {
-        return fetchUserInfoFromCognito().map(CognitoUserInfo::getPersonNin);
+    private Optional<String> fetchPersonNin() {
+        return fetchUserInfo().map(CognitoUserInfo::getPersonNin);
     }
 
-    private boolean checkAuthorizationOffline(AccessRight accessRight) {
+    private boolean checkAuthorizationFromContext(AccessRight accessRight) {
         return attempt(this::getCurrentCustomer)
                    .map(currentCustomer -> new AccessRightEntry(accessRight, currentCustomer))
                    .map(
-                       requiredAccessRight -> fetchAvailableAccessRightsOffline().anyMatch(requiredAccessRight::equals))
+                       requiredAccessRight -> fetchAvailableAccessRightsFromContext().anyMatch(requiredAccessRight::equals))
                    .orElse(fail -> handleAuthorizationFailure());
     }
 
@@ -414,12 +422,12 @@ public class RequestInfo {
         return false;
     }
 
-    private Stream<AccessRightEntry> fetchAvailableAccessRightsOffline() {
+    private Stream<AccessRightEntry> fetchAvailableAccessRightsFromContext() {
         return getRequestContextParameterOpt(PERSON_GROUPS).stream().flatMap(AccessRightEntry::fromCsv);
     }
 
     private Boolean checkAuthorizationOnline(AccessRight accessRight) {
-        var accessRightAtCustomer = fetchCustomerIdFromCognito().map(
+        var accessRightAtCustomer = fetchCustomerId().map(
             customer -> new AccessRightEntry(accessRight, customer));
 
         var availableRights = fetchAvailableRights();
@@ -427,7 +435,7 @@ public class RequestInfo {
     }
 
     private List<AccessRightEntry> fetchAvailableRights() {
-        var userInfo = fetchUserInfoFromCognito();
+        var userInfo = fetchUserInfo();
         return userInfo
                    .map(CognitoUserInfo::getAccessRights)
                    .map(accessRightEntryStr -> AccessRightEntry.fromCsvForCustomer(accessRightEntryStr, userInfo.get()
@@ -436,7 +444,14 @@ public class RequestInfo {
                    .orElseGet(Collections::emptyList);
     }
 
-    private Optional<CognitoUserInfo> fetchUserInfoFromCognito() {
+    private Optional<List<AccessRight>> extractAccessRightsForTests() {
+        return getRequestContextParameterOpt(PERSON_GROUPS)
+                   .map(AccessRightEntry::fromCsv)
+                   .map(stream -> stream.map(AccessRightEntry::getAccessRight))
+                   .map(stream -> stream.collect(Collectors.toList()));
+    }
+
+    private Optional<CognitoUserInfo> fetchUserInfo() {
         return attempt(() -> fetchUserInfo(cognitoUri)).or(() -> fetchUserInfo(e2eTestsUserInfoUri))
                    .toOptional(this::logOnlineFetchResult);
     }
@@ -450,8 +465,8 @@ public class RequestInfo {
         return this.getHeader(HttpHeaders.AUTHORIZATION);
     }
 
-    private Optional<URI> fetchCustomerIdFromCognito() {
-        return fetchUserInfoFromCognito().map(CognitoUserInfo::getCurrentCustomer);
+    private Optional<URI> fetchCustomerId() {
+        return fetchUserInfo().map(CognitoUserInfo::getCurrentCustomer);
     }
 
     private <K, V> Map<K, V> nonNullMap(Map<K, V> map) {

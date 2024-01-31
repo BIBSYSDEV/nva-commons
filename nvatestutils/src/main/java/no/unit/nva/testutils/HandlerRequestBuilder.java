@@ -194,13 +194,12 @@ public class HandlerRequestBuilder<T> {
     }
 
     /**
-     * @deprecated Not needed as {@link #withAccessRights(URI, AccessRight...)} will set the passed customer as current.
+     * @deprecated Not needed as {@link #withAccessRights(URI, AccessRight...)} will set it.
      * @param customerId
      * @return
      */
-    @Deprecated(forRemoval = true)
+    @Deprecated()
     public HandlerRequestBuilder<T> withCurrentCustomer(URI customerId) {
-        withAccessRights(customerId);
         return this;
     }
 

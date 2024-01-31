@@ -39,7 +39,6 @@ public final class RequestInfoConstants {
     public static final String MISSING_FROM_REQUEST_CONTEXT = "Missing from requestContext: ";
     public static final String DOMAIN_NAME_FIELD = "domainName";
     public static final String PERSON_GROUPS_CLAIM = "cognito:groups";
-    public static final String CURRENT_CUSTOMER_ID_CLAIM = "custom:customerId";
     public static final String AUTHORIZATION_FAILURE_WARNING = "Missing customerId or required access right";
     public static final String BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE = "https://api.nva.unit.no/scopes/backend";
     public static final String SCOPE = "scope";
@@ -49,7 +48,6 @@ public final class RequestInfoConstants {
     private static final String CLAIMS_PATH = "/authorizer/claims/";
     public static final JsonPointer PERSON_GROUPS = claimToJsonPointer(PERSON_GROUPS_CLAIM);
     public static final JsonPointer USER_NAME = claimToJsonPointer(USER_NAME_CLAIM);
-    public static final JsonPointer CURRENT_CUSTOMER_ID = claimToJsonPointer(CURRENT_CUSTOMER_ID_CLAIM);
     public static final JsonPointer TOP_LEVEL_ORG_CRISTIN_ID = claimToJsonPointer(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM);
     public static final JsonPointer PERSON_CRISTIN_ID = claimToJsonPointer(PERSON_CRISTIN_ID_CLAIM);
     public static final JsonPointer PERSON_AFFILIATION = claimToJsonPointer(PERSON_AFFILIATION_CLAIM);
