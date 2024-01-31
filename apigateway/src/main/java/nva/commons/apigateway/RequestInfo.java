@@ -413,7 +413,8 @@ public class RequestInfo {
         return attempt(this::getCurrentCustomer)
                    .map(currentCustomer -> new AccessRightEntry(accessRight, currentCustomer))
                    .map(
-                       requiredAccessRight -> fetchAvailableAccessRightsFromContext().anyMatch(requiredAccessRight::equals))
+                       requiredAccessRight -> fetchAvailableAccessRightsFromContext().anyMatch(
+                           requiredAccessRight::equals))
                    .orElse(fail -> handleAuthorizationFailure());
     }
 

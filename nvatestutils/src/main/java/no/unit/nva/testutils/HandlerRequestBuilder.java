@@ -194,9 +194,9 @@ public class HandlerRequestBuilder<T> {
     }
 
     /**
+     * @param customerId unused parameter.
+     * @return the builder.
      * @deprecated Not needed as {@link #withAccessRights(URI, AccessRight...)} will set it.
-     * @param customerId
-     * @return
      */
     @Deprecated()
     public HandlerRequestBuilder<T> withCurrentCustomer(URI customerId) {
