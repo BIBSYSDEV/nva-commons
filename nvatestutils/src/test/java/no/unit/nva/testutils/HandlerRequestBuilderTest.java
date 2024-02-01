@@ -139,7 +139,7 @@ class HandlerRequestBuilderTest {
         throws JsonProcessingException, UnauthorizedException {
         var expectedCustomerId = randomUri();
         var requestStream = new HandlerRequestBuilder<String>(objectMapper)
-                                .withCurrentCustomer(expectedCustomerId)
+                                .withAccessRights(expectedCustomerId, randomAccessRight())
                                 .build();
         var request = IoUtils.streamToString(requestStream);
         var requestInfo = JsonUtils.dtoObjectMapper.readValue(request, RequestInfo.class);
@@ -175,7 +175,7 @@ class HandlerRequestBuilderTest {
         var expectedApplicationRoles = "role1,role2";
 
         InputStream requestStream = new HandlerRequestBuilder<String>(objectMapper).withUserName(expectedUsername)
-                                        .withCurrentCustomer(expectedCustomerId)
+                                        .withAccessRights(expectedCustomerId, randomAccessRight())
                                         .withRoles(expectedApplicationRoles)
                                         .build();
         JsonNode request = toJsonNode(requestStream);

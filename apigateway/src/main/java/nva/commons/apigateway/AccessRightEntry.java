@@ -1,7 +1,6 @@
 package nva.commons.apigateway;
 
 import static java.util.function.Predicate.not;
-import static nva.commons.apigateway.AccessRight.USER;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Objects;
@@ -48,10 +47,6 @@ public class AccessRightEntry {
                    .map(accessRightEntryStr -> fromStringForCustomer(accessRightEntryStr, customerId));
     }
 
-    public static AccessRightEntry createUserAtCustomerGroup(URI customerId) {
-        return new AccessRightEntry(USER, customerId);
-    }
-
     @JacocoGenerated
     public URI getCustomerId() {
         return customerId;
@@ -85,9 +80,5 @@ public class AccessRightEntry {
     @Override
     public String toString() {
         return this.accessRight.toPersistedString() + AT + customerId.toString();
-    }
-
-    public boolean isUserAccessRight() {
-        return USER.equals(this.getAccessRight());
     }
 }

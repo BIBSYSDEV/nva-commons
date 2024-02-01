@@ -11,7 +11,6 @@ import static nva.commons.apigateway.AccessRight.MANAGE_DOI;
 import static nva.commons.apigateway.AccessRight.MANAGE_IMPORT;
 import static nva.commons.apigateway.AccessRight.MANAGE_NVI;
 import static nva.commons.apigateway.AccessRight.MANAGE_PUBLISHING_REQUESTS;
-import static nva.commons.apigateway.AccessRight.USER;
 import static nva.commons.apigateway.RequestInfo.ERROR_FETCHING_COGNITO_INFO;
 import static nva.commons.apigateway.RequestInfoConstants.AUTHORIZATION_FAILURE_WARNING;
 import static nva.commons.apigateway.RequestInfoConstants.BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE;
@@ -19,7 +18,6 @@ import static nva.commons.apigateway.RequestInfoConstants.REQUEST_CONTEXT_FIELD;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static nva.commons.core.paths.UriWrapper.HTTPS;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasKey;
@@ -60,7 +58,6 @@ import nva.commons.logutils.LogUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
@@ -629,6 +626,23 @@ class RequestInfoTest {
     }
 
     @Test
+    void shouldReturnAccessRightsWhenOnlyInCognito() throws JsonProcessingException {
+        var accessRights = randomAccessRights();
+        var accessRightsString = accessRights.stream()
+                                     .map(AccessRight::toPersistedString)
+                                     .collect(Collectors.joining(","));
+
+        var claims = dtoObjectMapper.createObjectNode();
+        claims.put(CognitoUserInfo.ACCESS_RIGHTS_CLAIM, accessRightsString);
+        var cognitoUserInfo = objectMapper.readValue(claims.toString(), CognitoUserInfo.class);
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserInfo));
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var actualAccessRights = requestInfo.getAccessRights();
+
+        assertThat(actualAccessRights, containsInAnyOrder(accessRights.toArray()));
+    }
+
+    @Test
     void shouldReturnOptionalEmptyWhenUserDoesNotHaveFeideId() {
         var cognitoUserEntryWithoutFeideId = CognitoUserInfo.builder().build();
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutFeideId));
@@ -661,7 +675,7 @@ class RequestInfoTest {
     @Test
     void shouldReturnListOfAccessRightsAvailableForUser() throws JsonProcessingException {
         var usersCustomer = randomUri();
-        var accessRights = List.of(USER, MANAGE_DEGREE, MANAGE_IMPORT, MANAGE_NVI);
+        var accessRights = List.of(MANAGE_DEGREE, MANAGE_IMPORT, MANAGE_NVI);
         var accessRightsForCustomer = accessRights.stream()
                                           .map(AccessRight::toPersistedString)
                                           .map(right -> right + AT + usersCustomer)
@@ -675,7 +689,7 @@ class RequestInfoTest {
     }
 
     private RequestInfo requestInfoWithCustomerId(URI userCustomer) throws JsonProcessingException {
-        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withCurrentCustomer(userCustomer).build();
+        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).build();
         return RequestInfo.fromRequest(request);
     }
 
@@ -764,7 +778,7 @@ class RequestInfoTest {
 
     private RequestInfo createRequestInfoForOfflineAuthorization(List<AccessRight> accessRights, URI userCustomer)
         throws JsonProcessingException {
-        var requestStream = new HandlerRequestBuilder<Void>(dtoObjectMapper).withCurrentCustomer(userCustomer)
+        var requestStream = new HandlerRequestBuilder<Void>(dtoObjectMapper)
                                 .withAccessRights(userCustomer, accessRights.toArray(AccessRight[]::new))
                                 .build();
         return RequestInfo.fromRequest(requestStream);

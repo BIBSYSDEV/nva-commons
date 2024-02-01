@@ -2,7 +2,6 @@ package no.unit.nva.testutils;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static java.util.function.Predicate.not;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -24,11 +23,8 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import nva.commons.apigateway.AccessRight;
 import nva.commons.apigateway.AccessRightEntry;
 import nva.commons.core.JacocoGenerated;
@@ -198,18 +194,12 @@ public class HandlerRequestBuilder<T> {
     }
 
     /**
-     * @param customerId The current customer URI as it is returned by the identity service
-     * @return this HandlerRequestBuilder
-     * @deprecated Use {@link #withCurrentCustomer(URI)} instead.
+     * @param customerId unused parameter.
+     * @return the builder.
+     * @deprecated Not needed as {@link #withAccessRights(URI, AccessRight...)} will set it.
      */
-    @Deprecated(since = "withCurrentCustomer was implemented")
-    public HandlerRequestBuilder<T> withCustomerId(URI customerId) {
-        return withCurrentCustomer(customerId);
-    }
-
+    @Deprecated()
     public HandlerRequestBuilder<T> withCurrentCustomer(URI customerId) {
-        var customerIdClaim = AccessRightEntry.createUserAtCustomerGroup(customerId);
-        addAccessRightToCognitoGroups(customerIdClaim);
         return this;
     }
 
@@ -283,11 +273,7 @@ public class HandlerRequestBuilder<T> {
 
     private void addAccessRightToCognitoGroups(AccessRightEntry accessRight) {
         var claims = getAuthorizerClaimsNode();
-        if (isPersonAtCustomerGroupClaim(accessRight)) {
-            insertAndOverwriteExistingCustomerId(accessRight, claims);
-        } else {
-            appendAccessRightClaimToAccessRightClaims(claims, accessRight);
-        }
+        appendAccessRightClaimToAccessRightClaims(claims, accessRight);
     }
 
     private void appendAccessRightClaimToAccessRightClaims(ObjectNode claims, AccessRightEntry accessRight) {
@@ -298,44 +284,10 @@ public class HandlerRequestBuilder<T> {
                            .collect(Collectors.joining(ENTRIES_DELIMITER));
         claims.put(GROUPS_CLAIM, newClaim);
     }
-
-    private void insertAndOverwriteExistingCustomerId(AccessRightEntry accessRight, ObjectNode claims) {
-        var existingAccessRights = extractExistingAccessRightsRemovingSpecialUserAtCustomerClaim(claims);
-        var updatedAccessRights = Stream.of(existingAccessRights.stream(), Stream.of(accessRight))
-                                      .flatMap(Function.identity())
-                                      .filter(Objects::nonNull)
-                                      .map(AccessRightEntry::toString)
-                                      .collect(Collectors.joining(ENTRIES_DELIMITER));
-        claims.put(GROUPS_CLAIM, updatedAccessRights);
-    }
-
-    private Collection<AccessRightEntry> extractExistingAccessRightsRemovingSpecialUserAtCustomerClaim(
-        ObjectNode claims) {
-        var existingAccessRights = extractAccessRights(claims);
-        if (customerIdExists(existingAccessRights)) {
-            existingAccessRights = removeCustomerIdFromAccessRights(existingAccessRights);
-        }
-        return existingAccessRights;
-    }
-
     private Collection<AccessRightEntry> extractAccessRights(ObjectNode claims) {
         return claims.has(GROUPS_CLAIM)
                    ? AccessRightEntry.fromCsv(claims.get(GROUPS_CLAIM).textValue()).collect(Collectors.toList())
                    : new ArrayList<>();
-    }
-
-    private boolean customerIdExists(Collection<AccessRightEntry> existingAccessRights) {
-        return existingAccessRights.stream().anyMatch(AccessRightEntry::isUserAccessRight);
-    }
-
-    private List<AccessRightEntry> removeCustomerIdFromAccessRights(Collection<AccessRightEntry> existingAccessRights) {
-        return existingAccessRights.stream()
-                   .filter(not(AccessRightEntry::isUserAccessRight))
-                   .collect(Collectors.toList());
-    }
-
-    private boolean isPersonAtCustomerGroupClaim(AccessRightEntry group) {
-        return group.isUserAccessRight();
     }
 
     private ObjectNode getAuthorizerClaimsNode() {
