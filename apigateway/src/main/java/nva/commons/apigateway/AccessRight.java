@@ -4,6 +4,7 @@ import static java.util.Optional.ofNullable;
 import com.google.common.collect.Maps;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import nva.commons.apigateway.exceptions.InvalidAccessRightException;
 
 public enum AccessRight {
@@ -103,7 +104,11 @@ public enum AccessRight {
      */
 
     public static AccessRight fromPersistedString(String accessRight) {
-        return ofNullable(LOOKUP.get(accessRight)).orElseThrow(() -> new InvalidAccessRightException(accessRight));
+        return fromPersistedStringOptional(accessRight).orElseThrow(() -> new InvalidAccessRightException(accessRight));
+    }
+
+    public static Optional<AccessRight> fromPersistedStringOptional(String accessRight) {
+        return ofNullable(LOOKUP.get(accessRight));
     }
 
 }
