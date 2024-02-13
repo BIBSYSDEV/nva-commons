@@ -1,5 +1,6 @@
 package nva.commons.apigateway;
 
+import static no.unit.nva.auth.CognitoUserInfo.CUSTOMER_ID_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.PERSON_AFFILIATION_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.PERSON_CRISTIN_ID_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.PERSON_NIN_CLAIM;
@@ -55,6 +56,7 @@ public final class RequestInfoConstants {
     public static final JsonPointer PERSON_NIN = claimToJsonPointer(PERSON_NIN_CLAIM);
     public static final JsonPointer FEIDE_ID = claimToJsonPointer(FEIDE_ID_CLAIM);
     public static final JsonPointer CLIENT_ID = claimToJsonPointer(CLIENT_ID_CLAIM);
+    public static final JsonPointer CUSTOMER_ID = claimToJsonPointer(CUSTOMER_ID_CLAIM);
     public static final JsonPointer ISS = claimToJsonPointer(ISS_CLAIM);
 
     private RequestInfoConstants() {

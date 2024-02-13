@@ -6,6 +6,7 @@ import static no.unit.nva.auth.CognitoUserInfo.ELEMENTS_DELIMITER;
 import static nva.commons.apigateway.RequestInfoConstants.AUTHORIZATION_FAILURE_WARNING;
 import static nva.commons.apigateway.RequestInfoConstants.BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE;
 import static nva.commons.apigateway.RequestInfoConstants.CLIENT_ID;
+import static nva.commons.apigateway.RequestInfoConstants.CUSTOMER_ID;
 import static nva.commons.apigateway.RequestInfoConstants.DEFAULT_COGNITO_URI;
 import static nva.commons.apigateway.RequestInfoConstants.DOMAIN_NAME_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.EXTERNAL_USER_POOL_URI;
@@ -317,7 +318,9 @@ public class RequestInfo {
 
     @JsonIgnore
     public URI getCurrentCustomer() throws UnauthorizedException {
-        return fetchCustomerId().or(this::fetchCustomerIdFromContext).orElseThrow(UnauthorizedException::new);
+        return fetchCustomerId().or(this::fetchCustomerIdFromContext)
+                   .or(this::extractCustomerIdForTests)
+                   .orElseThrow(UnauthorizedException::new);
     }
 
     @JsonIgnore
@@ -363,6 +366,10 @@ public class RequestInfo {
                    .distinct()
                    .collect(SingletonCollector.tryCollect())
                    .toOptional();
+    }
+
+    private Optional<URI> extractCustomerIdForTests() {
+        return getRequestContextParameterOpt(CUSTOMER_ID).map(URI::create);
     }
 
     private Optional<URI> extractTopLevelOrgForTests() {
