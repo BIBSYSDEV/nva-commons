@@ -272,7 +272,7 @@ public class RequestInfo {
     }
 
     public List<AccessRight> getAccessRights() {
-        return extractAccessRightsForTests().or(this::fetchAccessRights).orElseThrow();
+        return extractAccessRightsForTests().or(this::fetchAccessRights).orElse(Collections.emptyList());
     }
 
     private Optional<List<AccessRight>> fetchAccessRights() {
