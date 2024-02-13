@@ -139,7 +139,7 @@ class HandlerRequestBuilderTest {
         throws JsonProcessingException, UnauthorizedException {
         var expectedCustomerId = randomUri();
         var requestStream = new HandlerRequestBuilder<String>(objectMapper)
-                                .withAccessRights(expectedCustomerId, randomAccessRight())
+                                .withCurrentCustomer(expectedCustomerId)
                                 .build();
         var request = IoUtils.streamToString(requestStream);
         var requestInfo = JsonUtils.dtoObjectMapper.readValue(request, RequestInfo.class);

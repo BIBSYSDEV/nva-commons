@@ -40,6 +40,7 @@ public class HandlerRequestBuilder<T> {
     public static final String GROUPS_CLAIM = "cognito:groups";
     public static final String APPLICATION_ROLES_CLAIM = "custom:applicationRoles";
     public static final String PERSON_CRISTIN_ID = "custom:cristinId";
+    public static final String CUSTOMER_ID = "custom:customerId";
     public static final String FEIDE_ID_CLAIM = "custom:feideId";
     public static final String ENTRIES_DELIMITER = ",";
     public static final String SCOPE_CLAIM = "scope";
@@ -193,13 +194,9 @@ public class HandlerRequestBuilder<T> {
         return withUserName(nvaUsername);
     }
 
-    /**
-     * @param customerId unused parameter.
-     * @return the builder.
-     * @deprecated Not needed as {@link #withAccessRights(URI, AccessRight...)} will set it.
-     */
-    @Deprecated()
     public HandlerRequestBuilder<T> withCurrentCustomer(URI customerId) {
+        ObjectNode claims = getAuthorizerClaimsNode();
+        claims.put(CUSTOMER_ID, customerId.toString());
         return this;
     }
 

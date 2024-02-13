@@ -16,6 +16,7 @@ public class CognitoUserInfo {
     public static final String SELECTED_CUSTOMER_CLAIM = "custom:customerId";
     public static final String ACCESS_RIGHTS_CLAIM = "custom:accessRights";
     public static final String USER_NAME_CLAIM = "custom:nvaUsername";
+    public static final String CUSTOMER_ID_CLAIM = "custom:customerId";
     public static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
     public static final String PERSON_CRISTIN_ID_CLAIM = "custom:cristinId";
     public static final String PERSON_NIN_CLAIM = "custom:nin";
