@@ -123,7 +123,6 @@ public class FakeS3Client implements S3Client {
         this.filesAndContent.put(path, inputSteamToByteBuffer(inputStream));
         var sdkHttpResponse = SdkHttpResponse.builder().statusCode(200).build();
         return (PutObjectResponse) PutObjectResponse.builder()
-                                       .eTag("asdasda")
                                        .sdkHttpResponse(sdkHttpResponse)
                                        .build();
     }
