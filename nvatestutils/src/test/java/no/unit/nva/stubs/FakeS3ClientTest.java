@@ -150,6 +150,15 @@ class FakeS3ClientTest {
         assertThrows(IllegalArgumentException.class, () -> s3Client.listObjectsV2(listObjectRequest));
     }
 
+    @Test
+    void shouldReturnOkWhenPutRequestIsValid() {
+        var s3Client = new FakeS3Client();
+        var bucket = randomString();
+        var putRequest = insertFileToS3(bucket, UnixPath.of(randomString()));
+        var response = s3Client.putObject(putRequest, RequestBody.fromBytes(randomString().getBytes()));
+        assertThat(response.sdkHttpResponse().statusCode(), is(equalTo(200)));
+    }
+
     private static ListObjectsRequest createListObjectsRequest(String bucket,
                                                                UnixPath folder,
                                                                int pageSize,
