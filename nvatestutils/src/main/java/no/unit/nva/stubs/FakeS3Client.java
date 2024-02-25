@@ -23,6 +23,7 @@ import nva.commons.core.paths.UnixPath;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.http.AbortableInputStream;
+import software.amazon.awssdk.http.SdkHttpResponse;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectResponse;
@@ -120,7 +121,11 @@ public class FakeS3Client implements S3Client {
         var path = putObjectRequest.key();
         var inputStream = requestBody.contentStreamProvider().newStream();
         this.filesAndContent.put(path, inputSteamToByteBuffer(inputStream));
-        return PutObjectResponse.builder().build();
+        var sdkHttpResponse = SdkHttpResponse.builder().statusCode(200).build();
+        return (PutObjectResponse) PutObjectResponse.builder()
+                                       .eTag("asdasda")
+                                       .sdkHttpResponse(sdkHttpResponse)
+                                       .build();
     }
 
     @Override
