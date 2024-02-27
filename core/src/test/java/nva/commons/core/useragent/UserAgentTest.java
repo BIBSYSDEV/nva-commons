@@ -12,7 +12,7 @@ class UserAgentTest {
     @Test
     void shouldAllowCreationOfUserAgentString() {
         var actual = UserAgent.newBuilder()
-                         .clientName(UserAgentTest.class)
+                         .client(UserAgentTest.class)
                          .environment("dev")
                          .version("1.0")
                          .repository(URI.create("https://example.org/someRepo"))

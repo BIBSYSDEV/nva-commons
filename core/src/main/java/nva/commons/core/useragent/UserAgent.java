@@ -7,7 +7,7 @@ import java.util.Objects;
 /**
  * When sending HTTP requests, applying a User-Agent header allows the recipient to know who is executing the request.
  */
-public class UserAgent {
+public final class UserAgent {
 
     /**
      * For convenience, we provide the header.
@@ -43,10 +43,10 @@ public class UserAgent {
         public static final String USER_AGENT_TEMPLATE = "%s-%s/%s (%s; mailto:%s)";
         public static final String NULL_VALUE_ERROR = "No value for user agent builder may be null";
         private String clientName;
-        private String version;
+        private String versionName;
         private URI uri;
-        private String email;
-        private String environment;
+        private String emailAddress;
+        private String environmentName;
 
         private UserAgentBuilder() {
             // NO-OP
@@ -57,7 +57,7 @@ public class UserAgent {
          * @param aClass The root caller class that initiates the call.
          * @return UserAgentBuilder
          */
-        public UserAgentBuilder clientName(Class<?> aClass) {
+        public UserAgentBuilder client(Class<?> aClass) {
             this.clientName = aClass.getSimpleName();
             return this;
         }
@@ -68,7 +68,7 @@ public class UserAgent {
          * @return UserAgentBuilder
          */
         public UserAgentBuilder version(String version) {
-            this.version = version;
+            this.versionName = version;
             return this;
         }
 
@@ -88,7 +88,7 @@ public class UserAgent {
          * @return UserAgentBuilder
          */
         public UserAgentBuilder email(String email) {
-            this.email = email;
+            this.emailAddress = email;
             return this;
         }
 
@@ -98,7 +98,7 @@ public class UserAgent {
          * @return UserAgentBuilder
          */
         public UserAgentBuilder environment(String environment) {
-            this.environment = environment;
+            this.environmentName = environment;
             return this;
         }
 
@@ -107,8 +107,13 @@ public class UserAgent {
          * @return UserAgent.
          */
         public UserAgent build() {
-            validate(uri, clientName, environment, version, uri, email);
-            var userAgentString = String.format(USER_AGENT_TEMPLATE, clientName, environment, version, uri, email);
+            validate(uri, clientName, environmentName, versionName, uri, emailAddress);
+            var userAgentString = String.format(USER_AGENT_TEMPLATE,
+                                                clientName,
+                                                environmentName,
+                                                versionName,
+                                                uri,
+                                                emailAddress);
             return new UserAgent(userAgentString);
         }
 
