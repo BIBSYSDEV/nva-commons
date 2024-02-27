@@ -5,6 +5,7 @@ import nva.commons.apigateway.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.mockito.ArgumentCaptor;
 import org.mockito.stubbing.Answer;
 import java.io.IOException;
 import java.net.URI;
@@ -20,7 +21,9 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static no.unit.nva.auth.FetchUserInfo.AUTHORIZATION_HEADER;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class IdentityServiceClientTest {
@@ -30,6 +33,7 @@ class IdentityServiceClientTest {
     public static final String actingUser = randomString();
     public static final URI customer = randomUri();
     public static final URI cristinOrgUri = randomUri();
+    public static final String BEARER_BEARER_TOKEN_TEST = "Bearer BEARER_TOKEN_TEST";
     HttpClient httpClient = mock(HttpClient.class);
     CognitoCredentials cognitoCredentials;
     HttpResponse<String> okResponseWithBody = mock(HttpResponse.class);
@@ -38,7 +42,7 @@ class IdentityServiceClientTest {
     private IdentityServiceClient authorizedIdentityServiceClient;
 
     @BeforeEach
-    private void setup() throws IOException, InterruptedException {
+    public void setup() throws IOException, InterruptedException {
         cognitoCredentials = new CognitoCredentials(() -> "id", () -> "secret", URI.create("https://backend-auth/"));
 
         when(okResponseWithBody.statusCode()).thenReturn(500);
@@ -57,7 +61,7 @@ class IdentityServiceClientTest {
     }
 
     @Test
-    public void shouldSendRequestToCorrectUrlWhenGettingExternalClients()
+    void shouldSendRequestToCorrectUrlWhenGettingExternalClients()
         throws IOException, InterruptedException, NotFoundException {
         when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class)))
             .thenAnswer((Answer) invocation -> {
@@ -75,7 +79,7 @@ class IdentityServiceClientTest {
     }
 
     @Test
-    public void shouldReturnExternalClientWhenRequested() throws NotFoundException {
+    void shouldReturnExternalClientWhenRequested() throws NotFoundException {
 
         var externalClient = authorizedIdentityServiceClient.getExternalClient(clientId);
 
@@ -86,7 +90,25 @@ class IdentityServiceClientTest {
     }
 
     @Test
-    public void shouldThrowRuntimeExceptionWhenHttpClientReturnsUnhandledError() throws IOException,
+    void shouldReturnExternalClientWhenRequestedWithBearerToken()
+        throws NotFoundException, IOException, InterruptedException {
+
+        var externalClient = authorizedIdentityServiceClient.getExternalClientByToken(BEARER_BEARER_TOKEN_TEST);
+
+        ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
+        verify(httpClient).send(requestCaptor.capture(), any(BodyHandler.class));
+        HttpRequest request = requestCaptor.getValue();
+        var actualAuthorizationHeader = request.headers().firstValue(AUTHORIZATION_HEADER).orElse("");
+
+        assertThat(actualAuthorizationHeader, is(equalTo(BEARER_BEARER_TOKEN_TEST)));
+        assertThat(externalClient.getClientId(), is(equalTo(clientId)));
+        assertThat(externalClient.getActingUser(), is(equalTo(actingUser)));
+        assertThat(externalClient.getCustomerUri(), is(equalTo(customer)));
+        assertThat(externalClient.getCristinUrgUri(), is(equalTo(cristinOrgUri)));
+    }
+
+    @Test
+    void shouldThrowRuntimeExceptionWhenHttpClientReturnsUnhandledError() throws IOException,
                                                                                       InterruptedException {
         when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(notOkResponse);
 
@@ -96,7 +118,7 @@ class IdentityServiceClientTest {
     }
 
     @Test
-    public void shouldThrowNotFoundWhenHttpClientNotFound() throws IOException, InterruptedException {
+    void shouldThrowNotFoundWhenHttpClientNotFound() throws IOException, InterruptedException {
         when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(notFoundResponse);
 
         Executable action = () -> authorizedIdentityServiceClient.getExternalClient(clientId);
