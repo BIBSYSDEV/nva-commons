@@ -2,6 +2,7 @@ package no.unit.nva.clients;
 
 import static java.net.http.HttpResponse.BodyHandlers.ofString;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static no.unit.nva.auth.FetchUserInfo.AUTHORIZATION_HEADER;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -28,10 +29,12 @@ public class IdentityServiceClient {
     private final AuthorizedBackendClient authorizedClient;
     private static final String AUTH_HOST = new Environment().readEnv("BACKEND_CLIENT_AUTH_URL");
     private static final String API_HOST = new Environment().readEnv("API_HOST");
+    private final HttpClient unauthorizedClient;
 
     public IdentityServiceClient(HttpClient httpClient,
                                  String bearerToken,
                                  CognitoCredentials cognitoCredentials) {
+        this.unauthorizedClient = httpClient;
         this.authorizedClient = AuthorizedBackendClient.prepareWithBearerTokenAndCredentials(
             httpClient,
             bearerToken,
@@ -51,6 +54,12 @@ public class IdentityServiceClient {
                    .getUri();
     }
 
+    private URI constructExternalClientsUserinfoGetPath() {
+        return usersAndRolesURI()
+                   .addChild(API_PATH_EXTERNAL_CLIENTS)
+                   .getUri();
+    }
+
     private <T> T mapResponse(Class<T> clazz, HttpResponse<String> response)
         throws JsonProcessingException {
         return dtoObjectMapper.readValue(
@@ -63,6 +72,19 @@ public class IdentityServiceClient {
                           .GET()
                           .uri(constructExternalClientsGetPath(clientId));
         return attempt(getHttpResponseCallable(request))
+                   .map(this::validateResponse)
+                   .map(r -> mapResponse(GetExternalClientResponse.class, r))
+                   .orElseThrow(this::handleFailure);
+    }
+
+    public GetExternalClientResponse getExternalClientByToken(String bearerToken)
+        throws NotFoundException {
+        var request = HttpRequest.newBuilder()
+                          .GET()
+                          .uri(constructExternalClientsUserinfoGetPath())
+                          .setHeader(AUTHORIZATION_HEADER, bearerToken);
+
+        return attempt(() -> unauthorizedClient.send(request.build(), ofString(UTF_8)))
                    .map(this::validateResponse)
                    .map(r -> mapResponse(GetExternalClientResponse.class, r))
                    .orElseThrow(this::handleFailure);
