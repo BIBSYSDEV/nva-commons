@@ -27,12 +27,15 @@ import no.unit.nva.commons.json.JsonUtils;
 public class FakeAuthServer {
 
     public static final String ACCESS_TOKEN_TEMPLATE = "{\"access_token\": \"%s\"}";
+    public static final String ACCESS_TOKEN_FORBIDDEN = randomString();
+    public static final String FORBIDDEN_BODY = randomString();
     private WireMockServer httpServer;
     private URI serverUri;
     private Map<String, CognitoUserInfo> accessTokenUserMap;
 
     public FakeAuthServer() {
         initialize();
+        stubForbidden();
     }
 
     public void close() {
@@ -71,12 +74,11 @@ public class FakeAuthServer {
                     .willReturn(createOauthClientResponse(expectedAccessToken)));
     }
 
-    private FakeAuthServer initialize() {
+    private void initialize() {
         httpServer = new WireMockServer(options().httpDisabled(true).dynamicHttpsPort());
         httpServer.start();
         serverUri = URI.create(httpServer.baseUrl());
         WireMock.configureFor(HTTPS, serverUri.getHost(), httpServer.httpsPort());
-        return this;
     }
 
     private void stubEndpointForUserEntry(String accessToken) {
@@ -84,6 +86,19 @@ public class FakeAuthServer {
                     .withHeader(HttpHeaders.AUTHORIZATION, equalTo(bearerToken(accessToken)))
                     .willReturn(createUserInfoResponse(accessToken))
         );
+    }
+
+    private void stubForbidden() {
+        stubFor(get(OAUTH_USER_INFO)
+                    .withHeader(HttpHeaders.AUTHORIZATION, equalTo(bearerToken(ACCESS_TOKEN_FORBIDDEN)))
+                    .willReturn(createForbiddenResponse())
+        );
+    }
+
+    private ResponseDefinitionBuilder createForbiddenResponse() {
+        return aResponse()
+                   .withStatus(HttpURLConnection.HTTP_FORBIDDEN)
+                   .withBody(FORBIDDEN_BODY);
     }
 
     private ResponseDefinitionBuilder createOauthClientResponse(String expectedAccessToken) {

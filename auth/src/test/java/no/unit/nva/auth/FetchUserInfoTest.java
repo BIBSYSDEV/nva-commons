@@ -1,6 +1,8 @@
 package no.unit.nva.auth;
 
 import static no.unit.nva.auth.OAuthConstants.OAUTH_USER_INFO;
+import static no.unit.nva.stubs.FakeAuthServer.ACCESS_TOKEN_FORBIDDEN;
+import static no.unit.nva.stubs.FakeAuthServer.FORBIDDEN_BODY;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -14,6 +16,8 @@ import java.util.Map;
 import no.unit.nva.stubs.FakeAuthServer;
 import no.unit.nva.stubs.WiremockHttpClient;
 import nva.commons.core.paths.UriWrapper;
+import nva.commons.logutils.LogUtils;
+import nva.commons.logutils.TestAppender;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +48,18 @@ class FetchUserInfoTest {
             new FetchUserInfo(httpClient, () -> createCognitoUri(), bearerToken(accessToken));
         var actualUserInfo = fetchUserInfo.fetch();
         assertThat(actualUserInfo, is(equalTo(expectedUserInfo)));
+    }
+
+    @Test
+    void shouldLogResponseDetailsWhenHttpError() {
+        var fetchUserInfo =
+            new FetchUserInfo(httpClient, this::createCognitoUri, bearerToken(ACCESS_TOKEN_FORBIDDEN));
+
+        var testAppender = LogUtils.getTestingAppenderForRootLogger();
+        assertThrows(RuntimeException.class, fetchUserInfo::fetch);
+
+        assertThat(testAppender.getMessages(), containsString("Got status code 403"));
+        assertThat(testAppender.getMessages(), containsString(FORBIDDEN_BODY));
     }
 
     @Test
