@@ -14,16 +14,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.awsjavakit.eventbridge.models.AwsEventBridgeEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
-import no.unit.nva.events.models.AwsEventBridgeEvent;
 import no.unit.nva.stubs.FakeContext;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
@@ -54,7 +55,10 @@ public class EventHandlerTest extends AbstractEventHandlerTest {
         assertThat(actualEvent, is(equalTo(expectedEvent)));
     }
 
+    @Disabled
     @Test
+    //TODO: logging the exception before thrown will lead to log the exception twice. AWS Lambda logs the exceptions
+    // when they are thrown.
     public void handleRequestLogsErrorWhenExceptionIsThrown() {
         TestAppender appender = LogUtils.getTestingAppender(EventHandler.class);
         var handler = new EventHandlerThrowingException();

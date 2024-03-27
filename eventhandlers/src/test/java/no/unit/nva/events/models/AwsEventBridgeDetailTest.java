@@ -11,6 +11,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.github.awsjavakit.eventbridge.models.AwsEventBridgeDetail;
 import java.nio.file.Path;
 import no.unit.nva.events.handlers.SampleEventDetail;
 import nva.commons.core.ioutils.IoUtils;

@@ -10,14 +10,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.awsjavakit.eventbridge.models.AwsEventBridgeDetail;
+import com.github.awsjavakit.eventbridge.models.AwsEventBridgeEvent;
 import java.beans.IntrospectionException;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
 import no.unit.nva.commons.json.JsonUtils;
-import no.unit.nva.events.models.AwsEventBridgeDetail;
-import no.unit.nva.events.models.AwsEventBridgeEvent;
 import no.unit.nva.stubs.FakeContext;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -107,5 +107,7 @@ public class DestinationsEventBridgeEventHandlerTest extends AbstractEventHandle
             this.eventBuffer.set(event);
             return SampleEventDetail.eventWithEmptyFields();
         }
+
+
     }
 }
