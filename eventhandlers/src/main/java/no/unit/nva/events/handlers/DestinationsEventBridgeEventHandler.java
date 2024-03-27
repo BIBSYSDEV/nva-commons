@@ -2,9 +2,11 @@ package no.unit.nva.events.handlers;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.awsjavakit.eventbridge.handlers.EventParser;
+import com.github.awsjavakit.eventbridge.models.AwsEventBridgeDetail;
+import com.github.awsjavakit.eventbridge.models.AwsEventBridgeEvent;
 import no.unit.nva.events.EventsConfig;
-import no.unit.nva.events.models.AwsEventBridgeDetail;
-import no.unit.nva.events.models.AwsEventBridgeEvent;
+
 
 public abstract class DestinationsEventBridgeEventHandler<I, O>
     extends EventHandler<AwsEventBridgeDetail<I>, O> {

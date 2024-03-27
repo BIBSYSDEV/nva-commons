@@ -9,8 +9,9 @@ import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.awsjavakit.eventbridge.handlers.EventParser;
+import com.github.awsjavakit.eventbridge.models.AwsEventBridgeEvent;
 import java.util.Objects;
-import no.unit.nva.events.models.AwsEventBridgeEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 

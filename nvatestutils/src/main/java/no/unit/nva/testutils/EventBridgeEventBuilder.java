@@ -3,13 +3,14 @@ package no.unit.nva.testutils;
 import static no.unit.nva.testutils.RandomDataGenerator.randomElement;
 import static no.unit.nva.testutils.RandomDataGenerator.randomInstant;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
+import static nva.commons.core.attempt.Try.attempt;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.awsjavakit.eventbridge.models.AwsEventBridgeDetail;
+import com.github.awsjavakit.eventbridge.models.AwsEventBridgeEvent;
 import java.io.InputStream;
 import java.util.List;
-import no.unit.nva.commons.json.JsonSerializable;
 import no.unit.nva.commons.json.JsonUtils;
-import no.unit.nva.events.models.AwsEventBridgeDetail;
-import no.unit.nva.events.models.AwsEventBridgeEvent;
+import no.unit.nva.events.EventsConfig;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.attempt.Try;
 import nva.commons.core.ioutils.IoUtils;
@@ -30,7 +31,7 @@ public final class EventBridgeEventBuilder {
         var detail = createDestinationsEventDetailBody(eventBody);
         var event = sampleEventObject(detail);
         return Try.of(event)
-                   .map(AwsEventBridgeEvent::toJsonString)
+                   .map(EventBridgeEventBuilder::toJson)
                    .map(IoUtils::stringToStream)
                    .orElseThrow();
     }
@@ -38,9 +39,13 @@ public final class EventBridgeEventBuilder {
     @JacocoGenerated
     public static <T> InputStream sampleEvent(T detail) {
         return Try.of(sampleEventObject(detail))
-                   .map(JsonSerializable::toJsonString)
+                   .map(EventBridgeEventBuilder::toJson)
                    .map(IoUtils::stringToStream)
                    .orElseThrow();
+    }
+
+    private static <T> String toJson(AwsEventBridgeEvent<T> event) {
+        return attempt(()->EventsConfig.objectMapper.writeValueAsString(event)).orElseThrow();
     }
 
     @JacocoGenerated

@@ -15,6 +15,7 @@ dependencies {
     implementation libs.httpmime
     implementation libs.aws.lambda.events
 
+    implementation libs.awsjavkit.events
     implementation libs.aws.sdk2.s3
     implementation libs.aws.sdk2.firehose
     implementation libs.aws.sdk2.eventbridge
