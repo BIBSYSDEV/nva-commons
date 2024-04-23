@@ -14,6 +14,9 @@ dependencies {
     implementation libs.bundles.logging
     implementation libs.aws.lambda.events
 
+    implementation libs.aws.sdk2.s3
+    implementation libs.aws.sdk2.urlconnection
+
     implementation libs.jackson.core
     implementation libs.jackson.databind
     implementation libs.jackson.annotations
@@ -32,4 +35,6 @@ test{
     environment "ALLOWED_ORIGIN", "*"
     environment "COGNITO_URI", "https://cognito.com"
     environment "EXTERNAL_USER_POOL_URI", "https//user-pool.example.com/123"
+    environment "AWS_REGION", "eu-west-1"
+    environment "LARGE_API_RESPONSES_BUCKET", "large-bucket"
 }
