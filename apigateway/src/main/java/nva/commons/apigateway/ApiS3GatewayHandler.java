@@ -96,9 +96,9 @@ public abstract class ApiS3GatewayHandler<I> extends ApiGatewayHandler<I, Void> 
                    .build();
     }
 
-    abstract String processS3Input(I input, RequestInfo requestInfo, Context context) throws BadRequestException;
+    protected abstract String processS3Input(I input, RequestInfo requestInfo, Context context) throws BadRequestException;
 
-    abstract String getContentType();
+    protected abstract String getContentType();
 
     @JacocoGenerated
     public static S3Client defaultS3Client() {

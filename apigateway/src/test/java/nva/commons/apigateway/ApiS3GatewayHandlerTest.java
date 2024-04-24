@@ -77,12 +77,12 @@ class ApiS3GatewayHandlerTest {
     private ApiS3GatewayHandler createHandler(String data) {
         return new ApiS3GatewayHandler<>(Void.class, s3Client, s3Presigner) {
             @Override
-            String processS3Input(Void input, RequestInfo requestInfo, Context context) throws BadRequestException {
+            public String processS3Input(Void input, RequestInfo requestInfo, Context context) throws BadRequestException {
                 return data;
             }
 
             @Override
-            String getContentType() {
+            public String getContentType() {
                 return randomString();
             }
         };
