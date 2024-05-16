@@ -98,7 +98,7 @@ public class FakeS3Client implements S3Client {
     public ListObjectsV2Response listObjectsV2(ListObjectsV2Request v2Request){
         var oldRequest = ListObjectsRequest.builder()
                 .bucket(v2Request.bucket())
-                .marker(v2Request.continuationToken())
+                .marker(v2Request.startAfter())
                 .maxKeys(v2Request.maxKeys())
                 .prefix(v2Request.prefix())
                 .build();
@@ -107,6 +107,7 @@ public class FakeS3Client implements S3Client {
                 .builder()
                 .contents(oldResponse.contents())
                 .isTruncated(oldResponse.isTruncated())
+                .startAfter(oldResponse.nextMarker())
                 .continuationToken(v2Request.continuationToken())
                 .nextContinuationToken(oldResponse.nextMarker())
                 .build();

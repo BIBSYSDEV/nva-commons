@@ -9,7 +9,6 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -105,7 +104,12 @@ class FakeS3ClientTest {
     }
 
     @Test
-    void shouldReturnNextListingStartPointWhenReturningAPageOfResultsWithVersion2Request() {
+    @Deprecated
+        // From https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html#API_ListObjectsV2_ResponseSyntax:
+        // NextContinuationToken is sent when isTruncated is true, which means there are more keys in the bucket that
+        // can be listed. The next list requests to Amazon S3 can be continued with this NextContinuationToken.
+        // NextContinuationToken is obfuscated and is not a real key
+    void shouldReturnNextListingStartPointWhenReturningAPageOfResultsWithVersion2RequestDeprecated() {
         var s3Client = new FakeS3Client();
         var bucket = randomString();
         var expectedFile1 = insertRandomFileToS3(s3Client, bucket);
@@ -118,6 +122,22 @@ class FakeS3ClientTest {
                                     .build();
         var result = s3Client.listObjectsV2(listObjectRequest);
         assertThat(result.nextContinuationToken(), is(equalTo(expectedFile1.toString())));
+    }
+
+    @Test
+    void shouldReturnNextListingStartPointWhenReturningAPageOfResultsWithVersion2Request() {
+        var s3Client = new FakeS3Client();
+        var bucket = randomString();
+        var expectedFile1 = insertRandomFileToS3(s3Client, bucket);
+        var otherFile = insertRandomFileToS3(s3Client, bucket);
+
+        var listObjectRequest = ListObjectsV2Request.builder()
+                                    .bucket(bucket)
+                                    .prefix(expectedFile1.getParent().orElseThrow().toString())
+                                    .maxKeys(1)
+                                    .build();
+        var result = s3Client.listObjectsV2(listObjectRequest);
+        assertThat(result.startAfter(), is(equalTo(expectedFile1.toString())));
     }
 
     @Test
