@@ -5,6 +5,8 @@ import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
+import static no.unit.nva.testutils.TestHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
+import static no.unit.nva.testutils.TestHeaders.WILDCARD;
 import static nva.commons.apigateway.ApiGatewayHandler.REQUEST_ID;
 import static nva.commons.apigateway.MediaTypes.APPLICATION_PROBLEM_JSON;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
@@ -391,6 +393,7 @@ class ApiGatewayHandlerTest {
         var response = getResponse(Void.class, request, handler);
         assertThat(response.getStatusCode(), is(equalTo(expectedRedirectStatusCode)));
         assertThat(response.getHeaders(), hasEntry(HttpHeaders.LOCATION, expectedRedirectLocation.toString()));
+        assertThat(response.getHeaders(), hasEntry(ACCESS_CONTROL_ALLOW_ORIGIN, WILDCARD));
     }
 
     @Test

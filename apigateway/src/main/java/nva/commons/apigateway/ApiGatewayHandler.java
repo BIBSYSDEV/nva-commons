@@ -203,7 +203,8 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
 
     private GatewayResponse<Void> createRedirectResponse(RedirectException exception)
         throws GatewayResponseSerializingException {
-        var responseHeaders = Map.of(HttpHeaders.LOCATION, exception.getLocation().toString());
+        var responseHeaders = Map.of(HttpHeaders.LOCATION, exception.getLocation().toString(),
+                                     ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
         return new GatewayResponse<>(EMPTY_BODY, responseHeaders, exception.getStatusCode(), isBase64Encoded,
                                      objectMapper);
     }
