@@ -1,6 +1,8 @@
 package nva.commons.apigateway;
 
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
+import static com.google.common.net.HttpHeaders.STRICT_TRANSPORT_SECURITY;
+import static com.google.common.net.HttpHeaders.X_CONTENT_TYPE_OPTIONS;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
@@ -599,6 +601,8 @@ class ApiGatewayHandlerTest {
         Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(HttpHeaders.ACCEPT, MediaType.JSON_UTF_8.toString());
         headers.put(CONTENT_TYPE, MediaType.JSON_UTF_8.toString());
+        headers.put(X_CONTENT_TYPE_OPTIONS, "nosniff");
+        headers.put(STRICT_TRANSPORT_SECURITY, "max-age=63072000; includeSubDomains; preload");
         return createHeaders(headers);
     }
 

@@ -2,6 +2,8 @@ package nva.commons.apigateway;
 
 import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
+import static com.google.common.net.HttpHeaders.STRICT_TRANSPORT_SECURITY;
+import static com.google.common.net.HttpHeaders.X_CONTENT_TYPE_OPTIONS;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import com.amazonaws.services.lambda.runtime.Context;
@@ -268,6 +270,8 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
         headers.put(CONTENT_TYPE, MediaTypes.APPLICATION_PROBLEM_JSON.toString());
+        headers.put(X_CONTENT_TYPE_OPTIONS, "nosniff");
+        headers.put(STRICT_TRANSPORT_SECURITY, "max-age=63072000; includeSubDomains; preload");
         return headers;
     }
 
@@ -275,6 +279,8 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
         headers.put(CONTENT_TYPE, getDefaultResponseContentTypeHeaderValue(requestInfo).toString());
+        headers.put(X_CONTENT_TYPE_OPTIONS, "nosniff");
+        headers.put(STRICT_TRANSPORT_SECURITY, "max-age=63072000; includeSubDomains; preload");
         return headers;
     }
 
