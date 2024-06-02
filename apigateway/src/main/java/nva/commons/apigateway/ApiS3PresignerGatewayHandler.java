@@ -2,6 +2,7 @@ package nva.commons.apigateway;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.time.Duration;
 import java.util.Map;
 import nva.commons.apigateway.exceptions.BadRequestException;
@@ -25,9 +26,9 @@ public abstract class ApiS3PresignerGatewayHandler<I> extends ApiGatewayHandler<
     @Override
     protected Void processInput(I input, RequestInfo requestInfo, Context context) throws BadRequestException {
         var filename = context.getAwsRequestId();
-        var presign = presignS3Object(filename);
-        generateAndWriteDataToS3(filename, input);
-        setLocationHeader(presign.url().toString());
+        var preSignedUrl = presignS3Object(filename).url();
+        generateAndWriteDataToS3(preSignedUrl, input);
+        setLocationHeader(preSignedUrl.toString());
         return null;
     }
 
@@ -37,7 +38,7 @@ public abstract class ApiS3PresignerGatewayHandler<I> extends ApiGatewayHandler<
         return HttpURLConnection.HTTP_MOVED_TEMP;
     }
 
-    protected abstract void generateAndWriteDataToS3(String filename, I input);
+    protected abstract void generateAndWriteDataToS3(URL preSignedUrl, I input);
 
     protected abstract String getBucketName();
 

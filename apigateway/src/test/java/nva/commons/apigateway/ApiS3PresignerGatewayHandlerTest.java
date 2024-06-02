@@ -61,7 +61,7 @@ class ApiS3PresignerGatewayHandlerTest {
         return new ApiS3PresignerGatewayHandler<Void>(Void.class, s3Presigner) {
 
             @Override
-            protected void generateAndWriteDataToS3(String filename, Void input) {
+            protected void generateAndWriteDataToS3(URL preSignedUrl, Void input) {
             }
 
             @Override
