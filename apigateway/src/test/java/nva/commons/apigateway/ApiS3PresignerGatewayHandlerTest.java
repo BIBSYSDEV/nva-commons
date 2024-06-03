@@ -1,6 +1,5 @@
 package nva.commons.apigateway;
 
-import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -16,54 +15,40 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import no.unit.nva.stubs.FakeContext;
-import no.unit.nva.stubs.FakeS3Client;
 import nva.commons.apigateway.exceptions.BadRequestException;
-import nva.commons.core.Environment;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.http.HttpStatusCode;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
-class ApiS3GatewayHandlerTest {
+class ApiS3PresignerGatewayHandlerTest {
 
-    public static final String BUCKET_NAME = "large-bucket";
-    private S3Client s3Client;
     private S3Presigner s3Presigner;
     private ByteArrayOutputStream output;
+    private InputStream input;
+    private ApiS3PresignerGatewayHandler<Void> handler;
 
     @BeforeEach
     void init() {
-        s3Client = new FakeS3Client();
         s3Presigner = mock(S3Presigner.class);
-        this.output = new ByteArrayOutputStream();
+        input = IoUtils.stringToStream("{}");
+        output = new ByteArrayOutputStream();
+        handler = createHandler();
     }
 
     @Test
-    void shouldCallS3PutObjectWithCorrectData() throws IOException {
-        var expectedData = randomString();
-        var handler = createHandler(expectedData);
+    void shouldSetLocationHeader() throws IOException {
         var context = new FakeContext();
         var expectedFilename = context.getAwsRequestId();
 
-        PresignedGetObjectRequest t = mockPresignResponse(expectedFilename);
-        when(s3Presigner.presignGetObject(any(GetObjectPresignRequest.class))).thenReturn(t);
+        var presignedGetObjectRequest = mockPresignResponse(expectedFilename);
+        when(s3Presigner.presignGetObject(any(GetObjectPresignRequest.class))).thenReturn(presignedGetObjectRequest);
 
-        handler.handleRequest(IoUtils.stringToStream("{}"), this.output, context);
+        handler.handleRequest(input, output, context);
         var response = GatewayResponse.fromOutputStream(output, Void.class);
-
-        var getRequest = GetObjectRequest.builder()
-                             .bucket(BUCKET_NAME)
-                             .key(expectedFilename)
-                             .build();
-
-        var s3object = s3Client.getObject(getRequest, ResponseTransformer.toBytes());
-        assertThat(s3object.asUtf8String(), is(equalTo(expectedData)));
         assertThat(response.getHeaders().get("Location"), containsString(expectedFilename));
         assertThat(response.getStatusCode(), is(equalTo(HttpStatusCode.MOVED_TEMPORARILY)));
     }
@@ -75,19 +60,23 @@ class ApiS3GatewayHandlerTest {
         return presignRequest;
     }
 
-    private ApiS3GatewayHandler<Void>createHandler(String data) {
-        return new ApiS3GatewayHandler<>(Void.class, s3Client, s3Presigner) {
+    private ApiS3PresignerGatewayHandler<Void> createHandler() {
+        return new ApiS3PresignerGatewayHandler<Void>(Void.class, s3Presigner) {
 
             @Override
-            public String processS3Input(Void input, RequestInfo requestInfo, Context context) throws BadRequestException {
-                return data;
+            protected void generateAndWriteDataToS3(String filename, Void input, RequestInfo requestInfo,
+                                                    Context context) throws BadRequestException {
+
+            }
+            @Override
+            protected String getBucketName() {
+                return "someTestBucket";
             }
 
             @Override
-            public String getContentType() {
-                return randomString();
+            protected Duration getSignDuration() {
+                return Duration.ofMinutes(60);
             }
         };
     }
-
 }
