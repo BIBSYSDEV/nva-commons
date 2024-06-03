@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import com.amazonaws.services.lambda.runtime.Context;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +15,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import no.unit.nva.stubs.FakeContext;
+import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,9 +64,10 @@ class ApiS3PresignerGatewayHandlerTest {
         return new ApiS3PresignerGatewayHandler<Void>(Void.class, s3Presigner) {
 
             @Override
-            protected void generateAndWriteDataToS3(URL preSignedUrl, Void input) {
-            }
+            protected void generateAndWriteDataToS3(String filename, Void input, RequestInfo requestInfo,
+                                                    Context context) throws BadRequestException {
 
+            }
             @Override
             protected String getBucketName() {
                 return "someTestBucket";

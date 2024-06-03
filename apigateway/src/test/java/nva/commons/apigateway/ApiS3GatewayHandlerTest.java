@@ -14,9 +14,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import no.unit.nva.stubs.FakeContext;
 import no.unit.nva.stubs.FakeS3Client;
 import nva.commons.apigateway.exceptions.BadRequestException;
+import nva.commons.core.Environment;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,16 +32,15 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 
 class ApiS3GatewayHandlerTest {
 
+    public static final String BUCKET_NAME = "large-bucket";
     private S3Client s3Client;
     private S3Presigner s3Presigner;
     private ByteArrayOutputStream output;
-    private InputStream input;
 
     @BeforeEach
     void init() {
         s3Client = new FakeS3Client();
         s3Presigner = mock(S3Presigner.class);
-        this.input = InputStream.nullInputStream();
         this.output = new ByteArrayOutputStream();
     }
 
@@ -57,7 +58,7 @@ class ApiS3GatewayHandlerTest {
         var response = GatewayResponse.fromOutputStream(output, Void.class);
 
         var getRequest = GetObjectRequest.builder()
-                             .bucket("large-bucket")
+                             .bucket(BUCKET_NAME)
                              .key(expectedFilename)
                              .build();
 
@@ -74,8 +75,9 @@ class ApiS3GatewayHandlerTest {
         return presignRequest;
     }
 
-    private ApiS3GatewayHandler createHandler(String data) {
+    private ApiS3GatewayHandler<Void>createHandler(String data) {
         return new ApiS3GatewayHandler<>(Void.class, s3Client, s3Presigner) {
+
             @Override
             public String processS3Input(Void input, RequestInfo requestInfo, Context context) throws BadRequestException {
                 return data;
