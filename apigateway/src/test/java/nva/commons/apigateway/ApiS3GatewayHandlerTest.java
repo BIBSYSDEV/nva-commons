@@ -15,6 +15,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import no.unit.nva.stubs.FakeContext;
 import no.unit.nva.stubs.FakeS3Client;
+import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.ioutils.IoUtils;
@@ -77,8 +78,8 @@ class ApiS3GatewayHandlerTest {
         return new ApiS3GatewayHandler<>(Void.class, s3Client, s3Presigner) {
 
             @Override
-            protected void validateAccessRights(Void input, RequestInfo requestInfo, Context context)
-                throws UnauthorizedException {
+            protected void validateRequest(Void input, RequestInfo requestInfo, Context context)
+                throws ApiGatewayException {
                 //no-op
             }
 

@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import no.unit.nva.stubs.FakeContext;
+import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.testutils.ProxyHandler;
 import nva.commons.apigateway.testutils.RequestBody;
 import nva.commons.core.ioutils.IoUtils;
@@ -41,7 +42,13 @@ class ApiGatewayProxyHandlerTest {
     @DisplayName("ApiGatewayProxyHandlerTest has a constructor with input class as only parameter")
     public void apiGatewayHandlerHasACostructorWithInputClassAsOnlyParameter() {
         RestRequestHandler<String, String> handler = new ApiGatewayProxyHandler<>(String.class) {
-    
+
+            @Override
+            protected void validateRequest(String input, RequestInfo requestInfo, Context context)
+                throws ApiGatewayException {
+                //no-op
+            }
+
             @Override
             protected ProxyResponse<String> processProxyInput(String input, RequestInfo requestInfo, Context context) {
                 return null;

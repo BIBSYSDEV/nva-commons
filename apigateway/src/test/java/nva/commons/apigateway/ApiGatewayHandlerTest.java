@@ -98,6 +98,12 @@ class ApiGatewayHandlerTest {
     public void apiGatewayHandlerHasAConstructorWithInputClassAsOnlyParameter() {
         RestRequestHandler<String, String> handler = new ApiGatewayHandler<>(String.class) {
             @Override
+            protected void validateRequest(String input, RequestInfo requestInfo, Context context)
+                throws ApiGatewayException {
+                //no-op
+            }
+
+            @Override
             protected String processInput(String input, RequestInfo requestInfo, Context context) {
                 return null;
             }

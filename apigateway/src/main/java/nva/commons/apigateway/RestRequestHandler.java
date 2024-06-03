@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
-import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
 import nva.commons.core.attempt.Failure;
@@ -147,7 +146,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
             RequestInfo requestInfo = inputParser.getRequestInfo(inputString);
 
-            validateAccessRights(inputObject, requestInfo, context);
+            validateRequest(inputObject, requestInfo, context);
 
             O response = processInput(inputObject, requestInfo, context);
 
@@ -159,11 +158,17 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
         }
     }
 
-    @SuppressWarnings("PMD.EmptyMethodInAbstractClassShouldBeAbstract")
-    protected void validateAccessRights(I inputObject, RequestInfo requestInfo, Context context) throws
-                                                                                                 UnauthorizedException {
-        //Empty method to avoid breaking changes in existing implementations
-    }
+    /**
+     * Implements input validation and access control.
+     * {@link RestRequestHandler#handleExpectedException} method.
+     *
+     * @param input       The input object to the method. Usually a deserialized json.
+     * @param requestInfo Request headers and path.
+     * @param context     the ApiGateway context.
+     * @throws ApiGatewayException all exceptions are caught by writeFailure and mapped to error codes through the
+     *                             method {@link RestRequestHandler#getFailureStatusCode}
+     */
+    protected abstract void validateRequest(I input, RequestInfo requestInfo, Context context) throws ApiGatewayException;
 
     protected ApiGatewayException parsingExceptionToBadRequestException(Failure<I> fail) {
         return new BadRequestException(fail.getException().getMessage(), fail.getException());

@@ -33,6 +33,12 @@ public class Handler extends ApiGatewayHandler<RequestBody, RequestBody> {
     }
 
     @Override
+    protected void validateRequest(RequestBody input, RequestInfo requestInfo, Context context)
+        throws ApiGatewayException {
+        //no-op
+    }
+
+    @Override
     protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
         throws ApiGatewayException {
         this.headers = requestInfo.getHeaders();
