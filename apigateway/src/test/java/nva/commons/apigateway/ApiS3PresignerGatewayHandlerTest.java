@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import no.unit.nva.stubs.FakeContext;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,6 +68,11 @@ class ApiS3PresignerGatewayHandlerTest {
             @Override
             protected String getBucketName() {
                 return "someTestBucket";
+            }
+
+            @Override
+            protected Duration getSignDuration() {
+                return Duration.ofMinutes(60);
             }
         };
     }

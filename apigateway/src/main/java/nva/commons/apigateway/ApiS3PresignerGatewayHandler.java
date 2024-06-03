@@ -15,7 +15,6 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 public abstract class ApiS3PresignerGatewayHandler<I> extends ApiGatewayHandler<I, Void> {
 
     public static final String LOCATION = "Location";
-    public static final Duration SIGN_DURATION = Duration.ofMinutes(60);
     private final S3Presigner s3presigner;
 
     public ApiS3PresignerGatewayHandler(Class<I> iclass, S3Presigner s3Presigner) {
@@ -42,9 +41,11 @@ public abstract class ApiS3PresignerGatewayHandler<I> extends ApiGatewayHandler<
 
     protected abstract String getBucketName();
 
+    protected abstract Duration getSignDuration();
+
     private GetObjectPresignRequest createPresignRequest(String filename) {
         return GetObjectPresignRequest.builder()
-                   .signatureDuration(SIGN_DURATION)
+                   .signatureDuration(getSignDuration())
                    .getObjectRequest(buildRequest(filename))
                    .build();
     }
