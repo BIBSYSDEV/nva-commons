@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
+import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
 import nva.commons.core.attempt.Failure;
@@ -146,7 +147,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
             RequestInfo requestInfo = inputParser.getRequestInfo(inputString);
 
-            validateRequest(inputObject, requestInfo, context);
+            validateAccessRights(inputObject, requestInfo, context);
 
             O response = processInput(inputObject, requestInfo, context);
 
@@ -159,7 +160,8 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     }
 
     @SuppressWarnings("PMD.EmptyMethodInAbstractClassShouldBeAbstract")
-    protected void validateRequest(I inputObject, RequestInfo requestInfo, Context context) throws ApiGatewayException{
+    protected void validateAccessRights(I inputObject, RequestInfo requestInfo, Context context) throws
+                                                                                                 UnauthorizedException {
         //Empty method to avoid breaking changes in existing implementations
     }
 

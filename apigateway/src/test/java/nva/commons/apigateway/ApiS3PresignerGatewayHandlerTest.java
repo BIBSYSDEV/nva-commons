@@ -65,7 +65,7 @@ class ApiS3PresignerGatewayHandlerTest {
         return new ApiS3PresignerGatewayHandler<>(Void.class, s3Presigner) {
 
             @Override
-            protected void validateRequest(Void input, RequestInfo requestInfo, Context context)
+            protected void validateAccessRights(Void input, RequestInfo requestInfo, Context context)
                 throws UnauthorizedException {
                 //no-op
             }
