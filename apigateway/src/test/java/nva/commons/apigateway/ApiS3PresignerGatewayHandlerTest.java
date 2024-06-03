@@ -16,6 +16,7 @@ import java.net.URL;
 import java.time.Duration;
 import no.unit.nva.stubs.FakeContext;
 import nva.commons.apigateway.exceptions.BadRequestException;
+import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,13 +62,19 @@ class ApiS3PresignerGatewayHandlerTest {
     }
 
     private ApiS3PresignerGatewayHandler<Void> createHandler() {
-        return new ApiS3PresignerGatewayHandler<Void>(Void.class, s3Presigner) {
+        return new ApiS3PresignerGatewayHandler<>(Void.class, s3Presigner) {
+
+            @Override
+            protected void validateRequest(Void input, RequestInfo requestInfo, Context context)
+                throws UnauthorizedException {
+                //no-op
+            }
 
             @Override
             protected void generateAndWriteDataToS3(String filename, Void input, RequestInfo requestInfo,
                                                     Context context) throws BadRequestException {
-
             }
+
             @Override
             protected String getBucketName() {
                 return "someTestBucket";
