@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.HttpURLConnection;
 import java.time.Duration;
 import java.util.Map;
+import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.BadRequestException;
-import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
@@ -45,9 +45,7 @@ public abstract class ApiS3PresignerGatewayHandler<I> extends ApiGatewayHandler<
     }
 
     @Override
-    protected Void processInput(I input, RequestInfo requestInfo, Context context)
-        throws BadRequestException, UnauthorizedException {
-        validateRequest(input, requestInfo, context);
+    protected Void processInput(I input, RequestInfo requestInfo, Context context) throws ApiGatewayException {
         var filename = context.getAwsRequestId();
         generateAndWriteDataToS3(filename, input, requestInfo, context);
         var preSignedUrl = presignS3Object(filename);
@@ -60,9 +58,6 @@ public abstract class ApiS3PresignerGatewayHandler<I> extends ApiGatewayHandler<
     protected Integer getSuccessStatusCode(I input, Void output) {
         return HttpURLConnection.HTTP_MOVED_TEMP;
     }
-
-    protected abstract void validateRequest(I input, RequestInfo requestInfo, Context context)
-        throws UnauthorizedException;
 
     protected abstract void generateAndWriteDataToS3(String filename, I input, RequestInfo requestInfo, Context context)
         throws BadRequestException;

@@ -146,6 +146,8 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
             RequestInfo requestInfo = inputParser.getRequestInfo(inputString);
 
+            validateRequest(inputObject, requestInfo, context);
+
             O response = processInput(inputObject, requestInfo, context);
 
             writeOutput(inputObject, response, requestInfo);
@@ -154,6 +156,11 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
         } catch (Exception e) {
             handleUnexpectedException(context, inputObject, e);
         }
+    }
+
+    @SuppressWarnings("PMD.EmptyMethodInAbstractClassShouldBeAbstract")
+    protected void validateRequest(I inputObject, RequestInfo requestInfo, Context context) throws ApiGatewayException{
+        //Empty method to avoid breaking changes in existing implementations
     }
 
     protected ApiGatewayException parsingExceptionToBadRequestException(Failure<I> fail) {
