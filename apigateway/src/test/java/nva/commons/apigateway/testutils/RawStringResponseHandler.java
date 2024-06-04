@@ -62,6 +62,12 @@ public class RawStringResponseHandler extends ApiGatewayHandler<RequestBody, Str
     }
 
     @Override
+    protected void validateRequest(RequestBody input, RequestInfo requestInfo, Context context)
+        throws ApiGatewayException {
+        //no-op
+    }
+
+    @Override
     protected Map<MediaType, ObjectMapper> getObjectMappers() {
         return Map.of(XML_UTF_8, new XmlMapper());
     }

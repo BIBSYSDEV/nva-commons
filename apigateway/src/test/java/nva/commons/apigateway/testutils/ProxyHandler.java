@@ -44,6 +44,12 @@ public class ProxyHandler extends ApiGatewayProxyHandler<RequestBody, RequestBod
         return new ProxyResponse<>(HTTP_STATUS_CODE_TEST, this.body);
     }
 
+    @Override
+    protected void validateRequest(RequestBody input, RequestInfo requestInfo, Context context)
+        throws ApiGatewayException {
+        //no-op
+    }
+
     private Map<String, String> additionalHeaders(RequestBody input) {
         return Collections.singletonMap(HttpHeaders.WARNING, body.getField1());
     }

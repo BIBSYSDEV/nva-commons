@@ -14,6 +14,12 @@ public class Base64Handler extends ApiGatewayHandler<Void,Void> {
     }
 
     @Override
+    protected void validateRequest(Void input, RequestInfo requestInfo, Context context)
+        throws ApiGatewayException {
+        //no-op
+    }
+
+    @Override
     protected Void processInput(Void input, RequestInfo requestInfo, Context context) throws ApiGatewayException {
         setIsBase64Encoded(true);
         return null;

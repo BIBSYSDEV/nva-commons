@@ -146,6 +146,8 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
             RequestInfo requestInfo = inputParser.getRequestInfo(inputString);
 
+            validateRequest(inputObject, requestInfo, context);
+
             O response = processInput(inputObject, requestInfo, context);
 
             writeOutput(inputObject, response, requestInfo);
@@ -155,6 +157,18 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
             handleUnexpectedException(context, inputObject, e);
         }
     }
+
+    /**
+     * Implements input validation and access control.
+     * {@link RestRequestHandler#handleExpectedException} method.
+     *
+     * @param input       The input object to the method. Usually a deserialized json.
+     * @param requestInfo Request headers and path.
+     * @param context     the ApiGateway context.
+     * @throws ApiGatewayException all exceptions are caught by writeFailure and mapped to error codes through the
+     *                             method {@link RestRequestHandler#getFailureStatusCode}
+     */
+    protected abstract void validateRequest(I input, RequestInfo requestInfo, Context context) throws ApiGatewayException;
 
     protected ApiGatewayException parsingExceptionToBadRequestException(Failure<I> fail) {
         return new BadRequestException(fail.getException().getMessage(), fail.getException());

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.HttpURLConnection;
 import java.time.Duration;
 import java.util.Map;
+import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
@@ -44,7 +45,7 @@ public abstract class ApiS3PresignerGatewayHandler<I> extends ApiGatewayHandler<
     }
 
     @Override
-    protected Void processInput(I input, RequestInfo requestInfo, Context context) throws BadRequestException {
+    protected Void processInput(I input, RequestInfo requestInfo, Context context) throws ApiGatewayException {
         var filename = context.getAwsRequestId();
         generateAndWriteDataToS3(filename, input, requestInfo, context);
         var preSignedUrl = presignS3Object(filename);

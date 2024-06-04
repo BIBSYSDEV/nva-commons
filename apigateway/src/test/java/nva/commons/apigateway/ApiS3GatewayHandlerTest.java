@@ -11,14 +11,13 @@ import static org.mockito.Mockito.when;
 import com.amazonaws.services.lambda.runtime.Context;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.Duration;
 import no.unit.nva.stubs.FakeContext;
 import no.unit.nva.stubs.FakeS3Client;
+import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.BadRequestException;
-import nva.commons.core.Environment;
+import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,8 +74,14 @@ class ApiS3GatewayHandlerTest {
         return presignRequest;
     }
 
-    private ApiS3GatewayHandler<Void>createHandler(String data) {
+    private ApiS3GatewayHandler<Void> createHandler(String data) {
         return new ApiS3GatewayHandler<>(Void.class, s3Client, s3Presigner) {
+
+            @Override
+            protected void validateRequest(Void input, RequestInfo requestInfo, Context context)
+                throws ApiGatewayException {
+                //no-op
+            }
 
             @Override
             public String processS3Input(Void input, RequestInfo requestInfo, Context context) throws BadRequestException {
@@ -89,5 +94,4 @@ class ApiS3GatewayHandlerTest {
             }
         };
     }
-
 }
