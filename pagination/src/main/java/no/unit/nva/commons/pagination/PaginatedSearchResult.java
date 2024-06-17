@@ -185,13 +185,9 @@ public final class PaginatedSearchResult<T> {
         if (isLessThanZero(offset)) {
             throw new UnprocessableContentException("Unable to process negative offset");
         }
-        if (isLessThanOrEqualToZero(size)) {
+        if (isLessThanZero(size)) {
             throw new UnprocessableContentException("Unable to process size equal to or less than zero");
         }
-    }
-
-    private static boolean isLessThanOrEqualToZero(int number) {
-        return isLessThanZero(number) || number == 0;
     }
 
     private static boolean isLessThanZero(int number) {
