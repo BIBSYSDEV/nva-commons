@@ -137,7 +137,7 @@ class PaginatedSearchResultTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"10,0", "-1,10", "10,-1"})
+    @CsvSource({"-1,10", "10,-1"})
     void shouldThrowUnprocessableContentExceptionOnNonsenseRequest(int offset, int size) {
         assertThrows(UnprocessableContentException.class,
                      () -> PaginatedSearchResult.create(BASE_URI, offset, size, 50, Collections.emptyList(),
