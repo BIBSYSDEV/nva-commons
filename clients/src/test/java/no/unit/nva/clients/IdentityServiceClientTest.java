@@ -118,6 +118,25 @@ class IdentityServiceClientTest {
     }
 
     @Test
+    void shouldSendRequestToCorrectUrlWhenGettingUser()
+        throws IOException, InterruptedException, NotFoundException {
+        var userName = "userName";
+        when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class)))
+            .thenAnswer((Answer) invocation -> {
+                Object[] args = invocation.getArguments();
+                HttpRequest request = (HttpRequest) args[0];
+                var path = request.uri().getPath();
+                if (path.equals("/users-roles/users/" + userName)) {
+                    return okResponseWithBody;
+                }
+                return null;
+            });
+
+        var user = authorizedIdentityServiceClient.getUser(userName);
+        assertNotNull(user);
+    }
+
+    @Test
     void shouldReturnExternalClientWhenRequestedWithBearerToken()
         throws NotFoundException, IOException, InterruptedException {
 
