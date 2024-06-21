@@ -26,9 +26,10 @@ public class IdentityServiceClient {
     public static final String CREDENTIALS_SECRET_NAME = "BackendCognitoClientCredentials";
     public static final String API_PATH_USERS_AND_ROLES = "users-roles";
     public static final String API_PATH_EXTERNAL_CLIENTS = "external-clients";
-    private final AuthorizedBackendClient authorizedClient;
+    private static final String API_PATH_USERS = "users";
     private static final String AUTH_HOST = new Environment().readEnv("BACKEND_CLIENT_AUTH_URL");
     private static final String API_HOST = new Environment().readEnv("API_HOST");
+    private final AuthorizedBackendClient authorizedClient;
     private final HttpClient unauthorizedClient;
 
     public IdentityServiceClient(HttpClient httpClient,
@@ -42,29 +43,10 @@ public class IdentityServiceClient {
         );
     }
 
-    private UriWrapper usersAndRolesURI() {
-        return UriWrapper.fromHost(API_HOST)
-                   .addChild(API_PATH_USERS_AND_ROLES);
-    }
-
-    private URI constructExternalClientsGetPath(String clientId) {
-        return usersAndRolesURI()
-                   .addChild(API_PATH_EXTERNAL_CLIENTS)
-                   .addChild(clientId)
-                   .getUri();
-    }
-
-    private URI constructExternalClientsUserinfoGetPath() {
-        return usersAndRolesURI()
-                   .addChild(API_PATH_EXTERNAL_CLIENTS)
-                   .getUri();
-    }
-
-    private <T> T mapResponse(Class<T> clazz, HttpResponse<String> response)
-        throws JsonProcessingException {
-        return dtoObjectMapper.readValue(
-            response.body(),
-            clazz);
+    @JacocoGenerated
+    public static IdentityServiceClient prepare() {
+        var credentials = fetchCredentials();
+        return new IdentityServiceClient(HttpClient.newBuilder().build(), null, credentials);
     }
 
     public GetExternalClientResponse getExternalClient(String clientId) throws NotFoundException {
@@ -90,7 +72,59 @@ public class IdentityServiceClient {
                    .orElseThrow(this::handleFailure);
     }
 
-    private NotFoundException handleFailure(Failure<GetExternalClientResponse> responseFailure) {
+    public GetUserResponse getUser(String userName) throws NotFoundException {
+        var request = HttpRequest.newBuilder()
+                          .GET()
+                          .uri(constructUserGetPath(userName));
+        return attempt(getHttpResponseCallable(request))
+                   .map(this::validateResponse)
+                   .map(r -> mapResponse(GetUserResponse.class, r))
+                   .orElseThrow(this::handleFailure);
+    }
+
+    @JacocoGenerated
+    private static CognitoCredentials fetchCredentials() {
+        var secretsReader = new SecretsReader(SecretsReader.defaultSecretsManagerClient());
+
+        var credentials = secretsReader.fetchClassSecret(CREDENTIALS_SECRET_NAME,
+                                                         BackendClientCredentials.class);
+        var uri = UriWrapper.fromHost(AUTH_HOST).getUri();
+        return new CognitoCredentials(credentials::getId, credentials::getSecret, uri);
+    }
+
+    private UriWrapper usersAndRolesURI() {
+        return UriWrapper.fromHost(API_HOST)
+                   .addChild(API_PATH_USERS_AND_ROLES);
+    }
+
+    private URI constructExternalClientsGetPath(String clientId) {
+        return usersAndRolesURI()
+                   .addChild(API_PATH_EXTERNAL_CLIENTS)
+                   .addChild(clientId)
+                   .getUri();
+    }
+
+    private URI constructUserGetPath(String userName) {
+        return usersAndRolesURI()
+                   .addChild(API_PATH_USERS)
+                   .addChild(userName)
+                   .getUri();
+    }
+
+    private URI constructExternalClientsUserinfoGetPath() {
+        return usersAndRolesURI()
+                   .addChild(API_PATH_EXTERNAL_CLIENTS)
+                   .getUri();
+    }
+
+    private <T> T mapResponse(Class<T> clazz, HttpResponse<String> response)
+        throws JsonProcessingException {
+        return dtoObjectMapper.readValue(
+            response.body(),
+            clazz);
+    }
+
+    private NotFoundException handleFailure(Failure<?> responseFailure) {
         var exception = responseFailure.getException();
         if (exception instanceof NotFoundException) {
             return new NotFoundException(exception);
@@ -112,21 +146,5 @@ public class IdentityServiceClient {
 
     private Callable<HttpResponse<String>> getHttpResponseCallable(HttpRequest.Builder request) {
         return () -> authorizedClient.send(request, ofString(UTF_8));
-    }
-
-    @JacocoGenerated
-    private static CognitoCredentials fetchCredentials() {
-        var secretsReader = new SecretsReader(SecretsReader.defaultSecretsManagerClient());
-
-        var credentials = secretsReader.fetchClassSecret(CREDENTIALS_SECRET_NAME,
-                                                         BackendClientCredentials.class);
-        var uri = UriWrapper.fromHost(AUTH_HOST).getUri();
-        return new CognitoCredentials(credentials::getId, credentials::getSecret, uri);
-    }
-
-    @JacocoGenerated
-    public static IdentityServiceClient prepare() {
-        var credentials = fetchCredentials();
-        return new IdentityServiceClient(HttpClient.newBuilder().build(), null, credentials);
     }
 }
