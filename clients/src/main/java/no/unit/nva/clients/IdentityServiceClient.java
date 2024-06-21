@@ -26,6 +26,7 @@ public class IdentityServiceClient {
     public static final String CREDENTIALS_SECRET_NAME = "BackendCognitoClientCredentials";
     public static final String API_PATH_USERS_AND_ROLES = "users-roles";
     public static final String API_PATH_EXTERNAL_CLIENTS = "external-clients";
+    private static final String API_PATH_USERS = "users";
     private static final String AUTH_HOST = new Environment().readEnv("BACKEND_CLIENT_AUTH_URL");
     private static final String API_HOST = new Environment().readEnv("API_HOST");
     private final AuthorizedBackendClient authorizedClient;
@@ -46,10 +47,6 @@ public class IdentityServiceClient {
     public static IdentityServiceClient prepare() {
         var credentials = fetchCredentials();
         return new IdentityServiceClient(HttpClient.newBuilder().build(), null, credentials);
-    }
-
-    public GetUserResponse getUser(String userName) throws NotFoundException {
-        return null;
     }
 
     public GetExternalClientResponse getExternalClient(String clientId) throws NotFoundException {
@@ -75,6 +72,16 @@ public class IdentityServiceClient {
                    .orElseThrow(this::handleFailure);
     }
 
+    public GetUserResponse getUser(String userName) throws NotFoundException {
+        var request = HttpRequest.newBuilder()
+                          .GET()
+                          .uri(constructUserGetPath(userName));
+        return attempt(getHttpResponseCallable(request))
+                   .map(this::validateResponse)
+                   .map(r -> mapResponse(GetUserResponse.class, r))
+                   .orElseThrow(this::handleFailure);
+    }
+
     @JacocoGenerated
     private static CognitoCredentials fetchCredentials() {
         var secretsReader = new SecretsReader(SecretsReader.defaultSecretsManagerClient());
@@ -97,6 +104,13 @@ public class IdentityServiceClient {
                    .getUri();
     }
 
+    private URI constructUserGetPath(String userName) {
+        return usersAndRolesURI()
+                   .addChild(API_PATH_USERS)
+                   .addChild(userName)
+                   .getUri();
+    }
+
     private URI constructExternalClientsUserinfoGetPath() {
         return usersAndRolesURI()
                    .addChild(API_PATH_EXTERNAL_CLIENTS)
@@ -110,7 +124,7 @@ public class IdentityServiceClient {
             clazz);
     }
 
-    private NotFoundException handleFailure(Failure<GetExternalClientResponse> responseFailure) {
+    private NotFoundException handleFailure(Failure<?> responseFailure) {
         var exception = responseFailure.getException();
         if (exception instanceof NotFoundException) {
             return new NotFoundException(exception);

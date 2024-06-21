@@ -182,7 +182,7 @@ class IdentityServiceClientTest {
                    .withViewingScope(ViewingScope.builder()
                                          .withType("ViewingScope")
                                          .withIncludedUnits(List.of(randomUri()))
-                                         .withExcludedUnits(List.of())
+                                         .withExcludedUnits(List.of(randomUri()))
                                          .build())
                    .withRoles(List.of(Role.builder()
                                           .withRolename("Publishing-Curator")
