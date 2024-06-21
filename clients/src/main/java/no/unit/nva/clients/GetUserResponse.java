@@ -1,6 +1,5 @@
 package no.unit.nva.clients;
 
-import static java.util.Objects.isNull;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.net.URI;
 import java.util.List;
@@ -67,11 +66,6 @@ public record GetUserResponse(@JsonProperty("username") String username,
 
         public static Builder builder() {
             return new Builder();
-        }
-
-        @Override
-        public List<String> accessRights() {
-            return isNull(accessRights) ? List.of() : accessRights;
         }
 
         public static final class Builder {
