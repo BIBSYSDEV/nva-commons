@@ -112,6 +112,12 @@ class IdentityServiceClientTest {
     }
 
     @Test
+    void shouldThrowNotFoundWhenUserNotFound() throws IOException, InterruptedException {
+        when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(notFoundResponse);
+        assertThrows(NotFoundException.class, () -> authorizedIdentityServiceClient.getUser(randomString()));
+    }
+
+    @Test
     void shouldReturnExternalClientWhenRequestedWithBearerToken()
         throws NotFoundException, IOException, InterruptedException {
 
