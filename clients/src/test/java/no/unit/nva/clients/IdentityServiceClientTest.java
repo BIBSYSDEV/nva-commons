@@ -1,30 +1,34 @@
 package no.unit.nva.clients;
 
-import no.unit.nva.auth.CognitoCredentials;
-import nva.commons.apigateway.exceptions.NotFoundException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
-import org.mockito.ArgumentCaptor;
-import org.mockito.stubbing.Answer;
+import static no.unit.nva.auth.FetchUserInfo.AUTHORIZATION_HEADER;
+import static no.unit.nva.testutils.RandomDataGenerator.randomString;
+import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandler;
-import static no.unit.nva.testutils.RandomDataGenerator.randomString;
-import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static no.unit.nva.auth.FetchUserInfo.AUTHORIZATION_HEADER;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import java.util.List;
+import no.unit.nva.auth.CognitoCredentials;
+import no.unit.nva.clients.GetUserResponse.Role;
+import no.unit.nva.clients.GetUserResponse.ViewingScope;
+import nva.commons.apigateway.exceptions.NotFoundException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+import org.mockito.ArgumentCaptor;
+import org.mockito.stubbing.Answer;
 
 class IdentityServiceClientTest {
 
@@ -40,6 +44,14 @@ class IdentityServiceClientTest {
     HttpResponse<String> notOkResponse = mock(HttpResponse.class);
     HttpResponse<String> notFoundResponse = mock(HttpResponse.class);
     private IdentityServiceClient authorizedIdentityServiceClient;
+
+    @SuppressWarnings("unchecked")
+    public static HttpResponse<String> mockResponse(String body) {
+        var response = (HttpResponse<String>) mock(HttpResponse.class);
+        when(response.statusCode()).thenReturn(200);
+        when(response.body()).thenReturn(body);
+        return response;
+    }
 
     @BeforeEach
     public void setup() throws IOException, InterruptedException {
@@ -90,6 +102,16 @@ class IdentityServiceClientTest {
     }
 
     @Test
+    void shouldReturnUserWhenRequested() throws NotFoundException, IOException, InterruptedException {
+        var userName = "userName";
+        var expectedUser = createUser(userName);
+        var mockedResponse = mockResponse(expectedUser.toJsonString());
+        when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(mockedResponse);
+        var actual = authorizedIdentityServiceClient.getUser(userName);
+        assertEquals(expectedUser, actual);
+    }
+
+    @Test
     void shouldReturnExternalClientWhenRequestedWithBearerToken()
         throws NotFoundException, IOException, InterruptedException {
 
@@ -109,7 +131,7 @@ class IdentityServiceClientTest {
 
     @Test
     void shouldThrowRuntimeExceptionWhenHttpClientReturnsUnhandledError() throws IOException,
-                                                                                      InterruptedException {
+                                                                                 InterruptedException {
         when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(notOkResponse);
 
         Executable action = () -> authorizedIdentityServiceClient.getExternalClient(clientId);
@@ -126,4 +148,28 @@ class IdentityServiceClientTest {
         assertThrows(NotFoundException.class, action);
     }
 
+    private GetUserResponse createUser(String userName) {
+        return GetUserResponse.builder()
+                   .withUsername(userName)
+                   .withInstitution(randomUri())
+                   .withGivenName("Test")
+                   .withFamilyName("Testing")
+                   .withViewingScope(ViewingScope.builder()
+                                         .withType("ViewingScope")
+                                         .withIncludedUnits(List.of(randomUri()))
+                                         .withExcludedUnits(List.of())
+                                         .build())
+                   .withRoles(List.of(Role.builder()
+                                          .withRolename("Publishing-Curator")
+                                          .withAccessRights(List.of("MANAGE_PUBLISHING_REQUESTS"))
+                                          .withType("Role")
+                                          .build()))
+                   .withCristinId(randomUri())
+                   .withFeideIdentifier("feideIdentifier")
+                   .withInstitutionCristinId(randomUri())
+                   .withAffiliation(randomUri())
+                   .withType("User")
+                   .withAccessRights(List.of("MANAGE_PUBLISHING_REQUESTS"))
+                   .build();
+    }
 }
