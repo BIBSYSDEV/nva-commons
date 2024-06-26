@@ -6,9 +6,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
-import javax.ws.rs.core.UriBuilder;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.attempt.Try;
+import org.apache.hc.core5.net.URIBuilder;
 
 /**
  * Class for easily building and manipulating URIs. Tools to easily append paths and not have to deal with checking
@@ -145,7 +145,10 @@ public class UriWrapper {
     }
 
     public UriWrapper addQueryParameter(String param, String value) {
-        var newUri = UriBuilder.fromUri(uri).queryParam(param, value).build();
+        var newUri = attempt(() -> new URIBuilder(uri)
+                                       .addParameter(param, value)
+                                       .build())
+                         .orElseThrow();
         return new UriWrapper(newUri);
     }
 

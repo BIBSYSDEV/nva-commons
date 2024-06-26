@@ -23,8 +23,7 @@ apiGuardian = { strictly = '1.1.2' }
 wiremock = { strictly = '3.4.1' }
 datafaker = { strictly = '2.1.0' }
 com-auth0-jwt = { strictly = '4.4.0' }
-javaxWsRs = { strictly = '2.1.1' }
-jersey = { strictly = '2.34' }
+apacheHttpClient = { strictly = '5.3.1' }
 
 [libraries]
 zalando = { group = 'org.zalando', name = 'problem', version.ref = 'zalandoProblem' }
@@ -84,14 +83,13 @@ hamcrest-core = { group = 'org.hamcrest', name = 'hamcrest-core', version.ref = 
 mockito-core = { group = 'org.mockito', name = 'mockito-core', version.ref = 'mockito' }
 hamcrest-optional = { group = 'com.github.npathai', name = 'hamcrest-optional', version.ref = 'hamcrestOptional' }
 datafaker = { group = 'net.datafaker', name = 'datafaker', version.ref = 'datafaker' }
-javaxWsRs = { group = 'javax.ws.rs', name = 'javax.ws.rs-api', version.ref = 'javaxWsRs' }
-jerseyClient = { group = 'org.glassfish.jersey.core', name = 'jersey-client', version.ref = 'jersey' }
+httpclient5 = { group = 'org.apache.httpcomponents.client5', name = 'httpclient5', version.ref = 'apacheHttpClient' }
 
 apiguardian = { group = 'org.apiguardian', name = 'apiguardian-api', version.ref = 'apiGuardian' }
 wiremock = { group = 'org.wiremock', name = 'wiremock', version.ref = 'wiremock' }
 
 
-com-auth0-jwt = { group = 'com.auth0', name =  'java-jwt', version.ref = 'com-auth0-jwt' }
+com-auth0-jwt = { group = 'com.auth0', name = 'java-jwt', version.ref = 'com-auth0-jwt' }
 
 [bundles]
 testing = ['mockito-core', 'hamcrest', 'hamcrest-core', 'junit-jupiter', 'junit-jupiter-api',
