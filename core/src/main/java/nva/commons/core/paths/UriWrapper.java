@@ -6,8 +6,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
+import javax.ws.rs.core.UriBuilder;
 import nva.commons.core.JacocoGenerated;
-import nva.commons.core.StringUtils;
 import nva.commons.core.attempt.Try;
 
 /**
@@ -23,8 +23,6 @@ public class UriWrapper {
     public static final String MISSING_HOST = "Missing host for creating URI";
     public static final String HTTPS = "https";
     public static final String NULL_INPUT_ERROR = "Input URI cannot be null.";
-    public static final String ESCAPED_SPACE_AND_AMPERSAND = "%20&%20";
-    public static final String ESCAPED_SPACE_AND_ESCAPEDAMPERSAND = "%20%26%20";
     private static final int DEFAULT_PORT = -1;
     private final URI uri;
 
@@ -147,19 +145,7 @@ public class UriWrapper {
     }
 
     public UriWrapper addQueryParameter(String param, String value) {
-        var queryString = StringUtils.isBlank(uri.getQuery())
-                              ? param + "=" + value
-                              : uri.getQuery() + "&" + param + "=" + value;
-        URI newUri = attempt(() -> new URI(uri.getScheme(),
-                                           uri.getUserInfo(),
-                                           uri.getHost(),
-                                           uri.getPort(),
-                                           uri.getPath(),
-                                           queryString,
-                                           EMPTY_FRAGMENT))
-                         .map(this::escapeAmpersandsInQueryParameterValues)
-                         .orElseThrow();
-
+        var newUri = UriBuilder.fromUri(uri).queryParam(param, value).build();
         return new UriWrapper(newUri);
     }
 
@@ -192,10 +178,5 @@ public class UriWrapper {
 
     private static URI createUriFromHostDomain(String scheme, String host, int port) throws URISyntaxException {
         return new URI(scheme, EMPTY_USER_INFO, host, port, EMPTY_PATH, EMPTY_QUERY, EMPTY_FRAGMENT);
-    }
-
-    private URI escapeAmpersandsInQueryParameterValues(URI uri) {
-        var newUriString = uri.toString().replace(ESCAPED_SPACE_AND_AMPERSAND, ESCAPED_SPACE_AND_ESCAPEDAMPERSAND);
-        return URI.create(newUriString);
     }
 }

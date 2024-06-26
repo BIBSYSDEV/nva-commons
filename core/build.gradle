@@ -5,7 +5,8 @@ plugins {
 
 dependencies {
     implementation  libs.slf4j.api
-
+    implementation libs.javaxWsRs
+    implementation libs.jerseyClient
     compileOnly libs.jackson.annotations
     testImplementation libs.bundles.logging
     testImplementation libs.bundles.testing

@@ -112,11 +112,11 @@ class UriWrapperTest {
     @Test
     void shouldReturnUriWithEscapedAmpersandInQueryParameterValue() {
         URI expectedUri = URI.create(
-            "https://www.example.org/my-path?key1=someOtherValue&key2=some%20%26%20value&key3=valueWithout%26space");
+            "https://www.example.org/my-path?key1=someWonderfulSimpleValue&key2=some+%26+value&key3=valueWithout%26space");
         URI uri = URI.create("https://www.example.org/");
         URI actualUri = UriWrapper.fromUri(uri)
                             .addChild("my-path")
-                            .addQueryParameter("key1", "someOtherValue")
+                            .addQueryParameter("key1", "someWonderfulSimpleValue")
                             .addQueryParameter("key2", "some & value")
                             .addQueryParameter("key3", "valueWithout&space")
                             .getUri();
