@@ -6,6 +6,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -110,19 +111,19 @@ class UriWrapperTest {
     }
 
     @Test
-    void shouldReturnUriWithEscapedAndInQueryParameterValue(){
-        URI expectedUri = URI.create("https://www.example.org/path1/path2?key1=some%20%26%20value");
+    void shouldReturnUriWithEscapedAmpersandInQueryParameterValue(){
+        URI expectedUri = URI.create("https://www.example.org/my-path?key1=someOtherValue&key2=some%20%26%20value");
         URI uri = URI.create("https://www.example.org/");
         URI actualUri = UriWrapper.fromUri(uri)
-                            .addChild("path1")
-                            .addQueryParameter("key1", "some & value")
-                            .addChild("path2")
+                            .addChild("my-path")
+                            .addQueryParameter("key1", "someOtherValue")
+                            .addQueryParameter("key2", "some & value")
                             .getUri();
         assertThat(actualUri, is(equalTo(expectedUri)));
     }
 
     @Test
-    void shouldPreservePortWhenAddingPathAndQueryPapametersInUri() {
+    void shouldPreservePortWhenAddingPathAndQueryParametersInUri() {
         var expectedUri = URI.create("https://www.example.org:1234/path1/path2?key1=value1");
         var host = URI.create("https://www.example.org:1234");
         var actualUri = UriWrapper.fromUri(host)

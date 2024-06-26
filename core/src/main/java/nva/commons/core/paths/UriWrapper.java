@@ -23,6 +23,8 @@ public class UriWrapper {
     public static final String MISSING_HOST = "Missing host for creating URI";
     public static final String HTTPS = "https";
     public static final String NULL_INPUT_ERROR = "Input URI cannot be null.";
+    public static final String ESCAPED_SPACE_AND_AMPERSAND = "%20&%20";
+    public static final String ESCAPED_SPACE_AND_ESCAPEDAMPERSAND = "%20%26%20";
     private static final int DEFAULT_PORT = -1;
     private final URI uri;
 
@@ -37,6 +39,7 @@ public class UriWrapper {
 
     /**
      * Utility for working with URIs in a consistent manner.
+     *
      * @param uri the URI string
      * @deprecated Use the static call {@link UriWrapper#fromUri(String)} instead.
      */
@@ -72,14 +75,14 @@ public class UriWrapper {
 
     public UriWrapper getHost() {
         return attempt(() -> new URI(uri.getScheme(), uri.getHost(), EMPTY_PATH, EMPTY_FRAGMENT))
-            .map(UriWrapper::new)
-            .orElseThrow();
+                   .map(UriWrapper::new)
+                   .orElseThrow();
     }
 
     public UriWrapper addChild(String... path) {
         return addChild(UnixPath.of(path));
     }
-    
+
     /**
      * Appends a path to the URI.
      *
@@ -98,8 +101,8 @@ public class UriWrapper {
                           totalPath.toString(),
                           uri.getQuery(),
                           EMPTY_FRAGMENT))
-            .map(UriWrapper::new)
-            .orElseThrow();
+                   .map(UriWrapper::new)
+                   .orElseThrow();
     }
 
     public UnixPath toS3bucketPath() {
@@ -113,18 +116,18 @@ public class UriWrapper {
 
     public Optional<UriWrapper> getParent() {
         return Optional.of(uri)
-            .map(URI::getPath)
-            .map(UnixPath::of)
-            .flatMap(UnixPath::getParent)
-            .map(attempt(p -> new URI(uri.getScheme(),
-                                      uri.getUserInfo(),
-                                      uri.getHost(),
-                                      uri.getPort(),
-                                      p.toString(),
-                                      EMPTY_QUERY,
-                                      EMPTY_FRAGMENT)))
-            .map(Try::orElseThrow)
-            .map(UriWrapper::new);
+                   .map(URI::getPath)
+                   .map(UnixPath::of)
+                   .flatMap(UnixPath::getParent)
+                   .map(attempt(p -> new URI(uri.getScheme(),
+                                             uri.getUserInfo(),
+                                             uri.getHost(),
+                                             uri.getPort(),
+                                             p.toString(),
+                                             EMPTY_QUERY,
+                                             EMPTY_FRAGMENT)))
+                   .map(Try::orElseThrow)
+                   .map(UriWrapper::new);
     }
 
     public String getLastPathElement() {
@@ -154,7 +157,9 @@ public class UriWrapper {
                                            uri.getPath(),
                                            queryString,
                                            EMPTY_FRAGMENT))
-            .orElseThrow();
+                         .map(this::escapeAmpersandsInQueryParameterValues)
+                         .orElseThrow();
+
         return new UriWrapper(newUri);
     }
 
@@ -187,5 +192,10 @@ public class UriWrapper {
 
     private static URI createUriFromHostDomain(String scheme, String host, int port) throws URISyntaxException {
         return new URI(scheme, EMPTY_USER_INFO, host, port, EMPTY_PATH, EMPTY_QUERY, EMPTY_FRAGMENT);
+    }
+
+    private URI escapeAmpersandsInQueryParameterValues(URI uri) {
+        var newUriString = uri.toString().replace(ESCAPED_SPACE_AND_AMPERSAND, ESCAPED_SPACE_AND_ESCAPEDAMPERSAND);
+        return URI.create(newUriString);
     }
 }
