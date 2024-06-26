@@ -110,6 +110,18 @@ class UriWrapperTest {
     }
 
     @Test
+    void shouldReturnUriWithEscapedAndInQueryParameterValue(){
+        URI expectedUri = URI.create("https://www.example.org/path1/path2?key1=some%20%26%20value");
+        URI uri = URI.create("https://www.example.org/");
+        URI actualUri = UriWrapper.fromUri(uri)
+                            .addChild("path1")
+                            .addQueryParameter("key1", "some & value")
+                            .addChild("path2")
+                            .getUri();
+        assertThat(actualUri, is(equalTo(expectedUri)));
+    }
+
+    @Test
     void shouldPreservePortWhenAddingPathAndQueryPapametersInUri() {
         var expectedUri = URI.create("https://www.example.org:1234/path1/path2?key1=value1");
         var host = URI.create("https://www.example.org:1234");
