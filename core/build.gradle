@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
     implementation  libs.slf4j.api
-
+    implementation libs.httpclient5
     compileOnly libs.jackson.annotations
     testImplementation libs.bundles.logging
     testImplementation libs.bundles.testing

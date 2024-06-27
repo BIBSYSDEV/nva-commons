@@ -102,22 +102,37 @@ class UriWrapperTest {
         URI expectedUri = URI.create("https://www.example.org/path1/path2?key1=value1");
         URI uri = URI.create("https://www.example.org/");
         URI actualUri = UriWrapper.fromUri(uri)
-            .addChild("path1")
-            .addQueryParameter("key1", "value1")
-            .addChild("path2")
-            .getUri();
+                            .addChild("path1")
+                            .addQueryParameter("key1", "value1")
+                            .addChild("path2")
+                            .getUri();
         assertThat(actualUri, is(equalTo(expectedUri)));
     }
 
     @Test
-    void shouldPreservePortWhenAddingPathAndQueryPapametersInUri() {
+    void shouldReturnUriWithEscapedAmpersandInQueryParameterValue() {
+        URI expectedUri = URI.create(
+            "https://www.example.org/my-path?key1=someWonderfulSimpleValue&key2=some%20%26%20value&key3=valueWithout"
+            + "%26space");
+        URI uri = URI.create("https://www.example.org/");
+        URI actualUri = UriWrapper.fromUri(uri)
+                            .addChild("my-path")
+                            .addQueryParameter("key1", "someWonderfulSimpleValue")
+                            .addQueryParameter("key2", "some & value")
+                            .addQueryParameter("key3", "valueWithout&space")
+                            .getUri();
+        assertThat(actualUri, is(equalTo(expectedUri)));
+    }
+
+    @Test
+    void shouldPreservePortWhenAddingPathAndQueryParametersInUri() {
         var expectedUri = URI.create("https://www.example.org:1234/path1/path2?key1=value1");
         var host = URI.create("https://www.example.org:1234");
         var actualUri = UriWrapper.fromUri(host)
-            .addChild("path1")
-            .addQueryParameter("key1", "value1")
-            .addChild("path2")
-            .getUri();
+                            .addChild("path1")
+                            .addQueryParameter("key1", "value1")
+                            .addChild("path2")
+                            .getUri();
         assertThat(actualUri, is(equalTo(expectedUri)));
     }
 
@@ -126,11 +141,11 @@ class UriWrapperTest {
         URI expectedUri = URI.create("https://www.example.org/path1/path2?key1=value1&key2=value2");
         URI uri = URI.create("https://www.example.org/");
         URI actualUri = UriWrapper.fromUri(uri)
-            .addChild("path1")
-            .addQueryParameter("key1", "value1")
-            .addQueryParameter("key2", "value2")
-            .addChild("path2")
-            .getUri();
+                            .addChild("path1")
+                            .addQueryParameter("key1", "value1")
+                            .addQueryParameter("key2", "value2")
+                            .addChild("path2")
+                            .getUri();
         assertThat(actualUri, is(equalTo(expectedUri)));
     }
 
@@ -140,11 +155,11 @@ class UriWrapperTest {
         URI uri = URI.create("https://www.example.org/");
         final Map<String, String> parameters = getOrderedParametersMap();
         URI actualUri = UriWrapper.fromUri(uri)
-            .addChild("path1")
-            .addQueryParameters(parameters)
-            .addChild("path2")
-            .addQueryParameter("key3", "value3")
-            .getUri();
+                            .addChild("path1")
+                            .addQueryParameters(parameters)
+                            .addChild("path2")
+                            .addQueryParameter("key3", "value3")
+                            .getUri();
         assertThat(actualUri, is(equalTo(expectedUri)));
     }
 
@@ -152,15 +167,14 @@ class UriWrapperTest {
     void shouldReturnStringRepresentationOfUri() {
         URI expectedUri = URI.create("https://www.example.org/path1/path2?key1=value1&key2=value2&key3=value3");
         UriWrapper uri = new UriWrapper("https", "www.example.org")
-            .addChild("path1")
-            .addChild("path2")
-            .addQueryParameter("key1", "value1")
-            .addQueryParameter("key2", "value2")
-            .addQueryParameter("key3", "value3");
+                             .addChild("path1")
+                             .addChild("path2")
+                             .addQueryParameter("key1", "value1")
+                             .addQueryParameter("key2", "value2")
+                             .addQueryParameter("key3", "value3");
 
         assertThat(uri.toString(), is(equalTo(expectedUri.toString())));
     }
-
 
     @ParameterizedTest(name = "should throw exception when either host is empty")
     @NullAndEmptySource

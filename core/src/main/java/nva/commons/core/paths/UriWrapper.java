@@ -7,8 +7,8 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
 import nva.commons.core.JacocoGenerated;
-import nva.commons.core.StringUtils;
 import nva.commons.core.attempt.Try;
+import org.apache.hc.core5.net.URIBuilder;
 
 /**
  * Class for easily building and manipulating URIs. Tools to easily append paths and not have to deal with checking
@@ -37,6 +37,7 @@ public class UriWrapper {
 
     /**
      * Utility for working with URIs in a consistent manner.
+     *
      * @param uri the URI string
      * @deprecated Use the static call {@link UriWrapper#fromUri(String)} instead.
      */
@@ -72,14 +73,14 @@ public class UriWrapper {
 
     public UriWrapper getHost() {
         return attempt(() -> new URI(uri.getScheme(), uri.getHost(), EMPTY_PATH, EMPTY_FRAGMENT))
-            .map(UriWrapper::new)
-            .orElseThrow();
+                   .map(UriWrapper::new)
+                   .orElseThrow();
     }
 
     public UriWrapper addChild(String... path) {
         return addChild(UnixPath.of(path));
     }
-    
+
     /**
      * Appends a path to the URI.
      *
@@ -98,8 +99,8 @@ public class UriWrapper {
                           totalPath.toString(),
                           uri.getQuery(),
                           EMPTY_FRAGMENT))
-            .map(UriWrapper::new)
-            .orElseThrow();
+                   .map(UriWrapper::new)
+                   .orElseThrow();
     }
 
     public UnixPath toS3bucketPath() {
@@ -113,18 +114,18 @@ public class UriWrapper {
 
     public Optional<UriWrapper> getParent() {
         return Optional.of(uri)
-            .map(URI::getPath)
-            .map(UnixPath::of)
-            .flatMap(UnixPath::getParent)
-            .map(attempt(p -> new URI(uri.getScheme(),
-                                      uri.getUserInfo(),
-                                      uri.getHost(),
-                                      uri.getPort(),
-                                      p.toString(),
-                                      EMPTY_QUERY,
-                                      EMPTY_FRAGMENT)))
-            .map(Try::orElseThrow)
-            .map(UriWrapper::new);
+                   .map(URI::getPath)
+                   .map(UnixPath::of)
+                   .flatMap(UnixPath::getParent)
+                   .map(attempt(p -> new URI(uri.getScheme(),
+                                             uri.getUserInfo(),
+                                             uri.getHost(),
+                                             uri.getPort(),
+                                             p.toString(),
+                                             EMPTY_QUERY,
+                                             EMPTY_FRAGMENT)))
+                   .map(Try::orElseThrow)
+                   .map(UriWrapper::new);
     }
 
     public String getLastPathElement() {
@@ -144,17 +145,10 @@ public class UriWrapper {
     }
 
     public UriWrapper addQueryParameter(String param, String value) {
-        var queryString = StringUtils.isBlank(uri.getQuery())
-                              ? param + "=" + value
-                              : uri.getQuery() + "&" + param + "=" + value;
-        URI newUri = attempt(() -> new URI(uri.getScheme(),
-                                           uri.getUserInfo(),
-                                           uri.getHost(),
-                                           uri.getPort(),
-                                           uri.getPath(),
-                                           queryString,
-                                           EMPTY_FRAGMENT))
-            .orElseThrow();
+        var newUri = attempt(() -> new URIBuilder(uri)
+                                       .addParameter(param, value)
+                                       .build())
+                         .orElseThrow();
         return new UriWrapper(newUri);
     }
 
