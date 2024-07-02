@@ -92,7 +92,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
 
     private List<String> getValidOrigins() {
         return Arrays.stream(environment.readEnv(ALLOWED_ORIGIN_ENV).split(ORIGIN_DELIMITER))
-                   .map(String::trim)
+                   .map(String::strip)
                    .filter(StringUtils::isNotBlank)
                    .toList();
     }
