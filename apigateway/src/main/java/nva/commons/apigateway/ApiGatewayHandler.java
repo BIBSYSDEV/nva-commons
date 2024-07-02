@@ -310,7 +310,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         headers.put(CONTENT_TYPE, getDefaultResponseContentTypeHeaderValue(requestInfo).toString());
         headers.put(X_CONTENT_TYPE_OPTIONS, "nosniff");
         headers.put(STRICT_TRANSPORT_SECURITY, "max-age=63072000; includeSubDomains; preload");
-        headers.put(VARY, "Origin");
+        headers.put(VARY, "Origin, Accept");
         return headers;
     }
 
