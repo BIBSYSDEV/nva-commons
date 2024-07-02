@@ -49,6 +49,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     private static final List<MediaType> DEFAULT_SUPPORTED_MEDIA_TYPES = List.of(JSON_UTF_8);
     private static final String WILDCARD_TYPE = "*";
+    public static final String ALLOW_ALL_ORIGINS  = "*";
 
     /**
      * Calculates the Content MediaType of the response based on the supported Media Types and the requested Media
@@ -145,6 +146,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
                               .orElseThrow(this::parsingExceptionToBadRequestException);
 
             RequestInfo requestInfo = inputParser.getRequestInfo(inputString);
+            setAllowedOrigin(requestInfo);
 
             validateRequest(inputObject, requestInfo, context);
 
@@ -157,6 +159,9 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
             handleUnexpectedException(context, inputObject, e);
         }
     }
+
+
+    protected abstract void setAllowedOrigin(RequestInfo requestInfo);
 
     /**
      * Implements input validation and access control.
@@ -190,6 +195,8 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     protected void init(OutputStream outputStream, Context context) {
         this.outputStream = outputStream;
+        this.allowedOrigin = ALLOW_ALL_ORIGINS; //anti-pattern: this will be overwritten later on, but in the event
+        // that we get an exception before we get there, there is this.
     }
 
     /**

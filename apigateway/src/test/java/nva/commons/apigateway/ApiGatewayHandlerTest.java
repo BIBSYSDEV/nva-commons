@@ -1,7 +1,9 @@
 package nva.commons.apigateway;
 
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
+import static com.google.common.net.HttpHeaders.ORIGIN;
 import static com.google.common.net.HttpHeaders.STRICT_TRANSPORT_SECURITY;
+import static com.google.common.net.HttpHeaders.VARY;
 import static com.google.common.net.HttpHeaders.X_CONTENT_TYPE_OPTIONS;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
@@ -9,6 +11,9 @@ import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static no.unit.nva.testutils.TestHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
 import static no.unit.nva.testutils.TestHeaders.WILDCARD;
+import static nva.commons.apigateway.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
+import static nva.commons.apigateway.ApiGatewayHandler.ALL_ORIGINS_ALLOWED;
+import static nva.commons.apigateway.ApiGatewayHandler.FALLBACK_ORIGIN;
 import static nva.commons.apigateway.ApiGatewayHandler.REQUEST_ID;
 import static nva.commons.apigateway.MediaTypes.APPLICATION_PROBLEM_JSON;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
@@ -23,8 +28,10 @@ import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
@@ -58,6 +65,7 @@ import nva.commons.apigateway.testutils.Handler;
 import nva.commons.apigateway.testutils.RawStringResponseHandler;
 import nva.commons.apigateway.testutils.RedirectHandler;
 import nva.commons.apigateway.testutils.RequestBody;
+import nva.commons.core.Environment;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
@@ -433,6 +441,77 @@ class ApiGatewayHandlerTest {
         assertThat(actual, is(equalTo(expected)));
     }
 
+    @Test
+    void shouldReturnAllOriginsWhenEnvironmentAllowsAllOrigins() throws IOException {
+        var environment = mock(Environment.class);
+        when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn("*");
+
+        var handler = new RawStringResponseHandler(environment, dtoObjectMapper);
+        var inputStream = requestWithHeaders();
+
+        var outputStream = outputStream();
+        handler.handleRequest(inputStream, outputStream, context);
+
+        var response = GatewayResponse.fromOutputStream(outputStream, String.class);
+        var responseHeaders = response.getHeaders();
+        assertThat(responseHeaders.get(ACCESS_CONTROL_ALLOW_ORIGIN), is(equalTo(ALL_ORIGINS_ALLOWED)));
+        assertThat(responseHeaders.get(VARY), containsString("Origin"));
+    }
+
+    @Test
+    void shouldReturnNvaFrontendProdWhenEnvironmentIsEmpty() throws IOException {
+        var environment = mock(Environment.class);
+        when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn("");
+
+        var handler = new RawStringResponseHandler(environment, dtoObjectMapper);
+        var inputStream = requestWithHeaders();
+
+        var outputStream = outputStream();
+        handler.handleRequest(inputStream, outputStream, context);
+
+        var response = GatewayResponse.fromOutputStream(outputStream, String.class);
+        var responseHeaders = response.getHeaders();
+        assertThat(responseHeaders.get(ACCESS_CONTROL_ALLOW_ORIGIN), is(equalTo(FALLBACK_ORIGIN)));
+        assertThat(responseHeaders.get(VARY), containsString("Origin"));
+    }
+
+    @Test
+    void shouldEchoAllowedOriginWhenEnvironmentContainsOrigin() throws IOException {
+        var originInHeader = "https://example.com";
+        var environment = mock(Environment.class);
+        when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn("localhost, " + originInHeader + ", some-place-else");
+
+        var handler = new RawStringResponseHandler(environment, dtoObjectMapper);
+        var inputStream = requestWithHeaders();
+
+        var outputStream = outputStream();
+        handler.handleRequest(inputStream, outputStream, context);
+
+        var response = GatewayResponse.fromOutputStream(outputStream, String.class);
+        var responseHeaders = response.getHeaders();
+        assertThat(responseHeaders.get(ACCESS_CONTROL_ALLOW_ORIGIN), is(equalTo(originInHeader)));
+        assertThat(responseHeaders.get(VARY), containsString("Origin"));
+    }
+
+    @Test
+    void shouldReturnOneOfTheAllowedOriginsInEnvironmentWhenRequestOriginIsNotWhiteListed()
+        throws IOException {
+        var originInHeader = "https://example.com";
+        var environment = mock(Environment.class);
+        when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn("localhost, some-place-else");
+
+        var handler = new RawStringResponseHandler(environment, dtoObjectMapper);
+        var inputStream = requestWithHeaders();
+
+        var outputStream = outputStream();
+        handler.handleRequest(inputStream, outputStream, context);
+
+        var response = GatewayResponse.fromOutputStream(outputStream, String.class);
+        var responseHeaders = response.getHeaders();
+        assertThat(responseHeaders.get(ACCESS_CONTROL_ALLOW_ORIGIN), not(equalTo(originInHeader)));
+        assertThat(responseHeaders.get(VARY), containsString("Origin"));
+    }
+
     private String getUnsupportedMediaTypeErrorMessage(String mediaType) {
         return UnsupportedAcceptHeaderException.createMessage(List.of(MediaType.parse(mediaType)),
                                                               handler.listSupportedMediaTypes());
@@ -607,6 +686,7 @@ class ApiGatewayHandlerTest {
         Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(HttpHeaders.ACCEPT, MediaType.JSON_UTF_8.toString());
         headers.put(CONTENT_TYPE, MediaType.JSON_UTF_8.toString());
+        headers.put(ORIGIN, "https://example.com");
         headers.put(X_CONTENT_TYPE_OPTIONS, "nosniff");
         headers.put(STRICT_TRANSPORT_SECURITY, "max-age=63072000; includeSubDomains; preload");
         return createHeaders(headers);

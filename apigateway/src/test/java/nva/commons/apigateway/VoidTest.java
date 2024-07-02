@@ -1,5 +1,6 @@
 package nva.commons.apigateway;
 
+import static nva.commons.apigateway.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -40,6 +41,7 @@ public class VoidTest {
         environment = mock(Environment.class);
         context = new FakeContext();
         when(environment.readEnv(anyString())).thenReturn(SOME_ENV_VALUE);
+        when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn("*");
     }
 
     @DisplayName("handleRequest returns success when input class is void and body field is missing from "
