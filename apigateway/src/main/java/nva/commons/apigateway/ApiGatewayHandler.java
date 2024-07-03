@@ -3,20 +3,21 @@ package nva.commons.apigateway;
 import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static com.google.common.net.HttpHeaders.STRICT_TRANSPORT_SECURITY;
+import static com.google.common.net.HttpHeaders.VARY;
 import static com.google.common.net.HttpHeaders.X_CONTENT_TYPE_OPTIONS;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
-import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,6 +29,7 @@ import nva.commons.apigateway.exceptions.RedirectException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
+import nva.commons.core.StringUtils;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 import org.zalando.problem.ThrowableProblem;
@@ -42,6 +44,9 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     public static final String REQUEST_ID = "requestId";
     public static final Void EMPTY_BODY = null;
     public static final String RESOURCE = "resource";
+    public static final String ALL_ORIGINS_ALLOWED = "*";
+    public static final String ORIGIN_DELIMITER = ",";
+    public static final String FALLBACK_ORIGIN  = "https://nva.sikt.no";
 
     private final ObjectMapper objectMapper;
 
@@ -64,9 +69,32 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     }
 
     @Override
-    public void init(OutputStream outputStream, Context context) {
-        this.allowedOrigin = environment.readEnv(ALLOWED_ORIGIN_ENV);
-        super.init(outputStream, context);
+    protected void setAllowedOrigin(RequestInfo requestInfo) {
+        allowedOrigin = readAllowedOrigin(requestInfo);
+    }
+
+
+
+    private String readAllowedOrigin(RequestInfo requestInfo) {
+        var originsList = getValidOrigins();
+        if (originsList.isEmpty()){
+            return FALLBACK_ORIGIN;
+        }
+        if (originsList.contains(ALL_ORIGINS_ALLOWED)) {
+            return ALL_ORIGINS_ALLOWED;
+        }
+        var requestOrigin = requestInfo.getHeader("Origin");
+        if (originsList.contains(requestOrigin)) {
+            return requestOrigin;
+        }
+        return originsList.get(0);
+    }
+
+    private List<String> getValidOrigins() {
+        return Arrays.stream(environment.readEnv(ALLOWED_ORIGIN_ENV).split(ORIGIN_DELIMITER))
+                   .map(String::strip)
+                   .filter(StringUtils::isNotBlank)
+                   .toList();
     }
 
     /**
@@ -272,6 +300,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         headers.put(CONTENT_TYPE, MediaTypes.APPLICATION_PROBLEM_JSON.toString());
         headers.put(X_CONTENT_TYPE_OPTIONS, "nosniff");
         headers.put(STRICT_TRANSPORT_SECURITY, "max-age=63072000; includeSubDomains; preload");
+        headers.put(VARY, "Origin, Accept");
         return headers;
     }
 
@@ -281,6 +310,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         headers.put(CONTENT_TYPE, getDefaultResponseContentTypeHeaderValue(requestInfo).toString());
         headers.put(X_CONTENT_TYPE_OPTIONS, "nosniff");
         headers.put(STRICT_TRANSPORT_SECURITY, "max-age=63072000; includeSubDomains; preload");
+        headers.put(VARY, "Origin, Accept");
         return headers;
     }
 

@@ -38,6 +38,10 @@ public class RawStringResponseHandler extends ApiGatewayHandler<RequestBody, Str
         super(RequestBody.class, new Environment(), mapper);
     }
 
+    public RawStringResponseHandler(Environment environment, ObjectMapper mapper) {
+        super(RequestBody.class, environment, mapper);
+    }
+
 
     @Override
     protected String processInput(RequestBody input, RequestInfo requestInfo, Context context)
