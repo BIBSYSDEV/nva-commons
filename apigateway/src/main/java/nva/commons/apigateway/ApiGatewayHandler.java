@@ -47,6 +47,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     public static final String ALL_ORIGINS_ALLOWED = "*";
     public static final String ORIGIN_DELIMITER = ",";
     public static final String FALLBACK_ORIGIN  = "https://nva.sikt.no";
+    public static final String ORIGIN_HEADER = "origin";
 
     private final ObjectMapper objectMapper;
 
@@ -83,7 +84,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         if (originsList.contains(ALL_ORIGINS_ALLOWED)) {
             return ALL_ORIGINS_ALLOWED;
         }
-        var requestOrigin = requestInfo.getHeader("Origin");
+        var requestOrigin = requestInfo.getHeader(ORIGIN_HEADER);
         if (originsList.contains(requestOrigin)) {
             return requestOrigin;
         }

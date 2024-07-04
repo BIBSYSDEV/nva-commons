@@ -1,7 +1,6 @@
 package nva.commons.apigateway;
 
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
-import static com.google.common.net.HttpHeaders.ORIGIN;
 import static com.google.common.net.HttpHeaders.STRICT_TRANSPORT_SECURITY;
 import static com.google.common.net.HttpHeaders.VARY;
 import static com.google.common.net.HttpHeaders.X_CONTENT_TYPE_OPTIONS;
@@ -14,6 +13,7 @@ import static no.unit.nva.testutils.TestHeaders.WILDCARD;
 import static nva.commons.apigateway.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
 import static nva.commons.apigateway.ApiGatewayHandler.ALL_ORIGINS_ALLOWED;
 import static nva.commons.apigateway.ApiGatewayHandler.FALLBACK_ORIGIN;
+import static nva.commons.apigateway.ApiGatewayHandler.ORIGIN_HEADER;
 import static nva.commons.apigateway.ApiGatewayHandler.REQUEST_ID;
 import static nva.commons.apigateway.MediaTypes.APPLICATION_PROBLEM_JSON;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
@@ -686,7 +686,7 @@ class ApiGatewayHandlerTest {
         Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(HttpHeaders.ACCEPT, MediaType.JSON_UTF_8.toString());
         headers.put(CONTENT_TYPE, MediaType.JSON_UTF_8.toString());
-        headers.put(ORIGIN, "https://example.com");
+        headers.put(ORIGIN_HEADER, "https://example.com");
         headers.put(X_CONTENT_TYPE_OPTIONS, "nosniff");
         headers.put(STRICT_TRANSPORT_SECURITY, "max-age=63072000; includeSubDomains; preload");
         return createHeaders(headers);
