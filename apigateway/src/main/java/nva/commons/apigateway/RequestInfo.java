@@ -117,8 +117,11 @@ public class RequestInfo {
 
     @JsonIgnore
     public String getHeader(String header) {
-        return Optional.ofNullable(getHeaders().get(header))
-                   .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_HEADERS + header));
+        return getHeaders().entrySet().stream()
+                .filter(entry -> entry.getKey().equalsIgnoreCase(header))
+                .findFirst()
+                .map(Map.Entry::getValue)
+                .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_HEADERS + header));
     }
 
     @JsonIgnore
