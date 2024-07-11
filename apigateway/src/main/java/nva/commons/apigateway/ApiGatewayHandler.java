@@ -8,6 +8,7 @@ import static com.google.common.net.HttpHeaders.VARY;
 import static com.google.common.net.HttpHeaders.X_CONTENT_TYPE_OPTIONS;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
+import static nva.commons.core.attempt.Try.attempt;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
@@ -74,19 +75,17 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         allowedOrigin = readAllowedOrigin(requestInfo);
     }
 
-
-
     private String readAllowedOrigin(RequestInfo requestInfo) {
         var originsList = getValidOrigins();
-        if (originsList.isEmpty()){
+        if (originsList.isEmpty()) {
             return FALLBACK_ORIGIN;
         }
         if (originsList.contains(ALL_ORIGINS_ALLOWED)) {
             return ALL_ORIGINS_ALLOWED;
         }
-        var requestOrigin = requestInfo.getHeader(ORIGIN);
-        if (originsList.contains(requestOrigin)) {
-            return requestOrigin;
+        var requestOrigin = attempt(() -> requestInfo.getHeader(ORIGIN)).toOptional();
+        if (requestOrigin.isPresent() && originsList.contains(requestOrigin.get())) {
+            return requestOrigin.get();
         }
         return originsList.get(0);
     }
