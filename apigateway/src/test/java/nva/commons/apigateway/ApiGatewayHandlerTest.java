@@ -511,6 +511,25 @@ class ApiGatewayHandlerTest {
         assertThat(responseHeaders.get(VARY), containsString("Origin"));
     }
 
+    @Test
+    void shouldReturnFirstElementInAllowedOriginsListWhenOriginIsMissing() throws IOException {
+        var header1 = "https://example1.com";
+        var header2 = "https://example2.com";
+        var environment = mock(Environment.class);
+        when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn(header1 + ", " + header2);
+        var handler = new RawStringResponseHandler(environment, dtoObjectMapper);
+        var inputStream = requestWithMissingOriginHeader();
+        var outputStream = outputStream();
+        handler.handleRequest(inputStream, outputStream, context);
+
+        var response = GatewayResponse.fromOutputStream(outputStream, String.class);
+        var responseHeaders = response.getHeaders();
+        assertThat(responseHeaders.get(ACCESS_CONTROL_ALLOW_ORIGIN), equalTo(header1));
+        assertThat(responseHeaders.get(VARY), containsString("Origin"));
+    }
+
+
+
     private String getUnsupportedMediaTypeErrorMessage(String mediaType) {
         return UnsupportedAcceptHeaderException.createMessage(List.of(MediaType.parse(mediaType)),
                                                               handler.listSupportedMediaTypes());
@@ -659,6 +678,23 @@ class ApiGatewayHandlerTest {
         request.set("body", node);
         request.set("headers", createHeaders(headers));
         return jsonNodeToInputStream(request);
+    }
+
+    private InputStream requestWithMissingOriginHeader() throws JsonProcessingException {
+        ObjectNode request = defaultRestObjectMapper.createObjectNode();
+        ObjectNode node = createBody();
+        request.set("body", node);
+        request.set("headers", createHeadersWithMissingOrigin());
+        return jsonNodeToInputStream(request);
+    }
+
+    private JsonNode createHeadersWithMissingOrigin() {
+        Map<String, String> headers = new ConcurrentHashMap<>();
+        headers.put(HttpHeaders.ACCEPT, MediaType.JSON_UTF_8.toString());
+        headers.put(CONTENT_TYPE, MediaType.JSON_UTF_8.toString());
+        headers.put(X_CONTENT_TYPE_OPTIONS, "nosniff");
+        headers.put(STRICT_TRANSPORT_SECURITY, "max-age=63072000; includeSubDomains; preload");
+        return createHeaders(headers);
     }
 
     private InputStream requestWithHeaders() throws JsonProcessingException {
