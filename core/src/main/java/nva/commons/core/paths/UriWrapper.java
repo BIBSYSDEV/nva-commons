@@ -24,7 +24,7 @@ public class UriWrapper {
     public static final String HTTPS = "https";
     public static final String NULL_INPUT_ERROR = "Input URI cannot be null.";
     private static final int DEFAULT_PORT = -1;
-    private final URI uri;
+    private URI uri;
 
     @JacocoGenerated
     @Deprecated(forRemoval = true)
@@ -145,11 +145,11 @@ public class UriWrapper {
     }
 
     public UriWrapper addQueryParameter(String param, String value) {
-        var newUri = attempt(() -> new URIBuilder(uri)
+        this.uri = attempt(() -> new URIBuilder(uri)
                                        .addParameter(param, value)
                                        .build())
                          .orElseThrow();
-        return new UriWrapper(newUri);
+        return this;
     }
 
     public UriWrapper addQueryParameters(Map<String, String> parameters) {
