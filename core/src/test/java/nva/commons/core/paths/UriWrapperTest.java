@@ -1,7 +1,10 @@
 package nva.commons.core.paths;
 
 import static no.unit.nva.testutils.RandomDataGenerator.randomInteger;
+import static no.unit.nva.testutils.RandomDataGenerator.randomString;
+import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -201,6 +204,34 @@ class UriWrapperTest {
         var expectedPort = randomInteger(MAX_PORT_NUMBER);
         var actualUri = UriWrapper.fromHost("example.org", expectedPort).getUri();
         assertThat(actualUri, is(equalTo(URI.create("https://example.org:" + expectedPort))));
+    }
+
+    @Test
+    void shouldUpdateQueryParametersDynamically() {
+        var uri = randomUri();
+        var uriWrapper = UriWrapper.fromUri(uri);
+        var firstQueryParameter = randomString();
+        var secondQueryParameter = randomString();
+
+        uriWrapper.addQueryParameter("param1", firstQueryParameter);
+        uriWrapper.addQueryParameter("param2", secondQueryParameter);
+
+        assertThat(uriWrapper.toString(), containsString(firstQueryParameter));
+        assertThat(uriWrapper.toString(), containsString(secondQueryParameter));
+    }
+
+    @Test
+    void shouldAddTheSameQueryParameterTwiceDynamically() {
+        var uri = randomUri();
+        var uriWrapper = UriWrapper.fromUri(uri);
+        var firstQueryParameter = randomString();
+        var secondQueryParameter = randomString();
+
+        uriWrapper.addQueryParameter("param", firstQueryParameter);
+        uriWrapper.addQueryParameter("param", secondQueryParameter);
+
+        assertThat(uriWrapper.toString(), containsString(firstQueryParameter));
+        assertThat(uriWrapper.toString(), containsString(secondQueryParameter));
     }
 
     private Map<String, String> getOrderedParametersMap() {
