@@ -66,6 +66,7 @@ public enum AccessRight {
     MANAGE_DOI_AGENT("doi-agent"),
     SUPPORT("support"),
     MANAGE_KBS("kbs"),
+    MANAGE_RESOURCE_FILES("resource-files"),
 
     /**
      * Old ADMINISTRATE_APPLICATION
