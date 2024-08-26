@@ -12,8 +12,12 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 
 class UriWrapperTest {
@@ -21,6 +25,29 @@ class UriWrapperTest {
     public static final String HOST = "http://www.example.org";
     public static final int MAX_PORT_NUMBER = 65535;
     private static final String ROOT = "/";
+
+    public static Stream<Named<URI>> queryParameterProvider() {
+        return Stream.of(
+            Named.of("URI with unencoded query part", URI.create("https://example.org?q=høhë")),
+            Named.of("URI with encoded query part", URI.create("https://example.org?q=h%C3%B8h%C3%AB"))
+        );
+    }
+
+    public static Stream<Named<URI>> encodedParameterProvider() {
+        return Stream.of(
+            Named.of("Key containing encoded assignment character", URI.create("https://example.org?k%3Ds=equals")),
+            Named.of("Value containing encoded assignment character", URI.create("https://example.org?kes=%3Ds"))
+        );
+    }
+
+    public static Stream<Named<String>> valuelessParameterProvider() {
+        return Stream.of(
+            Named.of("URI with key only", "https://example.org?param"),
+            Named.of("URI with key and assignment symbol", "https://example.org?param="),
+            Named.of("URI with key and null-as-string assigned", "https://example.org?param=null"),
+            Named.of("URI with key and space assigned", "https://example.org?param=%20")
+        );
+    }
 
     @Test
     void getPathRemovesPathDelimiterFromTheEndOfTheUri() {
@@ -232,6 +259,33 @@ class UriWrapperTest {
 
         assertThat(uriWrapper.toString(), containsString(firstQueryParameter));
         assertThat(uriWrapper.toString(), containsString(secondQueryParameter));
+    }
+
+    @ParameterizedTest
+    @DisplayName("Should encode query params passed with original URI when adding new query params")
+    @MethodSource("queryParameterProvider")
+    void shouldEncodeOriginalUriQueryParametersWhenAddingQueryParameters(URI uri) {
+        var expected = "https://example.org?q=h%C3%B8h%C3%AB&b=m%C3%BCll%C3%A5r";
+        var uriWrapper = UriWrapper.fromUri(uri).addQueryParameter("b", "müllår");
+        assertThat(uriWrapper.toString(), is(equalTo(expected)));
+    }
+
+    @ParameterizedTest
+    @DisplayName("Should split query params passed with original URI when adding new query params")
+    @MethodSource("encodedParameterProvider")
+    void shouldSplitOriginalUriParametersWhenQueryParametersAreAdded(URI uri) {
+        var expected = uri.toString() + "&some=thing";
+        var uriWrapper = UriWrapper.fromUri(uri).addQueryParameter("some", "thing");
+        assertThat(uriWrapper.toString(), is(equalTo(expected)));
+    }
+
+    @ParameterizedTest
+    @DisplayName("Should accept zero value query params passed with original URI when adding new query params")
+    @MethodSource("valuelessParameterProvider")
+    void shouldAcceptValuelessQueryParameterWhenQueryParametersAreAdded(String uri) {
+        var expected = uri + "&a=b";
+        var uriWrapper = UriWrapper.fromUri(URI.create(uri)).addQueryParameter("a", "b");
+        assertThat(uriWrapper.toString(), is(equalTo(expected)));
     }
 
     private Map<String, String> getOrderedParametersMap() {
