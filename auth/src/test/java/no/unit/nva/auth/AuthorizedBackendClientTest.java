@@ -65,7 +65,7 @@ class AuthorizedBackendClientTest {
     }
 
     @Test
-    void shouldThrowUnhandledHttpResponseExceptionIfAuthServerReturnsForbidden() {
+    void shouldThrowUnexpectedHttpResponseExceptionIfAuthServerReturnsForbidden() {
         authServer.createOAuthAccessTokenResponseForbidden(
             cognitoCredentials.getCognitoAppClientId(),
             cognitoCredentials.getCognitoAppClientSecret()
@@ -73,7 +73,7 @@ class AuthorizedBackendClientTest {
 
         var client = prepareWithCognitoCredentials(httpClient, cognitoCredentials);
         var request = buildRequest();
-        var exception = assertThrows(Exception.class,
+        var exception = assertThrows(UnexpectedHttpResponseException.class,
                       () -> client.sendAsync(request, BodyHandlers.ofString(StandardCharsets.UTF_8)).join());
         assertThat(exception.getMessage(), containsString("403"));
     }

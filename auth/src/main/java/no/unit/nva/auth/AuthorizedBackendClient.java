@@ -2,6 +2,7 @@ package no.unit.nva.auth;
 
 import static java.util.Objects.isNull;
 import static nva.commons.core.attempt.Try.attempt;
+import static software.amazon.awssdk.http.HttpStatusCode.OK;
 import com.fasterxml.jackson.jr.ob.JSON;
 import java.io.IOException;
 import java.net.URI;
@@ -133,16 +134,16 @@ public class AuthorizedBackendClient {
             .orElseThrow();
     }
 
-    private Object assertFieldIsPresent(Object o) {
-        if (isNull(o)) {
+    private Object assertFieldIsPresent(Object object) {
+        if (isNull(object)) {
             throw new IllegalStateException("Received token response without token");
         }
-        return o;
+        return object;
     }
 
     private HttpResponse<String> assertResponseIsOk(HttpResponse<String> response) {
-        if (response.statusCode() < 200 || response.statusCode() >= 300) {
-            throw UnhandledHttpResponseException.fromHttpResponse(response);
+        if (response.statusCode() != OK) {
+            throw UnexpectedHttpResponseException.fromHttpResponse(response);
         }
 
         return response;
