@@ -88,23 +88,6 @@ class FakeAuthServerTest {
         assertThat(response.statusCode(), is(equalTo(WIREMOCK_DEFAULT_FAILURE_STATUS_CODE)));
     }
 
-    @Test
-    void should() throws IOException,
-                                                                                      InterruptedException {
-        var clientId = randomString();
-        var clientSecret = randomString();
-        var exampleResourcePath = "/example";
-        authServer.createHttpInteractions(clientId, clientSecret, randomString(),
-                                          exampleResourcePath);
-        var requestUri = UriWrapper.fromUri(authServer.getServerUri()).addChild(exampleResourcePath).getUri();
-        var request = HttpRequest.newBuilder(requestUri)
-                          .header(HttpHeaders.AUTHORIZATION, bearerToken(randomString()))
-                          .GET()
-                          .build();
-        var response = httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
-        assertThat(response.statusCode(), is(equalTo(WIREMOCK_DEFAULT_FAILURE_STATUS_CODE)));
-    }
-
     private String bearerToken(String userAccessToken) {
         return "Bearer " + userAccessToken;
     }
