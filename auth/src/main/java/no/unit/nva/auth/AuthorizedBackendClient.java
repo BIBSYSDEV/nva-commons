@@ -123,12 +123,29 @@ public class AuthorizedBackendClient {
 
     private String sendRequestAndExtractToken(HttpRequest request) {
         return attempt(() -> this.httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8)))
+            .map(this::assertResponseIsOk)
             .map(HttpResponse::body)
             .map(JSON.std::mapFrom)
             .map(json -> json.get(JWT_TOKEN_FIELD))
+            .map(this::assertFieldIsPresent)
             .map(Objects::toString)
             .map(this::createBearerToken)
             .orElseThrow();
+    }
+
+    private Object assertFieldIsPresent(Object o) {
+        if (isNull(o)) {
+            throw new IllegalStateException("Received token response without token");
+        }
+        return o;
+    }
+
+    private HttpResponse<String> assertResponseIsOk(HttpResponse<String> response) {
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            throw UnhandledHttpResponseException.fromHttpResponse(response);
+        }
+
+        return response;
     }
 
     private HttpRequest formatRequestForJwtToken(URI tokenUri) {
