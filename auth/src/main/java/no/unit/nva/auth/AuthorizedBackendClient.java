@@ -59,14 +59,14 @@ public class AuthorizedBackendClient {
 
     public <T> HttpResponse<T> send(HttpRequest.Builder request, BodyHandler<T> responseBodyHandler)
         throws IOException, InterruptedException {
-        refreshToken();
+        refreshTokenIfExpired();
         var authorizedRequest = request.setHeader(AUTHORIZATION_HEADER, bearerToken).build();
         return httpClient.send(authorizedRequest, responseBodyHandler);
     }
 
     public <T> CompletableFuture<HttpResponse<T>> sendAsync(Builder request,
                                                             BodyHandler<T> responseBodyHandler) {
-        refreshToken();
+        refreshTokenIfExpired();
         var authorizedRequest = request.setHeader(AUTHORIZATION_HEADER, bearerToken).build();
         return httpClient.sendAsync(authorizedRequest, responseBodyHandler);
     }
@@ -76,7 +76,7 @@ public class AuthorizedBackendClient {
         return bearerToken;
     }
 
-    private void refreshToken() {
+    private void refreshTokenIfExpired() {
         if (bearerTokenIsNotInjectedDirectly) {
             this.bearerToken = createBearerToken(cachedJwtProvider.getValue().getToken());
         }
