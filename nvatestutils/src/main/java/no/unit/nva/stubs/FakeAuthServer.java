@@ -26,7 +26,9 @@ import no.unit.nva.commons.json.JsonUtils;
 
 public class FakeAuthServer {
 
-    public static final String ACCESS_TOKEN_TEMPLATE = "{\"access_token\": \"%s\"}";
+    public static final String ACCESS_TOKEN_TEMPLATE = """
+        {"access_token": "%s","expires_in": %s}
+        """;
     public static final String ACCESS_TOKEN_FORBIDDEN = randomString();
     public static final String FORBIDDEN_BODY = randomString();
     private WireMockServer httpServer;
@@ -54,8 +56,9 @@ public class FakeAuthServer {
     public String createHttpInteractions(String clientId,
                                          String clientSecret,
                                          String expectedAccessToken,
-                                         String exampleResourcePath) {
-        createOAuthAccessTokenResponse(clientId, clientSecret, expectedAccessToken);
+                                         String exampleResourcePath,
+                                         int expectedExpiresIn) {
+        createOAuthAccessTokenResponse(clientId, clientSecret, expectedAccessToken, expectedExpiresIn);
         return createResponseForProtectedContent(expectedAccessToken, exampleResourcePath);
     }
 
@@ -67,11 +70,12 @@ public class FakeAuthServer {
         return protectedContent;
     }
 
-    private void createOAuthAccessTokenResponse(String clientId, String clientSecret, String expectedAccessToken) {
+    private void createOAuthAccessTokenResponse(String clientId, String clientSecret, String expectedAccessToken,
+                                                int expectedExpiresIn) {
         stubFor(post(OAUTH_TOKEN)
                     .withBasicAuth(clientId, clientSecret)
                     .withRequestBody(new ContainsPattern("grant_type=client_credentials"))
-                    .willReturn(createOauthClientResponse(expectedAccessToken)));
+                    .willReturn(createOauthClientResponse(expectedAccessToken, expectedExpiresIn)));
     }
 
     private void initialize() {
@@ -101,10 +105,10 @@ public class FakeAuthServer {
                    .withBody(FORBIDDEN_BODY);
     }
 
-    private ResponseDefinitionBuilder createOauthClientResponse(String expectedAccessToken) {
+    private ResponseDefinitionBuilder createOauthClientResponse(String expectedAccessToken, int expectedExpiresIn) {
         return aResponse()
                    .withStatus(HttpURLConnection.HTTP_OK)
-                   .withBody(String.format(ACCESS_TOKEN_TEMPLATE, expectedAccessToken));
+                   .withBody(String.format(ACCESS_TOKEN_TEMPLATE, expectedAccessToken, expectedExpiresIn));
     }
 
     private ResponseDefinitionBuilder createUserInfoResponse(String accessToken) {

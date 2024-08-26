@@ -12,6 +12,7 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandler;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Objects;
@@ -29,6 +30,7 @@ public class AuthorizedBackendClient {
     public static final Map<String, String> GRANT_TYPE_CLIENT_CREDENTIALS = Map.of("grant_type", "client_credentials");
     private final HttpClient httpClient;
     private final CognitoCredentials cognitoCredentials;
+    private final CachedJwtProvider cachedJwtProvider;
     private final boolean bearerTokenIsNotInjectedDirectly;
     private String bearerToken;
 
@@ -38,6 +40,8 @@ public class AuthorizedBackendClient {
         this.httpClient = httpClient;
         this.bearerToken = bearerToken;
         this.cognitoCredentials = cognitoCredentials;
+        this.cachedJwtProvider = new CachedJwtProvider(new CognitoAuthenticator(httpClient, cognitoCredentials),
+                                                       Clock.systemDefaultZone());
         this.bearerTokenIsNotInjectedDirectly = isNull(bearerToken);
     }
 

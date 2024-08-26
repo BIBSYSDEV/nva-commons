@@ -8,6 +8,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Test;
 class AuthorizedBackendClientTest {
 
     public static final String EXAMPLE_RESOURCE_PATH = "/example";
+    public static final int ONE_MINUTE_IN_SECONDS = 3600;
     private URI serverUri;
     private HttpClient httpClient;
     private String protectedContent;
@@ -37,10 +39,12 @@ class AuthorizedBackendClientTest {
         var clientId = randomString();
         var clientSecret = randomString();
         cognitoCredentials = new CognitoCredentials(() -> clientId, () -> clientSecret, authServer.getServerUri());
+        var expectedExpiresIn = 3600;
         protectedContent = authServer.createHttpInteractions(cognitoCredentials.getCognitoAppClientId(),
-            cognitoCredentials.getCognitoAppClientSecret(),
-            expectedAccessToken,
-            EXAMPLE_RESOURCE_PATH);
+                                                             cognitoCredentials.getCognitoAppClientSecret(),
+                                                             expectedAccessToken,
+                                                             EXAMPLE_RESOURCE_PATH,
+                                                             expectedExpiresIn);
         serverUri = authServer.getServerUri();
         this.httpClient = WiremockHttpClient.create();
     }
@@ -95,6 +99,22 @@ class AuthorizedBackendClientTest {
     }
 
     @Test
+    void shouldUseCachedBackendAccessTokenWhenCachedTokenIsNotExpiredAndTokenHasNotBeenManuallyInjected()
+        throws IOException, InterruptedException {
+        var client = prepareWithCognitoCredentials(httpClient, cognitoCredentials);
+        var request = buildRequest();
+
+        client.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
+        var firstToken = client.getBearerToken();
+
+        authClientReturnsAnotherAccessTokenOnTheNextCall(randomString());
+
+        client.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
+        var secondToken = client.getBearerToken();
+        assertEquals(firstToken, secondToken);
+    }
+
+    @Test
     void shouldNotRefreshTheAccessTokenWhenTheAccessTokenHasBeenManuallyInjected()
         throws IOException, InterruptedException {
         String bearerToken = "Bearer " + expectedAccessToken;
@@ -114,7 +134,8 @@ class AuthorizedBackendClientTest {
         protectedContent = authServer.createHttpInteractions(cognitoCredentials.getCognitoAppClientId(),
                                                              cognitoCredentials.getCognitoAppClientSecret(),
                                                              accessToken,
-                                                             EXAMPLE_RESOURCE_PATH);
+                                                             EXAMPLE_RESOURCE_PATH,
+                                                             ONE_MINUTE_IN_SECONDS);
     }
 
     private HttpRequest.Builder buildRequest() {
