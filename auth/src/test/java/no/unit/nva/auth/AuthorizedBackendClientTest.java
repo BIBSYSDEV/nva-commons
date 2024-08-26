@@ -8,6 +8,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -61,6 +62,32 @@ class AuthorizedBackendClientTest {
         var response =
             client.sendAsync(request, BodyHandlers.ofString(StandardCharsets.UTF_8)).join();
         assertThat(response.body(), containsString(protectedContent));
+    }
+
+    @Test
+    void shouldThrowUnexpectedHttpResponseExceptionIfAuthServerReturnsForbidden() {
+        authServer.createOAuthAccessTokenResponseForbidden(
+            cognitoCredentials.getCognitoAppClientId(),
+            cognitoCredentials.getCognitoAppClientSecret()
+        );
+
+        var client = prepareWithCognitoCredentials(httpClient, cognitoCredentials);
+        var request = buildRequest();
+        var exception = assertThrows(UnexpectedHttpResponseException.class,
+                      () -> client.sendAsync(request, BodyHandlers.ofString(StandardCharsets.UTF_8)).join());
+        assertThat(exception.getMessage(), containsString("403"));
+    }
+
+    @Test
+    void shouldThrowIllegalStateExceptionIfAuthServerReturns200okWithoutToken() {
+        authServer.createOAuthAccessTokenResponseMissingToken(
+            cognitoCredentials.getCognitoAppClientId(),
+            cognitoCredentials.getCognitoAppClientSecret()
+        );
+
+        var client = prepareWithCognitoCredentials(httpClient, cognitoCredentials);
+        var request = buildRequest();
+        assertThrows(IllegalStateException.class,() -> client.sendAsync(request, BodyHandlers.ofString(StandardCharsets.UTF_8)).join());
     }
 
     @Test

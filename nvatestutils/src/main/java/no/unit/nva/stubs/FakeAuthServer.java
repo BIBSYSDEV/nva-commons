@@ -6,6 +6,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
+import static java.lang.String.format;
+import static java.net.HttpURLConnection.HTTP_FORBIDDEN;
+import static java.net.HttpURLConnection.HTTP_OK;
 import static no.unit.nva.auth.AuthorizedBackendClient.AUTHORIZATION_HEADER;
 import static no.unit.nva.auth.OAuthConstants.HTTPS;
 import static no.unit.nva.auth.OAuthConstants.OAUTH_TOKEN;
@@ -18,11 +21,11 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.ContainsPattern;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import com.google.common.net.HttpHeaders;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.Map;
 import no.unit.nva.auth.CognitoUserInfo;
 import no.unit.nva.commons.json.JsonUtils;
+import nva.commons.core.JacocoGenerated;
 
 public class FakeAuthServer {
 
@@ -59,19 +62,36 @@ public class FakeAuthServer {
         return createResponseForProtectedContent(expectedAccessToken, exampleResourcePath);
     }
 
-    private String createResponseForProtectedContent(String expectedAccessToken, String exampleResourcePath) {
+    public String createResponseForProtectedContent(String expectedAccessToken, String exampleResourcePath) {
         var protectedContent = randomString();
         stubFor(get(exampleResourcePath)
                     .withHeader(AUTHORIZATION_HEADER, new EqualToPattern("Bearer " + expectedAccessToken))
-                    .willReturn(aResponse().withBody(protectedContent).withStatus(HttpURLConnection.HTTP_OK)));
+                    .willReturn(aResponse().withBody(protectedContent).withStatus(HTTP_OK)));
         return protectedContent;
     }
 
-    private void createOAuthAccessTokenResponse(String clientId, String clientSecret, String expectedAccessToken) {
+    public void createOAuthAccessTokenResponse(String clientId, String clientSecret, String expectedAccessToken) {
+        var body = format(ACCESS_TOKEN_TEMPLATE, expectedAccessToken);
         stubFor(post(OAUTH_TOKEN)
                     .withBasicAuth(clientId, clientSecret)
                     .withRequestBody(new ContainsPattern("grant_type=client_credentials"))
-                    .willReturn(createOauthClientResponse(expectedAccessToken)));
+                    .willReturn(createOauthClientResponse(body, HTTP_OK)));
+    }
+
+    @JacocoGenerated
+    public void createOAuthAccessTokenResponseForbidden(String clientId, String clientSecret) {
+        stubFor(post(OAUTH_TOKEN)
+                    .withBasicAuth(clientId, clientSecret)
+                    .withRequestBody(new ContainsPattern("grant_type=client_credentials"))
+                    .willReturn(createOauthClientResponse("{}", HTTP_FORBIDDEN)));
+    }
+
+    @JacocoGenerated
+    public void createOAuthAccessTokenResponseMissingToken(String clientId, String clientSecret) {
+        stubFor(post(OAUTH_TOKEN)
+                    .withBasicAuth(clientId, clientSecret)
+                    .withRequestBody(new ContainsPattern("grant_type=client_credentials"))
+                    .willReturn(createOauthClientResponse("{}", HTTP_OK)));
     }
 
     private void initialize() {
@@ -97,20 +117,21 @@ public class FakeAuthServer {
 
     private ResponseDefinitionBuilder createForbiddenResponse() {
         return aResponse()
-                   .withStatus(HttpURLConnection.HTTP_FORBIDDEN)
+                   .withStatus(HTTP_FORBIDDEN)
                    .withBody(FORBIDDEN_BODY);
     }
 
-    private ResponseDefinitionBuilder createOauthClientResponse(String expectedAccessToken) {
+    private ResponseDefinitionBuilder createOauthClientResponse(String body,
+                                                                int statusCode) {
         return aResponse()
-                   .withStatus(HttpURLConnection.HTTP_OK)
-                   .withBody(String.format(ACCESS_TOKEN_TEMPLATE, expectedAccessToken));
+                   .withStatus(statusCode)
+                   .withBody(body);
     }
 
     private ResponseDefinitionBuilder createUserInfoResponse(String accessToken) {
         return aResponse()
                    .withBody(userInfoString(accessToken))
-                   .withStatus(HttpURLConnection.HTTP_OK);
+                   .withStatus(HTTP_OK);
     }
 
     private String userInfoString(String accessToken) {
