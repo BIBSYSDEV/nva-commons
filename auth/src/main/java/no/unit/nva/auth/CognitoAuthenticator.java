@@ -25,7 +25,6 @@ public class CognitoAuthenticator {
     public static final String TOKEN_PATH_SEGMENT = "token";
     public static final String BASIC_AUTH_CREDENTIALS_TEMPLATE = "%s:%s";
     public static final String BASIC_AUTH_HEADER_TEMPLATE = "%s %s";
-    public static final String AUTHORIZATION_ERROR_MESSAGE = "Could not authorizer client";
     public static final String GRANT_TYPE_CLIENT_CREDENTIALS = "grant_type=client_credentials";
     public static final String JWT_TOKEN_FIELD = "access_token";
     private final CognitoCredentials credentials;

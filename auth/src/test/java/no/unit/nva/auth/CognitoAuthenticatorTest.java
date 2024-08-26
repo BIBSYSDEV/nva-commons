@@ -4,14 +4,13 @@ import static com.amazonaws.auth.internal.SignerConstants.AUTHORIZATION;
 import static java.net.HttpURLConnection.HTTP_FORBIDDEN;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static no.unit.nva.auth.AuthorizedBackendClient.APPLICATION_X_WWW_FORM_URLENCODED;
-import static no.unit.nva.auth.CognitoAuthenticator.AUTHORIZATION_ERROR_MESSAGE;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static org.apache.http.protocol.HTTP.CONTENT_TYPE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
@@ -24,7 +23,6 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.NoSuchElementException;
 import no.unit.nva.auth.utils.HttpRequestMetadataMatcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -101,13 +99,13 @@ class CognitoAuthenticatorTest {
     @Test
     void shouldThrowWhenResponseIsNotStructuredLikeAToken() throws IOException, InterruptedException {
         when(httpClient.<String>send(any(), any())).thenReturn(invalidResponse);
-        assertThrows(NoSuchElementException.class, () -> cognitoAuthenticator.fetchBearerToken());
+        assertThrows(IllegalStateException.class, () -> cognitoAuthenticator.fetchBearerToken());
     }
 
     @Test
     void shouldThrowWhenResponseIsNot200Ok() throws IOException, InterruptedException {
         when(httpClient.<String>send(any(), any())).thenReturn(errorResponse);
         var exception = assertThrows(RuntimeException.class, () -> cognitoAuthenticator.fetchBearerToken());
-        assertEquals(AUTHORIZATION_ERROR_MESSAGE, exception.getMessage());
+        assertTrue(exception.getMessage().contains("Got unexpected http response"));
     }
 }
