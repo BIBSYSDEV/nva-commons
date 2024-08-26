@@ -29,9 +29,7 @@ import nva.commons.core.JacocoGenerated;
 
 public class FakeAuthServer {
 
-    public static final String ACCESS_TOKEN_TEMPLATE = """
-        {"access_token": "%s","expires_in": %s}
-        """;
+    public static final String ACCESS_TOKEN_TEMPLATE = "{\"access_token\": \"%s\"}";
     public static final String ACCESS_TOKEN_FORBIDDEN = randomString();
     public static final String FORBIDDEN_BODY = randomString();
     private WireMockServer httpServer;
@@ -59,9 +57,8 @@ public class FakeAuthServer {
     public String createHttpInteractions(String clientId,
                                          String clientSecret,
                                          String expectedAccessToken,
-                                         String exampleResourcePath,
-                                         int expectedExpiresIn) {
-        createOAuthAccessTokenResponse(clientId, clientSecret, expectedAccessToken, expectedExpiresIn);
+                                         String exampleResourcePath) {
+        createOAuthAccessTokenResponse(clientId, clientSecret, expectedAccessToken);
         return createResponseForProtectedContent(expectedAccessToken, exampleResourcePath);
     }
 
@@ -73,9 +70,8 @@ public class FakeAuthServer {
         return protectedContent;
     }
 
-    public void createOAuthAccessTokenResponse(String clientId, String clientSecret, String expectedAccessToken,
-                                               int expectedExpiresIn) {
-        var body = format(ACCESS_TOKEN_TEMPLATE, expectedAccessToken, expectedExpiresIn);
+    public void createOAuthAccessTokenResponse(String clientId, String clientSecret, String expectedAccessToken) {
+        var body = format(ACCESS_TOKEN_TEMPLATE, expectedAccessToken);
         stubFor(post(OAUTH_TOKEN)
                     .withBasicAuth(clientId, clientSecret)
                     .withRequestBody(new ContainsPattern("grant_type=client_credentials"))

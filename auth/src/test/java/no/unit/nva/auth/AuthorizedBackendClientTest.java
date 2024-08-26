@@ -8,14 +8,19 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
 import no.unit.nva.stubs.FakeAuthServer;
 import no.unit.nva.stubs.WiremockHttpClient;
 import nva.commons.core.paths.UriWrapper;
@@ -25,7 +30,6 @@ import org.junit.jupiter.api.Test;
 class AuthorizedBackendClientTest {
 
     public static final String EXAMPLE_RESOURCE_PATH = "/example";
-    public static final int ONE_MINUTE_IN_SECONDS = 3600;
     private URI serverUri;
     private HttpClient httpClient;
     private String protectedContent;
@@ -36,16 +40,14 @@ class AuthorizedBackendClientTest {
     @BeforeEach
     public void init() {
         authServer = new FakeAuthServer();
-        expectedAccessToken = randomString();
+        expectedAccessToken = createTestJwt(Instant.now().plus(Duration.ofMinutes(5)));
         var clientId = randomString();
         var clientSecret = randomString();
         cognitoCredentials = new CognitoCredentials(() -> clientId, () -> clientSecret, authServer.getServerUri());
-        var expectedExpiresIn = 3600;
         protectedContent = authServer.createHttpInteractions(cognitoCredentials.getCognitoAppClientId(),
                                                              cognitoCredentials.getCognitoAppClientSecret(),
                                                              expectedAccessToken,
-                                                             EXAMPLE_RESOURCE_PATH,
-                                                             expectedExpiresIn);
+                                                             EXAMPLE_RESOURCE_PATH);
         serverUri = authServer.getServerUri();
         this.httpClient = WiremockHttpClient.create();
     }
@@ -78,7 +80,8 @@ class AuthorizedBackendClientTest {
         var client = prepareWithCognitoCredentials(httpClient, cognitoCredentials);
         var request = buildRequest();
         var exception = assertThrows(UnexpectedHttpResponseException.class,
-                      () -> client.sendAsync(request, BodyHandlers.ofString(StandardCharsets.UTF_8)).join());
+                                     () -> client.sendAsync(request, BodyHandlers.ofString(StandardCharsets.UTF_8))
+                                               .join());
         assertThat(exception.getMessage(), containsString("403"));
     }
 
@@ -91,7 +94,8 @@ class AuthorizedBackendClientTest {
 
         var client = prepareWithCognitoCredentials(httpClient, cognitoCredentials);
         var request = buildRequest();
-        assertThrows(IllegalStateException.class,() -> client.sendAsync(request, BodyHandlers.ofString(StandardCharsets.UTF_8)).join());
+        assertThrows(IllegalStateException.class,
+                     () -> client.sendAsync(request, BodyHandlers.ofString(StandardCharsets.UTF_8)).join());
     }
 
     @Test
@@ -110,19 +114,23 @@ class AuthorizedBackendClientTest {
     }
 
     @Test
-    void shouldRefreshTheBackendAccessTokenEveryTimeARequestIsSentWhenTheAccessTokenHasNotBeenManuallyInjected()
+    void shouldRefreshTheBackendAccessTokenWhenTokenIsExpiredAndTheAccessTokenHasNotBeenManuallyInjected()
         throws IOException, InterruptedException {
-        var client = prepareWithCognitoCredentials(httpClient, cognitoCredentials);
+        var client = new AuthorizedBackendClient(httpClient, null, cognitoCredentials);
         var request = buildRequest();
+        var firstToken = createTestJwt(Instant.now().minus(Duration.ofMinutes(1)));
+        authClientReturnsAnotherAccessTokenOnTheNextCall(firstToken);
 
         client.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
-        var firstToken = client.getBearerToken();
 
-        authClientReturnsAnotherAccessTokenOnTheNextCall(randomString());
+        var actualFirstToken = client.getBearerToken();
+        var secondToken = createTestJwt(Instant.now().plus(Duration.ofMinutes(1)));
+        authClientReturnsAnotherAccessTokenOnTheNextCall(secondToken);
 
         client.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
-        var secondToken = client.getBearerToken();
-        assertThat(secondToken, is(not(equalTo(firstToken))));
+
+        var actualSecondToken = client.getBearerToken();
+        assertThat(actualSecondToken, is(not(equalTo(actualFirstToken))));
     }
 
     @Test
@@ -133,8 +141,6 @@ class AuthorizedBackendClientTest {
 
         client.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
         var firstToken = client.getBearerToken();
-
-        authClientReturnsAnotherAccessTokenOnTheNextCall(randomString());
 
         client.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
         var secondToken = client.getBearerToken();
@@ -157,12 +163,17 @@ class AuthorizedBackendClientTest {
         assertThat(secondToken, is(equalTo(firstToken)));
     }
 
+    private static String createTestJwt(Instant expiresAt) {
+        return JWT.create()
+                   .withExpiresAt(Date.from(expiresAt))
+                   .sign(Algorithm.none());
+    }
+
     private void authClientReturnsAnotherAccessTokenOnTheNextCall(String accessToken) {
         protectedContent = authServer.createHttpInteractions(cognitoCredentials.getCognitoAppClientId(),
                                                              cognitoCredentials.getCognitoAppClientSecret(),
                                                              accessToken,
-                                                             EXAMPLE_RESOURCE_PATH,
-                                                             ONE_MINUTE_IN_SECONDS);
+                                                             EXAMPLE_RESOURCE_PATH);
     }
 
     private HttpRequest.Builder buildRequest() {
