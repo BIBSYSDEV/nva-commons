@@ -121,8 +121,7 @@ public class FakeAuthServer {
                    .withBody(FORBIDDEN_BODY);
     }
 
-    private ResponseDefinitionBuilder createOauthClientResponse(String body,
-                                                                int statusCode) {
+    private ResponseDefinitionBuilder createOauthClientResponse(String body, int statusCode) {
         return aResponse()
                    .withStatus(statusCode)
                    .withBody(body);

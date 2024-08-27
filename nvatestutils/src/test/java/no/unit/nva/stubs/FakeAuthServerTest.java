@@ -77,8 +77,7 @@ class FakeAuthServerTest {
         var clientId = randomString();
         var clientSecret = randomString();
         var exampleResourcePath = "/example";
-        authServer.createHttpInteractions(clientId, clientSecret, randomString(),
-                                          exampleResourcePath);
+        authServer.createHttpInteractions(clientId, clientSecret, randomString(), exampleResourcePath);
         var requestUri = UriWrapper.fromUri(authServer.getServerUri()).addChild(exampleResourcePath).getUri();
         var request = HttpRequest.newBuilder(requestUri)
                           .header(HttpHeaders.AUTHORIZATION, bearerToken(randomString()))

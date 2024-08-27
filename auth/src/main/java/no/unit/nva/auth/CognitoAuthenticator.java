@@ -1,12 +1,14 @@
 package no.unit.nva.auth;
 
 import static com.amazonaws.auth.internal.SignerConstants.AUTHORIZATION;
+import static java.util.Objects.isNull;
 import static no.unit.nva.auth.AuthorizedBackendClient.APPLICATION_X_WWW_FORM_URLENCODED;
 import static nva.commons.core.attempt.Try.attempt;
 import static org.apache.http.protocol.HTTP.CONTENT_TYPE;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.jr.ob.JSON;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -23,7 +25,6 @@ public class CognitoAuthenticator {
     public static final String TOKEN_PATH_SEGMENT = "token";
     public static final String BASIC_AUTH_CREDENTIALS_TEMPLATE = "%s:%s";
     public static final String BASIC_AUTH_HEADER_TEMPLATE = "%s %s";
-    public static final String AUTHORIZATION_ERROR_MESSAGE = "Could not authorizer client";
     public static final String GRANT_TYPE_CLIENT_CREDENTIALS = "grant_type=client_credentials";
     public static final String JWT_TOKEN_FIELD = "access_token";
     private final CognitoCredentials credentials;
@@ -40,7 +41,7 @@ public class CognitoAuthenticator {
                    .map(HttpResponse::body)
                    .map(JSON.std::mapFrom)
                    .map(json -> json.get(JWT_TOKEN_FIELD))
-                   .toOptional()
+                   .map(this::assertFieldIsPresent)
                    .map(Objects::toString)
                    .map(JWT::decode)
                    .orElseThrow();
@@ -52,6 +53,13 @@ public class CognitoAuthenticator {
 
     private static HttpRequest.BodyPublisher clientCredentialsAuthType() {
         return HttpRequest.BodyPublishers.ofString(GRANT_TYPE_CLIENT_CREDENTIALS);
+    }
+
+    private Object assertFieldIsPresent(Object object) {
+        if (isNull(object)) {
+            throw new IllegalStateException("Received token response without token");
+        }
+        return object;
     }
 
     private String formatAuthenticationHeaderValue() {
@@ -73,16 +81,18 @@ public class CognitoAuthenticator {
     }
 
     private HttpResponse<String> fetchTokenResponse() {
-        return attempt(
-            () -> this.httpClient.send(createTokenRequest(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
-        )
+        return attempt(this::sendTokenRequest)
                    .map(this::responseIsSuccessful)
                    .orElseThrow();
     }
 
+    private HttpResponse<String> sendTokenRequest() throws IOException, InterruptedException {
+        return this.httpClient.send(createTokenRequest(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+    }
+
     private HttpResponse<String> responseIsSuccessful(HttpResponse<String> response) {
         if (HttpURLConnection.HTTP_OK != response.statusCode()) {
-            throw new RuntimeException(AUTHORIZATION_ERROR_MESSAGE);
+            throw UnexpectedHttpResponseException.fromHttpResponse(response);
         }
         return response;
     }
