@@ -1,26 +1,66 @@
 package nva.commons.core.paths;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.unit.nva.testutils.RandomDataGenerator.randomInteger;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.net.URI;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 
 class UriWrapperTest {
 
-    public static final String HOST = "http://www.example.org";
+    private static final String HOST = "http://www.example.org";
     public static final int MAX_PORT_NUMBER = 65535;
     private static final String ROOT = "/";
+    private static final String AMPERSAND = "&";
+    private static final String ASSIGNMENT = "=";
+
+    public static Stream<Named<Map<String, String>>> queryParameterProvider() {
+        return Stream.of(
+            Named.of("Unencoded query parameter", Map.of("q", "høhë")),
+            Named.of("Multiple unencoded query parameters",
+                     Map.of("q", "høhë", "param2", "åpen")),
+            Named.of("Encoded query parameter", Map.of("q", "h%C3%B8h%C3%AB")),
+            Named.of("Multiple encoded query parameters",
+                     Map.of("q", "h%C3%B8h%C3%AB", "param2", "%C3%A5pen"))
+        );
+    }
+
+    public static Stream<Named<URI>> encodedParameterProvider() {
+        return Stream.of(
+            Named.of("Key containing encoded assignment character", URI.create("https://example.org?k%3Ds=equals")),
+            Named.of("Value containing encoded assignment character", URI.create("https://example.org?kes=%3Ds"))
+        );
+    }
+
+    public static Stream<Named<String>> valuelessParameterProvider() {
+        return Stream.of(
+            Named.of("URI with key only", "https://example.org?param"),
+            Named.of("URI with key and assignment symbol", "https://example.org?param="),
+            Named.of("URI with key and null-as-string assigned", "https://example.org?param=null"),
+            Named.of("URI with key and space assigned", "https://example.org?param=%20")
+        );
+    }
 
     @Test
     void getPathRemovesPathDelimiterFromTheEndOfTheUri() {
@@ -234,10 +274,72 @@ class UriWrapperTest {
         assertThat(uriWrapper.toString(), containsString(secondQueryParameter));
     }
 
+    @ParameterizedTest
+    @DisplayName("Should encode query params passed with original URI when adding new query params")
+    @MethodSource("queryParameterProvider")
+    void shouldEncodeOriginalUriQueryParametersWhenAddingQueryParameters(Map<String, String> params) {
+        var expected = convertToExpected(params, "b=m%C3%BCll%C3%A5r");
+
+        var uri = "https://example.org?" + convertToQueryString(params);
+        var uriWrapper = UriWrapper.fromUri(uri).addQueryParameter("b", "müllår");
+        var actual = Arrays.asList(uriWrapper.getUri().getRawQuery().split(AMPERSAND));
+
+        assertThat(actual, containsInAnyOrder(expected));
+    }
+
+    @ParameterizedTest
+    @DisplayName("Should split query params passed with original URI when adding new query params")
+    @MethodSource("encodedParameterProvider")
+    void shouldSplitOriginalUriParametersWhenQueryParametersAreAdded(URI uri) {
+        var expected = uri.toString() + "&some=thing";
+        var uriWrapper = UriWrapper.fromUri(uri).addQueryParameter("some", "thing");
+        assertThat(uriWrapper.toString(), is(equalTo(expected)));
+    }
+
+    @ParameterizedTest
+    @DisplayName("Should accept zero value query params passed with original URI when adding new query params")
+    @MethodSource("valuelessParameterProvider")
+    void shouldAcceptValuelessQueryParameterWhenQueryParametersAreAdded(String uri) {
+        var expected = uri + "&a=b";
+        var uriWrapper = UriWrapper.fromUri(URI.create(uri)).addQueryParameter("a", "b");
+        assertThat(uriWrapper.toString(), is(equalTo(expected)));
+    }
+
+    @Test
+    void shouldEncodeQueryParametersWhenMultipleQueryParametersAreAdded() {
+        var uri = "https://example.org?q=h%C3%B8h%C3%AB";
+        var expectedQueryParts = new String[]{"q=h%C3%B8h%C3%AB", "c=d%C3%A5", "a=b%C3%B8"};
+        var uriWrapper = UriWrapper.fromUri(URI.create(uri)).addQueryParameters(Map.of("a", "bø", "c", "då"));
+        var query = Arrays.asList(uriWrapper.getUri().getRawQuery().split(AMPERSAND));
+        assertThat(query, containsInAnyOrder(expectedQueryParts));
+    }
+
     private Map<String, String> getOrderedParametersMap() {
         final Map<String, String> parameters = new TreeMap<>();
         parameters.put("key1", "value1");
         parameters.put("key2", "value2");
         return parameters;
+    }
+
+
+    private static String[] convertToExpected(Map<String, String> params, String additionalParam) {
+        var expectedParams = params.entrySet().stream()
+                                 .map(entry -> Map.entry(entry.getKey(), reEncode(entry)))
+                                 .map(UriWrapperTest::joinAsParamKeyValue);
+        return Stream.concat(expectedParams, Stream.of(additionalParam)).toArray(String[]::new);
+    }
+
+    private static String reEncode(Entry<String, String> entry) {
+        return URLEncoder.encode(URLDecoder.decode(entry.getValue(), UTF_8), UTF_8);
+    }
+
+    private static String joinAsParamKeyValue(Entry<String, String> entry) {
+        return entry.getKey() + ASSIGNMENT + entry.getValue();
+    }
+
+    private static String convertToQueryString(Map<String, String> params) {
+        return params.entrySet().stream()
+                   .map(UriWrapperTest::joinAsParamKeyValue)
+                   .collect(Collectors.joining(AMPERSAND));
     }
 }
