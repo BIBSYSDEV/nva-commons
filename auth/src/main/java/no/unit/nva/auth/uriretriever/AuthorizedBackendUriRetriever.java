@@ -26,21 +26,22 @@ public class AuthorizedBackendUriRetriever implements RawContentRetriever {
     public static final String API_RESPONDED_WITH_ERROR_CODE = "Api responded with: ";
     public static final String ACCEPT = "Accept";
     private static final Logger logger = LoggerFactory.getLogger(AuthorizedBackendUriRetriever.class);
-    private final HttpClient httpClient;
     private final SecretsReader secretsReader;
 
     private final String backendClientAuthUrl;
 
     private final String backendClientSecretName;
+    private final AuthorizedBackendClient authorizedBackendClient;
 
     public AuthorizedBackendUriRetriever(HttpClient httpClient,
                                          SecretsManagerClient secretsManagerClient,
                                          String backendClientAuthUrl,
                                          String backendClientSecretName) {
-        this.httpClient = httpClient;
         this.secretsReader = new SecretsReader(secretsManagerClient);
         this.backendClientAuthUrl = backendClientAuthUrl;
         this.backendClientSecretName = backendClientSecretName;
+        this.authorizedBackendClient = AuthorizedBackendClient.prepareWithCognitoCredentials(httpClient,
+                                                                                             fetchCredentials());
     }
 
     @JacocoGenerated
@@ -53,17 +54,14 @@ public class AuthorizedBackendUriRetriever implements RawContentRetriever {
 
     @Override
     public Optional<String> getRawContent(URI uri, String mediaType) {
-        return attempt(this::getAuthorizedBackendClient)
-                   .map(authorizedBackendClient -> getHttpResponse(authorizedBackendClient, uri, mediaType))
+        return attempt(() -> getHttpResponse(uri, mediaType))
                    .map(this::getRawContentFromHttpResponse)
                    .toOptional();
     }
 
     @Override
     public Optional<HttpResponse<String>> fetchResponse(URI uri, String mediaType) {
-        return attempt(this::getAuthorizedBackendClient)
-                   .map(authorizedBackendClient -> getHttpResponse(authorizedBackendClient, uri, mediaType))
-                   .toOptional();
+        return attempt(() -> getHttpResponse(uri, mediaType)).toOptional();
     }
 
     private URI getCognitoTokenUrl() {
@@ -86,15 +84,9 @@ public class AuthorizedBackendUriRetriever implements RawContentRetriever {
         return new CognitoCredentials(credentials::getId, credentials::getSecret, uri);
     }
 
-    private AuthorizedBackendClient getAuthorizedBackendClient() {
-        return AuthorizedBackendClient.prepareWithCognitoCredentials(httpClient,
-                                                                     fetchCredentials());
-    }
-
-    private HttpResponse<String> getHttpResponse(AuthorizedBackendClient backendClient,
-                                                 URI customerId,
-                                                 String mediaType) throws IOException, InterruptedException {
+    private HttpResponse<String> getHttpResponse(URI customerId, String mediaType)
+        throws IOException, InterruptedException {
         var request = HttpRequest.newBuilder(customerId).headers(ACCEPT, mediaType).GET();
-        return backendClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
+        return authorizedBackendClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
     }
 }
