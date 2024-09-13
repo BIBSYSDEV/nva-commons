@@ -21,7 +21,7 @@ dependencies {
     implementation libs.aws.sdk2.cognitoidp
     implementation libs.aws.sdk2.secrets
     implementation libs.guava
-    implementation libs.wiremock
+    implementation libs.wiremock.jetty.'12'
     implementation libs.bundles.jackson
     implementation libs.commons.validator
 
