@@ -280,13 +280,12 @@ public class RequestInfo {
     }
 
     private Optional<List<AccessRight>> fetchAccessRights() {
-        return fetchUserInfo().map(CognitoUserInfo::getAccessRights)
-                   .map(accessRights -> Arrays.stream(accessRights.split(ELEMENTS_DELIMITER)))
-                   .map(RequestInfo::collectAccessRights);
+        return fetchUserInfo().map(CognitoUserInfo::getAccessRights).map(this::parseAccessRights);
     }
 
-    private static List<AccessRight> collectAccessRights(Stream<String> accessRights) {
-        return accessRights.filter(value -> !StringUtils.isEmpty(value))
+    private List<AccessRight> parseAccessRights(String value) {
+        return Arrays.stream(value.split(ELEMENTS_DELIMITER))
+                   .filter(array -> !StringUtils.isEmpty(array))
                    .map(AccessRight::fromPersistedString)
                    .collect(Collectors.toList());
     }
