@@ -60,6 +60,7 @@ import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.SingletonCollector;
+import nva.commons.core.StringUtils;
 import nva.commons.core.attempt.Failure;
 import nva.commons.core.exceptions.ExceptionUtils;
 import nva.commons.core.paths.UriWrapper;
@@ -281,8 +282,13 @@ public class RequestInfo {
     private Optional<List<AccessRight>> fetchAccessRights() {
         return fetchUserInfo().map(CognitoUserInfo::getAccessRights)
                    .map(accessRights -> Arrays.stream(accessRights.split(ELEMENTS_DELIMITER)))
-                   .map(
-                       accessRights -> accessRights.map(AccessRight::fromPersistedString).collect(Collectors.toList()));
+                   .map(RequestInfo::collectAccessRights);
+    }
+
+    private static List<AccessRight> collectAccessRights(Stream<String> accessRights) {
+        return accessRights.filter(value -> !StringUtils.isEmpty(value))
+                   .map(AccessRight::fromPersistedString)
+                   .collect(Collectors.toList());
     }
 
     @JacocoGenerated

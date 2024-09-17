@@ -20,6 +20,7 @@ import static nva.commons.core.paths.UriWrapper.HTTPS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
@@ -686,6 +687,16 @@ class RequestInfoTest {
         var rights = requestInfo.getAccessRights();
 
         assertThat(rights, containsInAnyOrder(accessRights.toArray()));
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenAccessRightsCognitoStringIsEmpty() {
+        var cognitoUserEntry = CognitoUserInfo.builder().build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var accessRights = requestInfo.getAccessRights();
+
+        assertThat(accessRights, is(emptyIterable()));
     }
 
     private RequestInfo requestInfoWithCustomerId(URI userCustomer) throws JsonProcessingException {
