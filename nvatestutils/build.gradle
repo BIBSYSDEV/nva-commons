@@ -24,6 +24,7 @@ dependencies {
     implementation libs.wiremock.jetty.'12'
     implementation libs.bundles.jackson
     implementation libs.commons.validator
+    implementation libs.com.auth0.jwt
 
     testImplementation project(":doi")
 }
