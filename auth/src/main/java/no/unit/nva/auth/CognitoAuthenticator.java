@@ -9,7 +9,6 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.jr.ob.JSON;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -18,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Objects;
 import nva.commons.core.paths.UriWrapper;
+import software.amazon.awssdk.http.HttpStatusFamily;
 
 public class CognitoAuthenticator {
 
@@ -91,7 +91,7 @@ public class CognitoAuthenticator {
     }
 
     private HttpResponse<String> responseIsSuccessful(HttpResponse<String> response) {
-        if (HttpURLConnection.HTTP_OK != response.statusCode()) {
+        if (HttpStatusFamily.SUCCESSFUL != HttpStatusFamily.of(response.statusCode())) {
             throw UnexpectedHttpResponseException.fromHttpResponse(response);
         }
         return response;
