@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Objects;
 import nva.commons.core.paths.UriWrapper;
+import software.amazon.awssdk.http.HttpStatusFamily;
 
 public class CognitoAuthenticator {
 
@@ -91,7 +92,7 @@ public class CognitoAuthenticator {
     }
 
     private HttpResponse<String> responseIsSuccessful(HttpResponse<String> response) {
-        if (HttpURLConnection.HTTP_OK != response.statusCode()) {
+        if (HttpStatusFamily.SUCCESSFUL != HttpStatusFamily.of(response.statusCode())) {
             throw UnexpectedHttpResponseException.fromHttpResponse(response);
         }
         return response;

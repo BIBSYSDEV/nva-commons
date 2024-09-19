@@ -69,7 +69,7 @@ public class AuthorizedBackendUriRetriever implements RawContentRetriever {
     }
 
     private String getRawContentFromHttpResponse(HttpResponse<String> response) {
-        if (HttpStatusFamily.SUCCESSFUL == HttpStatusFamily.of(response.statusCode())) {
+        if (HttpStatusFamily.SUCCESSFUL != HttpStatusFamily.of(response.statusCode())) {
             logger.error(FAILED_TO_RETRIEVE_URI, response);
             throw new RuntimeException(API_RESPONDED_WITH_ERROR_CODE + response.statusCode());
         }
