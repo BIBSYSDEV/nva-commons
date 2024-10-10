@@ -1,6 +1,7 @@
 package nva.commons.apigateway;
 
 import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
+import static com.google.common.net.HttpHeaders.CACHE_CONTROL;
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static com.google.common.net.HttpHeaders.ORIGIN;
 import static com.google.common.net.HttpHeaders.STRICT_TRANSPORT_SECURITY;
@@ -301,6 +302,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         headers.put(X_CONTENT_TYPE_OPTIONS, "nosniff");
         headers.put(STRICT_TRANSPORT_SECURITY, "max-age=63072000; includeSubDomains; preload");
         headers.put(VARY, "Origin, Accept");
+        headers.put(CACHE_CONTROL, "no-cache");
         return headers;
     }
 
