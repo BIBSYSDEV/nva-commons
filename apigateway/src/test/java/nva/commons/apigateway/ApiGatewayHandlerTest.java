@@ -1,5 +1,6 @@
 package nva.commons.apigateway;
 
+import static com.google.common.net.HttpHeaders.CACHE_CONTROL;
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static com.google.common.net.HttpHeaders.STRICT_TRANSPORT_SECURITY;
 import static com.google.common.net.HttpHeaders.VARY;
@@ -327,6 +328,17 @@ class ApiGatewayHandlerTest {
         assertThat(response.getStatusCode(), is(equalTo(TestException.ERROR_STATUS_CODE)));
         assertThat(response.getBodyObject(Problem.class).getStatus().getStatusCode(),
                    is(equalTo(TestException.ERROR_STATUS_CODE)));
+    }
+
+    @Test
+    public void shouldReturnFailureHeadersWhenHandlerThrowsException() throws IOException {
+        var handler = handlerThatThrowsExceptions();
+
+        var response = getProblemResponse(anyRequest(), handler);
+        var headers = response.getHeaders();
+
+        assertThat(headers.get(CONTENT_TYPE), is(equalTo(APPLICATION_PROBLEM_JSON.toString())));
+        assertThat(headers.get(CACHE_CONTROL), is(equalTo("no-cache")));
     }
 
     @Test
