@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
 import java.net.HttpURLConnection;
+import java.net.http.HttpClient;
 import java.util.Collections;
 import java.util.Map;
 import nva.commons.apigateway.ApiGatewayHandler;
@@ -28,8 +29,8 @@ public class Handler extends ApiGatewayHandler<RequestBody, RequestBody> {
      *
      * @param mapper Object Mapper
      */
-    public Handler(ObjectMapper mapper) {
-        super(RequestBody.class, new Environment(), mapper);
+    public Handler(ObjectMapper mapper,Environment environment, HttpClient httpClient) {
+        super(RequestBody.class, environment, mapper, httpClient);
     }
 
     @Override

@@ -4,6 +4,7 @@ import static nva.commons.apigateway.RequestInfoConstants.PROXY_TAG;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
+import java.net.http.HttpClient;
 import java.util.Collections;
 import java.util.Map;
 import nva.commons.apigateway.ApiGatewayProxyHandler;
@@ -29,8 +30,8 @@ public class ProxyHandler extends ApiGatewayProxyHandler<RequestBody, RequestBod
      *
      * @param mapper Object Mapper
      */
-    public ProxyHandler(ObjectMapper mapper) {
-        super(RequestBody.class, new Environment(), mapper);
+    public ProxyHandler(ObjectMapper mapper, Environment environment, HttpClient httpClient) {
+        super(RequestBody.class, environment, mapper, httpClient);
     }
     
     @Override

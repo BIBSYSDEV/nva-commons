@@ -3,6 +3,7 @@ package nva.commons.apigateway;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.HttpURLConnection;
+import java.net.http.HttpClient;
 import java.time.Duration;
 import java.util.Map;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
@@ -31,8 +32,9 @@ public abstract class ApiS3PresignerGatewayHandler<I> extends ApiGatewayHandler<
     public ApiS3PresignerGatewayHandler(Class<I> iclass,
                                         S3Presigner s3Presigner,
                                         Environment environment,
-                                        ObjectMapper objectMapper) {
-        super(iclass, environment, objectMapper);
+                                        ObjectMapper objectMapper,
+                                        HttpClient httpClient) {
+        super(iclass, environment, objectMapper, httpClient);
         this.s3presigner = s3Presigner;
     }
 
