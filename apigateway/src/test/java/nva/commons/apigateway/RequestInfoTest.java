@@ -305,7 +305,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnReturnBadRequestWhenObjectMapperFails(){
+    void shouldReturnApiIoExceptionWhenObjectMapperFails(){
         var request = "This is not a valid request";
         assertThrows(ApiIoException.class, () -> RequestInfo.fromRequest(IoUtils.stringToStream(request), httpClient));
     }
