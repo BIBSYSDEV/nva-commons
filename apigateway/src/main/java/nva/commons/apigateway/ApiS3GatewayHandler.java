@@ -1,7 +1,7 @@
 package nva.commons.apigateway;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.http.HttpClient;
 import java.time.Duration;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.core.Environment;
@@ -29,8 +29,8 @@ public abstract class ApiS3GatewayHandler<I> extends ApiS3PresignerGatewayHandle
                                S3Client s3client,
                                S3Presigner s3Presigner,
                                Environment environment,
-                               ObjectMapper objectMapper) {
-        super(iclass, s3Presigner, environment, objectMapper);
+                               HttpClient httpClient) {
+        super(iclass, s3Presigner, environment, httpClient);
         this.s3client = s3client;
     }
 

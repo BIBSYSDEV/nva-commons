@@ -34,6 +34,8 @@ import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.net.HttpHeaders;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.nio.file.Path;
@@ -272,7 +274,7 @@ class RequestInfoTest {
 
     @Test
     void shouldReturnThatUserIsAuthorizedWhenRequestInfoContainsACustomerIdAndTheRequestedAccessRight()
-        throws JsonProcessingException {
+        throws JsonProcessingException, ApiIoException {
         var usersCustomer = randomUri();
         var usersAccessRights = List.of(randomAccessRight(), randomAccessRight());
         RequestInfo requestInfo = createRequestInfoForOfflineAuthorization(usersAccessRights, usersCustomer);
@@ -283,7 +285,7 @@ class RequestInfoTest {
 
     @Test
     void shouldReturnNotAuthorizedWhenRequestInfoDoesNotContainTheRequestedAccessRightAndCheckIsPerformedOffline()
-        throws JsonProcessingException {
+        throws JsonProcessingException, ApiIoException {
         var userCustomer = randomUri();
         var usersAccessRights = List.of(MANAGE_DEGREE, MANAGE_IMPORT);
         var requestInfo =
@@ -294,7 +296,7 @@ class RequestInfoTest {
 
     @Test
     void shouldReturnNotAuthorizedWhenRequestInfoDoesNotContainAccessRightsAndCheckIsPerformedOffline()
-        throws JsonProcessingException {
+        throws JsonProcessingException, ApiIoException {
         var userCustomer = randomUri();
         var requestInfo = requestInfoWithCustomerId(userCustomer);
         var notAllocatedAccessRight = new AccessRightEntry(MANAGE_DEGREE, userCustomer);
@@ -303,7 +305,14 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnMultiValueQueryValuesWhenProvided() throws JsonProcessingException {
+    void shouldReturnApiIoExceptionWhenObjectMapperFails(){
+        var request = "This is not a valid request";
+        assertThrows(ApiIoException.class, () -> RequestInfo.fromRequest(IoUtils.stringToStream(request), httpClient));
+    }
+
+    @Test
+    void shouldReturnMultiValueQueryValuesWhenProvided()
+        throws JsonProcessingException, ApiIoException {
         var key = randomString();
         var value1 = randomString();
         var value2 = randomString();
@@ -311,52 +320,62 @@ class RequestInfoTest {
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withMultiValueQueryParameters(
             Map.of(key, List.of(value1, value2))).build();
 
-        var requestInfo = RequestInfo.fromRequest(request);
+        var requestInfo = getRequestInfo(request);
         assertThat(requestInfo.getMultiValueQueryParameter(key), is(equalTo(List.of(value1, value2))));
     }
 
     @Test
-    void isBackendClientShouldReturnTrueWhenScopeContainsTheBackendScope() throws JsonProcessingException {
+    void isBackendClientShouldReturnTrueWhenScopeContainsTheBackendScope()
+        throws JsonProcessingException, ApiIoException {
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withScope(
             BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE).build();
-        var requestInfo = RequestInfo.fromRequest(request);
+        var requestInfo = getRequestInfo(request);
         assertThat(requestInfo.clientIsInternalBackend(), is(true));
     }
 
     @Test
-    void isBackendClientShouldReturnFalseWhenScopeContainsTheBackendScope() throws JsonProcessingException {
+    void isBackendClientShouldReturnFalseWhenScopeContainsTheBackendScope()
+        throws JsonProcessingException, ApiIoException {
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withScope(randomString()).build();
-        var requestInfo = RequestInfo.fromRequest(request);
+        var requestInfo = getRequestInfo(request);
         assertThat(requestInfo.clientIsInternalBackend(), is(false));
     }
 
     @Test
-    void isThirdPartyShouldReturnTrueWhenScopeContainsTheExternalIssuedUserPool() throws JsonProcessingException {
+    void isThirdPartyShouldReturnTrueWhenScopeContainsTheExternalIssuedUserPool()
+        throws JsonProcessingException, ApiIoException {
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withIssuer(EXTERNAL_USER_POOL_URL).build();
-        var requestInfo = RequestInfo.fromRequest(request);
+        var requestInfo = getRequestInfo(request);
         assertThat(requestInfo.clientIsThirdParty(), is(true));
     }
 
     @Test
-    void isThirdPartyShouldReturnFalseWhenScopeContainsOtherUserPool() throws JsonProcessingException {
+    void isThirdPartyShouldReturnFalseWhenScopeContainsOtherUserPool()
+        throws JsonProcessingException, ApiIoException {
         var issuer = RandomDataGenerator.randomUri().toString();
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withIssuer(issuer).build();
-        var requestInfo = RequestInfo.fromRequest(request);
+        var requestInfo = getRequestInfo(request);
         assertThat(requestInfo.clientIsThirdParty(), is(false));
     }
 
     @Test
-    void getClientIdShouldReturnEmptyOptionalWhenClientIdIsNotInClaim() throws JsonProcessingException {
+    void getClientIdShouldReturnEmptyOptionalWhenClientIdIsNotInClaim()
+        throws JsonProcessingException, ApiIoException {
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).build();
-        var requestInfo = RequestInfo.fromRequest(request);
+        var requestInfo = getRequestInfo(request);
         assertThat(requestInfo.getClientId().isEmpty(), is(true));
     }
 
+    private RequestInfo getRequestInfo(InputStream request) throws ApiIoException {
+        return RequestInfo.fromRequest(request, httpClient);
+    }
+
     @Test
-    void getClientIdShouldReturnTheClientIdFromClaim() throws JsonProcessingException {
+    void getClientIdShouldReturnTheClientIdFromClaim()
+        throws JsonProcessingException, ApiIoException {
         var clientId = RandomDataGenerator.randomString();
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withClientId(clientId).build();
-        var requestInfo = RequestInfo.fromRequest(request);
+        var requestInfo = getRequestInfo(request);
         assertThat(requestInfo.getClientId().get(), is(equalTo(clientId)));
     }
 
@@ -517,7 +536,7 @@ class RequestInfoTest {
 
     @Test
     void shouldReturnTopLevelOrgCristinIdWhenRequestsAuthorizerNodeContainsCorrespondingClaim()
-        throws JsonProcessingException {
+        throws JsonProcessingException, ApiIoException {
         var topOrgCristinId = randomUri();
         var requestInfo = requestInfoWithAuthorizerClaim(topOrgCristinId.toString());
         assertThat(requestInfo.getTopLevelOrgCristinId().orElseThrow(), is(equalTo(topOrgCristinId)));
@@ -545,9 +564,9 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldLogWarningWhenAuthenticationFails() throws JsonProcessingException {
+    void shouldLogWarningWhenAuthenticationFails() throws JsonProcessingException, ApiIoException {
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).build();
-        var requestInfo = RequestInfo.fromRequest(request);
+        var requestInfo = getRequestInfo(request);
         var logger = LogUtils.getTestingAppenderForRootLogger();
         requestInfo.userIsAuthorized(randomAccessRight());
         assertThat(logger.getMessages(), containsString(AUTHORIZATION_FAILURE_WARNING));
@@ -674,7 +693,8 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnListOfAccessRightsAvailableForUser() throws JsonProcessingException {
+    void shouldReturnListOfAccessRightsAvailableForUser()
+        throws JsonProcessingException, ApiIoException {
         var usersCustomer = randomUri();
         var accessRights = List.of(MANAGE_DEGREE, MANAGE_IMPORT, MANAGE_NVI);
         var accessRightsForCustomer = accessRights.stream()
@@ -699,15 +719,17 @@ class RequestInfoTest {
         assertThat(accessRights, is(emptyIterable()));
     }
 
-    private RequestInfo requestInfoWithCustomerId(URI userCustomer) throws JsonProcessingException {
+    private RequestInfo requestInfoWithCustomerId(URI userCustomer) throws JsonProcessingException,
+                                                                           ApiIoException {
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).build();
-        return RequestInfo.fromRequest(request);
+        return getRequestInfo(request);
     }
 
-    private RequestInfo requestInfoWithAuthorizerClaim(String claim) throws JsonProcessingException {
+    private RequestInfo requestInfoWithAuthorizerClaim(String claim) throws JsonProcessingException,
+                                                                            ApiIoException {
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withAuthorizerClaim(
             CognitoUserInfo.TOP_LEVEL_ORG_CRISTIN_ID_CLAIM, claim).build();
-        return RequestInfo.fromRequest(request);
+        return getRequestInfo(request);
     }
 
     private CognitoUserInfo createCognitoUserEntry(URI usersCustomer, Set<String> accessRightsForCustomer) {
@@ -788,11 +810,11 @@ class RequestInfoTest {
     }
 
     private RequestInfo createRequestInfoForOfflineAuthorization(List<AccessRight> accessRights, URI userCustomer)
-        throws JsonProcessingException {
+        throws JsonProcessingException, ApiIoException {
         var requestStream = new HandlerRequestBuilder<Void>(dtoObjectMapper)
                                 .withAccessRights(userCustomer, accessRights.toArray(AccessRight[]::new))
                                 .build();
-        return RequestInfo.fromRequest(requestStream);
+        return getRequestInfo(requestStream);
     }
 
     private String bearerToken(String userAccessToken) {
@@ -801,8 +823,7 @@ class RequestInfoTest {
 
     private RequestInfo extractAccessRightsFromApiGatewayEvent() throws ApiIoException {
         String event = IoUtils.stringFromResources(RequestInfoTest.AWS_SAMPLE_PROXY_EVENT);
-        ApiMessageParser<String> apiMessageParser = new ApiMessageParser<>();
-        return apiMessageParser.getRequestInfo(event);
+        return getRequestInfo(new ByteArrayInputStream(event.getBytes()));
     }
 
     private void checkForNonNullMap(Path resourceFile, Function<RequestInfo, Object> getObject)

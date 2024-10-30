@@ -17,6 +17,7 @@ import com.google.common.net.MediaType;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,23 +52,16 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     public static final String ORIGIN_DELIMITER = ",";
     public static final String FALLBACK_ORIGIN  = "https://nva.sikt.no";
 
-    private final ObjectMapper objectMapper;
 
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
     private boolean isBase64Encoded;
 
     public ApiGatewayHandler(Class<I> iclass) {
-        this(iclass, new Environment());
+        this(iclass, new Environment(), HttpClient.newBuilder().build());
     }
 
-    public ApiGatewayHandler(Class<I> iclass, Environment environment) {
-        this(iclass, environment, defaultRestObjectMapper);
-        this.additionalSuccessHeadersSupplier = Collections::emptyMap;
-    }
-
-    public ApiGatewayHandler(Class<I> iclass, Environment environment, ObjectMapper objectMapper) {
-        super(iclass, environment);
-        this.objectMapper = objectMapper;
+    public ApiGatewayHandler(Class<I> iclass, Environment environment, HttpClient httpClient) {
+        super(iclass, environment, defaultRestObjectMapper, httpClient);
         this.additionalSuccessHeadersSupplier = Collections::emptyMap;
     }
 

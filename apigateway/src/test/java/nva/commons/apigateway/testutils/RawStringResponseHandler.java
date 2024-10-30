@@ -10,6 +10,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import java.net.HttpURLConnection;
+import java.net.http.HttpClient;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -31,17 +32,10 @@ public class RawStringResponseHandler extends ApiGatewayHandler<RequestBody, Str
 
     /**
      * Constructor that overrides default serialization.
-     *
-     * @param mapper Object Mapper
      */
-    public RawStringResponseHandler(ObjectMapper mapper) {
-        super(RequestBody.class, new Environment(), mapper);
+    public RawStringResponseHandler(Environment environment, HttpClient httpClient) {
+        super(RequestBody.class, environment, httpClient);
     }
-
-    public RawStringResponseHandler(Environment environment, ObjectMapper mapper) {
-        super(RequestBody.class, environment, mapper);
-    }
-
 
     @Override
     protected String processInput(RequestBody input, RequestInfo requestInfo, Context context)
