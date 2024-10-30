@@ -32,11 +32,9 @@ public class RawStringResponseHandler extends ApiGatewayHandler<RequestBody, Str
 
     /**
      * Constructor that overrides default serialization.
-     *
-     * @param mapper Object Mapper
      */
-    public RawStringResponseHandler(ObjectMapper mapper, Environment environment, HttpClient httpClient) {
-        super(RequestBody.class, environment, mapper, httpClient);
+    public RawStringResponseHandler(Environment environment, HttpClient httpClient) {
+        super(RequestBody.class, environment, httpClient);
     }
 
     @Override

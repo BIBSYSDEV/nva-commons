@@ -1,8 +1,6 @@
 package nva.commons.apigateway;
 
-import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import com.amazonaws.services.lambda.runtime.Context;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.http.HttpClient;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.core.Environment;
@@ -20,12 +18,12 @@ public abstract class ApiGatewayProxyHandler<I, O> extends ApiGatewayHandler<I, 
 
     @JacocoGenerated
     protected ApiGatewayProxyHandler(Class<I> iclass) {
-        this(iclass, new Environment(), defaultRestObjectMapper, HttpClient.newBuilder().build());
+        this(iclass, new Environment(), HttpClient.newBuilder().build());
     }
     
     @JacocoGenerated
-    protected ApiGatewayProxyHandler(Class<I> iclass, Environment environment, ObjectMapper objectMapper, HttpClient httpClient) {
-        super(iclass, environment, objectMapper, httpClient);
+    protected ApiGatewayProxyHandler(Class<I> iclass, Environment environment, HttpClient httpClient) {
+        super(iclass, environment, httpClient);
     }
 
     @Override

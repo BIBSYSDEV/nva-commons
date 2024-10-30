@@ -26,17 +26,12 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -104,7 +99,7 @@ class ApiGatewayHandlerTest {
         httpClient = mock(HttpClient.class);
         environment = mock(Environment.class);
         when(environment.readEnv("ALLOWED_ORIGIN")).thenReturn("*");
-        handler = new Handler(defaultRestObjectMapper, environment, httpClient);
+        handler = new Handler(environment, httpClient);
     }
 
     @Test
@@ -398,16 +393,6 @@ class ApiGatewayHandlerTest {
     }
 
     @Test
-    void handlerSerializesBodyWithNonDefaultSerializationWhenDefaultSerializerIsOverridden() throws IOException {
-        ObjectMapper spiedMapper = spy(defaultRestObjectMapper);
-        var handler = new Handler(spiedMapper, environment, httpClient);
-        var inputStream = requestWithHeaders();
-        var outputStream = outputStream();
-        handler.handleRequest(inputStream, outputStream, context);
-        verify(spiedMapper, atLeast(1)).writeValueAsString(any());
-    }
-
-    @Test
     void handlerSerializesWithIsBase64Encoded() throws IOException {
         var output = outputStream();
         InputStream input = requestWithBodyWithEmptyFields();
@@ -508,7 +493,7 @@ class ApiGatewayHandlerTest {
     }
 
     private RawStringResponseHandler getRawStringResponseHandler() {
-        return new RawStringResponseHandler(dtoObjectMapper, environment, httpClient);
+        return new RawStringResponseHandler(environment, httpClient);
     }
 
     @Test

@@ -1,7 +1,6 @@
 package nva.commons.apigateway;
 
 import static nva.commons.apigateway.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
-import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -81,7 +80,7 @@ public class VoidTest {
         public static final String SAMPLE_STRING = "sampleString";
 
         public VoidHandler(Environment environment, HttpClient httpClient) {
-            super(Void.class, environment, defaultRestObjectMapper, httpClient);
+            super(Void.class, environment, httpClient);
         }
 
         @Override

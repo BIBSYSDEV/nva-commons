@@ -57,11 +57,11 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     private boolean isBase64Encoded;
 
     public ApiGatewayHandler(Class<I> iclass) {
-        this(iclass, new Environment(), defaultRestObjectMapper, HttpClient.newBuilder().build());
+        this(iclass, new Environment(), HttpClient.newBuilder().build());
     }
 
-    public ApiGatewayHandler(Class<I> iclass, Environment environment, ObjectMapper objectMapper, HttpClient httpClient) {
-        super(iclass, environment, objectMapper, httpClient);
+    public ApiGatewayHandler(Class<I> iclass, Environment environment, HttpClient httpClient) {
+        super(iclass, environment, defaultRestObjectMapper, httpClient);
         this.additionalSuccessHeadersSupplier = Collections::emptyMap;
     }
 

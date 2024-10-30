@@ -2,7 +2,6 @@ package nva.commons.apigateway.testutils;
 
 import static nva.commons.apigateway.RequestInfoConstants.PROXY_TAG;
 import com.amazonaws.services.lambda.runtime.Context;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
 import java.net.http.HttpClient;
 import java.util.Collections;
@@ -27,11 +26,9 @@ public class ProxyHandler extends ApiGatewayProxyHandler<RequestBody, RequestBod
 
     /**
      * Constructor that overrides default serialization.
-     *
-     * @param mapper Object Mapper
      */
-    public ProxyHandler(ObjectMapper mapper, Environment environment, HttpClient httpClient) {
-        super(RequestBody.class, environment, mapper, httpClient);
+    public ProxyHandler(Environment environment, HttpClient httpClient) {
+        super(RequestBody.class, environment, httpClient);
     }
     
     @Override
