@@ -431,7 +431,7 @@ class ApiGatewayHandlerTest {
 
     @Test
     void shouldReturnJsonObjectWhenClientAsksForJson() throws Exception {
-        var handler = new RawStringResponseHandler(dtoObjectMapper, environment, httpClient);
+        var handler = getRawStringResponseHandler();
         var inputStream = requestWithHeaders();
         var expected = objectMapper.convertValue(createBody(), RequestBody.class);
         var outputStream = outputStream();
@@ -445,7 +445,7 @@ class ApiGatewayHandlerTest {
 
     @Test
     void shouldReturnXmlObjectWhenClientAsksForXml() throws Exception {
-        var handler = new RawStringResponseHandler(dtoObjectMapper, environment, httpClient);
+        var handler = getRawStringResponseHandler();
         var inputStream = requestWithAcceptXmlHeader();
         var expected = objectMapper.convertValue(createBody(), RequestBody.class);
         var outputStream = outputStream();
@@ -460,10 +460,9 @@ class ApiGatewayHandlerTest {
 
     @Test
     void shouldReturnAllOriginsWhenEnvironmentAllowsAllOrigins() throws IOException {
-        var environment = mock(Environment.class);
         when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn("*");
 
-        var handler = new RawStringResponseHandler(dtoObjectMapper, environment, httpClient);
+        var handler = getRawStringResponseHandler();
         var inputStream = requestWithHeaders();
 
         var outputStream = outputStream();
@@ -477,10 +476,9 @@ class ApiGatewayHandlerTest {
 
     @Test
     void shouldReturnNvaFrontendProdWhenEnvironmentIsEmpty() throws IOException {
-        var environment = mock(Environment.class);
         when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn("");
 
-        var handler = new RawStringResponseHandler(dtoObjectMapper, environment, httpClient);
+        var handler = getRawStringResponseHandler();
         var inputStream = requestWithHeaders();
 
         var outputStream = outputStream();
@@ -495,10 +493,9 @@ class ApiGatewayHandlerTest {
     @Test
     void shouldEchoAllowedOriginWhenEnvironmentContainsOrigin() throws IOException {
         var originInHeader = "https://example.com";
-        var environment = mock(Environment.class);
         when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn("localhost, " + originInHeader + ", some-place-else");
 
-        var handler = new RawStringResponseHandler(dtoObjectMapper, environment, httpClient);
+        var handler = getRawStringResponseHandler();
         var inputStream = requestWithHeaders();
 
         var outputStream = outputStream();
@@ -510,14 +507,17 @@ class ApiGatewayHandlerTest {
         assertThat(responseHeaders.get(VARY), containsString("Origin"));
     }
 
+    private RawStringResponseHandler getRawStringResponseHandler() {
+        return new RawStringResponseHandler(dtoObjectMapper, environment, httpClient);
+    }
+
     @Test
     void shouldReturnOneOfTheAllowedOriginsInEnvironmentWhenRequestOriginIsNotWhiteListed()
         throws IOException {
         var originInHeader = "https://example.com";
-        var environment = mock(Environment.class);
         when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn("localhost, some-place-else");
 
-        var handler = new RawStringResponseHandler(dtoObjectMapper, environment, httpClient);
+        var handler = getRawStringResponseHandler();
         var inputStream = requestWithHeaders();
 
         var outputStream = outputStream();
@@ -533,9 +533,8 @@ class ApiGatewayHandlerTest {
     void shouldReturnFirstElementInAllowedOriginsListWhenOriginIsMissing() throws IOException {
         var header1 = "https://example1.com";
         var header2 = "https://example2.com";
-        var environment = mock(Environment.class);
         when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn(header1 + ", " + header2);
-        var handler = new RawStringResponseHandler(dtoObjectMapper, environment, httpClient);
+        var handler = getRawStringResponseHandler();
         var inputStream = requestWithMissingOriginHeader();
         var outputStream = outputStream();
         handler.handleRequest(inputStream, outputStream, context);
