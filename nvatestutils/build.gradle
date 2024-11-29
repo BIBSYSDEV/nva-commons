@@ -12,7 +12,6 @@ dependencies {
     implementation project(":secrets")
 
     implementation libs.bundles.testing
-    implementation libs.httpmime
     implementation libs.aws.lambda.events
 
     implementation libs.aws.sdk2.s3
