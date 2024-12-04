@@ -115,6 +115,19 @@ public class UriWrapper {
                    .orElseThrow();
     }
 
+    public UriWrapper replacePathElementByIndexFromEnd(int index, String replacement) {
+        var newPath = getPath().replacePathElementByIndexFromEnd(index, replacement);
+        return attempt(() -> new URI(uri.getScheme(),
+                                     uri.getUserInfo(),
+                                     uri.getHost(),
+                                     uri.getPort(),
+                                     newPath.toString(),
+                                     uri.getQuery(),
+                                     EMPTY_FRAGMENT))
+                   .map(UriWrapper::new)
+                   .orElseThrow();
+    }
+
     public UnixPath toS3bucketPath() {
         return getPath().removeRoot();
     }
@@ -162,7 +175,7 @@ public class UriWrapper {
                                      .addParameters(extractUriQueryParameters())
                                      .addParameter(param, value)
                                      .build())
-                         .orElseThrow();
+                       .orElseThrow();
         return this;
     }
 
@@ -197,13 +210,6 @@ public class UriWrapper {
         return new URI(scheme, EMPTY_USER_INFO, host, port, EMPTY_PATH, EMPTY_QUERY, EMPTY_FRAGMENT);
     }
 
-    private List<NameValuePair> extractUriQueryParameters() {
-        var query = uri.getRawQuery();
-        return nonNull(query)
-                   ? extractKeyValuePairs(query)
-                   : Collections.emptyList();
-    }
-
     private static List<NameValuePair> extractKeyValuePairs(String query) {
         return Arrays.stream(splitKeyValuePairs(query))
                    .map(UriWrapper::createNameValuePair)
@@ -225,5 +231,12 @@ public class UriWrapper {
 
     private static String[] splitKeyValuePairs(String query) {
         return query.split(AMPERSAND);
+    }
+
+    private List<NameValuePair> extractUriQueryParameters() {
+        var query = uri.getRawQuery();
+        return nonNull(query)
+                   ? extractKeyValuePairs(query)
+                   : Collections.emptyList();
     }
 }
