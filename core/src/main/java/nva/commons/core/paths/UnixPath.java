@@ -129,6 +129,9 @@ public final class UnixPath {
     }
 
     public UnixPath replacePathElementByIndexFromEnd(int index, String replacement) {
+        if (isRoot() || isEmptyPath() || path.size() <= index) {
+            return this;
+        }
         var newPath = new ArrayList<>(path);
         newPath.set(lastPathElementIndex() - index, replacement);
         return new UnixPath(newPath);

@@ -283,6 +283,25 @@ class UnixPathTest {
         assertThat(actualPath, is(equalTo(expectedPath)));
     }
 
+    @Test
+    void shouldReturnEmptyPathWhenReplacingElementByIndexFromEndInEmptyPath() {
+        var actualPath = UnixPath.EMPTY_PATH.replacePathElementByIndexFromEnd(0, "replacement");
+        assertThat(actualPath, is(equalTo(UnixPath.EMPTY_PATH)));
+    }
+
+    @Test
+    void shouldDoNothingWhenReplacingElementByIndexFromEndInRootPath() {
+        var actualPath = UnixPath.ROOT_PATH.replacePathElementByIndexFromEnd(0, "replacement");
+        assertThat(actualPath, is(equalTo(UnixPath.ROOT_PATH)));
+    }
+
+    @Test
+    void shouldDoNothingWhenReplacingIndexThatDoesNotExist() {
+        var originalPath = UnixPath.of("justASingleElement");
+        var actualPath = originalPath.replacePathElementByIndexFromEnd(1, "replacement");
+        assertThat(actualPath, is(equalTo(originalPath)));
+    }
+
     private static class ClassWithUnixPath {
 
         private UnixPath field;
