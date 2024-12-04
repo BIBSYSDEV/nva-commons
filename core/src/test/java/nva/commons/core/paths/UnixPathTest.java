@@ -14,8 +14,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -264,6 +266,40 @@ class UnixPathTest {
         String expectedPath = "/some/folder/child";
         String actualPath = UnixPath.of(parentFolder).addChild(childFolder).toString();
         assertThat(actualPath, is(equalTo(expectedPath)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2, 3, 4})
+    void shouldReplacePathElementByIndexFromEnd(int indexFromEnd) {
+        var originalPathElements = new String[]{"one", "two", "three", "four", "five"};
+        var replacement = "replacement";
+
+        var expectedPathElements = new ArrayList<>(List.of(originalPathElements));
+        expectedPathElements.set(originalPathElements.length - indexFromEnd - 1, replacement);
+        var expectedPath = UnixPath.of(expectedPathElements.toArray(new String[0]));
+
+        var actualPath = UnixPath.of(originalPathElements).replacePathElementByIndexFromEnd(indexFromEnd, replacement);
+
+        assertThat(actualPath, is(equalTo(expectedPath)));
+    }
+
+    @Test
+    void shouldReturnEmptyPathWhenReplacingElementByIndexFromEndInEmptyPath() {
+        var actualPath = UnixPath.EMPTY_PATH.replacePathElementByIndexFromEnd(0, "replacement");
+        assertThat(actualPath, is(equalTo(UnixPath.EMPTY_PATH)));
+    }
+
+    @Test
+    void shouldDoNothingWhenReplacingElementByIndexFromEndInRootPath() {
+        var actualPath = UnixPath.ROOT_PATH.replacePathElementByIndexFromEnd(0, "replacement");
+        assertThat(actualPath, is(equalTo(UnixPath.ROOT_PATH)));
+    }
+
+    @Test
+    void shouldDoNothingWhenReplacingIndexThatDoesNotExist() {
+        var originalPath = UnixPath.of("justASingleElement");
+        var actualPath = originalPath.replacePathElementByIndexFromEnd(1, "replacement");
+        assertThat(actualPath, is(equalTo(originalPath)));
     }
 
     private static class ClassWithUnixPath {
