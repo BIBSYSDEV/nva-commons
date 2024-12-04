@@ -14,8 +14,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -263,6 +265,21 @@ class UnixPathTest {
         String childFolder = "/child";
         String expectedPath = "/some/folder/child";
         String actualPath = UnixPath.of(parentFolder).addChild(childFolder).toString();
+        assertThat(actualPath, is(equalTo(expectedPath)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2, 3, 4})
+    void shouldReplacePathElementByIndexFromEnd(int indexFromEnd) {
+        var pathElements = List.of("first", "second", "third", "fourth", "fifth");
+        var replacement = "replacement";
+
+        var expectedPathElements = new ArrayList<>(pathElements);
+        expectedPathElements.set(pathElements.size() - indexFromEnd - 1, replacement);
+        var expectedPath = UnixPath.of(expectedPathElements.toArray(new String[0]));
+
+        var actualPath = UnixPath.of(pathElements.toArray(new String[0]))
+                             .replacePathElementByIndexFromEnd(indexFromEnd, replacement);
         assertThat(actualPath, is(equalTo(expectedPath)));
     }
 
