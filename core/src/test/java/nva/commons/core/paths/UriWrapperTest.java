@@ -349,6 +349,24 @@ class UriWrapperTest {
         assertThat(actualUri, is(equalTo(expectedUri)));
     }
 
+    @Test
+    void shouldDoNothingWhenReplacingElementWhenPathIsRoot() {
+        var originalUri = URI.create("https://example.org/");
+        var actualUri = UriWrapper.fromUri(originalUri)
+                            .replacePathElementByIndexFromEnd(0, "replacement")
+                            .getUri();
+        assertThat(actualUri, is(equalTo(originalUri)));
+    }
+
+    @Test
+    void shouldDoNothingWhenReplacingElementForIndexThatDoesNotExist() {
+        var originalUri = URI.create("https://example.org");
+        var actualUri = UriWrapper.fromUri(originalUri)
+                            .replacePathElementByIndexFromEnd(0, "replacement")
+                            .getUri();
+        assertThat(actualUri, is(equalTo(originalUri)));
+    }
+
     private static String[] convertToExpected(Map<String, String> params, String additionalParam) {
         var expectedParams = params.entrySet().stream()
                                  .map(entry -> Map.entry(entry.getKey(), reEncode(entry)))

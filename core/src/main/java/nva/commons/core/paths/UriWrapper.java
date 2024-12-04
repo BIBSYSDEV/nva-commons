@@ -116,7 +116,10 @@ public class UriWrapper {
     }
 
     public UriWrapper replacePathElementByIndexFromEnd(int index, String replacement) {
-        var newPath = getPath().replacePathElementByIndexFromEnd(index, replacement);
+        var existingPath = getPath();
+        var newPath = existingPath.isRoot() || existingPath.isEmptyPath()
+                          ? existingPath
+                          : existingPath.replacePathElementByIndexFromEnd(index, replacement);
         return attempt(() -> new URI(uri.getScheme(),
                                      uri.getUserInfo(),
                                      uri.getHost(),
