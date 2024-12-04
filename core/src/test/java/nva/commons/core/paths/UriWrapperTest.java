@@ -350,12 +350,11 @@ class UriWrapperTest {
     }
 
     @Test
-    void shouldHandleUriWithQueryParametersWhenReplacingPathElementByIndexFromEnd() {
-        var originalUri = URI.create("https://example.org/myPath?queryParam=someValue/with/delimiters");
-        var replacement = "replacement";
-        var expectedUri = URI.create("https://example.org/replacement?queryParam=someValue/with/delimiters");
+    void shouldHandleUriWithQueryParametersAndFragmentsWhenReplacingPathElementByIndexFromEnd() {
+        var originalUri = URI.create("https://example.org/myPath?queryParam=a/b/c#/my/amazing/fragment");
+        var expectedUri = URI.create("https://example.org/replacement?queryParam=a/b/c#/my/amazing/fragment");
         var actualUri = UriWrapper.fromUri(originalUri)
-                            .replacePathElementByIndexFromEnd(0, replacement)
+                            .replacePathElementByIndexFromEnd(0, "replacement")
                             .getUri();
         assertThat(actualUri, is(equalTo(expectedUri)));
     }

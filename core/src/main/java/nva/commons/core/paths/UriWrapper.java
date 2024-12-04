@@ -123,7 +123,7 @@ public class UriWrapper {
                                      uri.getPort(),
                                      newPath.toString(),
                                      uri.getQuery(),
-                                     EMPTY_FRAGMENT))
+                                     uri.getFragment()))
                    .map(UriWrapper::new)
                    .orElseThrow();
     }
