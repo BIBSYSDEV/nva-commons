@@ -341,9 +341,10 @@ class UriWrapperTest {
     @Test
     void shouldHandleUriWithPathEndingWithSlashWhenReplacingPathElementByIndexFromEnd() {
         var originalUri = URI.create("https://example.org/path/");
-        var expectedUri = URI.create("https://example.org/replacement");
+        var replacement = "replacement";
+        var expectedUri = URI.create("https://example.org/" + replacement);
         var actualUri = UriWrapper.fromUri(originalUri)
-                            .replacePathElementByIndexFromEnd(0, "replacement")
+                            .replacePathElementByIndexFromEnd(0, replacement)
                             .getUri();
         assertThat(actualUri, is(equalTo(expectedUri)));
     }
