@@ -271,14 +271,14 @@ class UnixPathTest {
     @ParameterizedTest
     @ValueSource(ints = {0, 1, 2, 3, 4})
     void shouldReplacePathElementByIndexFromEnd(int indexFromEnd) {
-        var pathElements = new String[]{"one", "two", "three", "four", "five"};
+        var originalPathElements = new String[]{"one", "two", "three", "four", "five"};
         var replacement = "replacement";
 
-        var expectedPathElements = new ArrayList<>(List.of(pathElements));
-        expectedPathElements.set(pathElements.length - indexFromEnd - 1, replacement);
+        var expectedPathElements = new ArrayList<>(List.of(originalPathElements));
+        expectedPathElements.set(originalPathElements.length - indexFromEnd - 1, replacement);
         var expectedPath = UnixPath.of(expectedPathElements.toArray(new String[0]));
 
-        var actualPath = UnixPath.of(pathElements).replacePathElementByIndexFromEnd(indexFromEnd, replacement);
+        var actualPath = UnixPath.of(originalPathElements).replacePathElementByIndexFromEnd(indexFromEnd, replacement);
 
         assertThat(actualPath, is(equalTo(expectedPath)));
     }
