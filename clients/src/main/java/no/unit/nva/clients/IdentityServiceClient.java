@@ -7,6 +7,7 @@ import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -29,6 +30,8 @@ public class IdentityServiceClient {
     private static final String API_PATH_USERS = "users";
     private static final String AUTH_HOST = new Environment().readEnv("BACKEND_CLIENT_AUTH_URL");
     private static final String API_HOST = new Environment().readEnv("API_HOST");
+    public static final String CUSTOMER_PATH_PARAM = "customer";
+    public static final String CRISTIN_ID_PATH_PARAM = "cristinId";
     private final AuthorizedBackendClient authorizedClient;
     private final HttpClient unauthorizedClient;
 
@@ -80,6 +83,25 @@ public class IdentityServiceClient {
                    .map(this::validateResponse)
                    .map(r -> mapResponse(GetUserResponse.class, r))
                    .orElseThrow(this::handleFailure);
+    }
+
+    public GetCustomerResponse getCustomerByCristinId(URI topLevelOrgCristinId) throws NotFoundException {
+        var request = HttpRequest.newBuilder()
+                          .GET()
+                          .uri(constructCustomerGetPath(topLevelOrgCristinId));
+        return attempt(getHttpResponseCallable(request))
+                   .map(this::validateResponse)
+                   .map(r -> mapResponse(GetCustomerResponse.class, r))
+                   .orElseThrow(this::handleFailure);
+    }
+
+    private URI constructCustomerGetPath(URI topLevelOrgCristinId) {
+        var customerByCristinIdUri = UriWrapper.fromHost(API_HOST)
+                                    .addChild(CUSTOMER_PATH_PARAM)
+                                    .addChild(CRISTIN_ID_PATH_PARAM)
+                                    .getUri();
+        return URI.create(
+            customerByCristinIdUri + "/" + URLEncoder.encode(topLevelOrgCristinId.toString(), UTF_8));
     }
 
     @JacocoGenerated
