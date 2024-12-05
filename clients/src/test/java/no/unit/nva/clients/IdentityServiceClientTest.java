@@ -11,20 +11,26 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandler;
+import java.net.http.HttpResponse.BodyHandlers;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 import no.unit.nva.auth.CognitoCredentials;
 import no.unit.nva.clients.GetUserResponse.Role;
 import no.unit.nva.clients.GetUserResponse.ViewingScope;
 import nva.commons.apigateway.exceptions.NotFoundException;
+import nva.commons.core.Environment;
+import nva.commons.core.paths.UriWrapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -178,8 +184,14 @@ class IdentityServiceClientTest {
     void shouldReturnCustomerWhenRequested() throws NotFoundException, IOException, InterruptedException {
         var customerCristinId = randomUri();
         var expectedCustomer = createCustomer(customerCristinId);
-        var mockedResponse = mockResponse(expectedCustomer.toJsonString());
-        when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(mockedResponse);
+        var request = HttpRequest.newBuilder()
+                          .GET()
+                          .uri(createFetchCustomerByCristinIdUri(customerCristinId))
+                          .build();
+
+        when(okResponseWithBody.body()).thenReturn(expectedCustomer.toJsonString());
+        when(okResponseWithBody.statusCode()).thenReturn(200);
+        when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8))).thenReturn(okResponseWithBody);
 
         var actual = authorizedIdentityServiceClient.getCustomerByCristinId(customerCristinId);
 
@@ -188,8 +200,28 @@ class IdentityServiceClientTest {
 
     @Test
     void shouldThrowNotFoundWhenCustomerNotFound() throws IOException, InterruptedException {
-        when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(notFoundResponse);
-        assertThrows(NotFoundException.class, () -> authorizedIdentityServiceClient.getCustomerByCristinId(randomUri()));
+        var topLevelOrgCristinId = randomUri();
+
+        var request = HttpRequest.newBuilder()
+                          .GET()
+                          .uri(createFetchCustomerByCristinIdUri(topLevelOrgCristinId))
+                          .build();
+
+        when(okResponseWithBody.body()).thenReturn(null);
+        when(okResponseWithBody.statusCode()).thenReturn(404);
+        when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8))).thenReturn(okResponseWithBody);
+
+        assertThrows(NotFoundException.class, () -> authorizedIdentityServiceClient.getCustomerByCristinId(
+            topLevelOrgCristinId));
+    }
+
+    private static URI createFetchCustomerByCristinIdUri(URI customerCristinId) {
+        var fetchCustomerUri = UriWrapper.fromHost(new Environment().readEnv("API_HOST"))
+                                   .addChild("customer")
+                                   .addChild("cristinId")
+                                   .getUri();
+        return URI.create(fetchCustomerUri + "/" + URLEncoder.encode(customerCristinId.toString(),
+                                                                     StandardCharsets.UTF_8));
     }
 
     private GetCustomerResponse createCustomer(URI customerCristinId) {
