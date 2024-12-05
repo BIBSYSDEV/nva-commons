@@ -20,6 +20,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandler;
 import java.util.List;
+import java.util.UUID;
 import no.unit.nva.auth.CognitoCredentials;
 import no.unit.nva.clients.GetUserResponse.Role;
 import no.unit.nva.clients.GetUserResponse.ViewingScope;
@@ -171,6 +172,29 @@ class IdentityServiceClientTest {
         Executable action = () -> authorizedIdentityServiceClient.getExternalClient(clientId);
 
         assertThrows(NotFoundException.class, action);
+    }
+
+    @Test
+    void shouldReturnCustomerWhenRequested() throws NotFoundException, IOException, InterruptedException {
+        var customerCristinId = randomUri();
+        var expectedCustomer = createCustomer(customerCristinId);
+        var mockedResponse = mockResponse(expectedCustomer.toJsonString());
+        when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(mockedResponse);
+
+        var actual = authorizedIdentityServiceClient.getCustomerByCristinId(customerCristinId);
+
+        assertEquals(expectedCustomer, actual);
+    }
+
+    @Test
+    void shouldThrowNotFoundWhenCustomerNotFound() throws IOException, InterruptedException {
+        when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(notFoundResponse);
+        assertThrows(NotFoundException.class, () -> authorizedIdentityServiceClient.getCustomerByCristinId(randomUri()));
+    }
+
+    private GetCustomerResponse createCustomer(URI customerCristinId) {
+        return new GetCustomerResponse(randomUri(), UUID.randomUUID(), randomString(), randomString(), randomString(),
+                                       customerCristinId);
     }
 
     private GetUserResponse createUser(String userName) {
