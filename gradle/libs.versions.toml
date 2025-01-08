@@ -6,21 +6,21 @@ apiGuardian = { strictly = '1.1.2' }
 awsIon = { strictly = '1.11.9' }
 awsLambdaCore = { strictly = '1.2.3' }
 awsLambdaEvents = { strictly = '3.14.0' }
-awsSdk = { strictly = '1.12.779' }
-awsSdk2 = { strictly = '2.29.22' }
+awsSdk = { strictly = '1.12.780' }
+awsSdk2 = { strictly = '2.29.47' }
 com-auth0-jwt = { strictly = '4.4.0' }
 commonsValidator = { strictly = '1.9.0' }
 datafaker = { strictly = '2.4.2' }
-guava = { strictly = '33.3.1-jre' }
+guava = { strictly = '33.4.0-jre' }
 hamcrest = { strictly = '3.0' }
 hamcrestOptional = { strictly = '2.0.0' }
 jackson = { strictly = '2.18.2' }
-jupiter = { strictly = '5.11.3' }
+jupiter = { strictly = '5.11.4' }
 lambdaLog4j = { strictly = '1.6.0' }
-log4j = { strictly = '2.24.2' }
-mockito = { strictly = '5.14.2' }
+log4j = { strictly = '2.24.3' }
+mockito = { strictly = '5.15.2' }
 slf4j = { strictly = '2.0.16' }
-wiremock = { strictly = '3.9.2' }
+wiremock = { strictly = '3.10.0' }
 zalandoProblem = { strictly = '0.27.1' }
 
 [libraries]
