@@ -14,6 +14,7 @@ import java.net.http.HttpResponse;
 import java.util.concurrent.Callable;
 import no.unit.nva.auth.AuthorizedBackendClient;
 import no.unit.nva.auth.CognitoCredentials;
+import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.NotFoundException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
@@ -93,6 +94,31 @@ public class IdentityServiceClient {
                    .map(this::validateResponse)
                    .map(r -> mapResponse(GetCustomerResponse.class, r))
                    .orElseThrow(this::handleFailure);
+    }
+
+    public GetCustomerResponse getCustomerById(URI customerId) throws NotFoundException {
+        var request = HttpRequest.newBuilder()
+                          .GET()
+                          .uri(customerId);
+        return attempt(getHttpResponseCallable(request))
+                   .map(this::validateResponse)
+                   .map(r -> mapResponse(GetCustomerResponse.class, r))
+                   .orElseThrow(this::handleFailure);
+    }
+
+    public CustomerList getAllCustomers() throws ApiGatewayException {
+        var request = HttpRequest.newBuilder()
+                          .GET()
+                          .uri(constructListCustomerUri());
+        return attempt(getHttpResponseCallable(request))
+                   .map(this::validateResponse)
+                   .map(HttpResponse::body)
+                   .map(value -> dtoObjectMapper.readValue(value, CustomerList.class))
+                   .orElseThrow(this::handleFailure);
+    }
+
+    private URI constructListCustomerUri() {
+        return UriWrapper.fromHost(API_HOST).addChild(CUSTOMER_PATH_PARAM).getUri();
     }
 
     private URI constructCustomerGetPath(URI topLevelOrgCristinId) {
