@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
 import java.util.concurrent.Callable;
 import no.unit.nva.auth.AuthorizedBackendClient;
@@ -54,9 +55,7 @@ public class IdentityServiceClient {
     }
 
     public GetExternalClientResponse getExternalClient(String clientId) throws NotFoundException {
-        var request = HttpRequest.newBuilder()
-                          .GET()
-                          .uri(constructExternalClientsGetPath(clientId));
+        var request = getRequestBuilderFromUri(constructExternalClientsGetPath(clientId));
         return attempt(getHttpResponseCallable(request))
                    .map(this::validateResponse)
                    .map(r -> mapResponse(GetExternalClientResponse.class, r))
@@ -76,40 +75,38 @@ public class IdentityServiceClient {
                    .orElseThrow(this::handleFailure);
     }
 
-    public GetUserResponse getUser(String userName) throws NotFoundException {
-        var request = HttpRequest.newBuilder()
-                          .GET()
-                          .uri(constructUserGetPath(userName));
+    public UserDto getUser(String userName) throws NotFoundException {
+        var request = getRequestBuilderFromUri(constructUserGetPath(userName));
         return attempt(getHttpResponseCallable(request))
                    .map(this::validateResponse)
-                   .map(r -> mapResponse(GetUserResponse.class, r))
+                   .map(r -> mapResponse(UserDto.class, r))
                    .orElseThrow(this::handleFailure);
     }
 
-    public GetCustomerResponse getCustomerByCristinId(URI topLevelOrgCristinId) throws NotFoundException {
-        var request = HttpRequest.newBuilder()
-                          .GET()
-                          .uri(constructCustomerGetPath(topLevelOrgCristinId));
+    public CustomerDto getCustomerByCristinId(URI topLevelOrgCristinId) throws NotFoundException {
+        var request = getRequestBuilderFromUri(constructCustomerGetPath(topLevelOrgCristinId));
         return attempt(getHttpResponseCallable(request))
                    .map(this::validateResponse)
-                   .map(r -> mapResponse(GetCustomerResponse.class, r))
+                   .map(r -> mapResponse(CustomerDto.class, r))
                    .orElseThrow(this::handleFailure);
     }
 
-    public GetCustomerResponse getCustomerById(URI customerId) throws NotFoundException {
-        var request = HttpRequest.newBuilder()
-                          .GET()
-                          .uri(customerId);
+    public CustomerDto getCustomerById(URI customerId) throws NotFoundException {
+        var request = getRequestBuilderFromUri(customerId);
         return attempt(getHttpResponseCallable(request))
                    .map(this::validateResponse)
-                   .map(r -> mapResponse(GetCustomerResponse.class, r))
+                   .map(r -> mapResponse(CustomerDto.class, r))
                    .orElseThrow(this::handleFailure);
+    }
+
+    private static Builder getRequestBuilderFromUri(URI customerId) {
+        return HttpRequest.newBuilder()
+                   .GET()
+                   .uri(customerId);
     }
 
     public CustomerList getAllCustomers() throws ApiGatewayException {
-        var request = HttpRequest.newBuilder()
-                          .GET()
-                          .uri(constructListCustomerUri());
+        var request = getRequestBuilderFromUri(constructListCustomerUri());
         return attempt(getHttpResponseCallable(request))
                    .map(this::validateResponse)
                    .map(HttpResponse::body)

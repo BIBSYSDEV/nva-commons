@@ -25,9 +25,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 import no.unit.nva.auth.CognitoCredentials;
-import no.unit.nva.clients.GetCustomerResponse.RightsRetentionStrategy;
-import no.unit.nva.clients.GetUserResponse.Role;
-import no.unit.nva.clients.GetUserResponse.ViewingScope;
+import no.unit.nva.clients.CustomerDto.RightsRetentionStrategy;
+import no.unit.nva.clients.UserDto.Role;
+import no.unit.nva.clients.UserDto.ViewingScope;
 import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.NotFoundException;
@@ -293,19 +293,19 @@ class IdentityServiceClientTest {
                                                                      StandardCharsets.UTF_8));
     }
 
-    private GetCustomerResponse createCustomerWithCristinId(URI customerCristinId) {
-        return new GetCustomerResponse(randomUri(), UUID.randomUUID(), randomString(), randomString(), randomString(),
-                                       customerCristinId, null, false, false, false, null,
-                                       new RightsRetentionStrategy(randomString(), randomUri()));
+    private CustomerDto createCustomerWithCristinId(URI customerCristinId) {
+        return new CustomerDto(randomUri(), UUID.randomUUID(), randomString(), randomString(), randomString(),
+                               customerCristinId, null, false, false, false, null,
+                               new RightsRetentionStrategy(randomString(), randomUri()));
     }
 
-    private GetCustomerResponse createCustomer(URI customerId) {
-        return new GetCustomerResponse(customerId, UUID.randomUUID(), randomString(), randomString(), randomString(),
-                                       randomUri(), null, false, false, false, null, null);
+    private CustomerDto createCustomer(URI customerId) {
+        return new CustomerDto(customerId, UUID.randomUUID(), randomString(), randomString(), randomString(),
+                               randomUri(), null, false, false, false, null, null);
     }
 
-    private GetUserResponse createUser(String userName) {
-        return GetUserResponse.builder()
+    private UserDto createUser(String userName) {
+        return UserDto.builder()
                    .withUsername(userName)
                    .withInstitution(randomUri())
                    .withGivenName("Test")

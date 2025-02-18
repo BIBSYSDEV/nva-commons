@@ -5,18 +5,18 @@ import java.net.URI;
 import java.util.List;
 import no.unit.nva.commons.json.JsonSerializable;
 
-public record GetUserResponse(@JsonProperty("username") String username,
-                              @JsonProperty("institution") URI institution,
-                              @JsonProperty("givenName") String givenName,
-                              @JsonProperty("familyName") String familyName,
-                              @JsonProperty("viewingScope") ViewingScope viewingScope,
-                              @JsonProperty("roles") List<Role> roles,
-                              @JsonProperty("cristinId") URI cristinId,
-                              @JsonProperty("feideIdentifier") String feideIdentifier,
-                              @JsonProperty("institutionCristinId") URI institutionCristinId,
-                              @JsonProperty("affiliation") URI affiliation,
-                              @JsonProperty("type") String type,
-                              @JsonProperty("accessRights") List<String> accessRights) implements JsonSerializable {
+public record UserDto(@JsonProperty("username") String username,
+                      @JsonProperty("institution") URI institution,
+                      @JsonProperty("givenName") String givenName,
+                      @JsonProperty("familyName") String familyName,
+                      @JsonProperty("viewingScope") ViewingScope viewingScope,
+                      @JsonProperty("roles") List<Role> roles,
+                      @JsonProperty("cristinId") URI cristinId,
+                      @JsonProperty("feideIdentifier") String feideIdentifier,
+                      @JsonProperty("institutionCristinId") URI institutionCristinId,
+                      @JsonProperty("affiliation") URI affiliation,
+                      @JsonProperty("type") String type,
+                      @JsonProperty("accessRights") List<String> accessRights) implements JsonSerializable {
 
     public static Builder builder() {
         return new Builder();
@@ -177,9 +177,9 @@ public record GetUserResponse(@JsonProperty("username") String username,
             return this;
         }
 
-        public GetUserResponse build() {
-            return new GetUserResponse(username, institution, givenName, familyName, viewingScope, roles, cristinId,
-                                       feideIdentifier, institutionCristinId, affiliation, type, accessRights);
+        public UserDto build() {
+            return new UserDto(username, institution, givenName, familyName, viewingScope, roles, cristinId,
+                               feideIdentifier, institutionCristinId, affiliation, type, accessRights);
         }
     }
 }
