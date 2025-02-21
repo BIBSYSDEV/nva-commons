@@ -67,15 +67,15 @@ public class CristinClient {
     }
 
     private HttpResponse<String> validateResponse(HttpResponse<String> response) throws NotFoundException {
+        var requestUri = response.request().uri();
         if (response.statusCode() == HttpStatusCode.NOT_FOUND) {
-            LOGGER.error("Cristin responded with not found: {}", response.request().uri());
-            throw new NotFoundException("Client not found");
+            LOGGER.error("Cristin responded with not found: {}", requestUri);
+            throw new NotFoundException("Not found " + requestUri);
         }
 
         if (response.statusCode() != HttpStatusCode.OK) {
-            LOGGER.error("Cristin responded with {} when fetching: {}", response.statusCode(),
-                         response.request().uri());
-            throw new IllegalStateException("Received " + response.statusCode() + " from identity service");
+            LOGGER.error("Cristin responded with {} when fetching: {}", response.statusCode(), requestUri);
+            throw new RuntimeException("Something went wrong fetching: " + requestUri);
         }
         return response;
     }
