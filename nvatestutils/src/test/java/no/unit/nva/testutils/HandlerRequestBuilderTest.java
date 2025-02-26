@@ -272,13 +272,28 @@ class HandlerRequestBuilderTest {
     }
 
     @Test
-    void shouldContainCustomClaims() throws IOException {
+    void shouldContainCustomClaim() throws IOException {
         var claim = randomString();
         try (var request = new HandlerRequestBuilder<String>(objectMapper)
                                .withCustomClaim(claim, randomString())
                                .build()) {
 
             assertThat(new String(request.readAllBytes(), StandardCharsets.UTF_8), containsString(claim));
+        }
+    }
+
+    @Test
+    void shouldContainCustomClaims() throws IOException {
+        var claim = randomString();
+        var secondClaim = randomString();
+        try (var request = new HandlerRequestBuilder<String>(objectMapper)
+                               .withCustomClaim(claim, randomString())
+                               .withCustomClaim(secondClaim, randomString())
+                               .build()) {
+
+            var actual = new String(request.readAllBytes(), StandardCharsets.UTF_8);
+            assertThat(actual, containsString(claim));
+            assertThat(actual, containsString(secondClaim));
         }
     }
 
