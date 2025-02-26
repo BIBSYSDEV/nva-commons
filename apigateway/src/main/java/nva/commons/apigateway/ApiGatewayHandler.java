@@ -1,6 +1,7 @@
 package nva.commons.apigateway;
 
 import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
+import static com.google.common.net.HttpHeaders.CACHE_CONTROL;
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static com.google.common.net.HttpHeaders.ORIGIN;
 import static com.google.common.net.HttpHeaders.STRICT_TRANSPORT_SECURITY;
@@ -16,6 +17,7 @@ import com.google.common.net.MediaType;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -50,23 +52,16 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     public static final String ORIGIN_DELIMITER = ",";
     public static final String FALLBACK_ORIGIN  = "https://nva.sikt.no";
 
-    private final ObjectMapper objectMapper;
 
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
     private boolean isBase64Encoded;
 
     public ApiGatewayHandler(Class<I> iclass) {
-        this(iclass, new Environment());
+        this(iclass, new Environment(), HttpClient.newBuilder().build());
     }
 
-    public ApiGatewayHandler(Class<I> iclass, Environment environment) {
-        this(iclass, environment, defaultRestObjectMapper);
-        this.additionalSuccessHeadersSupplier = Collections::emptyMap;
-    }
-
-    public ApiGatewayHandler(Class<I> iclass, Environment environment, ObjectMapper objectMapper) {
-        super(iclass, environment);
-        this.objectMapper = objectMapper;
+    public ApiGatewayHandler(Class<I> iclass, Environment environment, HttpClient httpClient) {
+        super(iclass, environment, defaultRestObjectMapper, httpClient);
         this.additionalSuccessHeadersSupplier = Collections::emptyMap;
     }
 
@@ -301,6 +296,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         headers.put(X_CONTENT_TYPE_OPTIONS, "nosniff");
         headers.put(STRICT_TRANSPORT_SECURITY, "max-age=63072000; includeSubDomains; preload");
         headers.put(VARY, "Origin, Accept");
+        headers.put(CACHE_CONTROL, "no-cache");
         return headers;
     }
 

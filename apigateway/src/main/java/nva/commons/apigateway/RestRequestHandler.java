@@ -5,11 +5,13 @@ import static nva.commons.core.attempt.Try.attempt;
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.http.HttpClient;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,7 +44,9 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     protected final Environment environment;
     private static final Logger logger = LoggerFactory.getLogger(RestRequestHandler.class);
     private final transient Class<I> iclass;
-    private final transient ApiMessageParser<I> inputParser = new ApiMessageParser<>();
+    private final transient ApiMessageParser<I> inputParser;
+    protected final ObjectMapper objectMapper;
+    private final HttpClient httpClient;
 
     protected transient OutputStream outputStream;
     protected transient String allowedOrigin;
@@ -130,9 +134,13 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
      * @param iclass      The class object of the input class.
      * @param environment the Environment from where the handler will read ENV variables.
      */
-    public RestRequestHandler(Class<I> iclass, Environment environment) {
+    public RestRequestHandler(Class<I> iclass, Environment environment, ObjectMapper objectMapper,
+                              HttpClient httpClient) {
         this.iclass = iclass;
         this.environment = environment;
+        this.inputParser = new ApiMessageParser<>(objectMapper);
+        this.objectMapper = objectMapper;
+        this.httpClient = httpClient;
     }
 
     @Override
@@ -145,7 +153,8 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
             inputObject = attempt(() -> parseInput(inputString))
                               .orElseThrow(this::parsingExceptionToBadRequestException);
 
-            RequestInfo requestInfo = inputParser.getRequestInfo(inputString);
+            RequestInfo requestInfo = RequestInfo.fromString(inputString, httpClient);
+            requestInfo.setHttpClient(httpClient);
             setAllowedOrigin(requestInfo);
 
             validateRequest(inputObject, requestInfo, context);

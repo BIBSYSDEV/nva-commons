@@ -39,6 +39,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
 import java.io.InputStream;
 import java.net.URI;
@@ -55,13 +56,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import no.unit.nva.auth.CognitoUserInfo;
 import no.unit.nva.auth.FetchUserInfo;
-import no.unit.nva.commons.json.JsonUtils;
+import nva.commons.apigateway.exceptions.ApiIoException;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.SingletonCollector;
+import nva.commons.core.StringUtils;
 import nva.commons.core.attempt.Failure;
 import nva.commons.core.exceptions.ExceptionUtils;
+import nva.commons.core.ioutils.IoUtils;
 import nva.commons.core.paths.UriWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,9 +73,9 @@ import org.slf4j.LoggerFactory;
 public class RequestInfo {
 
     public static final String ERROR_FETCHING_COGNITO_INFO = "Could not fetch user information from Cognito:{}";
-    private static final HttpClient DEFAULT_HTTP_CLIENT = HttpClient.newBuilder().build();
     private static final Logger logger = LoggerFactory.getLogger(RequestInfo.class);
-    private final HttpClient httpClient;
+    private static final ObjectMapper mapper = defaultRestObjectMapper;
+    private HttpClient httpClient;
     private final Supplier<URI> cognitoUri;
     private final Supplier<URI> e2eTestsUserInfoUri;
     @JsonProperty(HEADERS_FIELD)
@@ -99,29 +102,36 @@ public class RequestInfo {
         this.e2eTestsUserInfoUri = e2eTestsUserInfoUri;
     }
 
-    public RequestInfo() {
+    private RequestInfo() {
         this.headers = new HashMap<>();
         this.pathParameters = new HashMap<>();
         this.queryParameters = new HashMap<>();
         this.multiValueQueryStringParameters = new HashMap<>();
         this.otherProperties = new LinkedHashMap<>(); // ordinary HashMap and ConcurrentHashMap fail.
         this.requestContext = defaultRestObjectMapper.createObjectNode();
-        this.httpClient = DEFAULT_HTTP_CLIENT;
+        this.httpClient = HttpClient.newBuilder().build();
         this.cognitoUri = DEFAULT_COGNITO_URI;
         this.e2eTestsUserInfoUri = RequestInfoConstants.E2E_TESTING_USER_INFO_ENDPOINT;
     }
 
-    public static RequestInfo fromRequest(InputStream requestStream) {
-        return attempt(() -> JsonUtils.dtoObjectMapper.readValue(requestStream, RequestInfo.class)).orElseThrow();
+    public static RequestInfo fromRequest(InputStream requestStream, HttpClient httpClient) throws ApiIoException {
+        String inputString = IoUtils.streamToString(requestStream);
+        return fromString(inputString, httpClient);
+    }
+
+    public static RequestInfo fromString(String inputString, HttpClient httpClient) throws ApiIoException {
+        var requestInfo = new ApiMessageParser<>(mapper).getRequestInfo(inputString);
+        requestInfo.setHttpClient(httpClient);
+        return requestInfo;
     }
 
     @JsonIgnore
     public String getHeader(String header) {
         return getHeaders().entrySet().stream()
-                .filter(entry -> entry.getKey().equalsIgnoreCase(header))
-                .findFirst()
-                .map(Map.Entry::getValue)
-                .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_HEADERS + header));
+                   .filter(entry -> entry.getKey().equalsIgnoreCase(header))
+                   .findFirst()
+                   .map(Map.Entry::getValue)
+                   .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_HEADERS + header));
     }
 
     @JsonIgnore
@@ -196,6 +206,11 @@ public class RequestInfo {
     @JacocoGenerated
     public void setOtherProperties(Map<String, Object> otherProperties) {
         this.otherProperties = otherProperties;
+    }
+
+    @JacocoGenerated
+    public void setHttpClient(HttpClient httpClient) {
+        this.httpClient = httpClient;
     }
 
     public Map<String, String> getHeaders() {
@@ -279,10 +294,14 @@ public class RequestInfo {
     }
 
     private Optional<List<AccessRight>> fetchAccessRights() {
-        return fetchUserInfo().map(CognitoUserInfo::getAccessRights)
-                   .map(accessRights -> Arrays.stream(accessRights.split(ELEMENTS_DELIMITER)))
-                   .map(
-                       accessRights -> accessRights.map(AccessRight::fromPersistedString).collect(Collectors.toList()));
+        return fetchUserInfo().map(CognitoUserInfo::getAccessRights).map(this::parseAccessRights);
+    }
+
+    private List<AccessRight> parseAccessRights(String value) {
+        return Arrays.stream(value.split(ELEMENTS_DELIMITER))
+                   .filter(array -> !StringUtils.isEmpty(array))
+                   .map(AccessRight::fromPersistedString)
+                   .collect(Collectors.toList());
     }
 
     @JacocoGenerated
@@ -335,7 +354,7 @@ public class RequestInfo {
     @JsonIgnore
     public URI getPersonAffiliation() throws UnauthorizedException {
         return extractPersonAffiliationForTests().or(this::fetchPersonAffiliation)
-            .orElseThrow(UnauthorizedException::new);
+                   .orElseThrow(UnauthorizedException::new);
     }
 
     @JsonIgnore
@@ -450,7 +469,7 @@ public class RequestInfo {
         return userInfo
                    .map(CognitoUserInfo::getAccessRights)
                    .map(accessRightEntryStr -> AccessRightEntry.fromCsvForCustomer(accessRightEntryStr, userInfo.get()
-                                                                                                 .getCurrentCustomer()))
+                                                                                                            .getCurrentCustomer()))
                    .map(stream -> stream.collect(Collectors.toList()))
                    .orElseGet(Collections::emptyList);
     }

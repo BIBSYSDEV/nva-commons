@@ -6,12 +6,17 @@ import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_QUERY_PAR
 import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_REQUEST_CONTEXT;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.core.JsonPointer;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.net.http.HttpClient;
 import java.util.List;
 import java.util.Map;
+import no.unit.nva.testutils.HandlerRequestBuilder;
+import nva.commons.apigateway.exceptions.ApiIoException;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,8 +30,10 @@ public class RequestInfoUtilityFunctionsTest {
     public static String VALUE = "value";
 
     @BeforeEach
-    public void setUp() {
-        RequestInfo spiedObject = new RequestInfo();
+    public void setUp() throws JsonProcessingException, ApiIoException {
+        var request = new HandlerRequestBuilder<String>(defaultRestObjectMapper).build();
+        var httpClient = mock(HttpClient.class);
+        RequestInfo spiedObject = RequestInfo.fromRequest(request, httpClient);
         requestInfo = spy(spiedObject);
     }
 

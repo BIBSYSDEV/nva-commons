@@ -7,12 +7,15 @@ import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
 import java.util.concurrent.Callable;
 import no.unit.nva.auth.AuthorizedBackendClient;
 import no.unit.nva.auth.CognitoCredentials;
+import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.NotFoundException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
@@ -29,6 +32,8 @@ public class IdentityServiceClient {
     private static final String API_PATH_USERS = "users";
     private static final String AUTH_HOST = new Environment().readEnv("BACKEND_CLIENT_AUTH_URL");
     private static final String API_HOST = new Environment().readEnv("API_HOST");
+    public static final String CUSTOMER_PATH_PARAM = "customer";
+    public static final String CRISTIN_ID_PATH_PARAM = "cristinId";
     private final AuthorizedBackendClient authorizedClient;
     private final HttpClient unauthorizedClient;
 
@@ -50,9 +55,7 @@ public class IdentityServiceClient {
     }
 
     public GetExternalClientResponse getExternalClient(String clientId) throws NotFoundException {
-        var request = HttpRequest.newBuilder()
-                          .GET()
-                          .uri(constructExternalClientsGetPath(clientId));
+        var request = getRequestBuilderFromUri(constructExternalClientsGetPath(clientId));
         return attempt(getHttpResponseCallable(request))
                    .map(this::validateResponse)
                    .map(r -> mapResponse(GetExternalClientResponse.class, r))
@@ -72,14 +75,56 @@ public class IdentityServiceClient {
                    .orElseThrow(this::handleFailure);
     }
 
-    public GetUserResponse getUser(String userName) throws NotFoundException {
-        var request = HttpRequest.newBuilder()
-                          .GET()
-                          .uri(constructUserGetPath(userName));
+    public UserDto getUser(String userName) throws NotFoundException {
+        var request = getRequestBuilderFromUri(constructUserGetPath(userName));
         return attempt(getHttpResponseCallable(request))
                    .map(this::validateResponse)
-                   .map(r -> mapResponse(GetUserResponse.class, r))
+                   .map(r -> mapResponse(UserDto.class, r))
                    .orElseThrow(this::handleFailure);
+    }
+
+    public CustomerDto getCustomerByCristinId(URI topLevelOrgCristinId) throws NotFoundException {
+        var request = getRequestBuilderFromUri(constructCustomerGetPath(topLevelOrgCristinId));
+        return attempt(getHttpResponseCallable(request))
+                   .map(this::validateResponse)
+                   .map(r -> mapResponse(CustomerDto.class, r))
+                   .orElseThrow(this::handleFailure);
+    }
+
+    public CustomerDto getCustomerById(URI customerId) throws NotFoundException {
+        var request = getRequestBuilderFromUri(customerId);
+        return attempt(getHttpResponseCallable(request))
+                   .map(this::validateResponse)
+                   .map(r -> mapResponse(CustomerDto.class, r))
+                   .orElseThrow(this::handleFailure);
+    }
+
+    private static Builder getRequestBuilderFromUri(URI customerId) {
+        return HttpRequest.newBuilder()
+                   .GET()
+                   .uri(customerId);
+    }
+
+    public CustomerList getAllCustomers() throws ApiGatewayException {
+        var request = getRequestBuilderFromUri(constructListCustomerUri());
+        return attempt(getHttpResponseCallable(request))
+                   .map(this::validateResponse)
+                   .map(HttpResponse::body)
+                   .map(value -> dtoObjectMapper.readValue(value, CustomerList.class))
+                   .orElseThrow(this::handleFailure);
+    }
+
+    private URI constructListCustomerUri() {
+        return UriWrapper.fromHost(API_HOST).addChild(CUSTOMER_PATH_PARAM).getUri();
+    }
+
+    private URI constructCustomerGetPath(URI topLevelOrgCristinId) {
+        var customerByCristinIdUri = UriWrapper.fromHost(API_HOST)
+                                    .addChild(CUSTOMER_PATH_PARAM)
+                                    .addChild(CRISTIN_ID_PATH_PARAM)
+                                    .getUri();
+        return URI.create(
+            customerByCristinIdUri + "/" + URLEncoder.encode(topLevelOrgCristinId.toString(), UTF_8));
     }
 
     @JacocoGenerated

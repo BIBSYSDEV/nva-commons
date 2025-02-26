@@ -9,7 +9,6 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import javax.net.ssl.HttpsURLConnection;
 import no.unit.nva.auth.AuthorizedBackendClient;
 import no.unit.nva.auth.CognitoCredentials;
 import nva.commons.core.JacocoGenerated;
@@ -17,6 +16,7 @@ import nva.commons.core.paths.UriWrapper;
 import nva.commons.secrets.SecretsReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.http.HttpStatusFamily;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 
 @JacocoGenerated
@@ -69,7 +69,7 @@ public class AuthorizedBackendUriRetriever implements RawContentRetriever {
     }
 
     private String getRawContentFromHttpResponse(HttpResponse<String> response) {
-        if (response.statusCode() != HttpsURLConnection.HTTP_OK) {
+        if (HttpStatusFamily.SUCCESSFUL != HttpStatusFamily.of(response.statusCode())) {
             logger.error(FAILED_TO_RETRIEVE_URI, response);
             throw new RuntimeException(API_RESPONDED_WITH_ERROR_CODE + response.statusCode());
         }

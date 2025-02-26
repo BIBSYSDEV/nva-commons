@@ -13,6 +13,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
+import static org.mockito.Mockito.mock;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -21,11 +22,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
 import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.apigateway.RequestInfo;
+import nva.commons.apigateway.exceptions.ApiIoException;
 import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.Test;
@@ -53,6 +56,7 @@ class HandlerRequestBuilderTest {
     private static final String HTTP_METHOD = "httpMethod";
     // Can not use ObjectMapper from nva-commons because it would create a circular dependency
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final HttpClient httpClient = mock(HttpClient.class);
 
     @Test
     void buildReturnsEmptyRequestOnNoArguments() throws Exception {
@@ -149,21 +153,22 @@ class HandlerRequestBuilderTest {
     }
 
     @Test
-    void buildReturnsPersonsFeideIdWhenSet() throws JsonProcessingException {
+    void buildReturnsPersonsFeideIdWhenSet() throws JsonProcessingException, ApiIoException {
         var expectedFeideId = randomString();
         var request = new HandlerRequestBuilder<String>(objectMapper)
                           .withFeideId(expectedFeideId)
                           .build();
-        var requestInfo = RequestInfo.fromRequest(request);
+        var requestInfo = RequestInfo.fromRequest(request, httpClient);
 
         assertThat(requestInfo.getFeideId().isPresent(), is(true));
         assertThat(requestInfo.getFeideId().orElseThrow(), is(equalTo(expectedFeideId)));
     }
 
     @Test
-    void buildReturnsEmptyOptionalWhenFeideIdNotSet() throws JsonProcessingException {
+    void buildReturnsEmptyOptionalWhenFeideIdNotSet()
+        throws JsonProcessingException, ApiIoException {
         var request = new HandlerRequestBuilder<String>(objectMapper).build();
-        var requestInfo = RequestInfo.fromRequest(request);
+        var requestInfo = RequestInfo.fromRequest(request, httpClient);
 
         assertThat(requestInfo.getFeideId().isPresent(), is(false));
         assertThat(requestInfo.getFeideId(), is(equalTo(Optional.empty())));

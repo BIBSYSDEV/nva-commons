@@ -12,7 +12,6 @@ dependencies {
     implementation project(":secrets")
 
     implementation libs.bundles.testing
-    implementation libs.httpmime
     implementation libs.aws.lambda.events
 
     implementation libs.aws.sdk2.s3
@@ -21,9 +20,10 @@ dependencies {
     implementation libs.aws.sdk2.cognitoidp
     implementation libs.aws.sdk2.secrets
     implementation libs.guava
-    implementation libs.wiremock
+    implementation libs.wiremock.jetty.'12'
     implementation libs.bundles.jackson
     implementation libs.commons.validator
+    implementation libs.com.auth0.jwt
 
     testImplementation project(":doi")
 }

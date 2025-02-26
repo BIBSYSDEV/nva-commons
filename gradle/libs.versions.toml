@@ -1,29 +1,27 @@
 [versions]
 
-zalandoProblem = { strictly = '0.27.1' }
-lambdaLog4j = { strictly = '1.6.0' }
-guava = { strictly = '33.0.0-jre' }
-awsSdk = { strictly = '1.12.668' }
-awsSdk2 = { strictly = '2.24.12' }
-awsLambdaEvents = { strictly = '3.11.4' }
-awsLambdaCore = { strictly = '1.2.3' }
-mockito = { strictly = '5.10.0' }
-httpmime = { strictly = '4.5.14' }
-jackson = { strictly = '2.16.2' }
-hamcrest = { strictly = '2.2' }
-apacheCommons = { require = '3.14.0' }
-commonsValidator = { strictly = '1.8.0' }
-jupiter = { strictly = '5.10.2' }
-awsIon = { strictly = '1.5.1' }
-hamcrestOptional = { strictly = '2.0.0' }
-log4j = { strictly = '2.23.0' }
-#wiremock 3.0.2 has multiple versions of  slf4j
-slf4j = { require = '2.0.12' }
+apacheCommons = { require = '3.17.0' }
+apacheHttpClient = { strictly = '5.4.1' }
 apiGuardian = { strictly = '1.1.2' }
-wiremock = { strictly = '3.4.1' }
-datafaker = { strictly = '2.1.0' }
+awsIon = { strictly = '1.11.9' }
+awsLambdaCore = { strictly = '1.2.3' }
+awsLambdaEvents = { strictly = '3.14.0' }
+awsSdk = { strictly = '1.12.780' }
+awsSdk2 = { strictly = '2.29.47' }
 com-auth0-jwt = { strictly = '4.4.0' }
-apacheHttpClient = { strictly = '5.3.1' }
+commonsValidator = { strictly = '1.9.0' }
+datafaker = { strictly = '2.4.2' }
+guava = { strictly = '33.4.0-jre' }
+hamcrest = { strictly = '3.0' }
+hamcrestOptional = { strictly = '2.0.0' }
+jackson = { strictly = '2.18.2' }
+jupiter = { strictly = '5.11.4' }
+lambdaLog4j = { strictly = '1.6.0' }
+log4j = { strictly = '2.24.3' }
+mockito = { strictly = '5.15.2' }
+slf4j = { strictly = '2.0.16' }
+wiremock = { strictly = '3.10.0' }
+zalandoProblem = { strictly = '0.27.1' }
 
 [libraries]
 zalando = { group = 'org.zalando', name = 'problem', version.ref = 'zalandoProblem' }
@@ -46,9 +44,7 @@ aws-sdk2-firehose = { group = 'software.amazon.awssdk', name = 'firehose', versi
 
 aws-http-client-spi = { group = 'software.amazon.awssdk', name = 'http-client-spi', version = 'awsSdk2' }
 aws-apache-client = { group = 'software.amazon.awssdk', name = 'apache-client', version.ref = 'awsSdk2' }
-aws-ion = { group = 'software.amazon.ion', name = 'ion-java', version.ref = 'awsIon' }
-
-httpmime = { group = 'org.apache.httpcomponents', name = 'httpmime', version.ref = 'httpmime' }
+aws-ion = { group = 'com.amazon.ion', name = 'ion-java', version.ref = 'awsIon' }
 
 jackson-core = { group = 'com.fasterxml.jackson.core', name = 'jackson-core', version.ref = 'jackson' }
 jackson-datatype-jdk8 = { group = 'com.fasterxml.jackson.datatype', name = 'jackson-datatype-jdk8', version.ref = 'jackson' }
@@ -61,7 +57,6 @@ jackson-dataformat-xml = { group = 'com.fasterxml.jackson.dataformat', name = 'j
 
 
 jackson-jr-objects = { group = 'com.fasterxml.jackson.jr', name = 'jackson-jr-objects', version.ref = 'jackson' }
-jackson-jr-stree = { group = 'com.fasterxml.jackson.jr', name = 'jackson-jr-stree', version.ref = 'jackson' }
 jackson-jr-annotations = { group = 'com.fasterxml.jackson.jr', name = 'jackson-jr-annotation-support', version.ref = 'jackson' }
 
 commons-lang = { group = 'org.apache.commons', name = 'commons-lang3', version.ref = 'apacheCommons' }
@@ -86,7 +81,7 @@ datafaker = { group = 'net.datafaker', name = 'datafaker', version.ref = 'datafa
 httpclient5 = { group = 'org.apache.httpcomponents.client5', name = 'httpclient5', version.ref = 'apacheHttpClient' }
 
 apiguardian = { group = 'org.apiguardian', name = 'apiguardian-api', version.ref = 'apiGuardian' }
-wiremock = { group = 'org.wiremock', name = 'wiremock', version.ref = 'wiremock' }
+wiremock-jetty-12 = { group = 'org.wiremock', name = 'wiremock-jetty12', version.ref = 'wiremock' }
 
 
 com-auth0-jwt = { group = 'com.auth0', name = 'java-jwt', version.ref = 'com-auth0-jwt' }

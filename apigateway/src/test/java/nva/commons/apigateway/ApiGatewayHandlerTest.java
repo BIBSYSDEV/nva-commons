@@ -1,5 +1,6 @@
 package nva.commons.apigateway;
 
+import static com.google.common.net.HttpHeaders.CACHE_CONTROL;
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static com.google.common.net.HttpHeaders.STRICT_TRANSPORT_SECURITY;
 import static com.google.common.net.HttpHeaders.VARY;
@@ -25,17 +26,12 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -46,6 +42,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
+import java.net.http.HttpClient;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +85,8 @@ class ApiGatewayHandlerTest {
     private static final String PATH = "path1/path2/path3";
     private Context context;
     private Handler handler;
+    private HttpClient httpClient;
+    private Environment environment;
 
     public static Stream<String> mediaTypeProvider() {
         return Stream.of(MediaTypes.APPLICATION_JSON_LD.toString(), MediaTypes.APPLICATION_DATACITE_XML.toString(),
@@ -97,7 +96,10 @@ class ApiGatewayHandlerTest {
     @BeforeEach
     public void setup() {
         context = new FakeContext();
-        handler = new Handler();
+        httpClient = mock(HttpClient.class);
+        environment = mock(Environment.class);
+        when(environment.readEnv("ALLOWED_ORIGIN")).thenReturn("*");
+        handler = new Handler(environment, httpClient);
     }
 
     @Test
@@ -330,6 +332,17 @@ class ApiGatewayHandlerTest {
     }
 
     @Test
+    public void shouldReturnFailureHeadersWhenHandlerThrowsException() throws IOException {
+        var handler = handlerThatThrowsExceptions();
+
+        var response = getProblemResponse(anyRequest(), handler);
+        var headers = response.getHeaders();
+
+        assertThat(headers.get(CONTENT_TYPE), is(equalTo(APPLICATION_PROBLEM_JSON.toString())));
+        assertThat(headers.get(CACHE_CONTROL), is(equalTo("no-cache")));
+    }
+
+    @Test
     public void handlerLogsRequestIdForEveryRequest() throws IOException {
         var appender = LogUtils.getTestingAppenderForRootLogger();
         var output = outputStream();
@@ -380,16 +393,6 @@ class ApiGatewayHandlerTest {
     }
 
     @Test
-    void handlerSerializesBodyWithNonDefaultSerializationWhenDefaultSerializerIsOverridden() throws IOException {
-        ObjectMapper spiedMapper = spy(defaultRestObjectMapper);
-        var handler = new Handler(spiedMapper);
-        var inputStream = requestWithHeaders();
-        var outputStream = outputStream();
-        handler.handleRequest(inputStream, outputStream, context);
-        verify(spiedMapper, atLeast(1)).writeValueAsString(any());
-    }
-
-    @Test
     void handlerSerializesWithIsBase64Encoded() throws IOException {
         var output = outputStream();
         InputStream input = requestWithBodyWithEmptyFields();
@@ -413,7 +416,7 @@ class ApiGatewayHandlerTest {
 
     @Test
     void shouldReturnJsonObjectWhenClientAsksForJson() throws Exception {
-        var handler = new RawStringResponseHandler(dtoObjectMapper);
+        var handler = getRawStringResponseHandler();
         var inputStream = requestWithHeaders();
         var expected = objectMapper.convertValue(createBody(), RequestBody.class);
         var outputStream = outputStream();
@@ -427,7 +430,7 @@ class ApiGatewayHandlerTest {
 
     @Test
     void shouldReturnXmlObjectWhenClientAsksForXml() throws Exception {
-        var handler = new RawStringResponseHandler(dtoObjectMapper);
+        var handler = getRawStringResponseHandler();
         var inputStream = requestWithAcceptXmlHeader();
         var expected = objectMapper.convertValue(createBody(), RequestBody.class);
         var outputStream = outputStream();
@@ -442,10 +445,9 @@ class ApiGatewayHandlerTest {
 
     @Test
     void shouldReturnAllOriginsWhenEnvironmentAllowsAllOrigins() throws IOException {
-        var environment = mock(Environment.class);
         when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn("*");
 
-        var handler = new RawStringResponseHandler(environment, dtoObjectMapper);
+        var handler = getRawStringResponseHandler();
         var inputStream = requestWithHeaders();
 
         var outputStream = outputStream();
@@ -459,10 +461,9 @@ class ApiGatewayHandlerTest {
 
     @Test
     void shouldReturnNvaFrontendProdWhenEnvironmentIsEmpty() throws IOException {
-        var environment = mock(Environment.class);
         when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn("");
 
-        var handler = new RawStringResponseHandler(environment, dtoObjectMapper);
+        var handler = getRawStringResponseHandler();
         var inputStream = requestWithHeaders();
 
         var outputStream = outputStream();
@@ -477,10 +478,9 @@ class ApiGatewayHandlerTest {
     @Test
     void shouldEchoAllowedOriginWhenEnvironmentContainsOrigin() throws IOException {
         var originInHeader = "https://example.com";
-        var environment = mock(Environment.class);
         when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn("localhost, " + originInHeader + ", some-place-else");
 
-        var handler = new RawStringResponseHandler(environment, dtoObjectMapper);
+        var handler = getRawStringResponseHandler();
         var inputStream = requestWithHeaders();
 
         var outputStream = outputStream();
@@ -492,14 +492,17 @@ class ApiGatewayHandlerTest {
         assertThat(responseHeaders.get(VARY), containsString("Origin"));
     }
 
+    private RawStringResponseHandler getRawStringResponseHandler() {
+        return new RawStringResponseHandler(environment, httpClient);
+    }
+
     @Test
     void shouldReturnOneOfTheAllowedOriginsInEnvironmentWhenRequestOriginIsNotWhiteListed()
         throws IOException {
         var originInHeader = "https://example.com";
-        var environment = mock(Environment.class);
         when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn("localhost, some-place-else");
 
-        var handler = new RawStringResponseHandler(environment, dtoObjectMapper);
+        var handler = getRawStringResponseHandler();
         var inputStream = requestWithHeaders();
 
         var outputStream = outputStream();
@@ -515,9 +518,8 @@ class ApiGatewayHandlerTest {
     void shouldReturnFirstElementInAllowedOriginsListWhenOriginIsMissing() throws IOException {
         var header1 = "https://example1.com";
         var header2 = "https://example2.com";
-        var environment = mock(Environment.class);
         when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn(header1 + ", " + header2);
-        var handler = new RawStringResponseHandler(environment, dtoObjectMapper);
+        var handler = getRawStringResponseHandler();
         var inputStream = requestWithMissingOriginHeader();
         var outputStream = outputStream();
         handler.handleRequest(inputStream, outputStream, context);

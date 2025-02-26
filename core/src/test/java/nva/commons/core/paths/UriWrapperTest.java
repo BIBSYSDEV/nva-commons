@@ -13,7 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -26,11 +28,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class UriWrapperTest {
 
     private static final String HOST = "http://www.example.org";
-    public static final int MAX_PORT_NUMBER = 65535;
+    private static final int MAX_PORT_NUMBER = 65535;
     private static final String ROOT = "/";
     private static final String AMPERSAND = "&";
     private static final String ASSIGNMENT = "=";
@@ -314,13 +317,65 @@ class UriWrapperTest {
         assertThat(query, containsInAnyOrder(expectedQueryParts));
     }
 
-    private Map<String, String> getOrderedParametersMap() {
-        final Map<String, String> parameters = new TreeMap<>();
-        parameters.put("key1", "value1");
-        parameters.put("key2", "value2");
-        return parameters;
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2, 3, 4})
+    void shouldReplacePathElementByIndexFromEnd(int indexFromEnd) {
+        var base = "https://example.org/";
+        var originalPathElements = new String[]{"one", "two", "three", "four", "five"};
+        var replacement = "replacement";
+
+        var expectedPathElements = new ArrayList<>(List.of(originalPathElements));
+        expectedPathElements.set(originalPathElements.length - indexFromEnd - 1, replacement);
+        var expectedUri = UriWrapper.fromHost(base)
+                              .addChild(expectedPathElements.toArray(String[]::new))
+                              .getUri();
+
+        var actualUri = UriWrapper.fromHost(base)
+                            .addChild(originalPathElements)
+                            .replacePathElementByIndexFromEnd(indexFromEnd, replacement)
+                            .getUri();
+
+        assertThat(actualUri, is(equalTo(expectedUri)));
     }
 
+    @Test
+    void shouldHandleUriWithPathEndingWithSlashWhenReplacingPathElementByIndexFromEnd() {
+        var originalUri = URI.create("https://example.org/path/");
+        var replacement = "replacement";
+        var expectedUri = URI.create("https://example.org/" + replacement);
+        var actualUri = UriWrapper.fromUri(originalUri)
+                            .replacePathElementByIndexFromEnd(0, replacement)
+                            .getUri();
+        assertThat(actualUri, is(equalTo(expectedUri)));
+    }
+
+    @Test
+    void shouldHandleUriWithQueryParametersAndFragmentsWhenReplacingPathElementByIndexFromEnd() {
+        var originalUri = URI.create("https://example.org/myPath?queryParam=a/b/c#/my/amazing/fragment");
+        var expectedUri = URI.create("https://example.org/replacement?queryParam=a/b/c#/my/amazing/fragment");
+        var actualUri = UriWrapper.fromUri(originalUri)
+                            .replacePathElementByIndexFromEnd(0, "replacement")
+                            .getUri();
+        assertThat(actualUri, is(equalTo(expectedUri)));
+    }
+
+    @Test
+    void shouldDoNothingWhenReplacingElementWhenPathIsRoot() {
+        var originalUri = URI.create("https://example.org/");
+        var actualUri = UriWrapper.fromUri(originalUri)
+                            .replacePathElementByIndexFromEnd(0, "replacement")
+                            .getUri();
+        assertThat(actualUri, is(equalTo(originalUri)));
+    }
+
+    @Test
+    void shouldDoNothingWhenReplacingElementForIndexThatDoesNotExist() {
+        var originalUri = URI.create("https://example.org");
+        var actualUri = UriWrapper.fromUri(originalUri)
+                            .replacePathElementByIndexFromEnd(0, "replacement")
+                            .getUri();
+        assertThat(actualUri, is(equalTo(originalUri)));
+    }
 
     private static String[] convertToExpected(Map<String, String> params, String additionalParam) {
         var expectedParams = params.entrySet().stream()
@@ -341,5 +396,12 @@ class UriWrapperTest {
         return params.entrySet().stream()
                    .map(UriWrapperTest::joinAsParamKeyValue)
                    .collect(Collectors.joining(AMPERSAND));
+    }
+
+    private Map<String, String> getOrderedParametersMap() {
+        final Map<String, String> parameters = new TreeMap<>();
+        parameters.put("key1", "value1");
+        parameters.put("key2", "value2");
+        return parameters;
     }
 }
