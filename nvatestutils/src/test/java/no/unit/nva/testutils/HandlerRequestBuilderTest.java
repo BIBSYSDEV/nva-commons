@@ -5,6 +5,7 @@ import static no.unit.nva.testutils.RandomDataGenerator.randomJson;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
@@ -20,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
 import no.unit.nva.commons.json.JsonUtils;
@@ -267,6 +269,17 @@ class HandlerRequestBuilderTest {
         JsonNode requestJson = toJsonNode(request);
         String actualPersonNin = requestJson.at(PERSON_NIN).asText();
         assertThat(actualPersonNin, is(equalTo(expectedPersonNin)));
+    }
+
+    @Test
+    void shouldContainCustomClaims() throws IOException {
+        var claim = randomString();
+        try (var request = new HandlerRequestBuilder<String>(objectMapper)
+                               .withCustomClaim(claim, randomString())
+                               .build()) {
+
+            assertThat(new String(request.readAllBytes(), StandardCharsets.UTF_8), containsString(claim));
+        }
     }
 
     private Map<String, Object> toMap(InputStream inputStream) throws JsonProcessingException {
