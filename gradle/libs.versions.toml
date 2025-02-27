@@ -2,7 +2,6 @@
 
 apacheCommons = { require = '3.17.0' }
 apacheHttpClient = { strictly = '5.4.2' }
-apiGuardian = { strictly = '1.1.2' }
 awsIon = { strictly = '1.11.10' }
 awsLambdaCore = { strictly = '1.2.3' }
 awsLambdaEvents = { strictly = '3.15.0' }
@@ -38,10 +37,8 @@ aws-sdk2-s3 = { group = 'software.amazon.awssdk', name = 's3', version.ref = 'aw
 aws-sdk2-eventbridge = { group = 'software.amazon.awssdk', name = 'eventbridge', version.ref = 'awsSdk2' }
 aws-sdk2-urlconnection = { group = 'software.amazon.awssdk', name = 'url-connection-client', version.ref = 'awsSdk2' }
 aws-sdk2-dynamo = { group = 'software.amazon.awssdk', name = 'dynamodb', version.ref = 'awsSdk2' }
-aws-sdk2-cognitoidp = { group = 'software.amazon.awssdk', name = 'cognitoidentityprovider', version.ref = 'awsSdk2' }
 aws-sdk2-firehose = { group = 'software.amazon.awssdk', name = 'firehose', version.ref = 'awsSdk2' }
 
-aws-http-client-spi = { group = 'software.amazon.awssdk', name = 'http-client-spi', version = 'awsSdk2' }
 aws-apache-client = { group = 'software.amazon.awssdk', name = 'apache-client', version.ref = 'awsSdk2' }
 aws-ion = { group = 'com.amazon.ion', name = 'ion-java', version.ref = 'awsIon' }
 
@@ -79,7 +76,6 @@ mockito-core = { group = 'org.mockito', name = 'mockito-core', version.ref = 'mo
 datafaker = { group = 'net.datafaker', name = 'datafaker', version.ref = 'datafaker' }
 httpclient5 = { group = 'org.apache.httpcomponents.client5', name = 'httpclient5', version.ref = 'apacheHttpClient' }
 
-apiguardian = { group = 'org.apiguardian', name = 'apiguardian-api', version.ref = 'apiGuardian' }
 wiremock-jetty-12 = { group = 'org.wiremock', name = 'wiremock-jetty12', version.ref = 'wiremock' }
 
 
