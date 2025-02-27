@@ -7,7 +7,7 @@ allprojects{
 }
 
 wrapper {
-    gradleVersion = '8.2.1'
+    gradleVersion = '8.12.1'
     distributionType = Wrapper.DistributionType.ALL
 }
 
