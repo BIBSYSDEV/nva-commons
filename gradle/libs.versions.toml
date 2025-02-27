@@ -1,26 +1,24 @@
 [versions]
 
 apacheCommons = { require = '3.17.0' }
-apacheHttpClient = { strictly = '5.4.1' }
-apiGuardian = { strictly = '1.1.2' }
-awsIon = { strictly = '1.11.9' }
+apacheHttpClient = { strictly = '5.4.2' }
+awsIon = { strictly = '1.11.10' }
 awsLambdaCore = { strictly = '1.2.3' }
-awsLambdaEvents = { strictly = '3.14.0' }
-awsSdk = { strictly = '1.12.780' }
-awsSdk2 = { strictly = '2.29.47' }
+awsLambdaEvents = { strictly = '3.15.0' }
+awsSdk = { strictly = '1.12.782' }
+awsSdk2 = { strictly = '2.30.27' }
 com-auth0-jwt = { strictly = '4.4.0' }
 commonsValidator = { strictly = '1.9.0' }
 datafaker = { strictly = '2.4.2' }
 guava = { strictly = '33.4.0-jre' }
 hamcrest = { strictly = '3.0' }
-hamcrestOptional = { strictly = '2.0.0' }
 jackson = { strictly = '2.18.2' }
-jupiter = { strictly = '5.11.4' }
+jupiter = { strictly = '5.12.0' }
 lambdaLog4j = { strictly = '1.6.0' }
 log4j = { strictly = '2.24.3' }
 mockito = { strictly = '5.15.2' }
 slf4j = { strictly = '2.0.16' }
-wiremock = { strictly = '3.10.0' }
+wiremock = { strictly = '3.12.0' }
 zalandoProblem = { strictly = '0.27.1' }
 
 [libraries]
@@ -39,10 +37,8 @@ aws-sdk2-s3 = { group = 'software.amazon.awssdk', name = 's3', version.ref = 'aw
 aws-sdk2-eventbridge = { group = 'software.amazon.awssdk', name = 'eventbridge', version.ref = 'awsSdk2' }
 aws-sdk2-urlconnection = { group = 'software.amazon.awssdk', name = 'url-connection-client', version.ref = 'awsSdk2' }
 aws-sdk2-dynamo = { group = 'software.amazon.awssdk', name = 'dynamodb', version.ref = 'awsSdk2' }
-aws-sdk2-cognitoidp = { group = 'software.amazon.awssdk', name = 'cognitoidentityprovider', version.ref = 'awsSdk2' }
 aws-sdk2-firehose = { group = 'software.amazon.awssdk', name = 'firehose', version.ref = 'awsSdk2' }
 
-aws-http-client-spi = { group = 'software.amazon.awssdk', name = 'http-client-spi', version = 'awsSdk2' }
 aws-apache-client = { group = 'software.amazon.awssdk', name = 'apache-client', version.ref = 'awsSdk2' }
 aws-ion = { group = 'com.amazon.ion', name = 'ion-java', version.ref = 'awsIon' }
 
@@ -73,14 +69,13 @@ junit-jupiter = { group = 'org.junit.jupiter', name = 'junit-jupiter', version.r
 junit-jupiter-api = { group = 'org.junit.jupiter', name = 'junit-jupiter-api', version.ref = 'jupiter' }
 junit-jupiter-params = { group = 'org.junit.jupiter', name = 'junit-jupiter-params', version.ref = 'jupiter' }
 junit-jupiter-engine = { group = 'org.junit.jupiter', name = 'junit-jupiter-engine', version.ref = 'jupiter' }
+junit-platform-launcher = { group = 'org.junit.platform', name = 'junit-platform-launcher' }
 hamcrest = { group = 'org.hamcrest', name = 'hamcrest', version.ref = 'hamcrest' }
 hamcrest-core = { group = 'org.hamcrest', name = 'hamcrest-core', version.ref = 'hamcrest' }
 mockito-core = { group = 'org.mockito', name = 'mockito-core', version.ref = 'mockito' }
-hamcrest-optional = { group = 'com.github.npathai', name = 'hamcrest-optional', version.ref = 'hamcrestOptional' }
 datafaker = { group = 'net.datafaker', name = 'datafaker', version.ref = 'datafaker' }
 httpclient5 = { group = 'org.apache.httpcomponents.client5', name = 'httpclient5', version.ref = 'apacheHttpClient' }
 
-apiguardian = { group = 'org.apiguardian', name = 'apiguardian-api', version.ref = 'apiGuardian' }
 wiremock-jetty-12 = { group = 'org.wiremock', name = 'wiremock-jetty12', version.ref = 'wiremock' }
 
 
@@ -88,7 +83,7 @@ com-auth0-jwt = { group = 'com.auth0', name = 'java-jwt', version.ref = 'com-aut
 
 [bundles]
 testing = ['mockito-core', 'hamcrest', 'hamcrest-core', 'junit-jupiter', 'junit-jupiter-api',
-    'junit-jupiter-params', 'junit-jupiter-engine', 'hamcrest-optional', 'commons-lang', 'datafaker']
+    'junit-jupiter-params', 'junit-jupiter-engine', 'commons-lang', 'datafaker', 'junit-platform-launcher']
 jackson = ['jackson-core', 'jackson-datatype-jdk8', 'jackson-datatype-jsr310', 'jackson-databind',
     'jackson-annotations', 'jackson-module-parameter-names', 'jackson-datatype-problem', 'jackson-dataformat-xml']
 jacksonjr = ['jackson-jr-objects', 'jackson-jr-annotations']
