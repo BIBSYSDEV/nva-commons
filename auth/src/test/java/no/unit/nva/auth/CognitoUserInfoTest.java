@@ -16,15 +16,17 @@ class CognitoUserInfoTest {
                            .withFeideId(randomString())
                            .withCurrentCustomer(randomUri())
                            .withUserName(randomString())
-            .withTopOrgCristinId(randomUri())
-            .withPersonCristinId(randomUri())
-            .withPersonNin(randomString())
-            .withCognitoUsername(randomString())
-            .withAllowedCustomers(randomString())
-            .withRoles(randomString())
-            .withPersonAffiliation(randomUri())
-            .withSub(randomString())
-            .build();
+                           .withTopOrgCristinId(randomUri())
+                           .withPersonCristinId(randomUri())
+                           .withPersonNin(randomString())
+                           .withCognitoUsername(randomString())
+                           .withAllowedCustomers(randomString())
+                           .withRoles(randomString())
+                           .withPersonAffiliation(randomUri())
+                           .withSub(randomString())
+                           .withViewingScopeIncluded(randomString())
+                           .withViewingScopeExcluded(randomString())
+                           .build();
         assertThat(userInfo, doesNotHaveEmptyValues());
     }
 }
