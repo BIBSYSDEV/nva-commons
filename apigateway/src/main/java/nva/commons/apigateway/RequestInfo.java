@@ -432,7 +432,8 @@ public class RequestInfo {
     }
 
     private Optional<ViewingScope> fetchViewingScope() {
-        return fetchUserInfo().map(u -> ViewingScope.from(u.getViewingScopeIncluded(), u.getViewingScopeExcluded()));
+        return fetchUserInfo().map(
+            userInfo -> ViewingScope.from(userInfo.getViewingScopeIncluded(), userInfo.getViewingScopeExcluded()));
     }
 
     private Optional<URI> extractPersonCristinIdForTests() {
