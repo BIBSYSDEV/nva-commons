@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 import nva.commons.core.JacocoGenerated;
 
+@SuppressWarnings("PMD")
 public class CognitoUserInfo {
 
     public static final String ELEMENTS_DELIMITER = ",";
@@ -26,6 +27,9 @@ public class CognitoUserInfo {
     public static final String PERSON_AFFILIATION_CLAIM = "custom:personAffiliation";
     public static final String ALLOWED_CUSTOMERS = "custom:allowedCustomers";
     public static final String COGNITO_USER_NAME = "username";
+    public static final String VIEWING_SCOPE_INCLUDED_CLAIM = "custom:viewingScopeIncluded";
+    public static final String VIEWING_SCOPE_EXCLUDED_CLAIM = "custom:viewingScopeExcluded";
+
     @JsonProperty(PERSON_FEIDE_ID_CLAIM)
     private String feideId;
     @JsonProperty(SELECTED_CUSTOMER_CLAIM)
@@ -51,6 +55,10 @@ public class CognitoUserInfo {
     private String allowedCustomers;
     @JsonProperty(COGNITO_USER_NAME)
     private String cognitoUsername;
+    @JsonProperty(VIEWING_SCOPE_INCLUDED_CLAIM)
+    private String viewingScopeIncluded;
+    @JsonProperty(VIEWING_SCOPE_EXCLUDED_CLAIM)
+    private String viewingScopeExcluded;
 
     public static Builder builder() {
         return new Builder();
@@ -156,12 +164,35 @@ public class CognitoUserInfo {
         this.personNin = personNin;
     }
 
+    public String getViewingScopeIncluded() {
+        return viewingScopeIncluded;
+    }
+
+    public void setViewingScopeIncluded(String viewingScopeIncluded) {
+        this.viewingScopeIncluded = viewingScopeIncluded;
+    }
+
+    public String getViewingScopeExcluded() {
+        return viewingScopeExcluded;
+    }
+
+    public void setViewingScopeExcluded(String viewingScopeExcluded) {
+        this.viewingScopeExcluded = viewingScopeExcluded;
+    }
+
     @JacocoGenerated
     @Override
     public int hashCode() {
-        return Objects.hash(getFeideId(), getCurrentCustomer(), getAccessRights(), getUserName(),
+        return Objects.hash(getFeideId(),
+                            getCurrentCustomer(),
+                            getAccessRights(),
+                            getUserName(),
                             getTopOrgCristinId(),
-                            getPersonCristinId(), getPersonAffiliation(), getPersonNin());
+                            getPersonCristinId(),
+                            getPersonAffiliation(),
+                            getPersonNin(),
+                            getViewingScopeIncluded(),
+                            getViewingScopeExcluded());
     }
 
     @JacocoGenerated
@@ -182,7 +213,9 @@ public class CognitoUserInfo {
                && Objects.equals(getPersonCristinId(), that.getPersonCristinId())
                && Objects.equals(getPersonAffiliation(), that.getPersonAffiliation())
                && Objects.equals(getPersonNin(), that.getPersonNin())
-               && Objects.equals(getFeideId(), that.getFeideId());
+               && Objects.equals(getFeideId(), that.getFeideId())
+               && Objects.equals(getViewingScopeIncluded(), that.getViewingScopeIncluded())
+               && Objects.equals(getViewingScopeExcluded(), that.getViewingScopeExcluded());
     }
 
     public static final class Builder {
@@ -252,6 +285,16 @@ public class CognitoUserInfo {
 
         public Builder withCognitoUsername(String cognitoUsername) {
             cognitoUserInfo.setCognitoUsername(cognitoUsername);
+            return this;
+        }
+
+        public Builder withViewingScopeIncluded(String viewingScopeIncluded) {
+            cognitoUserInfo.setViewingScopeIncluded(viewingScopeIncluded);
+            return this;
+        }
+
+        public Builder withViewingScopeExcluded(String viewingScopeExcluded) {
+            cognitoUserInfo.setViewingScopeExcluded(viewingScopeExcluded);
             return this;
         }
 
