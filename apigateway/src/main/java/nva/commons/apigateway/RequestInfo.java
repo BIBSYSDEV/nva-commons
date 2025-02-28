@@ -171,7 +171,7 @@ public class RequestInfo {
     }
 
     /**
-     * Get request context parameter. The root node is the {@link RequestInfoConstants#REQUEST_CONTEXT_FIELD} node from
+     * Get request context parameter. The root node is the {@link RequestInfoConstants#REQUEST_CONTEXT_FIELD} node of
      * the {@link RequestInfo} class.
      * <p>Example: {@code JsonPointer.compile("/authorizer/claims/custom:currentCustomer");  }
      * </p>

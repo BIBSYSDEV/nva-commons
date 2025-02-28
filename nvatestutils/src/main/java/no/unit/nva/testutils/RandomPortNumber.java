@@ -14,7 +14,7 @@ public final class RandomPortNumber implements Closeable {
     private final int port;
 
     /**
-     * Creates a new instance from RandomPort.
+     * Creates a new instance of RandomPort.
      * @return RandomPort instance.
      */
     public static RandomPortNumber newPort() {

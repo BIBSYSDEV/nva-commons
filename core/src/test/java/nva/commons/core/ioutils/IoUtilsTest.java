@@ -46,7 +46,7 @@ public class IoUtilsTest {
     }
 
     @Test
-    @DisplayName("stringFromResources returns the whole content from a resource file in a string")
+    @DisplayName("stringFromResources returns the whole content of a resource file in a string")
     public void stringFromResourcesReturnsTheWholeContentOfAResourceFileInAString() {
         String actual = IoUtils.stringFromResources(RESOURCE);
         String expected = new BufferedReader(new InputStreamReader(IoUtils.inputStreamFromResources(RESOURCE)))

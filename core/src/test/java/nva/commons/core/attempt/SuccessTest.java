@@ -78,7 +78,7 @@ public class SuccessTest {
     }
 
     @Test
-    @DisplayName("flatMap returns the value from the nested Try")
+    @DisplayName("flatMap returns the value of the nested Try")
     public void flatMapReturnsAFailureWithTheFirstException() {
         Try<Integer> actual = Try.of(sample)
             .map(this::identity)

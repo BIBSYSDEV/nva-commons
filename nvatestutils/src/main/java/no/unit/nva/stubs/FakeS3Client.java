@@ -204,7 +204,7 @@ public class FakeS3Client implements S3Client {
                 return calculatedStartIndex;
             }
         }
-        throw new IllegalStateException("Start index is out from bounds in FakeS3Client");
+        throw new IllegalStateException("Start index is out of bounds in FakeS3Client");
     }
 
     private static int indexOfLastReadFile(List<String> fileKeys, String marker) {

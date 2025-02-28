@@ -27,10 +27,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Template class for implementing Lambda function handlers that get activated through a call to ApiGateway. This class
- * is for processing a HTTP query directly without the usage from a Jersey-server or a SpringBoot template.
+ * is for processing a HTTP query directly without the usage of a Jersey-server or a SpringBoot template.
  *
- * @param <I> Class from the object in the body field from the ApiGateway message.
- * @param <O> Class from the response object.
+ * @param <I> Class of the object in the body field of the ApiGateway message.
+ * @param <O> Class of the response object.
  * @see <a href="https://github.com/awslabs/aws-serverless-java-container">aws-serverless-container</a> for
  *     alternative solutions.
  */
@@ -56,11 +56,11 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     public static final String ALLOW_ALL_ORIGINS  = "*";
 
     /**
-     * Calculates the Content MediaType from the response based on the supported Media Types and the requested Media
+     * Calculates the Content MediaType of the response based on the supported Media Types and the requested Media
      * Types.
      *
      * @param requestInfo The request as sent by ApiGateway
-     * @return the MediaType value from the Response. Basically the value from the Content header.
+     * @return the MediaType value of the Response. Basically the value of the Content header.
      * @throws UnsupportedAcceptHeaderException when no provided Accept header media types are supported in this
      *                                          handler.
      */
@@ -113,7 +113,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     /**
      * Override this method to change the supported media types for the handler.
      *
-     * @return a list from supported media types
+     * @return a list of supported media types
      */
     protected List<MediaType> listSupportedMediaTypes() {
         return DEFAULT_SUPPORTED_MEDIA_TYPES;
@@ -131,7 +131,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     /**
      * The input class should be set explicitly by the inheriting class.
      *
-     * @param iclass      The class object from the input class.
+     * @param iclass      The class object of the input class.
      * @param environment the Environment from where the handler will read ENV variables.
      */
     public RestRequestHandler(Class<I> iclass, Environment environment, ObjectMapper objectMapper,
@@ -209,7 +209,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     }
 
     /**
-     * Implements the main logic from the handler. Any exception thrown by this method will be handled by
+     * Implements the main logic of the handler. Any exception thrown by this method will be handled by
      * {@link RestRequestHandler#handleExpectedException} method.
      *
      * @param input       The input object to the method. Usually a deserialized json.
@@ -222,7 +222,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     protected abstract O processInput(I input, RequestInfo requestInfo, Context context) throws ApiGatewayException;
 
     /**
-     * Define the response statusCode in case from failure.
+     * Define the response statusCode in case of failure.
      *
      * @param input The request input.
      * @param error The exception that caused the failure.
@@ -236,7 +236,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
      * Method for parsing the input object from the ApiGateway message.
      *
      * @param inputString the ApiGateway message.
-     * @return an object from class I.
+     * @return an object of class I.
      * @throws IOException when parsing fails.
      */
     protected I parseInput(String inputString) throws IOException {

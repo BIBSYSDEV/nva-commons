@@ -18,7 +18,7 @@ public final class JwtTestToken {
     /**
      * Creates a random valid, current JWT.
      *
-     * @return String representation from the JWT.
+     * @return String representation of the JWT.
      */
     public static String randomToken() {
         var issuedAt = new Date();
@@ -29,7 +29,7 @@ public final class JwtTestToken {
     /**
      * Creates a random valid, expired JWT.
      *
-     * @return String representation from the expired JWT.
+     * @return String representation of the expired JWT.
      */
     public static String randomExpiredToken() {
         var issuedAt = new Date(new Date().getTime() - TimeUnit.HOURS.toMillis(1));

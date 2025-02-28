@@ -7,10 +7,10 @@ import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
 
 /**
- * An extension from ApiGatewayHandler where you are also able to specify the http status-code.
+ * An extension of ApiGatewayHandler where you are also able to specify the http status-code.
  *
- * @param <I> Class from the object in the body field from the ApiGateway message.
- * @param <O> Class from the response object.
+ * @param <I> Class of the object in the body field of the ApiGateway message.
+ * @param <O> Class of the response object.
  */
 public abstract class ApiGatewayProxyHandler<I, O> extends ApiGatewayHandler<I, O> {
 
@@ -42,14 +42,14 @@ public abstract class ApiGatewayProxyHandler<I, O> extends ApiGatewayHandler<I, 
     }
 
     /**
-     * Implements the main logic from the handler. Any exception thrown by this method will be handled by {@link
+     * Implements the main logic of the handler. Any exception thrown by this method will be handled by {@link
      * RestRequestHandler#handleExpectedException} method.
      *
      * @param input       The input object to the method. Usually a deserialized json.
      * @param requestInfo Request headers and path.
      * @param context     the ApiGateway context.
      *
-     * @return A Pair which consists from:
+     * @return A Pair which consists of:
      *     - the Response body that is going to be serialized in json
      *     - the http response code
      * @throws ApiGatewayException all exceptions are caught by writeFailure and mapped to error codes through the

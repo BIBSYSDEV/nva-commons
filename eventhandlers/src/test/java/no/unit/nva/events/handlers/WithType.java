@@ -1,7 +1,7 @@
 package no.unit.nva.events.handlers;
 
 /**
- * Interface for adding type to Json objects. The interface fixes the problem from Jackson where the annotations include
+ * Interface for adding type to Json objects. The interface fixes the problem of Jackson where the annotations include
  * the type only for the top object and not for the children object.
  */
 public interface WithType {

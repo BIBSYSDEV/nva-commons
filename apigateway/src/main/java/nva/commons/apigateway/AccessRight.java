@@ -100,7 +100,7 @@ public enum AccessRight {
     /**
      * Creates an AccessRight instance from a string which is in the shortened persisted format
      *
-     * @param accessRight string representation from access right
+     * @param accessRight string representation of access right
      * @return an AccessRight instance.
      */
 

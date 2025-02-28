@@ -138,8 +138,8 @@ class ApiGatewayHandlerTest {
                 expectedHeaders.get(expectedHeader).textValue()))));
     }
 
-    // TODO: Should return 415 when the Content-type header from request is unsupported (i.e., the one
-    //  describing the content from the body from a post request)
+    // TODO: Should return 415 when the Content-type header of request is unsupported (i.e., the one
+    //  describing the content of the body of a post request)
     // TODO: Should return 406 when Accept header contains unsupported media type
     @ParameterizedTest(name = "handleRequest should return Unsupported media-type when input is {0}")
     @ValueSource(strings = {"application/xml", "text/plain; charset=UTF-8"})
@@ -320,7 +320,7 @@ class ApiGatewayHandlerTest {
     }
 
     @Test
-    @DisplayName("getFailureStatusCode returns by default the status code from the ApiGatewayException")
+    @DisplayName("getFailureStatusCode returns by default the status code of the ApiGatewayException")
     public void getFailureStatusCodeReturnsByDefaultTheStatusCodeOfTheApiGatewayException() throws IOException {
         Handler handler = handlerThatThrowsExceptions();
 
