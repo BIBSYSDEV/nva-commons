@@ -1,10 +1,9 @@
 package no.unit.nva.commons.json;
 
-import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
-import static com.github.npathai.hamcrestopt.OptionalMatchers.isPresentAnd;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.commons.json.JsonUtils.singleLineObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
@@ -21,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import nva.commons.core.ioutils.IoUtils;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -71,13 +69,13 @@ class JsonUtilsTest {
     void jsonParserDeserializesOptionalNotPresent() {
         TestObjectForOptionals actual = deserialize(JSON_OBJECT_WITHOUT_VALUE);
         assertThat(actual.getTest(), is(equalTo(Optional.empty())));
-        assertThat(actual.getTest(), isEmpty());
+        assertThat(actual.getTest().isEmpty(), is(true));
     }
 
     @Test
     void jsonParserDeserializesOptionalPresent() {
         TestObjectForOptionals sut = deserialize(JSON_OBJECT_WITH_VALUE);
-        assertThat(sut.getTest(), isPresentAnd(Matchers.containsString(SAMPLE_VALUE)));
+        assertThat(sut.getTest().orElseThrow(), containsString(SAMPLE_VALUE));
     }
 
     @Test
@@ -159,8 +157,8 @@ class JsonUtilsTest {
         samplePojo.setField2("someValue");
         String jsonInSingleLine = singleLineObjectMapper.writeValueAsString(samplePojo);
         String prettyJson = dtoObjectMapper.writeValueAsString(samplePojo);
-        assertThat(jsonInSingleLine, not(Matchers.containsString(System.lineSeparator())));
-        assertThat(prettyJson, Matchers.containsString(System.lineSeparator()));
+        assertThat(jsonInSingleLine, not(containsString(System.lineSeparator())));
+        assertThat(prettyJson, containsString(System.lineSeparator()));
     }
 
     @Test

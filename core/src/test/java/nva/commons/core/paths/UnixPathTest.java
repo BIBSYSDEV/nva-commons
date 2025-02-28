@@ -1,6 +1,5 @@
 package nva.commons.core.paths;
 
-import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static nva.commons.core.paths.UnixPath.PATH_DELIMITER;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -125,7 +124,7 @@ class UnixPathTest {
     @NullAndEmptySource
     void shouldReturnEmptyOptionalWhenUnixPathIsEmpty(String path) {
         UnixPath unixPath = UnixPath.of(path);
-        assertThat(unixPath.getParent(), isEmpty());
+        assertThat(unixPath.getParent().isEmpty(), is(true));
     }
 
     @Test
