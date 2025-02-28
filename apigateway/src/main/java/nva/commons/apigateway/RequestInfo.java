@@ -30,6 +30,8 @@ import static nva.commons.apigateway.RequestInfoConstants.REQUEST_CONTEXT_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.SCOPES_CLAIM;
 import static nva.commons.apigateway.RequestInfoConstants.TOP_LEVEL_ORG_CRISTIN_ID;
 import static nva.commons.apigateway.RequestInfoConstants.USER_NAME;
+import static nva.commons.apigateway.RequestInfoConstants.VIEWING_SCOPE_EXCLUDED;
+import static nva.commons.apigateway.RequestInfoConstants.VIEWING_SCOPE_INCLUDED;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
 import static nva.commons.core.paths.UriWrapper.HTTPS;
@@ -169,7 +171,7 @@ public class RequestInfo {
     }
 
     /**
-     * Get request context parameter. The root node is the {@link RequestInfoConstants#REQUEST_CONTEXT_FIELD} node of
+     * Get request context parameter. The root node is the {@link RequestInfoConstants#REQUEST_CONTEXT_FIELD} node from
      * the {@link RequestInfo} class.
      * <p>Example: {@code JsonPointer.compile("/authorizer/claims/custom:currentCustomer");  }
      * </p>
@@ -324,6 +326,11 @@ public class RequestInfo {
     }
 
     @JsonIgnore
+    public ViewingScope getViewingScope() throws UnauthorizedException {
+        return extractViewingScopeForTests().or(this::fetchViewingScope).orElseThrow(UnauthorizedException::new);
+    }
+
+    @JsonIgnore
     public Optional<String> getFeideId() {
         return extractFeideIdForTests().or(this::fetchFeideId);
     }
@@ -406,12 +413,26 @@ public class RequestInfo {
         logger.warn(ERROR_FETCHING_COGNITO_INFO, ExceptionUtils.stackTraceInSingleLine(fail.getException()));
     }
 
+    private Optional<ViewingScope> extractViewingScopeForTests() {
+        var includedString = getRequestContextParameterOpt(VIEWING_SCOPE_INCLUDED);
+        var excludedString = getRequestContextParameterOpt(VIEWING_SCOPE_EXCLUDED);
+
+        if (includedString.isEmpty() || excludedString.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(ViewingScope.from(includedString.get(), excludedString.get()));
+    }
+
     private Optional<String> extractUserNameForTests() {
         return getRequestContextParameterOpt(USER_NAME);
     }
 
     private Optional<String> fetchUserName() {
         return fetchUserInfo().map(CognitoUserInfo::getUserName);
+    }
+
+    private Optional<ViewingScope> fetchViewingScope() {
+        return fetchUserInfo().map(u -> ViewingScope.from(u.getViewingScopeIncluded(), u.getViewingScopeExcluded()));
     }
 
     private Optional<URI> extractPersonCristinIdForTests() {

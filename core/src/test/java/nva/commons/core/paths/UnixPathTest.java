@@ -182,7 +182,7 @@ class UnixPathTest {
     }
 
     @ParameterizedTest(name = "should return {1} when input is {0}")
-    @DisplayName("should return the last element of the path")
+    @DisplayName("should return the last element from the path")
     @CsvSource({
         "/some/existing/folder/, folder",
         "/some/existing/folder/existingFile.ending, existingFile.ending"

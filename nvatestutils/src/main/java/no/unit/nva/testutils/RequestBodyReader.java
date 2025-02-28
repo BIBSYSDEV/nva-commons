@@ -14,10 +14,10 @@ public class RequestBodyReader {
     public static final String NO_BODY_PUBLISHER_ERROR = "HttpRequest has no bodyPublisher";
 
     /**
-     * Extracts the body of a {@link HttpRequest} into a String.
+     * Extracts the body from a {@link HttpRequest} into a String.
      *
      * @param request the {@link HttpRequest}.
-     * @return a String containing the contents of the body.
+     * @return a String containing the contents from the body.
      */
     @JacocoGenerated
     public static String requestBody(HttpRequest request) {

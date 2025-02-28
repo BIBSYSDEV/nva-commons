@@ -21,7 +21,7 @@ public class DoesNotHaveEmptyValues<T> extends BaseMatcher<T> {
 
     public static final String EMPTY_FIELD_ERROR = "Empty field found: ";
     public static final String FIELD_DELIMITER = ",";
-    public static final String TEST_DESCRIPTION = "All fields of all included objects need to be non empty";
+    public static final String TEST_DESCRIPTION = "All fields from all included objects need to be non empty";
 
     private final List<PropertyValuePair> emptyFields;
     private Set<Class<?>> stopRecursionClasses;
@@ -40,11 +40,11 @@ public class DoesNotHaveEmptyValues<T> extends BaseMatcher<T> {
     }
 
     /**
-     * Stop the nested check for the classes in the ignore list. The fields of the specified types will be checked
+     * Stop the nested check for the classes in the ignore list. The fields from the specified types will be checked
      * whether they are null or not, but their fields will not be checked.
      *
-     * @param ignoreList List of classes where the nested field check will stop.
-     * @param <R>        the type of the object in test.
+     * @param ignoreList List from classes where the nested field check will stop.
+     * @param <R>        the type from the object in test.
      * @return a matcher.
      */
     public static <R> DoesNotHaveEmptyValues<R> doesNotHaveEmptyValuesIgnoringClasses(Set<Class<?>> ignoreList) {

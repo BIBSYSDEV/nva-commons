@@ -15,6 +15,7 @@ import static nva.commons.apigateway.RequestInfo.ERROR_FETCHING_COGNITO_INFO;
 import static nva.commons.apigateway.RequestInfoConstants.AUTHORIZATION_FAILURE_WARNING;
 import static nva.commons.apigateway.RequestInfoConstants.BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE;
 import static nva.commons.apigateway.RequestInfoConstants.REQUEST_CONTEXT_FIELD;
+import static nva.commons.apigateway.RequestInfoConstants.VIEWING_SCOPE_INCLUDED;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static nva.commons.core.paths.UriWrapper.HTTPS;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -25,11 +26,13 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsIterableContaining.hasItems;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_METHOD;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -48,6 +51,7 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import no.unit.nva.auth.CognitoUserInfo;
 import no.unit.nva.stubs.FakeAuthServer;
 import no.unit.nva.stubs.WiremockHttpClient;
@@ -58,11 +62,15 @@ import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.core.paths.UriWrapper;
 import nva.commons.logutils.LogUtils;
+import org.hamcrest.core.IsIterableContaining;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 @TestInstance(PER_METHOD)
 class RequestInfoTest {
@@ -98,6 +106,7 @@ class RequestInfoTest {
     private FakeAuthServer cognito;
     private HttpClient httpClient;
     private String userAccessToken;
+
 
     @BeforeEach
     public void init() {
@@ -246,7 +255,7 @@ class RequestInfoTest {
     void shouldReturnThatUserDoesNotHaveAccessRightForSpecificCustomerWhenCognitoDoesNotHaveRespectiveAccessRight() {
         var usersCustomer = randomUri();
         var accessRightsForCustomer = Set.of(new AccessRightEntry(MANAGE_PUBLISHING_REQUESTS, usersCustomer)
-                                          .toString());
+                                                 .toString());
         var cognitoUserEntry = CognitoUserInfo.builder()
                                    .withCurrentCustomer(usersCustomer)
                                    .withAccessRights(accessRightsForCustomer)
@@ -305,7 +314,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnApiIoExceptionWhenObjectMapperFails(){
+    void shouldReturnApiIoExceptionWhenObjectMapperFails() {
         var request = "This is not a valid request";
         assertThrows(ApiIoException.class, () -> RequestInfo.fromRequest(IoUtils.stringToStream(request), httpClient));
     }
@@ -378,7 +387,6 @@ class RequestInfoTest {
         var requestInfo = getRequestInfo(request);
         assertThat(requestInfo.getClientId().get(), is(equalTo(clientId)));
     }
-
 
     @Test
     void canGetValueFromRequestContext() throws JsonProcessingException {
@@ -613,7 +621,7 @@ class RequestInfoTest {
         cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
         var actualFeideId = requestInfo.getFeideId();
-        
+
         assertThat(requestInfo.getFeideId().isPresent(), is(true));
         assertThat(actualFeideId.orElseThrow(), is(equalTo(expectedFeideId)));
     }
@@ -719,6 +727,50 @@ class RequestInfoTest {
         assertThat(accessRights, is(emptyIterable()));
     }
 
+    @ParameterizedTest
+    @MethodSource("emptyViewingScopeInputsProvider")
+    void shouldReturnEmptyViewingScopeIfNotPresentForUser(String includes, String excludes) throws UnauthorizedException {
+        var cognitoUserEntry = CognitoUserInfo.builder()
+                                   .withViewingScopeIncluded(includes)
+                                   .withViewingScopeExcluded(excludes)
+                                   .build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var getViewingScope = requestInfo.getViewingScope();
+        assertThat(getViewingScope.includes(), is(emptyIterable()));
+        assertThat(getViewingScope.excludes(), is(emptyIterable()));
+    }
+
+    @Test
+    void shouldReturnViewingScopeFromRequestContextIfPresentForUser()
+        throws UnauthorizedException, JsonProcessingException, ApiIoException {
+        var requestInfo = createRequestInfoWithViewScopeRequestContext("1,2", "3,4");
+        var getViewingScope = requestInfo.getViewingScope();
+        assertThat(getViewingScope.includes(), is(hasItems("1", "2")));
+        assertThat(getViewingScope.excludes(), is(hasItems("3", "4")));
+    }
+
+    @Test
+    void shouldReturnViewingScopeFromCognitoIfPresentForUser() throws UnauthorizedException {
+        var cognitoUserEntry = CognitoUserInfo.builder()
+                                   .withViewingScopeIncluded("1,2")
+                                   .withViewingScopeExcluded("3,4")
+                                   .build();
+        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var getViewingScope = requestInfo.getViewingScope();
+        assertThat(getViewingScope.includes(), is(hasItems("1", "2")));
+        assertThat(getViewingScope.excludes(), is(hasItems("3", "4")));
+    }
+
+    public static Stream<Arguments> emptyViewingScopeInputsProvider() {
+        return Stream.of(
+            argumentSet("both includes and excludes is null", null, null),
+            argumentSet("both includes and excludes is empty", "", ""),
+            argumentSet("both includes and excludes is null string", "null", "null")
+        );
+    }
+
     private RequestInfo requestInfoWithCustomerId(URI userCustomer) throws JsonProcessingException,
                                                                            ApiIoException {
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).build();
@@ -813,6 +865,15 @@ class RequestInfoTest {
         throws JsonProcessingException, ApiIoException {
         var requestStream = new HandlerRequestBuilder<Void>(dtoObjectMapper)
                                 .withAccessRights(userCustomer, accessRights.toArray(AccessRight[]::new))
+                                .build();
+        return getRequestInfo(requestStream);
+    }
+
+    private RequestInfo createRequestInfoWithViewScopeRequestContext(String includes, String excludes)
+        throws JsonProcessingException, ApiIoException {
+        var requestStream = new HandlerRequestBuilder<Void>(dtoObjectMapper)
+                                .withAuthorizerClaim("custom:viewingScopeIncluded", includes)
+                                .withAuthorizerClaim("custom:viewingScopeExcluded", excludes)
                                 .build();
         return getRequestInfo(requestStream);
     }

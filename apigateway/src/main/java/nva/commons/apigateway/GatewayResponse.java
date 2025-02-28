@@ -48,7 +48,7 @@ public class GatewayResponse<T> implements Serializable {
     /**
      * Constructor for GatewayResponse.
      *
-     * @param body         body of response
+     * @param body         body from response
      * @param headers      http headers for response
      * @param statusCode   status code for response
      * @param objectMapper desired object mapper
@@ -63,7 +63,7 @@ public class GatewayResponse<T> implements Serializable {
     /**
      * Constructor for GatewayResponse.
      *
-     * @param body            body of response
+     * @param body            body from response
      * @param headers         http headers for response
      * @param statusCode      status code for response
      * @param isBase64Encoded status code for response
@@ -85,7 +85,7 @@ public class GatewayResponse<T> implements Serializable {
     /**
      * Builder for GatewayResponse.
      *
-     * @param outputStream content of response
+     * @param outputStream content from response
      * @throws JsonProcessingException when serializing fails
      */
     public static <T> GatewayResponse<T> of(ByteArrayOutputStream outputStream) throws JsonProcessingException {
@@ -98,7 +98,7 @@ public class GatewayResponse<T> implements Serializable {
     /**
      * Builder for GatewayResponse.
      *
-     * @param inputStream content of response
+     * @param inputStream content from response
      * @throws JsonProcessingException when serializing fails
      */
     public static <T> GatewayResponse<T> of(InputStream inputStream) throws IOException {
@@ -110,7 +110,7 @@ public class GatewayResponse<T> implements Serializable {
     /**
      * Builder for GatewayResponse.
      *
-     * @param jsonString content of response
+     * @param jsonString content from response
      * @throws JsonProcessingException when serializing fails
      */
     public static <T> GatewayResponse<T> of(String jsonString) throws JsonProcessingException {
@@ -120,13 +120,13 @@ public class GatewayResponse<T> implements Serializable {
     }
 
     /**
-     * Create GatewayResponse object from an output stream. Used when we call the method {@code handleRequest()} of a
+     * Create GatewayResponse object from an output stream. Used when we call the method {@code handleRequest()} from a
      * Handler directly, and we want to read the output.
      *
      * @param outputStream the outputStream updated by the lambda handler
-     * @param className    the class of the returned object
-     * @param <T>          The type of the interface or class returned
-     * @return the GatewayResponse containing the output of the handler
+     * @param className    the class from the returned object
+     * @param <T>          The type from the interface or class returned
+     * @return the GatewayResponse containing the output from the handler
      * @throws JsonProcessingException when the OutputStream cannot be parsed to a JSON object.
      */
     public static <T> GatewayResponse<T> fromOutputStream(ByteArrayOutputStream outputStream, Class<T> className)
@@ -144,11 +144,11 @@ public class GatewayResponse<T> implements Serializable {
     }
 
     /**
-     * Create GatewayResponse object from a String. Used when we call the method {@code handleRequest()} of a Handler
-     * directly and we want to read the output. Usually the String is the output of an OutputStream.
+     * Create GatewayResponse object from a String. Used when we call the method {@code handleRequest()} from a Handler
+     * directly and we want to read the output. Usually the String is the output from an OutputStream.
      *
      * @param responseString a String containing the serialized GatwayResponse
-     * @return the GatewayResponse containing the output of the handler
+     * @return the GatewayResponse containing the output from the handler
      * @throws JsonProcessingException when the OutputStream cannot be parsed to a JSON object.
      */
     public static <T> GatewayResponse<T> fromString(String responseString, Class<T> className)
@@ -179,7 +179,7 @@ public class GatewayResponse<T> implements Serializable {
     /**
      * Parses the JSON body to an object.
      *
-     * @param clazz the class of the body object
+     * @param clazz the class from the body object
      * @return the body object.
      * @throws JsonProcessingException when JSON processing fails
      */

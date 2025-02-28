@@ -14,7 +14,7 @@ import nva.commons.core.JacocoGenerated;
 /**
  * Not intended for use outside the {@link RestRequestHandler}. Class for parsing a message from ApiGateway.
  *
- * @param <T> Class of the object we want to extract from the API message
+ * @param <T> Class from the object we want to extract from the API message
  */
 public class ApiMessageParser<T> {
 
@@ -46,11 +46,11 @@ public class ApiMessageParser<T> {
     }
 
     /**
-     * Get Request body from the JSON string of the Rest-API request.
+     * Get Request body from the JSON string from the Rest-API request.
      *
-     * @param inputString the JSON string of the Rest-API request.
+     * @param inputString the JSON string from the Rest-API request.
      * @param tclass      the class to map the the JSON object to.
-     * @return An instance of the input class.
+     * @return An instance from the input class.
      * @throws IOException when reading fails, or the JSON parser throws an Exception.
      */
     @SuppressWarnings("unchecked")

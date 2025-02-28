@@ -6,6 +6,8 @@ import static no.unit.nva.auth.CognitoUserInfo.PERSON_CRISTIN_ID_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.PERSON_NIN_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.TOP_LEVEL_ORG_CRISTIN_ID_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.USER_NAME_CLAIM;
+import static no.unit.nva.auth.CognitoUserInfo.VIEWING_SCOPE_EXCLUDED_CLAIM;
+import static no.unit.nva.auth.CognitoUserInfo.VIEWING_SCOPE_INCLUDED_CLAIM;
 import static no.unit.nva.auth.OAuthConstants.OAUTH_USER_INFO;
 import com.fasterxml.jackson.core.JsonPointer;
 import java.net.URI;
@@ -58,6 +60,8 @@ public final class RequestInfoConstants {
     public static final JsonPointer CLIENT_ID = claimToJsonPointer(CLIENT_ID_CLAIM);
     public static final JsonPointer CUSTOMER_ID = claimToJsonPointer(CUSTOMER_ID_CLAIM);
     public static final JsonPointer ISS = claimToJsonPointer(ISS_CLAIM);
+    public static final JsonPointer VIEWING_SCOPE_INCLUDED = claimToJsonPointer(VIEWING_SCOPE_INCLUDED_CLAIM);
+    public static final JsonPointer VIEWING_SCOPE_EXCLUDED = claimToJsonPointer(VIEWING_SCOPE_EXCLUDED_CLAIM);
 
     private RequestInfoConstants() {
 

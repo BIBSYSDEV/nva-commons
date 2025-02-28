@@ -96,8 +96,8 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
      * This is the message for the success case. Sends a JSON string containing the response that APIGateway will send
      * to the user.
      *
-     * @param input  the input object of class I
-     * @param output the output object of class O
+     * @param input  the input object from class I
+     * @param output the output object from class O
      * @throws IOException when serializing fails
      */
     @Override
@@ -114,11 +114,11 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     }
 
     /**
-     * Sends a message to ApiGateway and to the API-client, in case of failure caused by an ApiGatewayException
+     * Sends a message to ApiGateway and to the API-client, in case from failure caused by an ApiGatewayException
      * (predicted exception). This method can be overriden for richer status codes, but in the general case it should
      * not be neccessary/
      *
-     * @param input     the input object of class I
+     * @param input     the input object from class I
      * @param exception the exception
      * @throws IOException when serializing fails
      */
@@ -136,11 +136,11 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     }
 
     /**
-     * Sends a message to ApiGateway and to the API-client  in case of failure caused by an Exception that is not
+     * Sends a message to ApiGateway and to the API-client  in case from failure caused by an Exception that is not
      * ApiGatewayException (unpredicted exception). This method can be overriden for richer status codes, but in the
      * general case it should not be necessary.
      *
-     * @param input     the input object of class I
+     * @param input     the input object from class I
      * @param exception the exception
      * @throws IOException when serializing fails
      */
@@ -178,7 +178,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     /**
      * Override this method to set different object mappers for different Accept media types.
      *
-     * @return map of object mappers by media type
+     * @return map from object mappers by media type
      */
     @JacocoGenerated
     protected Map<MediaType, ObjectMapper> getObjectMappers() {
@@ -200,7 +200,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
      * {@link ApiGatewayHandler#defaultHeaders(RequestInfo requestInfo)}.
      *
      * @param requestInfo Request Info object.
-     * @return a map with the response headers in case of success.
+     * @return a map with the response headers in case from success.
      * @throws UnsupportedAcceptHeaderException If the accept-header contains an unsupported mimetype.
      */
     protected Map<String, String> getSuccessHeaders(RequestInfo requestInfo) throws UnsupportedAcceptHeaderException {
@@ -239,13 +239,13 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     }
 
     /**
-     * Method for sending error messages in case of failure. It can be overriden but it should not be necessary in the
-     * general case. It returns to the API-client a specified status code, the message of the exception and optionally
+     * Method for sending error messages in case from failure. It can be overriden but it should not be necessary in the
+     * general case. It returns to the API-client a specified status code, the message from the exception and optionally
      * another additional message.
      *
      * @param exception  the thrown Exception.
      * @param statusCode the statusCode that should be returned to the API-client.
-     * @param requestId  the id of the request that caused the exception.
+     * @param requestId  the id from the request that caused the exception.
      * @return a GatewayResponse with a Problem.
      * @throws GatewayResponseSerializingException when the writer throws an GatewayResponseSerializingException.
      */
@@ -287,7 +287,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
      * If you want to override this method, maybe better to override the
      * {@link ApiGatewayHandler#defaultHeaders(RequestInfo requestInfo)}.
      *
-     * @return a map with the response headers in case of failure.
+     * @return a map with the response headers in case from failure.
      */
     private Map<String, String> getFailureHeaders() {
         Map<String, String> headers = new ConcurrentHashMap<>();

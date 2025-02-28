@@ -268,12 +268,6 @@ public class HandlerRequestBuilder<T> {
         return this;
     }
 
-    public HandlerRequestBuilder<T> withCustomClaim(String claim, String value) {
-        var authorizerClaims = getAuthorizerClaimsNode();
-        authorizerClaims.put(claim, value);
-        return this;
-    }
-
     private void addAccessRightToCognitoGroups(AccessRightEntry accessRight) {
         var claims = getAuthorizerClaimsNode();
         appendAccessRightClaimToAccessRightClaims(claims, accessRight);
