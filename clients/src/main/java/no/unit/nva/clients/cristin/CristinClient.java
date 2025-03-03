@@ -32,7 +32,7 @@ public class CristinClient {
     }
 
     @JacocoGenerated
-    public static CristinClient prepareNotAuthorizedClient() {
+    public static CristinClient defaultClient() {
         return new CristinClient(HttpClient.newBuilder().build());
     }
 
