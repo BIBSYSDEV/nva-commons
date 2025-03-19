@@ -26,6 +26,7 @@ public class CognitoUserInfo {
     public static final String PERSON_NIN_CLAIM = "custom:nin";
     public static final String PERSON_FEIDE_NIN_CLAIM = "custom:feideIdNin";
     public static final String ROLES = "custom:roles";
+    public static final String PERSON_GROUPS_CLAIM = "cognito:groups";
     public static final String SUB = "sub";
     public static final String PERSON_AFFILIATION_CLAIM = "custom:personAffiliation";
     public static final String ALLOWED_CUSTOMERS = "custom:allowedCustomers";

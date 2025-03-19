@@ -24,8 +24,10 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import no.unit.nva.auth.CognitoUserInfo;
 import no.unit.nva.commons.json.JsonUtils;
+import nva.commons.apigateway.AccessRight;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ApiIoException;
 import nva.commons.apigateway.exceptions.UnauthorizedException;
@@ -144,6 +146,7 @@ class HandlerRequestBuilderTest {
         var expectedCustomerId = randomUri();
         var requestStream = new HandlerRequestBuilder<String>(objectMapper)
                                 .withCurrentCustomer(expectedCustomerId)
+                                .withAllowedCustomers(Set.of(expectedCustomerId))
                                 .build();
         var request = IoUtils.streamToString(requestStream);
         var requestInfo = JsonUtils.dtoObjectMapper.readValue(request, RequestInfo.class);
@@ -151,7 +154,7 @@ class HandlerRequestBuilderTest {
     }
 
     @Test
-    void buildReturnsPersonsFeideIdWhenSet() throws JsonProcessingException, ApiIoException {
+    void buildReturnsPersonsFeideIdWhenSet() throws JsonProcessingException, ApiIoException, UnauthorizedException {
         var expectedFeideId = randomString();
         var request = new HandlerRequestBuilder<String>(objectMapper)
                           .withFeideId(expectedFeideId)
@@ -164,7 +167,7 @@ class HandlerRequestBuilderTest {
 
     @Test
     void buildReturnsEmptyOptionalWhenFeideIdNotSet()
-        throws JsonProcessingException, ApiIoException {
+        throws JsonProcessingException, ApiIoException, UnauthorizedException {
         var request = new HandlerRequestBuilder<String>(objectMapper).build();
         var requestInfo = RequestInfo.fromRequest(request);
 
@@ -192,7 +195,9 @@ class HandlerRequestBuilderTest {
         var expectedApplicationRoles = "role1,role2";
 
         InputStream requestStream = new HandlerRequestBuilder<String>(objectMapper).withUserName(expectedUsername)
-                                        .withAccessRights(expectedCustomerId, randomAccessRight())
+                                        .withAccessRights(expectedCustomerId, randomAccessRight(),
+                                                          AccessRight.MANAGE_DEGREE,
+                                                          AccessRight.MANAGE_RESOURCES_STANDARD)
                                         .withRoles(expectedApplicationRoles)
                                         .build();
         JsonNode request = toJsonNode(requestStream);

@@ -1,31 +1,11 @@
 package nva.commons.apigateway;
 
-import static no.unit.nva.auth.CognitoUserInfo.PERSON_AFFILIATION_CLAIM;
-import static no.unit.nva.auth.CognitoUserInfo.PERSON_CRISTIN_ID_CLAIM;
-import static no.unit.nva.auth.CognitoUserInfo.PERSON_NIN_CLAIM;
-import static no.unit.nva.auth.CognitoUserInfo.SELECTED_CUSTOMER_CLAIM;
-import static no.unit.nva.auth.CognitoUserInfo.TOP_LEVEL_ORG_CRISTIN_ID_CLAIM;
-import static no.unit.nva.auth.CognitoUserInfo.USER_NAME_CLAIM;
-import static no.unit.nva.auth.CognitoUserInfo.VIEWING_SCOPE_EXCLUDED_CLAIM;
-import static no.unit.nva.auth.CognitoUserInfo.VIEWING_SCOPE_INCLUDED_CLAIM;
-import static no.unit.nva.auth.OAuthConstants.OAUTH_USER_INFO;
 import com.fasterxml.jackson.core.JsonPointer;
-import java.net.URI;
-import java.util.function.Supplier;
-import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
-import nva.commons.core.paths.UriWrapper;
 
 @JacocoGenerated
 public final class RequestInfoConstants {
 
-    public static final Environment ENVIRONMENT = new Environment();
-    public static final Supplier<URI> DEFAULT_COGNITO_URI =
-        RequestInfoConstants::lazyInitializationForDefaultCognitoUri;
-    public static final Supplier<String> EXTERNAL_USER_POOL_URI =
-        RequestInfoConstants::lazyInitializationForDefaultExternalUserPoolUri;
-    public static final String IDENTITY_SERVICE_PATH = "users-roles";
-    public static final String IDENTITY_SERVICE_USER_INFO_PATH = "userinfo";
     public static final String QUERY_STRING_PARAMETERS_FIELD = "queryStringParameters";
     public static final String MULTI_VALUE_QUERY_STRING_PARAMETERS_FIELD = "multiValueQueryStringParameters";
     public static final String PATH_PARAMETERS_FIELD = "pathParameters";
@@ -39,44 +19,19 @@ public final class RequestInfoConstants {
     public static final String MISSING_FROM_PATH_PARAMETERS = "Missing from pathParameters: ";
     public static final String MISSING_FROM_REQUEST_CONTEXT = "Missing from requestContext: ";
     public static final String DOMAIN_NAME_FIELD = "domainName";
-    public static final String PERSON_GROUPS_CLAIM = "cognito:groups";
     public static final String AUTHORIZATION_FAILURE_WARNING = "Missing customerId or required access right";
     public static final String BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE = "https://api.nva.unit.no/scopes/backend";
     public static final String SCOPE = "scope";
-    public static final String FEIDE_ID_CLAIM = "custom:feideId";
     public static final String CLIENT_ID_CLAIM = "client_id";
-    public static final String ISS_CLAIM = "iss";
     public static final String CLAIMS_PATH = "/authorizer/claims";
-    public static final JsonPointer PERSON_GROUPS = claimToJsonPointer(PERSON_GROUPS_CLAIM);
-    public static final JsonPointer USER_NAME = claimToJsonPointer(USER_NAME_CLAIM);
-    public static final JsonPointer TOP_LEVEL_ORG_CRISTIN_ID = claimToJsonPointer(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM);
-    public static final JsonPointer PERSON_CRISTIN_ID = claimToJsonPointer(PERSON_CRISTIN_ID_CLAIM);
-    public static final JsonPointer PERSON_AFFILIATION = claimToJsonPointer(PERSON_AFFILIATION_CLAIM);
+
     public static final JsonPointer SCOPES_CLAIM = claimToJsonPointer(SCOPE);
-    public static final JsonPointer PERSON_NIN = claimToJsonPointer(PERSON_NIN_CLAIM);
-    public static final JsonPointer FEIDE_ID = claimToJsonPointer(FEIDE_ID_CLAIM);
     public static final JsonPointer CLIENT_ID = claimToJsonPointer(CLIENT_ID_CLAIM);
-    public static final JsonPointer CUSTOMER_ID = claimToJsonPointer(SELECTED_CUSTOMER_CLAIM);
-    public static final JsonPointer ISS = claimToJsonPointer(ISS_CLAIM);
-    public static final JsonPointer VIEWING_SCOPE_INCLUDED = claimToJsonPointer(VIEWING_SCOPE_INCLUDED_CLAIM);
-    public static final JsonPointer VIEWING_SCOPE_EXCLUDED = claimToJsonPointer(VIEWING_SCOPE_EXCLUDED_CLAIM);
 
     private RequestInfoConstants() {
 
     }
 
-    private static URI lazyInitializationForDefaultCognitoUri() {
-        String cognitoHost = ENVIRONMENT.readEnv("COGNITO_HOST");
-        return createUri(cognitoHost, OAUTH_USER_INFO);
-    }
-
-    private static String lazyInitializationForDefaultExternalUserPoolUri() {
-        return ENVIRONMENT.readEnv("EXTERNAL_USER_POOL_URI");
-    }
-
-    private static URI createUri(String cognitoHost, String... path) {
-        return UriWrapper.fromHost(cognitoHost).addChild(path).getUri();
-    }
 
     private static JsonPointer claimToJsonPointer(String claim) {
         return JsonPointer.compile(CLAIMS_PATH + "/" + claim);

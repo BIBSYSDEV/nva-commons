@@ -10,7 +10,7 @@ plugins {
 
 
 group = 'com.github.bibsysdev'
-version = '1.41.9'
+version = '2.0.0'
 
 
 java {

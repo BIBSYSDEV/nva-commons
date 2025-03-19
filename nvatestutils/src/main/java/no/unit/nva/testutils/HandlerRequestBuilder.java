@@ -2,6 +2,8 @@ package no.unit.nva.testutils;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static no.unit.nva.auth.CognitoUserInfo.ACCESS_RIGHTS_CLAIM;
+import static no.unit.nva.auth.CognitoUserInfo.ALLOWED_CUSTOMERS;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -19,11 +21,13 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import nva.commons.apigateway.AccessRight;
 import nva.commons.apigateway.AccessRightEntry;
@@ -200,6 +204,12 @@ public class HandlerRequestBuilder<T> {
         return this;
     }
 
+    public HandlerRequestBuilder<T> withAllowedCustomers(Set<URI> customers) {
+        ObjectNode claims = getAuthorizerClaimsNode();
+        claims.put(ALLOWED_CUSTOMERS, customers.stream().map(URI::toString).collect(Collectors.joining(",")));
+        return this;
+    }
+
     public HandlerRequestBuilder<T> withAuthorizerClaim(String claimName, String claimValue) {
         var authorizerClaimsNode = getAuthorizerClaimsNode();
         authorizerClaimsNode.put(claimName, claimValue);
@@ -241,6 +251,13 @@ public class HandlerRequestBuilder<T> {
             var accessRightEntry = new AccessRightEntry(accessRight, customerId);
             addAccessRightToCognitoGroups(accessRightEntry);
         }
+
+        ObjectNode claims = getAuthorizerClaimsNode();
+        var accessRightsString = Arrays.stream(accessRights)
+                                     .map(AccessRight::toPersistedString)
+                                     .collect(Collectors.joining(","));
+        claims.put(ACCESS_RIGHTS_CLAIM, accessRightsString);
+
         return this;
     }
 
@@ -281,10 +298,11 @@ public class HandlerRequestBuilder<T> {
                            .collect(Collectors.joining(ENTRIES_DELIMITER));
         claims.put(GROUPS_CLAIM, newClaim);
     }
+
     private Collection<AccessRightEntry> extractAccessRights(ObjectNode claims) {
-        return claims.has(GROUPS_CLAIM)
-                   ? AccessRightEntry.fromCsv(claims.get(GROUPS_CLAIM).textValue()).collect(Collectors.toList())
-                   : new ArrayList<>();
+        return new ArrayList<>(
+            AccessRightEntry.fromCsv(Optional.ofNullable(claims.get(GROUPS_CLAIM)).map(JsonNode::asText).orElse(""))
+                .toList());
     }
 
     private ObjectNode getAuthorizerClaimsNode() {

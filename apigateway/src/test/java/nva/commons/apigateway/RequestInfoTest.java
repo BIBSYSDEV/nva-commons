@@ -1,6 +1,7 @@
 package nva.commons.apigateway;
 
 import static java.util.Objects.nonNull;
+import static no.unit.nva.auth.CognitoUserInfo.PERSON_GROUPS_CLAIM;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomAccessRight;
@@ -12,7 +13,6 @@ import static nva.commons.apigateway.AccessRight.MANAGE_IMPORT;
 import static nva.commons.apigateway.AccessRight.MANAGE_PUBLISHING_REQUESTS;
 import static nva.commons.apigateway.RequestInfoConstants.AUTHORIZATION_FAILURE_WARNING;
 import static nva.commons.apigateway.RequestInfoConstants.BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE;
-import static nva.commons.apigateway.RequestInfoConstants.PERSON_GROUPS_CLAIM;
 import static nva.commons.apigateway.RequestInfoConstants.REQUEST_CONTEXT_FIELD;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static nva.commons.core.paths.UriWrapper.HTTPS;
@@ -86,7 +86,8 @@ class RequestInfoTest {
     private static final Path AWS_SAMPLE_PROXY_EVENT = Path.of(API_GATEWAY_MESSAGES_FOLDER, "awsSampleProxyEvent.json");
     private static final String HARDCODED_AUTH_HEADER = "Bearer THE_ACCESS_TOKEN";
     public static final String EXTERNAL_USER_POOL_URL = "https//user-pool.example.com/123";
-    private static final String THIRD_PARTY_PUBLICATION_UPSERT = "https://api.nva.unit.no/scopes/third-party/publication-upsert";
+    private static final String THIRD_PARTY_PUBLICATION_UPSERT_SCOPE = "https://api.nva.unit"
+                                                                       + ".no/scopes/third-party/publication-upsert";
 
     static {
         QUERY_PARAMS_FOUND_IN_RESOURCE_FILE = new TreeMap<>();
@@ -317,7 +318,7 @@ class RequestInfoTest {
     void isThirdPartyShouldReturnTrueWhenScopeContainsTheExternalIssuedUserPool()
         throws JsonProcessingException, ApiIoException {
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withIssuer(EXTERNAL_USER_POOL_URL)
-                          .withScope(THIRD_PARTY_PUBLICATION_UPSERT)
+                          .withScope(THIRD_PARTY_PUBLICATION_UPSERT_SCOPE)
                           .build();
         var requestInfo = getRequestInfo(request);
         assertThat(requestInfo.clientIsThirdParty(), is(true));
@@ -493,7 +494,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnTopLevelOrgCristinIdWhenCurrentCustomerHasBeenSelectedForPerson() {
+    void shouldReturnTopLevelOrgCristinIdWhenCurrentCustomerHasBeenSelectedForPerson() throws UnauthorizedException {
         var topOrgCristinId = randomUri();
         var cognitoUserEntry = CognitoUserInfo.builder().withTopOrgCristinId(topOrgCristinId).build();
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
@@ -502,7 +503,7 @@ class RequestInfoTest {
 
     @Test
     void shouldReturnTopLevelOrgCristinIdWhenRequestsAuthorizerNodeContainsCorrespondingClaim()
-        throws JsonProcessingException, ApiIoException {
+        throws JsonProcessingException, ApiIoException, UnauthorizedException {
         var topOrgCristinId = randomUri();
         var requestInfo = requestInfoWithAuthorizerClaim(topOrgCristinId.toString());
         assertThat(requestInfo.getTopLevelOrgCristinId().orElseThrow(), is(equalTo(topOrgCristinId)));
@@ -539,7 +540,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnPersonNinFromCognitoWhenUserHasPersonNinInClaimAndIsNotOffline() {
+    void shouldReturnPersonNinFromCognitoWhenUserHasPersonNinInClaimAndIsNotOffline() throws UnauthorizedException {
         var expectedPersonNin = randomString();
         var cognitoUserEntry = CognitoUserInfo.builder().withPersonNin(expectedPersonNin).build();
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
@@ -548,7 +549,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnPersonNinWhenUserHasPersonNinInClaimAvailableOffline() {
+    void shouldReturnPersonNinWhenUserHasPersonNinInClaimAvailableOffline() throws UnauthorizedException {
         var cognitoUserEntry = CognitoUserInfo.builder().withPersonNin(randomString()).build();
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var expectedPersonNinDifferentFromCognito = randomString();
@@ -558,7 +559,8 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnPersonNinFromFeideNinClaimWhenOnlyFeideNinIsPresentInCognito() throws JsonProcessingException {
+    void shouldReturnPersonNinFromFeideNinClaimWhenOnlyFeideNinIsPresentInCognito()
+        throws JsonProcessingException, UnauthorizedException {
         var expectedPersonFeideNin = randomString();
         var claims = dtoObjectMapper.createObjectNode();
         claims.put(CognitoUserInfo.PERSON_FEIDE_NIN_CLAIM, expectedPersonFeideNin);
@@ -571,7 +573,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnFeideIdFromCognitoWhenUserHasFeideIdInClaimAndIsNotOffline() {
+    void shouldReturnFeideIdFromCognitoWhenUserHasFeideIdInClaimAndIsNotOffline() throws UnauthorizedException {
         var expectedFeideId = randomString();
         var cognitoUserEntry = CognitoUserInfo.builder().withFeideId(expectedFeideId).build();
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
@@ -582,7 +584,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnFeideIdWhenUserHasFeideIdInClaimAvailableOffline() {
+    void shouldReturnFeideIdWhenUserHasFeideIdInClaimAvailableOffline() throws UnauthorizedException {
         var cognitoUserEntry = CognitoUserInfo.builder().withFeideId(randomString()).build();
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var expectedFeideIdDifferentFromCognito = randomString();
@@ -594,7 +596,8 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnFeideIdFromFeideClaimWhenOnlyFeideIdIsPresentInCognito() throws JsonProcessingException {
+    void shouldReturnFeideIdFromFeideClaimWhenOnlyFeideIdIsPresentInCognito()
+        throws JsonProcessingException, UnauthorizedException {
         var expectedFeideId = randomString();
         var claims = dtoObjectMapper.createObjectNode();
         claims.put(CognitoUserInfo.PERSON_FEIDE_ID_CLAIM, expectedFeideId);
@@ -608,7 +611,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnAccessRightsWhenOnlyInCognito() throws JsonProcessingException {
+    void shouldReturnAccessRightsWhenOnlyInCognito() throws JsonProcessingException, UnauthorizedException {
         var accessRights = randomAccessRights();
         var accessRightsString = accessRights.stream()
                                      .map(AccessRight::toPersistedString)
@@ -625,7 +628,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnOptionalEmptyWhenUserDoesNotHaveFeideId() {
+    void shouldReturnOptionalEmptyWhenUserDoesNotHaveFeideId() throws UnauthorizedException {
         var cognitoUserEntryWithoutFeideId = CognitoUserInfo.builder().build();
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntryWithoutFeideId);
 
@@ -642,12 +645,25 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnEmptyListWhenAccessRightsCognitoStringIsEmpty() {
+    void shouldReturnEmptyListWhenAccessRightsCognitoStringIsEmpty() throws UnauthorizedException {
         var cognitoUserEntry = CognitoUserInfo.builder().build();
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var accessRights = requestInfo.getAccessRights();
 
         assertThat(accessRights, is(emptyIterable()));
+    }
+
+    @Test
+    void shouldReturnListOfAllowedCustomers() throws UnauthorizedException {
+        var allowedCustomers = List.of(randomUri(), randomUri());
+        String allowedCustomersString = allowedCustomers.stream()
+                                            .map(URI::toString)
+                                            .collect(Collectors.joining(","));
+        var cognitoUserEntry = CognitoUserInfo.builder().withAllowedCustomers(allowedCustomersString).build();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
+        var actual = requestInfo.getAllowedCustomers();
+
+        assertThat(actual, containsInAnyOrder(allowedCustomers.toArray()));
     }
 
     @ParameterizedTest

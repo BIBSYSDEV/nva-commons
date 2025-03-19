@@ -17,7 +17,6 @@ import static nva.commons.apigateway.RequestInfoConstants.MISSING_FROM_REQUEST_C
 import static nva.commons.apigateway.RequestInfoConstants.MULTI_VALUE_QUERY_STRING_PARAMETERS_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.PATH_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.PATH_PARAMETERS_FIELD;
-import static nva.commons.apigateway.RequestInfoConstants.PERSON_GROUPS;
 import static nva.commons.apigateway.RequestInfoConstants.QUERY_STRING_PARAMETERS_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.REQUEST_CONTEXT_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.SCOPES_CLAIM;
@@ -41,13 +40,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 import no.unit.nva.auth.CognitoUserInfo;
 import nva.commons.apigateway.exceptions.ApiIoException;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.JacocoGenerated;
-import nva.commons.core.SingletonCollector;
 import nva.commons.core.StringUtils;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.core.paths.UriWrapper;
@@ -57,7 +54,6 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("PMD.GodClass")
 public final class RequestInfo {
 
-    public static final String ERROR_FETCHING_COGNITO_INFO = "Could not fetch user information from Cognito:{}";
     private static final Logger logger = LoggerFactory.getLogger(RequestInfo.class);
     private static final ObjectMapper mapper = defaultRestObjectMapper;
     private static final String THIRD_PARTY_SCOPE_PREFIX = "https://api.nva.unit.no/scopes/third-party";
@@ -252,19 +248,28 @@ public final class RequestInfo {
     }
 
     public boolean userIsAuthorized(AccessRight accessRight) {
-        return checkAuthorizationFromContext(accessRight);
+        return attempt(() -> getAccessRights().contains(accessRight)).toOptional().orElse(handleAuthorizationFailure());
     }
 
-    public List<AccessRight> getAccessRights() {
+    private boolean handleAuthorizationFailure() {
+        logger.warn(AUTHORIZATION_FAILURE_WARNING);
+        return false;
+    }
+
+    public List<AccessRight> getAccessRights() throws UnauthorizedException {
         return fetchAccessRights().orElse(Collections.emptyList());
     }
 
-    private Optional<List<AccessRight>> fetchAccessRights() {
+    private Optional<List<AccessRight>> fetchAccessRights() throws UnauthorizedException {
         return fetchUserInfo().map(CognitoUserInfo::getAccessRights).map(this::parseAccessRights);
     }
 
-    private Optional<CognitoUserInfo> fetchUserInfo() {
-        return Optional.of(CognitoUserInfo.fromString(getRequestContext().at(CLAIMS_PATH).toString()));
+    private Optional<CognitoUserInfo> fetchUserInfo() throws UnauthorizedException {
+        var pointer = getRequestContext().at(CLAIMS_PATH);
+        if (pointer.isMissingNode()) {
+            throw new UnauthorizedException();
+        }
+        return Optional.of(CognitoUserInfo.fromString(pointer.toString()));
     }
 
     private List<AccessRight> parseAccessRights(String value) {
@@ -299,12 +304,12 @@ public final class RequestInfo {
     }
 
     @JsonIgnore
-    public Optional<String> getFeideId() {
+    public Optional<String> getFeideId() throws UnauthorizedException {
         return fetchFeideId();
     }
 
     @JsonIgnore
-    public Optional<URI> getTopLevelOrgCristinId() {
+    public Optional<URI> getTopLevelOrgCristinId() throws UnauthorizedException {
         return fetchTopLevelOrgCristinId();
     }
 
@@ -315,8 +320,12 @@ public final class RequestInfo {
 
     @JsonIgnore
     public URI getCurrentCustomer() throws UnauthorizedException {
-        return fetchCustomerId().or(this::fetchCustomerIdFromContext)
-                   .orElseThrow(UnauthorizedException::new);
+        return fetchCustomerId().orElseThrow(UnauthorizedException::new);
+    }
+
+    @JsonIgnore
+    public List<URI> getAllowedCustomers() throws UnauthorizedException {
+        return fetchAllowedCustomers().orElseThrow(UnauthorizedException::new);
     }
 
     @JsonIgnore
@@ -330,7 +339,7 @@ public final class RequestInfo {
     }
 
     @JsonIgnore
-    public String getPersonNin() {
+    public String getPersonNin() throws UnauthorizedException {
         return fetchPersonNin().orElseThrow(IllegalStateException::new);
     }
 
@@ -348,64 +357,44 @@ public final class RequestInfo {
                    .orElse(false);
     }
 
-    private Optional<String> fetchFeideId() {
+    private Optional<String> fetchFeideId() throws UnauthorizedException {
         return fetchUserInfo().map(CognitoUserInfo::getFeideId);
     }
 
-    private Optional<URI> fetchCustomerIdFromContext() {
-        return getRequestContextParameterOpt(PERSON_GROUPS).stream()
-                   .flatMap(AccessRightEntry::fromCsv)
-                   .map(AccessRightEntry::getCustomerId)
-                   .distinct()
-                   .collect(SingletonCollector.tryCollect())
-                   .toOptional();
-    }
-
-    private Optional<URI> fetchTopLevelOrgCristinId() {
+    private Optional<URI> fetchTopLevelOrgCristinId() throws UnauthorizedException {
         return fetchUserInfo().map(CognitoUserInfo::getTopOrgCristinId);
     }
 
-    private Optional<String> fetchUserName() {
+    private Optional<String> fetchUserName() throws UnauthorizedException {
         return fetchUserInfo().map(CognitoUserInfo::getUserName);
     }
 
-    private Optional<ViewingScope> fetchViewingScope() {
+    private Optional<ViewingScope> fetchViewingScope() throws UnauthorizedException {
         return fetchUserInfo().map(
             userInfo -> ViewingScope.from(userInfo.getViewingScopeIncluded(), userInfo.getViewingScopeExcluded()));
     }
 
-    private Optional<URI> fetchPersonCristinId() {
+    private Optional<URI> fetchPersonCristinId() throws UnauthorizedException {
         return fetchUserInfo().map(CognitoUserInfo::getPersonCristinId);
     }
 
-    private Optional<URI> fetchPersonAffiliation() {
+    private Optional<URI> fetchPersonAffiliation() throws UnauthorizedException {
         return fetchUserInfo().map(CognitoUserInfo::getPersonAffiliation);
     }
 
-    private Optional<String> fetchPersonNin() {
+    private Optional<String> fetchPersonNin() throws UnauthorizedException {
         return fetchUserInfo().map(CognitoUserInfo::getPersonNin);
     }
 
-    private boolean checkAuthorizationFromContext(AccessRight accessRight) {
-        return attempt(this::getCurrentCustomer)
-                   .map(currentCustomer -> new AccessRightEntry(accessRight, currentCustomer))
-                   .map(
-                       requiredAccessRight -> fetchAvailableAccessRightsFromContext().anyMatch(
-                           requiredAccessRight::equals))
-                   .orElse(fail -> handleAuthorizationFailure());
-    }
-
-    private boolean handleAuthorizationFailure() {
-        logger.warn(AUTHORIZATION_FAILURE_WARNING);
-        return false;
-    }
-
-    private Stream<AccessRightEntry> fetchAvailableAccessRightsFromContext() {
-        return getRequestContextParameterOpt(PERSON_GROUPS).stream().flatMap(AccessRightEntry::fromCsv);
-    }
-
-    private Optional<URI> fetchCustomerId() {
+    private Optional<URI> fetchCustomerId() throws UnauthorizedException {
         return fetchUserInfo().map(CognitoUserInfo::getCurrentCustomer);
+    }
+
+    private Optional<List<URI>> fetchAllowedCustomers() throws UnauthorizedException {
+        return fetchUserInfo().map(CognitoUserInfo::getAllowedCustomers)
+                   .map(customers -> customers.split(",")) // Split the string by commas
+                   .map(Arrays::stream)
+                   .map(stream -> stream.map(URI::create).toList());
     }
 
     private <K, V> Map<K, V> nonNullMap(Map<K, V> map) {
