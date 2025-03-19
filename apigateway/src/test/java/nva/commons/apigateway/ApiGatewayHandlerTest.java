@@ -42,7 +42,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
-import java.net.http.HttpClient;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +84,6 @@ class ApiGatewayHandlerTest {
     private static final String PATH = "path1/path2/path3";
     private Context context;
     private Handler handler;
-    private HttpClient httpClient;
     private Environment environment;
 
     public static Stream<String> mediaTypeProvider() {
@@ -96,10 +94,9 @@ class ApiGatewayHandlerTest {
     @BeforeEach
     public void setup() {
         context = new FakeContext();
-        httpClient = mock(HttpClient.class);
         environment = mock(Environment.class);
         when(environment.readEnv("ALLOWED_ORIGIN")).thenReturn("*");
-        handler = new Handler(environment, httpClient);
+        handler = new Handler(environment);
     }
 
     @Test
@@ -493,7 +490,7 @@ class ApiGatewayHandlerTest {
     }
 
     private RawStringResponseHandler getRawStringResponseHandler() {
-        return new RawStringResponseHandler(environment, httpClient);
+        return new RawStringResponseHandler(environment);
     }
 
     @Test

@@ -12,7 +12,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.http.HttpClient;
 import java.nio.file.Path;
 import no.unit.nva.stubs.FakeContext;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
@@ -32,7 +31,6 @@ public class VoidTest {
 
     private Environment environment;
     private Context context;
-    private HttpClient httpClient;
 
     /**
      * Setup.
@@ -44,7 +42,6 @@ public class VoidTest {
         context = new FakeContext();
         when(environment.readEnv(anyString())).thenReturn(SOME_ENV_VALUE);
         when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn("*");
-        httpClient = mock(HttpClient.class);
     }
 
     @DisplayName("handleRequest returns success when input class is void and body field is missing from "
@@ -70,7 +67,7 @@ public class VoidTest {
     private ByteArrayOutputStream responseFromVoidHandler(String missingBodyRequest) throws IOException {
         InputStream input = IoUtils.inputStreamFromResources(Path.of(APIGATEWAY_MESSAGES_FOLDER, missingBodyRequest));
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        VoidHandler handler = new VoidHandler(environment, httpClient);
+        VoidHandler handler = new VoidHandler(environment);
         handler.handleRequest(input, outputStream, context);
         return outputStream;
     }
@@ -79,8 +76,8 @@ public class VoidTest {
 
         public static final String SAMPLE_STRING = "sampleString";
 
-        public VoidHandler(Environment environment, HttpClient httpClient) {
-            super(Void.class, environment, httpClient);
+        public VoidHandler(Environment environment) {
+            super(Void.class, environment);
         }
 
         @Override

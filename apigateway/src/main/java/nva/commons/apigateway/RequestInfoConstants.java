@@ -1,9 +1,9 @@
 package nva.commons.apigateway;
 
-import static no.unit.nva.auth.CognitoUserInfo.CUSTOMER_ID_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.PERSON_AFFILIATION_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.PERSON_CRISTIN_ID_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.PERSON_NIN_CLAIM;
+import static no.unit.nva.auth.CognitoUserInfo.SELECTED_CUSTOMER_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.TOP_LEVEL_ORG_CRISTIN_ID_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.USER_NAME_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.VIEWING_SCOPE_EXCLUDED_CLAIM;
@@ -26,8 +26,6 @@ public final class RequestInfoConstants {
         RequestInfoConstants::lazyInitializationForDefaultExternalUserPoolUri;
     public static final String IDENTITY_SERVICE_PATH = "users-roles";
     public static final String IDENTITY_SERVICE_USER_INFO_PATH = "userinfo";
-    public static final Supplier<URI> E2E_TESTING_USER_INFO_ENDPOINT =
-        RequestInfoConstants::lazyInitializationForE2EUserInfoEndpoint;
     public static final String QUERY_STRING_PARAMETERS_FIELD = "queryStringParameters";
     public static final String MULTI_VALUE_QUERY_STRING_PARAMETERS_FIELD = "multiValueQueryStringParameters";
     public static final String PATH_PARAMETERS_FIELD = "pathParameters";
@@ -48,7 +46,7 @@ public final class RequestInfoConstants {
     public static final String FEIDE_ID_CLAIM = "custom:feideId";
     public static final String CLIENT_ID_CLAIM = "client_id";
     public static final String ISS_CLAIM = "iss";
-    private static final String CLAIMS_PATH = "/authorizer/claims/";
+    public static final String CLAIMS_PATH = "/authorizer/claims";
     public static final JsonPointer PERSON_GROUPS = claimToJsonPointer(PERSON_GROUPS_CLAIM);
     public static final JsonPointer USER_NAME = claimToJsonPointer(USER_NAME_CLAIM);
     public static final JsonPointer TOP_LEVEL_ORG_CRISTIN_ID = claimToJsonPointer(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM);
@@ -58,21 +56,13 @@ public final class RequestInfoConstants {
     public static final JsonPointer PERSON_NIN = claimToJsonPointer(PERSON_NIN_CLAIM);
     public static final JsonPointer FEIDE_ID = claimToJsonPointer(FEIDE_ID_CLAIM);
     public static final JsonPointer CLIENT_ID = claimToJsonPointer(CLIENT_ID_CLAIM);
-    public static final JsonPointer CUSTOMER_ID = claimToJsonPointer(CUSTOMER_ID_CLAIM);
+    public static final JsonPointer CUSTOMER_ID = claimToJsonPointer(SELECTED_CUSTOMER_CLAIM);
     public static final JsonPointer ISS = claimToJsonPointer(ISS_CLAIM);
     public static final JsonPointer VIEWING_SCOPE_INCLUDED = claimToJsonPointer(VIEWING_SCOPE_INCLUDED_CLAIM);
     public static final JsonPointer VIEWING_SCOPE_EXCLUDED = claimToJsonPointer(VIEWING_SCOPE_EXCLUDED_CLAIM);
 
     private RequestInfoConstants() {
 
-    }
-
-    private static URI lazyInitializationForE2EUserInfoEndpoint() {
-        var apiHost = ENVIRONMENT.readEnv("API_HOST");
-        return UriWrapper.fromHost(apiHost)
-            .addChild(IDENTITY_SERVICE_PATH)
-            .addChild(IDENTITY_SERVICE_USER_INFO_PATH)
-            .getUri();
     }
 
     private static URI lazyInitializationForDefaultCognitoUri() {
@@ -89,6 +79,6 @@ public final class RequestInfoConstants {
     }
 
     private static JsonPointer claimToJsonPointer(String claim) {
-        return JsonPointer.compile(CLAIMS_PATH + claim);
+        return JsonPointer.compile(CLAIMS_PATH + "/" + claim);
     }
 }

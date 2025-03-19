@@ -1,5 +1,6 @@
 package no.unit.nva.testutils;
 
+import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomAccessRight;
 import static no.unit.nva.testutils.RandomDataGenerator.randomJson;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
@@ -12,18 +13,18 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
-import static org.mockito.Mockito.mock;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.util.Map;
 import java.util.Optional;
+import no.unit.nva.auth.CognitoUserInfo;
 import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ApiIoException;
@@ -54,7 +55,6 @@ class HandlerRequestBuilderTest {
     private static final String HTTP_METHOD = "httpMethod";
     // Can not use ObjectMapper from nva-commons because it would create a circular dependency
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final HttpClient httpClient = mock(HttpClient.class);
 
     @Test
     void buildReturnsEmptyRequestOnNoArguments() throws Exception {
@@ -156,7 +156,7 @@ class HandlerRequestBuilderTest {
         var request = new HandlerRequestBuilder<String>(objectMapper)
                           .withFeideId(expectedFeideId)
                           .build();
-        var requestInfo = RequestInfo.fromRequest(request, httpClient);
+        var requestInfo = RequestInfo.fromRequest(request);
 
         assertThat(requestInfo.getFeideId().isPresent(), is(true));
         assertThat(requestInfo.getFeideId().orElseThrow(), is(equalTo(expectedFeideId)));
@@ -166,10 +166,22 @@ class HandlerRequestBuilderTest {
     void buildReturnsEmptyOptionalWhenFeideIdNotSet()
         throws JsonProcessingException, ApiIoException {
         var request = new HandlerRequestBuilder<String>(objectMapper).build();
-        var requestInfo = RequestInfo.fromRequest(request, httpClient);
+        var requestInfo = RequestInfo.fromRequest(request);
+
+        requestInfo.setRequestContext(getRequestContext());
 
         assertThat(requestInfo.getFeideId().isPresent(), is(false));
         assertThat(requestInfo.getFeideId(), is(equalTo(Optional.empty())));
+    }
+
+    private static ObjectNode getRequestContext() {
+        var claims = dtoObjectMapper.createObjectNode();
+        var authorizer = dtoObjectMapper.createObjectNode();
+        var requestContext = dtoObjectMapper.createObjectNode();
+        claims.put(CognitoUserInfo.USER_NAME_CLAIM, "someUsername");
+        authorizer.set("claims", claims);
+        requestContext.set("authorizer", authorizer);
+        return requestContext;
     }
 
     @Test

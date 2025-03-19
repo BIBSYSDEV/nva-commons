@@ -1,7 +1,6 @@
 package nva.commons.apigateway;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import java.net.http.HttpClient;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
@@ -18,12 +17,12 @@ public abstract class ApiGatewayProxyHandler<I, O> extends ApiGatewayHandler<I, 
 
     @JacocoGenerated
     protected ApiGatewayProxyHandler(Class<I> iclass) {
-        this(iclass, new Environment(), HttpClient.newBuilder().build());
+        this(iclass, new Environment());
     }
     
     @JacocoGenerated
-    protected ApiGatewayProxyHandler(Class<I> iclass, Environment environment, HttpClient httpClient) {
-        super(iclass, environment, httpClient);
+    protected ApiGatewayProxyHandler(Class<I> iclass, Environment environment) {
+        super(iclass, environment);
     }
 
     @Override
