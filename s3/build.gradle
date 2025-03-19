@@ -14,7 +14,6 @@ dependencies {
     implementation libs.aws.apache.client
 
     testImplementation libs.bundles.testing
-    testImplementation libs.aws.http.client.spi
     testImplementation project(":nvatestutils")
 
 }
