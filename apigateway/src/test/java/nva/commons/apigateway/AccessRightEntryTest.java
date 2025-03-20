@@ -20,7 +20,7 @@ class AccessRightEntryTest {
     }
 
     @Test
-    void fromCvs() {
+    void fromCsv() {
         var accessRight1 = randomAccessRight();
         var customerId1 = randomUri();
         var accessRight2 = randomAccessRight();
