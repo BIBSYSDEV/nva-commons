@@ -256,18 +256,18 @@ public final class RequestInfo {
         return false;
     }
 
-    public List<AccessRight> getAccessRights() throws UnauthorizedException {
+    public List<AccessRight> getAccessRights() {
         return fetchAccessRights().orElse(Collections.emptyList());
     }
 
-    private Optional<List<AccessRight>> fetchAccessRights() throws UnauthorizedException {
+    private Optional<List<AccessRight>> fetchAccessRights() {
         return fetchUserInfo().map(CognitoUserInfo::getAccessRights).map(this::parseAccessRights);
     }
 
-    private Optional<CognitoUserInfo> fetchUserInfo() throws UnauthorizedException {
+    private Optional<CognitoUserInfo> fetchUserInfo() {
         var pointer = getRequestContext().at(CLAIMS_PATH);
         if (pointer.isMissingNode()) {
-            throw new UnauthorizedException();
+            return Optional.empty();
         }
         return Optional.of(CognitoUserInfo.fromString(pointer.toString()));
     }
@@ -304,12 +304,12 @@ public final class RequestInfo {
     }
 
     @JsonIgnore
-    public Optional<String> getFeideId() throws UnauthorizedException {
+    public Optional<String> getFeideId()  {
         return fetchFeideId();
     }
 
     @JsonIgnore
-    public Optional<URI> getTopLevelOrgCristinId() throws UnauthorizedException {
+    public Optional<URI> getTopLevelOrgCristinId() {
         return fetchTopLevelOrgCristinId();
     }
 
@@ -339,7 +339,7 @@ public final class RequestInfo {
     }
 
     @JsonIgnore
-    public String getPersonNin() throws UnauthorizedException {
+    public String getPersonNin() {
         return fetchPersonNin().orElseThrow(IllegalStateException::new);
     }
 
@@ -357,40 +357,40 @@ public final class RequestInfo {
                    .orElse(false);
     }
 
-    private Optional<String> fetchFeideId() throws UnauthorizedException {
+    private Optional<String> fetchFeideId() {
         return fetchUserInfo().map(CognitoUserInfo::getFeideId);
     }
 
-    private Optional<URI> fetchTopLevelOrgCristinId() throws UnauthorizedException {
+    private Optional<URI> fetchTopLevelOrgCristinId() {
         return fetchUserInfo().map(CognitoUserInfo::getTopOrgCristinId);
     }
 
-    private Optional<String> fetchUserName() throws UnauthorizedException {
+    private Optional<String> fetchUserName() {
         return fetchUserInfo().map(CognitoUserInfo::getUserName);
     }
 
-    private Optional<ViewingScope> fetchViewingScope() throws UnauthorizedException {
+    private Optional<ViewingScope> fetchViewingScope(){
         return fetchUserInfo().map(
             userInfo -> ViewingScope.from(userInfo.getViewingScopeIncluded(), userInfo.getViewingScopeExcluded()));
     }
 
-    private Optional<URI> fetchPersonCristinId() throws UnauthorizedException {
+    private Optional<URI> fetchPersonCristinId() {
         return fetchUserInfo().map(CognitoUserInfo::getPersonCristinId);
     }
 
-    private Optional<URI> fetchPersonAffiliation() throws UnauthorizedException {
+    private Optional<URI> fetchPersonAffiliation() {
         return fetchUserInfo().map(CognitoUserInfo::getPersonAffiliation);
     }
 
-    private Optional<String> fetchPersonNin() throws UnauthorizedException {
+    private Optional<String> fetchPersonNin() {
         return fetchUserInfo().map(CognitoUserInfo::getPersonNin);
     }
 
-    private Optional<URI> fetchCustomerId() throws UnauthorizedException {
+    private Optional<URI> fetchCustomerId() {
         return fetchUserInfo().map(CognitoUserInfo::getCurrentCustomer);
     }
 
-    private Optional<List<URI>> fetchAllowedCustomers() throws UnauthorizedException {
+    private Optional<List<URI>> fetchAllowedCustomers() {
         return fetchUserInfo().map(CognitoUserInfo::getAllowedCustomers)
                    .map(customers -> customers.split(",")) // Split the string by commas
                    .map(Arrays::stream)

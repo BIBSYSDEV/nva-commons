@@ -242,8 +242,8 @@ class RequestInfoTest {
     @Test
     void shouldReturnThatUserIsAuthorizedWhenRequestInfoContainsACustomerIdAndTheRequestedAccessRight() {
         var usersCustomer = randomUri();
-        var usersAccessRights = Set.of(randomAccessRight().toPersistedString(),
-                                       randomAccessRight().toPersistedString());
+        var usersAccessRights = Set.of(MANAGE_DEGREE.toPersistedString(),
+                                       MANAGE_IMPORT.toPersistedString());
         var cognitoUserEntry = CognitoUserInfo.builder()
                                    .withCurrentCustomer(usersCustomer)
                                    .withAccessRights(usersAccessRights)
@@ -494,7 +494,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnTopLevelOrgCristinIdWhenCurrentCustomerHasBeenSelectedForPerson() throws UnauthorizedException {
+    void shouldReturnTopLevelOrgCristinIdWhenCurrentCustomerHasBeenSelectedForPerson() {
         var topOrgCristinId = randomUri();
         var cognitoUserEntry = CognitoUserInfo.builder().withTopOrgCristinId(topOrgCristinId).build();
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
@@ -503,7 +503,7 @@ class RequestInfoTest {
 
     @Test
     void shouldReturnTopLevelOrgCristinIdWhenRequestsAuthorizerNodeContainsCorrespondingClaim()
-        throws JsonProcessingException, ApiIoException, UnauthorizedException {
+        throws JsonProcessingException, ApiIoException {
         var topOrgCristinId = randomUri();
         var requestInfo = requestInfoWithAuthorizerClaim(topOrgCristinId.toString());
         assertThat(requestInfo.getTopLevelOrgCristinId().orElseThrow(), is(equalTo(topOrgCristinId)));
@@ -540,7 +540,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnPersonNinFromCognitoWhenUserHasPersonNinInClaimAndIsNotOffline() throws UnauthorizedException {
+    void shouldReturnPersonNinFromCognitoWhenUserHasPersonNinInClaimAndIsNotOffline() {
         var expectedPersonNin = randomString();
         var cognitoUserEntry = CognitoUserInfo.builder().withPersonNin(expectedPersonNin).build();
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
@@ -549,7 +549,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnPersonNinWhenUserHasPersonNinInClaimAvailableOffline() throws UnauthorizedException {
+    void shouldReturnPersonNinWhenUserHasPersonNinInClaimAvailableOffline() {
         var cognitoUserEntry = CognitoUserInfo.builder().withPersonNin(randomString()).build();
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var expectedPersonNinDifferentFromCognito = randomString();
@@ -560,7 +560,7 @@ class RequestInfoTest {
 
     @Test
     void shouldReturnPersonNinFromFeideNinClaimWhenOnlyFeideNinIsPresentInCognito()
-        throws JsonProcessingException, UnauthorizedException {
+        throws JsonProcessingException {
         var expectedPersonFeideNin = randomString();
         var claims = dtoObjectMapper.createObjectNode();
         claims.put(CognitoUserInfo.PERSON_FEIDE_NIN_CLAIM, expectedPersonFeideNin);
@@ -573,7 +573,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnFeideIdFromCognitoWhenUserHasFeideIdInClaimAndIsNotOffline() throws UnauthorizedException {
+    void shouldReturnFeideIdFromCognitoWhenUserHasFeideIdInClaimAndIsNotOffline() {
         var expectedFeideId = randomString();
         var cognitoUserEntry = CognitoUserInfo.builder().withFeideId(expectedFeideId).build();
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
@@ -584,7 +584,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnFeideIdWhenUserHasFeideIdInClaimAvailableOffline() throws UnauthorizedException {
+    void shouldReturnFeideIdWhenUserHasFeideIdInClaimAvailableOffline() {
         var cognitoUserEntry = CognitoUserInfo.builder().withFeideId(randomString()).build();
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var expectedFeideIdDifferentFromCognito = randomString();
@@ -597,7 +597,7 @@ class RequestInfoTest {
 
     @Test
     void shouldReturnFeideIdFromFeideClaimWhenOnlyFeideIdIsPresentInCognito()
-        throws JsonProcessingException, UnauthorizedException {
+        throws JsonProcessingException {
         var expectedFeideId = randomString();
         var claims = dtoObjectMapper.createObjectNode();
         claims.put(CognitoUserInfo.PERSON_FEIDE_ID_CLAIM, expectedFeideId);
@@ -611,7 +611,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnAccessRightsWhenOnlyInCognito() throws JsonProcessingException, UnauthorizedException {
+    void shouldReturnAccessRightsWhenOnlyInCognito() throws JsonProcessingException {
         var accessRights = randomAccessRights();
         var accessRightsString = accessRights.stream()
                                      .map(AccessRight::toPersistedString)
@@ -628,7 +628,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnOptionalEmptyWhenUserDoesNotHaveFeideId() throws UnauthorizedException {
+    void shouldReturnOptionalEmptyWhenUserDoesNotHaveFeideId() {
         var cognitoUserEntryWithoutFeideId = CognitoUserInfo.builder().build();
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntryWithoutFeideId);
 
@@ -645,7 +645,7 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnEmptyListWhenAccessRightsCognitoStringIsEmpty() throws UnauthorizedException {
+    void shouldReturnEmptyListWhenAccessRightsCognitoStringIsEmpty() {
         var cognitoUserEntry = CognitoUserInfo.builder().build();
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var accessRights = requestInfo.getAccessRights();
