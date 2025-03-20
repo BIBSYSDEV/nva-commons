@@ -57,6 +57,7 @@ public final class RequestInfo {
     private static final Logger logger = LoggerFactory.getLogger(RequestInfo.class);
     private static final ObjectMapper mapper = defaultRestObjectMapper;
     private static final String THIRD_PARTY_SCOPE_PREFIX = "https://api.nva.unit.no/scopes/third-party";
+    private static final String COMMA = ",";
     @JsonProperty(HEADERS_FIELD)
     private Map<String, String> headers;
     @JsonProperty(PATH_FIELD)
@@ -248,7 +249,7 @@ public final class RequestInfo {
     }
 
     public boolean userIsAuthorized(AccessRight accessRight) {
-        return attempt(() -> getAccessRights().contains(accessRight)).toOptional().orElse(handleAuthorizationFailure());
+        return getAccessRights().contains(accessRight) || handleAuthorizationFailure();
     }
 
     private boolean handleAuthorizationFailure() {
@@ -266,10 +267,8 @@ public final class RequestInfo {
 
     private Optional<CognitoUserInfo> fetchUserInfo() {
         var pointer = getRequestContext().at(CLAIMS_PATH);
-        if (pointer.isMissingNode()) {
-            return Optional.empty();
-        }
-        return Optional.of(CognitoUserInfo.fromString(pointer.toString()));
+
+        return pointer.isMissingNode() ? Optional.empty() : Optional.of(CognitoUserInfo.fromString(pointer.toString()));
     }
 
     private List<AccessRight> parseAccessRights(String value) {
@@ -304,7 +303,7 @@ public final class RequestInfo {
     }
 
     @JsonIgnore
-    public Optional<String> getFeideId()  {
+    public Optional<String> getFeideId() {
         return fetchFeideId();
     }
 
@@ -351,7 +350,7 @@ public final class RequestInfo {
     public boolean clientIsThirdParty() {
         return getRequestContextParameterOpt(SCOPES_CLAIM)
                    .map(string ->
-                            Arrays.stream(string.split(","))
+                            Arrays.stream(string.split(COMMA))
                                 .anyMatch(value -> value.startsWith(
                                     THIRD_PARTY_SCOPE_PREFIX)))
                    .orElse(false);
@@ -369,7 +368,7 @@ public final class RequestInfo {
         return fetchUserInfo().map(CognitoUserInfo::getUserName);
     }
 
-    private Optional<ViewingScope> fetchViewingScope(){
+    private Optional<ViewingScope> fetchViewingScope() {
         return fetchUserInfo().map(
             userInfo -> ViewingScope.from(userInfo.getViewingScopeIncluded(), userInfo.getViewingScopeExcluded()));
     }
@@ -392,7 +391,7 @@ public final class RequestInfo {
 
     private Optional<List<URI>> fetchAllowedCustomers() {
         return fetchUserInfo().map(CognitoUserInfo::getAllowedCustomers)
-                   .map(customers -> customers.split(",")) // Split the string by commas
+                   .map(customers -> customers.split(COMMA))
                    .map(Arrays::stream)
                    .map(stream -> stream.map(URI::create).toList());
     }

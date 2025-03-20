@@ -214,16 +214,14 @@ class RequestInfoTest {
     @Test
     void shouldReturnThatUserDoesNotHaveAccessRightForSpecificCustomerWhenCognitoDoesNotHaveRespectiveAccessRight() {
         var usersCustomer = randomUri();
-        var accessRightsForCustomer = Set.of(new AccessRightEntry(MANAGE_PUBLISHING_REQUESTS, usersCustomer)
-                                                 .toString());
+        var accessRights = Set.of(MANAGE_PUBLISHING_REQUESTS.toPersistedString());
         var cognitoUserEntry = CognitoUserInfo.builder()
                                    .withCurrentCustomer(usersCustomer)
-                                   .withAccessRights(accessRightsForCustomer)
+                                   .withAccessRights(accessRights)
                                    .build();
 
         var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
-        var requestedAccessRight = MANAGE_DOI;
-        var userIsAuthorized = requestInfo.userIsAuthorized(requestedAccessRight);
+        var userIsAuthorized = requestInfo.userIsAuthorized(MANAGE_DOI);
         assertThat(userIsAuthorized, is(false));
     }
 
@@ -723,10 +721,10 @@ class RequestInfoTest {
         return getRequestInfo(request);
     }
 
-    private CognitoUserInfo createCognitoUserEntry(URI usersCustomer, Set<String> accessRightsForCustomer) {
+    private CognitoUserInfo createCognitoUserEntry(URI usersCustomer, Set<String> accessRights) {
         return CognitoUserInfo.builder()
                    .withCurrentCustomer(usersCustomer)
-                   .withAccessRights(accessRightsForCustomer)
+                   .withAccessRights(accessRights)
                    .build();
     }
 
