@@ -51,7 +51,7 @@ import nva.commons.core.paths.UriWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("PMD.GodClass")
+@SuppressWarnings({"PMD.GodClass", "PMD.ExcessivePublicCount"})
 public final class RequestInfo {
 
     private static final Logger logger = LoggerFactory.getLogger(RequestInfo.class);
