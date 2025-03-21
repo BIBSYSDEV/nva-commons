@@ -51,7 +51,7 @@ import nva.commons.core.paths.UriWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("PMD.GodClass")
+@SuppressWarnings({"PMD.GodClass", "PMD.ExcessivePublicCount"})
 public final class RequestInfo {
 
     private static final Logger logger = LoggerFactory.getLogger(RequestInfo.class);
@@ -297,6 +297,16 @@ public final class RequestInfo {
     }
 
     @JsonIgnore
+    public String getCognitoUsername() throws UnauthorizedException {
+        return fetchCognitoUsername().orElseThrow(UnauthorizedException::new);
+    }
+
+    @JsonIgnore
+    public URI getIssuer() throws UnauthorizedException {
+        return fetchIssuer().orElseThrow(UnauthorizedException::new);
+    }
+
+    @JsonIgnore
     public ViewingScope getViewingScope() throws UnauthorizedException {
         return fetchViewingScope().orElseThrow(UnauthorizedException::new);
     }
@@ -365,6 +375,14 @@ public final class RequestInfo {
 
     private Optional<String> fetchUserName() {
         return fetchUserInfo().map(CognitoUserInfo::getUserName);
+    }
+
+    private Optional<String> fetchCognitoUsername() {
+        return fetchUserInfo().map(CognitoUserInfo::getCognitoUsername);
+    }
+
+    private Optional<URI> fetchIssuer() {
+        return fetchUserInfo().map(CognitoUserInfo::getIssuer).map(URI::create);
     }
 
     private Optional<ViewingScope> fetchViewingScope() {

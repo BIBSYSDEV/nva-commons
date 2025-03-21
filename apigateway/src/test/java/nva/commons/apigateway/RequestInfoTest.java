@@ -1,6 +1,7 @@
 package nva.commons.apigateway;
 
 import static java.util.Objects.nonNull;
+import static no.unit.nva.auth.CognitoUserInfo.COGNITO_USER_NAME;
 import static no.unit.nva.auth.CognitoUserInfo.PERSON_GROUPS_CLAIM;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
@@ -708,6 +709,26 @@ class RequestInfoTest {
         assertThat(actual, containsInAnyOrder(allowedCustomers.toArray()));
     }
 
+    @Test
+    void shouldReturnCognitoUsername() throws UnauthorizedException {
+        var username = randomString();
+        var cognitoUserEntry = CognitoUserInfo.builder().withCognitoUsername(username).build();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
+        var actual = requestInfo.getCognitoUsername();
+
+        assertThat(actual, equalTo(username));
+    }
+
+    @Test
+    void shouldReturnCognitoIssuer() throws UnauthorizedException {
+        var issuer = randomUri();
+        var cognitoUserEntry = CognitoUserInfo.builder().withIssuer(issuer).build();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
+        var actual = requestInfo.getIssuer();
+
+        assertThat(actual, equalTo(issuer));
+    }
+
     @ParameterizedTest
     @MethodSource("emptyViewingScopeInputsProvider")
     void shouldReturnEmptyViewingScopeIfNotPresentForUser(String includes, String excludes)
@@ -817,6 +838,7 @@ class RequestInfoTest {
         var authorizer = dtoObjectMapper.createObjectNode();
         var requestContext = dtoObjectMapper.createObjectNode();
         claims.put(CognitoUserInfo.PERSON_FEIDE_ID_CLAIM, expectedFeideIdDifferentFromCognito);
+        claims.put(COGNITO_USER_NAME, randomString());
         authorizer.set("claims", claims);
         requestContext.set("authorizer", authorizer);
         requestInfo.setRequestContext(requestContext);
@@ -834,7 +856,7 @@ class RequestInfoTest {
                                           .collect(Collectors.joining(","));
             claims.put(PERSON_GROUPS_CLAIM, customerAccessRigts);
         }
-
+        claims.put(COGNITO_USER_NAME, user.getCognitoUsername());
         authorizer.set("claims", claims);
         requestContext.set("authorizer", authorizer);
         return requestContext;
