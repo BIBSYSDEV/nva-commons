@@ -26,6 +26,7 @@ class CognitoUserInfoTest {
                            .withSub(randomString())
                            .withViewingScopeIncluded(randomString())
                            .withViewingScopeExcluded(randomString())
+                           .withIssuer(randomUri())
                            .build();
         assertThat(userInfo, doesNotHaveEmptyValues());
     }
