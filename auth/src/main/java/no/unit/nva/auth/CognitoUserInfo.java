@@ -31,6 +31,7 @@ public class CognitoUserInfo {
     public static final String PERSON_AFFILIATION_CLAIM = "custom:personAffiliation";
     public static final String ALLOWED_CUSTOMERS = "custom:allowedCustomers";
     public static final String COGNITO_USER_NAME = "username";
+    public static final String ISS_CLAIM = "iss";
     public static final String VIEWING_SCOPE_INCLUDED_CLAIM = "custom:viewingScopeIncluded";
     public static final String VIEWING_SCOPE_EXCLUDED_CLAIM = "custom:viewingScopeExcluded";
 
@@ -63,6 +64,8 @@ public class CognitoUserInfo {
     private String viewingScopeIncluded;
     @JsonProperty(VIEWING_SCOPE_EXCLUDED_CLAIM)
     private String viewingScopeExcluded;
+    @JsonProperty(ISS_CLAIM)
+    private String issuer;
 
     public static Builder builder() {
         return new Builder();
@@ -106,6 +109,14 @@ public class CognitoUserInfo {
 
     public String getCognitoUsername() {
         return cognitoUsername;
+    }
+
+    public String getIssuer() {
+        return issuer;
+    }
+
+    public void setIssuer(String issuer) {
+        this.issuer = issuer;
     }
 
     public void setCognitoUsername(String cognitoUsername) {
@@ -196,7 +207,12 @@ public class CognitoUserInfo {
                             getPersonAffiliation(),
                             getPersonNin(),
                             getViewingScopeIncluded(),
-                            getViewingScopeExcluded());
+                            getViewingScopeExcluded(),
+                            getRoles(),
+                            getSub(),
+                            getAllowedCustomers(),
+                            getCognitoUsername(),
+                            getIssuer());
     }
 
     @JacocoGenerated
@@ -219,7 +235,12 @@ public class CognitoUserInfo {
                && Objects.equals(getPersonNin(), that.getPersonNin())
                && Objects.equals(getFeideId(), that.getFeideId())
                && Objects.equals(getViewingScopeIncluded(), that.getViewingScopeIncluded())
-               && Objects.equals(getViewingScopeExcluded(), that.getViewingScopeExcluded());
+               && Objects.equals(getViewingScopeExcluded(), that.getViewingScopeExcluded())
+               && Objects.equals(getRoles(), that.getRoles())
+               && Objects.equals(getSub(), that.getSub())
+               && Objects.equals(getAllowedCustomers(), that.getAllowedCustomers())
+               && Objects.equals(getCognitoUsername(), that.getCognitoUsername())
+               && Objects.equals(getIssuer(), that.getIssuer());
     }
 
     public Map<String, String> getClaims() {
@@ -239,6 +260,7 @@ public class CognitoUserInfo {
         addClaimUnlessNull(claims, COGNITO_USER_NAME, getCognitoUsername());
         addClaimUnlessNull(claims, VIEWING_SCOPE_INCLUDED_CLAIM, getViewingScopeIncluded());
         addClaimUnlessNull(claims, VIEWING_SCOPE_EXCLUDED_CLAIM, getViewingScopeExcluded());
+        addClaimUnlessNull(claims, ISS_CLAIM, getIssuer());
         return claims;
     }
 
@@ -331,6 +353,11 @@ public class CognitoUserInfo {
 
         public Builder withViewingScopeExcluded(String viewingScopeExcluded) {
             cognitoUserInfo.setViewingScopeExcluded(viewingScopeExcluded);
+            return this;
+        }
+
+        public Builder withIssuer(URI issuer) {
+            cognitoUserInfo.setIssuer(issuer.toString());
             return this;
         }
 
