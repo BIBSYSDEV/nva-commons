@@ -266,9 +266,8 @@ public final class RequestInfo {
     }
 
     private Optional<CognitoUserInfo> fetchUserInfo() {
-        var pointer = getRequestContext().at(CLAIMS_PATH);
-
-        return pointer.isMissingNode() ? Optional.empty() : Optional.of(CognitoUserInfo.fromString(pointer.toString()));
+        var claims = getRequestContext().at(CLAIMS_PATH);
+        return claims.isObject() ? Optional.of(CognitoUserInfo.fromString(claims.toString())) : Optional.empty();
     }
 
     private List<AccessRight> parseAccessRights(String value) {

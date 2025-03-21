@@ -63,6 +63,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @TestInstance(PER_METHOD)
 class RequestInfoTest {
@@ -273,6 +274,49 @@ class RequestInfoTest {
         var notAllocatedAccessRight = new AccessRightEntry(MANAGE_DEGREE, userCustomer);
         var accessRight = notAllocatedAccessRight.getAccessRight();
         assertThat(requestInfo.userIsAuthorized(accessRight), is(false));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "{}", "\"\"", "null", "[]", "true", "false", "\"custom:feideId\"" })
+    void shouldThrowUnauthorizedOnEmptyOrInvalidClaimSyntax(String claims) throws ApiIoException {
+        var payload = """
+            {
+              "requestContext": {
+                "authorizer": {
+                  "claims": %s
+                }
+              }
+            }
+            """.formatted(claims);
+        var request = getRequestInfo(new ByteArrayInputStream(payload.getBytes()));
+
+        assertThrows(UnauthorizedException.class, request::getCurrentCustomer);
+    }
+
+    @Test
+    void shouldThrowUnauthorizedMissingClaims() throws ApiIoException {
+        var payload = """
+            {
+              "requestContext": {
+                "authorizer": {}
+              }
+            }
+            """;
+        var request = getRequestInfo(new ByteArrayInputStream(payload.getBytes()));
+
+        assertThrows(UnauthorizedException.class, request::getCurrentCustomer);
+    }
+
+    @Test
+    void shouldThrowUnauthorizedMissingAuthorizer() throws ApiIoException {
+        var payload = """
+            {
+              "requestContext": {}
+            }
+            """;
+        var request = getRequestInfo(new ByteArrayInputStream(payload.getBytes()));
+
+        assertThrows(UnauthorizedException.class, request::getCurrentCustomer);
     }
 
     @Test
