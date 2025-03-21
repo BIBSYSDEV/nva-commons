@@ -1,6 +1,7 @@
 package nva.commons.apigateway;
 
-import static no.unit.nva.auth.OAuthConstants.OAUTH_USER_INFO;
+import static java.util.Objects.nonNull;
+import static no.unit.nva.auth.CognitoUserInfo.PERSON_GROUPS_CLAIM;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomAccessRight;
@@ -9,13 +10,10 @@ import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static nva.commons.apigateway.AccessRight.MANAGE_DEGREE;
 import static nva.commons.apigateway.AccessRight.MANAGE_DOI;
 import static nva.commons.apigateway.AccessRight.MANAGE_IMPORT;
-import static nva.commons.apigateway.AccessRight.MANAGE_NVI;
 import static nva.commons.apigateway.AccessRight.MANAGE_PUBLISHING_REQUESTS;
-import static nva.commons.apigateway.RequestInfo.ERROR_FETCHING_COGNITO_INFO;
 import static nva.commons.apigateway.RequestInfoConstants.AUTHORIZATION_FAILURE_WARNING;
 import static nva.commons.apigateway.RequestInfoConstants.BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE;
 import static nva.commons.apigateway.RequestInfoConstants.REQUEST_CONTEXT_FIELD;
-import static nva.commons.apigateway.RequestInfoConstants.VIEWING_SCOPE_INCLUDED;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static nva.commons.core.paths.UriWrapper.HTTPS;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -36,12 +34,12 @@ import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.net.HttpHeaders;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -49,12 +47,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import no.unit.nva.auth.CognitoUserInfo;
-import no.unit.nva.stubs.FakeAuthServer;
-import no.unit.nva.stubs.WiremockHttpClient;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import no.unit.nva.testutils.RandomDataGenerator;
 import nva.commons.apigateway.exceptions.ApiIoException;
@@ -62,15 +57,13 @@ import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.core.paths.UriWrapper;
 import nva.commons.logutils.LogUtils;
-import org.hamcrest.core.IsIterableContaining;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @TestInstance(PER_METHOD)
 class RequestInfoTest {
@@ -88,36 +81,19 @@ class RequestInfoTest {
     public static final String PATH_FOUND_IN_RESOURCE_FILE = "my/path";
     public static final Map<String, String> QUERY_PARAMS_FOUND_IN_RESOURCE_FILE;
     public static final String AT = "@";
-    public static final String LOG_STRING_INTERPOLATION = "{}";
-    public static final String EMPTY_STRING = "";
     private static final String API_GATEWAY_MESSAGES_FOLDER = "apiGatewayMessages";
     private static final Path NULL_VALUES_FOR_MAPS = Path.of(API_GATEWAY_MESSAGES_FOLDER, "mapParametersAreNull.json");
     private static final Path MISSING_MAP_VALUES = Path.of(API_GATEWAY_MESSAGES_FOLDER, "missingRequestInfo.json");
     private static final Path AWS_SAMPLE_PROXY_EVENT = Path.of(API_GATEWAY_MESSAGES_FOLDER, "awsSampleProxyEvent.json");
     private static final String HARDCODED_AUTH_HEADER = "Bearer THE_ACCESS_TOKEN";
     public static final String EXTERNAL_USER_POOL_URL = "https//user-pool.example.com/123";
+    private static final String THIRD_PARTY_PUBLICATION_UPSERT_SCOPE = "https://api.nva.unit"
+                                                                       + ".no/scopes/third-party/publication-upsert";
 
     static {
         QUERY_PARAMS_FOUND_IN_RESOURCE_FILE = new TreeMap<>();
         QUERY_PARAMS_FOUND_IN_RESOURCE_FILE.put("parameter1", "value1");
         QUERY_PARAMS_FOUND_IN_RESOURCE_FILE.put("parameter2", "value");
-    }
-
-    private FakeAuthServer cognito;
-    private HttpClient httpClient;
-    private String userAccessToken;
-
-
-    @BeforeEach
-    public void init() {
-        this.cognito = new FakeAuthServer();
-        this.httpClient = WiremockHttpClient.create();
-        this.userAccessToken = randomString();
-    }
-
-    @AfterEach
-    public void close() {
-        this.cognito.close();
     }
 
     @Test
@@ -200,20 +176,8 @@ class RequestInfoTest {
         throws UnauthorizedException {
         var expectedCurrentCustomer = randomUri();
         var cognitoUserEntry = createCognitoUserEntry(expectedCurrentCustomer, null);
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
 
-        RequestInfo requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
-        var actualCustomerId = requestInfo.getCurrentCustomer();
-        assertThat(actualCustomerId, is(equalTo(expectedCurrentCustomer)));
-    }
-
-    @Test
-    void shouldReturnUserInfoWhenRequestContainsAccessTokenWithAdminScope() throws UnauthorizedException {
-        var expectedCurrentCustomer = randomUri();
-        var cognitoUserEntry = createCognitoUserEntry(expectedCurrentCustomer, null);
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-
-        RequestInfo requestInfo = createRequestInfoWithAccessTokenThatHasAdminScope();
+        RequestInfo requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var actualCustomerId = requestInfo.getCurrentCustomer();
         assertThat(actualCustomerId, is(equalTo(expectedCurrentCustomer)));
     }
@@ -222,13 +186,11 @@ class RequestInfoTest {
     void shouldReturnThatUserHasAccessRightForSpecificCustomerWhenCognitoHasRespectiveEntryAndUsesLegacyFormat() {
         var usersCustomer = randomUri();
         var accessRights = randomAccessRights();
-        var accessRightsForCustomer = accessRights.stream()
-                                          .map(AccessRight::toPersistedString)
-                                          .map(right -> right + AT + usersCustomer)
-                                          .collect(Collectors.toSet());
-        var cognitoUserEntry = createCognitoUserEntry(usersCustomer, accessRightsForCustomer);
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        Set<String> shortAccessRights = accessRights.stream()
+                                            .map(AccessRight::toPersistedString)
+                                            .collect(Collectors.toSet());
+        var cognitoUserEntry = createCognitoUserEntry(usersCustomer, shortAccessRights);
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         for (var accessRight : accessRights) {
             var userIsAuthorized = requestInfo.userIsAuthorized(accessRight);
             assertThat(userIsAuthorized, is(true));
@@ -243,8 +205,7 @@ class RequestInfoTest {
                                           .map(AccessRight::toPersistedString)
                                           .collect(Collectors.toSet());
         var cognitoUserEntry = createCognitoUserEntry(usersCustomer, accessRightsForCustomer);
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         for (var accessRight : accessRights) {
             var userIsAuthorized = requestInfo.userIsAuthorized(accessRight);
             assertThat(userIsAuthorized, is(true));
@@ -254,17 +215,14 @@ class RequestInfoTest {
     @Test
     void shouldReturnThatUserDoesNotHaveAccessRightForSpecificCustomerWhenCognitoDoesNotHaveRespectiveAccessRight() {
         var usersCustomer = randomUri();
-        var accessRightsForCustomer = Set.of(new AccessRightEntry(MANAGE_PUBLISHING_REQUESTS, usersCustomer)
-                                                 .toString());
+        var accessRights = Set.of(MANAGE_PUBLISHING_REQUESTS.toPersistedString());
         var cognitoUserEntry = CognitoUserInfo.builder()
                                    .withCurrentCustomer(usersCustomer)
-                                   .withAccessRights(accessRightsForCustomer)
+                                   .withAccessRights(accessRights)
                                    .build();
 
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
-        var requestedAccessRight = MANAGE_DOI;
-        var userIsAuthorized = requestInfo.userIsAuthorized(requestedAccessRight);
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
+        var userIsAuthorized = requestInfo.userIsAuthorized(MANAGE_DOI);
         assertThat(userIsAuthorized, is(false));
     }
 
@@ -275,30 +233,35 @@ class RequestInfoTest {
     @Test
     void shouldReturnThatUserDoesNotHaveAccessRightForSpecificCustomerWhenUserDoesNotHaveAnyAccessRights() {
         var cognitoUserEntryWithoutAccessRights = CognitoUserInfo.builder().withCurrentCustomer(randomUri()).build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutAccessRights));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntryWithoutAccessRights);
         var requestedAccessRight = randomAccessRight();
         assertThat(requestInfo.userIsAuthorized(requestedAccessRight), is(false));
     }
 
     @Test
-    void shouldReturnThatUserIsAuthorizedWhenRequestInfoContainsACustomerIdAndTheRequestedAccessRight()
-        throws JsonProcessingException, ApiIoException {
+    void shouldReturnThatUserIsAuthorizedWhenRequestInfoContainsACustomerIdAndTheRequestedAccessRight() {
         var usersCustomer = randomUri();
-        var usersAccessRights = List.of(randomAccessRight(), randomAccessRight());
-        RequestInfo requestInfo = createRequestInfoForOfflineAuthorization(usersAccessRights, usersCustomer);
+        var usersAccessRights = Set.of(MANAGE_DEGREE.toPersistedString(),
+                                       MANAGE_IMPORT.toPersistedString());
+        var cognitoUserEntry = CognitoUserInfo.builder()
+                                   .withCurrentCustomer(usersCustomer)
+                                   .withAccessRights(usersAccessRights)
+                                   .build();
+        RequestInfo requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         for (var accessRight : usersAccessRights) {
-            assertThat(requestInfo.userIsAuthorized(accessRight), is(true));
+            assertThat(requestInfo.userIsAuthorized(AccessRight.fromPersistedString(accessRight)), is(true));
         }
     }
 
     @Test
-    void shouldReturnNotAuthorizedWhenRequestInfoDoesNotContainTheRequestedAccessRightAndCheckIsPerformedOffline()
-        throws JsonProcessingException, ApiIoException {
+    void shouldReturnNotAuthorizedWhenRequestInfoDoesNotContainTheRequestedAccessRightAndCheckIsPerformedOffline() {
         var userCustomer = randomUri();
-        var usersAccessRights = List.of(MANAGE_DEGREE, MANAGE_IMPORT);
-        var requestInfo =
-            createRequestInfoForOfflineAuthorization(usersAccessRights, userCustomer);
+        var usersAccessRights = Set.of(MANAGE_DEGREE.toPersistedString(), MANAGE_IMPORT.toPersistedString());
+        var cognitoUserEntry = CognitoUserInfo.builder()
+                                   .withCurrentCustomer(userCustomer)
+                                   .withAccessRights(usersAccessRights)
+                                   .build();
+        RequestInfo requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var notAllocatedAccessRight = MANAGE_PUBLISHING_REQUESTS;
         assertThat(requestInfo.userIsAuthorized(notAllocatedAccessRight), is(false));
     }
@@ -313,10 +276,53 @@ class RequestInfoTest {
         assertThat(requestInfo.userIsAuthorized(accessRight), is(false));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = { "{}", "\"\"", "null", "[]", "true", "false", "\"custom:feideId\"" })
+    void shouldThrowUnauthorizedOnEmptyOrInvalidClaimSyntax(String claims) throws ApiIoException {
+        var payload = """
+            {
+              "requestContext": {
+                "authorizer": {
+                  "claims": %s
+                }
+              }
+            }
+            """.formatted(claims);
+        var request = getRequestInfo(new ByteArrayInputStream(payload.getBytes()));
+
+        assertThrows(UnauthorizedException.class, request::getCurrentCustomer);
+    }
+
+    @Test
+    void shouldThrowUnauthorizedMissingClaims() throws ApiIoException {
+        var payload = """
+            {
+              "requestContext": {
+                "authorizer": {}
+              }
+            }
+            """;
+        var request = getRequestInfo(new ByteArrayInputStream(payload.getBytes()));
+
+        assertThrows(UnauthorizedException.class, request::getCurrentCustomer);
+    }
+
+    @Test
+    void shouldThrowUnauthorizedMissingAuthorizer() throws ApiIoException {
+        var payload = """
+            {
+              "requestContext": {}
+            }
+            """;
+        var request = getRequestInfo(new ByteArrayInputStream(payload.getBytes()));
+
+        assertThrows(UnauthorizedException.class, request::getCurrentCustomer);
+    }
+
     @Test
     void shouldReturnApiIoExceptionWhenObjectMapperFails() {
         var request = "This is not a valid request";
-        assertThrows(ApiIoException.class, () -> RequestInfo.fromRequest(IoUtils.stringToStream(request), httpClient));
+        assertThrows(ApiIoException.class, () -> RequestInfo.fromRequest(IoUtils.stringToStream(request)));
     }
 
     @Test
@@ -353,7 +359,9 @@ class RequestInfoTest {
     @Test
     void isThirdPartyShouldReturnTrueWhenScopeContainsTheExternalIssuedUserPool()
         throws JsonProcessingException, ApiIoException {
-        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withIssuer(EXTERNAL_USER_POOL_URL).build();
+        var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withIssuer(EXTERNAL_USER_POOL_URL)
+                          .withScope(THIRD_PARTY_PUBLICATION_UPSERT_SCOPE)
+                          .build();
         var requestInfo = getRequestInfo(request);
         assertThat(requestInfo.clientIsThirdParty(), is(true));
     }
@@ -376,7 +384,7 @@ class RequestInfoTest {
     }
 
     private RequestInfo getRequestInfo(InputStream request) throws ApiIoException {
-        return RequestInfo.fromRequest(request, httpClient);
+        return RequestInfo.fromRequest(request);
     }
 
     @Test
@@ -422,8 +430,7 @@ class RequestInfoTest {
         throws UnauthorizedException {
         var expectedUsername = randomString();
         var cognitoUserEntry = CognitoUserInfo.builder().withUserName(expectedUsername).build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var actualUsername = requestInfo.getUserName();
         assertThat(actualUsername, is(equalTo(expectedUsername)));
     }
@@ -431,8 +438,7 @@ class RequestInfoTest {
     @Test
     void shouldReturnUsernameWhenClaimInAvailableOffline() throws UnauthorizedException {
         var cognitoUserEntry = CognitoUserInfo.builder().withUserName(randomString()).build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
 
         var expectedUsername = randomString();
         injectUserNameInRequestInfo(requestInfo, expectedUsername);
@@ -444,8 +450,7 @@ class RequestInfoTest {
     @Test
     void shouldThrowUnauthorizedExceptionWhenUserNameIsNotAvailable() {
         var cognitoUserEntryWithoutUserName = CognitoUserInfo.builder().build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutUserName));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntryWithoutUserName);
         assertThrows(UnauthorizedException.class, requestInfo::getUserName);
     }
 
@@ -453,9 +458,12 @@ class RequestInfoTest {
     void shouldReturnPersonCristinIdFromCognitoWhenUserHasSelectedCustomerAndClaimInNotAvailableOffline()
         throws UnauthorizedException {
         var expectedPersonCristinId = randomUri();
-        var cognitoUserEntry = CognitoUserInfo.builder().withPersonCristinId(expectedPersonCristinId).build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var cognitoUserEntry =
+            CognitoUserInfo.builder()
+                .withPersonCristinId(expectedPersonCristinId)
+                .withCurrentCustomer(randomUri())
+                .build();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var actualPersonCristinId = requestInfo.getPersonCristinId();
         assertThat(actualPersonCristinId, is(equalTo(expectedPersonCristinId)));
     }
@@ -463,8 +471,7 @@ class RequestInfoTest {
     @Test
     void shouldReturnPersonCristinIdWhenClaimInAvailableOffline() throws UnauthorizedException {
         var cognitoUserEntry = CognitoUserInfo.builder().withPersonCristinId(randomUri()).build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var expectedPersonCristinIdDifferentFromCognito = randomUri();
         injectPersonCristinIdInRequestInfo(requestInfo, expectedPersonCristinIdDifferentFromCognito);
         var actualPersonCristinId = requestInfo.getPersonCristinId();
@@ -474,8 +481,7 @@ class RequestInfoTest {
     @Test
     void shouldThrowUnauthorizedExceptionWhenPersonCristinIdIsNotAvailable() {
         var cognitoUserEntryWithoutPersonCristinId = CognitoUserInfo.builder().build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutPersonCristinId));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntryWithoutPersonCristinId);
         assertThrows(UnauthorizedException.class, requestInfo::getPersonCristinId);
     }
 
@@ -492,8 +498,7 @@ class RequestInfoTest {
         throws UnauthorizedException {
         var expectedPersonAffiliation = randomUri();
         var cognitoUserEntry = CognitoUserInfo.builder().withPersonAffiliation(expectedPersonAffiliation).build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var actualPersonAffiliation = requestInfo.getPersonAffiliation();
         assertThat(actualPersonAffiliation, is(equalTo(expectedPersonAffiliation)));
     }
@@ -501,8 +506,7 @@ class RequestInfoTest {
     @Test
     void shouldReturnPersonAffiliationWhenClaimInAvailableOffline() throws UnauthorizedException {
         var cognitoUserEntry = CognitoUserInfo.builder().withPersonAffiliation(randomUri()).build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var expectedPersonAffiliationDifferentFromCognito = randomUri();
         injectPersonAffiliationInRequestInfo(requestInfo, expectedPersonAffiliationDifferentFromCognito);
         var actualPersonAffiliation = requestInfo.getPersonAffiliation();
@@ -512,8 +516,7 @@ class RequestInfoTest {
     @Test
     void shouldThrowUnauthorizedExceptionWhenPersonAffiliationIsNotAvailable() {
         var cognitoUserEntryWithoutPersonAffiliation = CognitoUserInfo.builder().build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutPersonAffiliation));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntryWithoutPersonAffiliation);
         assertThrows(UnauthorizedException.class, requestInfo::getPersonAffiliation);
     }
 
@@ -528,8 +531,7 @@ class RequestInfoTest {
     @Test
     void shouldThrowUnauthorizedExceptionWhenCustomerIdIsNotAvailable() {
         var cognitoUserEntryWithoutCustomerId = CognitoUserInfo.builder().build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutCustomerId));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntryWithoutCustomerId);
         assertThrows(UnauthorizedException.class, requestInfo::getCurrentCustomer);
     }
 
@@ -537,8 +539,7 @@ class RequestInfoTest {
     void shouldReturnTopLevelOrgCristinIdWhenCurrentCustomerHasBeenSelectedForPerson() {
         var topOrgCristinId = randomUri();
         var cognitoUserEntry = CognitoUserInfo.builder().withTopOrgCristinId(topOrgCristinId).build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         assertThat(requestInfo.getTopLevelOrgCristinId().orElseThrow(), is(equalTo(topOrgCristinId)));
     }
 
@@ -584,8 +585,7 @@ class RequestInfoTest {
     void shouldReturnPersonNinFromCognitoWhenUserHasPersonNinInClaimAndIsNotOffline() {
         var expectedPersonNin = randomString();
         var cognitoUserEntry = CognitoUserInfo.builder().withPersonNin(expectedPersonNin).build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var actualPersonNin = requestInfo.getPersonNin();
         assertThat(actualPersonNin, is(equalTo(expectedPersonNin)));
     }
@@ -593,8 +593,7 @@ class RequestInfoTest {
     @Test
     void shouldReturnPersonNinWhenUserHasPersonNinInClaimAvailableOffline() {
         var cognitoUserEntry = CognitoUserInfo.builder().withPersonNin(randomString()).build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var expectedPersonNinDifferentFromCognito = randomString();
         injectPersonNinInRequestInfo(requestInfo, expectedPersonNinDifferentFromCognito);
         var actualPersonNin = requestInfo.getPersonNin();
@@ -602,13 +601,14 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnPersonNinFromFeideNinClaimWhenOnlyFeideNinIsPresentInCognito() throws JsonProcessingException {
+    void shouldReturnPersonNinFromFeideNinClaimWhenOnlyFeideNinIsPresentInCognito()
+        throws JsonProcessingException {
         var expectedPersonFeideNin = randomString();
         var claims = dtoObjectMapper.createObjectNode();
         claims.put(CognitoUserInfo.PERSON_FEIDE_NIN_CLAIM, expectedPersonFeideNin);
+        claims.put(CognitoUserInfo.SELECTED_CUSTOMER_CLAIM, randomString());
         var cognitoUserInfo = objectMapper.readValue(claims.toString(), CognitoUserInfo.class);
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserInfo));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserInfo);
         var actualPersonNin = requestInfo.getPersonNin();
 
         assertThat(actualPersonNin, is(equalTo(expectedPersonFeideNin)));
@@ -618,8 +618,7 @@ class RequestInfoTest {
     void shouldReturnFeideIdFromCognitoWhenUserHasFeideIdInClaimAndIsNotOffline() {
         var expectedFeideId = randomString();
         var cognitoUserEntry = CognitoUserInfo.builder().withFeideId(expectedFeideId).build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var actualFeideId = requestInfo.getFeideId();
 
         assertThat(requestInfo.getFeideId().isPresent(), is(true));
@@ -629,8 +628,7 @@ class RequestInfoTest {
     @Test
     void shouldReturnFeideIdWhenUserHasFeideIdInClaimAvailableOffline() {
         var cognitoUserEntry = CognitoUserInfo.builder().withFeideId(randomString()).build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var expectedFeideIdDifferentFromCognito = randomString();
         injectFeideIdInRequestInfo(requestInfo, expectedFeideIdDifferentFromCognito);
         var actualFeideId = requestInfo.getFeideId();
@@ -640,13 +638,14 @@ class RequestInfoTest {
     }
 
     @Test
-    void shouldReturnFeideIdFromFeideClaimWhenOnlyFeideIdIsPresentInCognito() throws JsonProcessingException {
+    void shouldReturnFeideIdFromFeideClaimWhenOnlyFeideIdIsPresentInCognito()
+        throws JsonProcessingException {
         var expectedFeideId = randomString();
         var claims = dtoObjectMapper.createObjectNode();
         claims.put(CognitoUserInfo.PERSON_FEIDE_ID_CLAIM, expectedFeideId);
+        claims.put(CognitoUserInfo.SELECTED_CUSTOMER_CLAIM, randomString());
         var cognitoUserInfo = objectMapper.readValue(claims.toString(), CognitoUserInfo.class);
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserInfo));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserInfo);
         var actualFeideId = requestInfo.getFeideId();
 
         assertThat(requestInfo.getFeideId().isPresent(), is(true));
@@ -662,9 +661,9 @@ class RequestInfoTest {
 
         var claims = dtoObjectMapper.createObjectNode();
         claims.put(CognitoUserInfo.ACCESS_RIGHTS_CLAIM, accessRightsString);
+        claims.put(CognitoUserInfo.SELECTED_CUSTOMER_CLAIM, randomString());
         var cognitoUserInfo = objectMapper.readValue(claims.toString(), CognitoUserInfo.class);
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserInfo));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserInfo);
         var actualAccessRights = requestInfo.getAccessRights();
 
         assertThat(actualAccessRights, containsInAnyOrder(accessRights.toArray()));
@@ -673,8 +672,7 @@ class RequestInfoTest {
     @Test
     void shouldReturnOptionalEmptyWhenUserDoesNotHaveFeideId() {
         var cognitoUserEntryWithoutFeideId = CognitoUserInfo.builder().build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutFeideId));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntryWithoutFeideId);
 
         assertThat(requestInfo.getFeideId().isPresent(), is(false));
         assertThat(requestInfo.getFeideId(), is(Optional.empty()));
@@ -683,59 +681,42 @@ class RequestInfoTest {
     @Test
     void shouldThrowIllegalStateExceptionWhenNoTypeOfPersonNinIsAvailable() {
         var cognitoUserEntryWithoutPersonNin = CognitoUserInfo.builder().build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntryWithoutPersonNin));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntryWithoutPersonNin);
 
         assertThrows(IllegalStateException.class, requestInfo::getPersonNin);
     }
 
     @Test
-    void shouldLogFailureWhenFailingToFetchInfoFromCognito() {
-        var cognitoUserEntry = CognitoUserInfo.builder().withPersonNin(randomString()).build();
-        cognito.setUserBase(Map.of(randomString(), cognitoUserEntry));
-        var logger = LogUtils.getTestingAppenderForRootLogger();
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
-        assertThrows(UnauthorizedException.class, requestInfo::getUserName);
-        assertThat(logger.getMessages(),
-                   containsString(ERROR_FETCHING_COGNITO_INFO.replace(LOG_STRING_INTERPOLATION, EMPTY_STRING)));
-    }
-
-    @Test
-    void shouldReturnListOfAccessRightsAvailableForUser()
-        throws JsonProcessingException, ApiIoException {
-        var usersCustomer = randomUri();
-        var accessRights = List.of(MANAGE_DEGREE, MANAGE_IMPORT, MANAGE_NVI);
-        var accessRightsForCustomer = accessRights.stream()
-                                          .map(AccessRight::toPersistedString)
-                                          .map(right -> right + AT + usersCustomer)
-                                          .collect(Collectors.toSet());
-        var cognitoUserEntry = createCognitoUserEntry(usersCustomer, accessRightsForCustomer);
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-        var requestInfo = createRequestInfoForOfflineAuthorization(accessRights, usersCustomer);
-        var rights = requestInfo.getAccessRights();
-
-        assertThat(rights, containsInAnyOrder(accessRights.toArray()));
-    }
-
-    @Test
     void shouldReturnEmptyListWhenAccessRightsCognitoStringIsEmpty() {
         var cognitoUserEntry = CognitoUserInfo.builder().build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var accessRights = requestInfo.getAccessRights();
 
         assertThat(accessRights, is(emptyIterable()));
     }
 
+    @Test
+    void shouldReturnListOfAllowedCustomers() throws UnauthorizedException {
+        var allowedCustomers = List.of(randomUri(), randomUri());
+        String allowedCustomersString = allowedCustomers.stream()
+                                            .map(URI::toString)
+                                            .collect(Collectors.joining(","));
+        var cognitoUserEntry = CognitoUserInfo.builder().withAllowedCustomers(allowedCustomersString).build();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
+        var actual = requestInfo.getAllowedCustomers();
+
+        assertThat(actual, containsInAnyOrder(allowedCustomers.toArray()));
+    }
+
     @ParameterizedTest
     @MethodSource("emptyViewingScopeInputsProvider")
-    void shouldReturnEmptyViewingScopeIfNotPresentForUser(String includes, String excludes) throws UnauthorizedException {
+    void shouldReturnEmptyViewingScopeIfNotPresentForUser(String includes, String excludes)
+        throws UnauthorizedException {
         var cognitoUserEntry = CognitoUserInfo.builder()
                                    .withViewingScopeIncluded(includes)
                                    .withViewingScopeExcluded(excludes)
                                    .build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var getViewingScope = requestInfo.getViewingScope();
         assertThat(getViewingScope.includes(), is(emptyIterable()));
         assertThat(getViewingScope.excludes(), is(emptyIterable()));
@@ -755,9 +736,9 @@ class RequestInfoTest {
         var cognitoUserEntry = CognitoUserInfo.builder()
                                    .withViewingScopeIncluded("1,2")
                                    .withViewingScopeExcluded("3,4")
+                                   .withCurrentCustomer(randomUri())
                                    .build();
-        cognito.setUserBase(Map.of(userAccessToken, cognitoUserEntry));
-        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope();
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserEntry);
         var getViewingScope = requestInfo.getViewingScope();
         assertThat(getViewingScope.includes(), is(hasItems("1", "2")));
         assertThat(getViewingScope.excludes(), is(hasItems("3", "4")));
@@ -784,10 +765,10 @@ class RequestInfoTest {
         return getRequestInfo(request);
     }
 
-    private CognitoUserInfo createCognitoUserEntry(URI usersCustomer, Set<String> accessRightsForCustomer) {
+    private CognitoUserInfo createCognitoUserEntry(URI usersCustomer, Set<String> accessRights) {
         return CognitoUserInfo.builder()
                    .withCurrentCustomer(usersCustomer)
-                   .withAccessRights(accessRightsForCustomer)
+                   .withAccessRights(accessRights)
                    .build();
     }
 
@@ -841,32 +822,33 @@ class RequestInfoTest {
         requestInfo.setRequestContext(requestContext);
     }
 
-    private RequestInfo createRequestInfoWithAccessTokenThatHasOpenIdScope() {
-        var cognitoServerUri = UriWrapper.fromUri(cognito.getServerUri()).addChild(OAUTH_USER_INFO).getUri();
-        // having openid scope means that the default cognito URI will be the successful one
-        var requestInfo = new RequestInfo(httpClient, () -> cognitoServerUri, failingUri());
-        requestInfo.setHeaders(Map.of(HttpHeaders.AUTHORIZATION, bearerToken(userAccessToken)));
-        return requestInfo;
+    private static ObjectNode getRequestContext(CognitoUserInfo user) {
+        var claims = dtoObjectMapper.createObjectNode();
+        var authorizer = dtoObjectMapper.createObjectNode();
+        var requestContext = dtoObjectMapper.createObjectNode();
+        user.getClaims().forEach(claims::put);
+
+        if (nonNull(user.getCurrentCustomer())) {
+            var customerAccessRigts = Arrays.stream(user.getAccessRights().split(","))
+                                          .map(right -> right + AT + user.getCurrentCustomer().toString())
+                                          .collect(Collectors.joining(","));
+            claims.put(PERSON_GROUPS_CLAIM, customerAccessRigts);
+        }
+
+        authorizer.set("claims", claims);
+        requestContext.set("authorizer", authorizer);
+        return requestContext;
     }
 
-    private RequestInfo createRequestInfoWithAccessTokenThatHasAdminScope() {
-        var cognitoServerUri = UriWrapper.fromUri(cognito.getServerUri()).addChild(OAUTH_USER_INFO).getUri();
-        // having admin scope means that the default cognito URI will fail and the alternative be the successful one
-        var requestInfo = new RequestInfo(httpClient, failingUri(), () -> cognitoServerUri);
-        requestInfo.setHeaders(Map.of(HttpHeaders.AUTHORIZATION, bearerToken(userAccessToken)));
-        return requestInfo;
-    }
+    private RequestInfo createRequestInfoWithAccessTokenThatHasOpenIdScope(CognitoUserInfo user) {
 
-    private Supplier<URI> failingUri() {
-        return RandomDataGenerator::randomUri;
-    }
-
-    private RequestInfo createRequestInfoForOfflineAuthorization(List<AccessRight> accessRights, URI userCustomer)
-        throws JsonProcessingException, ApiIoException {
-        var requestStream = new HandlerRequestBuilder<Void>(dtoObjectMapper)
-                                .withAccessRights(userCustomer, accessRights.toArray(AccessRight[]::new))
-                                .build();
-        return getRequestInfo(requestStream);
+        try {
+            var info = RequestInfo.fromString("{}");
+            info.setRequestContext(getRequestContext(user));
+            return info;
+        } catch (ApiIoException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private RequestInfo createRequestInfoWithViewScopeRequestContext(String includes, String excludes)
@@ -876,10 +858,6 @@ class RequestInfoTest {
                                 .withAuthorizerClaim("custom:viewingScopeExcluded", excludes)
                                 .build();
         return getRequestInfo(requestStream);
-    }
-
-    private String bearerToken(String userAccessToken) {
-        return "Bearer " + userAccessToken;
     }
 
     private RequestInfo extractAccessRightsFromApiGatewayEvent() throws ApiIoException {

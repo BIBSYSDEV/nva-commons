@@ -4,6 +4,8 @@ import static java.util.Objects.nonNull;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import nva.commons.core.JacocoGenerated;
@@ -13,16 +15,18 @@ public class CognitoUserInfo {
 
     public static final String ELEMENTS_DELIMITER = ",";
     public static final String EMPTY_STRING = "";
+
+    // Claims
     public static final String PERSON_FEIDE_ID_CLAIM = "custom:feideId";
     public static final String SELECTED_CUSTOMER_CLAIM = "custom:customerId";
     public static final String ACCESS_RIGHTS_CLAIM = "custom:accessRights";
     public static final String USER_NAME_CLAIM = "custom:nvaUsername";
-    public static final String CUSTOMER_ID_CLAIM = "custom:customerId";
     public static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
     public static final String PERSON_CRISTIN_ID_CLAIM = "custom:cristinId";
     public static final String PERSON_NIN_CLAIM = "custom:nin";
     public static final String PERSON_FEIDE_NIN_CLAIM = "custom:feideIdNin";
     public static final String ROLES = "custom:roles";
+    public static final String PERSON_GROUPS_CLAIM = "cognito:groups";
     public static final String SUB = "sub";
     public static final String PERSON_AFFILIATION_CLAIM = "custom:personAffiliation";
     public static final String ALLOWED_CUSTOMERS = "custom:allowedCustomers";
@@ -216,6 +220,38 @@ public class CognitoUserInfo {
                && Objects.equals(getFeideId(), that.getFeideId())
                && Objects.equals(getViewingScopeIncluded(), that.getViewingScopeIncluded())
                && Objects.equals(getViewingScopeExcluded(), that.getViewingScopeExcluded());
+    }
+
+    public Map<String, String> getClaims() {
+        var claims = new HashMap<String, String>();
+        addClaimUnlessNull(claims, PERSON_FEIDE_ID_CLAIM, getFeideId());
+        addClaimUnlessNull(claims, SELECTED_CUSTOMER_CLAIM, getCurrentCustomer());
+        addClaimUnlessNull(claims, ACCESS_RIGHTS_CLAIM, getAccessRights());
+        addClaimUnlessNull(claims, USER_NAME_CLAIM, getUserName());
+        addClaimUnlessNull(claims, TOP_LEVEL_ORG_CRISTIN_ID_CLAIM, getTopOrgCristinId());
+        addClaimUnlessNull(claims, PERSON_CRISTIN_ID_CLAIM, getPersonCristinId());
+        addClaimUnlessNull(claims, PERSON_NIN_CLAIM, getPersonNin());
+        addClaimUnlessNull(claims, PERSON_FEIDE_NIN_CLAIM, getPersonNin());
+        addClaimUnlessNull(claims, ROLES, getRoles());
+        addClaimUnlessNull(claims, SUB, getSub());
+        addClaimUnlessNull(claims, PERSON_AFFILIATION_CLAIM, getPersonAffiliation());
+        addClaimUnlessNull(claims, ALLOWED_CUSTOMERS, getAllowedCustomers());
+        addClaimUnlessNull(claims, COGNITO_USER_NAME, getCognitoUsername());
+        addClaimUnlessNull(claims, VIEWING_SCOPE_INCLUDED_CLAIM, getViewingScopeIncluded());
+        addClaimUnlessNull(claims, VIEWING_SCOPE_EXCLUDED_CLAIM, getViewingScopeExcluded());
+        return claims;
+    }
+
+    private void addClaimUnlessNull(HashMap<String, String> claims, String key, URI value) {
+        if (nonNull(value)) {
+            claims.put(key, value.toString());
+        }
+    }
+
+    private void addClaimUnlessNull(HashMap<String, String> claims, String key, String value) {
+        if (nonNull(value)) {
+            claims.put(key, value);
+        }
     }
 
     public static final class Builder {

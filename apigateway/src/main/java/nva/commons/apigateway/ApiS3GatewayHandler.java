@@ -1,7 +1,6 @@
 package nva.commons.apigateway;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import java.net.http.HttpClient;
 import java.time.Duration;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.core.Environment;
@@ -28,9 +27,8 @@ public abstract class ApiS3GatewayHandler<I> extends ApiS3PresignerGatewayHandle
     public ApiS3GatewayHandler(Class<I> iclass,
                                S3Client s3client,
                                S3Presigner s3Presigner,
-                               Environment environment,
-                               HttpClient httpClient) {
-        super(iclass, s3Presigner, environment, httpClient);
+                               Environment environment) {
+        super(iclass, s3Presigner, environment);
         this.s3client = s3client;
     }
 

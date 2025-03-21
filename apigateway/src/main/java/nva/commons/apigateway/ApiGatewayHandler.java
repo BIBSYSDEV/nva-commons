@@ -17,7 +17,6 @@ import com.google.common.net.MediaType;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,11 +56,11 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     private boolean isBase64Encoded;
 
     public ApiGatewayHandler(Class<I> iclass) {
-        this(iclass, new Environment(), HttpClient.newBuilder().build());
+        this(iclass, new Environment());
     }
 
-    public ApiGatewayHandler(Class<I> iclass, Environment environment, HttpClient httpClient) {
-        super(iclass, environment, defaultRestObjectMapper, httpClient);
+    public ApiGatewayHandler(Class<I> iclass, Environment environment) {
+        super(iclass, environment, defaultRestObjectMapper);
         this.additionalSuccessHeadersSupplier = Collections::emptyMap;
     }
 

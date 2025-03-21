@@ -11,7 +11,6 @@ import com.google.common.net.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.http.HttpClient;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,7 +45,6 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     private final transient Class<I> iclass;
     private final transient ApiMessageParser<I> inputParser;
     protected final ObjectMapper objectMapper;
-    private final HttpClient httpClient;
 
     protected transient OutputStream outputStream;
     protected transient String allowedOrigin;
@@ -134,13 +132,11 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
      * @param iclass      The class object of the input class.
      * @param environment the Environment from where the handler will read ENV variables.
      */
-    public RestRequestHandler(Class<I> iclass, Environment environment, ObjectMapper objectMapper,
-                              HttpClient httpClient) {
+    public RestRequestHandler(Class<I> iclass, Environment environment, ObjectMapper objectMapper) {
         this.iclass = iclass;
         this.environment = environment;
         this.inputParser = new ApiMessageParser<>(objectMapper);
         this.objectMapper = objectMapper;
-        this.httpClient = httpClient;
     }
 
     @Override
@@ -153,8 +149,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
             inputObject = attempt(() -> parseInput(inputString))
                               .orElseThrow(this::parsingExceptionToBadRequestException);
 
-            RequestInfo requestInfo = RequestInfo.fromString(inputString, httpClient);
-            requestInfo.setHttpClient(httpClient);
+            RequestInfo requestInfo = RequestInfo.fromString(inputString);
             setAllowedOrigin(requestInfo);
 
             validateRequest(inputObject, requestInfo, context);

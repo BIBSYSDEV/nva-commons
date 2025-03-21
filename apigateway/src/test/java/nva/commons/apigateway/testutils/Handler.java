@@ -4,7 +4,6 @@ import static nva.commons.apigateway.RequestInfoConstants.PROXY_TAG;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.google.common.net.HttpHeaders;
 import java.net.HttpURLConnection;
-import java.net.http.HttpClient;
 import java.util.Collections;
 import java.util.Map;
 import nva.commons.apigateway.ApiGatewayHandler;
@@ -26,8 +25,8 @@ public class Handler extends ApiGatewayHandler<RequestBody, RequestBody> {
     /**
      * Constructor that overrides default serialization.
      */
-    public Handler(Environment environment, HttpClient httpClient) {
-        super(RequestBody.class, environment, httpClient);
+    public Handler(Environment environment) {
+        super(RequestBody.class, environment);
     }
 
     @Override

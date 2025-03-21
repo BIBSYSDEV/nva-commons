@@ -2,6 +2,9 @@ package no.unit.nva.testutils;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static no.unit.nva.auth.CognitoUserInfo.ACCESS_RIGHTS_CLAIM;
+import static no.unit.nva.auth.CognitoUserInfo.ALLOWED_CUSTOMERS;
+import static no.unit.nva.auth.CognitoUserInfo.EMPTY_STRING;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -19,11 +22,13 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import nva.commons.apigateway.AccessRight;
 import nva.commons.apigateway.AccessRightEntry;
@@ -48,6 +53,7 @@ public class HandlerRequestBuilder<T> {
     public static final String CLIENT_ID_CLAIM = "client_id";
     public static final String PERSON_NIN_CLAIM = "custom:nin";
     private static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
+    private static final String COMMA = ",";
     private final ObjectMapper objectMapper;
     @JsonProperty("body")
     private String body;
@@ -183,7 +189,7 @@ public class HandlerRequestBuilder<T> {
     }
 
     public HandlerRequestBuilder<T> withUserName(String userName) {
-        ObjectNode claims = getAuthorizerClaimsNode();
+        var claims = getAuthorizerClaimsNode();
         claims.put(USER_NAME_CLAIM, userName);
         return this;
     }
@@ -195,8 +201,14 @@ public class HandlerRequestBuilder<T> {
     }
 
     public HandlerRequestBuilder<T> withCurrentCustomer(URI customerId) {
-        ObjectNode claims = getAuthorizerClaimsNode();
+        var claims = getAuthorizerClaimsNode();
         claims.put(CUSTOMER_ID, customerId.toString());
+        return this;
+    }
+
+    public HandlerRequestBuilder<T> withAllowedCustomers(Set<URI> customers) {
+        var claims = getAuthorizerClaimsNode();
+        claims.put(ALLOWED_CUSTOMERS, customers.stream().map(URI::toString).collect(Collectors.joining(",")));
         return this;
     }
 
@@ -207,31 +219,31 @@ public class HandlerRequestBuilder<T> {
     }
 
     public HandlerRequestBuilder<T> withTopLevelCristinOrgId(URI topLevelCristinOrgId) {
-        ObjectNode claims = getAuthorizerClaimsNode();
+        var claims = getAuthorizerClaimsNode();
         claims.put(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM, topLevelCristinOrgId.toString());
         return this;
     }
 
     public HandlerRequestBuilder<T> withPersonCristinId(URI personCristinId) {
-        ObjectNode claims = getAuthorizerClaimsNode();
+        var claims = getAuthorizerClaimsNode();
         claims.put(PERSON_CRISTIN_ID, personCristinId.toString());
         return this;
     }
 
     public HandlerRequestBuilder<T> withPersonNin(String personNin) {
-        ObjectNode claims = getAuthorizerClaimsNode();
+        var claims = getAuthorizerClaimsNode();
         claims.put(PERSON_NIN_CLAIM, personNin);
         return this;
     }
 
     public HandlerRequestBuilder<T> withFeideId(String feideId) {
-        ObjectNode claims = getAuthorizerClaimsNode();
+        var claims = getAuthorizerClaimsNode();
         claims.put(FEIDE_ID_CLAIM, feideId);
         return this;
     }
 
     public HandlerRequestBuilder<T> withRoles(String roles) {
-        ObjectNode claims = getAuthorizerClaimsNode();
+        var claims = getAuthorizerClaimsNode();
         claims.put(APPLICATION_ROLES_CLAIM, roles);
         return this;
     }
@@ -241,6 +253,13 @@ public class HandlerRequestBuilder<T> {
             var accessRightEntry = new AccessRightEntry(accessRight, customerId);
             addAccessRightToCognitoGroups(accessRightEntry);
         }
+
+        var claims = getAuthorizerClaimsNode();
+        var accessRightsString = Arrays.stream(accessRights)
+                                     .map(AccessRight::toPersistedString)
+                                     .collect(Collectors.joining(COMMA));
+        claims.put(ACCESS_RIGHTS_CLAIM, accessRightsString);
+
         return this;
     }
 
@@ -281,10 +300,11 @@ public class HandlerRequestBuilder<T> {
                            .collect(Collectors.joining(ENTRIES_DELIMITER));
         claims.put(GROUPS_CLAIM, newClaim);
     }
+
     private Collection<AccessRightEntry> extractAccessRights(ObjectNode claims) {
-        return claims.has(GROUPS_CLAIM)
-                   ? AccessRightEntry.fromCsv(claims.get(GROUPS_CLAIM).textValue()).collect(Collectors.toList())
-                   : new ArrayList<>();
+        return new ArrayList<>(
+            AccessRightEntry.fromCsv(Optional.ofNullable(claims.get(GROUPS_CLAIM)).map(JsonNode::asText).orElse(EMPTY_STRING))
+                .toList());
     }
 
     private ObjectNode getAuthorizerClaimsNode() {
