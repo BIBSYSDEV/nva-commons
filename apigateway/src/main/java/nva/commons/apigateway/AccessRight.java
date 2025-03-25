@@ -67,6 +67,7 @@ public enum AccessRight {
     SUPPORT("support"),
     MANAGE_KBS("kbs"),
     MANAGE_RESOURCE_FILES("resource-files"),
+    MANAGE_CHANNEL_CLAIMS("channel-claims"),
 
     /**
      * Old ADMINISTRATE_APPLICATION
