@@ -12,8 +12,8 @@ public class AuthorizerResponse {
     }
 
     private AuthorizerResponse(Builder builder) {
-        setPrincipalId(builder.principalId);
-        setPolicyDocument(builder.policyDocument);
+        this.principalId = builder.principalId;
+        this.policyDocument = builder.policyDocument;
     }
 
     public static Builder newBuilder() {

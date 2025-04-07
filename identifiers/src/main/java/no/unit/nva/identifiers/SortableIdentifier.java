@@ -79,10 +79,12 @@ public final class SortableIdentifier implements Comparable<SortableIdentifier> 
     }
 
     private void validate(String identifier) {
-        if (identifier.length() == UUID_LENGTH || identifier.length() == SORTABLE_ID_LENGTH) {
-            return;
-        } else {
+        if (!isValidIdentifierLength(identifier)) {
             throw new IllegalArgumentException(INVALID_SORTABLE_IDENTIFIER_ERROR);
         }
+    }
+
+    private static boolean isValidIdentifierLength(String identifier) {
+        return identifier.length() == UUID_LENGTH || identifier.length() == SORTABLE_ID_LENGTH;
     }
 }

@@ -17,8 +17,8 @@ public class AuthPolicy {
     }
 
     private AuthPolicy(Builder builder) {
-        setVersion(VERSION);
-        setStatement(builder.statement);
+        this.version = VERSION;
+        this.statement = builder.statement;
     }
 
     public static Builder newBuilder() {

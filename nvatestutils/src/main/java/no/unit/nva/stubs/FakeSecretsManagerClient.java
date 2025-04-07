@@ -87,7 +87,7 @@ public class FakeSecretsManagerClient implements SecretsManagerClient {
     }
 
     private void createNewSecret(String key, String value, SecretName secretName) {
-        ConcurrentHashMap<SecretKey, String> secretContents = new ConcurrentHashMap<>();
+        var secretContents = new ConcurrentHashMap<SecretKey, String>();
         secretContents.put(new SecretKey(key), value);
         secrets.put(secretName, secretContents);
     }
@@ -96,7 +96,7 @@ public class FakeSecretsManagerClient implements SecretsManagerClient {
         secrets.get(secretName).put(new SecretKey(key), value);
     }
 
-    private static class SecretName {
+    private static final class SecretName {
 
         private final String value;
 

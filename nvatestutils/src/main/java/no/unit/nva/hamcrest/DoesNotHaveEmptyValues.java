@@ -123,8 +123,8 @@ public class DoesNotHaveEmptyValues<T> extends BaseMatcher<T> {
     }
 
     private List<PropertyValuePair> createListWithFieldsToBeChecked(PropertyValuePair rootObject) {
-        List<PropertyValuePair> fieldsToBeChecked = new ArrayList<>();
-        Stack<PropertyValuePair> fieldsToBeVisited = initializeFieldsToBeVisited(rootObject);
+        var fieldsToBeChecked = new ArrayList<PropertyValuePair>();
+        var fieldsToBeVisited = initializeFieldsToBeVisited(rootObject);
         while (!fieldsToBeVisited.isEmpty()) {
             PropertyValuePair currentField = fieldsToBeVisited.pop();
             if (currentField.shouldBeChecked(stopRecursionClasses, ignoreFields)) {
@@ -135,13 +135,14 @@ public class DoesNotHaveEmptyValues<T> extends BaseMatcher<T> {
         return fieldsToBeChecked;
     }
 
+    @SuppressWarnings("PMD.LooseCoupling")
     private Stack<PropertyValuePair> initializeFieldsToBeVisited(PropertyValuePair rootObject) {
-        Stack<PropertyValuePair> fieldsToBeVisited = new Stack<>();
+        var fieldsToBeVisited = new Stack<PropertyValuePair>();
         fieldsToBeVisited.add(rootObject);
         return fieldsToBeVisited;
     }
 
-    private void addNestedFieldsToFieldsToBeVisited(Stack<PropertyValuePair> fieldsToBeVisited,
+    private void addNestedFieldsToFieldsToBeVisited(Collection<PropertyValuePair> fieldsToBeVisited,
                                                     PropertyValuePair currentField) {
         if (currentField.isComplexObject()) {
             fieldsToBeVisited.addAll(currentField.children());
@@ -150,9 +151,9 @@ public class DoesNotHaveEmptyValues<T> extends BaseMatcher<T> {
         }
     }
 
-    private void addEachArrayElementAsFieldToBeVisited(Stack<PropertyValuePair> fieldsToBeVisited,
+    private void addEachArrayElementAsFieldToBeVisited(Collection<PropertyValuePair> fieldsToBeVisited,
                                                        PropertyValuePair currentField) {
-        List<PropertyValuePair> collectionElements = currentField.createPropertyValuePairsForEachCollectionItem();
+        var collectionElements = currentField.createPropertyValuePairsForEachCollectionItem();
         fieldsToBeVisited.addAll(collectionElements);
     }
 
@@ -182,30 +183,18 @@ public class DoesNotHaveEmptyValues<T> extends BaseMatcher<T> {
     }
 
     private boolean isEmptyMap(Object value) {
-        if (value instanceof Map) {
-            return ((Map<?, ?>) value).isEmpty();
-        }
-        return false;
+        return value instanceof Map && ((Map<?, ?>) value).isEmpty();
     }
 
     private boolean isEmptyJsonNode(Object value) {
-        if (value instanceof JsonNode) {
-            return ((JsonNode) value).isEmpty();
-        }
-        return false;
+        return value instanceof JsonNode && ((JsonNode) value).isEmpty();
     }
 
     private boolean isEmptyCollection(Object value) {
-        if (value instanceof Collection) {
-            return ((Collection<?>) value).isEmpty();
-        }
-        return false;
+        return value instanceof Collection && ((Collection<?>) value).isEmpty();
     }
 
     private boolean isBlankString(Object value) {
-        if (value instanceof String) {
-            return ((String) value).isBlank();
-        }
-        return false;
+        return value instanceof String && ((String) value).isBlank();
     }
 }

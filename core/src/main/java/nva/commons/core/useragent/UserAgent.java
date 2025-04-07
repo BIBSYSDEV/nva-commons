@@ -39,7 +39,7 @@ public final class UserAgent {
     /**
      * Allows the building of a valid UserAgent string.
      */
-    public static class UserAgentBuilder {
+    public static final class UserAgentBuilder {
         public static final String USER_AGENT_TEMPLATE = "%s-%s/%s (%s; mailto:%s)";
         public static final String NULL_VALUE_ERROR = "No value for user agent builder may be null";
         private String clientName;

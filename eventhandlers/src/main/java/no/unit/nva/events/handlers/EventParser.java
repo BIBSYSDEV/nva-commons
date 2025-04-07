@@ -57,7 +57,7 @@ public class EventParser<I> {
         return objectMapper.readValue(input, eventBridgeJavaType);
     }
 
-    private <OutputType> RuntimeException handleParsingError(Failure<OutputType> fail) {
+    private <O> RuntimeException handleParsingError(Failure<O> fail) {
         logger.error(ERROR_PARSING_INPUT + input);
         logger.error(stackTraceInSingleLine(fail.getException()));
         return new RuntimeException(fail.getException());
