@@ -168,7 +168,7 @@ public class DoesNotHaveEmptyValues<T> extends BaseMatcher<T> {
     private List<PropertyValuePair> collectEmptyFields(List<PropertyValuePair> propertyValuePairs) {
         return propertyValuePairs.stream()
                    .filter(propertyValue -> isEmpty(propertyValue.getValue()))
-                   .collect(Collectors.toList());
+                   .toList();
     }
 
     private boolean isEmpty(Object value) {
@@ -183,18 +183,18 @@ public class DoesNotHaveEmptyValues<T> extends BaseMatcher<T> {
     }
 
     private boolean isEmptyMap(Object value) {
-        return value instanceof Map && ((Map<?, ?>) value).isEmpty();
+        return value instanceof Map<?,?> map && map.isEmpty();
     }
 
     private boolean isEmptyJsonNode(Object value) {
-        return value instanceof JsonNode && ((JsonNode) value).isEmpty();
+        return value instanceof JsonNode json && json.isEmpty();
     }
 
     private boolean isEmptyCollection(Object value) {
-        return value instanceof Collection && ((Collection<?>) value).isEmpty();
+        return value instanceof Collection<?> collection && collection.isEmpty();
     }
 
     private boolean isBlankString(Object value) {
-        return value instanceof String && ((String) value).isBlank();
+        return value instanceof String string && string.isBlank();
     }
 }
