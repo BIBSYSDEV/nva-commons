@@ -8,6 +8,8 @@ import static nva.commons.apigateway.testutils.ProxyHandler.HTTP_STATUS_CODE_TES
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -23,6 +25,7 @@ import no.unit.nva.stubs.FakeContext;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.testutils.ProxyHandler;
 import nva.commons.apigateway.testutils.RequestBody;
+import nva.commons.core.Environment;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,17 +34,21 @@ import org.junit.jupiter.api.Test;
 class ApiGatewayProxyHandlerTest {
     private Context context;
     private ProxyHandler handler;
+    private Environment environment;
 
     @BeforeEach
     public void setup() {
+        environment = mock(Environment.class);
+        when(environment.readEnv("COGNITO_AUTHORIZER_URLS")).thenReturn("https://localhost:3000");
+        when(environment.readEnv("ALLOWED_ORIGIN")).thenReturn("*");
         context = new FakeContext();
-        handler = new ProxyHandler();
+        handler = new ProxyHandler(environment);
     }
 
     @Test
     @DisplayName("ApiGatewayProxyHandlerTest has a constructor with input class as only parameter")
     public void apiGatewayHandlerHasACostructorWithInputClassAsOnlyParameter() {
-        RestRequestHandler<String, String> handler = new ApiGatewayProxyHandler<>(String.class) {
+        RestRequestHandler<String, String> handler = new ApiGatewayProxyHandler<>(String.class, environment) {
 
             @Override
             protected void validateRequest(String input, RequestInfo requestInfo, Context context)

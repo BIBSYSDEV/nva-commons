@@ -17,7 +17,7 @@ import java.time.Duration;
 import no.unit.nva.stubs.FakeContext;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.BadRequestException;
-import nva.commons.apigateway.exceptions.UnauthorizedException;
+import nva.commons.core.Environment;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,12 +32,17 @@ class ApiS3PresignerGatewayHandlerTest {
     private ByteArrayOutputStream output;
     private InputStream input;
     private ApiS3PresignerGatewayHandler<Void> handler;
+    private Environment environment;
 
     @BeforeEach
     void init() {
         s3Presigner = mock(S3Presigner.class);
         input = IoUtils.stringToStream("{}");
         output = new ByteArrayOutputStream();
+        environment = mock(Environment.class);
+        when(environment.readEnv("ALLOWED_ORIGIN")).thenReturn("*");
+        when(environment.readEnv("COGNITO_AUTHORIZER_URLS")).thenReturn("http://localhost:3000");
+        when(environment.readEnv("AWS_REGION")).thenReturn("eu-west-1");
         handler = createHandler();
     }
 
@@ -63,7 +68,7 @@ class ApiS3PresignerGatewayHandlerTest {
     }
 
     private ApiS3PresignerGatewayHandler<Void> createHandler() {
-        return new ApiS3PresignerGatewayHandler<>(Void.class, s3Presigner) {
+        return new ApiS3PresignerGatewayHandler<>(Void.class, s3Presigner, environment) {
 
             @Override
             protected void validateRequest(Void input, RequestInfo requestInfo, Context context)

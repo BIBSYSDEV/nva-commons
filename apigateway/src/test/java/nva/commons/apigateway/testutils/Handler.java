@@ -19,7 +19,7 @@ public class Handler extends ApiGatewayHandler<RequestBody, RequestBody> {
     private RequestBody body;
 
     public Handler() {
-        super(RequestBody.class);
+        super(RequestBody.class, new Environment());
     }
 
     /**

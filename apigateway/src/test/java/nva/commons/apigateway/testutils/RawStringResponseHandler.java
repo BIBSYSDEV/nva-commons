@@ -26,7 +26,7 @@ public class RawStringResponseHandler extends ApiGatewayHandler<RequestBody, Str
     private RequestBody body;
 
     public RawStringResponseHandler() {
-        super(RequestBody.class);
+        super(RequestBody.class, new Environment());
     }
 
     /**

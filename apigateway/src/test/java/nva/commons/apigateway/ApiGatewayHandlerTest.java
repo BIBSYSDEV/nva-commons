@@ -35,6 +35,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import java.io.ByteArrayOutputStream;
@@ -54,6 +57,7 @@ import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.GoneException;
 import nva.commons.apigateway.exceptions.TestException;
+import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.apigateway.testutils.Base64Handler;
 import nva.commons.apigateway.testutils.Handler;
@@ -64,6 +68,7 @@ import nva.commons.core.Environment;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -81,10 +86,22 @@ class ApiGatewayHandlerTest {
     public static final int OVERRIDDEN_STATUS_CODE = 418;  //I'm a teapot
     public static final Path EVENT_WITH_UNKNOWN_REQUEST_INFO = Path.of("apiGatewayMessages",
                                                                        "eventWithUnknownRequestInfo.json");
+    public static final Path EVENT_WITH_ACCESS_RIGHTS_CLAIMS = Path.of("apiGatewayMessages",
+                                                                       "event_with_access_rights_claim.json");
+    public static final Path EVENT_WITH_MANIPULATED_TOKEN = Path.of("apiGatewayMessages",
+                                                                    "event_with_manipulated_token.json");
+    public static final Path EVENT_WITH_NO_AUTHORIZER = Path.of("apiGatewayMessages",
+                                                                "event_without_authorizer_but_auth_header.json");
+    public static final Path EVENT_WITH_WRONG_ISSUER = Path.of("apiGatewayMessages",
+                                                                "event_without_authorizer_wrong_issuer.json");
+    public static final Path TEST_JWKS = Path.of("apiGatewayMessages",
+                                                 "test-jwks.json");
     private static final String PATH = "path1/path2/path3";
+    private static final int PORT_NUMBER = 3000;
     private Context context;
     private Handler handler;
     private Environment environment;
+    private WireMockServer wireMockServer;
 
     public static Stream<String> mediaTypeProvider() {
         return Stream.of(MediaTypes.APPLICATION_JSON_LD.toString(), MediaTypes.APPLICATION_DATACITE_XML.toString(),
@@ -96,13 +113,34 @@ class ApiGatewayHandlerTest {
         context = new FakeContext();
         environment = mock(Environment.class);
         when(environment.readEnv("ALLOWED_ORIGIN")).thenReturn("*");
+        when(environment.readEnv("COGNITO_AUTHORIZER_URLS")).thenReturn("http://localhost:3000");
         handler = new Handler(environment);
+        setupWireMockServer();
+    }
+
+    @AfterEach
+    public void tearDown() {
+        wireMockServer.stop();
+    }
+
+    private void setupWireMockServer() {
+        wireMockServer =
+            new WireMockServer(WireMockConfiguration.options().port(PORT_NUMBER).asynchronousResponseEnabled(true));
+        wireMockServer.start();
+        WireMock.configureFor("localhost", PORT_NUMBER);
+    }
+
+    private static void stubJwks(Path jwks) {
+        WireMock.stubFor(WireMock.get(WireMock.urlPathEqualTo("/.well-known/jwks.json"))
+                             .willReturn(WireMock.aResponse()
+                                             .withHeader("Content-Type", "application/json")
+                                             .withBody(IoUtils.stringFromResources(jwks))));
     }
 
     @Test
     @DisplayName("ApiGatewayHandler has a constructor with input class as only parameter")
     public void apiGatewayHandlerHasAConstructorWithInputClassAsOnlyParameter() {
-        RestRequestHandler<String, String> handler = new ApiGatewayHandler<>(String.class) {
+        RestRequestHandler<String, String> handler = new ApiGatewayHandler<>(String.class, environment) {
             @Override
             protected void validateRequest(String input, RequestInfo requestInfo, Context context)
                 throws ApiGatewayException {
@@ -201,6 +239,7 @@ class ApiGatewayHandlerTest {
         InputStream input = IoUtils.inputStreamFromResources(EVENT_WITH_UNKNOWN_REQUEST_INFO);
 
         GatewayResponse<RequestBody> response = getResponse(RequestBody.class, input, handler);
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
         RequestBody body = response.getBodyObject(RequestBody.class);
 
         String expectedValueForField1 = "value1";
@@ -393,7 +432,7 @@ class ApiGatewayHandlerTest {
     void handlerSerializesWithIsBase64Encoded() throws IOException {
         var output = outputStream();
         InputStream input = requestWithBodyWithEmptyFields();
-        var isBase64EncodedHandler = new Base64Handler();
+        var isBase64EncodedHandler = new Base64Handler(environment);
         isBase64EncodedHandler.handleRequest(input, output, context);
         GatewayResponse<Void> response = GatewayResponse.fromOutputStream(output, Void.class);
         assertThat(response.getIsBase64Encoded(), is(true));
@@ -403,7 +442,7 @@ class ApiGatewayHandlerTest {
     void handlerSendsRedirectionWhenItReceivesARedirectException() throws IOException {
         var expectedRedirectLocation = randomUri();
         var expectedRedirectStatusCode = HttpURLConnection.HTTP_SEE_OTHER;
-        var handler = new RedirectHandler(expectedRedirectLocation, expectedRedirectStatusCode);
+        var handler = new RedirectHandler(expectedRedirectLocation, expectedRedirectStatusCode, environment);
         var request = requestWithHeaders(Map.of(HttpHeaders.ACCEPT, MediaType.HTML_UTF_8.toString()));
         var response = getResponse(Void.class, request, handler);
         assertThat(response.getStatusCode(), is(equalTo(expectedRedirectStatusCode)));
@@ -489,6 +528,100 @@ class ApiGatewayHandlerTest {
         assertThat(responseHeaders.get(VARY), containsString("Origin"));
     }
 
+    @Test
+    void shouldRejectFakeJwt() throws IOException {
+        var inputStream = IoUtils.inputStreamFromResources(EVENT_WITH_MANIPULATED_TOKEN.toString());
+
+        stubJwks(TEST_JWKS);
+
+        var outputStream = outputStream();
+        handler.handleRequest(inputStream, outputStream, context);
+        var response = GatewayResponse.fromOutputStream(outputStream, String.class);
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_UNAUTHORIZED)));
+    }
+
+    @Test
+    void shouldAcceptValidJwt() throws IOException {
+        var inputStream = IoUtils.inputStreamFromResources(EVENT_WITH_NO_AUTHORIZER.toString());
+
+        stubJwks(TEST_JWKS);
+
+        var outputStream = outputStream();
+        handler.handleRequest(inputStream, outputStream, context);
+        var response = GatewayResponse.fromOutputStream(outputStream, String.class);
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
+    }
+
+    @Test
+    void shouldLetNonAuthRequestsPass() throws IOException {
+        var inputStream = IoUtils.inputStreamFromResources(EVENT_WITH_UNKNOWN_REQUEST_INFO.toString());
+
+        // No jwks stub, test would fail if requested
+
+        var outputStream = outputStream();
+        handler.handleRequest(inputStream, outputStream, context);
+        var response = GatewayResponse.fromOutputStream(outputStream, String.class);
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
+    }
+
+    @Test
+    void shouldSkipCheckIfAuthenticatedWithApiGateway() throws IOException {
+        var inputStream = IoUtils.inputStreamFromResources(EVENT_WITH_ACCESS_RIGHTS_CLAIMS.toString());
+
+        // No jwks stub, test would fail if requested
+
+        var outputStream = outputStream();
+        handler.handleRequest(inputStream, outputStream, context);
+        var response = GatewayResponse.fromOutputStream(outputStream, String.class);
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
+    }
+
+    @Test
+    void shouldBeAbleToReadClaimsFromToken() throws IOException {
+        var inputStream = IoUtils.inputStreamFromResources(EVENT_WITH_NO_AUTHORIZER.toString());
+
+        stubJwks(TEST_JWKS);
+
+        var outputStream = outputStream();
+        RestRequestHandler<String, List<AccessRight>> handler = new ApiGatewayHandler<>(String.class,
+                                                                                        environment) {
+            @Override
+            protected void validateRequest(String input, RequestInfo requestInfo, Context context)
+                throws ApiGatewayException {
+                //no-op
+            }
+
+            @Override
+            protected List<AccessRight> processInput(String input, RequestInfo requestInfo, Context context)
+                throws UnauthorizedException {
+                return requestInfo.getAccessRights();
+            }
+
+            @Override
+            protected Integer getSuccessStatusCode(String input, List<AccessRight> output) {
+                return HttpURLConnection.HTTP_OK;
+            }
+        };
+        handler.handleRequest(inputStream, outputStream, context);
+
+        var response = GatewayResponse.fromOutputStream(outputStream, String.class);
+        assertThat(response.getBody(), is(equalTo(
+            "[ \"MANAGE_OWN_AFFILIATION\", \"MANAGE_CUSTOMERS\", \"ACT_AS\", \"MANAGE_IMPORT\", \"MANAGE_NVI\", "
+            + "\"MANAGE_OWN_RESOURCES\", \"MANAGE_EXTERNAL_CLIENTS\" ]")));
+    }
+
+    @Test
+    void shouldRejectRequestWhenThereIsNoMatchOnJwkIssuer() throws IOException {
+        var inputStream = IoUtils.inputStreamFromResources(EVENT_WITH_WRONG_ISSUER.toString());
+
+        stubJwks(TEST_JWKS);
+
+        var outputStream = outputStream();
+        handler.handleRequest(inputStream, outputStream, context);
+        var response = GatewayResponse.fromOutputStream(outputStream, String.class);
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_UNAUTHORIZED)));
+    }
+
     private RawStringResponseHandler getRawStringResponseHandler() {
         return new RawStringResponseHandler(environment);
     }
@@ -527,8 +660,6 @@ class ApiGatewayHandlerTest {
         assertThat(responseHeaders.get(VARY), containsString("Origin"));
     }
 
-
-
     private String getUnsupportedMediaTypeErrorMessage(String mediaType) {
         return UnsupportedAcceptHeaderException.createMessage(List.of(MediaType.parse(mediaType)),
                                                               handler.listSupportedMediaTypes());
@@ -549,7 +680,7 @@ class ApiGatewayHandlerTest {
     }
 
     private Handler handlerFailingWhenParsing(String expectedMessage) {
-        return new Handler() {
+        return new Handler(environment) {
             @Override
             protected RequestBody parseInput(String inputString) {
                 throw new RuntimeException(expectedMessage);
@@ -573,7 +704,7 @@ class ApiGatewayHandlerTest {
     }
 
     private Handler handlerThatThrowsUncheckedExceptions() {
-        return new Handler() {
+        return new Handler(environment) {
             @Override
             protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context) {
                 throwUncheckedExceptions();
@@ -583,7 +714,7 @@ class ApiGatewayHandlerTest {
     }
 
     private Handler handlerThatThrowsGoneExceptionsWithCustomObject(CustomObject customObject) {
-        return new Handler() {
+        return new Handler(environment) {
             @Override
             protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
                 throws GoneException {
@@ -598,7 +729,7 @@ class ApiGatewayHandlerTest {
     }
 
     private Handler handlerThatOverridesListSupportedMediaTypes() {
-        return new Handler() {
+        return new Handler(environment) {
             @Override
             public List<MediaType> listSupportedMediaTypes() {
                 return List.of(MediaType.JSON_UTF_8, MediaTypes.APPLICATION_JSON_LD,
@@ -608,7 +739,7 @@ class ApiGatewayHandlerTest {
     }
 
     private Handler handlerThatOverridesGetFailureStatusCode() {
-        return new Handler() {
+        return new Handler(environment) {
             @Override
             public int getFailureStatusCode(RequestBody input, ApiGatewayException exception) {
                 return OVERRIDDEN_STATUS_CODE;
@@ -742,7 +873,7 @@ class ApiGatewayHandlerTest {
     }
 
     private Handler handlerThatThrowsExceptions() {
-        return new Handler() {
+        return new Handler(environment) {
             @Override
             protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
                 throws ApiGatewayException {

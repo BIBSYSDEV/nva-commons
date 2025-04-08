@@ -18,11 +18,6 @@ public abstract class ApiS3GatewayHandler<I> extends ApiS3PresignerGatewayHandle
     public static final Duration SIGN_DURATION = Duration.ofMinutes(60);
     private final S3Client s3client;
 
-    public ApiS3GatewayHandler(Class<I> iclass, S3Client s3client, S3Presigner s3Presigner) {
-        super(iclass, s3Presigner);
-        this.s3client = s3client;
-    }
-
     @JacocoGenerated
     public ApiS3GatewayHandler(Class<I> iclass,
                                S3Client s3client,
@@ -35,7 +30,7 @@ public abstract class ApiS3GatewayHandler<I> extends ApiS3PresignerGatewayHandle
     @JacocoGenerated
     public static S3Client defaultS3Client() {
         return S3Client.builder()
-                   .region(Region.of(AWS_REGION))
+                   .region(Region.of(new Environment().readEnv("AWS_REGION")))
                    .httpClient(UrlConnectionHttpClient.create())
                    .build();
     }

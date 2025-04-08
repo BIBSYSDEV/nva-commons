@@ -24,10 +24,14 @@ dependencies {
     implementation libs.jackson.datatype.jsr310
     implementation libs.jackson.datatype.problem
 
+    implementation libs.com.auth0.jwks
+    implementation libs.com.auth0.jwt
+
     testImplementation libs.bundles.testing
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")
     testImplementation libs.jackson.dataformat.xml
+    testImplementation libs.wiremock.jetty.'12'
 }
 
 

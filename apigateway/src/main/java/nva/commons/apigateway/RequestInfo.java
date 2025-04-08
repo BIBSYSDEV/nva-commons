@@ -23,6 +23,8 @@ import static nva.commons.apigateway.RequestInfoConstants.SCOPES_CLAIM;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
 import static nva.commons.core.paths.UriWrapper.HTTPS;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.Claim;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -39,8 +41,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import no.unit.nva.auth.CognitoUserInfo;
+import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.apigateway.exceptions.ApiIoException;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.UnauthorizedException;
@@ -58,6 +63,8 @@ public final class RequestInfo {
     private static final ObjectMapper mapper = defaultRestObjectMapper;
     private static final String THIRD_PARTY_SCOPE_PREFIX = "https://api.nva.unit.no/scopes/third-party";
     private static final String COMMA = ",";
+    private static final String AUTHORIZER_NAME = "authorizer";
+    private static final String AUTHORIZER_PATH = "/" + AUTHORIZER_NAME;
     @JsonProperty(HEADERS_FIELD)
     private Map<String, String> headers;
     @JsonProperty(PATH_FIELD)
@@ -94,18 +101,29 @@ public final class RequestInfo {
         return new ApiMessageParser<>(mapper).getRequestInfo(inputString);
     }
 
-    @JsonIgnore
+    @Deprecated(forRemoval = true)
     public String getHeader(String header) {
+        return getHeaderOptional(header).orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_HEADERS + header));
+    }
+
+    @JsonIgnore
+    public Optional<String> getHeaderOptional(String header) {
         return getHeaders().entrySet().stream()
                    .filter(entry -> entry.getKey().equalsIgnoreCase(header))
                    .findFirst()
-                   .map(Map.Entry::getValue)
-                   .orElseThrow(() -> new IllegalArgumentException(MISSING_FROM_HEADERS + header));
+                   .map(Map.Entry::getValue);
     }
 
     @JsonIgnore
     public String getAuthHeader() {
-        return getHeader(HttpHeaders.AUTHORIZATION);
+        return getHeaderOptional(HttpHeaders.AUTHORIZATION).orElseThrow(
+            () -> new IllegalArgumentException(MISSING_FROM_HEADERS + HttpHeaders.AUTHORIZATION));
+    }
+
+    @JsonIgnore
+    public Optional<String> getBearerToken() {
+        return getHeaderOptional(HttpHeaders.AUTHORIZATION)
+                   .map(authorizationHeader -> authorizationHeader.replaceFirst("Bearer ", ""));
     }
 
     @JsonIgnore
@@ -252,6 +270,10 @@ public final class RequestInfo {
         return getAccessRights().contains(accessRight) || handleAuthorizationFailure();
     }
 
+    public boolean isGatewayAuthorized() {
+        return getRequestContext().has(AUTHORIZER_NAME) && getRequestContext().at(AUTHORIZER_PATH).isObject();
+    }
+
     private boolean handleAuthorizationFailure() {
         logger.warn(AUTHORIZATION_FAILURE_WARNING);
         return false;
@@ -266,8 +288,44 @@ public final class RequestInfo {
     }
 
     private Optional<CognitoUserInfo> fetchUserInfo() {
-        var claims = getRequestContext().at(CLAIMS_PATH);
-        return claims.isObject() ? Optional.of(CognitoUserInfo.fromString(claims.toString())) : Optional.empty();
+        if (isGatewayAuthorized()) {
+            var claims = getRequestContext().at(CLAIMS_PATH);
+            return claims.isObject() ? Optional.of(CognitoUserInfo.fromString(claims.toString())) : Optional.empty();
+        } else {
+            return getBearerToken().map(this::getCognitoUserInfoFromToken);
+        }
+    }
+
+    private CognitoUserInfo getCognitoUserInfoFromToken(String token) {
+        var claims = JWT.decode(token).getClaims().entrySet().stream()
+                         .collect(Collectors.toMap(
+                             Entry::getKey,
+                             entry -> extractClaimValue(entry.getValue())
+                         ));
+
+        return attempt(() -> JsonUtils.dtoObjectMapper.writeValueAsString(claims))
+                   .map(CognitoUserInfo::fromString).orElseThrow();
+    }
+
+    @JacocoGenerated
+    private static Object extractClaimValue(Claim claim) {
+        if (claim.asBoolean() != null) {
+            return claim.asBoolean();
+        } else if (claim.asInt() != null) {
+            return claim.asInt();
+        } else if (claim.asDouble() != null) {
+            return claim.asDouble();
+        } else if (claim.asLong() != null) {
+            return claim.asLong();
+        } else if (claim.asString() != null) {
+            return claim.asString();
+        } else if (claim.asDate() != null) {
+            return claim.asDate();
+        } else if (claim.asArray(String.class) != null) {
+            return claim.asArray(String.class);
+        } else {
+            return claim.as(Object.class);
+        }
     }
 
     private List<AccessRight> parseAccessRights(String value) {
