@@ -155,7 +155,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
         this.environment = environment;
         this.inputParser = new ApiMessageParser<>(objectMapper);
         this.objectMapper = objectMapper;
-        this.authorizerUrls = String.format(this.environment.readEnv(COGNITO_AUTHORIZER_URLS)).split(",");
+        this.authorizerUrls = this.environment.readEnv(COGNITO_AUTHORIZER_URLS).split(",");
         this.jwkProviders = getJwkProviders(authorizerUrls);
     }
 
