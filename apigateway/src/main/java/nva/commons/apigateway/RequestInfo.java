@@ -65,6 +65,8 @@ public final class RequestInfo {
     private static final String COMMA = ",";
     private static final String AUTHORIZER_NAME = "authorizer";
     private static final String AUTHORIZER_PATH = "/" + AUTHORIZER_NAME;
+    private static final String BEARER_PREFIX = "Bearer ";
+    private static final String EMPTY_STRING = "";
     @JsonProperty(HEADERS_FIELD)
     private Map<String, String> headers;
     @JsonProperty(PATH_FIELD)
@@ -123,7 +125,7 @@ public final class RequestInfo {
     @JsonIgnore
     public Optional<String> getBearerToken() {
         return getHeaderOptional(HttpHeaders.AUTHORIZATION)
-                   .map(authorizationHeader -> authorizationHeader.replaceFirst("Bearer ", ""));
+                   .map(authorizationHeader -> authorizationHeader.replaceFirst(BEARER_PREFIX, EMPTY_STRING));
     }
 
     @JsonIgnore

@@ -583,8 +583,7 @@ class ApiGatewayHandlerTest {
         stubJwks(TEST_JWKS);
 
         var outputStream = outputStream();
-        RestRequestHandler<String, List<AccessRight>> handler = new ApiGatewayHandler<>(String.class,
-                                                                                        environment) {
+        var handler = new ApiGatewayHandler<String, List<AccessRight>>(String.class, environment) {
             @Override
             protected void validateRequest(String input, RequestInfo requestInfo, Context context)
                 throws ApiGatewayException {

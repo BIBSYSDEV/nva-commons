@@ -30,7 +30,7 @@ public class RedirectHandler extends Handler {
     }
 
     private boolean clientIsRequestingHtmlContent(RequestInfo requestInfo) {
-        MediaType requestedContent =
+        var requestedContent =
             MediaType.parse(requestInfo.getHeaderOptional(HttpHeaders.ACCEPT)
                                 .orElseThrow(() -> new IllegalArgumentException("Missing Accept header")))
                 .withoutParameters();

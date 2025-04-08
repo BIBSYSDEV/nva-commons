@@ -81,7 +81,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     protected MediaType calculateContentTypeHeaderReturnValue(RequestInfo requestInfo)
         throws UnsupportedAcceptHeaderException {
         if (requestInfo.getHeaders().containsKey(HttpHeaders.ACCEPT)) {
-            String acceptHeader = requestInfo.getHeaderOptional(HttpHeaders.ACCEPT).orElseThrow();
+            var acceptHeader = requestInfo.getHeaderOptional(HttpHeaders.ACCEPT).orElseThrow();
             return bestMatchingMediaTypeBasedOnRequestAcceptHeader(acceptHeader);
         }
         return defaultResponseContentTypeWhenNotSpecifiedByClientRequest();
@@ -89,9 +89,9 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     private MediaType bestMatchingMediaTypeBasedOnRequestAcceptHeader(String acceptHeader)
         throws UnsupportedAcceptHeaderException {
-        List<MediaType> acceptMediaTypes = parseAcceptHeader(acceptHeader);
+        var acceptMediaTypes = parseAcceptHeader(acceptHeader);
 
-        List<MediaType> matches = findMediaTypeMatches(acceptMediaTypes);
+        var matches = findMediaTypeMatches(acceptMediaTypes);
         if (matches.isEmpty()) {
             throw new UnsupportedAcceptHeaderException(acceptMediaTypes, listSupportedMediaTypes());
         }
