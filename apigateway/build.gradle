@@ -31,7 +31,7 @@ dependencies {
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")
     testImplementation libs.jackson.dataformat.xml
-    testImplementation libs.wiremock.jetty.'12'
+    testImplementation libs.wiremock
 }
 
 
