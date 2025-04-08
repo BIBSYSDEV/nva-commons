@@ -74,7 +74,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
 
         return requestInfo.getHeaderOptional(ORIGIN)
                    .filter(originsList::contains)
-                   .orElse(originsList.getFirst());
+                   .orElse(originsList.get(0));
     }
 
     private List<String> getValidOrigins() {
