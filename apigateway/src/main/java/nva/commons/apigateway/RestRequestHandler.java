@@ -1,6 +1,7 @@
 package nva.commons.apigateway;
 
 import static com.google.common.net.MediaType.JSON_UTF_8;
+import static java.util.Objects.isNull;
 import static nva.commons.core.attempt.Try.attempt;
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 import com.amazonaws.services.lambda.runtime.Context;
@@ -245,8 +246,9 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     private JwkProvider getJwkProvider(String issuer) throws UnauthorizedException {
         var jwkProvider = jwkProviders.get(issuer);
-        if (jwkProvider == null) {
-            throw new UnauthorizedException("No JWK provider found for issuer: " + issuer);
+        if (isNull(jwkProvider)) {
+            logger.error("JWK provider for issuer {} not found", issuer);
+            throw new UnauthorizedException("No JWK provider found for issuer");
         }
         return jwkProvider;
     }
