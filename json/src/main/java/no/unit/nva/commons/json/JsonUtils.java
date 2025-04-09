@@ -66,11 +66,11 @@ public final class JsonUtils {
         SimpleModule module = new SimpleModule();
         //Do not optimize the line under. It can fail due to a Oracle JDK bug.
         //noinspection Convert2Diamond
-        module.addDeserializer(String.class, new StdDeserializer<String>(String.class) {
+        module.addDeserializer(String.class, new StdDeserializer<>(String.class) {
 
             @Override
-            public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-                String result = StringDeserializer.instance.deserialize(p, ctxt);
+            public String deserialize(JsonParser p, DeserializationContext context) throws IOException {
+                String result = StringDeserializer.instance.deserialize(p, context);
                 if (result == null || result.isEmpty()) {
                     return null;
                 }

@@ -195,6 +195,7 @@ public class GatewayResponse<T> implements Serializable {
         return statusCode;
     }
 
+    @SuppressWarnings("PMD.BooleanGetMethodName")
     public Boolean getIsBase64Encoded() {
         return isBase64Encoded;
     }

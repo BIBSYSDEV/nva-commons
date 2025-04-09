@@ -14,9 +14,9 @@ public class StatementElement {
     }
 
     private StatementElement(Builder builder) {
-        setEffect(builder.effect);
-        setAction(builder.action);
-        setResource(builder.resource);
+        this.effect = builder.effect;
+        this.action = builder.action;
+        this.resource = builder.resource;
     }
 
     public static Builder newBuilder() {
