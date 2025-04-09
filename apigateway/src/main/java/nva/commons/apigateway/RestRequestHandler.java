@@ -194,12 +194,16 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
         return Stream.of(authorizerUrls)
                    .collect(Collectors.toMap(
                        domain -> domain,
-                       domain -> new JwkProviderBuilder(domain)
-                                     .cached(10, 1, TimeUnit.HOURS)
-                                     .rateLimited(10, 1, TimeUnit.MINUTES)
-                                     .timeouts(CONNECT_TIMEOUT, READ_TIMEOUT)
-                                     .build()
+                       RestRequestHandler::createJwkProvider
                    ));
+    }
+
+    private static JwkProvider createJwkProvider(String domain) {
+        return new JwkProviderBuilder(domain)
+                   .cached(10, 1, TimeUnit.HOURS)
+                   .rateLimited(10, 1, TimeUnit.MINUTES)
+                   .timeouts(CONNECT_TIMEOUT, READ_TIMEOUT)
+                   .build();
     }
 
     private void validateAuthorization(RequestInfo requestInfo) throws UnauthorizedException {
