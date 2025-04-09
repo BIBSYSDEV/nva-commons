@@ -80,27 +80,27 @@ import org.zalando.problem.Status;
 
 class ApiGatewayHandlerTest {
 
-    public static final String TOP_EXCEPTION_MESSAGE = "TOP Exception";
-    public static final String MIDDLE_EXCEPTION_MESSAGE = "MIDDLE Exception";
-    public static final String BOTTOM_EXCEPTION_MESSAGE = "BOTTOM Exception";
-    public static final int OVERRIDDEN_STATUS_CODE = 418;  //I'm a teapot
-    public static final Path EVENT_WITH_UNKNOWN_REQUEST_INFO = Path.of("apiGatewayMessages",
+    private static final String TOP_EXCEPTION_MESSAGE = "TOP Exception";
+    private static final String MIDDLE_EXCEPTION_MESSAGE = "MIDDLE Exception";
+    private static final String BOTTOM_EXCEPTION_MESSAGE = "BOTTOM Exception";
+    private static final int OVERRIDDEN_STATUS_CODE = 418;  //I'm a teapot
+    private static final Path EVENT_WITH_UNKNOWN_REQUEST_INFO = Path.of("apiGatewayMessages",
                                                                        "eventWithUnknownRequestInfo.json");
-    public static final Path EVENT_WITH_ACCESS_RIGHTS_CLAIMS = Path.of("apiGatewayMessages",
+    private static final Path EVENT_WITH_ACCESS_RIGHTS_CLAIMS = Path.of("apiGatewayMessages",
                                                                        "event_with_access_rights_claim.json");
-    public static final Path EVENT_WITH_MANIPULATED_TOKEN = Path.of("apiGatewayMessages",
+    private static final Path EVENT_WITH_MANIPULATED_TOKEN = Path.of("apiGatewayMessages",
                                                                     "event_with_manipulated_token.json");
-    public static final Path EVENT_WITH_NO_AUTHORIZER = Path.of("apiGatewayMessages",
+    private static final Path EVENT_WITH_NO_AUTHORIZER = Path.of("apiGatewayMessages",
                                                                 "event_without_authorizer_but_auth_header.json");
-    public static final Path EVENT_WITH_WRONG_ISSUER = Path.of("apiGatewayMessages",
+    private static final Path EVENT_WITH_WRONG_ISSUER = Path.of("apiGatewayMessages",
                                                                "event_without_authorizer_wrong_issuer.json");
-    public static final Path EVENT_SIGNED_UNSUPPORTED = Path.of("apiGatewayMessages",
+    private static final Path EVENT_SIGNED_UNSUPPORTED = Path.of("apiGatewayMessages",
                                                                "event_signed_unsupported.json");
-    public static final Path EVENT_SIGNED_NONE = Path.of("apiGatewayMessages",
-                                                                "event_signed_none.json");
-    public static final Path EVENT_EXTERNAL_CLIENT = Path.of("apiGatewayMessages",
+    private static final Path EVENT_UNSIGNED = Path.of("apiGatewayMessages",
+                                                       "event_signed_none.json");
+    private static final Path EVENT_EXTERNAL_CLIENT = Path.of("apiGatewayMessages",
                                                          "event_external_client.json");
-    public static final Path TEST_JWKS = Path.of("apiGatewayMessages",
+    private static final Path TEST_JWKS = Path.of("apiGatewayMessages",
                                                  "test-jwks.json");
     private static final String PATH = "path1/path2/path3";
     private static final int PORT_NUMBER = 3000;
@@ -115,7 +115,7 @@ class ApiGatewayHandlerTest {
     }
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         context = new FakeContext();
         environment = mock(Environment.class);
         when(environment.readEnv("ALLOWED_ORIGIN")).thenReturn("*");
@@ -125,7 +125,7 @@ class ApiGatewayHandlerTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         wireMockServer.stop();
     }
 
@@ -145,7 +145,7 @@ class ApiGatewayHandlerTest {
 
     @Test
     @DisplayName("ApiGatewayHandler has a constructor with input class as only parameter")
-    public void apiGatewayHandlerHasAConstructorWithInputClassAsOnlyParameter() {
+    void apiGatewayHandlerHasAConstructorWithInputClassAsOnlyParameter() {
         RestRequestHandler<String, String> handler = new ApiGatewayHandler<>(String.class, environment) {
             @Override
             protected void validateRequest(String input, RequestInfo requestInfo, Context context)
@@ -167,7 +167,7 @@ class ApiGatewayHandlerTest {
 
     @Test
     @DisplayName("handleRequest should have available the request headers")
-    public void handleRequestShouldHaveAvailableTheRequestHeaders() throws IOException {
+    void handleRequestShouldHaveAvailableTheRequestHeaders() throws IOException {
         InputStream input = requestWithHeaders();
 
         getStringResponse(input, handler);
@@ -184,7 +184,7 @@ class ApiGatewayHandlerTest {
     // TODO: Should return 406 when Accept header contains unsupported media type
     @ParameterizedTest(name = "handleRequest should return Unsupported media-type when input is {0}")
     @ValueSource(strings = {"application/xml", "text/plain; charset=UTF-8"})
-    public void handleRequestShouldReturnUnsupportedMediaTypeOnUnsupportedAcceptHeader(String mediaType)
+    void handleRequestShouldReturnUnsupportedMediaTypeOnUnsupportedAcceptHeader(String mediaType)
         throws IOException {
         InputStream input = requestWithAcceptHeader(mediaType);
 
@@ -200,7 +200,7 @@ class ApiGatewayHandlerTest {
         "text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8", "*; q=.2"
         // java.net.HttpURLConnection uses this Accept header
     })
-    public void handleRequestShouldReturnOkOnSupportedAcceptHeader(String mediaType) throws IOException {
+    void handleRequestShouldReturnOkOnSupportedAcceptHeader(String mediaType) throws IOException {
         InputStream input = requestWithAcceptHeader(mediaType);
 
         GatewayResponse<String> response = getStringResponse(input, handler);
@@ -209,7 +209,7 @@ class ApiGatewayHandlerTest {
     }
 
     @Test
-    public void handleRequestReturnsContentTypeJsonOnAcceptWildcard() throws IOException {
+    void handleRequestReturnsContentTypeJsonOnAcceptWildcard() throws IOException {
         Handler handler = handlerThatOverridesListSupportedMediaTypes();
 
         InputStream input = requestWithAcceptHeader(MediaType.ANY_TYPE.toString());
@@ -222,7 +222,7 @@ class ApiGatewayHandlerTest {
 
     @Test
     @DisplayName("handleRequest should have available the request path")
-    public void handleRequestShouldHaveAvailableTheRequestPath() throws IOException {
+    void handleRequestShouldHaveAvailableTheRequestPath() throws IOException {
         InputStream input = requestWithHeadersAndPath();
 
         getStringResponse(input, handler);
@@ -234,14 +234,14 @@ class ApiGatewayHandlerTest {
 
     @Test
     @DisplayName("handleRequest allows response headers depended on input")
-    public void apiGatewayHandlerAllowsResponseHeadersDependedOnInput() throws IOException {
+    void apiGatewayHandlerAllowsResponseHeadersDependedOnInput() throws IOException {
         InputStream input = requestWithHeadersAndPath();
         GatewayResponse<String> response = getStringResponse(input, handler);
         assertTrue(response.getHeaders().containsKey(HttpHeaders.WARNING));
     }
 
     @Test
-    public void handleRequestDoesNotThrowExceptionOnUnknownFieldsInRequestInfo() throws IOException {
+    void handleRequestDoesNotThrowExceptionOnUnknownFieldsInRequestInfo() throws IOException {
         InputStream input = IoUtils.inputStreamFromResources(EVENT_WITH_UNKNOWN_REQUEST_INFO);
 
         GatewayResponse<RequestBody> response = getResponse(RequestBody.class, input, handler);
@@ -256,7 +256,7 @@ class ApiGatewayHandlerTest {
 
     @Test
     @DisplayName("Logger logs the whole exception stacktrace when an exception has occurred 2")
-    public void loggerLogsTheWholeExceptionStackTraceWhenAnExceptionHasOccurred() throws IOException {
+    void loggerLogsTheWholeExceptionStackTraceWhenAnExceptionHasOccurred() throws IOException {
         TestAppender appender = LogUtils.getTestingAppenderForRootLogger();
         Handler handler = handlerThatThrowsExceptions();
         handler.handleRequest(requestWithHeadersAndPath(), outputStream(), context);
@@ -273,7 +273,7 @@ class ApiGatewayHandlerTest {
 
     @Test
     @DisplayName("Logger logs the whole exception stacktrace when an exception has occurred")
-    public void loggerLogsTheWholeExceptionStackTraceWhenAnUncheckedExceptionHasOccurred() throws IOException {
+    void loggerLogsTheWholeExceptionStackTraceWhenAnUncheckedExceptionHasOccurred() throws IOException {
         TestAppender appender = LogUtils.getTestingAppenderForRootLogger();
         Handler handler = handlerThatThrowsUncheckedExceptions();
 
@@ -289,7 +289,7 @@ class ApiGatewayHandlerTest {
 
     @Test
     @DisplayName("Handler does not reveal information for runtime exceptions")
-    public void handlerDoesNotRevealInformationForRuntimeExceptions() throws IOException {
+    void handlerDoesNotRevealInformationForRuntimeExceptions() throws IOException {
         Handler handler = handlerThatThrowsUncheckedExceptions();
         ByteArrayOutputStream outputStream = outputStream();
         handler.handleRequest(requestWithHeaders(), outputStream, context);
@@ -303,7 +303,7 @@ class ApiGatewayHandlerTest {
     }
 
     @Test
-    public void shouldReturnProblemContainingCustomResource() throws IOException {
+    void shouldReturnProblemContainingCustomResource() throws IOException {
         var customProblemObject = new CustomObject(randomString(), randomString());
         var handler = handlerThatThrowsGoneExceptionsWithCustomObject(customProblemObject);
         var outputStream = outputStream();
@@ -315,7 +315,7 @@ class ApiGatewayHandlerTest {
     }
 
     @Test
-    public void problemShouldNotContainCustomResourceWhenResourceIsNull() throws IOException {
+    void problemShouldNotContainCustomResourceWhenResourceIsNull() throws IOException {
         var handler = handlerThatThrowsGoneExceptionsWithCustomObject(null);
         var outputStream = outputStream();
         handler.handleRequest(requestWithHeaders(), outputStream, context);
@@ -326,7 +326,7 @@ class ApiGatewayHandlerTest {
 
     @Test
     @DisplayName("Failure message contains exception message and status code when an Exception is thrown")
-    public void failureMessageContainsExceptionMessageAndStatusCodeWhenAnExceptionIsThrown() throws IOException {
+    void failureMessageContainsExceptionMessageAndStatusCodeWhenAnExceptionIsThrown() throws IOException {
         Handler handler = handlerThatThrowsExceptions();
 
         GatewayResponse<Problem> responseParsing = getProblemResponse(requestWithHeadersAndPath(), handler);
@@ -341,7 +341,7 @@ class ApiGatewayHandlerTest {
 
     @Test
     @DisplayName("Failure message contains application/problem+json ContentType when an Exception is thrown")
-    public void failureMessageContainsApplicationProblemJsonContentTypeWhenExceptionIsThrown() throws IOException {
+    void failureMessageContainsApplicationProblemJsonContentTypeWhenExceptionIsThrown() throws IOException {
         Handler handler = handlerThatThrowsExceptions();
 
         GatewayResponse<Problem> responseParsing = getProblemResponse(requestWithHeadersAndPath(), handler);
@@ -351,7 +351,7 @@ class ApiGatewayHandlerTest {
 
     @Test
     @DisplayName("getFailureStatusCode sets the status code to the ApiGatewayResponse")
-    public void getFailureStatusCodeSetsTheStatusCodeToTheApiGatewayResponse() throws IOException {
+    void getFailureStatusCodeSetsTheStatusCodeToTheApiGatewayResponse() throws IOException {
         Handler handler = handlerThatOverridesGetFailureStatusCode();
 
         GatewayResponse<Problem> response = getProblemResponse(anyRequest(), handler);
@@ -363,7 +363,7 @@ class ApiGatewayHandlerTest {
 
     @Test
     @DisplayName("getFailureStatusCode returns by default the status code of the ApiGatewayException")
-    public void getFailureStatusCodeReturnsByDefaultTheStatusCodeOfTheApiGatewayException() throws IOException {
+    void getFailureStatusCodeReturnsByDefaultTheStatusCodeOfTheApiGatewayException() throws IOException {
         Handler handler = handlerThatThrowsExceptions();
 
         GatewayResponse<Problem> response = getProblemResponse(anyRequest(), handler);
@@ -374,7 +374,7 @@ class ApiGatewayHandlerTest {
     }
 
     @Test
-    public void shouldReturnFailureHeadersWhenHandlerThrowsException() throws IOException {
+    void shouldReturnFailureHeadersWhenHandlerThrowsException() throws IOException {
         var handler = handlerThatThrowsExceptions();
 
         var response = getProblemResponse(anyRequest(), handler);
@@ -385,7 +385,7 @@ class ApiGatewayHandlerTest {
     }
 
     @Test
-    public void handlerLogsRequestIdForEveryRequest() throws IOException {
+    void handlerLogsRequestIdForEveryRequest() throws IOException {
         var appender = LogUtils.getTestingAppenderForRootLogger();
         var output = outputStream();
         var expectedRequestId = context.getAwsRequestId();
@@ -394,7 +394,7 @@ class ApiGatewayHandlerTest {
     }
 
     @Test
-    public void itReturnsResponseWithPopulatedFieldsAndBothEmptyAndNonEmptyLists() throws IOException {
+    void itReturnsResponseWithPopulatedFieldsAndBothEmptyAndNonEmptyLists() throws IOException {
         var output = outputStream();
         InputStream input = requestWithBodyWithEmptyFields();
         handler.handleRequest(input, output, context);
@@ -409,7 +409,7 @@ class ApiGatewayHandlerTest {
     }
 
     @Test
-    public void handlerReturnsBadRequestWhenInputParsingFails() throws IOException {
+    void handlerReturnsBadRequestWhenInputParsingFails() throws IOException {
         String expectedMessage = "Expected error message when parsing fails";
         Handler handler = handlerFailingWhenParsing(expectedMessage);
         InputStream input = requestWithHeadersAndPath();
@@ -626,8 +626,8 @@ class ApiGatewayHandlerTest {
     }
 
     @Test
-    void shouldRejectNoneSignedAlgorithm() throws IOException {
-        var inputStream = IoUtils.inputStreamFromResources(EVENT_SIGNED_NONE.toString());
+    void shouldRejectUnSignedAlgorithm() throws IOException {
+        var inputStream = IoUtils.inputStreamFromResources(EVENT_UNSIGNED.toString());
 
         stubJwks(TEST_JWKS);
 
