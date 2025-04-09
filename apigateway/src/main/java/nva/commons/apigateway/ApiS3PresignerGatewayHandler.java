@@ -17,14 +17,8 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 
 public abstract class ApiS3PresignerGatewayHandler<I> extends ApiGatewayHandler<I, Void> {
 
-    public static final String AWS_REGION = new Environment().readEnv("AWS_REGION");
     public static final String LOCATION = "Location";
     private final S3Presigner s3presigner;
-
-    public ApiS3PresignerGatewayHandler(Class<I> iclass, S3Presigner s3Presigner) {
-        super(iclass);
-        this.s3presigner = s3Presigner;
-    }
 
     @JacocoGenerated
     public ApiS3PresignerGatewayHandler(Class<I> iclass,
@@ -37,7 +31,7 @@ public abstract class ApiS3PresignerGatewayHandler<I> extends ApiGatewayHandler<
     @JacocoGenerated
     public static S3Presigner defaultS3Presigner() {
         return S3Presigner.builder()
-                   .region(Region.of(AWS_REGION))
+                   .region(Region.of(new Environment().readEnv("AWS_REGION")))
                    .credentialsProvider(DefaultCredentialsProvider.create())
                    .build();
     }

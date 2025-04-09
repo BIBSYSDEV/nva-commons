@@ -1,22 +1,37 @@
 package nva.commons.apigateway;
 
 import static com.google.common.net.MediaType.JSON_UTF_8;
+import static java.util.Objects.isNull;
 import static nva.commons.core.attempt.Try.attempt;
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import com.auth0.jwk.InvalidPublicKeyException;
+import com.auth0.jwk.Jwk;
+import com.auth0.jwk.JwkException;
+import com.auth0.jwk.JwkProvider;
+import com.auth0.jwk.JwkProviderBuilder;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
+import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
 import nva.commons.core.attempt.Failure;
@@ -33,6 +48,7 @@ import org.slf4j.LoggerFactory;
  * @see <a href="https://github.com/awslabs/aws-serverless-java-container">aws-serverless-container</a> for
  *     alternative solutions.
  */
+@SuppressWarnings("PMD.GodClass")
 public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     public static final String REQUEST_ID = "RequestId:";
@@ -40,18 +56,23 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     public static final String EMPTY_STRING = "";
     public static final String COMMA = ",";
     public static final String PREFIX_SINGLE_WILDCARD_TYPE = "*/";
+    private static final String COGNITO_AUTHORIZER_URLS = "COGNITO_AUTHORIZER_URLS";
+    private static final int CONNECT_TIMEOUT = 1000;
+    private static final int READ_TIMEOUT = 2000;
     protected final Environment environment;
     private static final Logger logger = LoggerFactory.getLogger(RestRequestHandler.class);
     private final transient Class<I> iclass;
     private final transient ApiMessageParser<I> inputParser;
     protected final ObjectMapper objectMapper;
+    private final String[] authorizerUrls;
+    private final Map<String, JwkProvider> jwkProviders;
 
     protected transient OutputStream outputStream;
     protected transient String allowedOrigin;
 
     private static final List<MediaType> DEFAULT_SUPPORTED_MEDIA_TYPES = List.of(JSON_UTF_8);
     private static final String WILDCARD_TYPE = "*";
-    public static final String ALLOW_ALL_ORIGINS  = "*";
+    public static final String ALLOW_ALL_ORIGINS = "*";
 
     /**
      * Calculates the Content MediaType of the response based on the supported Media Types and the requested Media
@@ -65,15 +86,17 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     protected MediaType calculateContentTypeHeaderReturnValue(RequestInfo requestInfo)
         throws UnsupportedAcceptHeaderException {
         if (requestInfo.getHeaders().containsKey(HttpHeaders.ACCEPT)) {
-            return bestMatchingMediaTypeBasedOnRequestAcceptHeader(requestInfo);
+            var acceptHeader = requestInfo.getHeaderOptional(HttpHeaders.ACCEPT).orElseThrow();
+            return bestMatchingMediaTypeBasedOnRequestAcceptHeader(acceptHeader);
         }
         return defaultResponseContentTypeWhenNotSpecifiedByClientRequest();
     }
 
-    private MediaType bestMatchingMediaTypeBasedOnRequestAcceptHeader(RequestInfo requestInfo)
+    private MediaType bestMatchingMediaTypeBasedOnRequestAcceptHeader(String acceptHeader)
         throws UnsupportedAcceptHeaderException {
-        List<MediaType> acceptMediaTypes = parseAcceptHeader(requestInfo.getHeader(HttpHeaders.ACCEPT));
-        List<MediaType> matches = findMediaTypeMatches(acceptMediaTypes);
+        var acceptMediaTypes = parseAcceptHeader(acceptHeader);
+
+        var matches = findMediaTypeMatches(acceptMediaTypes);
         if (matches.isEmpty()) {
             throw new UnsupportedAcceptHeaderException(acceptMediaTypes, listSupportedMediaTypes());
         }
@@ -137,6 +160,8 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
         this.environment = environment;
         this.inputParser = new ApiMessageParser<>(objectMapper);
         this.objectMapper = objectMapper;
+        this.authorizerUrls = this.environment.readEnv(COGNITO_AUTHORIZER_URLS).split(",");
+        this.jwkProviders = getJwkProviders(authorizerUrls);
     }
 
     @Override
@@ -150,6 +175,9 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
                               .orElseThrow(this::parsingExceptionToBadRequestException);
 
             RequestInfo requestInfo = RequestInfo.fromString(inputString);
+
+            validateAuthorization(requestInfo);
+
             setAllowedOrigin(requestInfo);
 
             validateRequest(inputObject, requestInfo, context);
@@ -164,12 +192,72 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
         }
     }
 
+    private Map<String, JwkProvider> getJwkProviders(String... authorizerUrls) {
+        return Stream.of(authorizerUrls)
+                   .collect(Collectors.toMap(
+                       domain -> domain,
+                       RestRequestHandler::createJwkProvider
+                   ));
+    }
+
+    private static JwkProvider createJwkProvider(String domain) {
+        return new JwkProviderBuilder(domain)
+                   .cached(10, 1, TimeUnit.HOURS)
+                   .rateLimited(10, 1, TimeUnit.MINUTES)
+                   .timeouts(CONNECT_TIMEOUT, READ_TIMEOUT)
+                   .build();
+    }
+
+    private void validateAuthorization(RequestInfo requestInfo) throws UnauthorizedException {
+        var bearerToken = requestInfo.getBearerToken();
+        if (bearerToken.isPresent() && !requestInfo.isGatewayAuthorized()) {
+            try {
+                var decodedJWT = JWT.decode(bearerToken.get());
+                var jwkProvider = getJwkProvider(decodedJWT.getIssuer());
+
+                var jwk = jwkProvider.get(decodedJWT.getKeyId());
+
+                var algorithm = getAlgorithm(jwk, decodedJWT.getAlgorithm());
+
+                var jwtVerifier = JWT.require(algorithm)
+                                      .withIssuer(authorizerUrls)
+                                      .build();
+
+                jwtVerifier.verify(decodedJWT);
+            }
+            catch (JwkException | JWTVerificationException e) {
+                logger.error("Failed to verify token", e);
+                throw new UnauthorizedException("Failed to verify token");
+            }
+        }
+    }
+
+    private static Algorithm getAlgorithm(Jwk jwk, String algorithm)
+        throws InvalidPublicKeyException, UnauthorizedException {
+        return switch (algorithm) {
+            case "RS256" -> Algorithm.RSA256((RSAPublicKey) jwk.getPublicKey());
+            case "RS384" -> Algorithm.RSA384((RSAPublicKey) jwk.getPublicKey());
+            case "RS512" -> Algorithm.RSA512((RSAPublicKey) jwk.getPublicKey());
+            case "ES256" -> Algorithm.ECDSA256((ECPublicKey) jwk.getPublicKey());
+            case "ES384" -> Algorithm.ECDSA384((ECPublicKey) jwk.getPublicKey());
+            case "ES512" -> Algorithm.ECDSA512((ECPublicKey) jwk.getPublicKey());
+            default -> throw new UnauthorizedException("Unsupported algorithm");
+        };
+    }
+
+    private JwkProvider getJwkProvider(String issuer) throws UnauthorizedException {
+        var jwkProvider = jwkProviders.get(issuer);
+        if (isNull(jwkProvider)) {
+            logger.error("JWK provider for issuer {} not found", issuer);
+            throw new UnauthorizedException("No JWK provider found for issuer");
+        }
+        return jwkProvider;
+    }
 
     protected abstract void setAllowedOrigin(RequestInfo requestInfo);
 
     /**
-     * Implements input validation and access control.
-     * {@link RestRequestHandler#handleExpectedException} method.
+     * Implements input validation and access control. {@link RestRequestHandler#handleExpectedException} method.
      *
      * @param input       The input object to the method. Usually a deserialized json.
      * @param requestInfo Request headers and path.
@@ -177,7 +265,8 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
      * @throws ApiGatewayException all exceptions are caught by writeFailure and mapped to error codes through the
      *                             method {@link RestRequestHandler#getFailureStatusCode}
      */
-    protected abstract void validateRequest(I input, RequestInfo requestInfo, Context context) throws ApiGatewayException;
+    protected abstract void validateRequest(I input, RequestInfo requestInfo, Context context)
+        throws ApiGatewayException;
 
     protected ApiGatewayException parsingExceptionToBadRequestException(Failure<I> fail) {
         return new BadRequestException(fail.getException().getMessage(), fail.getException());

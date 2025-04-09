@@ -1,0 +1,127 @@
+{
+  "headers": {
+    "Accept": "*/*",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Authorization": "Bearer eyJraWQiOiJ0ZXN0LXJzYSIsImFsZyI6IlJTMzg0In0.eyJzdWIiOiJmYjcyZTZkYS00NTU1LTQ1YjItYTMzYy0wOGMyMTRiODllNzgiLCJjdXN0b206cm9sZXMiOiJDcmVhdG9yLEFwcC1hZG1pbixJbnRlcm5hbC1pbXBvcnRlcixJbnN0aXR1dGlvbi1hZG1pbiIsImN1c3RvbTpudmFVc2VybmFtZSI6IjEyMzQ1QDIwNzU0LjAuMC4wIiwiY29nbml0bzpncm91cHMiOlsib3duLWFmZmlsaWF0aW9uQGh0dHBzOi8vYXBpLmRldi5udmEuYXdzLnVuaXQubm8vY3VzdG9tZXIvYmIzZDBjMGMtNTA2NS00NjIzLTliOTgtNTgxMDk4M2MyNDc4IiwiY3VzdG9tZXJzQGh0dHBzOi8vYXBpLmRldi5udmEuYXdzLnVuaXQubm8vY3VzdG9tZXIvYmIzZDBjMGMtNTA2NS00NjIzLTliOTgtNTgxMDk4M2MyNDc4IiwiYWN0LWFzQGh0dHBzOi8vYXBpLmRldi5udmEuYXdzLnVuaXQubm8vY3VzdG9tZXIvYmIzZDBjMGMtNTA2NS00NjIzLTliOTgtNTgxMDk4M2MyNDc4IiwiaW1wb3J0QGh0dHBzOi8vYXBpLmRldi5udmEuYXdzLnVuaXQubm8vY3VzdG9tZXIvYmIzZDBjMGMtNTA2NS00NjIzLTliOTgtNTgxMDk4M2MyNDc4IiwibnZpLWFkbWluQGh0dHBzOi8vYXBpLmRldi5udmEuYXdzLnVuaXQubm8vY3VzdG9tZXIvYmIzZDBjMGMtNTA2NS00NjIzLTliOTgtNTgxMDk4M2MyNDc4IiwicmVzb3VyY2VzQGh0dHBzOi8vYXBpLmRldi5udmEuYXdzLnVuaXQubm8vY3VzdG9tZXIvYmIzZDBjMGMtNTA2NS00NjIzLTliOTgtNTgxMDk4M2MyNDc4IiwiZXh0ZXJuYWwtY2xpZW50c0BodHRwczovL2FwaS5kZXYubnZhLmF3cy51bml0Lm5vL2N1c3RvbWVyL2JiM2QwYzBjLTUwNjUtNDYyMy05Yjk4LTU4MTA5ODNjMjQ3OCJdLCJjdXN0b206dmlld2luZ1Njb3BlSW5jbHVkZWQiOiJudWxsIiwiY3VzdG9tOmNyaXN0aW5JZCI6Imh0dHBzOi8vYXBpLmRldi5udmEuYXdzLnVuaXQubm8vY3Jpc3Rpbi9wZXJzb24vMTIzNDUiLCJjdXN0b206cGVyc29uQWZmaWxpYXRpb24iOiJodHRwczovL2FwaS5kZXYubnZhLmF3cy51bml0Lm5vL2NyaXN0aW4vb3JnYW5pemF0aW9uLzIwNzU0LjAuMC4wIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwIiwidmVyc2lvbiI6MiwiY2xpZW50X2lkIjoiM3JsczdhZDUzbGRtanZkYmo3cDhmaWkxOHEiLCJjdXN0b206YWxsb3dlZEN1c3RvbWVycyI6Imh0dHBzOi8vYXBpLmRldi5udmEuYXdzLnVuaXQubm8vY3VzdG9tZXIvYmIzZDBjMGMtNTA2NS00NjIzLTliOTgtNTgxMDk4M2MyNDc4IiwiY3VzdG9tOmN1c3RvbWVySWQiOiJodHRwczovL2FwaS5kZXYubnZhLmF3cy51bml0Lm5vL2N1c3RvbWVyL2JiM2QwYzBjLTUwNjUtNDYyMy05Yjk4LTU4MTA5ODNjMjQ3OCIsImN1c3RvbTp0b3BPcmdDcmlzdGluSWQiOiJodHRwczovL2FwaS5kZXYubnZhLmF3cy51bml0Lm5vL2NyaXN0aW4vb3JnYW5pemF0aW9uLzIwNzU0LjAuMC4wIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJhd3MuY29nbml0by5zaWduaW4udXNlci5hZG1pbiBvcGVuaWQgaHR0cHM6Ly9hcGkubnZhLnVuaXQubm8vc2NvcGVzL2Zyb250ZW5kIiwiYXV0aF90aW1lIjoxNzQzNzY4NDYyLCJjdXN0b206dmlld2luZ1Njb3BlRXhjbHVkZWQiOiJudWxsIiwiY3VzdG9tOmJvb2wiOnRydWUsImN1c3RvbTpkb3VibGUiOjMuMTQsImN1c3RvbTpsb25nIjoxMjM0NTY3ODkwLCJjdXN0b206ZGF0ZSI6IjIwMjMtMTAtMTBUMDA6MDA6MDBaIiwiY3VzdG9tOm9iamVjdCI6eyJrZXkxIjoidmFsdWUxIiwia2V5MiI6NDJ9LCJleHAiOjI3NDM3NzIwNjIsImN1c3RvbTphY2Nlc3NSaWdodHMiOiJvd24tYWZmaWxpYXRpb24sY3VzdG9tZXJzLGFjdC1hcyxpbXBvcnQsbnZpLWFkbWluLHJlc291cmNlcyxleHRlcm5hbC1jbGllbnRzIiwiY3VzdG9tOmZlaWRlSWQiOiJsa2phc2hkZmtsanNhZGhma2FzbGtAc2lrdC5ubyIsImlhdCI6MTc0Mzc2ODQ2MywianRpIjoiOWE4ODY4YzYtOTczMy00OWU1LWJmNDctMjk4N2I4MTZiZmUxIiwidXNlcm5hbWUiOiJEYXRhcG9ydGVuX2RhY2YzMmJlLTM0YzYtNGU5ZC04MGMwLTM5ZGI0YmMwMDAwMCJ9.i0zdFNt5pcfnZai6k_VN6W0hbfN1QhvXJ0g1P685AorkMrqI6m4K516QAsk8ZLKXWkDujdEkAOnq92gqpKtr_OZ_cDkAHKVbjNdACl2zpprafL5k69QJRoHQHAu9mK3vy_wAjtusJ3OSsynjSNZOPn2vi9QfNvEzGZ469xTWahMf7UzHmzns3G89eX8MFQlfqhLQB5XZ_iviaG9mX0EqJz4yk6fFPoKxam6mZY6_sLfOckap8uJ-51DfFCHudwpkErkV1uQZ7yhBMEkOytgktfBMhBIwcNQE_P_Rq-Fkjvj3AUo2RQuqOIZQX-u-jZZ8MARuYTcL3RHqsSToAulHLg",
+    "Cache-Control": "no-cache",
+    "CloudFront-Forwarded-Proto": "https",
+    "CloudFront-Is-Desktop-Viewer": "true",
+    "CloudFront-Is-Mobile-Viewer": "false",
+    "CloudFront-Is-SmartTV-Viewer": "false",
+    "CloudFront-Is-Tablet-Viewer": "false",
+    "CloudFront-Viewer-Country": "NO",
+    "Host": "api.dev.nva.aws.unit.no",
+    "Postman-Token": "b563026a-0262-4c49-bb83-263cf294ff44",
+    "User-Agent": "PostmanRuntime/7.26.8",
+    "Via": "1.1 d4fd24ae65d4d2b97cfdea8d2f0c21a6.cloudfront.net (CloudFront)",
+    "X-Amz-Cf-Id": "86TD9M28sySy5nTFahL6tVUf14XWOuCVJ5XFtfTJnxgBeU5VNO_1hw==",
+    "X-Amzn-Trace-Id": "Root=1-5faaa0ba-6429d54a431451c07edfccb5",
+    "X-Forwarded-For": "84.52.239.232, 70.132.12.91",
+    "X-Forwarded-Port": "443",
+    "X-Forwarded-Proto": "https"
+  },
+  "path": "/orestis-doi-request/",
+  "pathParameters": {},
+  "queryStringParameters": {
+    "role": "CURATOR"
+  },
+  "requestContext": {
+    "resourceId": "otl84ok08k",
+    "resourcePath": "/",
+    "httpMethod": "GET",
+    "extendedRequestId": "Vy4NNHE7DoEF2bg=",
+    "requestTime": "10/Nov/2020:14:16:26 +0000",
+    "path": "/orestis-doi-request/",
+    "accountId": "884807050265",
+    "protocol": "HTTP/1.1",
+    "stage": "Prod",
+    "domainPrefix": "api",
+    "requestTimeEpoch": 1605017786881,
+    "requestId": "bdd5a322-0fee-48ba-bac2-eea8b2089376",
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "accountId": null,
+      "cognitoIdentityId": null,
+      "caller": null,
+      "sourceIp": "84.52.239.232",
+      "principalOrgId": null,
+      "accessKey": null,
+      "cognitoAuthenticationType": null,
+      "cognitoAuthenticationProvider": null,
+      "userArn": null,
+      "userAgent": "PostmanRuntime/7.26.8",
+      "user": null
+    },
+    "domainName": "api.dev.nva.aws.unit.no",
+    "apiId": "ngjdx59zya"
+  },
+  "resource": "/",
+  "httpMethod": "GET",
+  "multiValueHeaders": {
+    "Accept": [
+      "*/*"
+    ],
+    "Accept-Encoding": [
+      "gzip, deflate, br"
+    ],
+    "Authorization": [
+      "Bearer lsdkflskdjflksd"
+    ],
+    "Cache-Control": [
+      "no-cache"
+    ],
+    "CloudFront-Forwarded-Proto": [
+      "https"
+    ],
+    "CloudFront-Is-Desktop-Viewer": [
+      "true"
+    ],
+    "CloudFront-Is-Mobile-Viewer": [
+      "false"
+    ],
+    "CloudFront-Is-SmartTV-Viewer": [
+      "false"
+    ],
+    "CloudFront-Is-Tablet-Viewer": [
+      "false"
+    ],
+    "CloudFront-Viewer-Country": [
+      "NO"
+    ],
+    "Host": [
+      "api.dev.nva.aws.unit.no"
+    ],
+    "Postman-Token": [
+      "b563026a-0262-4c49-bb83-263cf294ff44"
+    ],
+    "User-Agent": [
+      "PostmanRuntime/7.26.8"
+    ],
+    "Via": [
+      "1.1 d4fd24ae65d4d2b97cfdea8d2f0c21a6.cloudfront.net (CloudFront)"
+    ],
+    "X-Amz-Cf-Id": [
+      "86TD9M28sySy5nTFahL6tVUf14XWOuCVJ5XFtfTJnxgBeU5VNO_1hw=="
+    ],
+    "X-Amzn-Trace-Id": [
+      "Root=1-5faaa0ba-6429d54a431451c07edfccb5"
+    ],
+    "X-Forwarded-For": [
+      "84.52.239.232, 70.132.12.91"
+    ],
+    "X-Forwarded-Port": [
+      "443"
+    ],
+    "X-Forwarded-Proto": [
+      "https"
+    ]
+  },
+  "multiValueQueryStringParameters": {
+    "role": [
+      "CURATOR"
+    ]
+  },
+  "stageVariables": null,
+  "body": "{\"field1\": \"value1\", \"field2\": \"value2\", \"type\": \"RequestBody\"}",
+  "isBase64Encoded": false
+}

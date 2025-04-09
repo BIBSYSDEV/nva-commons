@@ -560,6 +560,13 @@ class RequestInfoTest {
     }
 
     @Test
+    void shouldFailWhenNoAuthHeaderIsAvailable() throws JsonProcessingException {
+        var requestInfoString = IoUtils.stringFromResources(EVENT_WITH_UNKNOWN_REQUEST_INFO);
+        var requestInfo = dtoObjectMapper.readValue(requestInfoString, RequestInfo.class);
+        assertThrows(IllegalArgumentException.class, requestInfo::getAuthHeader);
+    }
+
+    @Test
     void shouldReadCognitoUriFromEnvByDefault() throws JsonProcessingException {
         var requestInfoString = IoUtils.stringFromResources(EVENT_WITH_AUTH_HEADER);
         var requestInfo = dtoObjectMapper.readValue(requestInfoString, RequestInfo.class);

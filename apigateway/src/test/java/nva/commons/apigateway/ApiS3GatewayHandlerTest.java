@@ -17,7 +17,7 @@ import no.unit.nva.stubs.FakeContext;
 import no.unit.nva.stubs.FakeS3Client;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.BadRequestException;
-import nva.commons.apigateway.exceptions.UnauthorizedException;
+import nva.commons.core.Environment;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,12 +35,16 @@ class ApiS3GatewayHandlerTest {
     private S3Client s3Client;
     private S3Presigner s3Presigner;
     private ByteArrayOutputStream output;
+    private Environment environment;
 
     @BeforeEach
     void init() {
         s3Client = new FakeS3Client();
         s3Presigner = mock(S3Presigner.class);
         this.output = new ByteArrayOutputStream();
+        environment = mock(Environment.class);
+        when(environment.readEnv("ALLOWED_ORIGIN")).thenReturn("*");
+        when(environment.readEnv("COGNITO_AUTHORIZER_URLS")).thenReturn("http://localhost:3000");
     }
 
     @Test
@@ -75,7 +79,7 @@ class ApiS3GatewayHandlerTest {
     }
 
     private ApiS3GatewayHandler<Void> createHandler(String data) {
-        return new ApiS3GatewayHandler<>(Void.class, s3Client, s3Presigner) {
+        return new ApiS3GatewayHandler<>(Void.class, s3Client, s3Presigner, environment) {
 
             @Override
             protected void validateRequest(Void input, RequestInfo requestInfo, Context context)

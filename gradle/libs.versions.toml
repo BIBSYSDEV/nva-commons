@@ -7,18 +7,19 @@ awsLambdaCore = { strictly = '1.2.3' }
 awsLambdaEvents = { strictly = '3.15.0' }
 awsSdk = { strictly = '1.12.782' }
 awsSdk2 = { strictly = '2.30.27' }
-com-auth0-jwt = { strictly = '4.4.0' }
+com-auth0-jwt = { strictly = '4.5.0' }
+com-auth0-jwks = { strictly = '0.22.1' }
 commonsValidator = { strictly = '1.9.0' }
 datafaker = { strictly = '2.4.2' }
 guava = { strictly = '33.4.0-jre' }
 hamcrest = { strictly = '3.0' }
-jackson = { strictly = '2.18.2' }
+jackson = { strictly = '2.18.3' }
 jupiter = { strictly = '5.12.0' }
 lambdaLog4j = { strictly = '1.6.0' }
 log4j = { strictly = '2.24.3' }
 mockito = { strictly = '5.15.2' }
 slf4j = { strictly = '2.0.16' }
-wiremock = { strictly = '3.12.0' }
+wiremock = { strictly = '3.12.1' }
 zalandoProblem = { strictly = '0.27.1' }
 
 [libraries]
@@ -30,6 +31,7 @@ aws-sdk-dynamo = { group = 'com.amazonaws', name = 'aws-java-sdk-dynamodb', vers
 aws-java-sdk-core = { group = 'com.amazonaws', name = 'aws-java-sdk-core', version.ref = 'awsSdk' }
 aws-lambda-events = { group = 'com.amazonaws', name = 'aws-lambda-java-events', version.ref = 'awsLambdaEvents' }
 aws-lambda-core = { group = 'com.amazonaws', name = 'aws-lambda-java-core', version.ref = 'awsLambdaCore' }
+com-auth0-jwks = { group = 'com.auth0', name =  'jwks-rsa', version.ref= 'com-auth0-jwks' }
 
 aws-sdk2-core = { group = 'software.amazon.awssdk', name = 'sdk-core', version.ref = 'awsSdk2' }
 aws-sdk2-secrets = { group = 'software.amazon.awssdk', name = 'secretsmanager', version.ref = 'awsSdk2' }
@@ -76,7 +78,7 @@ mockito-core = { group = 'org.mockito', name = 'mockito-core', version.ref = 'mo
 datafaker = { group = 'net.datafaker', name = 'datafaker', version.ref = 'datafaker' }
 httpclient5 = { group = 'org.apache.httpcomponents.client5', name = 'httpclient5', version.ref = 'apacheHttpClient' }
 
-wiremock-jetty-12 = { group = 'org.wiremock', name = 'wiremock-jetty12', version.ref = 'wiremock' }
+wiremock = { group = 'org.wiremock', name = 'wiremock-jetty12', version.ref = 'wiremock' }
 
 
 com-auth0-jwt = { group = 'com.auth0', name = 'java-jwt', version.ref = 'com-auth0-jwt' }

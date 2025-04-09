@@ -1,0 +1,127 @@
+{
+  "headers": {
+    "Accept": "*/*",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Authorization": "Bearer eyJraWQiOiJ0ZXN0LXJzYSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJzYWZzZGZkc2YyMzQiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6Imh0dHBzOi8vYXBpLm52YS51bml0Lm5vL3Njb3Blcy90aGlyZC1wYXJ0eS9wdWJsaWNhdGlvbi1yZWFkIiwiYXV0aF90aW1lIjoxNzQ0MTk1OTE5LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAiLCJleHAiOjI3NDQxOTY4MTksImlhdCI6MTc0NDE5NTkxOSwidmVyc2lvbiI6MiwianRpIjoiNTQxMDBhOWQtNjI4Mi00NDVmLTg5NjQtZWNlMjA1Y2NhYmI0IiwiY2xpZW50X2lkIjoiYWJjMTIzIn0.4n4nzk8fTCKpRe-oy0gF0xmuvVwX7Y_ACqPLB5_42VSCpzEIpEbPLfDTXkxCGATAoYr5qQOddKieBlHGaqDHSmTiV_RLzgLCh6lAudU0aerUhDRkn4aAtiZlrNsObRoAZoxnrjizvqAbrBgrdkP1WnOjhZ3j8Wo0Bd3JLUA4n4_BReMWspvfzTgu-GcRZGf3pDYB42a8PbX7m0adZx70jLR0cIMhFoExbpuQt609THDveYDy-8aBqG_Liqmylrrvrkdekho4X4hz7MR8_rlFUK7yU4TKZoHU2A8xHMsD0zAZmtGoSOe6KpUqVOfoD_xca-wT4yk8uoZbt2gR15Q13g",
+    "Cache-Control": "no-cache",
+    "CloudFront-Forwarded-Proto": "https",
+    "CloudFront-Is-Desktop-Viewer": "true",
+    "CloudFront-Is-Mobile-Viewer": "false",
+    "CloudFront-Is-SmartTV-Viewer": "false",
+    "CloudFront-Is-Tablet-Viewer": "false",
+    "CloudFront-Viewer-Country": "NO",
+    "Host": "api.dev.nva.aws.unit.no",
+    "Postman-Token": "b563026a-0262-4c49-bb83-263cf294ff44",
+    "User-Agent": "PostmanRuntime/7.26.8",
+    "Via": "1.1 d4fd24ae65d4d2b97cfdea8d2f0c21a6.cloudfront.net (CloudFront)",
+    "X-Amz-Cf-Id": "86TD9M28sySy5nTFahL6tVUf14XWOuCVJ5XFtfTJnxgBeU5VNO_1hw==",
+    "X-Amzn-Trace-Id": "Root=1-5faaa0ba-6429d54a431451c07edfccb5",
+    "X-Forwarded-For": "84.52.239.232, 70.132.12.91",
+    "X-Forwarded-Port": "443",
+    "X-Forwarded-Proto": "https"
+  },
+  "path": "/orestis-doi-request/",
+  "pathParameters": {},
+  "queryStringParameters": {
+    "role": "CURATOR"
+  },
+  "requestContext": {
+    "resourceId": "otl84ok08k",
+    "resourcePath": "/",
+    "httpMethod": "GET",
+    "extendedRequestId": "Vy4NNHE7DoEF2bg=",
+    "requestTime": "10/Nov/2020:14:16:26 +0000",
+    "path": "/orestis-doi-request/",
+    "accountId": "884807050265",
+    "protocol": "HTTP/1.1",
+    "stage": "Prod",
+    "domainPrefix": "api",
+    "requestTimeEpoch": 1605017786881,
+    "requestId": "bdd5a322-0fee-48ba-bac2-eea8b2089376",
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "accountId": null,
+      "cognitoIdentityId": null,
+      "caller": null,
+      "sourceIp": "84.52.239.232",
+      "principalOrgId": null,
+      "accessKey": null,
+      "cognitoAuthenticationType": null,
+      "cognitoAuthenticationProvider": null,
+      "userArn": null,
+      "userAgent": "PostmanRuntime/7.26.8",
+      "user": null
+    },
+    "domainName": "api.dev.nva.aws.unit.no",
+    "apiId": "ngjdx59zya"
+  },
+  "resource": "/",
+  "httpMethod": "GET",
+  "multiValueHeaders": {
+    "Accept": [
+      "*/*"
+    ],
+    "Accept-Encoding": [
+      "gzip, deflate, br"
+    ],
+    "Authorization": [
+      "Bearer lsdkflskdjflksd"
+    ],
+    "Cache-Control": [
+      "no-cache"
+    ],
+    "CloudFront-Forwarded-Proto": [
+      "https"
+    ],
+    "CloudFront-Is-Desktop-Viewer": [
+      "true"
+    ],
+    "CloudFront-Is-Mobile-Viewer": [
+      "false"
+    ],
+    "CloudFront-Is-SmartTV-Viewer": [
+      "false"
+    ],
+    "CloudFront-Is-Tablet-Viewer": [
+      "false"
+    ],
+    "CloudFront-Viewer-Country": [
+      "NO"
+    ],
+    "Host": [
+      "api.dev.nva.aws.unit.no"
+    ],
+    "Postman-Token": [
+      "b563026a-0262-4c49-bb83-263cf294ff44"
+    ],
+    "User-Agent": [
+      "PostmanRuntime/7.26.8"
+    ],
+    "Via": [
+      "1.1 d4fd24ae65d4d2b97cfdea8d2f0c21a6.cloudfront.net (CloudFront)"
+    ],
+    "X-Amz-Cf-Id": [
+      "86TD9M28sySy5nTFahL6tVUf14XWOuCVJ5XFtfTJnxgBeU5VNO_1hw=="
+    ],
+    "X-Amzn-Trace-Id": [
+      "Root=1-5faaa0ba-6429d54a431451c07edfccb5"
+    ],
+    "X-Forwarded-For": [
+      "84.52.239.232, 70.132.12.91"
+    ],
+    "X-Forwarded-Port": [
+      "443"
+    ],
+    "X-Forwarded-Proto": [
+      "https"
+    ]
+  },
+  "multiValueQueryStringParameters": {
+    "role": [
+      "CURATOR"
+    ]
+  },
+  "stageVariables": null,
+  "body": "{\"field1\": \"value1\", \"field2\": \"value2\", \"type\": \"RequestBody\"}",
+  "isBase64Encoded": false
+}

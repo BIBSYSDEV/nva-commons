@@ -4,6 +4,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static no.unit.nva.auth.CognitoUserInfo.ACCESS_RIGHTS_CLAIM;
 import static no.unit.nva.auth.CognitoUserInfo.ALLOWED_CUSTOMERS;
+import static no.unit.nva.auth.CognitoUserInfo.COGNITO_USER_NAME;
 import static no.unit.nva.auth.CognitoUserInfo.EMPTY_STRING;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -278,6 +279,12 @@ public class HandlerRequestBuilder<T> {
     public HandlerRequestBuilder<T> withIssuer(String issuer) {
         var authorizerClaims = getAuthorizerClaimsNode();
         authorizerClaims.put(ISS_CLAIM, issuer);
+        return this;
+    }
+
+    public HandlerRequestBuilder<T> withCognitoUsername(String cognitoUsername) {
+        var authorizerClaims = getAuthorizerClaimsNode();
+        authorizerClaims.put(COGNITO_USER_NAME, cognitoUsername);
         return this;
     }
 
