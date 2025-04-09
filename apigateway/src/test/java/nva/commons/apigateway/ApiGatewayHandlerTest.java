@@ -18,6 +18,7 @@ import static nva.commons.apigateway.ApiGatewayHandler.REQUEST_ID;
 import static nva.commons.apigateway.MediaTypes.APPLICATION_PROBLEM_JSON;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.instanceOf;
@@ -57,7 +58,6 @@ import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.GoneException;
 import nva.commons.apigateway.exceptions.TestException;
-import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.apigateway.testutils.Base64Handler;
 import nva.commons.apigateway.testutils.Handler;
@@ -93,7 +93,13 @@ class ApiGatewayHandlerTest {
     public static final Path EVENT_WITH_NO_AUTHORIZER = Path.of("apiGatewayMessages",
                                                                 "event_without_authorizer_but_auth_header.json");
     public static final Path EVENT_WITH_WRONG_ISSUER = Path.of("apiGatewayMessages",
-                                                                "event_without_authorizer_wrong_issuer.json");
+                                                               "event_without_authorizer_wrong_issuer.json");
+    public static final Path EVENT_SIGNED_UNSUPPORTED = Path.of("apiGatewayMessages",
+                                                               "event_signed_unsupported.json");
+    public static final Path EVENT_SIGNED_NONE = Path.of("apiGatewayMessages",
+                                                                "event_signed_none.json");
+    public static final Path EVENT_EXTERNAL_CLIENT = Path.of("apiGatewayMessages",
+                                                         "event_external_client.json");
     public static final Path TEST_JWKS = Path.of("apiGatewayMessages",
                                                  "test-jwks.json");
     private static final String PATH = "path1/path2/path3";
@@ -583,30 +589,110 @@ class ApiGatewayHandlerTest {
         stubJwks(TEST_JWKS);
 
         var outputStream = outputStream();
-        var handler = new ApiGatewayHandler<String, List<AccessRight>>(String.class, environment) {
+
+        createRequestInfoHandler().handleRequest(inputStream, outputStream, context);
+
+        var response = GatewayResponse.fromOutputStream(outputStream, RequestInfo.class);
+        var requestInfo = response.getBodyObject(RequestInfo.class);
+
+        assertThat(requestInfo.getAccessRights(), containsInAnyOrder(
+            AccessRight.MANAGE_OWN_AFFILIATION,
+            AccessRight.MANAGE_CUSTOMERS,
+            AccessRight.ACT_AS,
+            AccessRight.MANAGE_IMPORT,
+            AccessRight.MANAGE_NVI,
+            AccessRight.MANAGE_OWN_RESOURCES,
+            AccessRight.MANAGE_EXTERNAL_CLIENTS
+        ));
+    }
+
+    private ApiGatewayHandler<String, RequestInfo> createRequestInfoHandler() {
+        return new ApiGatewayHandler<>(String.class, environment) {
             @Override
-            protected void validateRequest(String input, RequestInfo requestInfo, Context context)
-                throws ApiGatewayException {
+            protected void validateRequest(String input, RequestInfo requestInfo, Context context) {
                 //no-op
             }
 
             @Override
-            protected List<AccessRight> processInput(String input, RequestInfo requestInfo, Context context)
-                throws UnauthorizedException {
-                return requestInfo.getAccessRights();
+            protected RequestInfo processInput(String input, RequestInfo requestInfo, Context context) {
+                return requestInfo;
             }
 
             @Override
-            protected Integer getSuccessStatusCode(String input, List<AccessRight> output) {
+            protected Integer getSuccessStatusCode(String input, RequestInfo output) {
                 return HttpURLConnection.HTTP_OK;
             }
         };
-        handler.handleRequest(inputStream, outputStream, context);
+    }
 
+    @Test
+    void shouldRejectNoneSignedAlgorithm() throws IOException {
+        var inputStream = IoUtils.inputStreamFromResources(EVENT_SIGNED_NONE.toString());
+
+        stubJwks(TEST_JWKS);
+
+        var outputStream = outputStream();
+        handler.handleRequest(inputStream, outputStream, context);
         var response = GatewayResponse.fromOutputStream(outputStream, String.class);
-        assertThat(response.getBody(), is(equalTo(
-            "[ \"MANAGE_OWN_AFFILIATION\", \"MANAGE_CUSTOMERS\", \"ACT_AS\", \"MANAGE_IMPORT\", \"MANAGE_NVI\", "
-            + "\"MANAGE_OWN_RESOURCES\", \"MANAGE_EXTERNAL_CLIENTS\" ]")));
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_UNAUTHORIZED)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "rs256", "rs384", "rs512", "es256", "es384", "es512"
+    })
+    void shouldAcceptAlgorithms(String algorithm) throws IOException {
+        var path = Path.of("apiGatewayMessages",
+                String.format("event_signed_with_%s.json", algorithm));
+        var inputStream = IoUtils.inputStreamFromResources(path.toString());
+
+        stubJwks(TEST_JWKS);
+
+        var outputStream = outputStream();
+        handler.handleRequest(inputStream, outputStream, context);
+        var response = GatewayResponse.fromOutputStream(outputStream, String.class);
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
+    }
+
+    @Test
+    void shouldRejectUnsupportedAlgorithm() throws IOException {
+        var inputStream = IoUtils.inputStreamFromResources(EVENT_SIGNED_UNSUPPORTED.toString());
+
+        stubJwks(TEST_JWKS);
+
+        var outputStream = outputStream();
+        handler.handleRequest(inputStream, outputStream, context);
+        var response = GatewayResponse.fromOutputStream(outputStream, String.class);
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_UNAUTHORIZED)));
+    }
+
+    @Test
+    void shouldAcceptValidExternalClient() throws IOException {
+        var inputStream = IoUtils.inputStreamFromResources(EVENT_EXTERNAL_CLIENT.toString());
+
+        stubJwks(TEST_JWKS);
+
+        var outputStream = outputStream();
+        handler.handleRequest(inputStream, outputStream, context);
+        var response = GatewayResponse.fromOutputStream(outputStream, String.class);
+        assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
+    }
+
+    @Test
+    void shouldBeAbleToReadClaimsFromExternalClientToken() throws IOException {
+        var inputStream = IoUtils.inputStreamFromResources(EVENT_EXTERNAL_CLIENT.toString());
+
+        stubJwks(TEST_JWKS);
+
+        var outputStream = outputStream();
+
+        createRequestInfoHandler().handleRequest(inputStream, outputStream, context);
+
+        var response = GatewayResponse.fromOutputStream(outputStream, RequestInfo.class);
+        var requestInfo = response.getBodyObject(RequestInfo.class);
+
+        assertThat(requestInfo.clientIsThirdParty(), is(equalTo(true)));
+        assertThat(requestInfo.getClientId().orElseThrow(), is(equalTo("abc123")));
     }
 
     @Test

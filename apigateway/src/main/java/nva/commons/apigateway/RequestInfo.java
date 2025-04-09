@@ -7,6 +7,7 @@ import static nva.commons.apigateway.RequestInfoConstants.AUTHORIZATION_FAILURE_
 import static nva.commons.apigateway.RequestInfoConstants.BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE;
 import static nva.commons.apigateway.RequestInfoConstants.CLAIMS_PATH;
 import static nva.commons.apigateway.RequestInfoConstants.CLIENT_ID;
+import static nva.commons.apigateway.RequestInfoConstants.CLIENT_ID_CLAIM;
 import static nva.commons.apigateway.RequestInfoConstants.DOMAIN_NAME_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.HEADERS_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.METHOD_ARN_FIELD;
@@ -19,6 +20,7 @@ import static nva.commons.apigateway.RequestInfoConstants.PATH_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.PATH_PARAMETERS_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.QUERY_STRING_PARAMETERS_FIELD;
 import static nva.commons.apigateway.RequestInfoConstants.REQUEST_CONTEXT_FIELD;
+import static nva.commons.apigateway.RequestInfoConstants.SCOPE;
 import static nva.commons.apigateway.RequestInfoConstants.SCOPES_CLAIM;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
@@ -35,6 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -282,7 +285,7 @@ public final class RequestInfo {
     }
 
     public List<AccessRight> getAccessRights() {
-        return fetchAccessRights().orElse(Collections.emptyList());
+        return new ArrayList<>(fetchAccessRights().orElse(Collections.emptyList()));
     }
 
     private Optional<List<AccessRight>> fetchAccessRights() {
@@ -309,25 +312,10 @@ public final class RequestInfo {
                    .map(CognitoUserInfo::fromString).orElseThrow();
     }
 
-    @JacocoGenerated
-    private static Object extractClaimValue(Claim claim) {
-        if (claim.asBoolean() != null) {
-            return claim.asBoolean();
-        } else if (claim.asInt() != null) {
-            return claim.asInt();
-        } else if (claim.asDouble() != null) {
-            return claim.asDouble();
-        } else if (claim.asLong() != null) {
-            return claim.asLong();
-        } else if (claim.asString() != null) {
-            return claim.asString();
-        } else if (claim.asDate() != null) {
-            return claim.asDate();
-        } else if (claim.asArray(String.class) != null) {
-            return claim.asArray(String.class);
-        } else {
-            return claim.as(Object.class);
-        }
+    private static String extractClaimValue(Claim value) {
+        return Optional.of(value)
+                   .map(Claim::asString)
+                   .orElseGet(value::toString);
     }
 
     private List<AccessRight> parseAccessRights(String value) {
@@ -383,7 +371,11 @@ public final class RequestInfo {
 
     @JsonIgnore
     public Optional<String> getClientId() {
-        return getRequestContextParameterOpt(CLIENT_ID);
+        if (isGatewayAuthorized()) {
+            return getRequestContextParameterOpt(CLIENT_ID);
+        } else {
+            return getClaimFromToken(CLIENT_ID_CLAIM);
+        }
     }
 
     @JsonIgnore
@@ -412,17 +404,28 @@ public final class RequestInfo {
     }
 
     public boolean clientIsInternalBackend() {
-        return getRequestContextParameterOpt(SCOPES_CLAIM).map(
-            value -> value.contains(BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE)).orElse(false);
+        var scope = isGatewayAuthorized() ?
+                        getRequestContextParameterOpt(SCOPES_CLAIM) : getClaimFromToken(SCOPE);
+
+        return scope.map(value -> value.contains(BACKEND_SCOPE_AS_DEFINED_IN_IDENTITY_SERVICE)).orElse(false);
     }
 
     public boolean clientIsThirdParty() {
-        return getRequestContextParameterOpt(SCOPES_CLAIM)
-                   .map(string ->
-                            Arrays.stream(string.split(COMMA))
-                                .anyMatch(value -> value.startsWith(
-                                    THIRD_PARTY_SCOPE_PREFIX)))
-                   .orElse(false);
+        var scope = isGatewayAuthorized() ?
+                        getRequestContextParameterOpt(SCOPES_CLAIM) : getClaimFromToken(SCOPE);
+        return scope.map(this::isThirdPartyScope).orElse(false);
+    }
+
+    private Boolean isThirdPartyScope(String scope) {
+        return Arrays.stream(scope.split(COMMA))
+                   .anyMatch(value -> value.startsWith(
+                       THIRD_PARTY_SCOPE_PREFIX));
+    }
+
+    private Optional<String> getClaimFromToken(String claim) {
+        return getBearerToken()
+                   .map(token -> JWT.decode(token).getClaim(claim))
+                   .map(Claim::asString);
     }
 
     private Optional<String> fetchFeideId() {

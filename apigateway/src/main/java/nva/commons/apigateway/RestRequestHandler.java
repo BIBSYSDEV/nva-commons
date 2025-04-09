@@ -5,6 +5,8 @@ import static nva.commons.core.attempt.Try.attempt;
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import com.auth0.jwk.InvalidPublicKeyException;
+import com.auth0.jwk.Jwk;
 import com.auth0.jwk.JwkException;
 import com.auth0.jwk.JwkProvider;
 import com.auth0.jwk.JwkProviderBuilder;
@@ -17,6 +19,7 @@ import com.google.common.net.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
 import java.util.List;
@@ -202,12 +205,14 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     private void validateAuthorization(RequestInfo requestInfo) throws UnauthorizedException {
         var bearerToken = requestInfo.getBearerToken();
         if (bearerToken.isPresent() && !requestInfo.isGatewayAuthorized()) {
-            var decodedJWT = JWT.decode(bearerToken.get());
-            var jwkProvider = getJwkProvider(decodedJWT.getIssuer());
-
             try {
+                var decodedJWT = JWT.decode(bearerToken.get());
+                var jwkProvider = getJwkProvider(decodedJWT.getIssuer());
+
                 var jwk = jwkProvider.get(decodedJWT.getKeyId());
-                var algorithm = Algorithm.RSA256((RSAPublicKey) jwk.getPublicKey());
+
+                var algorithm = getAlgorithm(jwk, decodedJWT.getAlgorithm());
+
                 var jwtVerifier = JWT.require(algorithm)
                                       .withIssuer(authorizerUrls)
                                       .build();
@@ -219,6 +224,19 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
                 throw new UnauthorizedException("Failed to verify token");
             }
         }
+    }
+
+    private static Algorithm getAlgorithm(Jwk jwk, String algorithm)
+        throws InvalidPublicKeyException, UnauthorizedException {
+        return switch (algorithm) {
+            case "RS256" -> Algorithm.RSA256((RSAPublicKey) jwk.getPublicKey());
+            case "RS384" -> Algorithm.RSA384((RSAPublicKey) jwk.getPublicKey());
+            case "RS512" -> Algorithm.RSA512((RSAPublicKey) jwk.getPublicKey());
+            case "ES256" -> Algorithm.ECDSA256((ECPublicKey) jwk.getPublicKey());
+            case "ES384" -> Algorithm.ECDSA384((ECPublicKey) jwk.getPublicKey());
+            case "ES512" -> Algorithm.ECDSA512((ECPublicKey) jwk.getPublicKey());
+            default -> throw new UnauthorizedException("Unsupported algorithm");
+        };
     }
 
     private JwkProvider getJwkProvider(String issuer) throws UnauthorizedException {
