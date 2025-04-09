@@ -1,5 +1,6 @@
 package no.unit.nva.events.models;
 
+import static nva.commons.core.StringUtils.isNotBlank;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.Collection;
@@ -44,7 +45,9 @@ public class AwsEventBridgeEvent<I> implements JsonSerializable {
 
     @JacocoGenerated
     public void setRegion(String region) {
-        this.region = region == null ? null : Region.of(region);
+        if (isNotBlank(region)) {
+            this.region = Region.of(region);
+        }
     }
 
     @JacocoGenerated

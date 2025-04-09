@@ -63,8 +63,8 @@ public class FakeS3Client implements S3Client {
     //TODO: fix if necessary
     @SuppressWarnings("PMD.CloseResource")
     @Override
-    public <ReturnT> ReturnT getObject(GetObjectRequest getObjectRequest,
-                                       ResponseTransformer<GetObjectResponse, ReturnT> responseTransformer) {
+    public <T> T getObject(GetObjectRequest getObjectRequest,
+                                       ResponseTransformer<GetObjectResponse, T> responseTransformer) {
         String filename = getObjectRequest.key();
         var contents = extractContent(filename).array();
         GetObjectResponse response = GetObjectResponse.builder().contentLength((long) contents.length).build();
@@ -223,7 +223,7 @@ public class FakeS3Client implements S3Client {
         }
     }
 
-    private <ReturnT> ReturnT transformResponse(ResponseTransformer<GetObjectResponse, ReturnT> responseTransformer,
+    private <T> T transformResponse(ResponseTransformer<GetObjectResponse, T> responseTransformer,
                                                 InputStream inputStream, GetObjectResponse response) {
         try {
             return responseTransformer.transform(response, AbortableInputStream.create(inputStream));

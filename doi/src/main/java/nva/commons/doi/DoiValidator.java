@@ -1,6 +1,7 @@
 package nva.commons.doi;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static nva.commons.core.attempt.Try.attempt;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -77,10 +78,7 @@ public class DoiValidator {
      * @return true if DOI is valid
      */
     public static boolean validateOffline(URI doi) {
-        if (isNull(doi)) {
-            return false;
-        }
-        return validateOffline(doi.toString());
+        return nonNull(doi) && validateOffline(doi.toString());
     }
 
     public Boolean validateOnline(URI doi) {

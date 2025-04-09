@@ -80,7 +80,7 @@ public enum AccessRight {
     MANAGE_EXTERNAL_CLIENTS("external-clients");
 
     private static final Map<String, AccessRight> LOOKUP = Maps.uniqueIndex(
-        Arrays.asList(AccessRight.values()),
+        Arrays.asList(values()),
         AccessRight::getPersistedValue
     );
 

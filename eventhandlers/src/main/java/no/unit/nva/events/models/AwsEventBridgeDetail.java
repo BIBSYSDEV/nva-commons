@@ -25,11 +25,11 @@ public class AwsEventBridgeDetail<I> {
     }
 
     private AwsEventBridgeDetail(Builder<I> builder) {
-        setVersion(builder.version);
-        setTimestamp(builder.timestamp);
-        setRequestContext(builder.requestPayload);
-        setResponseContext(builder.responseContext);
-        setResponsePayload(builder.responsePayload);
+        this.version = builder.version;
+        this.timestamp = builder.timestamp;
+        this.requestContext = builder.requestPayload;
+        this.responseContext = builder.responseContext;
+        this.responsePayload = builder.responsePayload;
     }
 
     public static <I> Builder<I> newBuilder() {

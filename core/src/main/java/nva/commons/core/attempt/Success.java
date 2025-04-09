@@ -48,7 +48,7 @@ public class Success<T> extends Try<T> {
         try {
             return action.apply(value);
         } catch (Exception e) {
-            return new Failure<S>(e);
+            return new Failure<>(e);
         }
     }
 
@@ -102,9 +102,9 @@ public class Success<T> extends Try<T> {
     public <E extends Exception> Try<Void> forEach(ConsumerWithException<T, E> action) {
         try {
             action.consume(value);
-            return new Success<Void>(null);
+            return new Success<>(null);
         } catch (Exception e) {
-            return new Failure<Void>(e);
+            return new Failure<>(e);
         }
     }
 

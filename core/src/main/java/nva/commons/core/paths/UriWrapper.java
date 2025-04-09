@@ -72,11 +72,11 @@ public class UriWrapper {
     }
 
     public static UriWrapper fromHost(String host) {
-        return new UriWrapper(createUriWithSchemeAndHost(UriWrapper.HTTPS, host, DEFAULT_PORT));
+        return new UriWrapper(createUriWithSchemeAndHost(HTTPS, host, DEFAULT_PORT));
     }
 
     public static UriWrapper fromHost(String host, int port) {
-        return new UriWrapper(createUriWithSchemeAndHost(UriWrapper.HTTPS, host, port));
+        return new UriWrapper(createUriWithSchemeAndHost(HTTPS, host, port));
     }
 
     public URI getUri() {
