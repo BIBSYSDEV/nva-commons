@@ -48,6 +48,7 @@ import org.slf4j.LoggerFactory;
  * @see <a href="https://github.com/awslabs/aws-serverless-java-container">aws-serverless-container</a> for
  *     alternative solutions.
  */
+@SuppressWarnings("PMD.GodClass")
 public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
     public static final String REQUEST_ID = "RequestId:";
