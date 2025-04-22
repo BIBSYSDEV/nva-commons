@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -74,18 +75,23 @@ class RequestInfoTest {
     public static final String KEY = "key";
     public static final String VALUE = "value";
     public static final String JSON_POINTER = "/authorizer/claims/key";
-    public static final Path EVENT_WITH_UNKNOWN_REQUEST_INFO = Path.of("apiGatewayMessages",
-                                                                       "eventWithUnknownRequestInfo.json");
-    public static final Path EVENT_WITH_AUTH_HEADER = Path.of("apiGatewayMessages", "event_with_auth_header.json");
     public static final String UNDEFINED_REQUEST_INFO_PROPERTY = "body";
     public static final String DOMAIN_NAME_FOUND_IN_RESOURCE_FILE = "id.execute-api.us-east-1.amazonaws.com";
     public static final String PATH_FOUND_IN_RESOURCE_FILE = "my/path";
     public static final Map<String, String> QUERY_PARAMS_FOUND_IN_RESOURCE_FILE;
     public static final String AT = "@";
     private static final String API_GATEWAY_MESSAGES_FOLDER = "apiGatewayMessages";
+    public static final Path EVENT_WITH_AUTH_HEADER = Path.of(API_GATEWAY_MESSAGES_FOLDER,
+                                                              "event_with_auth_header.json");
+    public static final Path EVENT_WITH_UNKNOWN_REQUEST_INFO = Path.of(API_GATEWAY_MESSAGES_FOLDER,
+                                                                       "eventWithUnknownRequestInfo.json");
     private static final Path NULL_VALUES_FOR_MAPS = Path.of(API_GATEWAY_MESSAGES_FOLDER, "mapParametersAreNull.json");
     private static final Path MISSING_MAP_VALUES = Path.of(API_GATEWAY_MESSAGES_FOLDER, "missingRequestInfo.json");
     private static final Path AWS_SAMPLE_PROXY_EVENT = Path.of(API_GATEWAY_MESSAGES_FOLDER, "awsSampleProxyEvent.json");
+    private static final Path EVENT_WITH_UNKNOEN_ACCESS_RIGHT = Path.of(API_GATEWAY_MESSAGES_FOLDER,
+                                               "event_with_unsupported_access_rights_claim"
+                                                                       + ".json");
+
     private static final String HARDCODED_AUTH_HEADER = "Bearer THE_ACCESS_TOKEN";
     public static final String EXTERNAL_USER_POOL_URL = "https//user-pool.example.com/123";
     private static final String THIRD_PARTY_PUBLICATION_UPSERT_SCOPE = "https://api.nva.unit"
@@ -184,6 +190,14 @@ class RequestInfoTest {
     }
 
     @Test
+    void accessRightsShouldBeForwardCompatible() throws JsonProcessingException {
+        var requestInfoString = IoUtils.stringFromResources(EVENT_WITH_UNKNOEN_ACCESS_RIGHT);
+        var requestInfo = dtoObjectMapper.readValue(requestInfoString, RequestInfo.class);
+        assertDoesNotThrow(requestInfo::getAccessRights);
+        assertThat(requestInfo.getAccessRights(), is(containsInAnyOrder(AccessRight.MANAGE_RESOURCES_STANDARD)));
+    }
+
+    @Test
     void shouldReturnThatUserHasAccessRightForSpecificCustomerWhenCognitoHasRespectiveEntryAndUsesLegacyFormat() {
         var usersCustomer = randomUri();
         var accessRights = randomAccessRights();
@@ -278,7 +292,7 @@ class RequestInfoTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "{}", "\"\"", "null", "[]", "true", "false", "\"custom:feideId\"" })
+    @ValueSource(strings = {"{}", "\"\"", "null", "[]", "true", "false", "\"custom:feideId\""})
     void shouldThrowUnauthorizedOnEmptyOrInvalidClaimSyntax(String claims) throws ApiIoException {
         var payload = """
             {
