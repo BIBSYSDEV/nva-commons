@@ -70,20 +70,20 @@ import org.junit.jupiter.params.provider.ValueSource;
 @TestInstance(PER_METHOD)
 class RequestInfoTest {
 
-    public static final String AUTHORIZER = "authorizer";
-    public static final String CLAIMS = "claims";
-    public static final String KEY = "key";
-    public static final String VALUE = "value";
-    public static final String JSON_POINTER = "/authorizer/claims/key";
-    public static final String UNDEFINED_REQUEST_INFO_PROPERTY = "body";
-    public static final String DOMAIN_NAME_FOUND_IN_RESOURCE_FILE = "id.execute-api.us-east-1.amazonaws.com";
-    public static final String PATH_FOUND_IN_RESOURCE_FILE = "my/path";
-    public static final Map<String, String> QUERY_PARAMS_FOUND_IN_RESOURCE_FILE;
-    public static final String AT = "@";
+    private static final String AUTHORIZER = "authorizer";
+    private static final String CLAIMS = "claims";
+    private static final String KEY = "key";
+    private static final String VALUE = "value";
+    private static final String JSON_POINTER = "/authorizer/claims/key";
+    private static final String UNDEFINED_REQUEST_INFO_PROPERTY = "body";
+    private static final String DOMAIN_NAME_FOUND_IN_RESOURCE_FILE = "id.execute-api.us-east-1.amazonaws.com";
+    private static final String PATH_FOUND_IN_RESOURCE_FILE = "my/path";
+    private static final Map<String, String> QUERY_PARAMS_FOUND_IN_RESOURCE_FILE;
+    private static final String AT = "@";
     private static final String API_GATEWAY_MESSAGES_FOLDER = "apiGatewayMessages";
-    public static final Path EVENT_WITH_AUTH_HEADER = Path.of(API_GATEWAY_MESSAGES_FOLDER,
+    private static final Path EVENT_WITH_AUTH_HEADER = Path.of(API_GATEWAY_MESSAGES_FOLDER,
                                                               "event_with_auth_header.json");
-    public static final Path EVENT_WITH_UNKNOWN_REQUEST_INFO = Path.of(API_GATEWAY_MESSAGES_FOLDER,
+    private static final Path EVENT_WITH_UNKNOWN_REQUEST_INFO = Path.of(API_GATEWAY_MESSAGES_FOLDER,
                                                                        "eventWithUnknownRequestInfo.json");
     private static final Path NULL_VALUES_FOR_MAPS = Path.of(API_GATEWAY_MESSAGES_FOLDER, "mapParametersAreNull.json");
     private static final Path MISSING_MAP_VALUES = Path.of(API_GATEWAY_MESSAGES_FOLDER, "missingRequestInfo.json");
@@ -93,7 +93,7 @@ class RequestInfoTest {
                                                                        + ".json");
 
     private static final String HARDCODED_AUTH_HEADER = "Bearer THE_ACCESS_TOKEN";
-    public static final String EXTERNAL_USER_POOL_URL = "https//user-pool.example.com/123";
+    private static final String EXTERNAL_USER_POOL_URL = "https//user-pool.example.com/123";
     private static final String THIRD_PARTY_PUBLICATION_UPSERT_SCOPE = "https://api.nva.unit"
                                                                        + ".no/scopes/third-party/publication-upsert";
 
