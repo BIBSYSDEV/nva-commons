@@ -321,7 +321,8 @@ public final class RequestInfo {
     private List<AccessRight> parseAccessRights(String value) {
         return Arrays.stream(value.split(ELEMENTS_DELIMITER))
                    .filter(array -> !StringUtils.isEmpty(array))
-                   .map(AccessRight::fromPersistedString)
+                   .map(AccessRight::fromPersistedStringOptional)
+                   .flatMap(Optional::stream)
                    .toList();
     }
 
