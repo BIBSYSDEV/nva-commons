@@ -88,7 +88,7 @@ class RequestInfoTest {
     private static final Path NULL_VALUES_FOR_MAPS = Path.of(API_GATEWAY_MESSAGES_FOLDER, "mapParametersAreNull.json");
     private static final Path MISSING_MAP_VALUES = Path.of(API_GATEWAY_MESSAGES_FOLDER, "missingRequestInfo.json");
     private static final Path AWS_SAMPLE_PROXY_EVENT = Path.of(API_GATEWAY_MESSAGES_FOLDER, "awsSampleProxyEvent.json");
-    private static final Path EVENT_WITH_UNKNOEN_ACCESS_RIGHT = Path.of(API_GATEWAY_MESSAGES_FOLDER,
+    private static final Path EVENT_WITH_UNKNOWN_ACCESS_RIGHT = Path.of(API_GATEWAY_MESSAGES_FOLDER,
                                                "event_with_unsupported_access_rights_claim"
                                                                        + ".json");
 
@@ -191,7 +191,7 @@ class RequestInfoTest {
 
     @Test
     void accessRightsShouldBeForwardCompatible() throws JsonProcessingException {
-        var requestInfoString = IoUtils.stringFromResources(EVENT_WITH_UNKNOEN_ACCESS_RIGHT);
+        var requestInfoString = IoUtils.stringFromResources(EVENT_WITH_UNKNOWN_ACCESS_RIGHT);
         var requestInfo = dtoObjectMapper.readValue(requestInfoString, RequestInfo.class);
         assertDoesNotThrow(requestInfo::getAccessRights);
         assertThat(requestInfo.getAccessRights(), is(containsInAnyOrder(AccessRight.MANAGE_RESOURCES_STANDARD)));
