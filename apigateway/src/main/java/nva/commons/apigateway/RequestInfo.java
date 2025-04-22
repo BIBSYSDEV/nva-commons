@@ -322,8 +322,7 @@ public final class RequestInfo {
         return Arrays.stream(value.split(ELEMENTS_DELIMITER))
                    .filter(array -> !StringUtils.isEmpty(array))
                    .map(AccessRight::fromPersistedStringOptional)
-                   .filter(Optional::isPresent)
-                   .map(Optional::get)
+                   .flatMap(Optional::stream)
                    .toList();
     }
 
