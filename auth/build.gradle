@@ -30,4 +30,5 @@ test {
     environment "BACKEND_CLIENT_ID", "backendClientId"
     environment "BACKEND_CLIENT_SECRET", "backendClientSecret"
     environment "COGNITO_URI", "https://notused.org"
+    environment "API_HOST", "https://backend-host/"
 }

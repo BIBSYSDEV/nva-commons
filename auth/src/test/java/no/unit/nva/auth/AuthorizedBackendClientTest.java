@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.util.Date;
 import no.unit.nva.stubs.FakeAuthServer;
 import no.unit.nva.stubs.WiremockHttpClient;
+import nva.commons.core.Environment;
 import nva.commons.core.paths.UriWrapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,6 +64,7 @@ class AuthorizedBackendClientTest {
 
     @Test
     void shouldSendAsyncRequestsContainingTheAccessTokenWhenUserAccessTokenIsNotSubmitted() {
+        var foo = new Environment().readEnv("API_HOST");
         var client = prepareWithCognitoCredentials(httpClient, cognitoCredentials);
         var request = buildRequest();
         var response =
