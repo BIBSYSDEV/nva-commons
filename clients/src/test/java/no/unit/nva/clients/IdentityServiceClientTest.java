@@ -25,6 +25,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 import no.unit.nva.auth.CognitoCredentials;
+import no.unit.nva.clients.ChannelClaimDto.ChannelClaim;
+import no.unit.nva.clients.ChannelClaimDto.ChannelClaim.ChannelConstraint;
+import no.unit.nva.clients.ChannelClaimDto.CustomerSummaryDto;
 import no.unit.nva.clients.CustomerDto.RightsRetentionStrategy;
 import no.unit.nva.clients.UserDto.Role;
 import no.unit.nva.clients.UserDto.ViewingScope;
@@ -282,6 +285,60 @@ class IdentityServiceClientTest {
         when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8))).thenReturn(okResponseWithBody);
 
         assertThrows(RuntimeException.class, () -> authorizedIdentityServiceClient.getAllCustomers());
+    }
+
+    @Test
+    void shouldReturnChannelClaimByIdWhenRequested() throws NotFoundException, IOException, InterruptedException {
+        var channelClaim = randomUri();
+        var expectedChannelClaim = channelClaimWithId(channelClaim);
+        var request = HttpRequest.newBuilder()
+                          .GET()
+                          .uri(channelClaim)
+                          .build();
+
+        when(okResponseWithBody.body()).thenReturn(expectedChannelClaim.toJsonString());
+        when(okResponseWithBody.statusCode()).thenReturn(200);
+        when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8))).thenReturn(okResponseWithBody);
+
+        var actual = authorizedIdentityServiceClient.getChannelClaim(channelClaim);
+
+        assertEquals(expectedChannelClaim, actual);
+    }
+
+    @Test
+    void shouldThrowNotFoundWhenIdentityServiceRespondsWithNoFoundWhenFetchingChannelClaim() throws IOException,
+                                                                                                     InterruptedException {
+        var channelClaim = randomUri();
+        var request = HttpRequest.newBuilder()
+                          .GET()
+                          .uri(channelClaim)
+                          .build();
+
+        when(okResponseWithBody.statusCode()).thenReturn(404);
+        when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8))).thenReturn(okResponseWithBody);
+
+        assertThrows(NotFoundException.class, () -> authorizedIdentityServiceClient.getChannelClaim(channelClaim));
+    }
+
+    @Test
+    void shouldThrowRuntimeExceptionWhenUnhandledExceptionWhenFetchingChannelClaim() throws IOException, InterruptedException {
+        var channelClaim = randomUri();
+        var request = HttpRequest.newBuilder()
+                          .GET()
+                          .uri(channelClaim)
+                          .build();
+
+        when(okResponseWithBody.statusCode()).thenReturn(500);
+        when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8))).thenReturn(okResponseWithBody);
+
+        assertThrows(RuntimeException.class, () -> authorizedIdentityServiceClient.getChannelClaim(channelClaim));
+    }
+
+    private ChannelClaimDto channelClaimWithId(URI channelClaim) {
+        return new ChannelClaimDto(new CustomerSummaryDto(
+            randomUri(), randomUri()), new ChannelClaim(channelClaim,
+                                                        new ChannelConstraint(randomString(), randomString(),
+                                                                                                       List.of(randomString(), randomString()))));
     }
 
     private static URI createFetchCustomerByCristinIdUri(URI customerCristinId) {

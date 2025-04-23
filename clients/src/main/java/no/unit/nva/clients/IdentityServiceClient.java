@@ -99,10 +99,18 @@ public class IdentityServiceClient {
                    .orElseThrow(this::handleFailure);
     }
 
-    private static Builder getRequestBuilderFromUri(URI customerId) {
+    public ChannelClaimDto getChannelClaim(URI channelClaim) throws NotFoundException {
+        var request = getRequestBuilderFromUri(channelClaim);
+        return attempt(getHttpResponseCallable(request))
+                   .map(this::validateResponse)
+                   .map(r -> mapResponse(ChannelClaimDto.class, r))
+                   .orElseThrow(this::handleFailure);
+    }
+
+    private static Builder getRequestBuilderFromUri(URI uri) {
         return HttpRequest.newBuilder()
                    .GET()
-                   .uri(customerId);
+                   .uri(uri);
     }
 
     public CustomerList getAllCustomers() throws ApiGatewayException {
