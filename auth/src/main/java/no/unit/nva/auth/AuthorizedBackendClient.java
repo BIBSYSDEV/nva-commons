@@ -64,7 +64,7 @@ public class AuthorizedBackendClient {
         refreshTokenIfExpired();
         var authorizedRequest = request.setHeader(AUTHORIZATION_HEADER, bearerToken).build();
 
-        if (!hasValidBackendHost(authorizedRequest)) {
+        if (hasInvalidBackendHost(authorizedRequest)) {
             throw new IllegalArgumentException(
                 "Request host does not match the backend hostname or API_HOST is not set");
         }
@@ -72,10 +72,10 @@ public class AuthorizedBackendClient {
         return httpClient.send(authorizedRequest, responseBodyHandler);
     }
 
-    private boolean hasValidBackendHost(HttpRequest request) {
+    private boolean hasInvalidBackendHost(HttpRequest request) {
         return new Environment().readEnvOpt(API_HOST)
-                   .map(hostName -> request.uri().getHost().equals(hostName))
-                   .orElse(false);
+                   .map(hostName -> !request.uri().getHost().equals(hostName))
+                   .orElse(true);
     }
 
     public <T> CompletableFuture<HttpResponse<T>> sendAsync(Builder request,
