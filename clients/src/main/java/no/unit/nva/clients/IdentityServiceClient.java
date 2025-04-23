@@ -58,7 +58,7 @@ public class IdentityServiceClient {
         var request = getRequestBuilderFromUri(constructExternalClientsGetPath(clientId));
         return attempt(getHttpResponseCallable(request))
                    .map(this::validateResponse)
-                   .map(r -> mapResponse(GetExternalClientResponse.class, r))
+                   .map(response -> mapResponse(GetExternalClientResponse.class, response))
                    .orElseThrow(this::handleFailure);
     }
 
@@ -71,7 +71,7 @@ public class IdentityServiceClient {
 
         return attempt(() -> unauthorizedClient.send(request.build(), ofString(UTF_8)))
                    .map(this::validateResponse)
-                   .map(r -> mapResponse(GetExternalClientResponse.class, r))
+                   .map(response -> mapResponse(GetExternalClientResponse.class, response))
                    .orElseThrow(this::handleFailure);
     }
 
@@ -79,7 +79,7 @@ public class IdentityServiceClient {
         var request = getRequestBuilderFromUri(constructUserGetPath(userName));
         return attempt(getHttpResponseCallable(request))
                    .map(this::validateResponse)
-                   .map(r -> mapResponse(UserDto.class, r))
+                   .map(response -> mapResponse(UserDto.class, response))
                    .orElseThrow(this::handleFailure);
     }
 
@@ -87,7 +87,7 @@ public class IdentityServiceClient {
         var request = getRequestBuilderFromUri(constructCustomerGetPath(topLevelOrgCristinId));
         return attempt(getHttpResponseCallable(request))
                    .map(this::validateResponse)
-                   .map(r -> mapResponse(CustomerDto.class, r))
+                   .map(response -> mapResponse(CustomerDto.class, response))
                    .orElseThrow(this::handleFailure);
     }
 
@@ -95,14 +95,22 @@ public class IdentityServiceClient {
         var request = getRequestBuilderFromUri(customerId);
         return attempt(getHttpResponseCallable(request))
                    .map(this::validateResponse)
-                   .map(r -> mapResponse(CustomerDto.class, r))
+                   .map(response -> mapResponse(CustomerDto.class, response))
                    .orElseThrow(this::handleFailure);
     }
 
-    private static Builder getRequestBuilderFromUri(URI customerId) {
+    public ChannelClaimDto getChannelClaim(URI channelClaim) throws NotFoundException {
+        var request = getRequestBuilderFromUri(channelClaim);
+        return attempt(getHttpResponseCallable(request))
+                   .map(this::validateResponse)
+                   .map(response -> mapResponse(ChannelClaimDto.class, response))
+                   .orElseThrow(this::handleFailure);
+    }
+
+    private static Builder getRequestBuilderFromUri(URI uri) {
         return HttpRequest.newBuilder()
                    .GET()
-                   .uri(customerId);
+                   .uri(uri);
     }
 
     public CustomerList getAllCustomers() throws ApiGatewayException {
@@ -175,7 +183,7 @@ public class IdentityServiceClient {
             return new NotFoundException(exception);
         }
 
-        throw new RuntimeException();
+        throw new RuntimeException("Something went wrong!");
     }
 
     private <S> HttpResponse<String> validateResponse(HttpResponse<String> response) throws NotFoundException {
