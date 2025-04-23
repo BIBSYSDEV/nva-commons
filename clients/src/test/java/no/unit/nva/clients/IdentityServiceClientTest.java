@@ -55,7 +55,7 @@ class IdentityServiceClientTest {
     private IdentityServiceClient authorizedIdentityServiceClient;
 
     @SuppressWarnings("unchecked")
-    public static HttpResponse<String> mockResponse(String body) {
+    static HttpResponse<String> mockResponse(String body) {
         var response = (HttpResponse<String>) mock(HttpResponse.class);
         when(response.statusCode()).thenReturn(200);
         when(response.body()).thenReturn(body);
@@ -63,7 +63,7 @@ class IdentityServiceClientTest {
     }
 
     @BeforeEach
-    public void setup() throws IOException, InterruptedException {
+    void setup() throws IOException, InterruptedException {
         cognitoCredentials = new CognitoCredentials(() -> "id", () -> "secret", URI.create("https://backend-auth/"));
 
         when(okResponseWithBody.statusCode()).thenReturn(500);
@@ -219,7 +219,7 @@ class IdentityServiceClientTest {
 
     @Test
     void shouldReturnCustomerByIdWhenRequested() throws NotFoundException, IOException, InterruptedException {
-        var customerId = randomUri();
+        var customerId = randomCustomerId();
         var expectedCustomer = createCustomerWithCristinId(customerId);
         var request = HttpRequest.newBuilder()
                           .GET()
@@ -235,9 +235,16 @@ class IdentityServiceClientTest {
         assertEquals(expectedCustomer, actual);
     }
 
+    private static URI randomCustomerId() {
+        return UriWrapper.fromHost(new Environment().readEnv("API_HOST"))
+                   .addChild("customer")
+                   .addChild(randomString())
+                   .getUri();
+    }
+
     @Test
     void shouldThrowNotFoundWhenFetchingCustomerByIdReturnsNotFound() throws IOException, InterruptedException {
-        var customerId = randomUri();
+        var customerId = randomCustomerId();
 
         var request = HttpRequest.newBuilder()
                           .GET()
