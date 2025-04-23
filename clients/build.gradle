@@ -34,6 +34,6 @@ dependencies {
         environment "BACKEND_CLIENT_SECRET", "backendClientSecret"
         environment "COGNITO_URI", "https://notused.org"
         environment "BACKEND_CLIENT_AUTH_URL", "https://backend-auth/"
-        environment "API_HOST", "backend-host"
+        environment "API_HOST", "localhost"
     }
 }
