@@ -239,8 +239,12 @@ class IdentityServiceClientTest {
     }
 
     private static URI randomCustomerId() {
+        return randomBackendUri("customer");
+    }
+
+    private static URI randomBackendUri(String path) {
         return UriWrapper.fromHost(new Environment().readEnv("API_HOST"))
-                   .addChild("customer")
+                   .addChild(path)
                    .addChild(randomString())
                    .getUri();
     }
@@ -264,7 +268,7 @@ class IdentityServiceClientTest {
 
     @Test
     void shouldReturnAllCustomers() throws IOException, InterruptedException, ApiGatewayException {
-        var customerList = new CustomerList(List.of(createCustomer(randomUri()), createCustomer(randomUri())));
+        var customerList = new CustomerList(List.of(createCustomer(randomCustomerId()), createCustomer(randomUri())));
         var uri = randomUri();
         var request = HttpRequest.newBuilder()
                           .GET()
@@ -296,7 +300,7 @@ class IdentityServiceClientTest {
 
     @Test
     void shouldReturnChannelClaimByIdWhenRequested() throws NotFoundException, IOException, InterruptedException {
-        var channelClaim = randomUri();
+        var channelClaim = randomBackendUri("customer/channel-claim");
         var expectedChannelClaim = channelClaimWithId(channelClaim);
         var request = HttpRequest.newBuilder()
                           .GET()
@@ -315,7 +319,7 @@ class IdentityServiceClientTest {
     @Test
     void shouldThrowNotFoundWhenIdentityServiceRespondsWithNoFoundWhenFetchingChannelClaim() throws IOException,
                                                                                                      InterruptedException {
-        var channelClaim = randomUri();
+        var channelClaim = randomBackendUri("customer/channel-claim");
         var request = HttpRequest.newBuilder()
                           .GET()
                           .uri(channelClaim)
