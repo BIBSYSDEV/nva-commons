@@ -9,12 +9,14 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandler;
 import java.time.Clock;
 import java.util.concurrent.CompletableFuture;
+import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
 
 public class AuthorizedBackendClient {
 
     public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
     public static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String API_HOST = "API_HOST";
 
     private final HttpClient httpClient;
     private final CachedJwtProvider cachedJwtProvider;
@@ -61,7 +63,19 @@ public class AuthorizedBackendClient {
         throws IOException, InterruptedException {
         refreshTokenIfExpired();
         var authorizedRequest = request.setHeader(AUTHORIZATION_HEADER, bearerToken).build();
+
+        if (hasInvalidBackendHost(authorizedRequest)) {
+            throw new IllegalArgumentException(
+                "Request host does not match the backend hostname or API_HOST is not set");
+        }
+
         return httpClient.send(authorizedRequest, responseBodyHandler);
+    }
+
+    private boolean hasInvalidBackendHost(HttpRequest request) {
+        return new Environment().readEnvOpt(API_HOST)
+                   .map(hostName -> !request.uri().getHost().equals(hostName))
+                   .orElse(true);
     }
 
     public <T> CompletableFuture<HttpResponse<T>> sendAsync(Builder request,

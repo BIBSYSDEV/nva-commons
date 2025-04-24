@@ -58,7 +58,7 @@ class IdentityServiceClientTest {
     private IdentityServiceClient authorizedIdentityServiceClient;
 
     @SuppressWarnings("unchecked")
-    public static HttpResponse<String> mockResponse(String body) {
+    static HttpResponse<String> mockResponse(String body) {
         var response = (HttpResponse<String>) mock(HttpResponse.class);
         when(response.statusCode()).thenReturn(200);
         when(response.body()).thenReturn(body);
@@ -66,7 +66,7 @@ class IdentityServiceClientTest {
     }
 
     @BeforeEach
-    public void setup() throws IOException, InterruptedException {
+    void setup() throws IOException, InterruptedException {
         cognitoCredentials = new CognitoCredentials(() -> "id", () -> "secret", URI.create("https://backend-auth/"));
 
         when(okResponseWithBody.statusCode()).thenReturn(500);
@@ -222,7 +222,7 @@ class IdentityServiceClientTest {
 
     @Test
     void shouldReturnCustomerByIdWhenRequested() throws NotFoundException, IOException, InterruptedException {
-        var customerId = randomUri();
+        var customerId = randomCustomerId();
         var expectedCustomer = createCustomerWithCristinId(customerId);
         var request = HttpRequest.newBuilder()
                           .GET()
@@ -238,9 +238,20 @@ class IdentityServiceClientTest {
         assertEquals(expectedCustomer, actual);
     }
 
+    private static URI randomCustomerId() {
+        return randomBackendUri("customer");
+    }
+
+    private static URI randomBackendUri(String path) {
+        return UriWrapper.fromHost(new Environment().readEnv("API_HOST"))
+                   .addChild(path)
+                   .addChild(randomString())
+                   .getUri();
+    }
+
     @Test
     void shouldThrowNotFoundWhenFetchingCustomerByIdReturnsNotFound() throws IOException, InterruptedException {
-        var customerId = randomUri();
+        var customerId = randomCustomerId();
 
         var request = HttpRequest.newBuilder()
                           .GET()
@@ -257,7 +268,7 @@ class IdentityServiceClientTest {
 
     @Test
     void shouldReturnAllCustomers() throws IOException, InterruptedException, ApiGatewayException {
-        var customerList = new CustomerList(List.of(createCustomer(randomUri()), createCustomer(randomUri())));
+        var customerList = new CustomerList(List.of(createCustomer(randomCustomerId()), createCustomer(randomUri())));
         var uri = randomUri();
         var request = HttpRequest.newBuilder()
                           .GET()
@@ -289,7 +300,7 @@ class IdentityServiceClientTest {
 
     @Test
     void shouldReturnChannelClaimByIdWhenRequested() throws NotFoundException, IOException, InterruptedException {
-        var channelClaim = randomUri();
+        var channelClaim = randomBackendUri("customer/channel-claim");
         var expectedChannelClaim = channelClaimWithId(channelClaim);
         var request = HttpRequest.newBuilder()
                           .GET()
@@ -308,7 +319,7 @@ class IdentityServiceClientTest {
     @Test
     void shouldThrowNotFoundWhenIdentityServiceRespondsWithNoFoundWhenFetchingChannelClaim() throws IOException,
                                                                                                      InterruptedException {
-        var channelClaim = randomUri();
+        var channelClaim = randomBackendUri("customer/channel-claim");
         var request = HttpRequest.newBuilder()
                           .GET()
                           .uri(channelClaim)
