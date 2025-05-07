@@ -13,7 +13,7 @@ commonsValidator = { strictly = '1.9.0' }
 datafaker = { strictly = '2.4.3' }
 guava = { strictly = '33.4.8-jre' }
 hamcrest = { strictly = '3.0' }
-jackson = { strictly = '2.18.3' }
+jackson = { strictly = '2.19.0' }
 jupiter = { strictly = '5.12.2' }
 lambdaLog4j = { strictly = '1.6.0' }
 log4j = { strictly = '2.24.3' }

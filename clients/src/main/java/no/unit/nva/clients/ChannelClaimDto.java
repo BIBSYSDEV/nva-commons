@@ -9,7 +9,7 @@ import no.unit.nva.commons.json.JsonSerializable;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonTypeName(CLAIMED_CHANNEL_TYPE)
-public record ChannelClaimDto(CustomerSummaryDto claimedBy, ChannelClaim channelClaim) implements JsonSerializable {
+public record ChannelClaimDto(URI id, CustomerSummaryDto claimedBy, ChannelClaim channelClaim) implements JsonSerializable {
 
     static final String CLAIMED_CHANNEL_TYPE = "ClaimedChannel";
 
