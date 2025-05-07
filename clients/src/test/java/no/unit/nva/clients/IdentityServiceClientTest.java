@@ -346,7 +346,7 @@ class IdentityServiceClientTest {
     }
 
     private ChannelClaimDto channelClaimWithId(URI channelClaim) {
-        return new ChannelClaimDto(new CustomerSummaryDto(
+        return new ChannelClaimDto(channelClaim, new CustomerSummaryDto(
             randomUri(), randomUri()), new ChannelClaim(channelClaim,
                                                         new ChannelConstraint(randomString(), randomString(),
                                                                                                        List.of(randomString(), randomString()))));
