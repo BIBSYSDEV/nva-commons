@@ -57,7 +57,7 @@ public final class SortableIdentifier implements Comparable<SortableIdentifier> 
             return false;
         }
         SortableIdentifier that = (SortableIdentifier) o;
-        return Objects.equals(toString(), that.toString());
+        return toString().equalsIgnoreCase(that.toString());
     }
 
     @Override
