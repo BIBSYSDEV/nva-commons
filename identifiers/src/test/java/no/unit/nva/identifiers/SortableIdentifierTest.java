@@ -136,26 +136,30 @@ public class SortableIdentifierTest {
     }
 
     @ParameterizedTest
-    @MethodSource("caseSensitiveSortableIdentifierProvider")
-    public void shouldIgnoreCaseWhenComparingSortableIdentifiers(SortableIdentifier left, SortableIdentifier right) {
-        assertEquals(left, right);
+    @MethodSource("caseSensitiveIdentifierProvider")
+    public void shouldIgnoreCaseWhenComparingSortableIdentifiers(String left, String right) {
+        var leftSortableIdentifier = new SortableIdentifier(left);
+        var rightSortableIdentifier = new SortableIdentifier(right);
+        assertEquals(leftSortableIdentifier, rightSortableIdentifier);
     }
 
-    private static Stream<Arguments> caseSensitiveSortableIdentifierProvider() {
-        return Stream.of(
-            Arguments.of(
-                new SortableIdentifier("f0dd703d-5d08-486f-af8a-f578fc7f6b59"),
-                new SortableIdentifier("F0DD703D-5D08-486F-AF8A-F578FC7F6B59")),
-            Arguments.of(
-                new SortableIdentifier("2F451CDA-08A6-4469-9C26-72051632BB90"),
-                new SortableIdentifier("2f451cda-08a6-4469-9c26-72051632bb90")),
-            Arguments.of(
-                new SortableIdentifier("c36517c5-1357-4c2d-af6d-33a634e82bc2"),
-                new SortableIdentifier("c36517c5-1357-4c2d-af6d-33a634e82bc2")),
-            Arguments.of(
-                new SortableIdentifier("0C443CDB-20C4-45A6-901B-26232773A1B7"),
-                new SortableIdentifier("0C443CDB-20C4-45A6-901B-26232773A1B7"))
-        );
+    private static Stream<Arguments> caseSensitiveIdentifierProvider() {
+        return Stream.of(Arguments.of("019716D1CB07-C12BEAB5-A45F-43AD-9496-8897A71D131B",
+                                      "019716d1cb07-c12beab5-a45f-43ad-9496-8897a71d131b"),
+                         Arguments.of("019716d1cb07-c12beab5-a45f-43ad-9496-8897a71d131b",
+                                      "019716D1CB07-C12BEAB5-A45F-43AD-9496-8897A71D131B"),
+                         Arguments.of("2f451cda-08a6-4469-9c26-72051632bb90",
+                                      "2F451CDA-08A6-4469-9C26-72051632BB90"),
+                         Arguments.of("2F451CDA-08A6-4469-9C26-72051632BB90",
+                                      "2f451cda-08a6-4469-9c26-72051632bb90"),
+                         Arguments.of("019716D1CB07-C12BEAB5-A45F-43AD-9496-8897A71D131B",
+                                      "019716D1CB07-C12BEAB5-A45F-43AD-9496-8897A71D131B"),
+                         Arguments.of("019716d1cb07-c12beab5-a45f-43ad-9496-8897a71d131b",
+                                      "019716d1cb07-c12beab5-a45f-43ad-9496-8897a71d131b"),
+                         Arguments.of("2F451CDA-08A6-4469-9C26-72051632BB90",
+                                      "2F451CDA-08A6-4469-9C26-72051632BB90"),
+                         Arguments.of("2f451cda-08a6-4469-9c26-72051632bb90",
+                                      "2f451cda-08a6-4469-9c26-72051632bb90"));
     }
 
     private void shuffle(List<SortableIdentifier> idStrings) {
