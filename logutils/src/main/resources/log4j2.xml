@@ -11,7 +11,10 @@
 
   </Appenders>
   <Loggers>
-    <Root level="${env:LOG_LEVEL:-info}">
+    <Logger name="nva" level="${env:LOG_LEVEL:-info}"/>
+    <Logger name="no.sikt.nva" level="${env:LOG_LEVEL:-info}"/>
+    <Logger name="no.unit.nva" level="${env:LOG_LEVEL:-info}"/>
+    <Root level="info">
       <AppenderRef ref="Lambda"/>
     </Root>
   </Loggers>
