@@ -11,7 +11,7 @@
 
   </Appenders>
   <Loggers>
-    <Root level="info">
+    <Root level="${env:LOG_LEVEL:-info}">
       <AppenderRef ref="Lambda"/>
     </Root>
   </Loggers>
