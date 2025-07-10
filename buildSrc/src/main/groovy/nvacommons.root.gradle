@@ -3,6 +3,7 @@ plugins {
     id 'nvacommons.gradlelint'
     id 'nvacommons.java-conventions'
     id 'jacoco-report-aggregation'
+    id 'version-catalog'
 }
 
 //workaround for jacoco-merge to work
