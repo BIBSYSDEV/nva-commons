@@ -1,0 +1,21 @@
+plugins {
+    id 'nvacommons.publish-artifact'
+    id 'version-catalog'
+}
+
+catalog {
+    versionCatalog {
+        from(files('../gradle/libs.versions.toml'))
+    }
+}
+
+publishing {
+    publications {
+        // Publish the version catalog from the root project as a single artifact
+        versionCatalog(MavenPublication) {
+            artifactId = 'versions'
+            from components.versionCatalog
+            pom(configureCommonPom)
+        }
+    }
+}

@@ -1,0 +1,57 @@
+plugins {
+    id 'maven-publish'
+    id 'signing'
+}
+
+/***********************************ATTENTION*******************************************************
+ Base plugin for publishing artifacts. Contains shared functionality like signing and POM configuration.
+ Part of the maven publishing configuration has to be in the root project (nvacommons.root.gradle)
+ ************************************ ATTENTION*****************************************************/
+
+def gitBranch() {
+    def branch = ""
+    def proc = "git rev-parse --abbrev-ref HEAD".execute()
+    proc.in.eachLine { line -> branch = line }
+    proc.err.eachLine { line -> println line }
+    proc.waitFor()
+    branch
+}
+
+boolean isMainBranch() {
+    def branch = gitBranch()
+    return ((branch == "master" || branch == "main"))
+}
+
+signing {
+    if (isMainBranch()) {
+        def signingKey = findProperty("signingKey")
+        def signingPassword = findProperty("signingPassword")
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign publishing.publications
+    }
+}
+
+ext.configureCommonPom = { MavenPom pom ->
+    pom.name.set('nva-commons')
+    pom.description.set('A common library for the NVA project')
+    pom.url.set('https://github.com/BIBSYSDEV/nva-commons')
+    pom.licenses {
+        license {
+            name.set('MIT License')
+            url.set('http://www.opensource.org/licenses/mit-license.php')
+        }
+    }
+    pom.developers {
+        developer {
+            name.set('Orestis Gkorgkas')
+            email.set('og@unit.no')
+            organization.set('UNIT')
+            organizationUrl.set('https://www.unit.no/')
+        }
+    }
+    pom.scm {
+        connection.set('scm:git:git://github.com/BIBSYSDEV/nva-commons.git')
+        developerConnection.set('scm:git:ssh://github.com/BIBSYSDEV/nva-commons.git')
+        url.set('https://github.com/BIBSYSDEV/nva-commons/tree/main')
+    }
+}
