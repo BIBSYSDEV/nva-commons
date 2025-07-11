@@ -9,7 +9,7 @@ awsSdk = { strictly = '1.12.787' }
 awsSdk2 = { strictly = '2.31.77' }
 com-auth0-jwt = { strictly = '4.5.0' }
 com-auth0-jwks = { strictly = '0.22.2' }
-commonsValidator = { strictly = '1.9.0' }
+commonsValidator = { strictly = '1.10.0' }
 datafaker = { strictly = '2.4.3' }
 guava = { strictly = '33.4.8-jre' }
 hamcrest = { strictly = '3.0' }
@@ -19,7 +19,7 @@ lambdaLog4j = { strictly = '1.6.0' }
 log4j = { strictly = '2.25.0' }
 mockito = { strictly = '5.18.0' }
 slf4j = { strictly = '2.0.17' }
-wiremock = { strictly = '3.13.1' }
+wiremock = { strictly = '4.0.0-beta.14' }
 zalandoProblem = { strictly = '0.27.1' }
 
 [libraries]
@@ -78,8 +78,7 @@ mockito-core = { group = 'org.mockito', name = 'mockito-core', version.ref = 'mo
 datafaker = { group = 'net.datafaker', name = 'datafaker', version.ref = 'datafaker' }
 httpclient5 = { group = 'org.apache.httpcomponents.client5', name = 'httpclient5', version.ref = 'apacheHttpClient' }
 
-wiremock = { group = 'org.wiremock', name = 'wiremock-jetty12', version.ref = 'wiremock' }
-
+wiremock = { group = 'org.wiremock', name = 'wiremock', version.ref = 'wiremock' }
 
 com-auth0-jwt = { group = 'com.auth0', name = 'java-jwt', version.ref = 'com-auth0-jwt' }
 
