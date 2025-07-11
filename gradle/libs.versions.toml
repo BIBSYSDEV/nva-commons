@@ -87,11 +87,31 @@ com-auth0-jwt = { group = 'com.auth0', name = 'java-jwt', version.ref = 'com-aut
 
 [bundles]
 # IMPORTANT: Renaming a bundle or removing elements from it is a breaking change
-testing-junit = ['junit-jupiter', 'junit-jupiter-api', 'junit-jupiter-params', 'junit-jupiter-engine', 'junit-platform-launcher']
+testing-junit = [
+    'junit-jupiter',
+    'junit-jupiter-api', 
+    'junit-jupiter-engine',
+    'junit-jupiter-params',
+    'junit-platform-launcher'
+]
 testing-mockito = ['mockito-core']
 testing-hamcrest = ['hamcrest', 'hamcrest-core']
-jackson = ['jackson-core', 'jackson-datatype-jdk8', 'jackson-datatype-jsr310', 'jackson-databind',
-    'jackson-annotations', 'jackson-module-parameter-names', 'jackson-datatype-problem', 'jackson-dataformat-xml']
+jackson = [
+    'jackson-annotations',
+    'jackson-core',
+    'jackson-databind',
+    'jackson-dataformat-xml',
+    'jackson-datatype-jdk8',
+    'jackson-datatype-jsr310',
+    'jackson-datatype-problem',
+    'jackson-module-parameter-names'
+]
 jacksonjr = ['jackson-jr-objects', 'jackson-jr-annotations']
-logging = ['log4j-core', 'log4j-api', 'log4j-slf4j-impl', 'slf4j-api', 'lambda-log4j']
+logging = [
+    'lambda-log4j',
+    'log4j-api',
+    'log4j-core',
+    'log4j-slf4j-impl',
+    'slf4j-api'
+]
 
