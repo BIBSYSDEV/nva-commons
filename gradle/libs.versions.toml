@@ -17,6 +17,7 @@ guava = { strictly = '33.4.8-jre' }
 hamcrest = { strictly = '3.0' }
 jackson = { strictly = '2.19.1' }
 jupiter = { strictly = '5.13.3' }
+jupiterPlatform = { strictly = '1.13.3' } # Keep minor & patch version in sync with `jupiter`
 lambdaLog4j = { strictly = '1.6.0' }
 log4j = { strictly = '2.25.0' }
 mockito = { strictly = '5.18.0' }
@@ -75,7 +76,7 @@ junit-jupiter = { group = 'org.junit.jupiter', name = 'junit-jupiter', version.r
 junit-jupiter-api = { group = 'org.junit.jupiter', name = 'junit-jupiter-api', version.ref = 'jupiter' }
 junit-jupiter-engine = { group = 'org.junit.jupiter', name = 'junit-jupiter-engine', version.ref = 'jupiter' }
 junit-jupiter-params = { group = 'org.junit.jupiter', name = 'junit-jupiter-params', version.ref = 'jupiter' }
-junit-platform-launcher = { group = 'org.junit.platform', name = 'junit-platform-launcher' }
+junit-platform-launcher = { group = 'org.junit.platform', name = 'junit-platform-launcher', version.ref = 'jupiterPlatform' }
 mockito-core = { group = 'org.mockito', name = 'mockito-core', version.ref = 'mockito' }
 wiremock = { group = 'org.wiremock', name = 'wiremock', version.ref = 'wiremock' }
 
