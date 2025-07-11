@@ -3,23 +3,11 @@ plugins {
     id 'nvacommons.gradlelint'
     id 'nvacommons.java-conventions'
     id 'jacoco-report-aggregation'
-    id 'maven-publish'
-    id 'version-catalog'
 }
 
 //workaround for jacoco-merge to work
 allprojects {
     apply plugin: 'nvacommons.java-conventions'
-}
-
-publishing {
-    publications {
-        // Publish the version catalog from the root project as an artifact
-        versionCatalog(MavenPublication) {
-            artifactId = 'versions'
-            from components.versionCatalog
-        }
-    }
 }
 
 nexusPublishing {

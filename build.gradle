@@ -6,12 +6,6 @@ allprojects{
     apply plugin: 'nvacommons.java-conventions'
 }
 
-catalog {
-    versionCatalog {
-        from(files("gradle/libs.versions.toml"))
-    }
-}
-
 wrapper {
     gradleVersion = '8.12.1'
     distributionType = Wrapper.DistributionType.ALL
