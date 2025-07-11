@@ -32,7 +32,7 @@ signing {
 }
 
 ext.configureCommonPom = { MavenPom pom ->
-    pom.name.set('nva-commons')
+    pom.name.set(project.name)
     pom.description.set('A common library for the NVA project')
     pom.url.set('https://github.com/BIBSYSDEV/nva-commons')
     pom.licenses {
