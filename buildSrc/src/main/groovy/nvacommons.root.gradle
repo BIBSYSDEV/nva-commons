@@ -2,8 +2,8 @@ plugins {
     id 'io.github.gradle-nexus.publish-plugin'
     id 'nvacommons.gradlelint'
     id 'nvacommons.java-conventions'
+    id 'nvacommons.publish-maven'
     id 'jacoco-report-aggregation'
-    id 'maven-publish'
     id 'version-catalog'
 }
 
