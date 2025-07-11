@@ -27,7 +27,11 @@ dependencies {
     implementation libs.com.auth0.jwks
     implementation libs.com.auth0.jwt
 
-    testImplementation libs.bundles.testing
+    testImplementation libs.bundles.testing.junit
+    testImplementation libs.bundles.testing.mockito
+    testImplementation libs.bundles.testing.hamcrest
+    testImplementation libs.commons.lang
+    testImplementation libs.datafaker
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")
     testImplementation libs.jackson.dataformat.xml

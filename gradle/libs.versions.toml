@@ -1,5 +1,7 @@
+# IMPORTANT: This is a published version catalog, used by other NVA repositories.
+# Renaming a component (library, plugin, or bundle) or upgrading major versions of dependencies
+# is a breaking change and should be reflected in our version number.
 [versions]
-
 apacheCommons = { require = '3.17.0' }
 apacheHttpClient = { strictly = '5.5' }
 awsIon = { strictly = '1.11.10' }
@@ -23,6 +25,7 @@ wiremock = { strictly = '4.0.0-beta.14' }
 zalandoProblem = { strictly = '0.27.1' }
 
 [libraries]
+# IMPORTANT: Renaming a library is a breaking change
 zalando = { group = 'org.zalando', name = 'problem', version.ref = 'zalandoProblem' }
 
 guava = { group = 'com.google.guava', name = 'guava', version.ref = 'guava' }
@@ -83,8 +86,10 @@ wiremock = { group = 'org.wiremock', name = 'wiremock', version.ref = 'wiremock'
 com-auth0-jwt = { group = 'com.auth0', name = 'java-jwt', version.ref = 'com-auth0-jwt' }
 
 [bundles]
-testing = ['mockito-core', 'hamcrest', 'hamcrest-core', 'junit-jupiter', 'junit-jupiter-api',
-    'junit-jupiter-params', 'junit-jupiter-engine', 'commons-lang', 'datafaker', 'junit-platform-launcher']
+# IMPORTANT: Renaming a bundle or removing elements from it is a breaking change
+testing-junit = ['junit-jupiter', 'junit-jupiter-api', 'junit-jupiter-params', 'junit-jupiter-engine', 'junit-platform-launcher']
+testing-mockito = ['mockito-core']
+testing-hamcrest = ['hamcrest', 'hamcrest-core']
 jackson = ['jackson-core', 'jackson-datatype-jdk8', 'jackson-datatype-jsr310', 'jackson-databind',
     'jackson-annotations', 'jackson-module-parameter-names', 'jackson-datatype-problem', 'jackson-dataformat-xml']
 jacksonjr = ['jackson-jr-objects', 'jackson-jr-annotations']
