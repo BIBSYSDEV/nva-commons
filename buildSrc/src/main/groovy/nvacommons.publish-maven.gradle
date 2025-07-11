@@ -1,7 +1,6 @@
 plugins {
     id 'maven-publish'
     id 'signing'
-    id 'version-catalog'
 }
 
 /***********************************ATTENTION*******************************************************
@@ -15,10 +14,6 @@ java {
 
 publishing {
     publications {
-        versionCatalog(MavenPublication) {
-            artifactId = project.name
-            from components.versionCatalog
-        }
         mavenJava(MavenPublication) {
             artifactId = project.name
             from components.java
