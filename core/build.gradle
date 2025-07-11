@@ -8,7 +8,11 @@ dependencies {
     implementation libs.httpclient5
     compileOnly libs.jackson.annotations
     testImplementation libs.bundles.logging
-    testImplementation libs.bundles.testing
+    testImplementation libs.bundles.testing.junit
+    testImplementation libs.bundles.testing.mockito
+    testImplementation libs.bundles.testing.hamcrest
+    testImplementation libs.commons.lang
+    testImplementation libs.datafaker
     testImplementation libs.bundles.jackson
     testImplementation project (":nvatestutils")
     testImplementation project(":logutils")

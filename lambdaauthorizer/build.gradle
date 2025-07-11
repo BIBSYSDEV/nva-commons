@@ -17,7 +17,11 @@ dependencies {
     testImplementation libs.guava
     testImplementation project(":logutils")
 
-    testImplementation libs.bundles.testing
+    testImplementation libs.bundles.testing.junit
+    testImplementation libs.bundles.testing.mockito
+    testImplementation libs.bundles.testing.hamcrest
+    testImplementation libs.commons.lang
+    testImplementation libs.datafaker
     testImplementation project(":nvatestutils")
 
 }

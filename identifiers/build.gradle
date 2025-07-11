@@ -11,5 +11,9 @@ dependencies {
 
     testImplementation project (":json")
     testImplementation libs.bundles.jackson
-    testImplementation libs.bundles.testing
+    testImplementation libs.bundles.testing.junit
+    testImplementation libs.bundles.testing.mockito
+    testImplementation libs.bundles.testing.hamcrest
+    testImplementation libs.commons.lang
+    testImplementation libs.datafaker
 }

@@ -22,5 +22,9 @@ dependencies {
     testImplementation libs.jackson.datatype.jdk8
     testImplementation libs.jackson.datatype.jsr310
     testImplementation libs.jackson.datatype.problem
-    testImplementation libs.bundles.testing
+    testImplementation libs.bundles.testing.junit
+    testImplementation libs.bundles.testing.mockito
+    testImplementation libs.bundles.testing.hamcrest
+    testImplementation libs.commons.lang
+    testImplementation libs.datafaker
 }
