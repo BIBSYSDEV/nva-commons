@@ -1,6 +1,6 @@
 plugins {
-    id 'nvacommons.publish-artifact'
     id 'version-catalog'
+    id 'nvacommons.publish-artifact'
 }
 
 catalog {
