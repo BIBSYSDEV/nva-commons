@@ -10,7 +10,7 @@ plugins {
 
 
 group = 'com.github.bibsysdev'
-version = '2.2.9'
+version = '2.2.10'
 
 
 java {
@@ -83,6 +83,7 @@ jacocoTestReport {
 }
 
 checkstyle {
+    toolVersion = '10.26.1'
     configFile = rootProject.resources.text.fromFile('config/checkstyle/checkstyle.xml').asFile()
     showViolations = true
 }
