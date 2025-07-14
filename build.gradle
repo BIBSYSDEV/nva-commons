@@ -6,7 +6,3 @@ plugins {
 allprojects{
     apply plugin: 'nvacommons.java-conventions'
 }
-
-tasks.withType(JavaCompile) {
-    options.release = 17
-}
