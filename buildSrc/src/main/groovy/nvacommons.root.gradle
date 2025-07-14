@@ -43,8 +43,21 @@ tasks.named('check') {
     dependsOn tasks.named('testCodeCoverageReport', JacocoReport)
 }
 
+def isNonStable(String version) {
+    def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { version.toUpperCase().contains(it) }
+
+    // Stable version patterns: digits/dots/v/hyphens optionally ending with -r/-jre/-android
+    def stableVersionPattern = /^[0-9,.v-]+(-r|-jre|-android)?$/
+    return !stableKeyword && !(version ==~ stableVersionPattern)
+}
+
 tasks.named('dependencyUpdates') {
     checkForGradleUpdate = true
     outputDir = 'build/dependencyUpdates'
     reportfileName = 'report'
+    gradleReleaseChannel='current'
+    rejectVersionIf {
+        // Don't suggest upgrading from a stable version to a non-stable version
+        isNonStable(it.candidate.version) && !isNonStable(it.currentVersion)
+    }
 }
