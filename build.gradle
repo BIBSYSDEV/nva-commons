@@ -1,16 +1,8 @@
 plugins {
     id 'nvacommons.root'
+    alias(libs.plugins.gradle.versions)
 }
 
 allprojects{
     apply plugin: 'nvacommons.java-conventions'
-}
-
-wrapper {
-    gradleVersion = '8.12.1'
-    distributionType = Wrapper.DistributionType.ALL
-}
-
-tasks.withType(JavaCompile) {
-    options.release = 17
 }

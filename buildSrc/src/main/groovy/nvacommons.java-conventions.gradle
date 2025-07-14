@@ -10,12 +10,13 @@ plugins {
 
 
 group = 'com.github.bibsysdev'
-version = '2.3.4'
-
+version = '2.3.5'
 
 java {
-    sourceCompatibility = JavaLanguageVersion.of(17)
-    targetCompatibility = JavaLanguageVersion.of(17)
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+        vendor = JvmVendorSpec.AMAZON
+    }
 }
 
 repositories {

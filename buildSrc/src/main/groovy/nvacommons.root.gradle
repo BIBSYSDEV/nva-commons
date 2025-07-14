@@ -3,6 +3,7 @@ plugins {
     id 'nvacommons.gradlelint'
     id 'nvacommons.java-conventions'
     id 'jacoco-report-aggregation'
+    id 'com.github.ben-manes.versions'
 }
 
 //workaround for jacoco-merge to work
@@ -33,15 +34,30 @@ dependencies {
 reporting {
     reports {
         testCodeCoverageReport(JacocoCoverageReport) {
-            testType = TestSuiteType.UNIT_TEST
-        }
-        integrationTestCodeCoverageReport(JacocoCoverageReport) {
-            testType = TestSuiteType.INTEGRATION_TEST
+            testSuiteName = 'test'
         }
     }
 }
 
 tasks.named('check') {
     dependsOn tasks.named('testCodeCoverageReport', JacocoReport)
-    dependsOn tasks.named('integrationTestCodeCoverageReport', JacocoReport)
+}
+
+def isNonStable(String version) {
+    def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { version.toUpperCase().contains(it) }
+
+    // Stable version patterns: digits/dots/v/hyphens optionally ending with -r/-jre/-android
+    def stableVersionPattern = /^[0-9,.v-]+(-r|-jre)?$/
+    return !stableKeyword && !(version ==~ stableVersionPattern)
+}
+
+tasks.named('dependencyUpdates') {
+    checkForGradleUpdate = true
+    outputDir = 'build/dependencyUpdates'
+    reportfileName = 'report'
+    gradleReleaseChannel='current'
+    rejectVersionIf {
+        // Don't suggest upgrading from a stable version to a non-stable version
+        isNonStable(it.candidate.version) && !isNonStable(it.currentVersion)
+    }
 }
