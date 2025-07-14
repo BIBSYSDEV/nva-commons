@@ -3,6 +3,7 @@ plugins {
     id 'nvacommons.gradlelint'
     id 'nvacommons.java-conventions'
     id 'jacoco-report-aggregation'
+    id 'com.github.ben-manes.versions'
 }
 
 //workaround for jacoco-merge to work
@@ -44,4 +45,10 @@ reporting {
 tasks.named('check') {
     dependsOn tasks.named('testCodeCoverageReport', JacocoReport)
     dependsOn tasks.named('integrationTestCodeCoverageReport', JacocoReport)
+}
+
+tasks.named('dependencyUpdates') {
+    checkForGradleUpdate = true
+    outputDir = 'build/dependencyUpdates'
+    reportfileName = 'report'
 }
