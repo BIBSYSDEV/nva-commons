@@ -2,9 +2,9 @@
 # Renaming a component (library, plugin, or bundle) or upgrading major versions of dependencies
 # is a breaking change and should be reflected in our version number.
 [versions]
-apache-poi = { strictly = '5.4.1' }
 apacheCommons = { require = '3.17.0' }
 apacheHttpClient = { strictly = '5.5' }
+apachePoi = { strictly = '5.4.1' }
 assertj = { strictly = '3.27.3' }
 awsIon = { strictly = '1.11.10' }
 awsLambdaCore = { strictly = '1.3.0' }
@@ -39,8 +39,8 @@ zalandoProblem = { strictly = '0.27.1' }
 
 [libraries]
 # IMPORTANT: Renaming a library is a breaking change
-apache-poi = { group = 'org.apache.poi', name = 'poi', version.ref = 'apache-poi' }
-apache-poi-ooxml = { group = 'org.apache.poi', name = 'poi-ooxml', version.ref = 'apache-poi' }
+apache-poi = { group = 'org.apache.poi', name = 'poi', version.ref = 'apachePoi' }
+apache-poi-ooxml = { group = 'org.apache.poi', name = 'poi-ooxml', version.ref = 'apachePoi' }
 
 aws-apache-client = { group = 'software.amazon.awssdk', name = 'apache-client', version.ref = 'awsSdk2' }
 aws-ion = { group = 'com.amazon.ion', name = 'ion-java', version.ref = 'awsIon' }
