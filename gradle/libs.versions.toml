@@ -26,7 +26,7 @@ jena = { strictly = '5.4.0' }
 jupiter = { strictly = '5.13.3' }
 jupiter-platform = { strictly = '1.13.3' } # Keep minor & patch version in sync with `jupiter`
 lambda-log4j = { strictly = '1.6.0' }
-log4j = { strictly = '2.25.0' }
+log4j = { strictly = '2.25.1' }
 mockito = { strictly = '5.18.0' }
 opencsv = { strictly = '5.11.2' }
 opensearch-client = { strictly = '3.1.0' }
