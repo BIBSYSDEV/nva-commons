@@ -68,6 +68,7 @@ guava = { group = 'com.google.guava', name = 'guava', version.ref = 'guava' }
 jackson-annotations = { group = 'com.fasterxml.jackson.core', name = 'jackson-annotations', version.ref = 'jackson' }
 jackson-core = { group = 'com.fasterxml.jackson.core', name = 'jackson-core', version.ref = 'jackson' }
 jackson-databind = { group = 'com.fasterxml.jackson.core', name = 'jackson-databind', version.ref = 'jackson' }
+jackson-dataformat-csv = { group = 'com.fasterxml.jackson.dataformat', name = 'jackson-dataformat-csv', version.ref = 'jackson' }
 jackson-dataformat-xml = { group = 'com.fasterxml.jackson.dataformat', name = 'jackson-dataformat-xml', version.ref = 'jackson' }
 jackson-datatype-jdk8 = { group = 'com.fasterxml.jackson.datatype', name = 'jackson-datatype-jdk8', version.ref = 'jackson' }
 jackson-datatype-jsr310 = { group = 'com.fasterxml.jackson.datatype', name = 'jackson-datatype-jsr310', version.ref = 'jackson' }
