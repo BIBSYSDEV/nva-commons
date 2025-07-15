@@ -53,8 +53,11 @@ aws-sdk2-dynamo = { group = 'software.amazon.awssdk', name = 'dynamodb', version
 aws-sdk2-dynamodbenhanced = { group = 'software.amazon.awssdk', name = 'dynamodb-enhanced', version.ref = 'aws-sdk2' }
 aws-sdk2-eventbridge = { group = 'software.amazon.awssdk', name = 'eventbridge', version.ref = 'aws-sdk2' }
 aws-sdk2-firehose = { group = 'software.amazon.awssdk', name = 'firehose', version.ref = 'aws-sdk2' }
+aws-sdk2-regions = { group = 'software.amazon.awssdk', name = 'regions', version.ref = 'aws-sdk2' }
 aws-sdk2-s3 = { group = 'software.amazon.awssdk', name = 's3', version.ref = 'aws-sdk2' }
 aws-sdk2-secrets = { group = 'software.amazon.awssdk', name = 'secretsmanager', version.ref = 'aws-sdk2' }
+aws-sdk2-sns = { group = 'software.amazon.awssdk', name = 'sns', version.ref = 'aws-sdk2' }
+aws-sdk2-sqs = { group = 'software.amazon.awssdk', name = 'sqs', version.ref = 'aws-sdk2' }
 aws-sdk2-urlconnection = { group = 'software.amazon.awssdk', name = 'url-connection-client', version.ref = 'aws-sdk2' }
 com-auth0-jwks = { group = 'com.auth0', name = 'jwks-rsa', version.ref = 'com-auth0-jwks' }
 com-auth0-jwt = { group = 'com.auth0', name = 'java-jwt', version.ref = 'com-auth0-jwt' }
