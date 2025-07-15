@@ -76,7 +76,7 @@ tasks.named('verifyCoverage') {
 def isNonStable(String version) {
     def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { version.toUpperCase().contains(it) }
 
-    // Stable version patterns: digits/dots/v/hyphens optionally ending with -r/-jre/-android
+    // Stable version patterns: digits/dots/v/hyphens optionally ending with -r/-jre
     def stableVersionPattern = /^[0-9,.v-]+(-r|-jre)?$/
     return !stableKeyword && !(version ==~ stableVersionPattern)
 }

@@ -43,6 +43,7 @@ zalando-problem = { strictly = '0.27.1' }
 apache-poi = { group = 'org.apache.poi', name = 'poi', version.ref = 'apache-poi' }
 apache-poi-ooxml = { group = 'org.apache.poi', name = 'poi-ooxml', version.ref = 'apache-poi' }
 aws-apache-client = { group = 'software.amazon.awssdk', name = 'apache-client', version.ref = 'aws-sdk2' }
+aws-dynamodb-local = { group = 'com.amazonaws', name = 'DynamoDBLocal', version.ref = 'aws-ddb-local' }
 aws-ion = { group = 'com.amazon.ion', name = 'ion-java', version.ref = 'aws-ion' }
 aws-java-sdk-core = { group = 'com.amazonaws', name = 'aws-java-sdk-core', version.ref = 'aws-sdk' }
 aws-lambda-core = { group = 'com.amazonaws', name = 'aws-lambda-java-core', version.ref = 'aws-lambda-core' }
@@ -63,7 +64,6 @@ com-auth0-jwks = { group = 'com.auth0', name = 'jwks-rsa', version.ref = 'com-au
 com-auth0-jwt = { group = 'com.auth0', name = 'java-jwt', version.ref = 'com-auth0-jwt' }
 commons-lang = { group = 'org.apache.commons', name = 'commons-lang3', version.ref = 'apache-commons' }
 commons-validator = { group = 'commons-validator', name = 'commons-validator', version.ref = 'commons-validator' }
-dynamodDbLocal = { group = 'com.amazonaws', name = 'DynamoDBLocal', version.ref = 'aws-ddb-local' }
 guava = { group = 'com.google.guava', name = 'guava', version.ref = 'guava' }
 jackson-annotations = { group = 'com.fasterxml.jackson.core', name = 'jackson-annotations', version.ref = 'jackson' }
 jackson-core = { group = 'com.fasterxml.jackson.core', name = 'jackson-core', version.ref = 'jackson' }
