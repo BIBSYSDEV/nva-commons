@@ -10,10 +10,10 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 import nva.commons.core.attempt.Try;
-import software.amazon.ion.IonReader;
-import software.amazon.ion.IonWriter;
-import software.amazon.ion.system.IonReaderBuilder;
-import software.amazon.ion.system.IonTextWriterBuilder;
+import com.amazon.ion.IonReader;
+import com.amazon.ion.IonWriter;
+import com.amazon.ion.system.IonReaderBuilder;
+import com.amazon.ion.system.IonTextWriterBuilder;
 
 public final class S3IonReader {
 

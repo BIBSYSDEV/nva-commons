@@ -10,19 +10,18 @@
   <exclude-pattern>.*/test/.*</exclude-pattern>
 
   <rule ref="category/java/errorprone.xml">
-    <exclude name="DataflowAnomalyAnalysis"/>
     <exclude name="MissingSerialVersionUID"/>
-    <exclude name="BeanMembersShouldSerialize"/>
   </rule>
 
-  <rule ref="category/java/multithreading.xml"/>
+  <rule ref="category/java/multithreading.xml">
+    <!-- Because it complains for the Map interface in the Resource class.-->
+    <exclude name="UseConcurrentHashMap"/>
+  </rule>
 
   <rule ref="category/java/bestpractices.xml">
     <exclude name="SystemPrintln"/>
     <exclude name="GuardLogStatement"/>
     <exclude name="AvoidPrintStackTrace"/>
-    <exclude name="UseVarargs"/>
-    <exclude name="ArrayIsStoredDirectly"/>
 
     <!-- In TableManager we map ResourceNotFoundException to TableNotFoundException -->
     <exclude name="PreserveStackTrace"/>
@@ -30,6 +29,7 @@
   </rule>
 
   <rule ref="category/java/codestyle.xml">
+    <exclude name="ShortClassName"/>
     <exclude name="AtLeastOneConstructor"/>
     <exclude name="LongVariable"/>
     <exclude name="ShortVariable"/>
@@ -39,17 +39,12 @@
     <exclude name="TooManyStaticImports"/>
     <exclude name="ClassNamingConventions"/>
     <exclude name="UnnecessaryConstructor"/>
-    <exclude name="ShortClassName"/>
-    <exclude name="GenericsNaming"/>
+    <!-- Conflicts with the rule category/java/codestyle.xml/AvoidProtectedMethodInFinalClassNotExtending -->
+    <exclude name="CommentDefaultAccessModifier"/>
+    <!-- Conflicts with the rule category/java/codestyle.xml/AvoidProtectedMethodInFinalClassNotExtending -->
 
-    <!--<exclude name="BeanMembersShouldSerialize"/>-->
-
+    <exclude name="UseExplicitTypes"/>
     <exclude name="ConfusingTernary"/>
-
-    <!-- printStackTrace is used in the Default Amazon handler in a static clause
-        We can re-enable this rule if we find a way to set a logger there
-    -->
-    <!--<exclude name="AvoidPrintStackTrace"/>-->
 
 
     <!-- This rule does not allow us the following:
@@ -60,13 +55,13 @@
 
     <!-- Sometimes it is useful in debugging to assign the return value to a local variable  -->
     <exclude name="UnnecessaryLocalBeforeReturn"/>
-    <exclude name="DefaultPackage"/>
 
 
   </rule>
 
 
   <rule ref="category/java/performance.xml">
+    <!-- https://softwareengineering.stackexchange.com/questions/149563/should-we-avoid-object-creation-in-java -->
     <exclude name="AvoidInstantiatingObjectsInLoops"/>
   </rule>
 

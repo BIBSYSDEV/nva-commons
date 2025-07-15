@@ -9,8 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.core.JsonPointer;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.List;
 import java.util.Map;
+import no.unit.nva.testutils.HandlerRequestBuilder;
+import nva.commons.apigateway.exceptions.ApiIoException;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,8 +28,9 @@ public class RequestInfoUtilityFunctionsTest {
     public static String VALUE = "value";
 
     @BeforeEach
-    public void setUp() {
-        RequestInfo spiedObject = new RequestInfo();
+    public void setUp() throws JsonProcessingException, ApiIoException {
+        var request = new HandlerRequestBuilder<String>(defaultRestObjectMapper).build();
+        RequestInfo spiedObject = RequestInfo.fromRequest(request);
         requestInfo = spy(spiedObject);
     }
 
@@ -60,6 +65,21 @@ public class RequestInfoUtilityFunctionsTest {
         String expected = MISSING_FROM_QUERY_PARAMETERS + KEY;
         assertEquals(expected, exception.getMessage());
     }
+
+    @Test
+    public void getMultiValueParameterReturnsValueOnValidKey() {
+        when(requestInfo.getMultiValueQueryStringParameters()).thenReturn(Map.of(KEY, List.of(VALUE)));
+        var values = requestInfo.getMultiValueQueryParameter(KEY);
+        assertEquals(VALUE, values.get(0));
+    }
+
+    @Test
+    public void getMultiValueParameterReturnsEmptyListOnUnknownKey() {
+        when(requestInfo.getMultiValueQueryStringParameters()).thenReturn(Map.of());
+        var values = requestInfo.getMultiValueQueryParameter(KEY);
+        assertEquals(0, values.size());
+    }
+
 
     @Test
     public void getPathParameterReturnsValueOnValidKey() {

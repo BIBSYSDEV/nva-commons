@@ -1,5 +1,7 @@
 package no.unit.nva.testutils;
 
+import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
+import static no.unit.nva.testutils.RandomDataGenerator.randomAccessRight;
 import static no.unit.nva.testutils.RandomDataGenerator.randomJson;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
@@ -16,12 +18,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import no.unit.nva.auth.CognitoUserInfo;
 import no.unit.nva.commons.json.JsonUtils;
+import nva.commons.apigateway.AccessRight;
 import nva.commons.apigateway.RequestInfo;
+import nva.commons.apigateway.exceptions.ApiIoException;
 import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.Test;
@@ -38,7 +46,7 @@ class HandlerRequestBuilderTest {
     public static final String SOME_METHOD = "POST";
 
     // copy-pasted values to avoid circular dependencies.
-    public static final JsonPointer NVA_USERNAME =
+    public static final JsonPointer USER_NAME =
         JsonPointer.compile("/requestContext/authorizer/claims/custom:nvaUsername");
     public static final JsonPointer PERSON_CRISTIN_ID =
         JsonPointer.compile("/requestContext/authorizer/claims/custom:cristinId");
@@ -62,8 +70,8 @@ class HandlerRequestBuilderTest {
     @Test
     void buildReturnsRequestWithBodyWhenStringInput() throws Exception {
         InputStream request = new HandlerRequestBuilder<String>(objectMapper)
-            .withBody(VALUE)
-            .build();
+                                  .withBody(VALUE)
+                                  .build();
 
         Map<String, Object> mapWithBody = toMap(request);
         assertThat(mapWithBody.get(BODY), equalTo(VALUE));
@@ -72,8 +80,8 @@ class HandlerRequestBuilderTest {
     @Test
     void buildReturnsRequestWithBodyWhenMapInput() throws Exception {
         InputStream request = new HandlerRequestBuilder<Map<String, Object>>(objectMapper)
-            .withBody(Map.of(KEY, VALUE))
-            .build();
+                                  .withBody(Map.of(KEY, VALUE))
+                                  .build();
 
         Map<String, Object> mapWithBody = toMap(request);
         assertThat(mapWithBody.get(BODY), notNullValue());
@@ -82,8 +90,8 @@ class HandlerRequestBuilderTest {
     @Test
     void buildReturnsRequestWithHeadersWhenWithHeaders() throws Exception {
         InputStream request = new HandlerRequestBuilder<String>(objectMapper)
-            .withHeaders(Map.of(KEY, VALUE))
-            .build();
+                                  .withHeaders(Map.of(KEY, VALUE))
+                                  .build();
 
         Map<String, Object> mapWithHeaders = toMap(request);
         assertThat(mapWithHeaders.get(HEADERS), notNullValue());
@@ -92,8 +100,8 @@ class HandlerRequestBuilderTest {
     @Test
     void buildReturnsRequestWithQueryParametersWhenWithQueryParameters() throws Exception {
         InputStream request = new HandlerRequestBuilder<String>(objectMapper)
-            .withQueryParameters(Map.of(KEY, VALUE))
-            .build();
+                                  .withQueryParameters(Map.of(KEY, VALUE))
+                                  .build();
 
         Map<String, Object> mapWithQueryParameters = toMap(request);
         assertThat(mapWithQueryParameters.get(QUERY_PARAMETERS), notNullValue());
@@ -102,8 +110,8 @@ class HandlerRequestBuilderTest {
     @Test
     void buildReturnsRequestWithPathParametersWhenWithPathParameters() throws Exception {
         InputStream request = new HandlerRequestBuilder<String>(objectMapper)
-            .withPathParameters(Map.of(KEY, VALUE))
-            .build();
+                                  .withPathParameters(Map.of(KEY, VALUE))
+                                  .build();
 
         Map<String, Object> mapWthPathParameters = toMap(request);
         assertThat(mapWthPathParameters.get(PATH_PARAMETERS), notNullValue());
@@ -116,20 +124,19 @@ class HandlerRequestBuilderTest {
         InputStream request = new HandlerRequestBuilder<String>(objectMapper)
                                   .withRequestContext(requestContext)
                                   .build();
-    
+
         Map<String, Object> mapWithRequestContext = toMap(request);
         assertThat(mapWithRequestContext.get(REQUEST_CONTEXT), notNullValue());
     }
 
     @Test
-    void buildReturnsRequestWithRequestContextWithNvaUsernameClaimWhenWithNvaUserClaim()
+    void buildReturnsRequestWithRequestContextWithUserNameClaimWhenWithNvaUserClaim()
         throws JsonProcessingException {
         var expectedUsername = randomString();
-        InputStream requestStream = new HandlerRequestBuilder<String>(objectMapper)
-            .withNvaUsername(expectedUsername)
-            .build();
+        InputStream requestStream = new HandlerRequestBuilder<String>(objectMapper).withUserName(expectedUsername)
+                                        .build();
         JsonNode request = toJsonNode(requestStream);
-        String actualUsername = request.at(NVA_USERNAME).textValue();
+        String actualUsername = request.at(USER_NAME).textValue();
         assertThat(actualUsername, is(equalTo(expectedUsername)));
     }
 
@@ -139,10 +146,45 @@ class HandlerRequestBuilderTest {
         var expectedCustomerId = randomUri();
         var requestStream = new HandlerRequestBuilder<String>(objectMapper)
                                 .withCurrentCustomer(expectedCustomerId)
+                                .withAllowedCustomers(Set.of(expectedCustomerId))
                                 .build();
         var request = IoUtils.streamToString(requestStream);
         var requestInfo = JsonUtils.dtoObjectMapper.readValue(request, RequestInfo.class);
         assertThat(requestInfo.getCurrentCustomer(), is(equalTo(expectedCustomerId)));
+    }
+
+    @Test
+    void buildReturnsPersonsFeideIdWhenSet() throws JsonProcessingException, ApiIoException, UnauthorizedException {
+        var expectedFeideId = randomString();
+        var request = new HandlerRequestBuilder<String>(objectMapper)
+                          .withFeideId(expectedFeideId)
+                          .build();
+        var requestInfo = RequestInfo.fromRequest(request);
+
+        assertThat(requestInfo.getFeideId().isPresent(), is(true));
+        assertThat(requestInfo.getFeideId().orElseThrow(), is(equalTo(expectedFeideId)));
+    }
+
+    @Test
+    void buildReturnsEmptyOptionalWhenFeideIdNotSet()
+        throws JsonProcessingException, ApiIoException, UnauthorizedException {
+        var request = new HandlerRequestBuilder<String>(objectMapper).build();
+        var requestInfo = RequestInfo.fromRequest(request);
+
+        requestInfo.setRequestContext(getRequestContext());
+
+        assertThat(requestInfo.getFeideId().isPresent(), is(false));
+        assertThat(requestInfo.getFeideId(), is(equalTo(Optional.empty())));
+    }
+
+    private static ObjectNode getRequestContext() {
+        var claims = dtoObjectMapper.createObjectNode();
+        var authorizer = dtoObjectMapper.createObjectNode();
+        var requestContext = dtoObjectMapper.createObjectNode();
+        claims.put(CognitoUserInfo.USER_NAME_CLAIM, "someUsername");
+        authorizer.set("claims", claims);
+        requestContext.set("authorizer", authorizer);
+        return requestContext;
     }
 
     @Test
@@ -151,22 +193,24 @@ class HandlerRequestBuilderTest {
         var expectedUsername = randomString();
         var expectedCustomerId = randomUri();
         var expectedApplicationRoles = "role1,role2";
-    
-        InputStream requestStream = new HandlerRequestBuilder<String>(objectMapper)
-                                        .withNvaUsername(expectedUsername).withCurrentCustomer(expectedCustomerId)
-            .withRoles(expectedApplicationRoles)
-            .build();
+
+        InputStream requestStream = new HandlerRequestBuilder<String>(objectMapper).withUserName(expectedUsername)
+                                        .withAccessRights(expectedCustomerId, randomAccessRight(),
+                                                          AccessRight.MANAGE_DEGREE,
+                                                          AccessRight.MANAGE_RESOURCES_STANDARD)
+                                        .withRoles(expectedApplicationRoles)
+                                        .build();
         JsonNode request = toJsonNode(requestStream);
 
-        String actualUsername = request.at(NVA_USERNAME).textValue();
+        String actualUsername = request.at(USER_NAME).textValue();
         assertThat(actualUsername, is(equalTo(expectedUsername)));
     }
 
     @Test
     void buildReturnsRequestWithMethodWhenWithMethod() throws Exception {
         InputStream request = new HandlerRequestBuilder<String>(objectMapper)
-            .withHttpMethod(SOME_METHOD)
-            .build();
+                                  .withHttpMethod(SOME_METHOD)
+                                  .build();
 
         Map<String, Object> mapWithMethod = toMap(request);
         assertThat(mapWithMethod.get(HTTP_METHOD).toString(), is(equalTo(SOME_METHOD)));
@@ -177,20 +221,19 @@ class HandlerRequestBuilderTest {
         String expectedKey = "someKey";
         String expectedValue = "someValue";
         InputStream request = new HandlerRequestBuilder<String>(objectMapper)
-            .withOtherProperties(Map.of(expectedKey, expectedValue))
-            .build();
+                                  .withOtherProperties(Map.of(expectedKey, expectedValue))
+                                  .build();
 
         Map<String, Object> mapWithCustomField = toMap(request);
         assertThat(mapWithCustomField, hasEntry(expectedKey, expectedValue));
     }
 
-
     @Test
     void shouldInsertPersonsCristinIdWhenSet() throws JsonProcessingException {
         var expectedCristinId = randomUri();
         var request = new HandlerRequestBuilder<String>(objectMapper)
-            .withPersonCristinId(expectedCristinId)
-            .build();
+                          .withPersonCristinId(expectedCristinId)
+                          .build();
 
         JsonNode requestJson = toJsonNode(request);
         String actualCristinId = requestJson.at(PERSON_CRISTIN_ID).asText();
@@ -202,9 +245,9 @@ class HandlerRequestBuilderTest {
         var expectedPath = "/path";
         var expectedDomainName = "localhost";
         var request = new HandlerRequestBuilder<String>(objectMapper)
-            .withRequestContextValue("path", expectedPath)
-            .withRequestContextValue("domainName", expectedDomainName)
-            .build();
+                          .withRequestContextValue("path", expectedPath)
+                          .withRequestContextValue("domainName", expectedDomainName)
+                          .build();
 
         JsonNode requestJson = toJsonNode(request);
         String actualPath = requestJson.at("/requestContext/path").asText();
@@ -218,8 +261,8 @@ class HandlerRequestBuilderTest {
     void shouldReturnRequestWithTopLevelOrgCristinId() throws JsonProcessingException {
         URI expectedUri = randomUri();
         var request = new HandlerRequestBuilder<String>(objectMapper)
-            .withTopLevelCristinOrgId(expectedUri)
-            .build();
+                          .withTopLevelCristinOrgId(expectedUri)
+                          .build();
         var requestJson = toJsonNode(request);
         var actualClaim = requestJson.at(TOP_ORG_CRISTIN_ID_CLAIM_PATH).textValue();
         assertThat(URI.create(actualClaim), is(equalTo(expectedUri)));
@@ -230,7 +273,7 @@ class HandlerRequestBuilderTest {
         var request = new HandlerRequestBuilder<String>(objectMapper)
                           .withPersonCristinId(randomUri())
                           .withBody(randomJson())
-                          .withAccessRights(randomUri(), randomString(), randomString())
+                          .withAccessRights(randomUri(), randomAccessRight(), randomAccessRight())
                           .withPathParameters(Map.of(randomString(), randomString()))
                           .buildRequestEvent();
         assertThat(request.getPathParameters().keySet(), is(not(empty())));

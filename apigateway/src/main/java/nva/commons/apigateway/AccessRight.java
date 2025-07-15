@@ -1,57 +1,116 @@
 package nva.commons.apigateway;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import static java.util.Optional.ofNullable;
+import com.google.common.collect.Maps;
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
 import nva.commons.apigateway.exceptions.InvalidAccessRightException;
 
 public enum AccessRight {
 
-    USER,// pseudo access-right to indicate the customer in cognito groups
-    APPROVE_DOI_REQUEST,
-    REJECT_DOI_REQUEST,
-    READ_DOI_REQUEST,
-    APPROVE_PUBLISH_REQUEST,
-    EDIT_OWN_INSTITUTION_RESOURCES,
-    EDIT_OWN_INSTITUTION_USERS,
-    EDIT_OWN_INSTITUTION_PROJECTS,
-    EDIT_OWN_INSTITUTION_PUBLICATION_WORKFLOW,
-    ADMINISTRATE_APPLICATION;
-
-    private static final Map<String, AccessRight> index = createIndex();
+    /**
+     * Old PUBLISH_FILES and PUBLISH_METADATA and APPROVE_PUBLISH_REQUEST.
+     */
+    MANAGE_PUBLISHING_REQUESTS("publishing"),
 
     /**
-     * Creates an AccessRight instance from a string (case insensitive).
+     * Old PUBLISH_DEGREE
+     */
+    MANAGE_DEGREE("degree"),
+
+    /**
+     * Old PUBLISH_DEGREE_EMBARGO
+     */
+    MANAGE_DEGREE_EMBARGO("degree-embargo"),
+
+    /**
+     * Old PROCESS_IMPORT_CANDIDATE
+     */
+    MANAGE_IMPORT("import"),
+
+    /**
+     * Old APPROVE_DOI_REQUEST, REJECT_DOI_REQUEST, READ_DOI_REQUEST
+     */
+    MANAGE_DOI("doi"),
+
+    /**
+     * Old EDIT_OWN_INSTITUTION_RESOURCES
+     */
+    MANAGE_RESOURCES_STANDARD("resource"),
+
+    /**
+     * Old EDIT_ALL_NON_DEGREE_RESOURCES
+     */
+    MANAGE_RESOURCES_ALL("resource-all"),
+
+    /**
+     * Old EDIT_OWN_INSTITUTION_USERS
+     */
+    MANAGE_OWN_AFFILIATION("own-affiliation"),
+
+    /**
+     * Old ADMINISTRATE_APPLICATION
+     */
+    MANAGE_CUSTOMERS("customers"),
+
+    MANAGE_OWN_RESOURCES("resources"),
+
+    /**
+     * Old MANAGE_NVI_PERIODS
+     */
+    MANAGE_NVI("nvi-admin"),
+
+    MANAGE_NVI_CANDIDATES("nvi-candidates"),
+    MANAGE_ALL_PROJECTS("manage-projects"),
+    MANAGE_DOI_AGENT("doi-agent"),
+    SUPPORT("support"),
+    MANAGE_KBS("kbs"),
+    MANAGE_RESOURCE_FILES("resource-files"),
+    MANAGE_CHANNEL_CLAIMS("channel-claims"),
+
+    /**
+     * Old ADMINISTRATE_APPLICATION
+     */
+    ACT_AS("act-as"),
+
+    /**
+     * Old ADMINISTRATE_APPLICATION
+     */
+    MANAGE_EXTERNAL_CLIENTS("external-clients");
+
+    private static final Map<String, AccessRight> LOOKUP = Maps.uniqueIndex(
+        Arrays.asList(values()),
+        AccessRight::getPersistedValue
+    );
+
+    private final String persistedValue;
+
+    private String getPersistedValue() {
+        return persistedValue;
+    }
+
+    AccessRight(String persistedValue) {
+        this.persistedValue = persistedValue;
+    }
+
+    public String toPersistedString() {
+        return persistedValue;
+    }
+
+    /**
+     * Creates an AccessRight instance from a string which is in the shortened persisted format
      *
      * @param accessRight string representation of access right
      * @return an AccessRight instance.
      */
-    @JsonCreator
-    public static AccessRight fromString(String accessRight) {
 
-        String formattedString = formatString(accessRight);
-        if (index.containsKey(formattedString)) {
-            return index.get(formattedString);
-        } else {
-            throw new InvalidAccessRightException(accessRight);
-        }
+    public static AccessRight fromPersistedString(String accessRight) {
+        return fromPersistedStringOptional(accessRight).orElseThrow(() -> new InvalidAccessRightException(accessRight));
     }
 
-    @Override
-    @JsonValue
-    public String toString() {
-        return formatString(this.name());
+    public static Optional<AccessRight> fromPersistedStringOptional(String accessRight) {
+        return ofNullable(LOOKUP.get(accessRight));
     }
 
-    private static String formatString(String accessRightString) {
-        return accessRightString.toUpperCase(Locale.getDefault());
-    }
-
-    private static Map<String, AccessRight> createIndex() {
-        return Arrays.stream(AccessRight.values())
-            .collect(Collectors.toMap(AccessRight::toString, v -> v));
-    }
 }

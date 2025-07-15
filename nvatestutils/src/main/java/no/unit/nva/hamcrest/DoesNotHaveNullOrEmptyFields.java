@@ -49,8 +49,8 @@ public class DoesNotHaveNullOrEmptyFields<T> extends BaseMatcher<T> {
     @Override
     public void describeMismatch(Object item, Description description) {
         String emptyFieldNames = emptyFields.stream()
-            .map(res -> res.propertyName)
-            .collect(Collectors.joining(FIELD_DELIMITER));
+                                     .map(res -> res.propertyName)
+                                     .collect(Collectors.joining(FIELD_DELIMITER));
 
         description.appendText("The following fields were found empty:")
             .appendText(emptyFieldNames);
@@ -59,9 +59,9 @@ public class DoesNotHaveNullOrEmptyFields<T> extends BaseMatcher<T> {
     private boolean assertThatNoPublicFieldIsNull(Object input) {
         Stream<PropertyDescriptor> properties = retrieveProperties(input);
         emptyFields = properties
-            .map(prop -> readPropertyValue(prop, input))
-            .filter(this::isEmpty)
-            .collect(Collectors.toList());
+                          .map(prop -> readPropertyValue(prop, input))
+                          .filter(this::isEmpty)
+                          .collect(Collectors.toList());
         return emptyFields.isEmpty();
     }
 

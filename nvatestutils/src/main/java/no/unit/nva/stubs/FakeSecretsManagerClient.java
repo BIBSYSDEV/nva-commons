@@ -15,10 +15,16 @@ import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRespon
 
 public class FakeSecretsManagerClient implements SecretsManagerClient {
 
+    private final Map<SecretName, String> plainTextSecrets = new ConcurrentHashMap<>();
     public Map<SecretName, Map<SecretKey, String>> secrets = new ConcurrentHashMap<>();
 
     public FakeSecretsManagerClient putSecret(String name, String key, String value) {
         var secretName = new SecretName(name);
+        if (plainTextSecrets.containsKey(secretName)) {
+            throw new IllegalArgumentException(
+                String.format("Secret already present as a plain text secret: %s", name));
+        }
+
         if (secrets.containsKey(secretName)) {
             addSecretValueToExistingSecret(key, value, secretName);
         } else {
@@ -27,11 +33,21 @@ public class FakeSecretsManagerClient implements SecretsManagerClient {
         return this;
     }
 
+    public FakeSecretsManagerClient putPlainTextSecret(String name, String value) {
+        var secretName = new SecretName(name);
+        if (secrets.containsKey(secretName)) {
+            throw new IllegalArgumentException(String.format("Secret already present as a key/value secret: %s", name));
+        }
+
+        plainTextSecrets.put(secretName, value);
+        return this;
+    }
+
     @Override
     public GetSecretValueResponse getSecretValue(GetSecretValueRequest getSecretValueRequest) {
         return Optional.ofNullable(getSecretValueRequest.secretId())
                    .map(SecretName::new)
-                   .map(secretName -> secrets.get(secretName))
+                   .flatMap(this::resolveSecret)
                    .map(secretContents -> addSecretContents(secretContents, getSecretValueRequest))
                    .orElseThrow();
     }
@@ -48,10 +64,10 @@ public class FakeSecretsManagerClient implements SecretsManagerClient {
 
     }
 
-    private static GetSecretValueResponse addSecretContents(Map<SecretKey, String> secretContents,
+    private static GetSecretValueResponse addSecretContents(String secretContents,
                                                             GetSecretValueRequest getSecretValueRequest) {
         return GetSecretValueResponse.builder()
-                   .secretString(serializeSecretContents(secretContents))
+                   .secretString(secretContents)
                    .name(getSecretValueRequest.secretId())
                    .build();
     }
@@ -60,8 +76,18 @@ public class FakeSecretsManagerClient implements SecretsManagerClient {
         return attempt(() -> JsonUtils.dtoObjectMapper.writeValueAsString(secretContents)).orElseThrow();
     }
 
+    private Optional<String> resolveSecret(SecretName secretName) {
+        if (secrets.containsKey(secretName)) {
+            return Optional.of(serializeSecretContents(secrets.get(secretName)));
+        } else if (plainTextSecrets.containsKey(secretName)) {
+            return Optional.of(plainTextSecrets.get(secretName));
+        } else {
+            return Optional.empty();
+        }
+    }
+
     private void createNewSecret(String key, String value, SecretName secretName) {
-        ConcurrentHashMap<SecretKey, String> secretContents = new ConcurrentHashMap<>();
+        var secretContents = new ConcurrentHashMap<SecretKey, String>();
         secretContents.put(new SecretKey(key), value);
         secrets.put(secretName, secretContents);
     }
@@ -70,7 +96,7 @@ public class FakeSecretsManagerClient implements SecretsManagerClient {
         secrets.get(secretName).put(new SecretKey(key), value);
     }
 
-    private static class SecretName {
+    private static final class SecretName {
 
         private final String value;
 

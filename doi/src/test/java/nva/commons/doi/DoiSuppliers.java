@@ -26,7 +26,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 public final class DoiSuppliers {
 
-    public static final int MIN_ARBITRARY_LENGTH = 3;
+    public static final int MIN_ARBITRARY_LENGTH = 4;
     public static final int MAX_ARBITRARY_LENGTH = 10;
     public static final String DOI_SUBPART_DELIMITER = ".";
     public static final Random RANDOM = new Random();
@@ -92,7 +92,7 @@ public final class DoiSuppliers {
     }
 
     private static String randomDoiString() {
-        String prefixSecondPart = RandomStringUtils.randomAlphanumeric(MIN_ARBITRARY_LENGTH, MAX_ARBITRARY_LENGTH);
+        String prefixSecondPart = RandomStringUtils.randomNumeric(MIN_ARBITRARY_LENGTH, MAX_ARBITRARY_LENGTH);
         String suffix = randomDoiSuffix();
         return STANDARD_FIRST_PART_OF_DOI_PREFIX
                + DOI_SUBPART_DELIMITER

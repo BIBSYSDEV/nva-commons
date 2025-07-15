@@ -1,20 +1,25 @@
 package nva.commons.apigateway;
 
 import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
+import static com.google.common.net.HttpHeaders.CACHE_CONTROL;
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
+import static com.google.common.net.HttpHeaders.ORIGIN;
+import static com.google.common.net.HttpHeaders.STRICT_TRANSPORT_SECURITY;
+import static com.google.common.net.HttpHeaders.VARY;
+import static com.google.common.net.HttpHeaders.X_CONTENT_TYPE_OPTIONS;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
-import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,6 +31,7 @@ import nva.commons.apigateway.exceptions.RedirectException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
+import nva.commons.core.StringUtils;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 import org.zalando.problem.ThrowableProblem;
@@ -39,30 +45,43 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     public static final String DEFAULT_ERROR_MESSAGE = "Unknown error in handler";
     public static final String REQUEST_ID = "requestId";
     public static final Void EMPTY_BODY = null;
-
-    private final ObjectMapper objectMapper;
+    public static final String RESOURCE = "resource";
+    public static final String ALL_ORIGINS_ALLOWED = "*";
+    public static final String ORIGIN_DELIMITER = ",";
+    public static final String FALLBACK_ORIGIN = "https://nva.sikt.no";
 
     private Supplier<Map<String, String>> additionalSuccessHeadersSupplier;
-
-    public ApiGatewayHandler(Class<I> iclass) {
-        this(iclass, new Environment());
-    }
+    private boolean isBase64Encoded;
 
     public ApiGatewayHandler(Class<I> iclass, Environment environment) {
-        this(iclass, environment, defaultRestObjectMapper);
-        this.additionalSuccessHeadersSupplier = Collections::emptyMap;
-    }
-
-    public ApiGatewayHandler(Class<I> iclass, Environment environment, ObjectMapper objectMapper) {
-        super(iclass, environment);
-        this.objectMapper = objectMapper;
+        super(iclass, environment, defaultRestObjectMapper);
         this.additionalSuccessHeadersSupplier = Collections::emptyMap;
     }
 
     @Override
-    public void init(OutputStream outputStream, Context context) {
-        this.allowedOrigin = environment.readEnv(ALLOWED_ORIGIN_ENV);
-        super.init(outputStream, context);
+    protected void setAllowedOrigin(RequestInfo requestInfo) {
+        allowedOrigin = readAllowedOrigin(requestInfo);
+    }
+
+    private String readAllowedOrigin(RequestInfo requestInfo) {
+        var originsList = getValidOrigins();
+        if (originsList.isEmpty()) {
+            return FALLBACK_ORIGIN;
+        }
+        if (originsList.contains(ALL_ORIGINS_ALLOWED)) {
+            return ALL_ORIGINS_ALLOWED;
+        }
+
+        return requestInfo.getHeaderOptional(ORIGIN)
+                   .filter(originsList::contains)
+                   .orElse(originsList.get(0));
+    }
+
+    private List<String> getValidOrigins() {
+        return Arrays.stream(environment.readEnv(ALLOWED_ORIGIN_ENV).split(ORIGIN_DELIMITER))
+                   .map(String::strip)
+                   .filter(StringUtils::isNotBlank)
+                   .toList();
     }
 
     /**
@@ -75,14 +94,13 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
      */
     @Override
     protected void writeOutput(I input, O output, RequestInfo requestInfo)
-        throws IOException, GatewayResponseSerializingException, UnsupportedAcceptHeaderException {
+        throws IOException, UnsupportedAcceptHeaderException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-            Map<String, String> headers = getSuccessHeaders(requestInfo);
-            Integer statusCode = getSuccessStatusCode(input, output);
-            String serializedOutput = getSerializedOutput(output);
-            GatewayResponse<String> gatewayResponse = new GatewayResponse<>(serializedOutput, headers, statusCode,
-                                                                            objectMapper);
-            String responseJson = objectMapper.writeValueAsString(gatewayResponse);
+            var headers = getSuccessHeaders(requestInfo);
+            var statusCode = getSuccessStatusCode(input, output);
+            var serializedOutput = getSerializedOutput(output);
+            var gatewayResponse = new GatewayResponse<String>(serializedOutput, headers, statusCode, isBase64Encoded);
+            var responseJson = objectMapper.writeValueAsString(gatewayResponse);
             writer.write(responseJson);
         }
     }
@@ -132,6 +150,10 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         }
     }
 
+    protected void setIsBase64Encoded(boolean value) {
+        isBase64Encoded = value;
+    }
+
     /**
      * Get the ObjectMapper to use for the given MediaType. Defaults to defaultRestObjectMapper if no other ObjectMapper
      * is found.
@@ -167,8 +189,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
 
     /**
      * If you want to override this method, maybe better to override the
-     * {@link ApiGatewayHandler#defaultHeaders(RequestInfo
-     * requestInfo)}.
+     * {@link ApiGatewayHandler#defaultHeaders(RequestInfo requestInfo)}.
      *
      * @param requestInfo Request Info object.
      * @return a map with the response headers in case of success.
@@ -199,8 +220,10 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
 
     private GatewayResponse<Void> createRedirectResponse(RedirectException exception)
         throws GatewayResponseSerializingException {
-        var responseHeaders = Map.of(HttpHeaders.LOCATION, exception.getLocation().toString());
-        return new GatewayResponse<>(EMPTY_BODY, responseHeaders, exception.getStatusCode(), objectMapper);
+        var responseHeaders = Map.of(HttpHeaders.LOCATION, exception.getLocation().toString(),
+                                     ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
+        return new GatewayResponse<>(EMPTY_BODY, responseHeaders, exception.getStatusCode(), isBase64Encoded,
+                                     objectMapper);
     }
 
     private boolean failureIsARedirection(ApiGatewayException exception) {
@@ -224,7 +247,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
                                                                                      String requestId)
         throws GatewayResponseSerializingException {
         ThrowableProblem problem = createProblemDescription(exception, statusCode, requestId);
-        return new GatewayResponse<>(problem, getFailureHeaders(), statusCode, objectMapper);
+        return new GatewayResponse<>(problem, getFailureHeaders(), statusCode, isBase64Encoded, objectMapper);
     }
 
     private <T> void writeGatewayResponse(GatewayResponse<T> gatewayResponse)
@@ -239,16 +262,22 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         String errorMessage = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
         Status status = Status.valueOf(statusCode);
         return Problem.builder().withStatus(status)
-            .withTitle(status.getReasonPhrase())
-            .withDetail(errorMessage)
-            .with(REQUEST_ID, requestId)
-            .build();
+                   .withTitle(status.getReasonPhrase())
+                   .withDetail(errorMessage)
+                   .with(REQUEST_ID, requestId)
+                   .with(RESOURCE, getResource(exception))
+                   .build();
+    }
+
+    private Object getResource(Exception exception) {
+        return exception instanceof ApiGatewayException apiGatewayException
+                   ? apiGatewayException.getInstance()
+                   : null;
     }
 
     /**
      * If you want to override this method, maybe better to override the
-     * {@link ApiGatewayHandler#defaultHeaders(RequestInfo
-     * requestInfo)}.
+     * {@link ApiGatewayHandler#defaultHeaders(RequestInfo requestInfo)}.
      *
      * @return a map with the response headers in case of failure.
      */
@@ -256,6 +285,10 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
         headers.put(CONTENT_TYPE, MediaTypes.APPLICATION_PROBLEM_JSON.toString());
+        headers.put(X_CONTENT_TYPE_OPTIONS, "nosniff");
+        headers.put(STRICT_TRANSPORT_SECURITY, "max-age=63072000; includeSubDomains; preload");
+        headers.put(VARY, "Origin, Accept");
+        headers.put(CACHE_CONTROL, "no-cache");
         return headers;
     }
 
@@ -263,6 +296,9 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
         Map<String, String> headers = new ConcurrentHashMap<>();
         headers.put(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
         headers.put(CONTENT_TYPE, getDefaultResponseContentTypeHeaderValue(requestInfo).toString());
+        headers.put(X_CONTENT_TYPE_OPTIONS, "nosniff");
+        headers.put(STRICT_TRANSPORT_SECURITY, "max-age=63072000; includeSubDomains; preload");
+        headers.put(VARY, "Origin, Accept");
         return headers;
     }
 

@@ -76,6 +76,7 @@ public class ParallelMapper<I, O> {
         futures = new ArrayList<>();
     }
 
+    @SuppressWarnings("PMD.CloseResource")
     public ParallelMapper<I, O> map() throws InterruptedException {
         ExecutorService executor = Executors.newCachedThreadPool();
         for (int index = 0; index < actions.size(); index += batchSize) {

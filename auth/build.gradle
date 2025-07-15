@@ -8,6 +8,7 @@ dependencies {
 
     implementation project(":core")
     implementation project(":json")
+    implementation project(":secrets")
 
     implementation libs.guava
     implementation libs.bundles.logging
@@ -15,7 +16,16 @@ dependencies {
 
     implementation libs.bundles.jacksonjr
 
-    testImplementation libs.bundles.testing
+    implementation libs.com.auth0.jwt
+
+    implementation libs.aws.java.sdk.core
+    implementation libs.aws.sdk2.secrets
+
+    testImplementation libs.bundles.testing.junit
+    testImplementation libs.bundles.testing.mockito
+    testImplementation libs.bundles.testing.hamcrest
+    testImplementation libs.commons.lang
+    testImplementation libs.datafaker
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")
 }
@@ -24,4 +34,5 @@ test {
     environment "BACKEND_CLIENT_ID", "backendClientId"
     environment "BACKEND_CLIENT_SECRET", "backendClientSecret"
     environment "COGNITO_URI", "https://notused.org"
+    environment "API_HOST", "localhost"
 }

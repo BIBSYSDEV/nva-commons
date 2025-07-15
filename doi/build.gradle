@@ -6,8 +6,13 @@ dependencies {
     implementation project(":core")
     implementation libs.bundles.logging
     implementation libs.jackson.annotations
+    implementation libs.commons.validator
 
-    testImplementation libs.bundles.testing
+    testImplementation libs.bundles.testing.junit
+    testImplementation libs.bundles.testing.mockito
+    testImplementation libs.bundles.testing.hamcrest
+    testImplementation libs.commons.lang
+    testImplementation libs.datafaker
     testImplementation libs.bundles.jackson
     testImplementation project(":json")
     testImplementation libs.aws.lambda.core

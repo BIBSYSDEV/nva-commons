@@ -1,38 +1,49 @@
 package no.unit.nva.s3;
 
 import static no.unit.nva.s3.S3Driver.S3_SCHEME;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringStartsWith.startsWith;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
-import net.datafaker.Faker;
+import net.datafaker.providers.base.BaseFaker;
 import no.unit.nva.stubs.FakeS3Client;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.core.paths.UnixPath;
 import nva.commons.core.paths.UriWrapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 class S3DriverTest {
 
     public static final int LARGE_NUMBER_OF_INPUTS = 10_000;
     public static final String EMPTY_STRING = "";
     public static final String ROOT = "/";
-    private static final Faker FAKER = Faker.instance();
+    public static final String MARKER_INDICATING_END_OF_LISTING = null;
+    private static final BaseFaker FAKER = new BaseFaker();
     private static final String SAMPLE_BUCKET = "sampleBucket";
     private static final String SOME_PATH = randomString();
     private S3Driver s3Driver;
@@ -69,7 +80,7 @@ class S3DriverTest {
         assertThat(firstBatch.isTruncated(), is(true));
 
         ListingResult secondBatch = s3Driver.listFiles(UnixPath.of(SOME_PATH), firstFilePath.toString(), 1);
-        assertThat(secondBatch.getListingStartingPoint(), is(equalTo(secondFilePath.toString())));
+        assertThat(secondBatch.getListingStartingPoint(), is(equalTo(MARKER_INDICATING_END_OF_LISTING)));
         assertThat(secondBatch.isTruncated(), is(false));
     }
 
@@ -91,11 +102,30 @@ class S3DriverTest {
     }
 
     @Test
+    void shouldReturnTheContentsOfAllFilesInFolderWhenInputIsAFolderAsAnS3Uri() throws IOException {
+
+        var folder = SOME_PATH;
+        final var firstFilePath = UnixPath.of(folder, randomFileName());
+        final var secondFilePath = UnixPath.of(folder, randomFileName());
+        s3Driver.insertFile(firstFilePath, randomString());
+        s3Driver.insertFile(secondFilePath, randomString());
+
+        var bucketName = "bucketName";
+        s3Driver = new S3Driver(s3Client, bucketName);
+        var folderUri = URI.create(String.format("s3://%s/%s", bucketName, folder));
+
+        var filePaths = s3Driver.listAllFiles(folderUri);
+
+        assertThat(filePaths.size(), is(equalTo(2)));
+        assertThat(filePaths, containsInAnyOrder(firstFilePath, secondFilePath));
+    }
+
+    @Test
     void shouldReturnFileWhenFileExists() throws IOException {
         UnixPath somePath = UnixPath.of(SOME_PATH);
         String expectedContent = randomString();
         URI fileLocation = s3Driver.insertFile(somePath, expectedContent);
-        String actualContent = s3Driver.getUncompressedFile(toS3Path(fileLocation)).orElseThrow();
+        String actualContent = s3Driver.getUncompressedFile(toS3Path(fileLocation));
         assertThat(actualContent, is(equalTo(expectedContent)));
     }
 
@@ -157,8 +187,19 @@ class S3DriverTest {
         String content = randomString();
         UnixPath someFolder = UnixPath.of("parent", "child1", "child2");
         URI fileLocation = s3Driver.insertEvent(someFolder, content);
-        String retrievedContent = s3Driver.readEvent(fileLocation);
+        String retrievedContent = s3Driver.readFile(fileLocation);
         assertThat(retrievedContent, is(equalTo(content)));
+    }
+
+    @Test
+    void shouldReadFileWhenReadingEvent() throws IOException {
+        s3Driver = new S3Driver(new FakeS3Client(), "ignoredBucketName");
+        String content = randomString();
+        UnixPath someFolder = UnixPath.of("parent", "child1", "child2");
+        URI fileLocation = s3Driver.insertEvent(someFolder, content);
+        String retrievedContentAsEvent = s3Driver.readEvent(fileLocation);
+        String retrievedContentAsFile = s3Driver.readFile(fileLocation);
+        assertThat(retrievedContentAsEvent, is(equalTo(retrievedContentAsFile)));
     }
 
     @Test
@@ -188,8 +229,8 @@ class S3DriverTest {
             s3Driver.insertAndCompressObjects(UnixPath.of(pathPrefix + expectedFolderNeverContainsRootFolder), input);
         GZIPInputStream compressedContent = s3Driver.getCompressedFile(toS3Path(fileLocation));
         List<String> actualContent = new BufferedReader(new InputStreamReader(compressedContent))
-            .lines()
-            .collect(Collectors.toList());
+                                         .lines()
+                                         .collect(Collectors.toList());
         assertThat(actualContent, is(equalTo(input)));
         assertThat(toS3Path(fileLocation).toString(), startsWith(expectedFolderNeverContainsRootFolder));
     }
@@ -200,6 +241,77 @@ class S3DriverTest {
         URI fileLocation = s3Driver.insertAndCompressObjects(List.of(input));
         String actualContent = s3Driver.getFile(toS3Path(fileLocation));
         assertThat(actualContent, is(equalTo(input)));
+    }
+
+    @Test
+    void shouldListFilesForFolder() throws IOException {
+        var expectedFile = s3Driver.insertFile(randomPath(), randomString());
+        var unexpectedFile = s3Driver.insertFile(randomPath(), randomString());
+
+        var expectedFilepath = UriWrapper.fromUri(expectedFile).getPath().removeRoot();
+        var unexpectedFilepath = UriWrapper.fromUri(unexpectedFile).getPath().removeRoot();
+        var parentFolder = expectedFilepath.getParent().orElseThrow();
+        var files = s3Driver.listAllFiles(parentFolder);
+        assertThat(files, contains(expectedFilepath));
+        assertThat(files, not(contains(unexpectedFilepath)));
+    }
+
+    @Test
+    void shouldAcceptEmptyPathAndListAllBucketFilesWhenInputIsEmptyPath() throws IOException {
+        var files = Stream.of(
+                s3Driver.insertFile(randomPath(), randomString()),
+                s3Driver.insertFile(randomPath(), randomString()))
+                        .map(UriWrapper::fromUri)
+                        .map(UriWrapper::getPath)
+                        .map(UnixPath::removeRoot)
+                        .toList();
+
+        var actualFiles = s3Driver.listAllFiles(UnixPath.of(""));
+        assertThat(actualFiles, containsInAnyOrder(files.toArray(UnixPath[]::new)));
+    }
+
+    @Test
+    void shouldBeAbleToDecodeStringInEncodingOtherThanUtf8() {
+        var expectedContent = randomString();
+        var filename = randomFileName();
+        var utf16 = expectedContent.getBytes(StandardCharsets.UTF_16);
+        var request = PutObjectRequest.builder()
+                          .bucket(SAMPLE_BUCKET)
+                          .key(filename)
+                          .build();
+        s3Client.putObject(request, RequestBody.fromBytes(utf16));
+        var actualContent = s3Driver.getFile(UnixPath.of(filename), StandardCharsets.UTF_16);
+        assertThat(actualContent, is(equalTo(expectedContent)));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenWrongEncodingHasBeenUsed() {
+        var expectedContent = randomString();
+        var filename = randomFileName();
+        var utf16 = expectedContent.getBytes(StandardCharsets.UTF_16);
+        var request = PutObjectRequest.builder()
+                          .bucket(SAMPLE_BUCKET)
+                          .key(filename)
+                          .build();
+        s3Client.putObject(request, RequestBody.fromBytes(utf16));
+
+        Executable action = () -> s3Driver.getFile(UnixPath.of(filename), StandardCharsets.UTF_8);
+        assertThrows(UncheckedIOException.class, action);
+    }
+
+    @Test
+    void shouldDeleteFileWhenFileExists() throws IOException {
+        var somePath = UnixPath.of(SOME_PATH);
+        var expectedContent = randomString();
+        var fileLocation = s3Driver.insertFile(somePath, expectedContent);
+        s3Driver.deleteFile(toS3Path(fileLocation));
+        assertThrows(NoSuchKeyException.class, () -> s3Driver.getFile(somePath));
+    }
+
+    @Test
+    void shouldDoNothingWhenDeletingFileThatDoesNotExist() {
+        var somePath = UnixPath.of(SOME_PATH);
+        assertDoesNotThrow(() -> s3Driver.deleteFile(somePath));
     }
 
     private static String randomFileName() {
@@ -216,6 +328,10 @@ class S3DriverTest {
         return parentFolder.addChild(expectedFileName);
     }
 
+    private UnixPath randomPath() {
+        return UnixPath.of(randomString(), randomString());
+    }
+
     private String readCompressedContents(GZIPInputStream contents) {
         BufferedReader reader = new BufferedReader(new InputStreamReader(contents));
         return reader.lines().collect(Collectors.joining());
@@ -227,9 +343,5 @@ class S3DriverTest {
 
     private String longText() {
         return FAKER.lorem().paragraph(10);
-    }
-
-    private S3Object sampleObjectListing(UnixPath firstExpectedObjectKey) {
-        return S3Object.builder().key(firstExpectedObjectKey.toString()).build();
     }
 }

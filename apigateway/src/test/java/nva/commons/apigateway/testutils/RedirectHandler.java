@@ -7,14 +7,15 @@ import java.net.URI;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.RedirectException;
+import nva.commons.core.Environment;
 
 public class RedirectHandler extends Handler {
 
     private final URI location;
     private final Integer redirectStatusCode;
 
-    public RedirectHandler(URI location, Integer redirectStatusCode) {
-        super();
+    public RedirectHandler(URI location, Integer redirectStatusCode, Environment environment) {
+        super(environment);
         this.location = location;
         this.redirectStatusCode = redirectStatusCode;
     }
@@ -29,7 +30,10 @@ public class RedirectHandler extends Handler {
     }
 
     private boolean clientIsRequestingHtmlContent(RequestInfo requestInfo) {
-        MediaType requestedContent = MediaType.parse(requestInfo.getHeader(HttpHeaders.ACCEPT)).withoutParameters();
+        var requestedContent =
+            MediaType.parse(requestInfo.getHeaderOptional(HttpHeaders.ACCEPT)
+                                .orElseThrow(() -> new IllegalArgumentException("Missing Accept header")))
+                .withoutParameters();
         return MediaType.HTML_UTF_8.withoutParameters().equals(requestedContent);
     }
 

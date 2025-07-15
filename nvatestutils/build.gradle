@@ -11,18 +11,22 @@ dependencies {
     implementation project(":apigateway")
     implementation project(":secrets")
 
-    implementation libs.bundles.testing
-    implementation libs.httpmime
+    implementation libs.bundles.testing.junit
+    implementation libs.bundles.testing.mockito
+    implementation libs.bundles.testing.hamcrest
+    implementation libs.commons.lang
+    implementation libs.datafaker
     implementation libs.aws.lambda.events
 
     implementation libs.aws.sdk2.s3
+    implementation libs.aws.sdk2.firehose
     implementation libs.aws.sdk2.eventbridge
-    implementation libs.aws.sdk2.cognitoidp
     implementation libs.aws.sdk2.secrets
     implementation libs.guava
     implementation libs.wiremock
     implementation libs.bundles.jackson
     implementation libs.commons.validator
+    implementation libs.com.auth0.jwt
 
     testImplementation project(":doi")
 }

@@ -23,7 +23,7 @@ public class Doi {
 
     @JsonCreator
     public static Doi fromUriString(String uriString) {
-        return Doi.fromUri(URI.create(uriString));
+        return fromUri(URI.create(uriString));
     }
 
     public static Doi fromUri(URI doiUri) {
@@ -51,7 +51,7 @@ public class Doi {
 
     public Doi changeHost(String host) {
         var newUri = UriWrapper.fromHost(host).addChild(uri.getPath()).getUri();
-        return Doi.fromUri(newUri);
+        return fromUri(newUri);
     }
 
     @Override

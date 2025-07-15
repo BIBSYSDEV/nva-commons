@@ -1,17 +1,21 @@
 package nva.commons.core.attempt;
 
+import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static nva.commons.core.attempt.Try.attempt;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,16 +61,16 @@ public class TryTest {
     @Test
     public void mapReturnsAMappableResult() {
         Try<String> attempt = attempt(() -> divide(6, 3))
-            .map(numbers::get)
-            .map(String::toUpperCase);
+                .map(numbers::get)
+                .map(String::toUpperCase);
         assertThat(attempt.get(), is(equalTo("TWO")));
     }
 
     @Test
     public void mapReportsTheFirstException() {
         Try<String> attempt = attempt(() -> divide(6, 0))
-            .map(numbers::get)
-            .map(String::toUpperCase);
+                .map(numbers::get)
+                .map(String::toUpperCase);
 
         assertThat(attempt.isFailure(), is(true));
         assertThat(attempt.getException().getClass(), is(equalTo(ArithmeticException.class)));
@@ -83,9 +87,9 @@ public class TryTest {
     @Test
     public void attemptReturnsFailureWhenCheckedExceptionIsThrown() {
         Optional<Exception> exception = Stream.of(SOME_STRING).map(attempt(this::throwCheckedException))
-            .filter(Try::isFailure)
-            .map(Try::getException)
-            .findFirst();
+                .filter(Try::isFailure)
+                .map(Try::getException)
+                .findFirst();
         assertThat(exception.isPresent(), is(true));
         assertThat(exception.get().getClass(), is(equalTo(IOException.class)));
     }
@@ -100,9 +104,9 @@ public class TryTest {
     @Test
     public void attemptReturnsFailureAtTheEndOfStreamProcessingWhenUncheckedExceptionIsThrown() {
         Optional<Exception> exception = Stream.of(SOME_STRING).map(attempt(this::throwUnCheckedException))
-            .filter(Try::isFailure)
-            .map(Try::getException)
-            .findFirst();
+                .filter(Try::isFailure)
+                .map(Try::getException)
+                .findFirst();
         assertThat(exception.isPresent(), is(true));
         assertThat(exception.get().getClass(), is(equalTo(SAMPLE_UNCHECKED_EXCEPTION.getClass())));
     }
@@ -110,21 +114,43 @@ public class TryTest {
     @Test
     public void orElseThrowsSpecifiedExceptionWhenUncheckedExceptionIsThrown() {
         Executable action = () -> attempt(() -> throwUnCheckedException("Some message"))
-            .orElseThrow(fail -> new TestException());
+                .orElseThrow(fail -> new TestException());
         assertThrows(TestException.class, action);
     }
+
+    @Test
+    public void shouldThrowExceptionDiscardingTheCauseWhenThereIsFailureAndSuppliedWithExpectionInsteadOfFunction() {
+        var unexpectedMessage = randomString();
+        var expectedMessage = randomString();
+        Executable action = () -> attempt(() -> throwCheckedException(unexpectedMessage))
+                .orElseThrow(new RuntimeException(expectedMessage));
+        var actualException = assertThrows(RuntimeException.class, action);
+        assertThat(actualException.getMessage(), is(equalTo(expectedMessage)));
+        assertThat(actualException.getCause(), is(nullValue()));
+    }
+
+    @Test
+    public void shouldReturnValueWhenSuccessfulAndOrElseThrowsWithExceptionIsCalled() {
+        var expectedMessage = randomString();
+        var actualMessage = attempt(() -> expectedMessage)
+                .orElseThrow(new RuntimeException(randomString()));
+
+        assertThat(actualMessage, is(equalTo(expectedMessage)));
+
+    }
+
 
     @Test
     public void failurePropagatesErrorThroughTheWholeChain() {
         int someInt = 2;
         Try<String> results = Stream.of(someInt)
-            .map(numbers::get)
-            .map(String::toUpperCase)
-            .map(attempt(this::throwCheckedException))
-            .map(att -> att.map(s -> s.replaceAll("o", "cc")))
-            .map(att -> att.map(String::trim))
-            .filter(Try::isFailure)
-            .findFirst().orElse(null);
+                .map(numbers::get)
+                .map(String::toUpperCase)
+                .map(attempt(this::throwCheckedException))
+                .map(att -> att.map(s -> s.replaceAll("o", "cc")))
+                .map(att -> att.map(String::trim))
+                .filter(Try::isFailure)
+                .findFirst().orElse(null);
         Exception exception = results.getException();
         assertThat(exception.getClass(), is(equalTo(IOException.class)));
         assertThat(exception.getMessage(), is(equalTo(EXCEPTION_MESSAGE)));
@@ -135,8 +161,8 @@ public class TryTest {
     public void flatMapPropagatesTheFirstException() {
         Integer someInt = 2;
         Try<String> actual = Try.of(someInt)
-            .map(Object::toString)
-            .flatMap(this::throwCheckedExceptionForFlatMap);
+                .map(Object::toString)
+                .flatMap(this::throwCheckedExceptionForFlatMap);
 
         assertTrue(actual.isFailure());
         assertThat(actual.getException().getMessage(), is(IsEqual.equalTo(EXCEPTION_MESSAGE)));
@@ -145,21 +171,21 @@ public class TryTest {
     @Test
     void shouldReturnFistSuccessWhenOrIsCalled() {
         var firstSucceeds = attempt(() -> divide(1, 1))
-            .or(() -> divide(2, 1))
-            .or(() -> divide(3, 1))
-            .orElseThrow();
+                .or(() -> divide(2, 1))
+                .or(() -> divide(3, 1))
+                .orElseThrow();
         assertThat(firstSucceeds, is(equalTo(1)));
 
         var middleSucceeds = attempt(() -> divide(1, PROVOKE_ERROR))
-            .or(() -> divide(2, 1))
-            .or(() -> divide(3, 1))
-            .orElseThrow();
+                .or(() -> divide(2, 1))
+                .or(() -> divide(3, 1))
+                .orElseThrow();
         assertThat(middleSucceeds, is(equalTo(2)));
 
         var finalSucceeds = attempt(() -> divide(1, PROVOKE_ERROR))
-            .or(() -> divide(2, PROVOKE_ERROR))
-            .or(() -> divide(3, 1))
-            .orElseThrow();
+                .or(() -> divide(2, PROVOKE_ERROR))
+                .or(() -> divide(3, 1))
+                .orElseThrow();
         assertThat(finalSucceeds, is(equalTo(3)));
     }
 

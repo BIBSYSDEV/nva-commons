@@ -12,19 +12,22 @@ class CognitoUserInfoTest {
     @Test
     void builderContainsAllFields() {
         var userInfo = CognitoUserInfo.builder()
-            .withAccessRights(Set.of(randomString(), randomString()))
-            .withFeideId(randomString())
-            .withCurrentCustomer(randomUri())
-            .withNvaUsername(randomString())
-            .withTopOrgCristinId(randomUri())
-            .withPersonCristinId(randomUri())
-            .withPersonNin(randomString())
-            .withCognitoUsername(randomString())
-            .withAllowedCustomers(randomString())
-            .withRoles(randomString())
-            .withPersonAffiliation(randomString())
-            .withSub(randomString())
-            .build();
+                           .withAccessRights(Set.of(randomString(), randomString()))
+                           .withFeideId(randomString())
+                           .withCurrentCustomer(randomUri())
+                           .withUserName(randomString())
+                           .withTopOrgCristinId(randomUri())
+                           .withPersonCristinId(randomUri())
+                           .withPersonNin(randomString())
+                           .withCognitoUsername(randomString())
+                           .withAllowedCustomers(randomString())
+                           .withRoles(randomString())
+                           .withPersonAffiliation(randomUri())
+                           .withSub(randomString())
+                           .withViewingScopeIncluded(randomString())
+                           .withViewingScopeExcluded(randomString())
+                           .withIssuer(randomUri())
+                           .build();
         assertThat(userInfo, doesNotHaveEmptyValues());
     }
 }

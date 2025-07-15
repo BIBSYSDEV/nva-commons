@@ -22,14 +22,14 @@ public class RequestBodyReader {
     @JacocoGenerated
     public static String requestBody(HttpRequest request) {
         BodyPublisher bodyPublisher = request.bodyPublisher()
-            .orElseThrow(() -> new IllegalStateException(NO_BODY_PUBLISHER_ERROR));
+                                          .orElseThrow(() -> new IllegalStateException(NO_BODY_PUBLISHER_ERROR));
         RequestBodySubscriber subscriber = new RequestBodySubscriber();
         bodyPublisher.subscribe(subscriber);
         return subscriber.getBody();
     }
 
     @JacocoGenerated
-    private static class RequestBodySubscriber implements Subscriber<ByteBuffer> {
+    private static final class RequestBodySubscriber implements Subscriber<ByteBuffer> {
 
         public static final int NUMBER_OF_REQUESTS_TO_PUBLISHER = 1000;
 

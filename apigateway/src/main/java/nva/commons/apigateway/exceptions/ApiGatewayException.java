@@ -6,6 +6,7 @@ public abstract class ApiGatewayException extends Exception {
 
     public static final String MISSING_STATUS_CODE = "Status code cannot be null for exception:";
     private Integer runtimeStatusCode;
+    private Object instance;
 
     public ApiGatewayException(String message) {
         super(message);
@@ -22,6 +23,15 @@ public abstract class ApiGatewayException extends Exception {
 
     public ApiGatewayException(Exception exception, String message) {
         super(message, exception);
+    }
+
+    public ApiGatewayException(String message, Object instance) {
+        super(message);
+        this.instance = instance;
+    }
+
+    public Object getInstance() {
+        return instance;
     }
 
     protected abstract Integer statusCode();

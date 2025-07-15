@@ -1,11 +1,11 @@
 package nva.commons.core.paths;
 
+import static java.util.Collections.emptyList;
 import static java.util.Objects.nonNull;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -20,9 +20,9 @@ import nva.commons.core.StringUtils;
  */
 public final class UnixPath {
 
-    public static final UnixPath EMPTY_PATH = new UnixPath(Collections.emptyList());
+    public static final UnixPath EMPTY_PATH = new UnixPath(emptyList());
     public static final String ROOT = "/";
-    public static final UnixPath ROOT_PATH = UnixPath.of(ROOT);
+    public static final UnixPath ROOT_PATH = of(ROOT);
     public static final String PATH_DELIMITER = "/";
     private static final String EMPTY_STRING = "";
 
@@ -36,7 +36,7 @@ public final class UnixPath {
     public static UnixPath of(String... path) {
         Stream<String> pathElements = extractAllPathElements(path);
         List<String> pathElementsList = addRootIfPresentInOriginalPath(pathElements, path)
-            .collect(Collectors.toList());
+                                            .collect(Collectors.toList());
         return pathIsEmpty(pathElementsList)
                    ? EMPTY_PATH
                    : new UnixPath(pathElementsList);
@@ -44,7 +44,7 @@ public final class UnixPath {
 
     @JsonCreator
     public static UnixPath fromString(String childPath) {
-        return UnixPath.of(childPath);
+        return of(childPath);
     }
 
     public boolean isRoot() {
@@ -88,18 +88,22 @@ public final class UnixPath {
     }
 
     public UnixPath addChild(String childPath) {
-        return addChild(UnixPath.of(childPath));
+        return addChild(of(childPath));
     }
 
     public UnixPath addChild(UnixPath childPath) {
         List<String> newPathArray = new ArrayList<>();
         newPathArray.addAll(this.path);
         newPathArray.addAll(childPath.path);
-        return UnixPath.of(newPathArray.toArray(String[]::new));
+        return of(newPathArray.toArray(String[]::new));
     }
 
     public String getLastPathElement() {
         return path.get(lastPathElementIndex());
+    }
+
+    public String getPathElementByIndexFromEnd(int index) {
+        return getPathElementByIndex(lastPathElementIndex() - index);
     }
 
     @Deprecated(since = "getLastPathElement was introduced")
@@ -120,39 +124,53 @@ public final class UnixPath {
                    : this;
     }
 
+    public boolean isEmptyPath() {
+        return pathIsEmpty(path);
+    }
+
+    public UnixPath replacePathElementByIndexFromEnd(int index, String replacement) {
+        if (isRoot() || isEmptyPath() || path.size() <= index) {
+            return this;
+        }
+        var newPath = new ArrayList<>(path);
+        newPath.set(lastPathElementIndex() - index, replacement);
+        return new UnixPath(newPath);
+    }
+
     private static Stream<String> prependRoot(Stream<String> pathElements) {
         return Stream.concat(Stream.of(ROOT), pathElements);
     }
 
-    private static Stream<String> extractAllPathElements(String[] path) {
+    private static Stream<String> extractAllPathElements(String... path) {
         Stream<String> nonNullPathElements = discardNullArrayElements(path);
         return splitInputElementsContainingPathDelimiter(nonNullPathElements);
     }
 
     private static Stream<String> splitInputElementsContainingPathDelimiter(Stream<String> pathElements) {
         return pathElements
-            .map(UnixPath::splitCompositePathElements)
-            .flatMap(Arrays::stream)
-            .filter(StringUtils::isNotBlank);
+                   .map(UnixPath::splitCompositePathElements)
+                   .flatMap(Arrays::stream)
+                   .filter(StringUtils::isNotBlank);
     }
 
-    private static Stream<String> discardNullArrayElements(String[] path) {
+    private static Stream<String> discardNullArrayElements(String... path) {
         return Optional.ofNullable(path)
-            .stream()
-            .flatMap(Arrays::stream)
-            .filter(Objects::nonNull);
+                   .stream()
+                   .flatMap(Arrays::stream)
+                   .filter(Objects::nonNull);
     }
 
-    //composite path element is an element of the form /folder1/folder2
     private static String[] splitCompositePathElements(String pathElement) {
         return pathElement.split(PATH_DELIMITER);
     }
 
-    private static Stream<String> addRootIfPresentInOriginalPath(Stream<String> pathElements, String[] path) {
+    //composite path element is an element of the form /folder1/folder2
+
+    private static Stream<String> addRootIfPresentInOriginalPath(Stream<String> pathElements, String... path) {
         return pathBeginsWithRoot(path) ? prependRoot(pathElements) : pathElements;
     }
 
-    private static boolean pathBeginsWithRoot(String[] path) {
+    private static boolean pathBeginsWithRoot(String... path) {
         return nonNull(path) && path.length > 0 && nonNull(path[0]) && path[0].startsWith(ROOT);
     }
 
@@ -160,8 +178,12 @@ public final class UnixPath {
         return Objects.isNull(path) || path.isEmpty();
     }
 
+    private String getPathElementByIndex(int index) {
+        return path.get(index);
+    }
+
     private boolean isAbsolute() {
-        return ROOT.equals(path.get(0));
+        return !isEmptyPath() && ROOT.equals(path.get(0));
     }
 
     private String formatPathAsString(List<String> pathArray) {

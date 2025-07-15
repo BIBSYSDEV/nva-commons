@@ -1,5 +1,6 @@
 package nva.commons.apigateway;
 
+import static nva.commons.apigateway.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -13,6 +14,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.nio.file.Path;
 import no.unit.nva.stubs.FakeContext;
+import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.core.Environment;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +41,7 @@ public class VoidTest {
         environment = mock(Environment.class);
         context = new FakeContext();
         when(environment.readEnv(anyString())).thenReturn(SOME_ENV_VALUE);
+        when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn("*");
     }
 
     @DisplayName("handleRequest returns success when input class is void and body field is missing from "
@@ -75,6 +78,12 @@ public class VoidTest {
 
         public VoidHandler(Environment environment) {
             super(Void.class, environment);
+        }
+
+        @Override
+        protected void validateRequest(Void input, RequestInfo requestInfo, Context context)
+            throws ApiGatewayException {
+            //no-op
         }
 
         @Override

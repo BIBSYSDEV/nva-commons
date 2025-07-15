@@ -3,42 +3,54 @@ plugins {
     id 'java-library'
     id 'jacoco'
     id 'checkstyle'
+    id 'jacoco-report-aggregation'
     id 'pmd'
     id 'idea'
-    id 'nebula.lint'
 }
 
-group 'com.github.bibsysdev'
-version = '1.25.4'
 
+group = 'com.github.bibsysdev'
+version = '2.3.5'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+        vendor = JvmVendorSpec.AMAZON
+    }
+}
 
 repositories {
-
     mavenCentral()
-    maven { url "https://jitpack.io" }
+    maven { url = "https://jitpack.io" }
 }
 
-test {
-    useJUnitPlatform {}
-    failFast = true
-    finalizedBy(jacocoTestReport)
-}
-
-jacocoTestReport {
-    dependsOn(test)
+testCodeCoverageReport {
     reports {
-        xml.required
+        csv.required = true
+        xml.required = true
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    failFast = true
+    testLogging {
+        events = ['skipped', 'passed', 'failed']
     }
 }
 
 pmd {
+    toolVersion = '7.11.0'
     ruleSetConfig = rootProject.resources.text.fromFile('config/pmd/ruleset.xml')
     ruleSets = []
     ignoreFailures = false
-    pmdMain {}
 }
 
+check.dependsOn jacocoTestCoverageVerification
+jacocoTestCoverageVerification.dependsOn(jacocoTestReport)
+
 jacocoTestCoverageVerification {
+
     violationRules {
         rule {
             limit {
@@ -58,19 +70,30 @@ jacocoTestCoverageVerification {
     }
 }
 
-check.dependsOn jacocoTestCoverageVerification
-jacocoTestCoverageVerification.dependsOn(jacocoTestReport)
+test {
+    useJUnitPlatform {}
+    failFast = true
+    finalizedBy(jacocoTestReport)
+}
+
+jacocoTestReport {
+    dependsOn(test)
+    reports {
+        xml.required = true
+    }
+}
 
 checkstyle {
+    toolVersion = '10.26.1'
     configFile = rootProject.resources.text.fromFile('config/checkstyle/checkstyle.xml').asFile()
     showViolations = true
 }
 
-tasks.withType(Checkstyle) {
+tasks.withType(Checkstyle) .configureEach{
     reports {
-        xml.required
-        html.required
-        html.stylesheet rootProject.resources.text.fromFile('config/checkstyle/checkstyle-simple.xsl')
+        xml.required = true
+        html.required = true
+        html.stylesheet = rootProject.resources.text.fromFile('config/checkstyle/checkstyle-simple.xsl')
     }
 }
 
@@ -80,9 +103,6 @@ dependencies {
         exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
         exclude group: "com.amazonaws", module: "aws-lambda-java-core"
         exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
-
     }
-
-    compileOnly libs.apiguardian
 }
 

@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -20,9 +21,13 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 import no.unit.nva.commons.json.JsonUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 public class SortableIdentifierTest {
 
@@ -96,7 +101,7 @@ public class SortableIdentifierTest {
         Throwable cause = actualException.getCause();
         assertThat(actualException.getMessage(), containsString(identifier.toString()));
         assertThat(actualException.getMessage(),
-            containsString(SortableIdentifierSerializer.SERIALIZATION_EXCEPTION_ERROR));
+                   containsString(SortableIdentifierSerializer.SERIALIZATION_EXCEPTION_ERROR));
         assertThat(cause, is(equalTo(exceptionCause)));
     }
 
@@ -128,6 +133,33 @@ public class SortableIdentifierTest {
         Executable action = () -> SortableIdentifier.fromUri(sampleUri);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, action);
         assertThat(exception.getMessage(), containsString(sampleUri.toString()));
+    }
+
+    @ParameterizedTest
+    @MethodSource("caseSensitiveIdentifierProvider")
+    public void shouldIgnoreCaseWhenComparingSortableIdentifiers(String left, String right) {
+        var leftSortableIdentifier = new SortableIdentifier(left);
+        var rightSortableIdentifier = new SortableIdentifier(right);
+        assertEquals(leftSortableIdentifier, rightSortableIdentifier);
+    }
+
+    private static Stream<Arguments> caseSensitiveIdentifierProvider() {
+        return Stream.of(Arguments.of("019716D1CB07-C12BEAB5-A45F-43AD-9496-8897A71D131B",
+                                      "019716d1cb07-c12beab5-a45f-43ad-9496-8897a71d131b"),
+                         Arguments.of("019716d1cb07-c12beab5-a45f-43ad-9496-8897a71d131b",
+                                      "019716D1CB07-C12BEAB5-A45F-43AD-9496-8897A71D131B"),
+                         Arguments.of("2f451cda-08a6-4469-9c26-72051632bb90",
+                                      "2F451CDA-08A6-4469-9C26-72051632BB90"),
+                         Arguments.of("2F451CDA-08A6-4469-9C26-72051632BB90",
+                                      "2f451cda-08a6-4469-9c26-72051632bb90"),
+                         Arguments.of("019716D1CB07-C12BEAB5-A45F-43AD-9496-8897A71D131B",
+                                      "019716D1CB07-C12BEAB5-A45F-43AD-9496-8897A71D131B"),
+                         Arguments.of("019716d1cb07-c12beab5-a45f-43ad-9496-8897a71d131b",
+                                      "019716d1cb07-c12beab5-a45f-43ad-9496-8897a71d131b"),
+                         Arguments.of("2F451CDA-08A6-4469-9C26-72051632BB90",
+                                      "2F451CDA-08A6-4469-9C26-72051632BB90"),
+                         Arguments.of("2f451cda-08a6-4469-9c26-72051632bb90",
+                                      "2f451cda-08a6-4469-9c26-72051632bb90"));
     }
 
     private void shuffle(List<SortableIdentifier> idStrings) {

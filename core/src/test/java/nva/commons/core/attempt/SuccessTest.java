@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +30,7 @@ public class SuccessTest {
     public void orElseThrowsIllegalStateExceptionForNullArgument() {
 
         Executable action =
-            () -> Try.of(sample).orElseThrow(null);
+            () -> Try.of(sample).orElseThrow((Function<Failure<Integer>, ? extends Exception>) null);
         IllegalStateException exception = assertThrows(IllegalStateException.class, action);
         assertThat(exception.getMessage(), is(equalTo(Failure.NULL_ACTION_MESSAGE)));
     }

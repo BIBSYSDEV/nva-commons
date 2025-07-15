@@ -5,7 +5,6 @@
   "headers": {
     "Accept": "*/*",
     "Accept-Encoding": "gzip, deflate, br",
-    "Authorization": "lskjflskfkddd",
     "Cache-Control": "no-cache",
     "Content-Type": "application/json",
     "Host": "2lcqynkwke.execute-api.eu-west-1.amazonaws.com",

@@ -1,10 +1,12 @@
 package no.unit.nva.events.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Objects;
 import nva.commons.core.JacocoGenerated;
 
+@JsonIgnoreProperties("requestPayload")
 public class AwsEventBridgeDetail<I> {
 
     @JsonProperty("version")
@@ -23,11 +25,11 @@ public class AwsEventBridgeDetail<I> {
     }
 
     private AwsEventBridgeDetail(Builder<I> builder) {
-        setVersion(builder.version);
-        setTimestamp(builder.timestamp);
-        setRequestContext(builder.requestPayload);
-        setResponseContext(builder.responseContext);
-        setResponsePayload(builder.responsePayload);
+        this.version = builder.version;
+        this.timestamp = builder.timestamp;
+        this.requestContext = builder.requestPayload;
+        this.responseContext = builder.responseContext;
+        this.responsePayload = builder.responsePayload;
     }
 
     public static <I> Builder<I> newBuilder() {

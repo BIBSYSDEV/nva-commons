@@ -12,7 +12,7 @@ dependencies {
     compileOnly libs.jackson.datatype.jdk8
     compileOnly libs.jackson.datatype.jsr310
     compileOnly libs.zalando
-    compileOnly libs.jackson.datatype.problem
+    implementation libs.jackson.datatype.problem
 
 
     testImplementation libs.jackson.core
@@ -23,5 +23,9 @@ dependencies {
     testImplementation libs.jackson.datatype.problem
 
 
-    testImplementation libs.bundles.testing
+    testImplementation libs.bundles.testing.junit
+    testImplementation libs.bundles.testing.mockito
+    testImplementation libs.bundles.testing.hamcrest
+    testImplementation libs.commons.lang
+    testImplementation libs.datafaker
 }

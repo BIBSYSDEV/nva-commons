@@ -4,13 +4,13 @@
 
   <xsl:template match="/">
     <html>
-      <head>
-        <title>Sun Coding Style Violations</title>
-      </head>
       <body bgcolor="#FFFFEF">
+        <hr align="left" size="1" width="95%"/>
         <p>
           <b>Coding Style Check Results</b>
         </p>
+        <p>The following are violations of the Sun Coding-Style Standards:</p>
+        <p/>
         <table border="1" cellpadding="2" cellspacing="0">
           <tr bgcolor="#CC9966">
             <th colspan="2">
@@ -42,23 +42,16 @@
             </td>
           </tr>
         </table>
-        <hr align="left" size="1" width="95%"/>
-        <p>The following are violations of the Sun Coding-Style Standards:</p>
-        <p/>
         <xsl:apply-templates/>
       </body>
+      <head>
+        <title>Sun Coding Style Violations</title>
+      </head>
     </html>
   </xsl:template>
 
   <xsl:template match="file[error]">
-    <table bgcolor="#55BBDD" border="1" cellpadding="2" cellspacing="0" width="95%">
-      <tr>
-        <th>File:</th>
-        <td>
-          <xsl:value-of select="@name"/>
-        </td>
-      </tr>
-    </table>
+    <p/>
     <table bgcolor="#EEEEEE" border="1" cellpadding="2" cellspacing="0" width="95%">
       <tr>
         <th>Line Number</th>
@@ -66,7 +59,14 @@
       </tr>
       <xsl:apply-templates select="error"/>
     </table>
-    <p/>
+    <table bgcolor="#55BBDD" border="1" cellpadding="2" cellspacing="0" width="95%">
+      <tr>
+        <td>
+          <xsl:value-of select="@name"/>
+        </td>
+        <th>File:</th>
+      </tr>
+    </table>
   </xsl:template>
 
   <xsl:template match="error">

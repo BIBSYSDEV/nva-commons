@@ -4,7 +4,6 @@ import java.net.Socket;
 import java.net.http.HttpClient;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -48,48 +47,38 @@ public final class WiremockHttpClient {
 
             @JacocoGenerated
             @Override
+            public void checkServerTrusted(X509Certificate[] chain, String authType) {
+            }
+
+            @JacocoGenerated
+            @Override
             public X509Certificate[] getAcceptedIssuers() {
                 return new X509Certificate[0];
             }
 
             @JacocoGenerated
             @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-
+            public void checkClientTrusted(X509Certificate[] chain, String authType) {
             }
 
             @JacocoGenerated
             @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-
+            public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) {
             }
 
             @JacocoGenerated
             @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket)
-                throws CertificateException {
-
+            public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) {
             }
 
             @JacocoGenerated
             @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket)
-                throws CertificateException {
-
+            public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine) {
             }
 
             @JacocoGenerated
             @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine)
-                throws CertificateException {
-
-            }
-
-            @JacocoGenerated
-            @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine)
-                throws CertificateException {
-
+            public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) {
             }
         };
     }

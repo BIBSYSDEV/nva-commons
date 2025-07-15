@@ -12,7 +12,7 @@ import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.plugins.PluginBuilderFactory;
 
-@SuppressWarnings("PMD.AvoidStringBufferField")
+@SuppressWarnings({"PMD.AvoidStringBufferField", "PMD.TestClassWithoutTestCases"})
 @Plugin(name = TestAppender.PLUGIN_NAME, category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE,
     printObject = true)
 public class TestAppender extends AbstractAppender {

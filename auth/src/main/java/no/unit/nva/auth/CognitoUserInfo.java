@@ -4,35 +4,45 @@ import static java.util.Objects.nonNull;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import nva.commons.core.JacocoGenerated;
 
+@SuppressWarnings("PMD")
 public class CognitoUserInfo {
 
     public static final String ELEMENTS_DELIMITER = ",";
     public static final String EMPTY_STRING = "";
-    public static final String FEIDE_ID_CLAIM = "custom:feideId";
+
+    // Claims
+    public static final String PERSON_FEIDE_ID_CLAIM = "custom:feideId";
     public static final String SELECTED_CUSTOMER_CLAIM = "custom:customerId";
     public static final String ACCESS_RIGHTS_CLAIM = "custom:accessRights";
-    public static final String NVA_USERNAME_CLAIM = "custom:nvaUsername";
+    public static final String USER_NAME_CLAIM = "custom:nvaUsername";
     public static final String TOP_LEVEL_ORG_CRISTIN_ID_CLAIM = "custom:topOrgCristinId";
     public static final String PERSON_CRISTIN_ID_CLAIM = "custom:cristinId";
     public static final String PERSON_NIN_CLAIM = "custom:nin";
     public static final String PERSON_FEIDE_NIN_CLAIM = "custom:feideIdNin";
     public static final String ROLES = "custom:roles";
+    public static final String PERSON_GROUPS_CLAIM = "cognito:groups";
     public static final String SUB = "sub";
-    public static final String PERSON_AFFILIATION = "custom:personAffiliation";
+    public static final String PERSON_AFFILIATION_CLAIM = "custom:personAffiliation";
     public static final String ALLOWED_CUSTOMERS = "custom:allowedCustomers";
-    public static final String COGNITO_USERNAME = "username";
-    @JsonProperty(FEIDE_ID_CLAIM)
+    public static final String COGNITO_USER_NAME = "username";
+    public static final String ISS_CLAIM = "iss";
+    public static final String VIEWING_SCOPE_INCLUDED_CLAIM = "custom:viewingScopeIncluded";
+    public static final String VIEWING_SCOPE_EXCLUDED_CLAIM = "custom:viewingScopeExcluded";
+
+    @JsonProperty(PERSON_FEIDE_ID_CLAIM)
     private String feideId;
     @JsonProperty(SELECTED_CUSTOMER_CLAIM)
     private URI currentCustomer;
     @JsonProperty(ACCESS_RIGHTS_CLAIM)
     private String accessRights;
-    @JsonProperty(NVA_USERNAME_CLAIM)
-    private String nvaUsername;
+    @JsonProperty(USER_NAME_CLAIM)
+    private String userName;
     @JsonProperty(TOP_LEVEL_ORG_CRISTIN_ID_CLAIM)
     private URI topOrgCristinId;
     @JsonProperty(PERSON_CRISTIN_ID_CLAIM)
@@ -44,12 +54,18 @@ public class CognitoUserInfo {
     private String roles;
     @JsonProperty(SUB)
     private String sub;
-    @JsonProperty(PERSON_AFFILIATION)
-    private String personAffiliation;
+    @JsonProperty(PERSON_AFFILIATION_CLAIM)
+    private URI personAffiliation;
     @JsonProperty(ALLOWED_CUSTOMERS)
     private String allowedCustomers;
-    @JsonProperty(COGNITO_USERNAME)
+    @JsonProperty(COGNITO_USER_NAME)
     private String cognitoUsername;
+    @JsonProperty(VIEWING_SCOPE_INCLUDED_CLAIM)
+    private String viewingScopeIncluded;
+    @JsonProperty(VIEWING_SCOPE_EXCLUDED_CLAIM)
+    private String viewingScopeExcluded;
+    @JsonProperty(ISS_CLAIM)
+    private String issuer;
 
     public static Builder builder() {
         return new Builder();
@@ -75,11 +91,11 @@ public class CognitoUserInfo {
         this.sub = sub;
     }
 
-    public String getPersonAffiliation() {
+    public URI getPersonAffiliation() {
         return personAffiliation;
     }
 
-    public void setPersonAffiliation(String personAffiliation) {
+    public void setPersonAffiliation(URI personAffiliation) {
         this.personAffiliation = personAffiliation;
     }
 
@@ -95,6 +111,14 @@ public class CognitoUserInfo {
         return cognitoUsername;
     }
 
+    public String getIssuer() {
+        return issuer;
+    }
+
+    public void setIssuer(String issuer) {
+        this.issuer = issuer;
+    }
+
     public void setCognitoUsername(String cognitoUsername) {
         this.cognitoUsername = cognitoUsername;
     }
@@ -107,12 +131,12 @@ public class CognitoUserInfo {
         this.topOrgCristinId = topOrgCristinId;
     }
 
-    public String getNvaUsername() {
-        return nvaUsername;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setNvaUsername(String nvaUsername) {
-        this.nvaUsername = nvaUsername;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public URI getCurrentCustomer() {
@@ -155,12 +179,40 @@ public class CognitoUserInfo {
         this.personNin = personNin;
     }
 
+    public String getViewingScopeIncluded() {
+        return viewingScopeIncluded;
+    }
+
+    public void setViewingScopeIncluded(String viewingScopeIncluded) {
+        this.viewingScopeIncluded = viewingScopeIncluded;
+    }
+
+    public String getViewingScopeExcluded() {
+        return viewingScopeExcluded;
+    }
+
+    public void setViewingScopeExcluded(String viewingScopeExcluded) {
+        this.viewingScopeExcluded = viewingScopeExcluded;
+    }
+
     @JacocoGenerated
     @Override
     public int hashCode() {
-        return Objects.hash(getFeideId(), getCurrentCustomer(), getAccessRights(), getNvaUsername(),
+        return Objects.hash(getFeideId(),
+                            getCurrentCustomer(),
+                            getAccessRights(),
+                            getUserName(),
                             getTopOrgCristinId(),
-                            getPersonCristinId(), getPersonNin());
+                            getPersonCristinId(),
+                            getPersonAffiliation(),
+                            getPersonNin(),
+                            getViewingScopeIncluded(),
+                            getViewingScopeExcluded(),
+                            getRoles(),
+                            getSub(),
+                            getAllowedCustomers(),
+                            getCognitoUsername(),
+                            getIssuer());
     }
 
     @JacocoGenerated
@@ -176,10 +228,52 @@ public class CognitoUserInfo {
         return Objects.equals(getFeideId(), that.getFeideId())
                && Objects.equals(getCurrentCustomer(), that.getCurrentCustomer())
                && Objects.equals(getAccessRights(), that.getAccessRights())
-               && Objects.equals(getNvaUsername(), that.getNvaUsername())
+               && Objects.equals(getUserName(), that.getUserName())
                && Objects.equals(getTopOrgCristinId(), that.getTopOrgCristinId())
                && Objects.equals(getPersonCristinId(), that.getPersonCristinId())
-               && Objects.equals(getPersonNin(), that.getPersonNin());
+               && Objects.equals(getPersonAffiliation(), that.getPersonAffiliation())
+               && Objects.equals(getPersonNin(), that.getPersonNin())
+               && Objects.equals(getFeideId(), that.getFeideId())
+               && Objects.equals(getViewingScopeIncluded(), that.getViewingScopeIncluded())
+               && Objects.equals(getViewingScopeExcluded(), that.getViewingScopeExcluded())
+               && Objects.equals(getRoles(), that.getRoles())
+               && Objects.equals(getSub(), that.getSub())
+               && Objects.equals(getAllowedCustomers(), that.getAllowedCustomers())
+               && Objects.equals(getCognitoUsername(), that.getCognitoUsername())
+               && Objects.equals(getIssuer(), that.getIssuer());
+    }
+
+    public Map<String, String> getClaims() {
+        var claims = new HashMap<String, String>();
+        addClaimUnlessNull(claims, PERSON_FEIDE_ID_CLAIM, getFeideId());
+        addClaimUnlessNull(claims, SELECTED_CUSTOMER_CLAIM, getCurrentCustomer());
+        addClaimUnlessNull(claims, ACCESS_RIGHTS_CLAIM, getAccessRights());
+        addClaimUnlessNull(claims, USER_NAME_CLAIM, getUserName());
+        addClaimUnlessNull(claims, TOP_LEVEL_ORG_CRISTIN_ID_CLAIM, getTopOrgCristinId());
+        addClaimUnlessNull(claims, PERSON_CRISTIN_ID_CLAIM, getPersonCristinId());
+        addClaimUnlessNull(claims, PERSON_NIN_CLAIM, getPersonNin());
+        addClaimUnlessNull(claims, PERSON_FEIDE_NIN_CLAIM, getPersonNin());
+        addClaimUnlessNull(claims, ROLES, getRoles());
+        addClaimUnlessNull(claims, SUB, getSub());
+        addClaimUnlessNull(claims, PERSON_AFFILIATION_CLAIM, getPersonAffiliation());
+        addClaimUnlessNull(claims, ALLOWED_CUSTOMERS, getAllowedCustomers());
+        addClaimUnlessNull(claims, COGNITO_USER_NAME, getCognitoUsername());
+        addClaimUnlessNull(claims, VIEWING_SCOPE_INCLUDED_CLAIM, getViewingScopeIncluded());
+        addClaimUnlessNull(claims, VIEWING_SCOPE_EXCLUDED_CLAIM, getViewingScopeExcluded());
+        addClaimUnlessNull(claims, ISS_CLAIM, getIssuer());
+        return claims;
+    }
+
+    private void addClaimUnlessNull(HashMap<String, String> claims, String key, URI value) {
+        if (nonNull(value)) {
+            claims.put(key, value.toString());
+        }
+    }
+
+    private void addClaimUnlessNull(HashMap<String, String> claims, String key, String value) {
+        if (nonNull(value)) {
+            claims.put(key, value);
+        }
     }
 
     public static final class Builder {
@@ -207,8 +301,8 @@ public class CognitoUserInfo {
             return this;
         }
 
-        public Builder withNvaUsername(String nvaUsername) {
-            cognitoUserInfo.setNvaUsername(nvaUsername);
+        public Builder withUserName(String userName) {
+            cognitoUserInfo.setUserName(userName);
             return this;
         }
 
@@ -237,7 +331,7 @@ public class CognitoUserInfo {
             return this;
         }
 
-        public Builder withPersonAffiliation(String personAffiliation) {
+        public Builder withPersonAffiliation(URI personAffiliation) {
             cognitoUserInfo.setPersonAffiliation(personAffiliation);
             return this;
         }
@@ -249,6 +343,21 @@ public class CognitoUserInfo {
 
         public Builder withCognitoUsername(String cognitoUsername) {
             cognitoUserInfo.setCognitoUsername(cognitoUsername);
+            return this;
+        }
+
+        public Builder withViewingScopeIncluded(String viewingScopeIncluded) {
+            cognitoUserInfo.setViewingScopeIncluded(viewingScopeIncluded);
+            return this;
+        }
+
+        public Builder withViewingScopeExcluded(String viewingScopeExcluded) {
+            cognitoUserInfo.setViewingScopeExcluded(viewingScopeExcluded);
+            return this;
+        }
+
+        public Builder withIssuer(URI issuer) {
+            cognitoUserInfo.setIssuer(issuer.toString());
             return this;
         }
 

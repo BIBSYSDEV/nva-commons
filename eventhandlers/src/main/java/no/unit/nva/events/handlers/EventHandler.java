@@ -21,13 +21,13 @@ import org.slf4j.LoggerFactory;
   Implemented as RequestStreamHandler because RequestHandler has problem with java.time.Instant class.
   Probably the class RequestHandler does not include the java-8-module.
  */
-public abstract class EventHandler<InputType, OutputType> implements RequestStreamHandler {
+public abstract class EventHandler<I, O> implements RequestStreamHandler {
 
     public static final String HANDLER_INPUT = "Handler input:\n";
     public static final String ERROR_WRITING_TO_OUTPUT_STREAM = "Error writing output to output stream. Output is: ";
     private static final Logger logger = LoggerFactory.getLogger(EventHandler.class);
     protected final ObjectMapper objectMapper;
-    private final Class<InputType> iclass;
+    private final Class<I> iclass;
     /*
       Raw class usage in order to support parameterized types when EventHandler is extended by another class.
      */
@@ -35,7 +35,7 @@ public abstract class EventHandler<InputType, OutputType> implements RequestStre
     @SuppressWarnings({"rawtypes", "unchecked"})
     protected EventHandler(Class iclass, ObjectMapper objectMapper) {
         super();
-        this.iclass = (Class<InputType>) iclass;
+        this.iclass = (Class<I>) iclass;
         this.objectMapper = objectMapper;
     }
 
@@ -50,8 +50,8 @@ public abstract class EventHandler<InputType, OutputType> implements RequestStre
         try {
             inputString = IoUtils.streamToString(inputStream);
             logger.trace(HANDLER_INPUT + inputString);
-            AwsEventBridgeEvent<InputType> input = parseEvent(inputString);
-            OutputType output = processInput(input.getDetail(), input, context);
+            AwsEventBridgeEvent<I> input = parseEvent(inputString);
+            O output = processInput(input.getDetail(), input, context);
 
             writeOutput(outputStream, output);
         } catch (Exception e) {
@@ -60,7 +60,7 @@ public abstract class EventHandler<InputType, OutputType> implements RequestStre
         }
     }
 
-    protected void writeOutput(OutputStream outputStream, OutputType output) {
+    protected void writeOutput(OutputStream outputStream, O output) {
         {
             try (BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
@@ -73,10 +73,10 @@ public abstract class EventHandler<InputType, OutputType> implements RequestStre
         }
     }
 
-    protected abstract OutputType processInput(InputType input, AwsEventBridgeEvent<InputType> event, Context context);
+    protected abstract O processInput(I input, AwsEventBridgeEvent<I> event, Context context);
 
-    protected AwsEventBridgeEvent<InputType> parseEvent(String input) {
-        return new EventParser<InputType>(input, objectMapper).parse(iclass);
+    protected AwsEventBridgeEvent<I> parseEvent(String input) {
+        return new EventParser<I>(input, objectMapper).parse(iclass);
     }
 
     protected void handleError(Exception e, String inputString) {

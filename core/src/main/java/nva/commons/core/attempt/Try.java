@@ -16,7 +16,7 @@ public abstract class Try<T> {
 
     @SuppressWarnings("PMD.ShortMethodName")
     public static <T> Try<T> of(T input) {
-        return new Success<T>(input);
+        return new Success<>(input);
     }
 
     /**
@@ -30,9 +30,9 @@ public abstract class Try<T> {
      */
     public static <S> Try<S> attempt(Callable<S> action) {
         try {
-            return new Success<S>(action.call());
+            return new Success<>(action.call());
         } catch (Exception e) {
-            return new Failure<S>(e);
+            return new Failure<>(e);
         }
     }
 
@@ -50,9 +50,9 @@ public abstract class Try<T> {
     public static <T, R, E extends Exception> Function<T, Try<R>> attempt(FunctionWithException<T, R, E> fe) {
         return arg -> {
             try {
-                return new Success<R>(fe.apply(arg));
+                return new Success<>(fe.apply(arg));
             } catch (Exception e) {
-                return new Failure<R>(e);
+                return new Failure<>(e);
             }
         };
     }
@@ -76,6 +76,10 @@ public abstract class Try<T> {
     public abstract <E extends Exception> Try<Void> forEach(ConsumerWithException<T, E> consumer);
 
     public abstract <E extends Exception> T orElseThrow(Function<Failure<T>, E> action) throws E;
+
+    public T orElseThrow(RuntimeException e)  {
+        return orElseThrow(fail -> e);
+    }
 
     public abstract T orElseThrow();
 

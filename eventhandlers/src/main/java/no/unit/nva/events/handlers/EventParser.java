@@ -10,7 +10,7 @@ import nva.commons.core.attempt.Failure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EventParser<InputType> {
+public class EventParser<I> {
 
     public static final String ERROR_PARSING_INPUT = "Could not parse input: ";
     public static final int SKIP_BOTTOM_TYPE = 2;
@@ -24,7 +24,7 @@ public class EventParser<InputType> {
         this.objectMapper = objectMapper;
     }
 
-    public AwsEventBridgeEvent<InputType> parse(Class<InputType> iclass) {
+    public AwsEventBridgeEvent<I> parse(Class<I> iclass) {
         return attempt(() -> parseJson(iclass)).orElseThrow(this::handleParsingError);
     }
 
@@ -44,7 +44,7 @@ public class EventParser<InputType> {
         return attempt(() -> parseJson(nestedParameterClasses)).orElseThrow(this::handleParsingError);
     }
 
-    private AwsEventBridgeEvent<InputType> parseJson(Class<InputType> iclass) throws JsonProcessingException {
+    private AwsEventBridgeEvent<I> parseJson(Class<I> iclass) throws JsonProcessingException {
         JavaType javaType =
             objectMapper.getTypeFactory().constructParametricType(AwsEventBridgeEvent.class, iclass);
         return objectMapper.readValue(input, javaType);
@@ -57,7 +57,7 @@ public class EventParser<InputType> {
         return objectMapper.readValue(input, eventBridgeJavaType);
     }
 
-    private <OutputType> RuntimeException handleParsingError(Failure<OutputType> fail) {
+    private <O> RuntimeException handleParsingError(Failure<O> fail) {
         logger.error(ERROR_PARSING_INPUT + input);
         logger.error(stackTraceInSingleLine(fail.getException()));
         return new RuntimeException(fail.getException());
@@ -68,7 +68,7 @@ public class EventParser<InputType> {
      * it creates a {@link JavaType} for the object  ClassA<ClassB<ClassC...<ClassZ>>>>
      */
     @SuppressWarnings(RAWTYPES)
-    private JavaType nestedGenericTypesToJavaType(Class[] classes) {
+    private JavaType nestedGenericTypesToJavaType(Class... classes) {
         //Variables not inlined for readability purposes.
         JavaType mostRecentType = objectMapper.getTypeFactory().constructType(innermostType(classes));
         for (int index = classes.length - SKIP_BOTTOM_TYPE; index >= 0; index--) {
@@ -82,7 +82,8 @@ public class EventParser<InputType> {
         return objectMapper.getTypeFactory().constructParametricType(currentClass, mostRecentType);
     }
 
-    private <T> T innermostType(T[] classes) {
+    @SafeVarargs
+    private <T> T innermostType(T... classes) {
         return classes[classes.length - 1];
     }
 

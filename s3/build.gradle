@@ -10,11 +10,14 @@ dependencies {
     implementation libs.aws.sdk2.core
     implementation libs.aws.ion
 
-    implementation libs.jackson.databind
+    implementation libs.bundles.jackson
     implementation libs.aws.apache.client
 
-    testImplementation libs.bundles.testing
-    testImplementation libs.aws.http.client.spi
+    testImplementation libs.bundles.testing.junit
+    testImplementation libs.bundles.testing.mockito
+    testImplementation libs.bundles.testing.hamcrest
+    testImplementation libs.commons.lang
+    testImplementation libs.datafaker
     testImplementation project(":nvatestutils")
 
 }

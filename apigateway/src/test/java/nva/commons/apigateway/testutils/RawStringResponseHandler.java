@@ -26,18 +26,15 @@ public class RawStringResponseHandler extends ApiGatewayHandler<RequestBody, Str
     private RequestBody body;
 
     public RawStringResponseHandler() {
-        super(RequestBody.class);
+        super(RequestBody.class, new Environment());
     }
 
     /**
      * Constructor that overrides default serialization.
-     *
-     * @param mapper Object Mapper
      */
-    public RawStringResponseHandler(ObjectMapper mapper) {
-        super(RequestBody.class, new Environment(), mapper);
+    public RawStringResponseHandler(Environment environment) {
+        super(RequestBody.class, environment);
     }
-
 
     @Override
     protected String processInput(RequestBody input, RequestInfo requestInfo, Context context)
@@ -59,6 +56,12 @@ public class RawStringResponseHandler extends ApiGatewayHandler<RequestBody, Str
     @Override
     protected List<MediaType> listSupportedMediaTypes() {
         return List.of(JSON_UTF_8, XML_UTF_8);
+    }
+
+    @Override
+    protected void validateRequest(RequestBody input, RequestInfo requestInfo, Context context)
+        throws ApiGatewayException {
+        //no-op
     }
 
     @Override

@@ -1,90 +1,145 @@
+# IMPORTANT: This is a published version catalog, used by other NVA repositories.
+# Renaming a component (library, plugin, or bundle) or upgrading major versions of dependencies
+# is a breaking change and should be reflected in our version number.
 [versions]
-zalandoProblem = { strictly = '0.27.1' }
-lambdaLog4j = { strictly = '1.5.1' }
-guava = { strictly = '31.1-jre' }
-awsSdk = { strictly = '1.12.220' }
-awsSdk2 = { strictly = '2.17.191' }
-awsLambdaEvents = { strictly = '3.11.0' }
-awsLambdaCore = { strictly = '1.2.1' }
-mockito = { strictly = '4.5.1' }
-httpmime = { strictly = '4.5.13' }
-jackson = { strictly = '2.13.3' }
-hamcrest = { strictly = '2.2' }
-apacheCommons = { strictly = '3.12.0' }
-commonsValidator = { strictly = '1.7' }
-jupiter = { strictly = '5.8.2' }
-awsIon = { strictly = '1.5.1' }
-hamcrestOptional = { strictly = '2.0.0' }
-log4j = { strictly = '2.17.2' }
-slf4j = { strictly = '1.8.0-beta4' }
-apiGuardian = { strictly = '1.1.2' }
-wiremock = { strictly = '2.33.2' }
-datafaker = { strictly = '1.3.0' }
+apache-commons = { require = '3.18.0' }
+apache-http-client = { strictly = '5.5' }
+apache-poi = { strictly = '5.4.1' }
+assertj = { strictly = '3.27.3' }
+aws-ion = { strictly = '1.11.10' }
+aws-lambda-core = { strictly = '1.3.0' }
+aws-lambda-events = { strictly = '3.16.0' }
+aws-sdk = { strictly = '1.12.787' }
+aws-sdk2 = { strictly = '2.31.78' }
+ben-manes-versions = { strictly = '0.52.0' }
+com-auth0-jwks = { strictly = '0.22.2' }
+com-auth0-jwt = { strictly = '4.5.0' }
+commons-validator = { strictly = '1.10.0' }
+cucumber = { strictly = '7.21.1' }
+datafaker = { strictly = '2.4.4' }
+errorprone = { strictly = '2.37.0' }
+errorprone-plugin = { strictly = '4.1.0' }
+guava = { strictly = '33.4.8-jre' }
+hamcrest = { strictly = '3.0' }
+jackson = { strictly = '2.19.1' }
+jena = { strictly = '5.4.0' }
+jupiter = { strictly = '5.13.3' }
+jupiter-platform = { strictly = '1.13.3' } # Keep minor & patch version in sync with `jupiter`
+lambda-log4j = { strictly = '1.6.0' }
+log4j = { strictly = '2.25.1' }
+mockito = { strictly = '5.18.0' }
+opencsv = { strictly = '5.11.2' }
+opensearch-client = { strictly = '3.1.0' }
+opensearch-testcontainer = { strictly = '3.0.1' }
+slf4j = { strictly = '2.0.17' }
+spotless = { strictly = '7.1.0' }
+testcontainers = { strictly = '1.21.3' }
+wiremock = { strictly = '4.0.0-beta.14' }
+zalando-problem = { strictly = '0.27.1' }
 
 [libraries]
-zalando = { group = 'org.zalando', name = 'problem', version.ref = 'zalandoProblem' }
-
+# IMPORTANT: Renaming a library is a breaking change
+apache-poi = { group = 'org.apache.poi', name = 'poi', version.ref = 'apache-poi' }
+apache-poi-ooxml = { group = 'org.apache.poi', name = 'poi-ooxml', version.ref = 'apache-poi' }
+aws-apache-client = { group = 'software.amazon.awssdk', name = 'apache-client', version.ref = 'aws-sdk2' }
+aws-ion = { group = 'com.amazon.ion', name = 'ion-java', version.ref = 'aws-ion' }
+aws-java-sdk-core = { group = 'com.amazonaws', name = 'aws-java-sdk-core', version.ref = 'aws-sdk' }
+aws-lambda-core = { group = 'com.amazonaws', name = 'aws-lambda-java-core', version.ref = 'aws-lambda-core' }
+aws-lambda-events = { group = 'com.amazonaws', name = 'aws-lambda-java-events', version.ref = 'aws-lambda-events' }
+aws-sdk-dynamo = { group = 'com.amazonaws', name = 'aws-java-sdk-dynamodb', version.ref = 'aws-sdk' }
+aws-sdk2-core = { group = 'software.amazon.awssdk', name = 'sdk-core', version.ref = 'aws-sdk2' }
+aws-sdk2-dynamo = { group = 'software.amazon.awssdk', name = 'dynamodb', version.ref = 'aws-sdk2' }
+aws-sdk2-eventbridge = { group = 'software.amazon.awssdk', name = 'eventbridge', version.ref = 'aws-sdk2' }
+aws-sdk2-firehose = { group = 'software.amazon.awssdk', name = 'firehose', version.ref = 'aws-sdk2' }
+aws-sdk2-s3 = { group = 'software.amazon.awssdk', name = 's3', version.ref = 'aws-sdk2' }
+aws-sdk2-secrets = { group = 'software.amazon.awssdk', name = 'secretsmanager', version.ref = 'aws-sdk2' }
+aws-sdk2-urlconnection = { group = 'software.amazon.awssdk', name = 'url-connection-client', version.ref = 'aws-sdk2' }
+com-auth0-jwks = { group = 'com.auth0', name = 'jwks-rsa', version.ref = 'com-auth0-jwks' }
+com-auth0-jwt = { group = 'com.auth0', name = 'java-jwt', version.ref = 'com-auth0-jwt' }
+commons-lang = { group = 'org.apache.commons', name = 'commons-lang3', version.ref = 'apache-commons' }
+commons-validator = { group = 'commons-validator', name = 'commons-validator', version.ref = 'commons-validator' }
 guava = { group = 'com.google.guava', name = 'guava', version.ref = 'guava' }
-
-aws-sdk-dynamo = { group = 'com.amazonaws', name = 'aws-java-sdk-dynamodb', version.ref = 'awsSdk' }
-aws-lambda-events = { group = 'com.amazonaws', name = 'aws-lambda-java-events', version.ref = 'awsLambdaEvents' }
-aws-lambda-core = { group = 'com.amazonaws', name = 'aws-lambda-java-core', version.ref = 'awsLambdaCore' }
-
-aws-sdk2-core = { group = 'software.amazon.awssdk', name = 'sdk-core', version.ref = 'awsSdk2' }
-aws-sdk2-secrets = { group = 'software.amazon.awssdk', name = 'secretsmanager', version.ref = 'awsSdk2' }
-aws-sdk2-s3 = { group = 'software.amazon.awssdk', name = 's3', version.ref = 'awsSdk2' }
-aws-sdk2-eventbridge = { group = 'software.amazon.awssdk', name = 'eventbridge', version.ref = 'awsSdk2' }
-aws-sdk2-urlconnection = { group = 'software.amazon.awssdk', name = 'url-connection-client', version.ref = 'awsSdk2' }
-aws-sdk2-dynamo = { group = 'software.amazon.awssdk', name = 'dynamodb', version.ref = 'awsSdk2' }
-aws-sdk2-cognitoidp = { group = 'software.amazon.awssdk', name = 'cognitoidentityprovider', version.ref = 'awsSdk2' }
-
-aws-http-client-spi = { group = 'software.amazon.awssdk', name = 'http-client-spi', version = 'awsSdk2' }
-aws-apache-client = { group = 'software.amazon.awssdk', name = 'apache-client', version.ref = 'awsSdk2' }
-aws-ion = { group = 'software.amazon.ion', name = 'ion-java', version.ref = 'awsIon' }
-
-httpmime = { group = 'org.apache.httpcomponents', name = 'httpmime', version.ref = 'httpmime' }
-
+jackson-annotations = { group = 'com.fasterxml.jackson.core', name = 'jackson-annotations', version.ref = 'jackson' }
 jackson-core = { group = 'com.fasterxml.jackson.core', name = 'jackson-core', version.ref = 'jackson' }
+jackson-databind = { group = 'com.fasterxml.jackson.core', name = 'jackson-databind', version.ref = 'jackson' }
+jackson-dataformat-xml = { group = 'com.fasterxml.jackson.dataformat', name = 'jackson-dataformat-xml', version.ref = 'jackson' }
 jackson-datatype-jdk8 = { group = 'com.fasterxml.jackson.datatype', name = 'jackson-datatype-jdk8', version.ref = 'jackson' }
 jackson-datatype-jsr310 = { group = 'com.fasterxml.jackson.datatype', name = 'jackson-datatype-jsr310', version.ref = 'jackson' }
-jackson-databind = { group = 'com.fasterxml.jackson.core', name = 'jackson-databind', version.ref = 'jackson' }
-jackson-annotations = { group = 'com.fasterxml.jackson.core', name = 'jackson-annotations', version.ref = 'jackson' }
-jackson-module-parameter-names = { group = 'com.fasterxml.jackson.module', name = 'jackson-module-parameter-names', version.ref = 'jackson' }
-jackson-datatype-problem = { group = 'org.zalando', name = 'jackson-datatype-problem', version.ref = 'zalandoProblem' }
-jackson-dataformat-xml = { group = 'com.fasterxml.jackson.dataformat', name = 'jackson-dataformat-xml', version.ref = 'jackson' }
-
-
-jackson-jr-objects = { group = 'com.fasterxml.jackson.jr', name = 'jackson-jr-objects', version.ref = 'jackson' }
-jackson-jr-stree = { group = 'com.fasterxml.jackson.jr', name = 'jackson-jr-stree', version.ref = 'jackson' }
+jackson-datatype-problem = { group = 'org.zalando', name = 'jackson-datatype-problem', version.ref = 'zalando-problem' }
 jackson-jr-annotations = { group = 'com.fasterxml.jackson.jr', name = 'jackson-jr-annotation-support', version.ref = 'jackson' }
+jackson-jr-objects = { group = 'com.fasterxml.jackson.jr', name = 'jackson-jr-objects', version.ref = 'jackson' }
+jackson-module-parameter-names = { group = 'com.fasterxml.jackson.module', name = 'jackson-module-parameter-names', version.ref = 'jackson' }
+jena-arq = { group = 'org.apache.jena', name = 'jena-arq', version.ref = 'jena' }
+jena-core = { group = 'org.apache.jena', name = 'jena-core', version.ref = 'jena' }
+opencsv = { group = 'com.opencsv', name = 'opencsv', version.ref = 'opencsv' }
+zalando = { group = 'org.zalando', name = 'problem', version.ref = 'zalando-problem' }
 
-commons-lang = { group = 'org.apache.commons', name = 'commons-lang3', version.ref = 'apacheCommons' }
-commons-validator = { group = 'commons-validator', name = 'commons-validator', version.ref = 'commonsValidator' }
+# Build tools
+errorprone = { group = 'com.google.errorprone', name = 'error_prone_core', version.ref = 'errorprone' }
 
-log4j-core = { group = 'org.apache.logging.log4j', name = 'log4j-core', version.ref = 'log4j' }
+# Logging dependencies
+lambda-log4j = { group = 'com.amazonaws', name = 'aws-lambda-java-log4j2', version.ref = 'lambda-log4j' }
 log4j-api = { group = 'org.apache.logging.log4j', name = 'log4j-api', version.ref = 'log4j' }
-log4j-slf4j18-impl = { group = 'org.apache.logging.log4j', name = 'log4j-slf4j18-impl', version.ref = 'log4j' }
+log4j-core = { group = 'org.apache.logging.log4j', name = 'log4j-core', version.ref = 'log4j' }
+log4j-slf4j-impl = { group = 'org.apache.logging.log4j', name = 'log4j-slf4j2-impl', version.ref = 'log4j' }
 slf4j-api = { group = 'org.slf4j', name = 'slf4j-api', version.ref = 'slf4j' }
-lambda-log4j = { group = 'com.amazonaws', name = 'aws-lambda-java-log4j2', version.ref = 'lambdaLog4j' }
 
-junit-jupiter = { group = 'org.junit.jupiter', name = 'junit-jupiter', version.ref = 'jupiter' }
-junit-jupiter-api = { group = 'org.junit.jupiter', name = 'junit-jupiter-api', version.ref = 'jupiter' }
-junit-jupiter-params = { group = 'org.junit.jupiter', name = 'junit-jupiter-params', version.ref = 'jupiter' }
-junit-jupiter-engine = { group = 'org.junit.jupiter', name = 'junit-jupiter-engine', version.ref = 'jupiter' }
+# Test dependencies
+assertj-core = { group = 'org.assertj', name = 'assertj-core', version.ref = 'assertj' }
+cucumber-java = { group = 'io.cucumber', name = 'cucumber-java', version.ref = 'cucumber' }
+cucumber-junit-platform-engine = { group = 'io.cucumber', name = 'cucumber-junit-platform-engine', version.ref = 'cucumber' }
+cucumber-picocontainer = { group = 'io.cucumber', name = 'cucumber-picocontainer', version.ref = 'cucumber' }
+datafaker = { group = 'net.datafaker', name = 'datafaker', version.ref = 'datafaker' }
 hamcrest = { group = 'org.hamcrest', name = 'hamcrest', version.ref = 'hamcrest' }
 hamcrest-core = { group = 'org.hamcrest', name = 'hamcrest-core', version.ref = 'hamcrest' }
-datafaker = { group = 'net.datafaker', name = 'datafaker', version.ref = 'datafaker' }
+httpclient5 = { group = 'org.apache.httpcomponents.client5', name = 'httpclient5', version.ref = 'apache-http-client' }
+junit-jupiter = { group = 'org.junit.jupiter', name = 'junit-jupiter', version.ref = 'jupiter' }
+junit-jupiter-api = { group = 'org.junit.jupiter', name = 'junit-jupiter-api', version.ref = 'jupiter' }
+junit-jupiter-engine = { group = 'org.junit.jupiter', name = 'junit-jupiter-engine', version.ref = 'jupiter' }
+junit-jupiter-params = { group = 'org.junit.jupiter', name = 'junit-jupiter-params', version.ref = 'jupiter' }
+junit-platform-launcher = { group = 'org.junit.platform', name = 'junit-platform-launcher', version.ref = 'jupiter-platform' }
 mockito-core = { group = 'org.mockito', name = 'mockito-core', version.ref = 'mockito' }
-hamcrest-optional = { group = 'com.github.npathai', name = 'hamcrest-optional', version.ref = 'hamcrestOptional' }
+opensearch-java = { group = 'org.opensearch.client', name = 'opensearch-java', version.ref = 'opensearch-client' }
+opensearch-rest-client = { group = 'org.opensearch.client', name = 'opensearch-rest-client', version.ref = 'opensearch-client' }
+testcontainers = { group = 'org.testcontainers', name = 'testcontainers', version.ref = 'testcontainers' }
+testcontainers-junit = { group = 'org.testcontainers', name = 'junit-jupiter', version.ref = 'testcontainers' }
+testcontainers-opensearch = { group = 'org.opensearch', name = 'opensearch-testcontainers', version.ref = 'opensearch-testcontainer' }
+wiremock = { group = 'org.wiremock', name = 'wiremock', version.ref = 'wiremock' }
 
-apiguardian = { group = 'org.apiguardian', name = 'apiguardian-api', version.ref = 'apiGuardian' }
-wiremock = { group = 'com.github.tomakehurst', name = 'wiremock-jre8', version.ref = 'wiremock' }
+[plugins]
+# IMPORTANT: Renaming or removing a plugin is a breaking change
+errorprone = { id = "net.ltgt.errorprone", version.ref = 'errorprone-plugin' }
+gradle-versions = { id = "com.github.ben-manes.versions", version.ref = 'ben-manes-versions' }
+spotless = { id = "com.diffplug.spotless", version.ref = 'spotless' }
 
 [bundles]
-testing = ['mockito-core', 'hamcrest', 'hamcrest-core', 'junit-jupiter', 'junit-jupiter-api',
-    'junit-jupiter-params', 'junit-jupiter-engine', 'datafaker', 'hamcrest-optional', 'commons-lang']
-jackson = ['jackson-core', 'jackson-datatype-jdk8', 'jackson-datatype-jsr310', 'jackson-databind',
-    'jackson-annotations', 'jackson-module-parameter-names', 'jackson-datatype-problem', 'jackson-dataformat-xml']
+# IMPORTANT: Renaming a bundle or removing elements from it is a breaking change
+apache-poi = ['apache-poi', 'apache-poi-ooxml']
+jackson = [
+    'jackson-annotations',
+    'jackson-core',
+    'jackson-databind',
+    'jackson-dataformat-xml',
+    'jackson-datatype-jdk8',
+    'jackson-datatype-jsr310',
+    'jackson-datatype-problem',
+    'jackson-module-parameter-names']
 jacksonjr = ['jackson-jr-objects', 'jackson-jr-annotations']
-logging = ['log4j-core', 'log4j-api', 'log4j-slf4j18-impl', 'slf4j-api', 'lambda-log4j']
+jena = ['jena-core', 'jena-arq']
+logging = [
+    'lambda-log4j',
+    'log4j-api',
+    'log4j-core',
+    'log4j-slf4j-impl',
+    'slf4j-api']
 
+testing-cucumber = ['cucumber-java', 'cucumber-junit-platform-engine', 'cucumber-picocontainer']
+testing-hamcrest = ['hamcrest', 'hamcrest-core']
+testing-junit = [
+    'junit-jupiter',
+    'junit-jupiter-api',
+    'junit-jupiter-engine',
+    'junit-jupiter-params',
+    'junit-platform-launcher']
+testing-mockito = ['mockito-core']
+testing-testcontainers = ['testcontainers', 'testcontainers-junit', 'testcontainers-opensearch']

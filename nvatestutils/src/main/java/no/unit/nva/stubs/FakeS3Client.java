@@ -1,6 +1,9 @@
 package no.unit.nva.stubs;
 
+
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,21 +15,29 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.ioutils.IoUtils;
+import nva.commons.core.paths.UnixPath;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.http.AbortableInputStream;
+import software.amazon.awssdk.http.SdkHttpResponse;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectResponse;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectsResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.services.s3.model.S3Object;
+
 
 @JacocoGenerated
 public class FakeS3Client implements S3Client {
@@ -44,15 +55,16 @@ public class FakeS3Client implements S3Client {
 
     public static FakeS3Client fromContentsMap(Map<String, InputStream> filesAndContent) {
         var toByteBuffer = filesAndContent.entrySet().stream()
-            .collect(Collectors.toMap(Entry::getKey, entry -> inputSteamToByteBuffer(entry.getValue())));
+                               .collect(
+                                   Collectors.toMap(Entry::getKey, entry -> inputSteamToByteBuffer(entry.getValue())));
         return new FakeS3Client(toByteBuffer);
     }
 
     //TODO: fix if necessary
     @SuppressWarnings("PMD.CloseResource")
     @Override
-    public <ReturnT> ReturnT getObject(GetObjectRequest getObjectRequest,
-                                       ResponseTransformer<GetObjectResponse, ReturnT> responseTransformer) {
+    public <T> T getObject(GetObjectRequest getObjectRequest,
+                                       ResponseTransformer<GetObjectResponse, T> responseTransformer) {
         String filename = getObjectRequest.key();
         var contents = extractContent(filename).array();
         GetObjectResponse response = GetObjectResponse.builder().contentLength((long) contents.length).build();
@@ -67,26 +79,59 @@ public class FakeS3Client implements S3Client {
      */
     @Override
     public ListObjectsResponse listObjects(ListObjectsRequest listObjectsRequest) {
-        List<String> fileKeys = new ArrayList<>(filesAndContent.keySet());
+        var fileKeys = new ArrayList<>(filesAndContent.keySet());
 
         var startIndex = calculateStartIndex(fileKeys, listObjectsRequest.marker());
-        var endIndex = calculateEndIndex(fileKeys, listObjectsRequest.marker(), listObjectsRequest.maxKeys());
-        var truncated = endIndex < fileKeys.size();
-        List<S3Object> files = fileKeys.subList(startIndex, endIndex).stream()
-            .map(filename -> S3Object.builder().key(filename).build())
-            .collect(Collectors.toList());
+        var excludedEndIndex = calculateEndIndex(fileKeys, listObjectsRequest.marker(), listObjectsRequest.maxKeys());
 
-        return ListObjectsResponse.builder().contents(files).isTruncated(truncated).build();
+        var files = fileKeys.subList(startIndex, excludedEndIndex).stream()
+                        .filter(filePath -> filePathIsInSpecifiedParentFolder(filePath, listObjectsRequest))
+                        .map(filename -> S3Object.builder().key(filename).build())
+                        .collect(Collectors.toList());
+        var nextStartListingPoint = calculateNestStartListingPoint(fileKeys, excludedEndIndex);
+
+        return ListObjectsResponse.builder().contents(files)
+                .nextMarker(nextStartListingPoint)
+                .isTruncated(nonNull(nextStartListingPoint)).build();
     }
+
+    @Override
+    public ListObjectsV2Response listObjectsV2(ListObjectsV2Request v2Request){
+        var oldRequest = ListObjectsRequest.builder()
+                .bucket(v2Request.bucket())
+                .marker(v2Request.continuationToken())
+                .maxKeys(v2Request.maxKeys())
+                .prefix(v2Request.prefix())
+                .build();
+        var oldResponse= listObjects(oldRequest);
+        return ListObjectsV2Response
+                .builder()
+                .contents(oldResponse.contents())
+                .isTruncated(oldResponse.isTruncated())
+                .continuationToken(v2Request.continuationToken())
+                .nextContinuationToken(oldResponse.nextMarker())
+                .build();
+    }
+
 
     //TODO: fix if necessary
     @SuppressWarnings("PMD.CloseResource")
     @Override
     public PutObjectResponse putObject(PutObjectRequest putObjectRequest, RequestBody requestBody) {
-        String path = putObjectRequest.key();
-        InputStream inputStream = requestBody.contentStreamProvider().newStream();
+        var path = putObjectRequest.key();
+        var inputStream = requestBody.contentStreamProvider().newStream();
         this.filesAndContent.put(path, inputSteamToByteBuffer(inputStream));
-        return PutObjectResponse.builder().build();
+        var sdkHttpResponse = SdkHttpResponse.builder().statusCode(200).build();
+        return (PutObjectResponse) PutObjectResponse.builder()
+                                       .sdkHttpResponse(sdkHttpResponse)
+                                       .build();
+    }
+
+    @Override
+    public DeleteObjectResponse deleteObject(DeleteObjectRequest deleteObjectRequest) {
+        var path = deleteObjectRequest.key();
+        this.filesAndContent.remove(path);
+        return DeleteObjectResponse.builder().build();
     }
 
     @Override
@@ -99,11 +144,18 @@ public class FakeS3Client implements S3Client {
 
     }
 
-    private static Map<String, ByteBuffer> readResourceFiles(String[] filesInBucket) {
+    private String calculateNestStartListingPoint(List<String> fileKeys,
+      int excludedEndIndex) {
+        return excludedEndIndex >= fileKeys.size()
+          ? null
+          : fileKeys.get(excludedEndIndex-1);
+    }
+
+    private static Map<String, ByteBuffer> readResourceFiles(String... filesInBucket) {
         List<String> suppliedFilenames = Arrays.asList(filesInBucket);
         return suppliedFilenames.stream()
-            .map(filename -> new SimpleEntry<>(filename, readFileFromResources(filename)))
-            .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
+                   .map(filename -> new SimpleEntry<>(filename, readFileFromResources(filename)))
+                   .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
     }
 
     private static ByteBuffer readFileFromResources(String filename) {
@@ -115,6 +167,29 @@ public class FakeS3Client implements S3Client {
         return ByteBuffer.wrap(readAllBytes(inputStream));
     }
 
+    private static byte[] readAllBytes(InputStream inputStream) {
+        try {
+            return inputStream.readAllBytes();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
+    private boolean filePathIsInSpecifiedParentFolder(String filePathString, ListObjectsRequest listObjectsRequest) {
+        var filePath = UnixPath.of(filePathString).removeRoot();
+        var parentFolder = Optional.of(listObjectsRequest)
+                               .map(ListObjectsRequest::prefix)
+                               .map(UnixPath::of)
+                               .map(UnixPath::removeRoot)
+                               .orElse(UnixPath.EMPTY_PATH);
+
+        return parentFolder.isEmptyPath()
+               || parentFolder.isRoot()
+               || filePath.toString().startsWith(parentFolder.toString());
+    }
+
     private int calculateEndIndex(List<String> fileKeys, String marker, Integer pageSize) {
         int startIndex = calculateStartIndex(fileKeys, marker);
         return Math.min(startIndex + pageSize, fileKeys.size());
@@ -124,7 +199,7 @@ public class FakeS3Client implements S3Client {
         if (isNull(marker)) {
             return START_FROM_BEGINNING;
         } else {
-            var calculatedStartIndex = fileKeys.indexOf(marker) + 1;
+            var calculatedStartIndex = indexOfLastReadFile(fileKeys, marker) + 1;
             if (calculatedStartIndex < fileKeys.size()) {
                 return calculatedStartIndex;
             }
@@ -132,12 +207,12 @@ public class FakeS3Client implements S3Client {
         throw new IllegalStateException("Start index is out of bounds in FakeS3Client");
     }
 
-    private static byte[] readAllBytes(InputStream inputStream) {
-        try {
-            return inputStream.readAllBytes();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    private static int indexOfLastReadFile(List<String> fileKeys, String marker) {
+        int indexOfLastFileRead = fileKeys.indexOf(marker);
+        if(indexOfLastFileRead<0){
+            throw new IllegalArgumentException("Marker/ContinuationToken is not valid");
         }
+        return indexOfLastFileRead;
     }
 
     private ByteBuffer extractContent(String filename) {
@@ -148,7 +223,7 @@ public class FakeS3Client implements S3Client {
         }
     }
 
-    private <ReturnT> ReturnT transformResponse(ResponseTransformer<GetObjectResponse, ReturnT> responseTransformer,
+    private <T> T transformResponse(ResponseTransformer<GetObjectResponse, T> responseTransformer,
                                                 InputStream inputStream, GetObjectResponse response) {
         try {
             return responseTransformer.transform(response, AbortableInputStream.create(inputStream));
