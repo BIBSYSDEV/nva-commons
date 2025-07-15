@@ -1,13 +1,13 @@
 # Build Logic
 
-This subproject contains Gradle convention plugins that centralize common build configuration 
-for the NVA project. These are published as artifacts to Maven Central alongside the Java 
+This subproject contains Gradle convention plugins that centralize common build configuration
+for the NVA project. These are published as artifacts to Maven Central alongside the Java
 libraries in this repository.
 
 ## Convention Plugins
 
 The core concept is to bundle relevant Gradle configuration into "convention" plugins.
-These can be split up further without requiring changes from consumers, as long as the main 
+These can be split up further without requiring changes from consumers, as long as the main
 plugin IDs stay the same.
 
 ### `nva.root-module-conventions`
@@ -68,24 +68,16 @@ build-logic/
 
 ## How It Works
 
-1. **Plugin Compilation**: Gradle compiles the `.gradle` files in `src/main/groovy/` into proper 
+1. **Plugin Compilation**: Gradle compiles the `.gradle` files in `src/main/groovy/` into proper
    Gradle plugins
 2. **Plugin Registration**: Each `.gradle` file becomes a plugin with an ID matching its filename
-3. **Plugin Application**: Other subprojects apply these plugins using the standard `plugins {}` 
+3. **Plugin Application**: Other subprojects apply these plugins using the standard `plugins {}`
    block
 
 ## Usage in Other Projects
 
-To use these convention plugins in other NVA projects:
-
-1. Include the build-logic dependency in your `buildSrc` or `build.gradle`
-2. Apply the relevant convention plugins:
-   ```groovy
-   plugins {
-       id 'nva.java-conventions'
-       // other plugins...
-   }
-   ```
+See our [example repository](https://github.com/BIBSYSDEV/nva-gradle-template) for a complete
+example on how to use these convention plugins.
 
 ## Customization
 
