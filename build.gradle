@@ -3,6 +3,11 @@ plugins {
     alias(libs.plugins.gradle.versions)
 }
 
+repositories {
+    gradlePluginPortal()
+    mavenCentral()
+}
+
 allprojects {
     group = project.property('GROUP')
     version = project.property('VERSION_NAME')

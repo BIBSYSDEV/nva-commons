@@ -3,6 +3,15 @@ plugins {
     id 'nvacommons.publish-artifact'
 }
 
-repositories {
-    gradlePluginPortal()
+// Helper to turn a version‑catalog plugin alias into marker‑artifact coordinates <id>:<id>.gradle.plugin:<version>
+def pluginNotation = { Provider<PluginDependency> plugin ->
+    plugin.map {
+        "${it.pluginId}:${it.pluginId}.gradle.plugin:${it.version.getStrictVersion()}"
+    }
+}
+
+dependencies {
+    implementation(pluginNotation(libs.plugins.spotless))
+    implementation(pluginNotation(libs.plugins.errorprone))
+    implementation(pluginNotation(libs.plugins.gradle.versions))
 }
