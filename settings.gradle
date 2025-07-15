@@ -1,4 +1,5 @@
 rootProject.name = 'nva-commons'
+include 'build-logic'
 include 'json'
 include 'logutils'
 include 'core'
@@ -16,6 +17,3 @@ include 'pagination'
 include 'clients'
 include 'dlq'
 include 'versions'
-
-
-

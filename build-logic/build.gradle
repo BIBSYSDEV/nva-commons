@@ -1,0 +1,8 @@
+plugins {
+    id 'groovy-gradle-plugin'
+    id 'nvacommons.publish-artifact'
+}
+
+repositories {
+    gradlePluginPortal()
+}
