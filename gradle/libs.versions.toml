@@ -49,6 +49,7 @@ aws-lambda-events = { group = 'com.amazonaws', name = 'aws-lambda-java-events', 
 aws-sdk-dynamo = { group = 'com.amazonaws', name = 'aws-java-sdk-dynamodb', version.ref = 'aws-sdk' }
 aws-sdk2-core = { group = 'software.amazon.awssdk', name = 'sdk-core', version.ref = 'aws-sdk2' }
 aws-sdk2-dynamo = { group = 'software.amazon.awssdk', name = 'dynamodb', version.ref = 'aws-sdk2' }
+aws-sdk2-dynamodbenhanced = { group = 'software.amazon.awssdk', name = 'dynamodb-enhanced', version.ref = 'aws-sdk2' }
 aws-sdk2-eventbridge = { group = 'software.amazon.awssdk', name = 'eventbridge', version.ref = 'aws-sdk2' }
 aws-sdk2-firehose = { group = 'software.amazon.awssdk', name = 'firehose', version.ref = 'aws-sdk2' }
 aws-sdk2-s3 = { group = 'software.amazon.awssdk', name = 's3', version.ref = 'aws-sdk2' }
