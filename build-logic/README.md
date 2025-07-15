@@ -38,7 +38,6 @@ Applied directly in each Java module's `build.gradle`:
 ```groovy
 plugins {
     id 'nva.java-conventions'
-    id 'nvacommons.publish-maven'
 }
 ```
 
