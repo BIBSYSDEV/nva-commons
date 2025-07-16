@@ -15,11 +15,6 @@ java {
     }
 }
 
-repositories {
-    mavenCentral()
-    maven { url = "https://jitpack.io" }
-}
-
 testCodeCoverageReport {
     reports {
         csv.required = true
@@ -101,4 +96,3 @@ dependencies {
         exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
     }
 }
-

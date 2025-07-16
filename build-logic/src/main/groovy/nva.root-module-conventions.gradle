@@ -1,15 +1,20 @@
 plugins {
     id 'base'
     id 'jacoco-report-aggregation'
+    id 'nva.configuration'
     id 'nva.formatting-conventions'
+    id 'nva.gradlelint'
     id 'com.github.ben-manes.versions'
+    id 'io.github.gradle-nexus.publish-plugin'
 }
 
 dependencies {
     // Automatically aggregate coverage from all subprojects
-    subprojects.each { subproject ->
-        jacocoAggregation subproject
-    }
+    subprojects.each { subproject -> jacocoAggregation subproject }
+}
+
+jacoco {
+    toolVersion = nva.jacocoVersion
 }
 
 reporting {
@@ -85,7 +90,7 @@ tasks.named('dependencyUpdates') {
     checkForGradleUpdate = true
     outputDir = 'build/dependencyUpdates'
     reportfileName = 'report'
-    gradleReleaseChannel='current'
+    gradleReleaseChannel = 'current'
     rejectVersionIf {
         // Don't suggest upgrading from a stable version to a non-stable version
         isNonStable(it.candidate.version) && !isNonStable(it.currentVersion)

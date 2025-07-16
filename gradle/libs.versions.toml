@@ -29,6 +29,8 @@ jupiter-platform = { strictly = '1.13.3' } # Keep minor & patch version in sync 
 lambda-log4j = { strictly = '1.6.0' }
 log4j = { strictly = '2.25.1' }
 mockito = { strictly = '5.18.0' }
+nebula-lint = { strictly = '20.5.6' }
+nexus-publish = { strictly = '2.0.0' }
 opencsv = { strictly = '5.11.2' }
 opensearch-client = { strictly = '3.1.0' }
 opensearch-testcontainer = { strictly = '3.0.1' }
@@ -116,9 +118,11 @@ wiremock = { group = 'org.wiremock', name = 'wiremock', version.ref = 'wiremock'
 
 [plugins]
 # IMPORTANT: Renaming or removing a plugin is a breaking change
-errorprone = { id = "net.ltgt.errorprone", version.ref = 'errorprone-plugin' }
-gradle-versions = { id = "com.github.ben-manes.versions", version.ref = 'ben-manes-versions' }
-spotless = { id = "com.diffplug.spotless", version.ref = 'spotless' }
+errorprone = { id = 'net.ltgt.errorprone', version.ref = 'errorprone-plugin' }
+gradle-versions = { id = 'com.github.ben-manes.versions', version.ref = 'ben-manes-versions' }
+nebula-lint = { id = 'nebula.lint', version.ref = 'nebula-lint' }
+nexus-publish = { id = 'io.github.gradle-nexus.publish-plugin', version.ref = 'nexus-publish' }
+spotless = { id = 'com.diffplug.spotless', version.ref = 'spotless' }
 
 [bundles]
 # IMPORTANT: Renaming a bundle or removing elements from it is a breaking change

@@ -1,14 +1,28 @@
 plugins {
-    id 'nvacommons.root'
+    id 'nva.root-module-conventions'
+    alias(libs.plugins.nexus.publish)
     alias(libs.plugins.gradle.versions)
-}
-
-repositories {
-    gradlePluginPortal()
-    mavenCentral()
 }
 
 allprojects {
     group = project.property('GROUP')
     version = project.property('VERSION_NAME')
+    nva {
+        spotlessEnabled = false
+        spotlessEnforced = false
+    }
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            username = findProperty("sonatypeUsername")
+            password = findProperty("sonatypePassword")
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
+        }
+    }
+
+    clientTimeout = Duration.ofSeconds(600)
+    connectTimeout = Duration.ofSeconds(60)
 }

@@ -1,6 +1,7 @@
 plugins {
     id 'groovy-gradle-plugin'
-    id 'nvacommons.publish-artifact'
+    id 'maven-publish'
+    id 'signing'
 }
 
 // Helper to turn a version‑catalog plugin alias into marker‑artifact coordinates <id>:<id>.gradle.plugin:<version>
@@ -11,7 +12,22 @@ def pluginNotation = { Provider<PluginDependency> plugin ->
 }
 
 dependencies {
-    implementation(pluginNotation(libs.plugins.spotless))
     implementation(pluginNotation(libs.plugins.errorprone))
     implementation(pluginNotation(libs.plugins.gradle.versions))
+    implementation(pluginNotation(libs.plugins.nebula.lint))
+    implementation(pluginNotation(libs.plugins.nexus.publish))
+    implementation(pluginNotation(libs.plugins.spotless))
+}
+
+// Apply shared publishing configuration
+apply from: '../gradle/shared-publish.gradle'
+group = gradle.parent.rootProject.property('GROUP')
+version = gradle.parent.rootProject.property('VERSION_NAME')
+
+publishing {
+    publications {
+        all {
+            pom(configureCommonPom)
+        }
+    }
 }

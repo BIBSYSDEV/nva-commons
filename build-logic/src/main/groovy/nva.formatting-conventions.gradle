@@ -1,8 +1,11 @@
 plugins {
     id 'com.diffplug.spotless'
+    id 'nva.configuration'
 }
 
 spotless {
+    enforceCheck = false
+
     if (plugins.hasPlugin('java')) {
         java {
             toggleOffOn() // Ignores sections between `spotless:off` / `spotless:on`
@@ -26,10 +29,17 @@ spotless {
     }
 }
 
-tasks.named('build').configure {
-    dependsOn('spotlessApply')
-}
+afterEvaluate {
+    if (nva.spotlessEnabled) {
+        tasks.named('build').configure {
+            dependsOn('spotlessApply')
+        }
 
-tasks.matching { it.name == 'test' }.configureEach {
-    dependsOn('spotlessApply')
+        tasks.matching { it.name == 'test' }.configureEach {
+            dependsOn('spotlessApply')
+        }
+    }
+    if (nva.spotlessEnforced) {
+        spotless.enforceCheck = true
+    }
 }
