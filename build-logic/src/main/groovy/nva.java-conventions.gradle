@@ -6,6 +6,8 @@ plugins {
     id 'net.ltgt.errorprone'
 }
 
+pmd.toolVersion = '7.15.0'
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -21,7 +23,6 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 pmd {
-    toolVersion = '7.15.0'
     ruleSetFiles = files(resources.text.fromString(getClass().getResourceAsStream('/pmd-ruleset.xml').text))
     ruleSets = []
     ignoreFailures = false

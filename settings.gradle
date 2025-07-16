@@ -1,4 +1,13 @@
+pluginManagement {
+    includeBuild('build-logic')
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
 dependencyResolutionManagement {
+    repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
     repositories {
         gradlePluginPortal()
         mavenCentral()
@@ -6,7 +15,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = 'nva-commons'
-include 'build-logic'
 include 'json'
 include 'logutils'
 include 'core'

@@ -1,11 +1,7 @@
 plugins {
-    id 'nvacommons.root'
+    id 'nva.root-module-conventions'
+    alias(libs.plugins.nexus.publish)
     alias(libs.plugins.gradle.versions)
-}
-
-repositories {
-    gradlePluginPortal()
-    mavenCentral()
 }
 
 allprojects {
