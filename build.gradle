@@ -3,6 +3,12 @@ plugins {
     alias(libs.plugins.gradle.versions)
 }
 
-allprojects{
-    apply plugin: 'nvacommons.java-conventions'
+repositories {
+    gradlePluginPortal()
+    mavenCentral()
+}
+
+allprojects {
+    group = project.property('GROUP')
+    version = project.property('VERSION_NAME')
 }

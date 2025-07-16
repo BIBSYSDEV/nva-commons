@@ -6,11 +6,6 @@ plugins {
     id 'com.github.ben-manes.versions'
 }
 
-//workaround for jacoco-merge to work
-allprojects {
-    apply plugin: 'nvacommons.java-conventions'
-}
-
 nexusPublishing {
     repositories {
         sonatype {

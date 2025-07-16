@@ -1,0 +1,93 @@
+plugins {
+    id 'base'
+    id 'jacoco-report-aggregation'
+    id 'nva.formatting-conventions'
+    id 'com.github.ben-manes.versions'
+}
+
+dependencies {
+    // Automatically aggregate coverage from all subprojects
+    subprojects.each { subproject ->
+        jacocoAggregation subproject
+    }
+}
+
+reporting {
+    reports {
+        testCodeCoverageReport(JacocoCoverageReport) {
+            testSuiteName = 'test'
+        }
+    }
+}
+
+tasks.register('verifyCoverage', JacocoCoverageVerification) {
+    group = "test coverage"
+    description = "Verify test coverage"
+    dependsOn tasks.named('testCodeCoverageReport', JacocoReport)
+
+    // Get data from the aggregated report task
+    def reportTask = tasks.named('testCodeCoverageReport')
+    executionData = reportTask.get().executionData
+    sourceDirectories = reportTask.get().sourceDirectories
+    classDirectories = reportTask.get().classDirectories
+
+    violationRules {
+        rule {
+            limit {
+                counter = 'METHOD'
+                value = 'COVEREDRATIO'
+                minimum = 1.000
+            }
+        }
+
+        rule {
+            limit {
+                counter = 'CLASS'
+                value = 'COVEREDRATIO'
+                minimum = 1.000
+            }
+        }
+    }
+}
+
+tasks.register('showCoverageReport') {
+    group = "test coverage"
+    description = "Show clickable link to test coverage report"
+    dependsOn tasks.named('testCodeCoverageReport', JacocoReport)
+    outputs.upToDateWhen { false }
+
+    doLast {
+        def reportDirPath = "reports/jacoco/testCodeCoverageReport/html"
+        def reportDir = layout.buildDirectory.dir(reportDirPath).get().asFile
+        logger.quiet("Combined coverage report:")
+        logger.quiet("file://${reportDir}/index.html")
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('verifyCoverage', JacocoCoverageVerification)
+    finalizedBy tasks.named('showCoverageReport')
+}
+
+tasks.named('verifyCoverage') {
+    finalizedBy tasks.named('showCoverageReport')
+}
+
+def isNonStable(String version) {
+    def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { version.toUpperCase().contains(it) }
+
+    // Stable version patterns: digits/dots/v/hyphens optionally ending with -r/-jre
+    def stableVersionPattern = /^[0-9,.v-]+(-r|-jre)?$/
+    return !stableKeyword && !(version ==~ stableVersionPattern)
+}
+
+tasks.named('dependencyUpdates') {
+    checkForGradleUpdate = true
+    outputDir = 'build/dependencyUpdates'
+    reportfileName = 'report'
+    gradleReleaseChannel='current'
+    rejectVersionIf {
+        // Don't suggest upgrading from a stable version to a non-stable version
+        isNonStable(it.candidate.version) && !isNonStable(it.currentVersion)
+    }
+}

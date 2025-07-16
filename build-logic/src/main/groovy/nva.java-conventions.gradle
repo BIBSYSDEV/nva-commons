@@ -1,0 +1,49 @@
+plugins {
+    id 'java-library'
+    id 'nva.formatting-conventions'
+    id 'jacoco'
+    id 'pmd'
+    id 'net.ltgt.errorprone'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+        vendor = JvmVendorSpec.AMAZON
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.errorprone {
+        // Suppress build failures from lint errors (remove this if possible)
+        allErrorsAsWarnings = true
+    }
+}
+
+pmd {
+    toolVersion = '7.15.0'
+    ruleSetFiles = files(resources.text.fromString(getClass().getResourceAsStream('/pmd-ruleset.xml').text))
+    ruleSets = []
+    ignoreFailures = false
+}
+
+tasks.named('test', Test) {
+    useJUnitPlatform()
+    failFast = false
+    testLogging {
+        events = ['skipped', 'passed', 'failed']
+        showCauses = true
+        exceptionFormat = "full"
+    }
+}
+
+tasks.named("jacocoTestReport", JacocoReport) {
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('test')
+}

@@ -6,6 +6,7 @@ apache-commons = { require = '3.18.0' }
 apache-http-client = { strictly = '5.5' }
 apache-poi = { strictly = '5.4.1' }
 assertj = { strictly = '3.27.3' }
+aws-ddb-local = { strictly = '2.6.1' }
 aws-ion = { strictly = '1.11.10' }
 aws-lambda-core = { strictly = '1.3.0' }
 aws-lambda-events = { strictly = '3.16.0' }
@@ -42,6 +43,7 @@ zalando-problem = { strictly = '0.27.1' }
 apache-poi = { group = 'org.apache.poi', name = 'poi', version.ref = 'apache-poi' }
 apache-poi-ooxml = { group = 'org.apache.poi', name = 'poi-ooxml', version.ref = 'apache-poi' }
 aws-apache-client = { group = 'software.amazon.awssdk', name = 'apache-client', version.ref = 'aws-sdk2' }
+aws-dynamodb-local = { group = 'com.amazonaws', name = 'DynamoDBLocal', version.ref = 'aws-ddb-local' }
 aws-ion = { group = 'com.amazon.ion', name = 'ion-java', version.ref = 'aws-ion' }
 aws-java-sdk-core = { group = 'com.amazonaws', name = 'aws-java-sdk-core', version.ref = 'aws-sdk' }
 aws-lambda-core = { group = 'com.amazonaws', name = 'aws-lambda-java-core', version.ref = 'aws-lambda-core' }
@@ -49,10 +51,14 @@ aws-lambda-events = { group = 'com.amazonaws', name = 'aws-lambda-java-events', 
 aws-sdk-dynamo = { group = 'com.amazonaws', name = 'aws-java-sdk-dynamodb', version.ref = 'aws-sdk' }
 aws-sdk2-core = { group = 'software.amazon.awssdk', name = 'sdk-core', version.ref = 'aws-sdk2' }
 aws-sdk2-dynamo = { group = 'software.amazon.awssdk', name = 'dynamodb', version.ref = 'aws-sdk2' }
+aws-sdk2-dynamodbenhanced = { group = 'software.amazon.awssdk', name = 'dynamodb-enhanced', version.ref = 'aws-sdk2' }
 aws-sdk2-eventbridge = { group = 'software.amazon.awssdk', name = 'eventbridge', version.ref = 'aws-sdk2' }
 aws-sdk2-firehose = { group = 'software.amazon.awssdk', name = 'firehose', version.ref = 'aws-sdk2' }
+aws-sdk2-regions = { group = 'software.amazon.awssdk', name = 'regions', version.ref = 'aws-sdk2' }
 aws-sdk2-s3 = { group = 'software.amazon.awssdk', name = 's3', version.ref = 'aws-sdk2' }
 aws-sdk2-secrets = { group = 'software.amazon.awssdk', name = 'secretsmanager', version.ref = 'aws-sdk2' }
+aws-sdk2-sns = { group = 'software.amazon.awssdk', name = 'sns', version.ref = 'aws-sdk2' }
+aws-sdk2-sqs = { group = 'software.amazon.awssdk', name = 'sqs', version.ref = 'aws-sdk2' }
 aws-sdk2-urlconnection = { group = 'software.amazon.awssdk', name = 'url-connection-client', version.ref = 'aws-sdk2' }
 com-auth0-jwks = { group = 'com.auth0', name = 'jwks-rsa', version.ref = 'com-auth0-jwks' }
 com-auth0-jwt = { group = 'com.auth0', name = 'java-jwt', version.ref = 'com-auth0-jwt' }
@@ -62,6 +68,7 @@ guava = { group = 'com.google.guava', name = 'guava', version.ref = 'guava' }
 jackson-annotations = { group = 'com.fasterxml.jackson.core', name = 'jackson-annotations', version.ref = 'jackson' }
 jackson-core = { group = 'com.fasterxml.jackson.core', name = 'jackson-core', version.ref = 'jackson' }
 jackson-databind = { group = 'com.fasterxml.jackson.core', name = 'jackson-databind', version.ref = 'jackson' }
+jackson-dataformat-csv = { group = 'com.fasterxml.jackson.dataformat', name = 'jackson-dataformat-csv', version.ref = 'jackson' }
 jackson-dataformat-xml = { group = 'com.fasterxml.jackson.dataformat', name = 'jackson-dataformat-xml', version.ref = 'jackson' }
 jackson-datatype-jdk8 = { group = 'com.fasterxml.jackson.datatype', name = 'jackson-datatype-jdk8', version.ref = 'jackson' }
 jackson-datatype-jsr310 = { group = 'com.fasterxml.jackson.datatype', name = 'jackson-datatype-jsr310', version.ref = 'jackson' }
@@ -98,6 +105,7 @@ junit-jupiter-api = { group = 'org.junit.jupiter', name = 'junit-jupiter-api', v
 junit-jupiter-engine = { group = 'org.junit.jupiter', name = 'junit-jupiter-engine', version.ref = 'jupiter' }
 junit-jupiter-params = { group = 'org.junit.jupiter', name = 'junit-jupiter-params', version.ref = 'jupiter' }
 junit-platform-launcher = { group = 'org.junit.platform', name = 'junit-platform-launcher', version.ref = 'jupiter-platform' }
+junit-platform-suite = { group = 'org.junit.platform', name = 'junit-platform-suite', version.ref = 'jupiter-platform' }
 mockito-core = { group = 'org.mockito', name = 'mockito-core', version.ref = 'mockito' }
 opensearch-java = { group = 'org.opensearch.client', name = 'opensearch-java', version.ref = 'opensearch-client' }
 opensearch-rest-client = { group = 'org.opensearch.client', name = 'opensearch-rest-client', version.ref = 'opensearch-client' }

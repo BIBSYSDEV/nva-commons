@@ -1,0 +1,35 @@
+plugins {
+    id 'com.diffplug.spotless'
+}
+
+spotless {
+    if (plugins.hasPlugin('java')) {
+        java {
+            toggleOffOn() // Ignores sections between `spotless:off` / `spotless:on`
+            googleJavaFormat().reflowLongStrings().formatJavadoc(true).reorderImports(true)
+        }
+    }
+
+    groovyGradle {
+        target '**/*.gradle'
+        greclipse()
+        leadingTabsToSpaces(4)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+
+    format 'misc', {
+        target '.gitignore', '.gitattributes', '.editorconfig', '**/*.md'
+        leadingTabsToSpaces(4)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+tasks.named('build').configure {
+    dependsOn('spotlessApply')
+}
+
+tasks.matching { it.name == 'test' }.configureEach {
+    dependsOn('spotlessApply')
+}

@@ -8,10 +8,6 @@ plugins {
     id 'idea'
 }
 
-
-group = 'com.github.bibsysdev'
-version = '2.3.5'
-
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
