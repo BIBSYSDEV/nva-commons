@@ -120,7 +120,7 @@ wiremock = { group = 'org.wiremock', name = 'wiremock', version.ref = 'wiremock'
 # IMPORTANT: Renaming or removing a plugin is a breaking change
 errorprone = { id = 'net.ltgt.errorprone', version.ref = 'errorprone-plugin' }
 gradle-versions = { id = 'com.github.ben-manes.versions', version.ref = 'ben-manes-versions' }
-nebula-lint = { id = "nebula.lint", version.ref = "nebula-lint" }
+nebula-lint = { id = 'nebula.lint', version.ref = 'nebula-lint' }
 nexus-publish = { id = 'io.github.gradle-nexus.publish-plugin', version.ref = 'nexus-publish' }
 spotless = { id = 'com.diffplug.spotless', version.ref = 'spotless' }
 
