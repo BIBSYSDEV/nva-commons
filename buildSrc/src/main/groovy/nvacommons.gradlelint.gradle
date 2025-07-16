@@ -1,5 +1,0 @@
-plugins {
-    id 'nebula.lint'
-}
-
-gradleLint.rules = ['unused-dependency']
