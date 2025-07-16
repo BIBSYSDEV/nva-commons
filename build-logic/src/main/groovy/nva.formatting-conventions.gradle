@@ -3,6 +3,8 @@ plugins {
 }
 
 spotless {
+    enforceCheck = false // Temporarily disable checking during build until the project is reformatted
+
     if (plugins.hasPlugin('java')) {
         java {
             toggleOffOn() // Ignores sections between `spotless:off` / `spotless:on`
@@ -26,10 +28,11 @@ spotless {
     }
 }
 
-tasks.named('build').configure {
-    dependsOn('spotlessApply')
-}
-
-tasks.matching { it.name == 'test' }.configureEach {
-    dependsOn('spotlessApply')
-}
+// Commented out for now, uncomment when the project is reformatted and ready to enforce the formatting rules
+//tasks.named('build').configure {
+//    dependsOn('spotlessApply')
+//}
+//
+//tasks.matching { it.name == 'test' }.configureEach {
+//    dependsOn('spotlessApply')
+//}
