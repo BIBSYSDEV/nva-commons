@@ -29,3 +29,16 @@ publishing {
         }
     }
 }
+
+// Workarounds to ensure `build-logic` is published with the main build
+afterEvaluate {
+    tasks.matching { it.name == 'publishToMavenLocal' }.configureEach {
+        dependsOn gradle.includedBuild('build-logic').task(':publishToMavenLocal')
+    }
+    tasks.matching { it.name == 'publishToSonatype' }.configureEach {
+        dependsOn gradle.includedBuild('build-logic').task(':publishToSonatype')
+    }
+    tasks.matching { it.name == 'signMavenJavaPublication' }.configureEach {
+        dependsOn gradle.includedBuild('build-logic').task(':signPluginMavenPublication')
+    }
+}
