@@ -2,4 +2,8 @@ plugins {
     id 'nebula.lint'
 }
 
-gradleLint.rules = ['unused-dependency', 'dependency-parentheses', 'dependency-tuple']
+gradleLint.rules = [
+    'unused-dependency',
+    'dependency-parentheses',
+    'dependency-tuple'
+]

@@ -1,12 +1,11 @@
 plugins {
     id 'java-library'
+    id 'nva.configuration'
     id 'nva.formatting-conventions'
     id 'jacoco'
     id 'pmd'
     id 'net.ltgt.errorprone'
 }
-
-pmd.toolVersion = '7.15.0'
 
 java {
     toolchain {
@@ -22,10 +21,13 @@ tasks.withType(JavaCompile).configureEach {
     }
 }
 
-pmd {
-    ruleSetFiles = files(resources.text.fromString(getClass().getResourceAsStream('/pmd-ruleset.xml').text))
-    ruleSets = []
-    ignoreFailures = false
+afterEvaluate {
+    pmd {
+        toolVersion = nva.pmdVersion
+        ruleSetFiles = files(resources.text.fromString(getClass().getResourceAsStream('/pmd-ruleset.xml').text))
+        ruleSets = []
+        ignoreFailures = nva.pmdIgnoreFailures
+    }
 }
 
 tasks.named('test', Test) {

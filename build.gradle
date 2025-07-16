@@ -7,6 +7,10 @@ plugins {
 allprojects {
     group = project.property('GROUP')
     version = project.property('VERSION_NAME')
+    nva {
+        spotlessEnabled = false
+        spotlessEnforced = false
+    }
 }
 
 nexusPublishing {

@@ -1,0 +1,16 @@
+// Base extension for NVA convention plugins
+class NvaConventionsExtension {
+    // Centralized versions of tools (not supported by version catalog)
+    String pmdVersion = "7.15.0"
+    String jacocoVersion = "0.8.13"
+
+    // Optional configuration of convention plugins
+    boolean spotlessEnabled = true
+    boolean spotlessEnforced = true
+    boolean pmdIgnoreFailures = false
+}
+
+// Create the shared extension if it doesn't exist
+if (!extensions.findByName('nva')) {
+    extensions.create('nva', NvaConventionsExtension)
+}
