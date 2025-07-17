@@ -19,14 +19,7 @@ boolean isMainBranch() {
     return ((branch == "master" || branch == "main"))
 }
 
-signing {
-    if (isMainBranch()) {
-        def signingKey = findProperty("signingKey")
-        def signingPassword = findProperty("signingPassword")
-        useInMemoryPgpKeys(signingKey, signingPassword)
-        sign publishing.publications
-    }
-}
+rootProject.ext.isMainBranch = this.&isMainBranch
 
 ext.configureCommonPom = { MavenPom pom ->
     pom.name.set(project.name)

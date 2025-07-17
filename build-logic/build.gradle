@@ -2,6 +2,7 @@ plugins {
     id 'groovy-gradle-plugin'
     id 'maven-publish'
     id 'signing'
+    alias(libs.plugins.nexus.publish)
 }
 
 // Helper to turn a version‑catalog plugin alias into marker‑artifact coordinates <id>:<id>.gradle.plugin:<version>
@@ -19,15 +20,25 @@ dependencies {
     implementation(pluginNotation(libs.plugins.spotless))
 }
 
-// Apply shared publishing configuration
-apply from: '../gradle/shared-publish.gradle'
-group = gradle.parent.rootProject.property('GROUP')
-version = gradle.parent.rootProject.property('VERSION_NAME')
+group = gradle.parent.rootProject.getProperty('GROUP')
+version = gradle.parent.rootProject.getProperty('VERSION_NAME')
 
+// Configure publishing (included build doesn't inherit root config)
+apply from: "${rootDir}/../gradle/shared-publish.gradle"
 publishing {
-    publications {
-        all {
-            pom(configureCommonPom)
-        }
+    publications.withType(MavenPublication).configureEach {
+        artifactId = project.name
+        pom(configureCommonPom)
     }
+}
+
+signing {
+    required = isMainBranch()
+    useInMemoryPgpKeys(findProperty('signingKey'),
+            findProperty('signingPassword'))
+    sign publishing.publications
+}
+
+nexusPublishing {
+    repositories { sonatype() }
 }
