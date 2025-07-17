@@ -1,6 +1,5 @@
 plugins {
-    id 'maven-publish'
-    id 'signing'
+    id 'nvacommons.publish-artifact'
 }
 
 /***********************************ATTENTION*******************************************************
@@ -18,6 +17,7 @@ publishing {
         mavenJava(MavenPublication) {
             artifactId = project.name
             from components.java
+            pom(configureCommonPom)
             versionMapping {
                 usage('java-api') {
                     fromResolutionOf('runtimeClasspath')

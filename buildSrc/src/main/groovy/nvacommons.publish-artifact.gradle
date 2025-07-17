@@ -8,27 +8,11 @@ plugins {
  Part of the maven publishing configuration has to be in the root project (nvacommons.root.gradle)
  ************************************ ATTENTION*****************************************************/
 
-def gitBranch() {
-    def branch = ""
-    def proc = "git rev-parse --abbrev-ref HEAD".execute()
-    proc.in.eachLine { line -> branch = line }
-    proc.err.eachLine { line -> println line }
-    proc.waitFor()
-    branch
-}
-
-boolean isMainBranch() {
-    def branch = gitBranch()
-    return ((branch == "master" || branch == "main"))
-}
-
 signing {
-    if (isMainBranch()) {
-        def signingKey = findProperty("signingKey")
-        def signingPassword = findProperty("signingPassword")
-        useInMemoryPgpKeys(signingKey, signingPassword)
-        sign publishing.publications
-    }
+    required = { project.hasProperty("signingKey") }
+    useInMemoryPgpKeys(findProperty('signingKey'),
+            findProperty('signingPassword'))
+    sign publishing.publications
 }
 
 ext.configureCommonPom = { MavenPom pom ->
@@ -53,5 +37,14 @@ ext.configureCommonPom = { MavenPom pom ->
         connection.set('scm:git:git://github.com/BIBSYSDEV/nva-commons.git')
         developerConnection.set('scm:git:ssh://github.com/BIBSYSDEV/nva-commons.git')
         url.set('https://github.com/BIBSYSDEV/nva-commons/tree/main')
+    }
+}
+
+afterEvaluate {
+    tasks.named('publishToMavenLocal') {
+        dependsOn(gradle.includedBuild('build-logic').task(':publishToMavenLocal'))
+    }
+    tasks.named("publishToSonatype") {
+        dependsOn(gradle.includedBuild("build-logic").task(":publishToSonatype"))
     }
 }
