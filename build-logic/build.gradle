@@ -34,8 +34,8 @@ publishing {
 
 signing {
     required = { project.hasProperty("signingKey") }
-    useInMemoryPgpKeys(getProperty('signingKey'),
-            getProperty('signingPassword'))
+    useInMemoryPgpKeys(findProperty('signingKey'),
+            findProperty('signingPassword'))
     sign publishing.publications
 }
 
