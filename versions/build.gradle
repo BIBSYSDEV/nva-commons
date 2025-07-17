@@ -1,7 +1,8 @@
 plugins {
     id 'version-catalog'
     id 'nvacommons.java-conventions'
-    id 'nvacommons.publish-artifact'
+    id 'maven-publish'
+    id 'signing'
 }
 
 catalog {
@@ -12,11 +13,9 @@ catalog {
 
 publishing {
     publications {
-        // Publish the version catalog from the root project as a single artifact
-        versionCatalog(MavenPublication) {
-            artifactId = 'versions'
+        create("versionCatalog", MavenPublication)  {
+            artifactId = project.name
             from components.versionCatalog
-            pom(configureCommonPom)
         }
     }
 }

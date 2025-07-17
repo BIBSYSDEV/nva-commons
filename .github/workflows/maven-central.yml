@@ -33,4 +33,8 @@ jobs:
           ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.OSSRH_PASSWORD }}
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
-        run: ./gradlew signMavenJavaPublication publishToSonatype closeAndReleaseSonatypeStagingRepository
+        run: ./gradlew \
+          signMavenJavaPublication \
+          :build-logic:publishToSonatype \
+          publishToSonatype \
+          closeAndReleaseSonatypeStagingRepository

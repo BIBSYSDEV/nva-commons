@@ -1,15 +1,44 @@
 plugins {
     id 'nva.root-module-conventions'
+    id 'signing'
     alias(libs.plugins.nexus.publish)
     alias(libs.plugins.gradle.versions)
 }
 
 allprojects {
-    group = project.property('GROUP')
-    version = project.property('VERSION_NAME')
+    group = findProperty("GROUP")
+    version = findProperty("VERSION_NAME")
     nva {
         spotlessEnabled = false
         spotlessEnforced = false
+    }
+}
+
+// Configure publishing of each sub-project
+apply from: "$rootDir/gradle/shared-publish.gradle"
+subprojects {
+    plugins.withId('maven-publish') {
+        publishing {
+            publications.withType(MavenPublication).configureEach {
+                pom(configureCommonPom)
+            }
+        }
+
+        signing {
+            required = isMainBranch()
+            useInMemoryPgpKeys(findProperty('signingKey'),
+                    findProperty('signingPassword'))
+            sign publishing.publications
+        }
+
+        afterEvaluate {
+            tasks.named('publishToMavenLocal') {
+                dependsOn(gradle.includedBuild('build-logic').task(':publishToMavenLocal'))
+            }
+            tasks.named("publishToSonatype") {
+                dependsOn(gradle.includedBuild("build-logic").task(":publishToSonatype"))
+            }
+        }
     }
 }
 
