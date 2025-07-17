@@ -7,8 +7,12 @@ on: [push,pull_request]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+    env:
+      ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.OSSRH_USERNAME }}
+      ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.OSSRH_PASSWORD }}
+      ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
+      ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
 
     steps:
       - uses: actions/checkout@v3
@@ -39,3 +43,10 @@ jobs:
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: $(pwd)/build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml
+
+      - name: Verify artifacts
+        run: ./gradlew :build-logic:publishToMavenLocal publishToMavenLocal
+
+      - name: Publish artifacts
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: ./gradlew :build-logic:publishToSonatype publishToSonatype closeAndReleaseSonatypeStagingRepository
