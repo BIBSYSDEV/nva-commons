@@ -6,8 +6,8 @@ plugins {
 }
 
 allprojects {
-    group = findProperty("GROUP")
-    version = findProperty("VERSION_NAME")
+    group = getProperty("GROUP")
+    version = getProperty("VERSION_NAME")
     nva {
         spotlessEnabled = false
         spotlessEnforced = false

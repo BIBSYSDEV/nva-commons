@@ -20,8 +20,8 @@ dependencies {
     implementation(pluginNotation(libs.plugins.spotless))
 }
 
-group = gradle.parent.rootProject.findProperty('GROUP')
-version = gradle.parent.rootProject.findProperty('VERSION_NAME')
+group = gradle.parent.rootProject.getProperty('GROUP')
+version = gradle.parent.rootProject.getProperty('VERSION_NAME')
 
 // Configure publishing (included build doesn't inherit root config)
 apply from: "${rootDir}/../gradle/shared-publish.gradle"
