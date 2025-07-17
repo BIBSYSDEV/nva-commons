@@ -5,22 +5,6 @@
  * IMPORTANT: The consuming build.gradle must apply the 'maven-publish' and 'signing' plugins
  ************************************ ATTENTION*****************************************************/
 
-def gitBranch() {
-    def branch = ""
-    def proc = "git rev-parse --abbrev-ref HEAD".execute()
-    proc.in.eachLine { line -> branch = line }
-    proc.err.eachLine { line -> println line }
-    proc.waitFor()
-    branch
-}
-
-boolean isMainBranch() {
-    def branch = gitBranch()
-    return ((branch == "master" || branch == "main"))
-}
-
-rootProject.ext.isMainBranch = this.&isMainBranch
-
 ext.configureCommonPom = { MavenPom pom ->
     pom.name.set(project.name)
     pom.description.set('A common library for the NVA project')

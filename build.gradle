@@ -14,33 +14,8 @@ allprojects {
     }
 }
 
-// Configure publishing of each sub-project
+// Load method to configure publishing of each sub-project
 apply from: "$rootDir/gradle/shared-publish.gradle"
-subprojects {
-    plugins.withId('maven-publish') {
-        publishing {
-            publications.withType(MavenPublication).configureEach {
-                pom(configureCommonPom)
-            }
-        }
-
-        signing {
-            required = isMainBranch()
-            useInMemoryPgpKeys(findProperty('signingKey'),
-                    findProperty('signingPassword'))
-            sign publishing.publications
-        }
-
-        afterEvaluate {
-            tasks.named('publishToMavenLocal') {
-                dependsOn(gradle.includedBuild('build-logic').task(':publishToMavenLocal'))
-            }
-            tasks.named("publishToSonatype") {
-                dependsOn(gradle.includedBuild("build-logic").task(":publishToSonatype"))
-            }
-        }
-    }
-}
 
 nexusPublishing {
     repositories {
