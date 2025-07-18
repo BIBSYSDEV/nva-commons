@@ -33,9 +33,9 @@ publishing {
 }
 
 signing {
-    required = { gradle.parent.rootProject.hasProperty("signingKey") }
-    useInMemoryPgpKeys(gradle.parent.rootProject.findProperty('signingKey'),
-            gradle.parent.rootProject.findProperty('signingPassword'))
+    required = { project.hasProperty("signingKey") }
+    useInMemoryPgpKeys(findProperty('signingKey'),
+            findProperty('signingPassword'))
     sign publishing.publications
 }
 
