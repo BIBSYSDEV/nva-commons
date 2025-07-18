@@ -39,12 +39,3 @@ ext.configureCommonPom = { MavenPom pom ->
         url.set('https://github.com/BIBSYSDEV/nva-commons/tree/main')
     }
 }
-
-afterEvaluate {
-    tasks.named('publishToMavenLocal') {
-        dependsOn(gradle.includedBuild('build-logic').task(':publishToMavenLocal'))
-    }
-    tasks.named("publishToSonatype") {
-        dependsOn(gradle.includedBuild("build-logic").task(":publishToSonatype"))
-    }
-}
