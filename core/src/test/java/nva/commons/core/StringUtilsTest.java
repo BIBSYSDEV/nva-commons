@@ -136,6 +136,15 @@ public class StringUtilsTest {
         assertThat(actualContent, is(equalTo(sample)));
     }
 
+    @Test
+    void shouldRemoveXmlTagsFromString() {
+        var string = "Territorial expansion of the European Ips species in the 20<sup>th</sup> century - a review";
+        var updatedString = StringUtils.removeXmlTags(string);
+        var expected = "Territorial expansion of the European Ips species in the 20th century - a review";
+
+        assertThat(updatedString, is(equalTo(expected)));
+    }
+
     static Stream<String> blankStrings() {
         return Stream.of(EMPTY_STRING,
             BLANK_STRING,
