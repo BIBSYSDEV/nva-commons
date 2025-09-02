@@ -80,7 +80,7 @@ jackson-jr-objects = { group = 'com.fasterxml.jackson.jr', name = 'jackson-jr-ob
 jackson-module-parameter-names = { group = 'com.fasterxml.jackson.module', name = 'jackson-module-parameter-names', version.ref = 'jackson' }
 jena-arq = { group = 'org.apache.jena', name = 'jena-arq', version.ref = 'jena' }
 jena-core = { group = 'org.apache.jena', name = 'jena-core', version.ref = 'jena' }
-jena-shaql = { group = 'org.apache.jena', name = 'jena-shacl', version.ref = 'jena'}
+jena-shacl = { group = 'org.apache.jena', name = 'jena-shacl', version.ref = 'jena'}
 opencsv = { group = 'com.opencsv', name = 'opencsv', version.ref = 'opencsv' }
 zalando = { group = 'org.zalando', name = 'problem', version.ref = 'zalando-problem' }
 
