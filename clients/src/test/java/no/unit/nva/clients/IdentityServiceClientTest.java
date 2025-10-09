@@ -364,12 +364,12 @@ class IdentityServiceClientTest {
     private CustomerDto createCustomerWithCristinId(URI customerCristinId) {
         return new CustomerDto(randomUri(), UUID.randomUUID(), randomString(), randomString(), randomString(),
                                customerCristinId, null, false, false, false, null,
-                               new RightsRetentionStrategy(randomString(), randomUri()));
+                               new RightsRetentionStrategy(randomString(), randomUri()), true);
     }
 
     private CustomerDto createCustomer(URI customerId) {
         return new CustomerDto(customerId, UUID.randomUUID(), randomString(), randomString(), randomString(),
-                               randomUri(), null, false, false, false, null, null);
+                               randomUri(), null, false, false, false, null, null, false);
     }
 
     private UserDto createUser(String userName) {

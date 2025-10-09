@@ -9,7 +9,8 @@ import no.unit.nva.commons.json.JsonSerializable;
 public record CustomerDto(@JsonProperty("id") URI id, UUID identifier, String name, String displayName,
                           String shortName, URI cristinId, String publicationWorkflow, boolean nviInstitution,
                           boolean rboInstitution, boolean generalSupportEnabled,
-                          List<String> allowFileUploadForTypes, RightsRetentionStrategy rightsRetentionStrategy)
+                          List<String> allowFileUploadForTypes, RightsRetentionStrategy rightsRetentionStrategy,
+                          boolean autoPublishScopusImportFiles)
     implements JsonSerializable {
 
     public record RightsRetentionStrategy(String type, URI id) {
