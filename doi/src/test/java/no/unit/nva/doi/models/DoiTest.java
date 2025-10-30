@@ -125,6 +125,14 @@ class DoiTest {
         assertThat(parsedDoi.getStandardizedUri(), is(equalTo(expectedDoi)));
     }
 
+    @Test
+    void shouldExtractPrefixWhenPrefixIsRequested() {
+        var prefix = "10.1000";
+        var doi = Doi.fromPrefixAndSuffix(Doi.DEFAULT_HOST, prefix, randomString());
+        var actual = doi.getPrefix();
+        assertThat(actual, is(equalTo(prefix)));
+    }
+
     private URI createExpectedSandboxDoiUri(URI seedValue, String hostOfSandboxEnvironment) throws URISyntaxException {
         return new URI(UriWrapper.HTTPS, hostOfSandboxEnvironment, seedValue.getPath(), DoiTest.EMPTY_FRAGMENT);
     }

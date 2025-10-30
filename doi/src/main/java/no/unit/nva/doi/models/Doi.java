@@ -98,4 +98,8 @@ public class Doi {
     private boolean isDoiUri() {
         return DOI_SCHEME.equalsIgnoreCase(uri.getScheme()) || DOC_SCHEME.equalsIgnoreCase(uri.getScheme());
     }
+
+    public String getPrefix() {
+        return UriWrapper.fromUri(uri).getPath().getPathElementByIndexFromEnd(1);
+    }
 }
