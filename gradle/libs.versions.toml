@@ -23,9 +23,9 @@ errorprone-plugin = { strictly = '4.1.0' }
 guava = { strictly = '33.5.0-jre' }
 hamcrest = { strictly = '3.0' }
 jackson = { strictly = '2.19.1' }
-jena = { strictly = '5.4.0' }
-jupiter = { strictly = '5.13.3' }
-jupiter-platform = { strictly = '1.13.3' } # Keep minor & patch version in sync with `jupiter`
+jena = { strictly = '5.6.0' }
+jupiter = { strictly = '5.14.1' }
+jupiter-platform = { strictly = '1.14.1' } # Keep minor & patch version in sync with `jupiter`
 lambda-log4j = { strictly = '1.6.0' }
 log4j = { strictly = '2.25.2' }
 mockito = { strictly = '5.20.0' }
