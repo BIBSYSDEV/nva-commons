@@ -22,7 +22,8 @@ errorprone = { strictly = '2.37.0' }
 errorprone-plugin = { strictly = '4.1.0' }
 guava = { strictly = '33.5.0-jre' }
 hamcrest = { strictly = '3.0' }
-jackson = { strictly = '2.19.1' }
+jackson = { strictly = '2.20.0' }
+jackson-annotations = { strictly = '2.20' }
 jena = { strictly = '5.6.0' }
 jupiter = { strictly = '5.14.1' }
 jupiter-platform = { strictly = '1.14.1' } # Keep minor & patch version in sync with `jupiter`
@@ -36,7 +37,7 @@ opensearch-client = { strictly = '3.1.0' }
 opensearch-testcontainer = { strictly = '3.0.1' }
 slf4j = { strictly = '2.0.17' }
 spotless = { strictly = '7.1.0' }
-testcontainers = { strictly = '1.21.3' }
+testcontainers = { strictly = '2.0.2' }
 wiremock = { strictly = '4.0.0-beta.14' }
 zalando-problem = { strictly = '0.27.1' }
 
@@ -67,7 +68,7 @@ com-auth0-jwt = { group = 'com.auth0', name = 'java-jwt', version.ref = 'com-aut
 commons-lang = { group = 'org.apache.commons', name = 'commons-lang3', version.ref = 'apache-commons' }
 commons-validator = { group = 'commons-validator', name = 'commons-validator', version.ref = 'commons-validator' }
 guava = { group = 'com.google.guava', name = 'guava', version.ref = 'guava' }
-jackson-annotations = { group = 'com.fasterxml.jackson.core', name = 'jackson-annotations', version.ref = 'jackson' }
+jackson-annotations = { group = 'com.fasterxml.jackson.core', name = 'jackson-annotations', version.ref = 'jackson-annotations' }
 jackson-core = { group = 'com.fasterxml.jackson.core', name = 'jackson-core', version.ref = 'jackson' }
 jackson-databind = { group = 'com.fasterxml.jackson.core', name = 'jackson-databind', version.ref = 'jackson' }
 jackson-dataformat-csv = { group = 'com.fasterxml.jackson.dataformat', name = 'jackson-dataformat-csv', version.ref = 'jackson' }
@@ -113,7 +114,7 @@ mockito-core = { group = 'org.mockito', name = 'mockito-core', version.ref = 'mo
 opensearch-java = { group = 'org.opensearch.client', name = 'opensearch-java', version.ref = 'opensearch-client' }
 opensearch-rest-client = { group = 'org.opensearch.client', name = 'opensearch-rest-client', version.ref = 'opensearch-client' }
 testcontainers = { group = 'org.testcontainers', name = 'testcontainers', version.ref = 'testcontainers' }
-testcontainers-junit = { group = 'org.testcontainers', name = 'junit-jupiter', version.ref = 'testcontainers' }
+testcontainers-junit = { group = 'org.testcontainers', name = 'testcontainers-junit-jupiter', version.ref = 'testcontainers' }
 testcontainers-opensearch = { group = 'org.opensearch', name = 'opensearch-testcontainers', version.ref = 'opensearch-testcontainer' }
 wiremock = { group = 'org.wiremock', name = 'wiremock', version.ref = 'wiremock' }
 
