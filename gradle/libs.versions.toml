@@ -24,6 +24,7 @@ guava = { strictly = '33.5.0-jre' }
 hamcrest = { strictly = '3.0' }
 jackson = { strictly = '2.20.0' }
 jackson-annotations = { strictly = '2.20' }
+javers = { strictly = '7.8.0' }
 jena = { strictly = '5.6.0' }
 jupiter = { strictly = '5.14.1' }
 jupiter-platform = { strictly = '1.14.1' } # Keep minor & patch version in sync with `jupiter`
@@ -52,17 +53,22 @@ aws-java-sdk-core = { group = 'com.amazonaws', name = 'aws-java-sdk-core', versi
 aws-lambda-core = { group = 'com.amazonaws', name = 'aws-lambda-java-core', version.ref = 'aws-lambda-core' }
 aws-lambda-events = { group = 'com.amazonaws', name = 'aws-lambda-java-events', version.ref = 'aws-lambda-events' }
 aws-sdk-dynamo = { group = 'com.amazonaws', name = 'aws-java-sdk-dynamodb', version.ref = 'aws-sdk' }
+aws-sdk-apigateway = { group = 'com.amazonaws', name = 'aws-java-sdk-api-gateway', version.ref = 'aws-sdk' }
+aws-sdk-sqs = {group = 'com.amazonaws', name = 'aws-java-sdk-sqs', version.ref = 'aws-sdk'}
+aws-sdk2-auth = { group = 'software.amazon.awssdk', name = 'auth', version.ref = 'aws-sdk2' }
 aws-sdk2-core = { group = 'software.amazon.awssdk', name = 'sdk-core', version.ref = 'aws-sdk2' }
 aws-sdk2-dynamo = { group = 'software.amazon.awssdk', name = 'dynamodb', version.ref = 'aws-sdk2' }
 aws-sdk2-dynamodbenhanced = { group = 'software.amazon.awssdk', name = 'dynamodb-enhanced', version.ref = 'aws-sdk2' }
 aws-sdk2-eventbridge = { group = 'software.amazon.awssdk', name = 'eventbridge', version.ref = 'aws-sdk2' }
 aws-sdk2-firehose = { group = 'software.amazon.awssdk', name = 'firehose', version.ref = 'aws-sdk2' }
+aws-sdk2-http-client = { group = 'software.amazon.awssdk', name = 'http-client-spi', version.ref = 'aws-sdk2' }
 aws-sdk2-regions = { group = 'software.amazon.awssdk', name = 'regions', version.ref = 'aws-sdk2' }
 aws-sdk2-s3 = { group = 'software.amazon.awssdk', name = 's3', version.ref = 'aws-sdk2' }
 aws-sdk2-secrets = { group = 'software.amazon.awssdk', name = 'secretsmanager', version.ref = 'aws-sdk2' }
 aws-sdk2-sns = { group = 'software.amazon.awssdk', name = 'sns', version.ref = 'aws-sdk2' }
 aws-sdk2-sqs = { group = 'software.amazon.awssdk', name = 'sqs', version.ref = 'aws-sdk2' }
 aws-sdk2-urlconnection = { group = 'software.amazon.awssdk', name = 'url-connection-client', version.ref = 'aws-sdk2' }
+aws-sdk2-utils = { group = 'software.amazon.awssdk', name = 'utils', version.ref = 'aws-sdk2' }
 com-auth0-jwks = { group = 'com.auth0', name = 'jwks-rsa', version.ref = 'com-auth0-jwks' }
 com-auth0-jwt = { group = 'com.auth0', name = 'java-jwt', version.ref = 'com-auth0-jwt' }
 commons-lang = { group = 'org.apache.commons', name = 'commons-lang3', version.ref = 'apache-commons' }
@@ -79,6 +85,7 @@ jackson-datatype-problem = { group = 'org.zalando', name = 'jackson-datatype-pro
 jackson-jr-annotations = { group = 'com.fasterxml.jackson.jr', name = 'jackson-jr-annotation-support', version.ref = 'jackson' }
 jackson-jr-objects = { group = 'com.fasterxml.jackson.jr', name = 'jackson-jr-objects', version.ref = 'jackson' }
 jackson-module-parameter-names = { group = 'com.fasterxml.jackson.module', name = 'jackson-module-parameter-names', version.ref = 'jackson' }
+javers = { group = 'org.javers', name = 'javers-core', version.ref = 'javers' }
 jena-arq = { group = 'org.apache.jena', name = 'jena-arq', version.ref = 'jena' }
 jena-core = { group = 'org.apache.jena', name = 'jena-core', version.ref = 'jena' }
 jena-shacl = { group = 'org.apache.jena', name = 'jena-shacl', version.ref = 'jena'}
