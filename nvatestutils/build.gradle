@@ -16,6 +16,7 @@ dependencies {
     implementation libs.bundles.testing.hamcrest
     implementation libs.commons.lang
     implementation libs.datafaker
+    implementation libs.httpcore5
     implementation libs.aws.lambda.events
 
     implementation libs.aws.sdk2.s3
