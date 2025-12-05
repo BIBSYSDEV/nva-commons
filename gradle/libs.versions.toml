@@ -2,7 +2,8 @@
 # Renaming a component (library, plugin, or bundle) or upgrading major versions of dependencies
 # is a breaking change and should be reflected in our version number.
 [versions]
-apache-commons = { require = '3.19.0' }
+apache-commons = { require = '3.20.0' }
+apache-http-core = { strictly = '5.3.6' }
 apache-http-client = { strictly = '5.5.1' }
 apache-poi = { strictly = '5.4.1' }
 assertj = { strictly = '3.27.3' }
@@ -10,19 +11,19 @@ aws-ddb-local = { strictly = '2.6.1' }
 aws-ion = { strictly = '1.11.11' }
 aws-lambda-core = { strictly = '1.4.0' }
 aws-lambda-events = { strictly = '3.16.1' }
-aws-sdk = { strictly = '1.12.793' }
-aws-sdk2 = { strictly = '2.38.5' }
+aws-sdk = { strictly = '1.12.794' }
+aws-sdk2 = { strictly = '2.40.2' }
 ben-manes-versions = { strictly = '0.53.0' }
 com-auth0-jwks = { strictly = '0.23.0' }
 com-auth0-jwt = { strictly = '4.5.0' }
-commons-validator = { strictly = '1.10.0' }
+commons-validator = { strictly = '1.10.1' }
 cucumber = { strictly = '7.21.1' }
 datafaker = { strictly = '2.5.3' }
 errorprone = { strictly = '2.37.0' }
 errorprone-plugin = { strictly = '4.1.0' }
 guava = { strictly = '33.5.0-jre' }
 hamcrest = { strictly = '3.0' }
-jackson = { strictly = '2.20.0' }
+jackson = { strictly = '2.20.1' }
 jackson-annotations = { strictly = '2.20' }
 javers = { strictly = '7.8.0' }
 jena = { strictly = '5.6.0' }
@@ -39,7 +40,7 @@ opensearch-testcontainer = { strictly = '3.0.1' }
 slf4j = { strictly = '2.0.17' }
 spotless = { strictly = '7.1.0' }
 testcontainers = { strictly = '2.0.2' }
-wiremock = { strictly = '4.0.0-beta.14' }
+wiremock = { strictly = '4.0.0-beta.20' }
 zalando-problem = { strictly = '0.27.1' }
 
 [libraries]
@@ -74,6 +75,8 @@ com-auth0-jwt = { group = 'com.auth0', name = 'java-jwt', version.ref = 'com-aut
 commons-lang = { group = 'org.apache.commons', name = 'commons-lang3', version.ref = 'apache-commons' }
 commons-validator = { group = 'commons-validator', name = 'commons-validator', version.ref = 'commons-validator' }
 guava = { group = 'com.google.guava', name = 'guava', version.ref = 'guava' }
+httpclient5 = { group = 'org.apache.httpcomponents.client5', name = 'httpclient5', version.ref = 'apache-http-client' }
+httpcore5 = { group = 'org.apache.httpcomponents.core5', name = 'httpcore5', version.ref = 'apache-http-core' }
 jackson-annotations = { group = 'com.fasterxml.jackson.core', name = 'jackson-annotations', version.ref = 'jackson-annotations' }
 jackson-core = { group = 'com.fasterxml.jackson.core', name = 'jackson-core', version.ref = 'jackson' }
 jackson-databind = { group = 'com.fasterxml.jackson.core', name = 'jackson-databind', version.ref = 'jackson' }
@@ -110,7 +113,6 @@ cucumber-picocontainer = { group = 'io.cucumber', name = 'cucumber-picocontainer
 datafaker = { group = 'net.datafaker', name = 'datafaker', version.ref = 'datafaker' }
 hamcrest = { group = 'org.hamcrest', name = 'hamcrest', version.ref = 'hamcrest' }
 hamcrest-core = { group = 'org.hamcrest', name = 'hamcrest-core', version.ref = 'hamcrest' }
-httpclient5 = { group = 'org.apache.httpcomponents.client5', name = 'httpclient5', version.ref = 'apache-http-client' }
 junit-jupiter = { group = 'org.junit.jupiter', name = 'junit-jupiter', version.ref = 'jupiter' }
 junit-jupiter-api = { group = 'org.junit.jupiter', name = 'junit-jupiter-api', version.ref = 'jupiter' }
 junit-jupiter-engine = { group = 'org.junit.jupiter', name = 'junit-jupiter-engine', version.ref = 'jupiter' }
