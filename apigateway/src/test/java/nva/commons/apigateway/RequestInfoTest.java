@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_METHOD;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import com.fasterxml.jackson.core.JsonPointer;
@@ -96,6 +97,7 @@ class RequestInfoTest {
     private static final String EXTERNAL_USER_POOL_URL = "https//user-pool.example.com/123";
     private static final String THIRD_PARTY_PUBLICATION_UPSERT_SCOPE = "https://api.nva.unit"
                                                                        + ".no/scopes/third-party/publication-upsert";
+    public static final String EMPTY_JSON = "{}";
 
     static {
         QUERY_PARAMS_FOUND_IN_RESOURCE_FILE = new TreeMap<>();
@@ -784,6 +786,26 @@ class RequestInfoTest {
         var getViewingScope = requestInfo.getViewingScope();
         assertThat(getViewingScope.includes(), is(hasItems("1", "2")));
         assertThat(getViewingScope.excludes(), is(hasItems("3", "4")));
+    }
+
+    @Test
+    void shouldReturnOptionalEmptyWhenUserNameIsMissing() throws ApiIoException {
+        var emptyRequestInfo = RequestInfo.fromString(EMPTY_JSON);
+
+        var username = emptyRequestInfo.getUserNameOptional();
+
+        assertTrue(username.isEmpty());
+    }
+
+    @Test
+    void shouldReturnOptionalUserNameWhenPresent() {
+        var cognitoUserInfo = CognitoUserInfo.builder()
+                                   .withUserName(randomString())
+                                   .build();
+
+        var requestInfo = createRequestInfoWithAccessTokenThatHasOpenIdScope(cognitoUserInfo);
+
+        assertTrue(requestInfo.getUserNameOptional().isPresent());
     }
 
     public static Stream<Arguments> emptyViewingScopeInputsProvider() {

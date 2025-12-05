@@ -346,6 +346,11 @@ public final class RequestInfo {
     }
 
     @JsonIgnore
+    public Optional<String> getUserNameOptional()  {
+        return fetchUserName();
+    }
+
+    @JsonIgnore
     public String getCognitoUsername() throws UnauthorizedException {
         return fetchCognitoUsername().orElseThrow(UnauthorizedException::new);
     }
