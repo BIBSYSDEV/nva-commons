@@ -126,6 +126,7 @@ testcontainers = { group = 'org.testcontainers', name = 'testcontainers', versio
 testcontainers-junit = { group = 'org.testcontainers', name = 'testcontainers-junit-jupiter', version.ref = 'testcontainers' }
 testcontainers-opensearch = { group = 'org.opensearch', name = 'opensearch-testcontainers', version.ref = 'opensearch-testcontainer' }
 wiremock = { group = 'org.wiremock', name = 'wiremock', version.ref = 'wiremock' }
+wiremock-junit5 = { group = 'org.wiremock', name = 'wiremock-junit5', version.ref = 'wiremock' }
 
 [plugins]
 # IMPORTANT: Renaming or removing a plugin is a breaking change
@@ -166,3 +167,4 @@ testing-junit = [
     'junit-platform-launcher']
 testing-mockito = ['mockito-core']
 testing-testcontainers = ['testcontainers', 'testcontainers-junit', 'testcontainers-opensearch']
+wiremock = ['wiremock', 'wiremock-junit5']
