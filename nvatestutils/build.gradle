@@ -24,7 +24,7 @@ dependencies {
     implementation libs.aws.sdk2.eventbridge
     implementation libs.aws.sdk2.secrets
     implementation libs.guava
-    implementation libs.wiremock
+    implementation libs.bundles.wiremock
     implementation libs.bundles.jackson
     implementation libs.commons.validator
     implementation libs.com.auth0.jwt
