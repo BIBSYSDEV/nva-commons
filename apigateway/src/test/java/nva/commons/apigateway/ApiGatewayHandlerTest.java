@@ -13,6 +13,7 @@ import static no.unit.nva.testutils.TestHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
 import static no.unit.nva.testutils.TestHeaders.WILDCARD;
 import static nva.commons.apigateway.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
 import static nva.commons.apigateway.ApiGatewayHandler.ALL_ORIGINS_ALLOWED;
+import static nva.commons.apigateway.ApiGatewayHandler.CONFLICTING_KEYS;
 import static nva.commons.apigateway.ApiGatewayHandler.FALLBACK_ORIGIN;
 import static nva.commons.apigateway.ApiGatewayHandler.REQUEST_ID;
 import static nva.commons.apigateway.MediaTypes.APPLICATION_PROBLEM_JSON;
@@ -56,6 +57,7 @@ import no.unit.nva.commons.json.JsonSerializable;
 import no.unit.nva.stubs.FakeContext;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
+import nva.commons.apigateway.exceptions.ConflictException;
 import nva.commons.apigateway.exceptions.GoneException;
 import nva.commons.apigateway.exceptions.TestException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
@@ -322,6 +324,32 @@ class ApiGatewayHandlerTest {
         var problem = getProblemFromFailureResponse(outputStream);
 
         assertThat(problem.getParameters().get("resource"), is(nullValue()));
+    }
+
+    @Test
+    void shouldReturnProblemContainingConflictingKeysWhenConflictExceptionHasKeys() throws IOException {
+        var conflictingKeys = Map.of("sourceId", "12345", "organizationId", "org-789");
+        var handler = handlerThatThrowsConflictExceptionWithKeys(conflictingKeys);
+        var outputStream = outputStream();
+        handler.handleRequest(requestWithHeaders(), outputStream, context);
+        var problem = getProblemFromFailureResponse(outputStream);
+
+        assertThat(problem.getStatus(), is(Status.CONFLICT));
+        @SuppressWarnings("unchecked")
+        var returnedKeys = (Map<String, String>) problem.getParameters().get(CONFLICTING_KEYS);
+        assertThat(returnedKeys, hasEntry("sourceId", "12345"));
+        assertThat(returnedKeys, hasEntry("organizationId", "org-789"));
+    }
+
+    @Test
+    void problemShouldNotContainConflictingKeysWhenConflictExceptionHasNoKeys() throws IOException {
+        var handler = handlerThatThrowsConflictExceptionWithoutKeys();
+        var outputStream = outputStream();
+        handler.handleRequest(requestWithHeaders(), outputStream, context);
+        var problem = getProblemFromFailureResponse(outputStream);
+
+        assertThat(problem.getStatus(), is(Status.CONFLICT));
+        assertThat(problem.getParameters().containsKey(CONFLICTING_KEYS), is(false));
     }
 
     @Test
@@ -809,6 +837,26 @@ class ApiGatewayHandlerTest {
 
             private void throwGoneExceptionWithInstance() throws GoneException {
                 throw new GoneException("some message", customObject);
+            }
+        };
+    }
+
+    private Handler handlerThatThrowsConflictExceptionWithKeys(Map<String, String> conflictingKeys) {
+        return new Handler(environment) {
+            @Override
+            protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
+                throws ConflictException {
+                throw new ConflictException("Resource already exists", conflictingKeys);
+            }
+        };
+    }
+
+    private Handler handlerThatThrowsConflictExceptionWithoutKeys() {
+        return new Handler(environment) {
+            @Override
+            protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
+                throws ConflictException {
+                throw new ConflictException("Resource already exists");
             }
         };
     }
