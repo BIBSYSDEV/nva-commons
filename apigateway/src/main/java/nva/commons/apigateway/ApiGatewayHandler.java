@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.ApiGatewayUncheckedException;
+import nva.commons.apigateway.exceptions.ConflictException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
 import nva.commons.apigateway.exceptions.RedirectException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
@@ -46,6 +47,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     public static final String REQUEST_ID = "requestId";
     public static final Void EMPTY_BODY = null;
     public static final String RESOURCE = "resource";
+    public static final String CONFLICTING_KEYS = "conflictingKeys";
     public static final String ALL_ORIGINS_ALLOWED = "*";
     public static final String ORIGIN_DELIMITER = ",";
     public static final String FALLBACK_ORIGIN = "https://nva.sikt.no";
@@ -266,12 +268,20 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
                    .withDetail(errorMessage)
                    .with(REQUEST_ID, requestId)
                    .with(RESOURCE, getResource(exception))
+                   .with(CONFLICTING_KEYS, getConflictingKeys(exception))
                    .build();
     }
 
     private Object getResource(Exception exception) {
         return exception instanceof ApiGatewayException apiGatewayException
                    ? apiGatewayException.getInstance()
+                   : null;
+    }
+
+    private Map<String, String> getConflictingKeys(Exception exception) {
+        return exception instanceof ConflictException conflictException
+                   && !conflictException.getConflictingKeys().isEmpty()
+                   ? conflictException.getConflictingKeys()
                    : null;
     }
 
