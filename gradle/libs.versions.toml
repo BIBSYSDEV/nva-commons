@@ -3,7 +3,7 @@
 # is a breaking change and should be reflected in our version number.
 [versions]
 apache-commons = { require = '3.20.0' }
-apache-http-core = { strictly = '5.4' }
+apache-http-core = { strictly = '5.3.6' }
 apache-http-client = { strictly = '5.5.1' }
 apache-poi = { strictly = '5.5.1' }
 assertj = { strictly = '3.27.6' }
