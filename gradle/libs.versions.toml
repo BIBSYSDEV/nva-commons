@@ -5,22 +5,22 @@
 apache-commons = { require = '3.20.0' }
 apache-http-core = { strictly = '5.3.6' }
 apache-http-client = { strictly = '5.5.1' }
-apache-poi = { strictly = '5.4.1' }
-assertj = { strictly = '3.27.3' }
+apache-poi = { strictly = '5.5.1' }
+assertj = { strictly = '3.27.6' }
 aws-ddb-local = { strictly = '2.6.1' }
 aws-ion = { strictly = '1.11.11' }
 aws-lambda-core = { strictly = '1.4.0' }
 aws-lambda-events = { strictly = '3.16.1' }
-aws-sdk = { strictly = '1.12.794' }
-aws-sdk2 = { strictly = '2.40.2' }
+aws-sdk = { strictly = '1.12.795' }
+aws-sdk2 = { strictly = '2.40.9' }
 ben-manes-versions = { strictly = '0.53.0' }
 com-auth0-jwks = { strictly = '0.23.0' }
 com-auth0-jwt = { strictly = '4.5.0' }
 commons-validator = { strictly = '1.10.1' }
-cucumber = { strictly = '7.21.1' }
+cucumber = { strictly = '7.33.0' }
 datafaker = { strictly = '2.5.3' }
-errorprone = { strictly = '2.37.0' }
-errorprone-plugin = { strictly = '4.1.0' }
+errorprone = { strictly = '2.45.0' }
+errorprone-plugin = { strictly = '4.3.0' }
 guava = { strictly = '33.5.0-jre' }
 hamcrest = { strictly = '3.0' }
 jackson = { strictly = '2.20.1' }
@@ -31,16 +31,17 @@ jupiter = { strictly = '5.14.1' }
 jupiter-platform = { strictly = '1.14.1' } # Keep minor & patch version in sync with `jupiter`
 lambda-log4j = { strictly = '1.6.0' }
 log4j = { strictly = '2.25.2' }
-mockito = { strictly = '5.20.0' }
+mockito = { strictly = '5.21.0' }
 nebula-lint = { strictly = '20.5.6' }
 nexus-publish = { strictly = '2.0.0' }
-opencsv = { strictly = '5.11.2' }
-opensearch-client = { strictly = '3.1.0' }
-opensearch-testcontainer = { strictly = '3.0.1' }
+opencsv = { strictly = '5.12.0' }
+opensearch-java = { strictly = '3.4.0' }
+opensearch-rest = { strictly = '3.3.2' }
+opensearch-testcontainer = { strictly = '4.0.0' }
 slf4j = { strictly = '2.0.17' }
-spotless = { strictly = '7.1.0' }
-testcontainers = { strictly = '2.0.2' }
-wiremock = { strictly = '4.0.0-beta.20' }
+spotless = { strictly = '8.1.0' }
+testcontainers = { strictly = '2.0.3' }
+wiremock = { strictly = '4.0.0-beta.22' }
 zalando-problem = { strictly = '0.27.1' }
 
 [libraries]
@@ -120,8 +121,8 @@ junit-jupiter-params = { group = 'org.junit.jupiter', name = 'junit-jupiter-para
 junit-platform-launcher = { group = 'org.junit.platform', name = 'junit-platform-launcher', version.ref = 'jupiter-platform' }
 junit-platform-suite = { group = 'org.junit.platform', name = 'junit-platform-suite', version.ref = 'jupiter-platform' }
 mockito-core = { group = 'org.mockito', name = 'mockito-core', version.ref = 'mockito' }
-opensearch-java = { group = 'org.opensearch.client', name = 'opensearch-java', version.ref = 'opensearch-client' }
-opensearch-rest-client = { group = 'org.opensearch.client', name = 'opensearch-rest-client', version.ref = 'opensearch-client' }
+opensearch-java = { group = 'org.opensearch.client', name = 'opensearch-java', version.ref = 'opensearch-java' }
+opensearch-rest-client = { group = 'org.opensearch.client', name = 'opensearch-rest-client', version.ref = 'opensearch-rest' }
 testcontainers = { group = 'org.testcontainers', name = 'testcontainers', version.ref = 'testcontainers' }
 testcontainers-junit = { group = 'org.testcontainers', name = 'testcontainers-junit-jupiter', version.ref = 'testcontainers' }
 testcontainers-opensearch = { group = 'org.opensearch', name = 'opensearch-testcontainers', version.ref = 'opensearch-testcontainer' }
