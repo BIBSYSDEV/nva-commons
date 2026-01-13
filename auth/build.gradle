@@ -18,7 +18,6 @@ dependencies {
 
     implementation libs.com.auth0.jwt
 
-    implementation libs.aws.java.sdk.core
     implementation libs.aws.sdk2.secrets
 
     testImplementation libs.bundles.testing.junit

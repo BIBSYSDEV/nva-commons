@@ -18,7 +18,10 @@ import software.amazon.awssdk.services.eventbridge.model.PutEventsRequestEntry;
  * startMarker} is a scan start marker as required by the DynamoDb client. The {@code pageSize} is the number of the
  * results the scan will return (max 1000). The {@code topic} is the event topic that the handler is listening for
  * events.
+ *
+ * @deprecated Use {@link ScanDatabaseRequestV2} instead, which uses AWS SDK v2 DynamoDB types.
  */
+@Deprecated
 public class ScanDatabaseRequest implements EventBody, JsonSerializable {
 
     public static final String START_MARKER = "startMarker";

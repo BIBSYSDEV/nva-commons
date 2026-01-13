@@ -7,10 +7,15 @@ dependencies {
     implementation project(":core")
     implementation project(":json")
 
+    // SDK v1 - deprecated, kept for backward compatibility
     api(libs.aws.sdk.dynamo) {
         exclude(group: 'com.amazonaws', module: 'aws-java-sdk-s3')
         exclude(group: 'com.amazonaws', module: 'jmespath-java')
     }
+    // SDK v2 - preferred
+    api libs.aws.sdk2.dynamo
+    api libs.aws.sdk2.core
+
     api libs.aws.lambda.events
 
     testImplementation libs.bundles.testing.junit

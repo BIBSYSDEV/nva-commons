@@ -16,6 +16,12 @@ import java.util.Map;
 import java.util.Set;
 import nva.commons.core.JacocoGenerated;
 
+/**
+ * Utility class for mapping AWS SDK v1 DynamoDB AttributeValue maps to JSON.
+ *
+ * @deprecated Use {@link ItemMapperV2} instead, which uses AWS SDK v2 DynamoDB types.
+ */
+@Deprecated
 public final class ItemMapper {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();

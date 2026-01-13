@@ -3,10 +3,6 @@ package no.unit.nva.events.examples;
 import static nva.commons.utils.JsonUtils.objectMapper;
 import static nva.commons.utils.attempt.Try.attempt;
 
-import com.amazonaws.services.eventbridge.AmazonEventBridge;
-import com.amazonaws.services.eventbridge.AmazonEventBridgeClientBuilder;
-import com.amazonaws.services.eventbridge.model.PutEventsRequest;
-import com.amazonaws.services.eventbridge.model.PutEventsRequestEntry;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import java.io.BufferedWriter;
@@ -24,6 +20,9 @@ import nva.commons.utils.attempt.Failure;
 import nva.commons.utils.attempt.FunctionWithException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.eventbridge.EventBridgeClient;
+import software.amazon.awssdk.services.eventbridge.model.PutEventsRequest;
+import software.amazon.awssdk.services.eventbridge.model.PutEventsRequestEntry;
 
 /**
  * The classes {@link EventProducer}, {@link EventConducer} ,and {@link DestinationsEventConsumer} are a demo of the
@@ -48,15 +47,15 @@ public class EventProducer implements RequestStreamHandler {
     public static final String DEFAULT_MESSAGE = "success";
 
     private final Environment environment;
-    private final AmazonEventBridge eventBridgeClient;
+    private final EventBridgeClient eventBridgeClient;
 
     @JacocoGenerated
     public EventProducer() {
-        this(new Environment(), AmazonEventBridgeClientBuilder.defaultClient());
+        this(new Environment(), EventBridgeClient.create());
     }
 
     @JacocoGenerated
-    public EventProducer(Environment environment, AmazonEventBridge eventBridgeClient) {
+    public EventProducer(Environment environment, EventBridgeClient eventBridgeClient) {
         this.environment = environment;
         this.eventBridgeClient = eventBridgeClient;
     }
@@ -102,13 +101,16 @@ public class EventProducer implements RequestStreamHandler {
     @JacocoGenerated
     private void putEventDirectlyToEventBridge(DataciteDoiRequest dataciteDoiRequest) {
         logger.info("Putting event directly to eventbridge");
-        PutEventsRequestEntry putEventsRequestEntry = new PutEventsRequestEntry()
-            .withDetail(dataciteDoiRequest.toString())
-            .withEventBusName(environment.readEnv(EVENT_BUS_ENV_VAR))
-            .withSource(SOURCE)
-            .withDetailType(dataciteDoiRequest.getType());
+        var putEventsRequestEntry = PutEventsRequestEntry.builder()
+            .detail(dataciteDoiRequest.toString())
+            .eventBusName(environment.readEnv(EVENT_BUS_ENV_VAR))
+            .source(SOURCE)
+            .detailType(dataciteDoiRequest.getType())
+            .build();
 
-        PutEventsRequest putEventsRequest = new PutEventsRequest().withEntries(putEventsRequestEntry);
+        var putEventsRequest = PutEventsRequest.builder()
+            .entries(putEventsRequestEntry)
+            .build();
         eventBridgeClient.putEvents(putEventsRequest);
     }
 

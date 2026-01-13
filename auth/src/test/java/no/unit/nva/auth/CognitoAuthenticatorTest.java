@@ -1,11 +1,9 @@
 package no.unit.nva.auth;
 
-import static com.amazonaws.auth.internal.SignerConstants.AUTHORIZATION;
 import static java.net.HttpURLConnection.HTTP_FORBIDDEN;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static no.unit.nva.auth.AuthorizedBackendClient.APPLICATION_X_WWW_FORM_URLENCODED;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
-import static org.apache.http.protocol.HTTP.CONTENT_TYPE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -84,8 +82,8 @@ class CognitoAuthenticatorTest {
 
         var expectedRequest = HttpRequest.newBuilder()
                                   .uri(uri)
-                                  .setHeader(AUTHORIZATION, "Basic " + encodedAuth)
-                                  .setHeader(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
+                                  .setHeader("Authorization", "Basic " + encodedAuth)
+                                  .setHeader("Content-Type", APPLICATION_X_WWW_FORM_URLENCODED)
                                   .POST(BodyPublishers.noBody())
                                   .build();
 

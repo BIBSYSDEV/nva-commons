@@ -1,10 +1,8 @@
 package no.unit.nva.auth;
 
-import static com.amazonaws.auth.internal.SignerConstants.AUTHORIZATION;
 import static java.util.Objects.isNull;
 import static no.unit.nva.auth.AuthorizedBackendClient.APPLICATION_X_WWW_FORM_URLENCODED;
 import static nva.commons.core.attempt.Try.attempt;
-import static org.apache.http.protocol.HTTP.CONTENT_TYPE;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.jr.ob.JSON;
@@ -27,6 +25,8 @@ public class CognitoAuthenticator {
     public static final String BASIC_AUTH_HEADER_TEMPLATE = "%s %s";
     public static final String GRANT_TYPE_CLIENT_CREDENTIALS = "grant_type=client_credentials";
     public static final String JWT_TOKEN_FIELD = "access_token";
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
     private final CognitoCredentials credentials;
     private final HttpClient httpClient;
 
@@ -99,8 +99,8 @@ public class CognitoAuthenticator {
 
     private HttpRequest formatRequestForJwtToken(URI tokenUri) {
         return HttpRequest.newBuilder(tokenUri)
-                   .setHeader(AUTHORIZATION, formatBasicAuthenticationHeader())
-                   .setHeader(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
+                   .setHeader(AUTHORIZATION_HEADER, formatBasicAuthenticationHeader())
+                   .setHeader(CONTENT_TYPE_HEADER, APPLICATION_X_WWW_FORM_URLENCODED)
                    .POST(clientCredentialsAuthType())
                    .build();
     }
