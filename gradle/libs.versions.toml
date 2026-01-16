@@ -70,6 +70,7 @@ aws-sdk2-sns = { group = 'software.amazon.awssdk', name = 'sns', version.ref = '
 aws-sdk2-sqs = { group = 'software.amazon.awssdk', name = 'sqs', version.ref = 'aws-sdk2' }
 aws-sdk2-urlconnection = { group = 'software.amazon.awssdk', name = 'url-connection-client', version.ref = 'aws-sdk2' }
 aws-sdk2-utils = { group = 'software.amazon.awssdk', name = 'utils', version.ref = 'aws-sdk2' }
+aws-sdk2-netty = { group = 'software.amazon.awssdk', name = 'netty-nio-client', version.ref = 'aws-sdk2' }
 com-auth0-jwks = { group = 'com.auth0', name = 'jwks-rsa', version.ref = 'com-auth0-jwks' }
 com-auth0-jwt = { group = 'com.auth0', name = 'java-jwt', version.ref = 'com-auth0-jwt' }
 commons-lang = { group = 'org.apache.commons', name = 'commons-lang3', version.ref = 'apache-commons' }

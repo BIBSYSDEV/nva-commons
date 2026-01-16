@@ -8,6 +8,7 @@ dependencies {
     implementation project (":json")
     implementation libs.aws.sdk2.s3
     implementation libs.aws.sdk2.core
+    implementation libs.aws.sdk2.netty
     implementation libs.aws.ion
 
     implementation libs.bundles.jackson
