@@ -103,9 +103,6 @@ public final class S3DriverAsync {
         return s3Utilities.parseUri(uri);
     }
 
-    /**
-     * Fetch a single file from S3 URI and return as string.
-     */
     private CompletableFuture<S3FetchResult<String>> fetchFileAsync(S3Uri s3Uri) {
         var bucket = getBucket(s3Uri).orElseThrow();
         var key = getKey(s3Uri).orElseThrow();
