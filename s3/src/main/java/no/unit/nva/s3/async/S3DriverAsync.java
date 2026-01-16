@@ -22,7 +22,6 @@ import software.amazon.awssdk.core.async.AsyncResponseTransformer;
 import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Uri;
-import software.amazon.awssdk.services.s3.S3Utilities;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
@@ -33,11 +32,9 @@ public final class S3DriverAsync {
     private static final String GZIP_EXTENSION = ".gz";
 
     private final S3AsyncClient s3AsyncClient;
-    private final S3Utilities s3Utilities;
 
     public S3DriverAsync(S3AsyncClient s3AsyncClient) {
         this.s3AsyncClient = s3AsyncClient;
-        this.s3Utilities = s3AsyncClient.utilities();
     }
 
     @JacocoGenerated
@@ -97,7 +94,7 @@ public final class S3DriverAsync {
     private S3Uri convertToS3Uri(URI uri) {
         ensureBucketIsPresent(uri);
         ensureKeyIsPresent(uri);
-        return s3Utilities.parseUri(uri);
+        return s3AsyncClient.utilities().parseUri(uri);
     }
 
     private CompletableFuture<S3FetchResult<String>> fetchFileAsync(S3Uri s3Uri) {

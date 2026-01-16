@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import nva.commons.core.JacocoGenerated;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.async.AsyncResponseTransformer;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Utilities;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
@@ -31,7 +32,7 @@ public class FakeS3AsyncClient implements S3AsyncClient {
 
     @Override
     public S3Utilities utilities() {
-        return S3AsyncClient.builder().build().utilities();
+        return S3Utilities.builder().region(Region.EU_WEST_1).build();
     }
 
     @Override
