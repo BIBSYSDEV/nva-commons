@@ -28,9 +28,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 public final class S3DriverAsync {
 
-    private static final int MAX_CONCURRENT_S3_READS = 200;
     private static final int DEFAULT_CONNECTION_TIMEOUT = 5;
-    private static final int DEFAULT_READ_TIMEOUT = 60;
     private static final String DECOMPRESSION_FAILURE_MESSAGE = "Failed to decompress gzip content";
     private static final String GZIP_EXTENSION = ".gz";
 
@@ -43,13 +41,12 @@ public final class S3DriverAsync {
     }
 
     @JacocoGenerated
-    public static S3DriverAsync defaultDriver() {
+    public static S3DriverAsync defaultDriver(int maxConcurrentReads, int readTimeoutInSeconds) {
         var s3AsyncClient = S3AsyncClient.builder()
                                 .httpClientBuilder(NettyNioAsyncHttpClient.builder()
-                                                       .maxConcurrency(MAX_CONCURRENT_S3_READS)
-                                                       .connectionTimeout(
-                                                           Duration.ofSeconds(DEFAULT_CONNECTION_TIMEOUT))
-                                                       .readTimeout(Duration.ofSeconds(DEFAULT_READ_TIMEOUT)))
+                                                       .maxConcurrency(maxConcurrentReads)
+                                                       .connectionTimeout(Duration.ofSeconds(DEFAULT_CONNECTION_TIMEOUT))
+                                                       .readTimeout(Duration.ofSeconds(readTimeoutInSeconds)))
                                 .build();
 
         return new S3DriverAsync(s3AsyncClient);
