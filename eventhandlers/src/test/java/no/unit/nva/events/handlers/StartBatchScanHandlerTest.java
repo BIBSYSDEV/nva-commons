@@ -2,14 +2,12 @@ package no.unit.nva.events.handlers;
 
 import static no.unit.nva.testutils.RandomDataGenerator.randomInteger;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
-import static nva.commons.core.attempt.Try.attempt;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.Mockito.mock;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.lambda.runtime.Context;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,7 +16,6 @@ import java.util.Map;
 import no.unit.nva.events.models.ScanDatabaseRequest;
 import no.unit.nva.stubs.FakeEventBridgeClient;
 import nva.commons.core.SingletonCollector;
-import nva.commons.core.attempt.Try;
 import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +25,7 @@ class StartBatchScanHandlerTest {
 
     public static final int MAX_PAGE_SIZE_FOR_DYNAMO = 1000;
     public static final Integer NO_PAGE_SIZE = null;
-    public static final Map<String, AttributeValue> NO_START_MARKER = null;
+    public static final Map<String, String> NO_START_MARKER = null;
     private static final String EMPTY_JSON = "{}";
     private StartBatchScanHandler startBatchScanHandler;
     private String eventTopicSetByHandler;
@@ -36,7 +33,7 @@ class StartBatchScanHandlerTest {
     private ByteArrayOutputStream output;
     private FakeEventBridgeClient eventBridgeClient;
     private Integer randomPageSize;
-    private Map<String, AttributeValue> randomStartMarker;
+    private Map<String, String> randomStartMarker;
 
     @BeforeEach
     public void init() {
@@ -45,7 +42,7 @@ class StartBatchScanHandlerTest {
         this.input = IoUtils.stringToStream(EMPTY_JSON);
         this.output = new ByteArrayOutputStream();
         this.randomPageSize = positivePageSizeWithinDynamosPageLimits();
-        this.randomStartMarker = dynamoDbScanStartMarker();
+        this.randomStartMarker = scanStartMarker();
         startBatchScanHandler = newStartBatchHandler(eventBridgeClient);
     }
 
@@ -89,9 +86,9 @@ class StartBatchScanHandlerTest {
         assertThat(actualTopic, is(equalTo(eventTopicSetByHandler)));
     }
 
-    private Map<String, AttributeValue> dynamoDbScanStartMarker() {
-        return Map.of(randomString(), new AttributeValue().withS(randomString()),
-                      randomString(), new AttributeValue().withS(randomString()));
+    private Map<String, String> scanStartMarker() {
+        return Map.of(randomString(), randomString(),
+                      randomString(), randomString());
     }
 
     private int positivePageSizeWithinDynamosPageLimits() {
@@ -125,8 +122,7 @@ class StartBatchScanHandlerTest {
     private ScanDatabaseRequest getEmittedScanRequest() {
         return eventBridgeClient.getRequestEntries().stream()
             .map(PutEventsRequestEntry::detail)
-            .map(attempt(ScanDatabaseRequest::fromJson))
-            .map(Try::orElseThrow)
+            .map(ScanDatabaseRequest::fromJson)
             .collect(SingletonCollector.collect());
     }
 }

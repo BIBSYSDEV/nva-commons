@@ -7,12 +7,11 @@ apache-http-core = { strictly = '5.3.6' }
 apache-http-client = { strictly = '5.5.1' }
 apache-poi = { strictly = '5.5.1' }
 assertj = { strictly = '3.27.6' }
-aws-ddb-local = { strictly = '2.6.1' }
+aws-ddb-local = { strictly = '3.3.0' }
 aws-ion = { strictly = '1.11.11' }
 aws-lambda-core = { strictly = '1.4.0' }
 aws-lambda-events = { strictly = '3.16.1' }
-aws-sdk = { strictly = '1.12.795' }
-aws-sdk2 = { strictly = '2.40.9' }
+aws-sdk2 = { strictly = '2.41.10' }
 ben-manes-versions = { strictly = '0.53.0' }
 com-auth0-jwks = { strictly = '0.23.0' }
 com-auth0-jwt = { strictly = '4.5.0' }
@@ -49,14 +48,10 @@ zalando-problem = { strictly = '0.27.1' }
 apache-poi = { group = 'org.apache.poi', name = 'poi', version.ref = 'apache-poi' }
 apache-poi-ooxml = { group = 'org.apache.poi', name = 'poi-ooxml', version.ref = 'apache-poi' }
 aws-apache-client = { group = 'software.amazon.awssdk', name = 'apache-client', version.ref = 'aws-sdk2' }
-aws-dynamodb-local = { group = 'com.amazonaws', name = 'DynamoDBLocal', version.ref = 'aws-ddb-local' }
+aws-dynamodb-local = { group = 'software.amazon.dynamodb', name = 'DynamoDBLocal', version.ref = 'aws-ddb-local' }
 aws-ion = { group = 'com.amazon.ion', name = 'ion-java', version.ref = 'aws-ion' }
-aws-java-sdk-core = { group = 'com.amazonaws', name = 'aws-java-sdk-core', version.ref = 'aws-sdk' }
 aws-lambda-core = { group = 'com.amazonaws', name = 'aws-lambda-java-core', version.ref = 'aws-lambda-core' }
 aws-lambda-events = { group = 'com.amazonaws', name = 'aws-lambda-java-events', version.ref = 'aws-lambda-events' }
-aws-sdk-dynamo = { group = 'com.amazonaws', name = 'aws-java-sdk-dynamodb', version.ref = 'aws-sdk' }
-aws-sdk-apigateway = { group = 'com.amazonaws', name = 'aws-java-sdk-api-gateway', version.ref = 'aws-sdk' }
-aws-sdk-sqs = {group = 'com.amazonaws', name = 'aws-java-sdk-sqs', version.ref = 'aws-sdk'}
 aws-sdk2-auth = { group = 'software.amazon.awssdk', name = 'auth', version.ref = 'aws-sdk2' }
 aws-sdk2-core = { group = 'software.amazon.awssdk', name = 'sdk-core', version.ref = 'aws-sdk2' }
 aws-sdk2-dynamo = { group = 'software.amazon.awssdk', name = 'dynamodb', version.ref = 'aws-sdk2' }

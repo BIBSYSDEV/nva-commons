@@ -1,6 +1,5 @@
 package no.unit.nva.events.handlers;
 
-import static no.unit.nva.events.EventsConfig.objectMapper;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import java.io.IOException;
@@ -8,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import no.unit.nva.events.models.ScanDatabaseRequest;
 import nva.commons.core.Environment;
+import nva.commons.core.ioutils.IoUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.eventbridge.EventBridgeClient;
@@ -36,7 +36,8 @@ public abstract class StartBatchScanHandler implements RequestStreamHandler {
     protected abstract String getScanEventTopic();
 
     private ScanDatabaseRequest parseUserInput(InputStream input) throws IOException {
-        return objectMapper.readValue(input, ScanDatabaseRequest.class);
+        var json = IoUtils.streamToString(input);
+        return ScanDatabaseRequest.fromJson(json);
     }
 
     private ScanDatabaseRequest createEventAsExpectedByEventListener(ScanDatabaseRequest input) {
