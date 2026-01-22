@@ -13,7 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
-import no.unit.nva.events.models.ScanDatabaseRequestV2;
+import no.unit.nva.events.models.ScanDatabaseRequest;
 import no.unit.nva.stubs.FakeEventBridgeClient;
 import nva.commons.core.SingletonCollector;
 import nva.commons.core.ioutils.IoUtils;
@@ -96,17 +96,17 @@ class StartBatchScanHandlerTest {
     }
 
     private InputStream scanDatabaseRequestWithCustomTopic(String userDefinedTopic) {
-        var request = new ScanDatabaseRequestV2(userDefinedTopic, NO_PAGE_SIZE, NO_START_MARKER);
+        var request = new ScanDatabaseRequest(userDefinedTopic, NO_PAGE_SIZE, NO_START_MARKER);
         return IoUtils.stringToStream(request.toString());
     }
 
     private InputStream scanDatabaseRequestWithStartMarker() {
-        var request = new ScanDatabaseRequestV2(randomString(), randomPageSize, randomStartMarker);
+        var request = new ScanDatabaseRequest(randomString(), randomPageSize, randomStartMarker);
         return IoUtils.stringToStream(request.toString());
     }
 
     private InputStream scanDatabaseRequestWithPageSize() {
-        var request = new ScanDatabaseRequestV2(randomString(), randomPageSize, null);
+        var request = new ScanDatabaseRequest(randomString(), randomPageSize, null);
         return IoUtils.stringToStream(request.toString());
     }
 
@@ -119,10 +119,10 @@ class StartBatchScanHandlerTest {
         };
     }
 
-    private ScanDatabaseRequestV2 getEmittedScanRequest() {
+    private ScanDatabaseRequest getEmittedScanRequest() {
         return eventBridgeClient.getRequestEntries().stream()
             .map(PutEventsRequestEntry::detail)
-            .map(ScanDatabaseRequestV2::fromJson)
+            .map(ScanDatabaseRequest::fromJson)
             .collect(SingletonCollector.collect());
     }
 }

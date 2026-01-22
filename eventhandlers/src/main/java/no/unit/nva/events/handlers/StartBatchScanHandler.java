@@ -5,7 +5,7 @@ import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import no.unit.nva.events.models.ScanDatabaseRequestV2;
+import no.unit.nva.events.models.ScanDatabaseRequest;
 import nva.commons.core.Environment;
 import nva.commons.core.ioutils.IoUtils;
 import org.slf4j.Logger;
@@ -35,26 +35,26 @@ public abstract class StartBatchScanHandler implements RequestStreamHandler {
 
     protected abstract String getScanEventTopic();
 
-    private ScanDatabaseRequestV2 parseUserInput(InputStream input) throws IOException {
+    private ScanDatabaseRequest parseUserInput(InputStream input) throws IOException {
         var json = IoUtils.streamToString(input);
-        return ScanDatabaseRequestV2.fromJson(json);
+        return ScanDatabaseRequest.fromJson(json);
     }
 
-    private ScanDatabaseRequestV2 createEventAsExpectedByEventListener(ScanDatabaseRequestV2 input) {
-        return new ScanDatabaseRequestV2(getScanEventTopic(),
-                                         input.getPageSize(),
-                                         input.getStartMarker());
+    private ScanDatabaseRequest createEventAsExpectedByEventListener(ScanDatabaseRequest input) {
+        return new ScanDatabaseRequest(getScanEventTopic(),
+                                       input.getPageSize(),
+                                       input.getStartMarker());
     }
 
-    private void emitEvent(Context context, ScanDatabaseRequestV2 requestWithTopic) {
+    private void emitEvent(Context context, ScanDatabaseRequest requestWithTopic) {
         eventClient.putEvents(createEvent(context, requestWithTopic));
     }
 
-    private PutEventsRequest createEvent(Context context, ScanDatabaseRequestV2 request) {
+    private PutEventsRequest createEvent(Context context, ScanDatabaseRequest request) {
         return PutEventsRequest.builder().entries(createNewEventEntry(context, request)).build();
     }
 
-    private PutEventsRequestEntry createNewEventEntry(Context context, ScanDatabaseRequestV2 request) {
+    private PutEventsRequestEntry createNewEventEntry(Context context, ScanDatabaseRequest request) {
         return request.createNewEventEntry(EVENT_BUS,
                                            SCAN_REQUEST_EVENTS_DETAIL_TYPE,
                                            context.getInvokedFunctionArn());

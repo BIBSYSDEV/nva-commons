@@ -14,7 +14,6 @@ dependencies {
     implementation libs.jackson.core
 
     implementation libs.aws.sdk2.dynamo
-    implementation libs.aws.sdk2.dynamo
     implementation libs.aws.sdk2.core
     implementation libs.aws.sdk2.eventbridge
 

@@ -20,7 +20,7 @@ import software.amazon.awssdk.services.eventbridge.model.PutEventsRequestEntry;
  * results the scan will return (max 1000). The {@code topic} is the event topic that the handler is listening for
  * events.
  */
-public class ScanDatabaseRequestV2 implements EventBody {
+public class ScanDatabaseRequest implements EventBody {
 
     public static final String START_MARKER = "startMarker";
     public static final String PAGE_SIZE = "pageSize";
@@ -36,18 +36,18 @@ public class ScanDatabaseRequestV2 implements EventBody {
     @JsonProperty(TOPIC)
     private String topic;
 
-    public ScanDatabaseRequestV2() {
+    public ScanDatabaseRequest() {
 
     }
 
-    public ScanDatabaseRequestV2(String topic, Integer pageSize, Map<String, String> startMarker) {
+    public ScanDatabaseRequest(String topic, Integer pageSize, Map<String, String> startMarker) {
         setPageSize(pageSize);
         setTopic(topic);
         setStartMarker(startMarker);
     }
 
-    public static ScanDatabaseRequestV2 fromJson(String detail) {
-        return attempt(() -> objectMapperLight.beanFrom(ScanDatabaseRequestV2.class, detail)).orElseThrow();
+    public static ScanDatabaseRequest fromJson(String detail) {
+        return attempt(() -> objectMapperLight.beanFrom(ScanDatabaseRequest.class, detail)).orElseThrow();
     }
 
     public Map<String, String> getStartMarker() {
@@ -66,8 +66,8 @@ public class ScanDatabaseRequestV2 implements EventBody {
         this.pageSize = isValid(pageSize) ? pageSize : DEFAULT_PAGE_SIZE;
     }
 
-    public ScanDatabaseRequestV2 newScanDatabaseRequest(Map<String, AttributeValue> newStartMarker) {
-        return new ScanDatabaseRequestV2(getTopic(), getPageSize(), toSerializableForm(newStartMarker));
+    public ScanDatabaseRequest newScanDatabaseRequest(Map<String, AttributeValue> newStartMarker) {
+        return new ScanDatabaseRequest(getTopic(), getPageSize(), toSerializableForm(newStartMarker));
     }
 
     @Override
@@ -115,10 +115,10 @@ public class ScanDatabaseRequestV2 implements EventBody {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ScanDatabaseRequestV2)) {
+        if (!(o instanceof ScanDatabaseRequest)) {
             return false;
         }
-        ScanDatabaseRequestV2 that = (ScanDatabaseRequestV2) o;
+        ScanDatabaseRequest that = (ScanDatabaseRequest) o;
         return getPageSize() == that.getPageSize()
                && Objects.equals(getStartMarker(), that.getStartMarker())
                && Objects.equals(getTopic(), that.getTopic());
