@@ -78,7 +78,7 @@ class StartBatchScanHandlerTest {
 
     @Test
     void shouldEmitScanRequestWithTopicDecidedByHandlerAndNotByUser() throws IOException {
-        var userDefinedTopic = randomString();
+        String userDefinedTopic = randomString();
         input = scanDatabaseRequestWithCustomTopic(userDefinedTopic);
         startBatchScanHandler.handleRequest(input, output, mock(Context.class));
         var actualTopic = getEmittedScanRequest().getTopic();
@@ -97,17 +97,17 @@ class StartBatchScanHandlerTest {
 
     private InputStream scanDatabaseRequestWithCustomTopic(String userDefinedTopic) {
         var request = new ScanDatabaseRequest(userDefinedTopic, NO_PAGE_SIZE, NO_START_MARKER);
-        return IoUtils.stringToStream(request.toString());
+        return IoUtils.stringToStream(request.toJsonString());
     }
 
     private InputStream scanDatabaseRequestWithStartMarker() {
         var request = new ScanDatabaseRequest(randomString(), randomPageSize, randomStartMarker);
-        return IoUtils.stringToStream(request.toString());
+        return IoUtils.stringToStream(request.toJsonString());
     }
 
     private InputStream scanDatabaseRequestWithPageSize() {
         var request = new ScanDatabaseRequest(randomString(), randomPageSize, null);
-        return IoUtils.stringToStream(request.toString());
+        return IoUtils.stringToStream(request.toJsonString());
     }
 
     private StartBatchScanHandler newStartBatchHandler(FakeEventBridgeClient eventBridgeClient) {

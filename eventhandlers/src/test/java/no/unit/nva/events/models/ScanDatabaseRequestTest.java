@@ -76,7 +76,7 @@ class ScanDatabaseRequestTest {
     void shouldSerializeAndDeserializeWithoutInformationLoss() {
         var startMarker = randomMarker();
         var sampleRequest = new ScanDatabaseRequest(randomString(), randomInteger(), startMarker);
-        var json = sampleRequest.toString();
+        var json = sampleRequest.toJsonString();
         var deserialized = ScanDatabaseRequest.fromJson(json);
         assertThat(deserialized, is(equalTo(sampleRequest)));
         assertThatNonSerializableDynamoScanMarkerConstainsSameValuesAsItsEquivalentSerializableRepresentation(

@@ -4,13 +4,13 @@ import static java.util.Objects.nonNull;
 import static no.unit.nva.events.EventsConfig.objectMapperLight;
 import static nva.commons.core.attempt.Try.attempt;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import no.unit.nva.commons.json.JsonSerializable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import no.unit.nva.commons.json.JsonSerializable;
 import nva.commons.core.JacocoGenerated;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.eventbridge.model.PutEventsRequestEntry;
@@ -51,6 +51,25 @@ public class ScanDatabaseRequest implements EventBody, JsonSerializable {
         return attempt(() -> objectMapperLight.beanFrom(ScanDatabaseRequest.class, detail)).orElseThrow();
     }
 
+    @JacocoGenerated
+    @Override
+    public String getTopic() {
+        return topic;
+    }
+
+    public final void setTopic(String topic) {
+        this.topic = topic;
+    }
+
+    public int getPageSize() {
+        return nonNull(pageSize) ? pageSize : DEFAULT_PAGE_SIZE;
+    }
+
+    public final void setPageSize(Integer pageSize) {
+        this.pageSize = pageSizeWithinLimits(pageSize) ? pageSize : DEFAULT_PAGE_SIZE;
+    }
+
+    @JacocoGenerated
     public Map<String, String> getStartMarker() {
         return startMarker;
     }
@@ -59,25 +78,14 @@ public class ScanDatabaseRequest implements EventBody, JsonSerializable {
         this.startMarker = startMarker;
     }
 
-    public int getPageSize() {
-        return nonNull(pageSize) ? pageSize : DEFAULT_PAGE_SIZE;
-    }
-
-    public final void setPageSize(Integer pageSize) {
-        this.pageSize = isValid(pageSize) ? pageSize : DEFAULT_PAGE_SIZE;
-    }
-
+    /**
+     * Utility method for creating easily the next scan request.
+     *
+     * @param newStartMarker the start marker for the next scan operation.
+     * @return a new ScanDatabaseRequest containing the the {@code newStartMarker}
+     */
     public ScanDatabaseRequest newScanDatabaseRequest(Map<String, AttributeValue> newStartMarker) {
         return new ScanDatabaseRequest(getTopic(), getPageSize(), toSerializableForm(newStartMarker));
-    }
-
-    @Override
-    public String getTopic() {
-        return topic;
-    }
-
-    public final void setTopic(String topic) {
-        this.topic = topic;
     }
 
     @JsonIgnore
@@ -96,7 +104,7 @@ public class ScanDatabaseRequest implements EventBody, JsonSerializable {
         return PutEventsRequestEntry
             .builder()
             .eventBusName(eventBusName)
-            .detail(this.toString())
+            .detail(this.toJsonString())
             .detailType(detailType)
             .resources(invokedFunctionArn)
             .time(Instant.now())
@@ -104,14 +112,14 @@ public class ScanDatabaseRequest implements EventBody, JsonSerializable {
             .build();
     }
 
-    @JacocoGenerated
     @Override
+    @JacocoGenerated
     public int hashCode() {
         return Objects.hash(getStartMarker(), getPageSize(), getTopic());
     }
 
-    @JacocoGenerated
     @Override
+    @JacocoGenerated
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -126,7 +134,7 @@ public class ScanDatabaseRequest implements EventBody, JsonSerializable {
     }
 
     @Override
-    public String toString() {
+    public String toJsonString() {
         return attempt(() -> objectMapperLight.asString(this)).orElseThrow();
     }
 
@@ -136,8 +144,8 @@ public class ScanDatabaseRequest implements EventBody, JsonSerializable {
             .collect(Collectors.toMap(Entry::getKey, e -> createAttributeValue(e.getValue())));
     }
 
-    private boolean isValid(Integer pageSize) {
-        return nonNull(pageSize) && pageSize > 0 && pageSize < MAX_PAGE_SIZE;
+    private boolean pageSizeWithinLimits(Integer pageSize) {
+        return nonNull(pageSize) && pageSize > 0 && pageSize <= MAX_PAGE_SIZE;
     }
 
     private Map<String, String> toSerializableForm(Map<String, AttributeValue> newStartMarker) {

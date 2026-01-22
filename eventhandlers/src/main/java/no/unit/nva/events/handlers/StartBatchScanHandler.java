@@ -30,7 +30,7 @@ public abstract class StartBatchScanHandler implements RequestStreamHandler {
         var requestSentByUser = parseUserInput(input);
         var requestWithTopic = createEventAsExpectedByEventListener(requestSentByUser);
         emitEvent(context, requestWithTopic);
-        logger.info("Emitted request {}", requestWithTopic);
+        logger.info("Emitted request {}", requestWithTopic.toJsonString());
     }
 
     protected abstract String getScanEventTopic();
