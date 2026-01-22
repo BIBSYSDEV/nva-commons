@@ -4,6 +4,7 @@ import static java.util.Objects.nonNull;
 import static no.unit.nva.events.EventsConfig.objectMapperLight;
 import static nva.commons.core.attempt.Try.attempt;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import no.unit.nva.commons.json.JsonSerializable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.Map;
@@ -20,7 +21,7 @@ import software.amazon.awssdk.services.eventbridge.model.PutEventsRequestEntry;
  * results the scan will return (max 1000). The {@code topic} is the event topic that the handler is listening for
  * events.
  */
-public class ScanDatabaseRequest implements EventBody {
+public class ScanDatabaseRequest implements EventBody, JsonSerializable {
 
     public static final String START_MARKER = "startMarker";
     public static final String PAGE_SIZE = "pageSize";

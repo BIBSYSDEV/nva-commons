@@ -4,7 +4,6 @@ dependencies {
     implementation group: 'com.github.BIBSYSDEV', name: 'nva-commons', version: project.ext.nvaCommonsVersion
     implementation libs.aws.lambda.core
     implementation libs.aws.lambda.events
-    // SDK v2 EventBridge
     implementation libs.aws.sdk2.eventbridge
     testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: project.ext.nvaTestUtilsVersion
 }
