@@ -62,7 +62,7 @@ public class ScanDatabaseRequestV2 implements EventBody {
         return nonNull(pageSize) ? pageSize : DEFAULT_PAGE_SIZE;
     }
 
-    public final void setPageSize(int pageSize) {
+    public final void setPageSize(Integer pageSize) {
         this.pageSize = isValid(pageSize) ? pageSize : DEFAULT_PAGE_SIZE;
     }
 
