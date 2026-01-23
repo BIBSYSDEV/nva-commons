@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import nva.commons.core.JacocoGenerated;
 import software.amazon.awssdk.services.eventbridge.EventBridgeClient;
+import software.amazon.awssdk.services.eventbridge.model.EventBridgeException;
 import software.amazon.awssdk.services.eventbridge.model.EventBus;
 import software.amazon.awssdk.services.eventbridge.model.ListEventBusesRequest;
 import software.amazon.awssdk.services.eventbridge.model.ListEventBusesResponse;
@@ -47,6 +48,9 @@ public class FakeEventBridgeClient implements EventBridgeClient {
     @JacocoGenerated
     @Override
     public PutEventsResponse putEvents(PutEventsRequest putEventsRequest) {
+        if (putEventsRequest.entries().isEmpty()) {
+            throw EventBridgeException.builder().message("Cannot send request with empty list of entries").build();
+        }
         requestEntries.addAll(putEventsRequest.entries());
         return PutEventsResponse.builder().failedEntryCount(mockFailedEntryCount).build();
     }
