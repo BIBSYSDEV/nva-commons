@@ -39,7 +39,7 @@ opensearch-java = { strictly = '3.4.0' }
 opensearch-rest = { strictly = '3.3.2' }
 opensearch-testcontainer = { strictly = '4.0.0' }
 slf4j = { strictly = '2.0.17' }
-spotless = { strictly = '8.1.0' }
+spotless = { strictly = '8.2.0' }
 testcontainers = { strictly = '2.0.3' }
 wiremock = { strictly = '4.0.0-beta.22' }
 zalando-problem = { strictly = '0.27.1' }
