@@ -3,8 +3,8 @@
 # is a breaking change and should be reflected in our version number.
 [versions]
 apache-commons = { require = '3.20.0' }
-apache-http-core = { strictly = '5.3.6' }
-apache-http-client = { strictly = '5.5.1' }
+apache-http-core = { strictly = '5.4' }
+apache-http-client = { strictly = '5.6' }
 apache-poi = { strictly = '5.5.1' }
 assertj = { strictly = '3.27.6' }
 aws-ddb-local = { strictly = '2.6.1' }
@@ -23,8 +23,8 @@ errorprone = { strictly = '2.45.0' }
 errorprone-plugin = { strictly = '4.3.0' }
 guava = { strictly = '33.5.0-jre' }
 hamcrest = { strictly = '3.0' }
-jackson = { strictly = '2.20.1' }
-jackson-annotations = { strictly = '2.20' }
+jackson = { strictly = '2.21.0' }
+jackson-annotations = { strictly = '2.21' }
 javers = { strictly = '7.8.0' }
 jena = { strictly = '5.6.0' }
 jupiter = { strictly = '5.14.1' }
@@ -41,7 +41,7 @@ opensearch-testcontainer = { strictly = '4.0.0' }
 slf4j = { strictly = '2.0.17' }
 spotless = { strictly = '8.2.0' }
 testcontainers = { strictly = '2.0.3' }
-wiremock = { strictly = '4.0.0-beta.22' }
+wiremock = { strictly = '4.0.0-beta.25' }
 zalando-problem = { strictly = '0.27.1' }
 
 [libraries]
