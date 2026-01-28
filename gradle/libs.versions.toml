@@ -11,8 +11,9 @@ aws-ddb-local = { strictly = '2.6.1' }
 aws-ion = { strictly = '1.11.11' }
 aws-lambda-core = { strictly = '1.4.0' }
 aws-lambda-events = { strictly = '3.16.1' }
-aws-sdk = { strictly = '1.12.795' }
-aws-sdk2 = { strictly = '2.40.9' }
+aws-sdk = { strictly = '1.12.797' }
+aws-sdk2 = { strictly = '2.41.16' }
+aws-sdk2-dynamodblocal = { strictly = '3.3.0' }
 ben-manes-versions = { strictly = '0.53.0' }
 com-auth0-jwks = { strictly = '0.23.0' }
 com-auth0-jwt = { strictly = '4.5.0' }
@@ -29,19 +30,19 @@ javers = { strictly = '7.8.0' }
 jena = { strictly = '5.6.0' }
 jupiter = { strictly = '5.14.1' }
 jupiter-platform = { strictly = '1.14.1' } # Keep minor & patch version in sync with `jupiter`
-lambda-log4j = { strictly = '1.6.0' }
-log4j = { strictly = '2.25.2' }
+lambda-log4j = { strictly = '1.6.1' }
+log4j = { strictly = '2.25.3' }
 mockito = { strictly = '5.21.0' }
 nebula-lint = { strictly = '20.5.6' }
 nexus-publish = { strictly = '2.0.0' }
 opencsv = { strictly = '5.12.0' }
-opensearch-java = { strictly = '3.4.0' }
-opensearch-rest = { strictly = '3.3.2' }
-opensearch-testcontainer = { strictly = '4.0.0' }
+opensearch-java = { strictly = '3.5.0' }
+opensearch-rest = { strictly = '3.4.0' }
+opensearch-testcontainer = { strictly = '4.1.0' }
 slf4j = { strictly = '2.0.17' }
 spotless = { strictly = '8.2.0' }
 testcontainers = { strictly = '2.0.3' }
-wiremock = { strictly = '4.0.0-beta.25' }
+wiremock = { strictly = '4.0.0-beta.27' }
 zalando-problem = { strictly = '0.27.1' }
 
 [libraries]
@@ -60,6 +61,7 @@ aws-sdk-sqs = {group = 'com.amazonaws', name = 'aws-java-sdk-sqs', version.ref =
 aws-sdk2-auth = { group = 'software.amazon.awssdk', name = 'auth', version.ref = 'aws-sdk2' }
 aws-sdk2-core = { group = 'software.amazon.awssdk', name = 'sdk-core', version.ref = 'aws-sdk2' }
 aws-sdk2-dynamo = { group = 'software.amazon.awssdk', name = 'dynamodb', version.ref = 'aws-sdk2' }
+aws-sdk2-dynamodblocal = { group = 'software.amazon.dynamodb', name = 'DynamoDBLocal', version.ref = 'aws-sdk2-dynamodblocal' }
 aws-sdk2-dynamodbenhanced = { group = 'software.amazon.awssdk', name = 'dynamodb-enhanced', version.ref = 'aws-sdk2' }
 aws-sdk2-eventbridge = { group = 'software.amazon.awssdk', name = 'eventbridge', version.ref = 'aws-sdk2' }
 aws-sdk2-firehose = { group = 'software.amazon.awssdk', name = 'firehose', version.ref = 'aws-sdk2' }
