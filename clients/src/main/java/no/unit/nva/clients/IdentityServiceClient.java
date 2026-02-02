@@ -27,16 +27,17 @@ import software.amazon.awssdk.http.HttpStatusCode;
 
 public class IdentityServiceClient {
 
-    public static final String CREDENTIALS_SECRET_NAME = "BackendCognitoClientCredentials";
-    public static final String API_PATH_USERS_AND_ROLES = "users-roles";
-    public static final String API_PATH_EXTERNAL_CLIENTS = "external-clients";
+    private static final String CREDENTIALS_SECRET_NAME = "BackendCognitoClientCredentials";
+    private static final String API_PATH_USERS_AND_ROLES = "users-roles";
+    private static final String API_PATH_EXTERNAL_CLIENTS = "external-clients";
     private static final String API_PATH_USERS = "users";
     private static final String AUTH_HOST = new Environment().readEnv("BACKEND_CLIENT_AUTH_URL");
     private static final String API_HOST = new Environment().readEnv("API_HOST");
-    public static final String CUSTOMER_PATH_PARAM = "customer";
-    public static final String CRISTIN_ID_PATH_PARAM = "cristinId";
-    public static final String OPERATION_REQUIRES_AUTHORIZED_CLIENT_MESSAGE = "This operation requires an authorized client";
-    private final AuthorizedBackendClient authorizedClient;
+    private static final String CUSTOMER_PATH_PARAM = "customer";
+    private static final String CRISTIN_ID_PATH_PARAM = "cristinId";
+    private static final String OPERATION_REQUIRES_AUTHORIZED_CLIENT_MESSAGE =
+        "This operation requires an authorized client";
+    private AuthorizedBackendClient authorizedClient;
     private final HttpClient unauthorizedClient;
 
     /**
@@ -67,7 +68,6 @@ public class IdentityServiceClient {
      */
     public IdentityServiceClient(HttpClient httpClient) {
         this.unauthorizedClient = httpClient;
-        this.authorizedClient = null;
     }
 
     /**
