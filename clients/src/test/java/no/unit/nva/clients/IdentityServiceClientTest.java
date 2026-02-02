@@ -50,6 +50,7 @@ class IdentityServiceClientTest {
     public static final URI customer = randomUri();
     public static final URI cristinOrgUri = randomUri();
     public static final String BEARER_BEARER_TOKEN_TEST = "Bearer BEARER_TOKEN_TEST";
+    public static final String OPERATION_REQUIRES_AN_AUTHORIZED_CLIENT_MESSAGE = "This operation requires an authorized client";
     HttpClient httpClient = mock(HttpClient.class);
     CognitoCredentials cognitoCredentials;
     HttpResponse<String> okResponseWithBody = mock(HttpResponse.class);
@@ -345,6 +346,38 @@ class IdentityServiceClientTest {
         assertThrows(RuntimeException.class, () -> authorizedIdentityServiceClient.getChannelClaim(channelClaim));
     }
 
+    @Test
+    void shouldThrowIllegalStateExceptionWhenFetchingCustomerWithUnauthorizedHttpClient() {
+        var service = new IdentityServiceClient(mock(HttpClient.class));
+        var throwable = assertThrows(IllegalStateException.class, () -> service.getCustomerById(randomUri()));
+
+        assertEquals(OPERATION_REQUIRES_AN_AUTHORIZED_CLIENT_MESSAGE,  throwable.getMessage());
+    }
+
+    @Test
+    void shouldThrowIllegalStateExceptionWhenFetchingUserWithUnauthorizedHttpClient() {
+        var service = new IdentityServiceClient(mock(HttpClient.class));
+        var throwable = assertThrows(IllegalStateException.class, () -> service.getUser(randomString()));
+
+        assertEquals(OPERATION_REQUIRES_AN_AUTHORIZED_CLIENT_MESSAGE,  throwable.getMessage());
+    }
+
+    @Test
+    void shouldThrowIllegalStateExceptionWhenFetchingCustomerByCristinIdWithUnauthorizedHttpClient() {
+        var service = new IdentityServiceClient(mock(HttpClient.class));
+        var throwable = assertThrows(IllegalStateException.class, () -> service.getCustomerByCristinId(randomUri()));
+
+        assertEquals(OPERATION_REQUIRES_AN_AUTHORIZED_CLIENT_MESSAGE,  throwable.getMessage());
+    }
+
+    @Test
+    void shouldThrowIllegalStateExceptionWhenFetchingExternalClientWithUnauthorizedHttpClient() {
+        var service = new IdentityServiceClient(mock(HttpClient.class));
+        var throwable = assertThrows(IllegalStateException.class, () -> service.getExternalClient(randomString()));
+
+        assertEquals(OPERATION_REQUIRES_AN_AUTHORIZED_CLIENT_MESSAGE,  throwable.getMessage());
+    }
+
     private ChannelClaimDto channelClaimWithId(URI channelClaim) {
         return new ChannelClaimDto(channelClaim, new CustomerSummaryDto(
             randomUri(), randomUri()), new ChannelClaim(channelClaim,
@@ -364,12 +397,12 @@ class IdentityServiceClientTest {
     private CustomerDto createCustomerWithCristinId(URI customerCristinId) {
         return new CustomerDto(randomUri(), UUID.randomUUID(), randomString(), randomString(), randomString(),
                                customerCristinId, null, false, false, false, null,
-                               new RightsRetentionStrategy(randomString(), randomUri()), true);
+                               new RightsRetentionStrategy(randomString(), randomUri()), true, randomString());
     }
 
     private CustomerDto createCustomer(URI customerId) {
         return new CustomerDto(customerId, UUID.randomUUID(), randomString(), randomString(), randomString(),
-                               randomUri(), null, false, false, false, null, null, false);
+                               randomUri(), null, false, false, false, null, null, false, randomString());
     }
 
     private UserDto createUser(String userName) {

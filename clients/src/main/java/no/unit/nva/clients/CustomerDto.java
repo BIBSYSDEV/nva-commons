@@ -10,7 +10,7 @@ public record CustomerDto(@JsonProperty("id") URI id, UUID identifier, String na
                           String shortName, URI cristinId, String publicationWorkflow, boolean nviInstitution,
                           boolean rboInstitution, boolean generalSupportEnabled,
                           List<String> allowFileUploadForTypes, RightsRetentionStrategy rightsRetentionStrategy,
-                          boolean autoPublishScopusImportFiles)
+                          boolean autoPublishScopusImportFiles, String sector)
     implements JsonSerializable {
 
     public record RightsRetentionStrategy(String type, URI id) {
