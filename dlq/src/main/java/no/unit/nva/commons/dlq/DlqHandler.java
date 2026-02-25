@@ -4,7 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage;
-import com.google.common.collect.Lists;
+import nva.commons.core.CollectionUtils;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,7 +49,7 @@ public class DlqHandler implements RequestHandler<SQSEvent, Void> {
     public Void handleRequest(SQSEvent input, Context context) {
 
         var failedEvents = extractFailedEventsFromDlqMessages(input);
-        Lists.partition(failedEvents, NUMBER_OF_GROUPS).forEach(failedEventsHandlingService::handleFailedEvents);
+        CollectionUtils.partition(failedEvents, NUMBER_OF_GROUPS).forEach(failedEventsHandlingService::handleFailedEvents);
         return null;
     }
 

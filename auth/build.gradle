@@ -10,7 +10,6 @@ dependencies {
     implementation project(":json")
     implementation project(":secrets")
 
-    implementation libs.guava
     implementation libs.bundles.logging
     implementation libs.aws.lambda.events
 

@@ -18,7 +18,6 @@ dependencies {
     implementation libs.jackson.datatype.jsr310
     implementation libs.jackson.datatype.problem
 
-    implementation libs.guava
     implementation libs.bundles.logging
     implementation libs.aws.lambda.events
     implementation libs.aws.sdk2.secrets

@@ -10,7 +10,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayCustomAuthorizerEvent;
-import com.google.common.net.HttpHeaders;
 import java.util.Map;
 import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.logutils.LogUtils;
@@ -108,7 +107,7 @@ class DefaultRequestAuthorizerTest {
     private APIGatewayCustomAuthorizerEvent requestWithApiKey(String authorizationHeader) {
         return APIGatewayCustomAuthorizerEvent.builder()
             .withMethodArn(this.inputMethodArn)
-            .withHeaders(Map.of(HttpHeaders.AUTHORIZATION, authorizationHeader))
+            .withHeaders(Map.of("Authorization", authorizationHeader))
             .build();
     }
 }

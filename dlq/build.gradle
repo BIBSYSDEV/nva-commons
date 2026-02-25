@@ -9,7 +9,6 @@ dependencies {
     implementation libs.aws.lambda.core
     implementation libs.aws.lambda.events
     implementation libs.aws.sdk2.firehose
-    implementation libs.guava
     compileOnly libs.jackson.annotations
     testImplementation libs.bundles.logging
     testImplementation libs.bundles.testing.junit
