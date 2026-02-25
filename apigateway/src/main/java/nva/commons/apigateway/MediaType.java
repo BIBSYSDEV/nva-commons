@@ -1,15 +1,19 @@
 package nva.commons.apigateway;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Objects;
 
 public final class MediaType {
 
+    private static final String UTF_8 = "utf-8";
+
     public static final MediaType ANY_TYPE = create("*", "*");
-    public static final MediaType JSON_UTF_8 = create("application", "json", StandardCharsets.UTF_8.name());
-    public static final MediaType XML_UTF_8 = create("text", "xml", StandardCharsets.UTF_8.name());
-    public static final MediaType HTML_UTF_8 = create("text", "html", StandardCharsets.UTF_8.name());
+    public static final MediaType ANY_APPLICATION_TYPE = create("application", "*");
+    public static final MediaType ANY_TEXT_TYPE = create("text", "*");
+    public static final MediaType JSON_UTF_8 = create("application", "json", UTF_8);
+    public static final MediaType XML_UTF_8 = create("text", "xml", UTF_8);
+    public static final MediaType HTML_UTF_8 = create("text", "html", UTF_8);
+    public static final MediaType XHTML_UTF_8 = create("application", "xhtml+xml", UTF_8);
 
     private static final String WILDCARD = "*";
     private static final String TYPE_SEPARATOR = "/";

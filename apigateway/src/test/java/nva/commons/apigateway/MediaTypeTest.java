@@ -20,8 +20,8 @@ class MediaTypeTest {
 
     @Test
     void parseTypeWithWhitespace() {
-        var mediaType = MediaType.parse("  text/html ;  charset=UTF-8 ");
-        assertThat(mediaType.toString()).isEqualTo("text/html; charset=UTF-8");
+        var mediaType = MediaType.parse("  text/html ;  charset=utf-8 ");
+        assertThat(mediaType.toString()).isEqualTo("text/html; charset=utf-8");
     }
 
     @Test
@@ -88,7 +88,7 @@ class MediaTypeTest {
 
     @Test
     void equalsIsCaseInsensitive() {
-        var a = MediaType.parse("Application/JSON; charset=UTF-8");
+        var a = MediaType.parse("Application/JSON; charset=utf-8");
         var b = MediaType.parse("application/json; charset=utf-8");
         assertThat(a).isEqualTo(b);
         assertThat(a.hashCode()).isEqualTo(b.hashCode());
@@ -110,9 +110,32 @@ class MediaTypeTest {
 
     @Test
     void predefinedConstantsHaveExpectedValues() {
-        assertThat(MediaType.JSON_UTF_8.toString()).isEqualTo("application/json; charset=UTF-8");
-        assertThat(MediaType.XML_UTF_8.toString()).isEqualTo("text/xml; charset=UTF-8");
-        assertThat(MediaType.HTML_UTF_8.toString()).isEqualTo("text/html; charset=UTF-8");
+        assertThat(MediaType.JSON_UTF_8.toString()).isEqualTo("application/json; charset=utf-8");
+        assertThat(MediaType.XML_UTF_8.toString()).isEqualTo("text/xml; charset=utf-8");
+        assertThat(MediaType.HTML_UTF_8.toString()).isEqualTo("text/html; charset=utf-8");
         assertThat(MediaType.ANY_TYPE.toString()).isEqualTo("*/*");
+        assertThat(MediaType.ANY_APPLICATION_TYPE.toString()).isEqualTo("application/*");
+        assertThat(MediaType.ANY_TEXT_TYPE.toString()).isEqualTo("text/*");
+        assertThat(MediaType.XHTML_UTF_8.toString()).isEqualTo("application/xhtml+xml; charset=utf-8");
+    }
+
+    @Test
+    void anyApplicationTypeMatchesApplicationSubtypes() {
+        assertThat(MediaType.JSON_UTF_8.matches(MediaType.ANY_APPLICATION_TYPE)).isTrue();
+    }
+
+    @Test
+    void anyApplicationTypeDoesNotMatchTextSubtypes() {
+        assertThat(MediaType.HTML_UTF_8.matches(MediaType.ANY_APPLICATION_TYPE)).isFalse();
+    }
+
+    @Test
+    void anyTextTypeMatchesTextSubtypes() {
+        assertThat(MediaType.HTML_UTF_8.matches(MediaType.ANY_TEXT_TYPE)).isTrue();
+    }
+
+    @Test
+    void anyTextTypeDoesNotMatchApplicationSubtypes() {
+        assertThat(MediaType.JSON_UTF_8.matches(MediaType.ANY_TEXT_TYPE)).isFalse();
     }
 }
