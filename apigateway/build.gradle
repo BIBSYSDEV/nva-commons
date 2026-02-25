@@ -24,7 +24,9 @@ dependencies {
     implementation libs.jackson.datatype.jsr310
     implementation libs.jackson.datatype.problem
 
-    implementation libs.com.auth0.jwks
+    implementation(libs.com.auth0.jwks) {
+        exclude group: "com.google.guava"
+    }
     implementation libs.com.auth0.jwt
 
     testImplementation libs.assertj.core
