@@ -1,6 +1,5 @@
 package nva.commons.apigateway;
 
-import com.google.common.net.MediaType;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;

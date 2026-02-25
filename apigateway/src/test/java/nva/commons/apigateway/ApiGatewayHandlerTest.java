@@ -1,10 +1,8 @@
 package nva.commons.apigateway;
 
-import static com.google.common.net.HttpHeaders.CACHE_CONTROL;
-import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
-import static com.google.common.net.HttpHeaders.STRICT_TRANSPORT_SECURITY;
-import static com.google.common.net.HttpHeaders.VARY;
-import static com.google.common.net.HttpHeaders.X_CONTENT_TYPE_OPTIONS;
+import static org.apache.hc.core5.http.HttpHeaders.CACHE_CONTROL;
+import static org.apache.hc.core5.http.HttpHeaders.CONTENT_TYPE;
+import static org.apache.hc.core5.http.HttpHeaders.VARY;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
@@ -40,8 +38,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import com.google.common.net.HttpHeaders;
-import com.google.common.net.MediaType;
+import org.apache.hc.core5.http.HttpHeaders;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,6 +79,8 @@ import org.zalando.problem.Status;
 
 class ApiGatewayHandlerTest {
 
+    private static final String STRICT_TRANSPORT_SECURITY = "Strict-Transport-Security";
+    private static final String X_CONTENT_TYPE_OPTIONS = "X-Content-Type-Options";
     private static final String TOP_EXCEPTION_MESSAGE = "TOP Exception";
     private static final String MIDDLE_EXCEPTION_MESSAGE = "MIDDLE Exception";
     private static final String BOTTOM_EXCEPTION_MESSAGE = "BOTTOM Exception";

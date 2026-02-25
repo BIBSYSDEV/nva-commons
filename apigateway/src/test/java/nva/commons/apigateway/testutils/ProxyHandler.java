@@ -2,7 +2,7 @@ package nva.commons.apigateway.testutils;
 
 import static nva.commons.apigateway.RequestInfoConstants.PROXY_TAG;
 import com.amazonaws.services.lambda.runtime.Context;
-import com.google.common.net.HttpHeaders;
+import org.apache.hc.core5.http.HttpHeaders;
 import java.util.Collections;
 import java.util.Map;
 import nva.commons.apigateway.ApiGatewayProxyHandler;

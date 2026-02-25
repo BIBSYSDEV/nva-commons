@@ -1,6 +1,6 @@
 package nva.commons.apigateway.exceptions;
 
-import com.google.common.net.MediaType;
+import nva.commons.apigateway.MediaType;
 
 import java.net.HttpURLConnection;
 import java.util.List;

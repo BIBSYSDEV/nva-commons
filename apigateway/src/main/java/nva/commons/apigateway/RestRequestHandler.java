@@ -1,7 +1,7 @@
 package nva.commons.apigateway;
 
-import static com.google.common.net.MediaType.JSON_UTF_8;
 import static java.util.Objects.isNull;
+import static nva.commons.apigateway.MediaType.JSON_UTF_8;
 import static nva.commons.core.attempt.Try.attempt;
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 import com.amazonaws.services.lambda.runtime.Context;
@@ -15,8 +15,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.net.HttpHeaders;
-import com.google.common.net.MediaType;
+import org.apache.hc.core5.http.HttpHeaders;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -128,7 +127,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     private boolean inAcceptedMediaTypeRange(MediaType mediaType, List<MediaType> acceptMediaTypes) {
         return acceptMediaTypes.stream()
                    .map(MediaType::withoutParameters)
-                   .anyMatch(mediaType::is);
+                   .anyMatch(mediaType::matches);
     }
 
     /**

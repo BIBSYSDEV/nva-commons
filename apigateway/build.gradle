@@ -10,7 +10,7 @@ dependencies {
     implementation project(":json")
     implementation project(":auth")
 
-    implementation libs.guava
+    implementation libs.httpcore5
     implementation libs.bundles.logging
     implementation libs.aws.lambda.events
 
@@ -27,6 +27,7 @@ dependencies {
     implementation libs.com.auth0.jwks
     implementation libs.com.auth0.jwt
 
+    testImplementation libs.assertj.core
     testImplementation libs.bundles.testing.junit
     testImplementation libs.bundles.testing.mockito
     testImplementation libs.bundles.testing.hamcrest

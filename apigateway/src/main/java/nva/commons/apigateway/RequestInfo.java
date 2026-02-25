@@ -34,7 +34,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.net.HttpHeaders;
+import org.apache.hc.core5.http.HttpHeaders;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;

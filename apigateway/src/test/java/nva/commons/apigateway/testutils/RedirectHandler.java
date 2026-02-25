@@ -1,8 +1,8 @@
 package nva.commons.apigateway.testutils;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.google.common.net.HttpHeaders;
-import com.google.common.net.MediaType;
+import nva.commons.apigateway.MediaType;
+import org.apache.hc.core5.http.HttpHeaders;
 import java.net.URI;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
