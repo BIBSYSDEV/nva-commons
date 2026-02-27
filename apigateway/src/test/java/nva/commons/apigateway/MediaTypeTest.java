@@ -7,79 +7,78 @@ import org.junit.jupiter.api.Test;
 class MediaTypeTest {
 
     @Test
-    void parseSimpleType() {
+    void shouldParseSimpleMediaType() {
         var mediaType = MediaType.parse("application/json");
         assertThat(mediaType.toString()).isEqualTo("application/json");
     }
 
     @Test
-    void parseTypeWithCharset() {
+    void shouldParseMediaTypeWithCharset() {
         var mediaType = MediaType.parse("application/json; charset=utf-8");
         assertThat(mediaType.toString()).isEqualTo("application/json; charset=utf-8");
     }
 
     @Test
-    void parseTypeWithWhitespace() {
+    void shouldParseMediaTypeWithWhitespace() {
         var mediaType = MediaType.parse("  text/html ;  charset=utf-8 ");
         assertThat(mediaType.toString()).isEqualTo("text/html; charset=utf-8");
     }
 
     @Test
-    void createFromComponents() {
+    void shouldCreateMediaTypeFromComponents() {
         var mediaType = MediaType.create("application", "ld+json");
         assertThat(mediaType.toString()).isEqualTo("application/ld+json");
     }
 
     @Test
-    void withoutParametersStripsCharset() {
+    void shouldStripCharsetWithWithoutParameters() {
         var withCharset = MediaType.parse("application/json; charset=utf-8");
         var withoutParams = withCharset.withoutParameters();
         assertThat(withoutParams.toString()).isEqualTo("application/json");
     }
 
     @Test
-    void withoutParametersOnTypeWithNoParamsReturnsSameValue() {
+    void shouldReturnSameValueWhenWithoutParametersCalledOnTypeWithNoParams() {
         var mediaType = MediaType.create("text", "plain");
         assertThat(mediaType.withoutParameters().toString()).isEqualTo("text/plain");
     }
 
     @Test
-    void isMatchesWildcardType() {
+    void shouldMatchWildcardType() {
         var json = MediaType.parse("application/json");
-        var anyType = MediaType.ANY_TYPE;
-        assertThat(json.matches(anyType)).isTrue();
+        assertThat(json.matches(MediaType.ANY_TYPE)).isTrue();
     }
 
     @Test
-    void isMatchesWildcardSubtype() {
+    void shouldMatchWildcardSubtype() {
         var json = MediaType.parse("application/json");
         var anyApplication = MediaType.parse("application/*");
         assertThat(json.matches(anyApplication)).isTrue();
     }
 
     @Test
-    void isDoesNotMatchDifferentType() {
+    void shouldNotMatchDifferentType() {
         var json = MediaType.parse("application/json");
         var textPlain = MediaType.parse("text/plain");
         assertThat(json.matches(textPlain)).isFalse();
     }
 
     @Test
-    void isDoesNotMatchDifferentSubtype() {
+    void shouldNotMatchDifferentSubtype() {
         var json = MediaType.parse("application/json");
         var xml = MediaType.parse("application/xml");
         assertThat(json.matches(xml)).isFalse();
     }
 
     @Test
-    void isMatchesExactSameType() {
+    void shouldMatchExactSameType() {
         var json = MediaType.parse("application/json");
         var alsoJson = MediaType.parse("application/json");
         assertThat(json.matches(alsoJson)).isTrue();
     }
 
     @Test
-    void equalsAndHashCodeForEqualTypes() {
+    void shouldBeEqualAndHaveSameHashCodeForEqualTypes() {
         var a = MediaType.parse("application/json; charset=utf-8");
         var b = MediaType.parse("application/json; charset=utf-8");
         assertThat(a).isEqualTo(b);
@@ -87,7 +86,7 @@ class MediaTypeTest {
     }
 
     @Test
-    void equalsIsCaseInsensitive() {
+    void shouldBeEqualRegardlessOfCase() {
         var a = MediaType.parse("Application/JSON; charset=utf-8");
         var b = MediaType.parse("application/json; charset=utf-8");
         assertThat(a).isEqualTo(b);
@@ -95,21 +94,21 @@ class MediaTypeTest {
     }
 
     @Test
-    void notEqualWhenDifferentCharset() {
+    void shouldNotBeEqualWhenDifferentCharset() {
         var a = MediaType.parse("text/html; charset=utf-8");
         var b = MediaType.parse("text/html; charset=iso-8859-1");
         assertThat(a).isNotEqualTo(b);
     }
 
     @Test
-    void notEqualWhenOneHasCharset() {
+    void shouldNotBeEqualWhenOnlyOneHasCharset() {
         var a = MediaType.parse("text/html; charset=utf-8");
         var b = MediaType.create("text", "html");
         assertThat(a).isNotEqualTo(b);
     }
 
     @Test
-    void predefinedConstantsHaveExpectedValues() {
+    void shouldHaveExpectedValuesForPredefinedConstants() {
         assertThat(MediaType.JSON_UTF_8.toString()).isEqualTo("application/json; charset=utf-8");
         assertThat(MediaType.XML_UTF_8.toString()).isEqualTo("text/xml; charset=utf-8");
         assertThat(MediaType.HTML_UTF_8.toString()).isEqualTo("text/html; charset=utf-8");
@@ -120,22 +119,22 @@ class MediaTypeTest {
     }
 
     @Test
-    void anyApplicationTypeMatchesApplicationSubtypes() {
+    void shouldMatchApplicationSubtypesWithAnyApplicationType() {
         assertThat(MediaType.JSON_UTF_8.matches(MediaType.ANY_APPLICATION_TYPE)).isTrue();
     }
 
     @Test
-    void anyApplicationTypeDoesNotMatchTextSubtypes() {
+    void shouldNotMatchTextSubtypesWithAnyApplicationType() {
         assertThat(MediaType.HTML_UTF_8.matches(MediaType.ANY_APPLICATION_TYPE)).isFalse();
     }
 
     @Test
-    void anyTextTypeMatchesTextSubtypes() {
+    void shouldMatchTextSubtypesWithAnyTextType() {
         assertThat(MediaType.HTML_UTF_8.matches(MediaType.ANY_TEXT_TYPE)).isTrue();
     }
 
     @Test
-    void anyTextTypeDoesNotMatchApplicationSubtypes() {
+    void shouldNotMatchApplicationSubtypesWithAnyTextType() {
         assertThat(MediaType.JSON_UTF_8.matches(MediaType.ANY_TEXT_TYPE)).isFalse();
     }
 }
