@@ -6,25 +6,29 @@ import static nva.commons.core.attempt.Try.attempt;
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import com.auth0.jwk.InvalidPublicKeyException;
-import com.auth0.jwk.Jwk;
-import com.auth0.jwk.JwkException;
-import com.auth0.jwk.JwkProvider;
-import com.auth0.jwk.JwkProviderBuilder;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKMatcher;
+import com.nimbusds.jose.jwk.JWKSelector;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.jwk.source.RemoteJWKSet;
+import com.nimbusds.jose.proc.SecurityContext;
+import com.nimbusds.jose.util.DefaultResourceRetriever;
 import org.apache.hc.core5.http.HttpHeaders;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPublicKey;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
@@ -58,13 +62,14 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     private static final String COGNITO_AUTHORIZER_URLS = "COGNITO_AUTHORIZER_URLS";
     private static final int CONNECT_TIMEOUT = 1000;
     private static final int READ_TIMEOUT = 2000;
+    private static final String JWKS_PATH = "/.well-known/jwks.json";
     protected final Environment environment;
     private static final Logger logger = LoggerFactory.getLogger(RestRequestHandler.class);
     private final transient Class<I> iclass;
     private final transient ApiMessageParser<I> inputParser;
     protected final ObjectMapper objectMapper;
     private final String[] authorizerUrls;
-    private final Map<String, JwkProvider> jwkProviders;
+    private final Map<String, JWKSource<SecurityContext>> jwkSources;
 
     protected transient OutputStream outputStream;
     protected transient String allowedOrigin;
@@ -160,7 +165,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
         this.inputParser = new ApiMessageParser<>(objectMapper);
         this.objectMapper = objectMapper;
         this.authorizerUrls = this.environment.readEnv(COGNITO_AUTHORIZER_URLS).split(",");
-        this.jwkProviders = getJwkProviders(authorizerUrls);
+        this.jwkSources = getJwkSources(authorizerUrls);
     }
 
     @Override
@@ -191,20 +196,23 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
         }
     }
 
-    private Map<String, JwkProvider> getJwkProviders(String... authorizerUrls) {
+    private Map<String, JWKSource<SecurityContext>> getJwkSources(String... authorizerUrls) {
         return Stream.of(authorizerUrls)
                    .collect(Collectors.toMap(
                        domain -> domain,
-                       RestRequestHandler::createJwkProvider
+                       RestRequestHandler::createJwkSource
                    ));
     }
 
-    private static JwkProvider createJwkProvider(String domain) {
-        return new JwkProviderBuilder(domain)
-                   .cached(10, 1, TimeUnit.HOURS)
-                   .rateLimited(10, 1, TimeUnit.MINUTES)
-                   .timeouts(CONNECT_TIMEOUT, READ_TIMEOUT)
-                   .build();
+    private static JWKSource<SecurityContext> createJwkSource(String domain) {
+        try {
+            var normalizedDomain = domain.startsWith("http") ? domain : "https://" + domain;
+            var retriever = new DefaultResourceRetriever(CONNECT_TIMEOUT, READ_TIMEOUT);
+            var jwksUrl = URI.create(normalizedDomain + JWKS_PATH).toURL();
+            return new RemoteJWKSet<>(jwksUrl, retriever);
+        } catch (MalformedURLException exception) {
+            throw new IllegalArgumentException("Invalid JWKS URL for domain: " + domain, exception);
+        }
     }
 
     private void validateAuthorization(RequestInfo requestInfo) throws UnauthorizedException {
@@ -212,45 +220,49 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
         if (bearerToken.isPresent() && !requestInfo.isGatewayAuthorized()) {
             try {
                 var decodedJWT = JWT.decode(bearerToken.get());
-                var jwkProvider = getJwkProvider(decodedJWT.getIssuer());
+                var jwkSource = getJwkSource(decodedJWT.getIssuer());
 
-                var jwk = jwkProvider.get(decodedJWT.getKeyId());
+                var selector = new JWKSelector(
+                    new JWKMatcher.Builder().keyID(decodedJWT.getKeyId()).build());
+                var keys = jwkSource.get(selector, null);
+                if (keys.isEmpty()) {
+                    throw new UnauthorizedException("No matching JWK found");
+                }
 
-                var algorithm = getAlgorithm(jwk, decodedJWT.getAlgorithm());
+                var algorithm = getAlgorithm(keys.getFirst(), decodedJWT.getAlgorithm());
 
                 var jwtVerifier = JWT.require(algorithm)
                                       .withIssuer(authorizerUrls)
                                       .build();
 
                 jwtVerifier.verify(decodedJWT);
-            }
-            catch (JwkException | JWTVerificationException e) {
+            } catch (JOSEException | JWTVerificationException e) {
                 logger.error("Failed to verify token", e);
                 throw new UnauthorizedException("Failed to verify token");
             }
         }
     }
 
-    private static Algorithm getAlgorithm(Jwk jwk, String algorithm)
-        throws InvalidPublicKeyException, UnauthorizedException {
-        return switch (algorithm) {
-            case "RS256" -> Algorithm.RSA256((RSAPublicKey) jwk.getPublicKey());
-            case "RS384" -> Algorithm.RSA384((RSAPublicKey) jwk.getPublicKey());
-            case "RS512" -> Algorithm.RSA512((RSAPublicKey) jwk.getPublicKey());
-            case "ES256" -> Algorithm.ECDSA256((ECPublicKey) jwk.getPublicKey());
-            case "ES384" -> Algorithm.ECDSA384((ECPublicKey) jwk.getPublicKey());
-            case "ES512" -> Algorithm.ECDSA512((ECPublicKey) jwk.getPublicKey());
+    private static Algorithm getAlgorithm(JWK jwk, String algorithmName)
+        throws JOSEException, UnauthorizedException {
+        return switch (algorithmName) {
+            case "RS256" -> Algorithm.RSA256(((RSAKey) jwk).toRSAPublicKey());
+            case "RS384" -> Algorithm.RSA384(((RSAKey) jwk).toRSAPublicKey());
+            case "RS512" -> Algorithm.RSA512(((RSAKey) jwk).toRSAPublicKey());
+            case "ES256" -> Algorithm.ECDSA256(((ECKey) jwk).toECPublicKey());
+            case "ES384" -> Algorithm.ECDSA384(((ECKey) jwk).toECPublicKey());
+            case "ES512" -> Algorithm.ECDSA512(((ECKey) jwk).toECPublicKey());
             default -> throw new UnauthorizedException("Unsupported algorithm");
         };
     }
 
-    private JwkProvider getJwkProvider(String issuer) throws UnauthorizedException {
-        var jwkProvider = jwkProviders.get(issuer);
-        if (isNull(jwkProvider)) {
-            logger.error("JWK provider for issuer {} not found", issuer);
-            throw new UnauthorizedException("No JWK provider found for issuer");
+    private JWKSource<SecurityContext> getJwkSource(String issuer) throws UnauthorizedException {
+        var jwkSource = jwkSources.get(issuer);
+        if (isNull(jwkSource)) {
+            logger.error("JWK source for issuer {} not found", issuer);
+            throw new UnauthorizedException("No JWK source found for issuer");
         }
-        return jwkProvider;
+        return jwkSource;
     }
 
     protected abstract void setAllowedOrigin(RequestInfo requestInfo);
