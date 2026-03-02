@@ -116,6 +116,9 @@ class MediaTypeTest {
         assertThat(MediaType.ANY_APPLICATION_TYPE.toString()).isEqualTo("application/*");
         assertThat(MediaType.ANY_TEXT_TYPE.toString()).isEqualTo("text/*");
         assertThat(MediaType.XHTML_UTF_8.toString()).isEqualTo("application/xhtml+xml; charset=utf-8");
+        assertThat(MediaType.MICROSOFT_EXCEL.toString()).isEqualTo("application/vnd.ms-excel");
+        assertThat(MediaType.OOXML_SHEET.toString())
+            .isEqualTo("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     }
 
     @Test
