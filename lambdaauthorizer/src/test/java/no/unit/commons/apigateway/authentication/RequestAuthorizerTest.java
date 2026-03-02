@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayCustomAuthorizerEvent;
-import com.google.common.net.HttpHeaders;
 import java.util.Map;
 import nva.commons.logutils.LogUtils;
 import nva.commons.logutils.TestAppender;
@@ -35,7 +34,7 @@ public class RequestAuthorizerTest {
     }
 
     public static Map<String, String> authHeaders(String apiKey) {
-        return Map.of(HttpHeaders.AUTHORIZATION, apiKey);
+        return Map.of("Authorization", apiKey);
     }
 
     @Test

@@ -1,7 +1,5 @@
 package nva.commons.apigateway;
 
-import com.google.common.net.MediaType;
-
 public final class MediaTypes {
 
     public static final String APPLICATION = "application";

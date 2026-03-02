@@ -1,10 +1,11 @@
 package nva.commons.apigateway;
 
 import static java.util.Optional.ofNullable;
-import com.google.common.collect.Maps;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import nva.commons.apigateway.exceptions.InvalidAccessRightException;
 
 public enum AccessRight {
@@ -79,10 +80,9 @@ public enum AccessRight {
      */
     MANAGE_EXTERNAL_CLIENTS("external-clients");
 
-    private static final Map<String, AccessRight> LOOKUP = Maps.uniqueIndex(
-        Arrays.asList(values()),
-        AccessRight::getPersistedValue
-    );
+  private static final Map<String, AccessRight> LOOKUP =
+      Arrays.stream(values())
+          .collect(Collectors.toMap(AccessRight::getPersistedValue, Function.identity()));
 
     private final String persistedValue;
 

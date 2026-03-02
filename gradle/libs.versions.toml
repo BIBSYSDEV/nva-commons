@@ -28,8 +28,8 @@ jackson = { strictly = '2.21.0' }
 jackson-annotations = { strictly = '2.21' }
 javers = { strictly = '7.8.0' }
 jena = { strictly = '5.6.0' }
-jupiter = { strictly = '5.14.1' }
-jupiter-platform = { strictly = '1.14.1' } # Keep minor & patch version in sync with `jupiter`
+jupiter = { strictly = '5.14.2' }
+jupiter-platform = { strictly = '1.14.2' } # Keep minor & patch version in sync with `jupiter`
 lambda-log4j = { strictly = '1.6.1' }
 log4j = { strictly = '2.25.3' }
 mockito = { strictly = '5.21.0' }

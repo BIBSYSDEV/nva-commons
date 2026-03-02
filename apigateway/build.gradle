@@ -10,7 +10,7 @@ dependencies {
     implementation project(":json")
     implementation project(":auth")
 
-    implementation libs.guava
+    implementation libs.httpcore5
     implementation libs.bundles.logging
     implementation libs.aws.lambda.events
 
@@ -24,9 +24,13 @@ dependencies {
     implementation libs.jackson.datatype.jsr310
     implementation libs.jackson.datatype.problem
 
-    implementation libs.com.auth0.jwks
+    implementation(libs.com.auth0.jwks) {
+        // Only needed by GuavaCachedJwkProvider which we do not use
+        exclude group: "com.google.guava"
+    }
     implementation libs.com.auth0.jwt
 
+    testImplementation libs.assertj.core
     testImplementation libs.bundles.testing.junit
     testImplementation libs.bundles.testing.mockito
     testImplementation libs.bundles.testing.hamcrest

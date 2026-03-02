@@ -1,18 +1,14 @@
 package nva.commons.apigateway;
 
-import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
-import static com.google.common.net.HttpHeaders.CACHE_CONTROL;
-import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
-import static com.google.common.net.HttpHeaders.ORIGIN;
-import static com.google.common.net.HttpHeaders.STRICT_TRANSPORT_SECURITY;
-import static com.google.common.net.HttpHeaders.VARY;
-import static com.google.common.net.HttpHeaders.X_CONTENT_TYPE_OPTIONS;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
+import static org.apache.hc.core5.http.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
+import static org.apache.hc.core5.http.HttpHeaders.CACHE_CONTROL;
+import static org.apache.hc.core5.http.HttpHeaders.CONTENT_TYPE;
+import static org.apache.hc.core5.http.HttpHeaders.VARY;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.net.HttpHeaders;
-import com.google.common.net.MediaType;
+import org.apache.hc.core5.http.HttpHeaders;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -38,6 +34,10 @@ import org.zalando.problem.Status;
 import org.zalando.problem.ThrowableProblem;
 
 public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
+
+    private static final String STRICT_TRANSPORT_SECURITY = "Strict-Transport-Security";
+    private static final String X_CONTENT_TYPE_OPTIONS = "X-Content-Type-Options";
+    private static final String ORIGIN = "Origin";
 
     public static final String ALLOWED_ORIGIN_ENV = "ALLOWED_ORIGIN";
     public static final String MESSAGE_FOR_RUNTIME_EXCEPTIONS_HIDING_IMPLEMENTATION_DETAILS_TO_API_CLIENTS =

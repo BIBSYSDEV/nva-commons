@@ -14,7 +14,6 @@ dependencies {
 
     testImplementation project(":json")
     testImplementation libs.bundles.jackson
-    testImplementation libs.guava
     testImplementation project(":logutils")
 
     testImplementation libs.bundles.testing.junit
