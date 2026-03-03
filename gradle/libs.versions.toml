@@ -34,7 +34,6 @@ lambda-log4j = { strictly = '1.6.1' }
 log4j = { strictly = '2.25.3' }
 mockito = { strictly = '5.21.0' }
 nebula-lint = { strictly = '20.5.6' }
-nimbus-jose-jwt = { strictly = '10.8' }
 nexus-publish = { strictly = '2.0.0' }
 opencsv = { strictly = '5.12.0' }
 opensearch-java = { strictly = '3.5.0' }
@@ -97,7 +96,6 @@ jena-arq = { group = 'org.apache.jena', name = 'jena-arq', version.ref = 'jena' 
 jena-core = { group = 'org.apache.jena', name = 'jena-core', version.ref = 'jena' }
 jena-shacl = { group = 'org.apache.jena', name = 'jena-shacl', version.ref = 'jena'}
 opencsv = { group = 'com.opencsv', name = 'opencsv', version.ref = 'opencsv' }
-nimbus-jose-jwt = { group = 'com.nimbusds', name = 'nimbus-jose-jwt', version.ref = 'nimbus-jose-jwt' }
 zalando = { group = 'org.zalando', name = 'problem', version.ref = 'zalando-problem' }
 
 # Build tools
