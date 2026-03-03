@@ -200,11 +200,11 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     }
 
     private static JwkProvider createJwkProvider(String domain) {
-        return new JwkProviderBuilder(domain)
-                   .cached(10, 1, TimeUnit.HOURS)
-                   .rateLimited(10, 1, TimeUnit.MINUTES)
-                   .timeouts(CONNECT_TIMEOUT, READ_TIMEOUT)
-                   .build();
+        var provider = new JwkProviderBuilder(domain)
+                           .rateLimited(10, 1, TimeUnit.MINUTES)
+                           .timeouts(CONNECT_TIMEOUT, READ_TIMEOUT)
+                           .build();
+        return new CachedJwkProvider(provider, 1, TimeUnit.HOURS);
     }
 
     private void validateAuthorization(RequestInfo requestInfo) throws UnauthorizedException {
@@ -223,8 +223,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
                                       .build();
 
                 jwtVerifier.verify(decodedJWT);
-            }
-            catch (JwkException | JWTVerificationException e) {
+            } catch (JwkException | JWTVerificationException e) {
                 logger.error("Failed to verify token", e);
                 throw new UnauthorizedException("Failed to verify token");
             }
