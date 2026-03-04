@@ -10,7 +10,7 @@ import com.auth0.jwk.InvalidPublicKeyException;
 import com.auth0.jwk.Jwk;
 import com.auth0.jwk.JwkException;
 import com.auth0.jwk.JwkProvider;
-import com.auth0.jwk.JwkProviderBuilder;
+import com.auth0.jwk.UrlJwkProvider;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
@@ -56,8 +56,6 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     public static final String COMMA = ",";
     public static final String PREFIX_SINGLE_WILDCARD_TYPE = "*/";
     private static final String COGNITO_AUTHORIZER_URLS = "COGNITO_AUTHORIZER_URLS";
-    private static final int CONNECT_TIMEOUT = 1000;
-    private static final int READ_TIMEOUT = 2000;
     protected final Environment environment;
     private static final Logger logger = LoggerFactory.getLogger(RestRequestHandler.class);
     private final transient Class<I> iclass;
@@ -200,10 +198,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     }
 
     private static JwkProvider createJwkProvider(String domain) {
-        var provider = new JwkProviderBuilder(domain)
-                           .rateLimited(10, 1, TimeUnit.MINUTES)
-                           .timeouts(CONNECT_TIMEOUT, READ_TIMEOUT)
-                           .build();
+        var provider = new UrlJwkProvider(domain);
         return new CachedJwkProvider(provider, 1, TimeUnit.HOURS);
     }
 
