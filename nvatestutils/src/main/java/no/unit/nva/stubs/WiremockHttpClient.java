@@ -40,7 +40,6 @@ public final class WiremockHttpClient {
         }
     }
 
-    @SuppressWarnings("checkstyle:OverloadMethodsDeclarationOrder")
     private static X509ExtendedTrustManager createTrustEverythingManager() {
 
         return new X509ExtendedTrustManager() {
