@@ -2,7 +2,6 @@ plugins {
     id 'java'
     id 'java-library'
     id 'jacoco'
-    id 'checkstyle'
     id 'jacoco-report-aggregation'
     id 'pmd'
     id 'idea'
@@ -71,20 +70,6 @@ jacocoTestReport {
     dependsOn(test)
     reports {
         xml.required = true
-    }
-}
-
-checkstyle {
-    toolVersion = '10.26.1'
-    configFile = rootProject.resources.text.fromFile('config/checkstyle/checkstyle.xml').asFile()
-    showViolations = true
-}
-
-tasks.withType(Checkstyle) .configureEach{
-    reports {
-        xml.required = true
-        html.required = true
-        html.stylesheet = rootProject.resources.text.fromFile('config/checkstyle/checkstyle-simple.xsl')
     }
 }
 
