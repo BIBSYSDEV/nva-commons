@@ -1,11 +1,10 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   Sample template for demonstrating EventHandlers.
 
   ATTENTION. This template is not being currently deployed. It serves only as a working example of
   a template that creates the event handlers.
-
 
 Metadata:
   AWS::ServerlessRepo::Application:
@@ -20,7 +19,6 @@ Globals:
   Function:
     Timeout: 20
 
-
 Parameters:
   EventBusName:
     Type: String
@@ -34,7 +32,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -44,7 +42,7 @@ Resources:
       Policies:
         - PolicyName: LambdaDefaults
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
@@ -56,7 +54,7 @@ Resources:
                 Resource: "*"
         - PolicyName: Events
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
@@ -88,7 +86,7 @@ Resources:
           Type: EventBridgeRule
           Properties:
             EventBusName: !GetAtt EventBus.Name
-            Pattern: { "detail-type": [ { "prefix": "Lambda Function Invocation Result" } ] }
+            Pattern: { "detail-type": [{ "prefix": "Lambda Function Invocation Result" }] }
   EventConducer:
     DependsOn:
       - EventBus
@@ -109,7 +107,7 @@ Resources:
           Type: EventBridgeRule
           Properties:
             EventBusName: !GetAtt EventBus.Name
-            Pattern: { "detail-type": [ "MyType" ] }
+            Pattern: { "detail-type": ["MyType"] }
       EventInvokeConfig:
         DestinationConfig:
           OnSuccess:

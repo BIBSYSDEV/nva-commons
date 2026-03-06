@@ -22,9 +22,21 @@ spotless {
     }
 
     format 'misc', {
-        target '.gitignore', '.gitattributes', '.editorconfig', '**/*.md'
+        target('.gitignore', '.gitattributes', '.editorconfig')
         leadingTabsToSpaces(4)
         trimTrailingWhitespace()
+        endWithNewline()
+    }
+
+    format 'markdown', {
+        target('**/*.md')
+        prettier().config(['proseWrap': 'preserve'])
+        endWithNewline()
+    }
+
+    format 'yaml', {
+        target('**/*.yaml', '**/*.yml')
+        prettier().config(['printWidth': 120])
         endWithNewline()
     }
 }

@@ -4,11 +4,9 @@ Transform:
   - AWS::LanguageExtensions
 Description: DLQ resources
 
-
 Parameters:
   Suffix:
     Type: String
-
 
 Globals:
   Function:
@@ -46,7 +44,7 @@ Resources:
         - !Ref PushToDlqPolicy
         - !Ref AccessDlqBucketPolicy
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -56,7 +54,7 @@ Resources:
       Policies:
         - PolicyName: HandleSQSDLQMessages
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               Effect: Allow
               Action:
@@ -80,7 +78,7 @@ Resources:
       ManagedPolicyArns:
         - !Ref AccessDlqBucketPolicy
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -93,7 +91,7 @@ Resources:
     Properties:
       ManagedPolicyName: !Sub DefaultLambdaPermissions-${AWS::StackName}-${Suffix}
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Action:
@@ -108,7 +106,7 @@ Resources:
     Properties:
       ManagedPolicyName: !Sub AccessDlqBucketPolicy-${AWS::StackName}-${Suffix}
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Action:
@@ -121,7 +119,7 @@ Resources:
               - s3:GetObjectVersion
             Resource:
               - !GetAtt DlqBucket.Arn
-              - !Sub '${DlqBucket.Arn}/*'
+              - !Sub "${DlqBucket.Arn}/*"
 
   PushToDlqPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -129,7 +127,7 @@ Resources:
       Description: Policy allowing lambda to push to the DLQ.
       ManagedPolicyName: !Sub PushToDlqPolicy-${AWS::StackName}-${Suffix}
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Action:
@@ -142,20 +140,20 @@ Resources:
               - !GetAtt Dlq.Arn
           - Effect: Allow
             Action:
-             - firehose:PutRecord
-             - firehose:PutRecordBatch
+              - firehose:PutRecord
+              - firehose:PutRecordBatch
             Resource:
               - !GetAtt DlqFirehose.Arn
 
   Dlq:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: !Sub 'Dlq-${Suffix}'
+      QueueName: !Sub "Dlq-${Suffix}"
 
   DlqBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub 'dlq-bucket-${Suffix}-${AWS::AccountId}'
+      BucketName: !Sub "dlq-bucket-${Suffix}-${AWS::AccountId}"
       LifecycleConfiguration:
         Rules:
           - Id: ExpirationRule
@@ -186,4 +184,4 @@ Outputs:
   PushToDlqPolicy:
     Value: !Ref PushToDlqPolicy
     Export:
-      Name: !Sub 'PushToDlqPolicy-${Suffix}'
+      Name: !Sub "PushToDlqPolicy-${Suffix}"

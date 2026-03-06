@@ -19,5 +19,4 @@ dependencies {
     testImplementation project(":json")
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")
-
 }

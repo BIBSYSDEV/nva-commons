@@ -9,8 +9,8 @@ allprojects {
     group = getProperty("GROUP")
     version = getProperty("VERSION_NAME")
     nva {
-        spotlessEnabled = false
-        spotlessEnforced = false
+        spotlessEnabled = true
+        spotlessEnforced = true
     }
 }
 
