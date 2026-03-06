@@ -12,5 +12,4 @@ dependencies {
     testImplementation libs.bundles.testing.hamcrest
     testImplementation libs.commons.lang
     testImplementation libs.datafaker
-
 }

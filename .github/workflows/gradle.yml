@@ -3,7 +3,7 @@
 
 name: Java CI with Gradle
 
-on: [push,pull_request]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -14,14 +14,14 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '21'
-          distribution: 'corretto'
+          java-version: "21"
+          distribution: "corretto"
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: install jq
-        run:  sudo apt-get install -y jq
+        run: sudo apt-get install -y jq
 
       - name: Cache Gradle packages
         uses: actions/cache@v3

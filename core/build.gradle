@@ -16,7 +16,6 @@ dependencies {
     testImplementation libs.bundles.jackson
     testImplementation project (":nvatestutils")
     testImplementation project(":logutils")
-
 }
 
 test {

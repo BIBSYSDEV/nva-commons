@@ -14,13 +14,10 @@ Globals:
       - arm64
 
 Parameters:
-
   Suffix:
     Type: String
 
-
 Resources:
-
   SomeLambda:
     Type: AWS::Serverless::Function
     Properties:
@@ -34,8 +31,6 @@ Resources:
             Destination: !GetAtt DlqStack.Outputs.DlqArn
       Role: !GetAtt SomeLambdaRole.Arn
 
-
-
   SomeLambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -43,14 +38,13 @@ Resources:
       ManagedPolicyArns:
         - !GetAtt DlqStack.Outputs.PushToDlqPolicy
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
               Service:
                 - lambda.amazonaws.com
             Action: sts:AssumeRole
-
 
   SomeLambdaLogGroup:
     Type: AWS::Logs::LogGroup

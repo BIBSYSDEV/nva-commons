@@ -17,9 +17,9 @@ Configuration and utilities specific to the root project:
 - Aggregates code coverage reports from all subprojects
 - Enforces 100% test coverage on method and class level
 - Custom tasks for convenience:
-    - `verifyCoverage`: Verifies aggregated coverage meets requirements
-    - `showCoverageReport`: Displays clickable link to coverage report
-    - `dependencyUpdates`: Shows available dependency updates
+  - `verifyCoverage`: Verifies aggregated coverage meets requirements
+  - `showCoverageReport`: Displays clickable link to coverage report
+  - `dependencyUpdates`: Shows available dependency updates
 
 Applied only in the root project's `build.gradle`.
 
