@@ -18,12 +18,26 @@ public final class WiremockHttpClient {
         "Failed to configure the trust everything rule for the http client, which is required to connect to "
         + "wiremock server and local signed SSL certificate for now.";
 
+    private static final HttpClient INSTANCE = init();
+
+
+
     private WiremockHttpClient() {
 
     }
 
+    private static HttpClient init() {
+        return HttpClient.newBuilder()
+                   .sslContext(createInsecureSslContextTrustingEverything())
+                   .build();
+    }
+
+    /**
+     * This is actually "getInstance", but we preserve the naming to avoid having to re-write every test.
+     * @return HttpClient test instance that is insecure, and trusts everything
+     */
     public static HttpClient create() {
-        return HttpClient.newBuilder().sslContext(createInsecureSslContextTrustingEverything()).build();
+        return INSTANCE;
     }
 
     @SuppressWarnings("PMD.AvoidPrintStackTrace")
