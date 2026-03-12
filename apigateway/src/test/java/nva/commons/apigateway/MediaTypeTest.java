@@ -2,26 +2,69 @@ package nva.commons.apigateway;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class MediaTypeTest {
 
-    @Test
-    void shouldParseSimpleMediaType() {
-        var mediaType = MediaType.parse("application/json");
-        assertThat(mediaType.toString()).isEqualTo("application/json");
+    static Stream<Arguments> parseProvider() {
+        return Stream.of(
+            Arguments.of("application/json", "application/json"),
+            Arguments.of("application/json; charset=utf-8", "application/json; charset=utf-8"),
+            Arguments.of("  text/html ;  charset=utf-8 ", "text/html; charset=utf-8"));
     }
 
-    @Test
-    void shouldParseMediaTypeWithCharset() {
-        var mediaType = MediaType.parse("application/json; charset=utf-8");
-        assertThat(mediaType.toString()).isEqualTo("application/json; charset=utf-8");
+    static Stream<Arguments> predefinedConstantsProvider() {
+        return Stream.of(
+            Arguments.of(MediaType.CSV_UTF_8, "text/csv; charset=utf-8"),
+            Arguments.of(MediaType.JSON_UTF_8, "application/json; charset=utf-8"),
+            Arguments.of(MediaType.XML_UTF_8, "text/xml; charset=utf-8"),
+            Arguments.of(MediaType.HTML_UTF_8, "text/html; charset=utf-8"),
+            Arguments.of(MediaType.ANY_TYPE, "*/*"),
+            Arguments.of(MediaType.ANY_APPLICATION_TYPE, "application/*"),
+            Arguments.of(MediaType.ANY_TEXT_TYPE, "text/*"),
+            Arguments.of(MediaType.XHTML_UTF_8, "application/xhtml+xml; charset=utf-8"),
+            Arguments.of(MediaType.MICROSOFT_EXCEL, "application/vnd.ms-excel"),
+            Arguments.of(
+                MediaType.OOXML_SHEET,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
     }
 
-    @Test
-    void shouldParseMediaTypeWithWhitespace() {
-        var mediaType = MediaType.parse("  text/html ;  charset=utf-8 ");
-        assertThat(mediaType.toString()).isEqualTo("text/html; charset=utf-8");
+    static Stream<Arguments> matchingProvider() {
+        return Stream.of(
+            Arguments.of("application/json", "*/*", true),
+            Arguments.of("application/json", "application/*", true),
+            Arguments.of("application/json", "application/json", true),
+            Arguments.of("application/json", "text/plain", false),
+            Arguments.of("application/json", "application/xml", false),
+            Arguments.of("application/json; charset=utf-8", "application/*", true),
+            Arguments.of("text/html; charset=utf-8", "application/*", false),
+            Arguments.of("text/html; charset=utf-8", "text/*", true),
+            Arguments.of("application/json; charset=utf-8", "text/*", false));
+    }
+
+    @ParameterizedTest
+    @MethodSource("parseProvider")
+    void shouldParseMediaType(String input, String expected) {
+        var mediaType = MediaType.parse(input);
+        assertThat(mediaType.toString()).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @MethodSource("predefinedConstantsProvider")
+    void shouldHaveExpectedValuesForPredefinedConstants(MediaType constant, String expected) {
+        assertThat(constant.toString()).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @MethodSource("matchingProvider")
+    void shouldMatchCorrectly(String mediaType, String pattern, boolean shouldMatch) {
+        var parsed = MediaType.parse(mediaType);
+        var parsedPattern = MediaType.parse(pattern);
+        assertThat(parsed.matches(parsedPattern)).isEqualTo(shouldMatch);
     }
 
     @Test
@@ -41,40 +84,6 @@ class MediaTypeTest {
     void shouldReturnSameValueWhenWithoutParametersCalledOnTypeWithNoParams() {
         var mediaType = MediaType.create("text", "plain");
         assertThat(mediaType.withoutParameters().toString()).isEqualTo("text/plain");
-    }
-
-    @Test
-    void shouldMatchWildcardType() {
-        var json = MediaType.parse("application/json");
-        assertThat(json.matches(MediaType.ANY_TYPE)).isTrue();
-    }
-
-    @Test
-    void shouldMatchWildcardSubtype() {
-        var json = MediaType.parse("application/json");
-        var anyApplication = MediaType.parse("application/*");
-        assertThat(json.matches(anyApplication)).isTrue();
-    }
-
-    @Test
-    void shouldNotMatchDifferentType() {
-        var json = MediaType.parse("application/json");
-        var textPlain = MediaType.parse("text/plain");
-        assertThat(json.matches(textPlain)).isFalse();
-    }
-
-    @Test
-    void shouldNotMatchDifferentSubtype() {
-        var json = MediaType.parse("application/json");
-        var xml = MediaType.parse("application/xml");
-        assertThat(json.matches(xml)).isFalse();
-    }
-
-    @Test
-    void shouldMatchExactSameType() {
-        var json = MediaType.parse("application/json");
-        var alsoJson = MediaType.parse("application/json");
-        assertThat(json.matches(alsoJson)).isTrue();
     }
 
     @Test
@@ -105,40 +114,5 @@ class MediaTypeTest {
         var a = MediaType.parse("text/html; charset=utf-8");
         var b = MediaType.create("text", "html");
         assertThat(a).isNotEqualTo(b);
-    }
-
-    @Test
-    void shouldHaveExpectedValuesForPredefinedConstants() {
-        assertThat(MediaType.CSV_UTF_8.toString()).isEqualTo("text/csv; charset=utf-8");
-        assertThat(MediaType.JSON_UTF_8.toString()).isEqualTo("application/json; charset=utf-8");
-        assertThat(MediaType.XML_UTF_8.toString()).isEqualTo("text/xml; charset=utf-8");
-        assertThat(MediaType.HTML_UTF_8.toString()).isEqualTo("text/html; charset=utf-8");
-        assertThat(MediaType.ANY_TYPE.toString()).isEqualTo("*/*");
-        assertThat(MediaType.ANY_APPLICATION_TYPE.toString()).isEqualTo("application/*");
-        assertThat(MediaType.ANY_TEXT_TYPE.toString()).isEqualTo("text/*");
-        assertThat(MediaType.XHTML_UTF_8.toString()).isEqualTo("application/xhtml+xml; charset=utf-8");
-        assertThat(MediaType.MICROSOFT_EXCEL.toString()).isEqualTo("application/vnd.ms-excel");
-        assertThat(MediaType.OOXML_SHEET.toString())
-            .isEqualTo("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    }
-
-    @Test
-    void shouldMatchApplicationSubtypesWithAnyApplicationType() {
-        assertThat(MediaType.JSON_UTF_8.matches(MediaType.ANY_APPLICATION_TYPE)).isTrue();
-    }
-
-    @Test
-    void shouldNotMatchTextSubtypesWithAnyApplicationType() {
-        assertThat(MediaType.HTML_UTF_8.matches(MediaType.ANY_APPLICATION_TYPE)).isFalse();
-    }
-
-    @Test
-    void shouldMatchTextSubtypesWithAnyTextType() {
-        assertThat(MediaType.HTML_UTF_8.matches(MediaType.ANY_TEXT_TYPE)).isTrue();
-    }
-
-    @Test
-    void shouldNotMatchApplicationSubtypesWithAnyTextType() {
-        assertThat(MediaType.JSON_UTF_8.matches(MediaType.ANY_TEXT_TYPE)).isFalse();
     }
 }
