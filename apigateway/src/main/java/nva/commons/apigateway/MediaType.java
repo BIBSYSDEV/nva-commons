@@ -12,6 +12,7 @@ public final class MediaType {
     public static final MediaType ANY_TYPE = create("*", "*");
     public static final MediaType ANY_APPLICATION_TYPE = create(APPLICATION, "*");
     public static final MediaType ANY_TEXT_TYPE = create(TEXT, "*");
+    public static final MediaType CSV_UTF_8 = create(TEXT, "csv", UTF_8);
     public static final MediaType JSON_UTF_8 = create(APPLICATION, "json", UTF_8);
     public static final MediaType XML_UTF_8 = create(TEXT, "xml", UTF_8);
     public static final MediaType HTML_UTF_8 = create(TEXT, "html", UTF_8);
