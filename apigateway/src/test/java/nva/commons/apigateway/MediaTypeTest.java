@@ -109,6 +109,7 @@ class MediaTypeTest {
 
     @Test
     void shouldHaveExpectedValuesForPredefinedConstants() {
+        assertThat(MediaType.CSV_UTF_8.toString()).isEqualTo("text/csv; charset=utf-8");
         assertThat(MediaType.JSON_UTF_8.toString()).isEqualTo("application/json; charset=utf-8");
         assertThat(MediaType.XML_UTF_8.toString()).isEqualTo("text/xml; charset=utf-8");
         assertThat(MediaType.HTML_UTF_8.toString()).isEqualTo("text/html; charset=utf-8");
