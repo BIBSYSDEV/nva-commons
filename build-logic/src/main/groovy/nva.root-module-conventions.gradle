@@ -8,6 +8,18 @@ plugins {
     id 'com.autonomousapps.dependency-analysis'
 }
 
+dependencyAnalysis {
+    issues {
+        all {
+            onRuntimeOnly {
+                // Log4j-core is loaded via ServiceLoader, not direct imports.
+                // The plugin incorrectly suggests testRuntimeOnly, but tests need it on the compile classpath.
+                exclude 'org.apache.logging.log4j:log4j-core'
+            }
+        }
+    }
+}
+
 dependencies {
     // Automatically aggregate coverage from all subprojects
     subprojects.each { subproject -> jacocoAggregation subproject }

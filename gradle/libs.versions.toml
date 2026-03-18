@@ -4,6 +4,7 @@
 [versions]
 apache-commons = { require = '3.20.0' }
 apache-http-core = { strictly = '5.4.1' }
+apache-http-core4 = { strictly = '4.4.16' }
 apache-http-client = { strictly = '5.6' }
 apache-poi = { strictly = '5.5.1' }
 assertj = { strictly = '3.27.7' }
@@ -60,7 +61,8 @@ aws-sdk-dynamo = { group = 'com.amazonaws', name = 'aws-java-sdk-dynamodb', vers
 aws-sdk-apigateway = { group = 'com.amazonaws', name = 'aws-java-sdk-api-gateway', version.ref = 'aws-sdk' }
 aws-sdk-sqs = {group = 'com.amazonaws', name = 'aws-java-sdk-sqs', version.ref = 'aws-sdk'}
 aws-sdk2-auth = { group = 'software.amazon.awssdk', name = 'auth', version.ref = 'aws-sdk2' }
-aws-sdk2-core = { group = 'software.amazon.awssdk', name = 'sdk-core', version.ref = 'aws-sdk2' }
+aws-sdk2-aws-core = { group = 'software.amazon.awssdk', name = 'aws-core', version.ref = 'aws-sdk2' }
+aws-sdk2-core = { group = 'software.amazon.awssdk', name = 'sdk-core', version.ref = 'aws-sdk2' } # Duplicate, kept temporarily for backwards compatibility
 aws-sdk2-dynamo = { group = 'software.amazon.awssdk', name = 'dynamodb', version.ref = 'aws-sdk2' }
 aws-sdk2-dynamodblocal = { group = 'software.amazon.dynamodb', name = 'DynamoDBLocal', version.ref = 'aws-sdk2-dynamodblocal' }
 aws-sdk2-dynamodbenhanced = { group = 'software.amazon.awssdk', name = 'dynamodb-enhanced', version.ref = 'aws-sdk2' }
@@ -70,6 +72,7 @@ aws-sdk2-http-client = { group = 'software.amazon.awssdk', name = 'http-client-s
 aws-sdk2-regions = { group = 'software.amazon.awssdk', name = 'regions', version.ref = 'aws-sdk2' }
 aws-sdk2-s3 = { group = 'software.amazon.awssdk', name = 's3', version.ref = 'aws-sdk2' }
 aws-sdk2-secrets = { group = 'software.amazon.awssdk', name = 'secretsmanager', version.ref = 'aws-sdk2' }
+aws-sdk2-sdk-core = { group = 'software.amazon.awssdk', name = 'sdk-core', version.ref = 'aws-sdk2' }
 aws-sdk2-sns = { group = 'software.amazon.awssdk', name = 'sns', version.ref = 'aws-sdk2' }
 aws-sdk2-sqs = { group = 'software.amazon.awssdk', name = 'sqs', version.ref = 'aws-sdk2' }
 aws-sdk2-urlconnection = { group = 'software.amazon.awssdk', name = 'url-connection-client', version.ref = 'aws-sdk2' }
@@ -80,6 +83,7 @@ commons-lang = { group = 'org.apache.commons', name = 'commons-lang3', version.r
 commons-validator = { group = 'commons-validator', name = 'commons-validator', version.ref = 'commons-validator' }
 guava = { group = 'com.google.guava', name = 'guava', version.ref = 'guava' }
 httpclient5 = { group = 'org.apache.httpcomponents.client5', name = 'httpclient5', version.ref = 'apache-http-client' }
+httpcore4 = { group = 'org.apache.httpcomponents', name = 'httpcore', version.ref = 'apache-http-core4' }
 httpcore5 = { group = 'org.apache.httpcomponents.core5', name = 'httpcore5', version.ref = 'apache-http-core' }
 jackson-annotations = { group = 'com.fasterxml.jackson.core', name = 'jackson-annotations', version.ref = 'jackson-annotations' }
 jackson-core = { group = 'com.fasterxml.jackson.core', name = 'jackson-core', version.ref = 'jackson' }
@@ -130,6 +134,7 @@ testcontainers = { group = 'org.testcontainers', name = 'testcontainers', versio
 testcontainers-junit = { group = 'org.testcontainers', name = 'testcontainers-junit-jupiter', version.ref = 'testcontainers' }
 testcontainers-opensearch = { group = 'org.opensearch', name = 'opensearch-testcontainers', version.ref = 'opensearch-testcontainer' }
 wiremock = { group = 'org.wiremock', name = 'wiremock', version.ref = 'wiremock' }
+wiremock-core = { group = 'org.wiremock', name = 'wiremock-core', version.ref = 'wiremock' }
 wiremock-junit5 = { group = 'org.wiremock', name = 'wiremock-junit5', version.ref = 'wiremock' }
 
 [plugins]

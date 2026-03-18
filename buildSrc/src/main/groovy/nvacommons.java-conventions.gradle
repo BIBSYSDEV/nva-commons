@@ -75,10 +75,8 @@ jacocoTestReport {
 }
 
 dependencies {
-    api(libs.lambda.log4j) {
-        exclude group: "org.apache.logging.log4j", module: "log4j-core"
-        exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
-        exclude group: "com.amazonaws", module: "aws-lambda-java-core"
-        exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
-    }
+    runtimeOnly libs.log4j.api
+    runtimeOnly libs.log4j.core
+    runtimeOnly libs.log4j.slf4j.impl
+    testImplementation libs.log4j.core
 }

@@ -4,29 +4,44 @@ plugins {
 }
 
 dependencies {
-    implementation project(":core")
-    implementation project(":eventhandlers")
-    implementation project(":json")
-    implementation project(":auth")
-    implementation project(":apigateway")
-    implementation project(":secrets")
-
-    implementation libs.bundles.testing.junit
-    implementation libs.bundles.testing.mockito
-    implementation libs.bundles.testing.hamcrest
-    implementation libs.commons.lang
-    implementation libs.datafaker
-    implementation libs.httpcore5
-    implementation libs.aws.lambda.events
-
-    implementation libs.aws.sdk2.s3
-    implementation libs.aws.sdk2.firehose
-    implementation libs.aws.sdk2.eventbridge
-    implementation libs.aws.sdk2.secrets
-    implementation libs.bundles.wiremock
-    implementation libs.bundles.jackson
-    implementation libs.commons.validator
+    api libs.aws.lambda.core
+    api libs.aws.lambda.events
+    api libs.aws.sdk2.eventbridge
+    api libs.aws.sdk2.firehose
+    api libs.aws.sdk2.s3
+    api libs.aws.sdk2.sdk.core
+    api libs.aws.sdk2.secrets
+    api libs.datafaker
+    api libs.hamcrest
+    api libs.jackson.annotations
+    api libs.jackson.core
+    api libs.jackson.databind
+    api libs.mockito.core
+    api libs.slf4j.api
+    api project(":apigateway")
+    api project(":auth")
+    api project(":eventhandlers")
+    implementation libs.aws.sdk2.aws.core
+    implementation libs.aws.sdk2.http.client
+    implementation libs.aws.sdk2.regions
     implementation libs.com.auth0.jwt
-
+    implementation libs.commons.lang
+    implementation libs.guava
+    implementation libs.httpcore5
+    implementation libs.junit.jupiter.api
+    implementation libs.wiremock.core
+    implementation project(":core")
+    implementation project(":json")
+    runtimeOnly libs.jackson.dataformat.xml
+    runtimeOnly libs.jackson.datatype.jdk8
+    runtimeOnly libs.jackson.datatype.jsr310
+    runtimeOnly libs.jackson.datatype.problem
+    runtimeOnly libs.jackson.module.parameter.names
+    runtimeOnly libs.junit.jupiter.engine
+    runtimeOnly libs.junit.platform.launcher
+    runtimeOnly libs.wiremock
+    testImplementation libs.commons.validator
+    testImplementation libs.junit.jupiter.params
     testImplementation project(":doi")
+    testImplementation project(":secrets")
 }

@@ -4,19 +4,28 @@ plugins{
 }
 
 dependencies {
-    implementation project (":core")
-    implementation project (":json")
-    implementation libs.aws.sdk2.s3
-    implementation libs.aws.sdk2.core
-    implementation libs.aws.ion
-
-    implementation libs.bundles.jackson
+    api libs.aws.sdk2.s3
+    api libs.jackson.databind
+    api project(":core")
     implementation libs.aws.apache.client
-
-    testImplementation libs.bundles.testing.junit
-    testImplementation libs.bundles.testing.mockito
-    testImplementation libs.bundles.testing.hamcrest
-    testImplementation libs.commons.lang
-    testImplementation libs.datafaker
+    implementation libs.aws.ion
+    implementation libs.aws.sdk2.auth
+    implementation libs.aws.sdk2.aws.core
+    implementation libs.aws.sdk2.http.client
+    implementation libs.aws.sdk2.regions
+    implementation libs.aws.sdk2.sdk.core
+    implementation project(":json")
+    runtimeOnly libs.jackson.core
+    runtimeOnly libs.jackson.dataformat.xml
+    runtimeOnly libs.jackson.datatype.jdk8
+    runtimeOnly libs.jackson.datatype.jsr310
+    runtimeOnly libs.jackson.datatype.problem
+    runtimeOnly libs.jackson.module.parameter.names
+    testImplementation libs.hamcrest
+    testImplementation libs.junit.jupiter.api
+    testImplementation libs.junit.jupiter.params
     testImplementation project(":nvatestutils")
+    testRuntimeOnly libs.datafaker
+    testRuntimeOnly libs.junit.jupiter.engine
+    testRuntimeOnly libs.junit.platform.launcher
 }

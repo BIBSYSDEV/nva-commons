@@ -4,19 +4,27 @@ plugins {
 }
 
 dependencies {
-    implementation project (":core")
-    implementation  libs.slf4j.api
-    implementation libs.aws.lambda.core
-    implementation libs.aws.lambda.events
-    implementation libs.aws.sdk2.firehose
+    api libs.aws.lambda.core
+    api libs.aws.lambda.events
+    api libs.aws.sdk2.firehose
     compileOnly libs.jackson.annotations
-    testImplementation libs.bundles.logging
-    testImplementation libs.bundles.testing.junit
-    testImplementation libs.bundles.testing.mockito
-    testImplementation libs.bundles.testing.hamcrest
-    testImplementation libs.commons.lang
-    testImplementation libs.datafaker
-    testImplementation libs.bundles.jackson
-    testImplementation project (":nvatestutils")
-    testImplementation project(":logutils")
+    implementation libs.aws.sdk2.sdk.core
+    implementation project(":core")
+    testImplementation libs.hamcrest
+    testImplementation libs.jackson.databind
+    testImplementation libs.junit.jupiter.api
+    testImplementation libs.junit.jupiter.params
+    testImplementation project(":nvatestutils")
+    testRuntimeOnly libs.datafaker
+    testRuntimeOnly libs.jackson.core
+    testRuntimeOnly libs.jackson.dataformat.xml
+    testRuntimeOnly libs.jackson.datatype.jdk8
+    testRuntimeOnly libs.jackson.datatype.jsr310
+    testRuntimeOnly libs.jackson.datatype.problem
+    testRuntimeOnly libs.jackson.module.parameter.names
+    testRuntimeOnly libs.junit.jupiter.engine
+    testRuntimeOnly libs.junit.platform.launcher
+    testRuntimeOnly libs.log4j.api
+    testRuntimeOnly libs.log4j.core
+    testRuntimeOnly libs.log4j.slf4j.impl
 }
