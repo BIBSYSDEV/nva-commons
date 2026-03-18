@@ -5,6 +5,7 @@ plugins {
     id 'jacoco-report-aggregation'
     id 'pmd'
     id 'idea'
+    id 'com.autonomousapps.dependency-analysis'
 }
 
 java {

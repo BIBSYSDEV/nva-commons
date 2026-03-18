@@ -5,6 +5,7 @@ plugins {
     id 'nva.formatting-conventions'
     id 'nva.gradlelint'
     id 'com.github.ben-manes.versions'
+    id 'com.autonomousapps.dependency-analysis'
 }
 
 dependencies {

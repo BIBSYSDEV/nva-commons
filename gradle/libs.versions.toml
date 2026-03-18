@@ -15,6 +15,7 @@ aws-sdk = { strictly = '1.12.797' }
 aws-sdk2 = { strictly = '2.42.5' }
 aws-sdk2-dynamodblocal = { strictly = '3.3.0' }
 ben-manes-versions = { strictly = '0.53.0' }
+build-health = { strictly = '3.6.1' }
 com-auth0-jwks = { strictly = '0.23.0' }
 com-auth0-jwt = { strictly = '4.5.1' }
 commons-validator = { strictly = '1.10.1' }
@@ -133,6 +134,7 @@ wiremock-junit5 = { group = 'org.wiremock', name = 'wiremock-junit5', version.re
 
 [plugins]
 # IMPORTANT: Renaming or removing a plugin is a breaking change
+build-health = { id = 'com.autonomousapps.build-health', version.ref = 'build-health' }
 errorprone = { id = 'net.ltgt.errorprone', version.ref = 'errorprone-plugin' }
 gradle-versions = { id = 'com.github.ben-manes.versions', version.ref = 'ben-manes-versions' }
 nebula-lint = { id = 'nebula.lint', version.ref = 'nebula-lint' }

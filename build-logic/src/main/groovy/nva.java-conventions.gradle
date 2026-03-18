@@ -5,6 +5,7 @@ plugins {
     id 'jacoco'
     id 'pmd'
     id 'net.ltgt.errorprone'
+    id 'com.autonomousapps.dependency-analysis'
 }
 
 java {
