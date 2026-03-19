@@ -1,4 +1,4 @@
-package nva.commons.apigateway;
+package nva.commons.apigateway.s3;
 
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -15,6 +15,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import no.unit.nva.stubs.FakeContext;
 import no.unit.nva.stubs.FakeS3Client;
+import nva.commons.apigateway.GatewayResponse;
+import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.core.Environment;

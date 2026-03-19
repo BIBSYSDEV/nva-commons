@@ -5,24 +5,18 @@ plugins {
 
 dependencies {
     api libs.aws.lambda.core
-    api libs.aws.sdk2.s3
     api libs.jackson.annotations
     api libs.jackson.core
     api libs.jackson.databind
     api project(":core")
     api(libs.com.auth0.jwks) { exclude group: 'com.google.guava' }
-    implementation libs.aws.sdk2.auth
-    implementation libs.aws.sdk2.aws.core
-    implementation libs.aws.sdk2.http.client
-    implementation libs.aws.sdk2.regions
-    implementation libs.aws.sdk2.sdk.core
-    implementation libs.aws.sdk2.urlconnection
     implementation libs.com.auth0.jwt
     implementation libs.httpcore5
     implementation libs.slf4j.api
     implementation libs.zalando
     implementation project(":auth")
     implementation project(":json")
+    runtimeOnly libs.aws.sdk2.urlconnection
     runtimeOnly libs.jackson.datatype.jdk8
     runtimeOnly libs.jackson.datatype.jsr310
     runtimeOnly libs.jackson.datatype.problem

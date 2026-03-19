@@ -1,7 +1,9 @@
-package nva.commons.apigateway;
+package nva.commons.apigateway.s3;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import java.time.Duration;
+
+import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
