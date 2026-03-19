@@ -4,12 +4,22 @@ plugins {
 }
 
 dependencies {
-    implementation libs.bundles.logging
-    implementation libs.bundles.jackson
-    implementation libs.aws.lambda.core
-    testImplementation libs.bundles.testing.junit
-    testImplementation libs.bundles.testing.mockito
-    testImplementation libs.bundles.testing.hamcrest
-    testImplementation libs.commons.lang
-    testImplementation libs.datafaker
+    api libs.log4j.core
+    implementation libs.log4j.api
+    runtimeOnly libs.jackson.core
+    runtimeOnly libs.jackson.databind
+    runtimeOnly libs.jackson.dataformat.xml
+    runtimeOnly libs.jackson.datatype.jdk8
+    runtimeOnly libs.jackson.datatype.jsr310
+    runtimeOnly libs.jackson.datatype.problem
+    runtimeOnly libs.jackson.module.parameter.names
+    runtimeOnly libs.log4j.slf4j.impl
+    testImplementation libs.hamcrest
+    testImplementation libs.jackson.annotations
+    testImplementation libs.junit.jupiter.api
+    testImplementation libs.log4j.core
+    testImplementation libs.slf4j.api
+    testRuntimeOnly libs.datafaker
+    testRuntimeOnly libs.junit.jupiter.engine
+    testRuntimeOnly libs.junit.platform.launcher
 }

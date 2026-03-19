@@ -4,19 +4,26 @@ plugins {
 }
 
 dependencies {
-    implementation project(":core")
-    implementation project(":json")
-
+    api libs.aws.lambda.events
     api(libs.aws.sdk.dynamo) {
         exclude(group: 'com.amazonaws', module: 'aws-java-sdk-s3')
         exclude(group: 'com.amazonaws', module: 'jmespath-java')
     }
-    api libs.aws.lambda.events
-
-    testImplementation libs.bundles.testing.junit
-    testImplementation libs.bundles.testing.mockito
-    testImplementation libs.bundles.testing.hamcrest
-    testImplementation libs.commons.lang
-    testImplementation libs.datafaker
-    testImplementation libs.bundles.jackson
+    api libs.jackson.core
+    api libs.jackson.databind
+    implementation libs.aws.java.sdk.core
+    implementation project(":core")
+    testImplementation libs.hamcrest
+    testImplementation libs.junit.jupiter.api
+    testImplementation project(":json")
+    testRuntimeOnly libs.datafaker
+    testRuntimeOnly libs.jackson.core
+    testRuntimeOnly libs.jackson.dataformat.xml
+    testRuntimeOnly libs.jackson.datatype.jdk8
+    testRuntimeOnly libs.jackson.datatype.jsr310
+    testRuntimeOnly libs.jackson.datatype.problem
+    testRuntimeOnly libs.jackson.module.parameter.names
+    testRuntimeOnly libs.junit.jupiter.engine
+    testRuntimeOnly libs.junit.platform.launcher
+    testRuntimeOnly libs.log4j.core
 }

@@ -13,6 +13,7 @@ def pluginNotation = { Provider<PluginDependency> plugin ->
 }
 
 dependencies {
+    implementation(pluginNotation(libs.plugins.build.health))
     implementation(pluginNotation(libs.plugins.errorprone))
     implementation(pluginNotation(libs.plugins.gradle.versions))
     implementation(pluginNotation(libs.plugins.nebula.lint))

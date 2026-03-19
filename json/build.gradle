@@ -4,28 +4,24 @@ plugins {
 }
 
 dependencies {
-
-    implementation project (":core")
+    compileOnly libs.jackson.annotations
     compileOnly libs.jackson.core
     compileOnly libs.jackson.databind
-    compileOnly libs.jackson.annotations
     compileOnly libs.jackson.datatype.jdk8
     compileOnly libs.jackson.datatype.jsr310
     compileOnly libs.zalando
     implementation libs.jackson.datatype.problem
-
-
+    testImplementation libs.hamcrest
+    testImplementation libs.jackson.annotations
     testImplementation libs.jackson.core
     testImplementation libs.jackson.databind
-    testImplementation libs.jackson.annotations
-    testImplementation libs.jackson.datatype.jdk8
-    testImplementation libs.jackson.datatype.jsr310
-    testImplementation libs.jackson.datatype.problem
-
-
-    testImplementation libs.bundles.testing.junit
-    testImplementation libs.bundles.testing.mockito
-    testImplementation libs.bundles.testing.hamcrest
-    testImplementation libs.commons.lang
-    testImplementation libs.datafaker
+    testImplementation libs.junit.jupiter.api
+    testImplementation libs.junit.jupiter.params
+    testImplementation project(":core")
+    testRuntimeOnly libs.datafaker
+    testRuntimeOnly libs.jackson.datatype.jdk8
+    testRuntimeOnly libs.jackson.datatype.jsr310
+    testRuntimeOnly libs.jackson.datatype.problem
+    testRuntimeOnly libs.junit.jupiter.engine
+    testRuntimeOnly libs.junit.platform.launcher
 }
