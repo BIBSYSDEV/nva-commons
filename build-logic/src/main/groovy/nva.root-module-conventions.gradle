@@ -11,6 +11,9 @@ plugins {
 dependencyAnalysis {
     issues {
         all {
+            onAny {
+                severity 'fail'
+            }
             onRuntimeOnly {
                 // Log4j-core is loaded via ServiceLoader, not direct imports.
                 // The plugin incorrectly suggests testRuntimeOnly, but tests need it on the compile classpath.
@@ -83,6 +86,7 @@ tasks.register('showCoverageReport') {
 
 tasks.named('check') {
     dependsOn tasks.named('verifyCoverage', JacocoCoverageVerification)
+    dependsOn tasks.named('buildHealth')
     finalizedBy tasks.named('showCoverageReport')
 }
 
