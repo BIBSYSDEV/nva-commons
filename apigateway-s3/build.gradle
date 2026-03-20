@@ -1,0 +1,30 @@
+plugins {
+    id 'nvacommons.java-conventions'
+    id 'nvacommons.publish-maven'
+}
+
+dependencies {
+    api libs.aws.lambda.core
+    api libs.aws.sdk2.s3
+    api project(':apigateway')
+    api project(':core')
+    implementation libs.aws.sdk2.auth
+    implementation libs.aws.sdk2.aws.core
+    implementation libs.aws.sdk2.http.client
+    implementation libs.aws.sdk2.regions
+    implementation libs.aws.sdk2.sdk.core
+    implementation libs.aws.sdk2.urlconnection
+    testImplementation libs.hamcrest
+    testImplementation libs.junit.jupiter.api
+    testImplementation libs.mockito.core
+    testImplementation project(':nvatestutils')
+    testRuntimeOnly libs.jackson.dataformat.xml
+}
+
+test {
+    environment "ALLOWED_ORIGIN", "*"
+    environment "COGNITO_URI", "https://cognito.com"
+    environment "EXTERNAL_USER_POOL_URI", "https://user-pool.example.com/123"
+    environment "AWS_REGION", "eu-west-1"
+    environment "LARGE_API_RESPONSES_BUCKET", "large-bucket"
+}
