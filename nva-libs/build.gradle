@@ -1,0 +1,36 @@
+plugins {
+    id 'version-catalog'
+    id 'nvacommons.publish-artifact'
+}
+
+catalog {
+    versionCatalog {
+        library("apigateway", "com.github.bibsysdev", "apigateway").version(project.version)
+        library("apigateway-s3", "com.github.bibsysdev", "apigateway-s3").version(project.version)
+        library("auth", "com.github.bibsysdev", "auth").version(project.version)
+        library("clients", "com.github.bibsysdev", "clients").version(project.version)
+        library("core", "com.github.bibsysdev", "core").version(project.version)
+        library("dlq", "com.github.bibsysdev", "dlq").version(project.version)
+        library("doi", "com.github.bibsysdev", "doi").version(project.version)
+        library("dynamodb", "com.github.bibsysdev", "dynamodb").version(project.version)
+        library("eventhandlers", "com.github.bibsysdev", "eventhandlers").version(project.version)
+        library("identifiers", "com.github.bibsysdev", "identifiers").version(project.version)
+        library("json", "com.github.bibsysdev", "json").version(project.version)
+        library("lambdaauthorizer", "com.github.bibsysdev", "lambdaauthorizer").version(project.version)
+        library("logutils", "com.github.bibsysdev", "logutils").version(project.version)
+        library("pagination", "com.github.bibsysdev", "pagination").version(project.version)
+        library("s3", "com.github.bibsysdev", "s3").version(project.version)
+        library("secrets", "com.github.bibsysdev", "secrets").version(project.version)
+        library("testutils", "com.github.bibsysdev", "nvatestutils").version(project.version)
+    }
+}
+
+publishing {
+    publications {
+        create("versionCatalog", MavenPublication) {
+            artifactId = project.name
+            from components.versionCatalog
+            pom(configureCommonPom)
+        }
+    }
+}
