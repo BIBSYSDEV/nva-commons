@@ -17,10 +17,10 @@ ext.configureCommonPom = { MavenPom pom ->
     }
     pom.developers {
         developer {
-            name.set('Orestis Gkorgkas')
-            email.set('og@unit.no')
-            organization.set('UNIT')
-            organizationUrl.set('https://www.unit.no/')
+            name.set("NVA Team")
+            email.set("kontakt@sikt.no")
+            organization.set("Sikt")
+            organizationUrl.set("https://sikt.no/")
         }
     }
     pom.scm {
