@@ -1,21 +1,12 @@
 plugins {
-    id 'nva.root-module-conventions'
-    id 'signing'
+    id 'nvacommons.root-module-conventions'
     alias(libs.plugins.nexus.publish)
-    alias(libs.plugins.gradle.versions)
 }
 
 allprojects {
     group = getProperty("GROUP")
     version = getProperty("VERSION_NAME")
-    nva {
-        spotlessEnabled = true
-        spotlessEnforced = true
-    }
 }
-
-// Load method to configure publishing of each sub-project
-apply from: "$rootDir/gradle/shared-publish.gradle"
 
 nexusPublishing {
     repositories {

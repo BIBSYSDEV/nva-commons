@@ -5,7 +5,7 @@ plugins {
 
 /***********************************ATTENTION*******************************************************
  Base plugin for publishing artifacts. Contains shared functionality like signing and POM configuration.
- Part of the maven publishing configuration has to be in the root project (nvacommons.root.gradle)
+ Part of the maven publishing configuration has to be in the root project (build.gradle)
  ************************************ ATTENTION*****************************************************/
 
 signing {

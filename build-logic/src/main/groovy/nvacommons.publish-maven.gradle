@@ -4,7 +4,7 @@ plugins {
 
 /***********************************ATTENTION*******************************************************
  * Re-usable plugin for publishing a Java sub-project as a Maven artifact.
- * Part of the maven publishing configuration has to be in the root project(nvacommons.root.gradle)
+ * Part of the maven publishing configuration has to be in the root project (build.gradle)
  ************************************ ATTENTION*****************************************************/
 
 java {

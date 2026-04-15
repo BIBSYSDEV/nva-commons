@@ -1,0 +1,12 @@
+plugins {
+    id 'nva.root-module-conventions'
+}
+
+nva {
+    dependencyAnalysis {
+        enforced = true
+    }
+    spotless {
+        enabled = false
+    }
+}
