@@ -7,6 +7,7 @@ public interface JsonSerializable {
      *
      * @return JsonString
      */
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     default String toJsonString() {
         try {
             return JsonUtils.singleLineObjectMapper.writeValueAsString(this);

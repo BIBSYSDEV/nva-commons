@@ -49,9 +49,7 @@ public final class ItemMapper {
     public static JsonNode toJsonNode(Map<String, AttributeValue> attributeValueMap) throws JsonProcessingException {
         var object = toObject(attributeValueMap);
         Item item = Item.fromMap(object);
-        var jsonNode = objectMapper.readTree(item.toJSON());
-
-        return jsonNode;
+        return objectMapper.readTree(item.toJSON());
     }
 
     private static Map<String, Object> toObject(Map<String, AttributeValue> attributeMap) {
@@ -74,7 +72,6 @@ public final class ItemMapper {
             return Map.of();
         }
 
-        @SuppressWarnings("PMD.UseConcurrentHashMap")
         Map<String, T> result = new LinkedHashMap<>(values.size());
         for (Map.Entry<String, AttributeValue> entry : values.entrySet()) {
             T t = toSimpleValue(entry.getValue());
@@ -93,42 +90,32 @@ public final class ItemMapper {
         } else if (Boolean.FALSE.equals(value.getNULL())) {
             throw new UnsupportedOperationException("False-NULL is not supported in DynamoDB");
         } else if (value.getBOOL() != null) {
-            T t = (T) value.getBOOL();
-            return t;
+            return (T) value.getBOOL();
         } else if (value.getS() != null) {
-            T t = (T) value.getS();
-            return t;
+            return (T) value.getS();
         } else if (value.getN() != null) {
-            T t = (T) new BigDecimal(value.getN());
-            return t;
+            return (T) new BigDecimal(value.getN());
         } else if (value.getB() != null) {
-            T t = (T) copyAllBytesFrom(value.getB());
-            return t;
+            return (T) copyAllBytesFrom(value.getB());
         } else if (value.getSS() != null) {
-            @SuppressWarnings("PMD.UseConcurrentHashMap")
-            T t = (T) new LinkedHashSet<>(value.getSS());
-            return t;
+            return (T) new LinkedHashSet<>(value.getSS());
         } else if (value.getNS() != null) {
             Set<BigDecimal> set = new LinkedHashSet<>(value.getNS().size());
             value.getNS()
                     .stream()
                     .map(BigDecimal::new)
                     .forEach(set::add);
-            T t = (T) set;
-            return t;
+            return (T) set;
         } else if (value.getBS() != null) {
             Set<byte[]> set = new LinkedHashSet<>(value.getBS().size());
             for (ByteBuffer bb : value.getBS()) {
                 set.add(copyAllBytesFrom(bb));
             }
-            T t = (T) set;
-            return t;
+            return (T) set;
         } else if (value.getL() != null) {
-            T t = (T) toSimpleList(value.getL());
-            return t;
+            return (T) toSimpleList(value.getL());
         } else if (value.getM() != null) {
-            T t = (T) toSimpleMapValue(value.getM());
-            return t;
+            return (T) toSimpleMapValue(value.getM());
         } else {
             return null;
         }

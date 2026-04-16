@@ -45,6 +45,7 @@ public abstract class EventHandler<I, O> implements RequestStreamHandler {
     }
 
     @Override
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) {
         String inputString = null;
         try {

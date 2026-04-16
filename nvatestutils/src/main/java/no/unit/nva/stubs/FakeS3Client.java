@@ -60,8 +60,6 @@ public class FakeS3Client implements S3Client {
         return new FakeS3Client(toByteBuffer);
     }
 
-    //TODO: fix if necessary
-    @SuppressWarnings("PMD.CloseResource")
     @Override
     public <T> T getObject(GetObjectRequest getObjectRequest,
                                        ResponseTransformer<GetObjectResponse, T> responseTransformer) {
@@ -223,6 +221,7 @@ public class FakeS3Client implements S3Client {
         }
     }
 
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     private <T> T transformResponse(ResponseTransformer<GetObjectResponse, T> responseTransformer,
                                                 InputStream inputStream, GetObjectResponse response) {
         try {

@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import nva.commons.core.JacocoGenerated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.nio.charset.StandardCharsets;
 
 @SuppressWarnings("PMD.TestClassWithoutTestCases")
 @JacocoGenerated
@@ -18,6 +19,6 @@ public class TestLogger implements LambdaLogger {
 
     @Override
     public void log(byte[] message) {
-        logger.info(new String(message));
+        logger.info(new String(message, StandardCharsets.UTF_8));
     }
 }

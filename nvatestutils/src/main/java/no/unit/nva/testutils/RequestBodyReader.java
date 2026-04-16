@@ -29,7 +29,7 @@ public class RequestBodyReader {
     }
 
     @JacocoGenerated
-    private static final class RequestBodySubscriber implements Subscriber<ByteBuffer> {
+    public static final class RequestBodySubscriber implements Subscriber<ByteBuffer> {
 
         public static final int NUMBER_OF_REQUESTS_TO_PUBLISHER = 1000;
 

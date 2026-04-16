@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Provides random JWTs for testing purposes. It has DELIBERATELY limited functionality to avoid misuse.
  */
+@SuppressWarnings("PMD.ReplaceJavaUtilDate") // FIXME
 public final class JwtTestToken {
 
     private JwtTestToken() {

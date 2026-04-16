@@ -18,6 +18,7 @@ public class SortableIdentifierSerializer extends JsonSerializer<SortableIdentif
     }
 
     @Override
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public void serialize(SortableIdentifier value, JsonGenerator gen, SerializerProvider serializers) {
         try {
             if (Objects.nonNull(value)) {

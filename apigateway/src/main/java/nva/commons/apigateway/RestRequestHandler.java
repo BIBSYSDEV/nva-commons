@@ -162,6 +162,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     }
 
     @Override
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
         logger.info(REQUEST_ID + context.getAwsRequestId());
         I inputObject = null;

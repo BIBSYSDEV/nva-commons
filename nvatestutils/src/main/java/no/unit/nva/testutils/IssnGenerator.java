@@ -1,6 +1,6 @@
 package no.unit.nva.testutils;
 
-final class IssnGenerator {
+public final class IssnGenerator {
 
     public static final String SYMBOL_FOR_NUMBER_TEN = "X";
     private static final int MIDDLE_INDEX_OF_ISSN_STRING = 4;

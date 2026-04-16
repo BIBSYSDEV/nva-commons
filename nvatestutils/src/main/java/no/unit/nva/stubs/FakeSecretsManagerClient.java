@@ -96,7 +96,7 @@ public class FakeSecretsManagerClient implements SecretsManagerClient {
         secrets.get(secretName).put(new SecretKey(key), value);
     }
 
-    private static final class SecretName {
+    public static final class SecretName {
 
         private final String value;
 
@@ -133,7 +133,7 @@ public class FakeSecretsManagerClient implements SecretsManagerClient {
         }
     }
 
-    private static class SecretKey {
+    public static class SecretKey {
 
         private final String value;
 
