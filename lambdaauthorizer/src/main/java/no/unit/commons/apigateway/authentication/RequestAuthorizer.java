@@ -97,6 +97,7 @@ public abstract class RequestAuthorizer implements RequestHandler<APIGatewayCust
             .orElseThrow(ForbiddenException::new);
     }
 
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     private String readPrincipalId() {
         try {
             return principalId();

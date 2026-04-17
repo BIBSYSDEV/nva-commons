@@ -82,6 +82,7 @@ public class EventReference implements JsonSerializable, EventBody {
 
 
     @Override
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public String toJsonString() {
         try {
             return JsonUtils.singleLineObjectMapper.writeValueAsString(this);

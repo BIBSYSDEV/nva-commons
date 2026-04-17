@@ -46,6 +46,7 @@ public final class IoUtils {
      * @param path the path to the resource.
      * @return an InputStream with the data.
      */
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public static InputStream inputStreamFromResources(String path) {
         try {
             InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);

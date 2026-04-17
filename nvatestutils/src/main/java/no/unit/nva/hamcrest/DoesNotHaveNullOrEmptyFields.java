@@ -107,7 +107,7 @@ public class DoesNotHaveNullOrEmptyFields<T> extends BaseMatcher<T> {
         }
     }
 
-    private static class PropertyValuePair {
+    public static class PropertyValuePair {
 
         public final String propertyName;
         public final Object value;

@@ -34,6 +34,7 @@ public final class SortableIdentifier implements Comparable<SortableIdentifier> 
         return new SortableIdentifier(newIdentifierString());
     }
 
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public static SortableIdentifier fromUri(URI uri) {
         try {
             String path = uri.getPath();

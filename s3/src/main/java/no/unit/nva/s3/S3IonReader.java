@@ -34,7 +34,7 @@ public final class S3IonReader {
     }
 
     private static Stream<String> contentToLines(InputStream content) {
-        return new BufferedReader(new InputStreamReader(content)).lines();
+        return new BufferedReader(new InputStreamReader(content, StandardCharsets.UTF_8)).lines();
     }
 
     private static String toJsonObjectsString(String ion) throws IOException {

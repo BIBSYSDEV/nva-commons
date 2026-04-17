@@ -40,7 +40,6 @@ public final class WiremockHttpClient {
         return INSTANCE;
     }
 
-    @SuppressWarnings("PMD.AvoidPrintStackTrace")
     private static SSLContext createInsecureSslContextTrustingEverything() {
         try {
             var insecureSslContext = SSLContext.getInstance("SSL");

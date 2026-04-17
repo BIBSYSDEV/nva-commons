@@ -44,6 +44,7 @@ public class Success<T> extends Try<T> {
     }
 
     @Override
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public <S, E extends Exception> Try<S> flatMap(FunctionWithException<T, Try<S>, E> action) {
         try {
             return action.apply(value);
@@ -99,6 +100,7 @@ public class Success<T> extends Try<T> {
      * @return a new {@link Try} instance
      */
     @Override
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public <E extends Exception> Try<Void> forEach(ConsumerWithException<T, E> action) {
         try {
             action.consume(value);

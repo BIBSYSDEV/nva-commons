@@ -36,7 +36,6 @@ import nva.commons.apigateway.AccessRightEntry;
 import nva.commons.core.JacocoGenerated;
 
 @JacocoGenerated
-@SuppressWarnings("PMD.GodClass")
 public class HandlerRequestBuilder<T> {
 
     public static final String DELIMITER = System.lineSeparator();

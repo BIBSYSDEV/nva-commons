@@ -28,6 +28,7 @@ public abstract class Try<T> {
      * @param <S>    the resulting object
      * @return a new {@link Try} instance
      */
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public static <S> Try<S> attempt(Callable<S> action) {
         try {
             return new Success<>(action.call());
@@ -47,6 +48,7 @@ public abstract class Try<T> {
      * @param <E> the type of the thrown Exception
      * @return a new {@link Try} instance
      */
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public static <T, R, E extends Exception> Function<T, Try<R>> attempt(FunctionWithException<T, R, E> fe) {
         return arg -> {
             try {

@@ -80,8 +80,6 @@ public class ApiMessageParser<T> {
     }
 
     private T parseBody(ObjectMapper mapper, String json, Class<T> tclass) throws IOException {
-
-        T object = mapper.readValue(json, tclass);
-        return object;
+        return mapper.readValue(json, tclass);
     }
 }

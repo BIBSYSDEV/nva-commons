@@ -39,7 +39,6 @@ public final class LogUtils {
      * @param <T>   The class of the object under test
      * @return a {@link TestAppender}
      */
-    @SuppressWarnings("PMD.CloseResource")
     public static <T> TestAppender getTestingAppender(Class<T> clazz) {
         final LoggerContext context = (LoggerContext) LogManager.getContext(false);
 
@@ -64,7 +63,6 @@ public final class LogUtils {
      * @param <T> The class of the object under test
      * @return a {@link TestAppender}
      */
-    @SuppressWarnings("PMD.CloseResource")
     public static <T> TestAppender getTestingAppenderForRootLogger() {
         final LoggerContext context = (LoggerContext) LogManager.getContext(false);
 
