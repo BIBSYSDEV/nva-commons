@@ -30,8 +30,7 @@ jackson = { strictly = '2.21.2' }
 jackson-annotations = { strictly = '2.21' }
 javers = { strictly = '7.8.0' }
 jena = { strictly = '5.6.0' }
-jupiter = { strictly = '5.14.3' }
-jupiter-platform = { strictly = '1.14.3' } # Keep minor & patch version in sync with `jupiter`
+jupiter = { strictly = '6.0.3' }
 lambda-log4j = { strictly = '1.6.2' }
 log4j = { strictly = '2.25.4' }
 mockito = { strictly = '5.23.0' }
@@ -126,8 +125,8 @@ junit-jupiter = { group = 'org.junit.jupiter', name = 'junit-jupiter', version.r
 junit-jupiter-api = { group = 'org.junit.jupiter', name = 'junit-jupiter-api', version.ref = 'jupiter' }
 junit-jupiter-engine = { group = 'org.junit.jupiter', name = 'junit-jupiter-engine', version.ref = 'jupiter' }
 junit-jupiter-params = { group = 'org.junit.jupiter', name = 'junit-jupiter-params', version.ref = 'jupiter' }
-junit-platform-launcher = { group = 'org.junit.platform', name = 'junit-platform-launcher', version.ref = 'jupiter-platform' }
-junit-platform-suite = { group = 'org.junit.platform', name = 'junit-platform-suite', version.ref = 'jupiter-platform' }
+junit-platform-launcher = { group = 'org.junit.platform', name = 'junit-platform-launcher', version.ref = 'jupiter' }
+junit-platform-suite = { group = 'org.junit.platform', name = 'junit-platform-suite', version.ref = 'jupiter' }
 mockito-core = { group = 'org.mockito', name = 'mockito-core', version.ref = 'mockito' }
 opensearch-java = { group = 'org.opensearch.client', name = 'opensearch-java', version.ref = 'opensearch-java' }
 opensearch-rest-client = { group = 'org.opensearch.client', name = 'opensearch-rest-client', version.ref = 'opensearch-rest' }
