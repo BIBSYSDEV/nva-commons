@@ -61,6 +61,7 @@ aws-sdk-dynamo = { group = 'com.amazonaws', name = 'aws-java-sdk-dynamodb', vers
 aws-sdk-apigateway = { group = 'com.amazonaws', name = 'aws-java-sdk-api-gateway', version.ref = 'aws-sdk' }
 aws-sdk-sqs = {group = 'com.amazonaws', name = 'aws-java-sdk-sqs', version.ref = 'aws-sdk'}
 aws-sdk2-auth = { group = 'software.amazon.awssdk', name = 'auth', version.ref = 'aws-sdk2' }
+aws-sdk2-bom = { group = 'software.amazon.awssdk', name = 'bom', version.ref = 'aws-sdk2' }
 aws-sdk2-aws-core = { group = 'software.amazon.awssdk', name = 'aws-core', version.ref = 'aws-sdk2' }
 aws-sdk2-core = { group = 'software.amazon.awssdk', name = 'sdk-core', version.ref = 'aws-sdk2' } # Duplicate, kept temporarily for backwards compatibility
 aws-sdk2-dynamo = { group = 'software.amazon.awssdk', name = 'dynamodb', version.ref = 'aws-sdk2' }
