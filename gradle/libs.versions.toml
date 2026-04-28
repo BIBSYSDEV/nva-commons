@@ -3,7 +3,7 @@
 # is a breaking change and should be reflected in our version number.
 [versions]
 apache-commons = { require = '3.20.0' }
-apache-http-core = { strictly = '5.4.1' }
+apache-http-core = { strictly = '5.4.2' }
 apache-http-core4 = { strictly = '4.4.16' }
 apache-http-client = { strictly = '5.6' }
 apache-poi = { strictly = '5.5.1' }
@@ -13,28 +13,27 @@ aws-ion = { strictly = '1.11.11' }
 aws-lambda-core = { strictly = '1.4.0' }
 aws-lambda-events = { strictly = '3.16.1' }
 aws-sdk = { strictly = '1.12.797' }
-aws-sdk2 = { strictly = '2.42.5' }
+aws-sdk2 = { strictly = '2.42.39' }
 aws-sdk2-dynamodblocal = { strictly = '3.3.0' }
 ben-manes-versions = { strictly = '0.53.0' }
 build-health = { strictly = '3.6.1' }
-com-auth0-jwks = { strictly = '0.23.0' }
+com-auth0-jwks = { strictly = '0.23.1' }
 com-auth0-jwt = { strictly = '4.5.1' }
 commons-validator = { strictly = '1.10.1' }
 cucumber = { strictly = '7.33.0' }
 datafaker = { strictly = '2.5.4' }
-errorprone = { strictly = '2.48.0' }
+errorprone = { strictly = '2.49.0' }
 errorprone-plugin = { strictly = '5.1.0' }
-guava = { strictly = '33.5.0-jre' }
+guava = { strictly = '33.6.0-jre' }
 hamcrest = { strictly = '3.0' }
-jackson = { strictly = '2.21.1' }
+jackson = { strictly = '2.21.2' }
 jackson-annotations = { strictly = '2.21' }
 javers = { strictly = '7.8.0' }
 jena = { strictly = '5.6.0' }
-jupiter = { strictly = '5.14.2' }
-jupiter-platform = { strictly = '1.14.2' } # Keep minor & patch version in sync with `jupiter`
+jupiter = { strictly = '6.0.3' }
 lambda-log4j = { strictly = '1.6.2' }
-log4j = { strictly = '2.25.3' }
-mockito = { strictly = '5.22.0' }
+log4j = { strictly = '2.25.4' }
+mockito = { strictly = '5.23.0' }
 nebula-lint = { strictly = '20.6.2' }
 nexus-publish = { strictly = '2.0.0' }
 opencsv = { strictly = '5.12.0' }
@@ -44,7 +43,7 @@ opensearch-testcontainer = { strictly = '4.1.0' }
 slf4j = { strictly = '2.0.17' }
 spotless = { strictly = '8.2.0' }
 testcontainers = { strictly = '2.0.3' }
-wiremock = { strictly = '4.0.0-beta.29' }
+wiremock = { strictly = '4.0.0-beta.32' }
 zalando-problem = { strictly = '0.27.1' }
 
 [libraries]
@@ -61,6 +60,7 @@ aws-sdk-dynamo = { group = 'com.amazonaws', name = 'aws-java-sdk-dynamodb', vers
 aws-sdk-apigateway = { group = 'com.amazonaws', name = 'aws-java-sdk-api-gateway', version.ref = 'aws-sdk' }
 aws-sdk-sqs = {group = 'com.amazonaws', name = 'aws-java-sdk-sqs', version.ref = 'aws-sdk'}
 aws-sdk2-auth = { group = 'software.amazon.awssdk', name = 'auth', version.ref = 'aws-sdk2' }
+aws-sdk2-bom = { group = 'software.amazon.awssdk', name = 'bom', version.ref = 'aws-sdk2' }
 aws-sdk2-aws-core = { group = 'software.amazon.awssdk', name = 'aws-core', version.ref = 'aws-sdk2' }
 aws-sdk2-core = { group = 'software.amazon.awssdk', name = 'sdk-core', version.ref = 'aws-sdk2' } # Duplicate, kept temporarily for backwards compatibility
 aws-sdk2-dynamo = { group = 'software.amazon.awssdk', name = 'dynamodb', version.ref = 'aws-sdk2' }
@@ -125,8 +125,8 @@ junit-jupiter = { group = 'org.junit.jupiter', name = 'junit-jupiter', version.r
 junit-jupiter-api = { group = 'org.junit.jupiter', name = 'junit-jupiter-api', version.ref = 'jupiter' }
 junit-jupiter-engine = { group = 'org.junit.jupiter', name = 'junit-jupiter-engine', version.ref = 'jupiter' }
 junit-jupiter-params = { group = 'org.junit.jupiter', name = 'junit-jupiter-params', version.ref = 'jupiter' }
-junit-platform-launcher = { group = 'org.junit.platform', name = 'junit-platform-launcher', version.ref = 'jupiter-platform' }
-junit-platform-suite = { group = 'org.junit.platform', name = 'junit-platform-suite', version.ref = 'jupiter-platform' }
+junit-platform-launcher = { group = 'org.junit.platform', name = 'junit-platform-launcher', version.ref = 'jupiter' }
+junit-platform-suite = { group = 'org.junit.platform', name = 'junit-platform-suite', version.ref = 'jupiter' }
 mockito-core = { group = 'org.mockito', name = 'mockito-core', version.ref = 'mockito' }
 opensearch-java = { group = 'org.opensearch.client', name = 'opensearch-java', version.ref = 'opensearch-java' }
 opensearch-rest-client = { group = 'org.opensearch.client', name = 'opensearch-rest-client', version.ref = 'opensearch-rest' }
