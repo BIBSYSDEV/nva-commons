@@ -13,6 +13,7 @@ import static nva.commons.apigateway.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
 import static nva.commons.apigateway.ApiGatewayHandler.ALL_ORIGINS_ALLOWED;
 import static nva.commons.apigateway.ApiGatewayHandler.CONFLICTING_KEYS;
 import static nva.commons.apigateway.ApiGatewayHandler.FALLBACK_ORIGIN;
+import static nva.commons.apigateway.ApiGatewayHandler.INVALID_PARAMS;
 import static nva.commons.apigateway.ApiGatewayHandler.REQUEST_ID;
 import static nva.commons.apigateway.MediaTypes.APPLICATION_PROBLEM_JSON;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
@@ -54,7 +55,9 @@ import no.unit.nva.commons.json.JsonSerializable;
 import no.unit.nva.stubs.FakeContext;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
+import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.ConflictException;
+import nva.commons.apigateway.exceptions.InvalidParam;
 import nva.commons.apigateway.exceptions.GoneException;
 import nva.commons.apigateway.exceptions.TestException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
@@ -349,6 +352,35 @@ class ApiGatewayHandlerTest {
 
         assertThat(problem.getStatus(), is(Status.CONFLICT));
         assertThat(problem.getParameters().containsKey(CONFLICTING_KEYS), is(false));
+    }
+
+    @Test
+    void shouldReturnProblemContainingInvalidParamsWhenBadRequestExceptionHasParams() throws IOException {
+        var invalidParams = List.of(
+            new InvalidParam("title", "must not be blank"),
+            new InvalidParam("year", "must be a number"));
+        var handler = handlerThatThrowsBadRequestExceptionWithInvalidParams(invalidParams);
+        var outputStream = outputStream();
+        handler.handleRequest(requestWithHeaders(), outputStream, context);
+        var problem = getProblemFromFailureResponse(outputStream);
+
+        assertThat(problem.getStatus(), is(Status.BAD_REQUEST));
+        @SuppressWarnings("unchecked")
+        var returnedParams = (List<Map<String, String>>) problem.getParameters().get(INVALID_PARAMS);
+        assertThat(returnedParams, containsInAnyOrder(
+            Map.of("name", "title", "reason", "must not be blank"),
+            Map.of("name", "year", "reason", "must be a number")));
+    }
+
+    @Test
+    void problemShouldNotContainInvalidParamsWhenBadRequestExceptionHasNoParams() throws IOException {
+        var handler = handlerThatThrowsBadRequestExceptionWithoutInvalidParams();
+        var outputStream = outputStream();
+        handler.handleRequest(requestWithHeaders(), outputStream, context);
+        var problem = getProblemFromFailureResponse(outputStream);
+
+        assertThat(problem.getStatus(), is(Status.BAD_REQUEST));
+        assertThat(problem.getParameters().containsKey(INVALID_PARAMS), is(false));
     }
 
     @Test
@@ -856,6 +888,26 @@ class ApiGatewayHandlerTest {
             protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
                 throws ConflictException {
                 throw new ConflictException("Resource already exists");
+            }
+        };
+    }
+
+    private Handler handlerThatThrowsBadRequestExceptionWithInvalidParams(List<InvalidParam> invalidParams) {
+        return new Handler(environment) {
+            @Override
+            protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
+                throws BadRequestException {
+                throw new BadRequestException("Invalid request", invalidParams);
+            }
+        };
+    }
+
+    private Handler handlerThatThrowsBadRequestExceptionWithoutInvalidParams() {
+        return new Handler(environment) {
+            @Override
+            protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
+                throws BadRequestException {
+                throw new BadRequestException("Invalid request");
             }
         };
     }
