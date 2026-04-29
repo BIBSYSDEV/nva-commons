@@ -22,9 +22,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.ApiGatewayUncheckedException;
-import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.ConflictException;
 import nva.commons.apigateway.exceptions.ValidationError;
+import nva.commons.apigateway.exceptions.WithErrors;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
 import nva.commons.apigateway.exceptions.RedirectException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
@@ -290,9 +290,9 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     }
 
     private List<ValidationError> getErrors(Exception exception) {
-        return exception instanceof BadRequestException badRequestException
-                   && !badRequestException.getErrors().isEmpty()
-                   ? badRequestException.getErrors()
+        return exception instanceof WithErrors withErrors
+                   && !withErrors.getErrors().isEmpty()
+                   ? withErrors.getErrors()
                    : null;
     }
 

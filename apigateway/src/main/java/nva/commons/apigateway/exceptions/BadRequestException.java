@@ -4,7 +4,7 @@ import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.List;
 
-public class BadRequestException extends ApiGatewayException {
+public class BadRequestException extends ApiGatewayException implements WithErrors {
 
     private static final List<ValidationError> EMPTY_LIST = Collections.emptyList();
 
@@ -25,6 +25,7 @@ public class BadRequestException extends ApiGatewayException {
         this.errors = EMPTY_LIST;
     }
 
+    @Override
     public List<ValidationError> getErrors() {
         return errors;
     }
