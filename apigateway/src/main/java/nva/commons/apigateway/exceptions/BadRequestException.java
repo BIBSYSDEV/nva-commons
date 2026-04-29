@@ -6,27 +6,27 @@ import java.util.List;
 
 public class BadRequestException extends ApiGatewayException {
 
-    private static final List<InvalidParam> EMPTY_LIST = Collections.emptyList();
+    private static final List<ValidationError> EMPTY_LIST = Collections.emptyList();
 
-    private final List<InvalidParam> invalidParams;
+    private final transient List<ValidationError> errors;
 
     public BadRequestException(String message) {
         super(message);
-        this.invalidParams = EMPTY_LIST;
+        this.errors = EMPTY_LIST;
     }
 
-    public BadRequestException(String message, List<InvalidParam> invalidParams) {
+    public BadRequestException(String message, List<ValidationError> errors) {
         super(message);
-        this.invalidParams = invalidParams;
+        this.errors = errors;
     }
 
     public BadRequestException(String message, Exception cause) {
         super(cause, message);
-        this.invalidParams = EMPTY_LIST;
+        this.errors = EMPTY_LIST;
     }
 
-    public List<InvalidParam> getInvalidParams() {
-        return invalidParams;
+    public List<ValidationError> getErrors() {
+        return errors;
     }
 
     @Override

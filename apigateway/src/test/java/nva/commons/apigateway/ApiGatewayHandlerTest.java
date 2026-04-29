@@ -13,7 +13,7 @@ import static nva.commons.apigateway.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
 import static nva.commons.apigateway.ApiGatewayHandler.ALL_ORIGINS_ALLOWED;
 import static nva.commons.apigateway.ApiGatewayHandler.CONFLICTING_KEYS;
 import static nva.commons.apigateway.ApiGatewayHandler.FALLBACK_ORIGIN;
-import static nva.commons.apigateway.ApiGatewayHandler.INVALID_PARAMS;
+import static nva.commons.apigateway.ApiGatewayHandler.ERRORS;
 import static nva.commons.apigateway.ApiGatewayHandler.REQUEST_ID;
 import static nva.commons.apigateway.MediaTypes.APPLICATION_PROBLEM_JSON;
 import static nva.commons.apigateway.RestConfig.defaultRestObjectMapper;
@@ -57,7 +57,7 @@ import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.ConflictException;
-import nva.commons.apigateway.exceptions.InvalidParam;
+import nva.commons.apigateway.exceptions.ValidationError;
 import nva.commons.apigateway.exceptions.GoneException;
 import nva.commons.apigateway.exceptions.TestException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
@@ -355,32 +355,32 @@ class ApiGatewayHandlerTest {
     }
 
     @Test
-    void shouldReturnProblemContainingInvalidParamsWhenBadRequestExceptionHasParams() throws IOException {
-        var invalidParams = List.of(
-            new InvalidParam("title", "must not be blank"),
-            new InvalidParam("year", "must be a number"));
-        var handler = handlerThatThrowsBadRequestExceptionWithInvalidParams(invalidParams);
+    void shouldReturnProblemContainingErrorsWhenBadRequestExceptionHasErrors() throws IOException {
+        var errors = List.of(
+            new ValidationError("must not be blank", "#/title"),
+            new ValidationError("must be a number", "#/year"));
+        var handler = handlerThatThrowsBadRequestExceptionWithErrors(errors);
         var outputStream = outputStream();
         handler.handleRequest(requestWithHeaders(), outputStream, context);
         var problem = getProblemFromFailureResponse(outputStream);
 
         assertThat(problem.getStatus(), is(Status.BAD_REQUEST));
         @SuppressWarnings("unchecked")
-        var returnedParams = (List<Map<String, String>>) problem.getParameters().get(INVALID_PARAMS);
-        assertThat(returnedParams, containsInAnyOrder(
-            Map.of("name", "title", "reason", "must not be blank"),
-            Map.of("name", "year", "reason", "must be a number")));
+        var returnedErrors = (List<Map<String, String>>) problem.getParameters().get(ERRORS);
+        assertThat(returnedErrors, containsInAnyOrder(
+            Map.of("detail", "must not be blank", "pointer", "#/title"),
+            Map.of("detail", "must be a number", "pointer", "#/year")));
     }
 
     @Test
-    void problemShouldNotContainInvalidParamsWhenBadRequestExceptionHasNoParams() throws IOException {
-        var handler = handlerThatThrowsBadRequestExceptionWithoutInvalidParams();
+    void problemShouldNotContainErrorsWhenBadRequestExceptionHasNoErrors() throws IOException {
+        var handler = handlerThatThrowsBadRequestExceptionWithoutErrors();
         var outputStream = outputStream();
         handler.handleRequest(requestWithHeaders(), outputStream, context);
         var problem = getProblemFromFailureResponse(outputStream);
 
         assertThat(problem.getStatus(), is(Status.BAD_REQUEST));
-        assertThat(problem.getParameters().containsKey(INVALID_PARAMS), is(false));
+        assertThat(problem.getParameters().containsKey(ERRORS), is(false));
     }
 
     @Test
@@ -892,17 +892,17 @@ class ApiGatewayHandlerTest {
         };
     }
 
-    private Handler handlerThatThrowsBadRequestExceptionWithInvalidParams(List<InvalidParam> invalidParams) {
+    private Handler handlerThatThrowsBadRequestExceptionWithErrors(List<ValidationError> errors) {
         return new Handler(environment) {
             @Override
             protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
                 throws BadRequestException {
-                throw new BadRequestException("Invalid request", invalidParams);
+                throw new BadRequestException("Invalid request", errors);
             }
         };
     }
 
-    private Handler handlerThatThrowsBadRequestExceptionWithoutInvalidParams() {
+    private Handler handlerThatThrowsBadRequestExceptionWithoutErrors() {
         return new Handler(environment) {
             @Override
             protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)

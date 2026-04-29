@@ -18,21 +18,21 @@ class BadRequestExceptionTest {
     }
 
     @Test
-    void invalidParamsAreEmptyByDefault() {
+    void errorsAreEmptyByDefault() {
         BadRequestException exception = new BadRequestException("some message");
-        assertThat(exception.getInvalidParams(), is(empty()));
+        assertThat(exception.getErrors(), is(empty()));
     }
 
     @Test
-    void invalidParamsAreEmptyWhenConstructedWithCause() {
+    void errorsAreEmptyWhenConstructedWithCause() {
         BadRequestException exception = new BadRequestException("some message", new RuntimeException("cause"));
-        assertThat(exception.getInvalidParams(), is(empty()));
+        assertThat(exception.getErrors(), is(empty()));
     }
 
     @Test
-    void invalidParamsAreReturnedWhenSupplied() {
-        InvalidParam invalidParam = new InvalidParam("title", "must not be blank");
-        BadRequestException exception = new BadRequestException("some message", List.of(invalidParam));
-        assertThat(exception.getInvalidParams(), contains(invalidParam));
+    void errorsAreReturnedWhenSupplied() {
+        ValidationError validationError = new ValidationError("must not be blank", "#/title");
+        BadRequestException exception = new BadRequestException("some message", List.of(validationError));
+        assertThat(exception.getErrors(), contains(validationError));
     }
 }

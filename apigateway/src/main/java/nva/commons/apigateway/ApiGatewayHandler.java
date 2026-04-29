@@ -24,7 +24,7 @@ import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.ApiGatewayUncheckedException;
 import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.ConflictException;
-import nva.commons.apigateway.exceptions.InvalidParam;
+import nva.commons.apigateway.exceptions.ValidationError;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
 import nva.commons.apigateway.exceptions.RedirectException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
@@ -50,7 +50,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
     public static final Void EMPTY_BODY = null;
     public static final String RESOURCE = "resource";
     public static final String CONFLICTING_KEYS = "conflictingKeys";
-    public static final String INVALID_PARAMS = "invalid-params";
+    public static final String ERRORS = "errors";
     public static final String ALL_ORIGINS_ALLOWED = "*";
     public static final String ORIGIN_DELIMITER = ",";
     public static final String FALLBACK_ORIGIN = "https://nva.sikt.no";
@@ -272,7 +272,7 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
                    .with(REQUEST_ID, requestId)
                    .with(RESOURCE, getResource(exception))
                    .with(CONFLICTING_KEYS, getConflictingKeys(exception))
-                   .with(INVALID_PARAMS, getInvalidParams(exception))
+                   .with(ERRORS, getErrors(exception))
                    .build();
     }
 
@@ -289,10 +289,10 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
                    : null;
     }
 
-    private List<InvalidParam> getInvalidParams(Exception exception) {
+    private List<ValidationError> getErrors(Exception exception) {
         return exception instanceof BadRequestException badRequestException
-                   && !badRequestException.getInvalidParams().isEmpty()
-                   ? badRequestException.getInvalidParams()
+                   && !badRequestException.getErrors().isEmpty()
+                   ? badRequestException.getErrors()
                    : null;
     }
 
