@@ -12,6 +12,7 @@ import static no.unit.nva.testutils.TestHeaders.WILDCARD;
 import static nva.commons.apigateway.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
 import static nva.commons.apigateway.ApiGatewayHandler.ALL_ORIGINS_ALLOWED;
 import static nva.commons.apigateway.ApiGatewayHandler.CONFLICTING_KEYS;
+import static nva.commons.apigateway.ApiGatewayHandler.ERRORS;
 import static nva.commons.apigateway.ApiGatewayHandler.FALLBACK_ORIGIN;
 import static nva.commons.apigateway.ApiGatewayHandler.REQUEST_ID;
 import static nva.commons.apigateway.MediaTypes.APPLICATION_PROBLEM_JSON;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -45,6 +47,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,10 +57,12 @@ import no.unit.nva.commons.json.JsonSerializable;
 import no.unit.nva.stubs.FakeContext;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
+import nva.commons.apigateway.exceptions.BadRequestException;
 import nva.commons.apigateway.exceptions.ConflictException;
 import nva.commons.apigateway.exceptions.GoneException;
 import nva.commons.apigateway.exceptions.TestException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
+import nva.commons.apigateway.exceptions.ValidationError;
 import nva.commons.apigateway.testutils.Base64Handler;
 import nva.commons.apigateway.testutils.Handler;
 import nva.commons.apigateway.testutils.RawStringResponseHandler;
@@ -349,6 +354,36 @@ class ApiGatewayHandlerTest {
 
         assertThat(problem.getStatus(), is(Status.CONFLICT));
         assertThat(problem.getParameters().containsKey(CONFLICTING_KEYS), is(false));
+    }
+
+    @Test
+    void shouldReturnProblemContainingErrorsWhenBadRequestExceptionHasErrors() throws IOException {
+        var errors = List.of(
+            new ValidationError("must not be blank", "#/title"),
+            new ValidationError("must be a number", "#/year"));
+        var handler = handlerThatThrowsBadRequestExceptionWithErrors(errors);
+        var outputStream = outputStream();
+        handler.handleRequest(requestWithHeaders(), outputStream, context);
+        var problem = getProblemFromFailureResponse(outputStream);
+
+        assertThat(problem.getStatus(), is(Status.BAD_REQUEST));
+        var returnedErrors = defaultRestObjectMapper.convertValue(
+            problem.getParameters().get(ERRORS),
+            new TypeReference<List<ValidationError>>() {});
+        assertThat(returnedErrors, containsInAnyOrder(
+            new ValidationError("must not be blank", "#/title"),
+            new ValidationError("must be a number", "#/year")));
+    }
+
+    @Test
+    void problemShouldNotContainErrorsKeyWhenBadRequestExceptionHasEmptyErrorCollection() throws IOException {
+        var handler = handlerThatThrowsBadRequestExceptionWithoutErrors();
+        var outputStream = outputStream();
+        handler.handleRequest(requestWithHeaders(), outputStream, context);
+        var problem = getProblemFromFailureResponse(outputStream);
+
+        assertThat(problem.getStatus(), is(Status.BAD_REQUEST));
+        assertThat(problem.getParameters().containsKey(ERRORS), is(false));
     }
 
     @Test
@@ -856,6 +891,26 @@ class ApiGatewayHandlerTest {
             protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
                 throws ConflictException {
                 throw new ConflictException("Resource already exists");
+            }
+        };
+    }
+
+    private Handler handlerThatThrowsBadRequestExceptionWithErrors(Collection<ValidationError> errors) {
+        return new Handler(environment) {
+            @Override
+            protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
+                throws BadRequestException {
+                throw new BadRequestException("Invalid request", errors);
+            }
+        };
+    }
+
+    private Handler handlerThatThrowsBadRequestExceptionWithoutErrors() {
+        return new Handler(environment) {
+            @Override
+            protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
+                throws BadRequestException {
+                throw new BadRequestException("Invalid request");
             }
         };
     }

@@ -1,15 +1,36 @@
 package nva.commons.apigateway.exceptions;
 
 import java.net.HttpURLConnection;
+import java.util.Collection;
+import java.util.List;
 
-public class BadRequestException extends ApiGatewayException {
+public class BadRequestException extends ApiGatewayException implements WithErrors {
+
+    private final List<ValidationError> errors;
 
     public BadRequestException(String message) {
         super(message);
+        this.errors = List.of();
+    }
+
+    public BadRequestException(String message, Collection<ValidationError> errors) {
+        super(message);
+        this.errors = List.copyOf(errors);
+    }
+
+    public BadRequestException(String message, ValidationError... errors) {
+        super(message);
+        this.errors = List.of(errors);
     }
 
     public BadRequestException(String message, Exception cause) {
         super(cause, message);
+        this.errors = List.of();
+    }
+
+    @Override
+    public List<ValidationError> getErrors() {
+        return errors;
     }
 
     @Override
