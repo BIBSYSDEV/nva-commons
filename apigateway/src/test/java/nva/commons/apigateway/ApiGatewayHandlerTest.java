@@ -31,6 +31,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -46,6 +47,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -365,15 +367,16 @@ class ApiGatewayHandlerTest {
         var problem = getProblemFromFailureResponse(outputStream);
 
         assertThat(problem.getStatus(), is(Status.BAD_REQUEST));
-        @SuppressWarnings("unchecked")
-        var returnedErrors = (List<Map<String, String>>) problem.getParameters().get(ERRORS);
+        var returnedErrors = defaultRestObjectMapper.convertValue(
+            problem.getParameters().get(ERRORS),
+            new TypeReference<List<ValidationError>>() {});
         assertThat(returnedErrors, containsInAnyOrder(
-            Map.of("detail", "must not be blank", "pointer", "#/title"),
-            Map.of("detail", "must be a number", "pointer", "#/year")));
+            new ValidationError("must not be blank", "#/title"),
+            new ValidationError("must be a number", "#/year")));
     }
 
     @Test
-    void problemShouldNotContainErrorsWhenBadRequestExceptionHasNoErrors() throws IOException {
+    void problemShouldNotContainErrorsKeyWhenBadRequestExceptionHasEmptyErrorCollection() throws IOException {
         var handler = handlerThatThrowsBadRequestExceptionWithoutErrors();
         var outputStream = outputStream();
         handler.handleRequest(requestWithHeaders(), outputStream, context);
@@ -892,7 +895,7 @@ class ApiGatewayHandlerTest {
         };
     }
 
-    private Handler handlerThatThrowsBadRequestExceptionWithErrors(List<ValidationError> errors) {
+    private Handler handlerThatThrowsBadRequestExceptionWithErrors(Collection<ValidationError> errors) {
         return new Handler(environment) {
             @Override
             protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)

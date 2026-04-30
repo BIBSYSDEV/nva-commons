@@ -13,26 +13,33 @@ class BadRequestExceptionTest {
 
     @Test
     public void statusCodeReturnsBadRequest() {
-        BadRequestException exception = new BadRequestException("some message");
+        var exception = new BadRequestException("some message");
         assertThat(exception.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_BAD_REQUEST)));
     }
 
     @Test
     void errorsAreEmptyByDefault() {
-        BadRequestException exception = new BadRequestException("some message");
+        var exception = new BadRequestException("some message");
         assertThat(exception.getErrors(), is(empty()));
     }
 
     @Test
     void errorsAreEmptyWhenConstructedWithCause() {
-        BadRequestException exception = new BadRequestException("some message", new RuntimeException("cause"));
+        var exception = new BadRequestException("some message", new RuntimeException("cause"));
         assertThat(exception.getErrors(), is(empty()));
     }
 
     @Test
-    void errorsAreReturnedWhenSupplied() {
-        ValidationError validationError = new ValidationError("must not be blank", "#/title");
-        BadRequestException exception = new BadRequestException("some message", List.of(validationError));
+    void errorsAreReturnedWhenSuppliedAsCollection() {
+        var validationError = new ValidationError("must not be blank", "#/title");
+        var exception = new BadRequestException("some message", List.of(validationError));
+        assertThat(exception.getErrors(), contains(validationError));
+    }
+
+    @Test
+    void errorsAreReturnedWhenSuppliedAsVarargs() {
+        var validationError = new ValidationError("must not be blank", "#/title");
+        var exception = new BadRequestException("some message", validationError);
         assertThat(exception.getErrors(), contains(validationError));
     }
 }
