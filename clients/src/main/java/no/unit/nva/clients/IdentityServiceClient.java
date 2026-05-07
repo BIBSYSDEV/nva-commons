@@ -31,12 +31,12 @@ public class IdentityServiceClient {
     private static final String API_PATH_USERS_AND_ROLES = "users-roles";
     private static final String API_PATH_EXTERNAL_CLIENTS = "external-clients";
     private static final String API_PATH_USERS = "users";
-    private static final String AUTH_HOST = new Environment().readEnv("BACKEND_CLIENT_AUTH_URL");
-    private static final String API_HOST = new Environment().readEnv("API_HOST");
     private static final String CUSTOMER_PATH_PARAM = "customer";
     private static final String CRISTIN_ID_PATH_PARAM = "cristinId";
     private static final String OPERATION_REQUIRES_AUTHORIZED_CLIENT_MESSAGE =
         "This operation requires an authorized client";
+    private final String apiHost;
+    private final String authHost;
     private AuthorizedBackendClient authorizedClient;
     private final HttpClient unauthorizedClient;
 
@@ -51,7 +51,22 @@ public class IdentityServiceClient {
     public IdentityServiceClient(HttpClient httpClient,
                                  String bearerToken,
                                  CognitoCredentials cognitoCredentials) {
-        this.unauthorizedClient = httpClient;
+        this(httpClient, bearerToken, cognitoCredentials, new Environment());
+    }
+
+    /**
+     * Creates an IdentityServiceClient with authorization support and a caller-supplied environment.
+     *
+     * @param httpClient the HTTP client to use for requests
+     * @param bearerToken the bearer token for authorization
+     * @param cognitoCredentials the credentials for backend authentication
+     * @param environment the environment used to resolve configuration values
+     */
+    public IdentityServiceClient(HttpClient httpClient,
+                                 String bearerToken,
+                                 CognitoCredentials cognitoCredentials,
+                                 Environment environment) {
+        this(httpClient, environment);
         this.authorizedClient = AuthorizedBackendClient.prepareWithBearerTokenAndCredentials(
             httpClient,
             bearerToken,
@@ -67,6 +82,18 @@ public class IdentityServiceClient {
      * @param httpClient the HTTP client to use for requests
      */
     public IdentityServiceClient(HttpClient httpClient) {
+        this(httpClient, new Environment());
+    }
+
+    /**
+     * Creates an IdentityServiceClient without authorization support and with a caller-supplied environment.
+     *
+     * @param httpClient the HTTP client to use for requests
+     * @param environment the environment used to resolve configuration values
+     */
+    public IdentityServiceClient(HttpClient httpClient, Environment environment) {
+        this.apiHost = environment.readEnv("API_HOST");
+        this.authHost = environment.readEnv("BACKEND_CLIENT_AUTH_URL");
         this.unauthorizedClient = httpClient;
     }
 
@@ -77,8 +104,11 @@ public class IdentityServiceClient {
      */
     @JacocoGenerated
     public static IdentityServiceClient prepare() {
-        var credentials = fetchCredentials();
-        return new IdentityServiceClient(HttpClient.newBuilder().build(), null, credentials);
+        var client = new IdentityServiceClient(HttpClient.newBuilder().build());
+        var credentials = client.fetchCredentials();
+        client.authorizedClient = AuthorizedBackendClient.prepareWithBearerTokenAndCredentials(
+            client.unauthorizedClient, null, credentials);
+        return client;
     }
 
     /**
@@ -220,11 +250,11 @@ public class IdentityServiceClient {
     }
 
     private URI constructListCustomerUri() {
-        return UriWrapper.fromHost(API_HOST).addChild(CUSTOMER_PATH_PARAM).getUri();
+        return UriWrapper.fromHost(apiHost).addChild(CUSTOMER_PATH_PARAM).getUri();
     }
 
     private URI constructCustomerGetPath(URI topLevelOrgCristinId) {
-        var customerByCristinIdUri = UriWrapper.fromHost(API_HOST)
+        var customerByCristinIdUri = UriWrapper.fromHost(apiHost)
                                     .addChild(CUSTOMER_PATH_PARAM)
                                     .addChild(CRISTIN_ID_PATH_PARAM)
                                     .getUri();
@@ -233,17 +263,17 @@ public class IdentityServiceClient {
     }
 
     @JacocoGenerated
-    private static CognitoCredentials fetchCredentials() {
+    private CognitoCredentials fetchCredentials() {
         var secretsReader = new SecretsReader(SecretsReader.defaultSecretsManagerClient());
 
         var credentials = secretsReader.fetchClassSecret(CREDENTIALS_SECRET_NAME,
                                                          BackendClientCredentials.class);
-        var uri = UriWrapper.fromHost(AUTH_HOST).getUri();
+        var uri = UriWrapper.fromHost(authHost).getUri();
         return new CognitoCredentials(credentials::getId, credentials::getSecret, uri);
     }
 
     private UriWrapper usersAndRolesURI() {
-        return UriWrapper.fromHost(API_HOST)
+        return UriWrapper.fromHost(apiHost)
                    .addChild(API_PATH_USERS_AND_ROLES);
     }
 

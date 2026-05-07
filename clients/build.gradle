@@ -6,13 +6,13 @@ dependencies {
     api libs.jackson.annotations
     api project(":apigateway")
     api project(":auth")
+    api project(":core")
     api project(":json")
     implementation libs.aws.sdk2.http.client
     implementation libs.aws.sdk2.secrets
     implementation libs.jackson.core
     implementation libs.jackson.databind
     implementation libs.slf4j.api
-    implementation project(":core")
     implementation project(":secrets")
     runtimeOnly libs.aws.sdk2.urlconnection
     runtimeOnly libs.jackson.core
