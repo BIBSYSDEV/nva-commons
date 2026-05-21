@@ -12,6 +12,11 @@ import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.plugins.PluginBuilderFactory;
 
+/**
+ * @deprecated Use {@link LogRecorder} together with Log4j's {@link
+ *     org.apache.logging.log4j.core.test.appender.ListAppender} instead.
+ */
+@Deprecated(since = "2.7.2")
 @SuppressWarnings({"PMD.AvoidStringBufferField", "PMD.TestClassWithoutTestCases"})
 @Plugin(name = TestAppender.PLUGIN_NAME, category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE,
     printObject = true)

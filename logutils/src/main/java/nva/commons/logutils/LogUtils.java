@@ -18,7 +18,12 @@ import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 /**
  * Methods for testing logging when using Log4j2 as logging platform. Can be used when using SLF4J as well with Log4j2
  * as background logging platform.
+ *
+ * @deprecated Use {@link LogRecorder} instead. It captures events without reconfiguring the global
+ *     Log4j context, returns structured {@link org.apache.logging.log4j.core.LogEvent}s, and avoids
+ *     side effects on unrelated loggers.
  */
+@Deprecated(since = "2.7.2")
 public final class LogUtils {
 
     public static final String PATTERN_ATTRIBUTE_NAME = "pattern";
@@ -38,7 +43,9 @@ public final class LogUtils {
      * @param clazz The class of the object under test.
      * @param <T>   The class of the object under test
      * @return a {@link TestAppender}
+     * @deprecated Use {@link LogRecorder#forClass(Class)} instead.
      */
+    @Deprecated(since = "2.7.2")
     public static <T> TestAppender getTestingAppender(Class<T> clazz) {
         final LoggerContext context = (LoggerContext) LogManager.getContext(false);
 
@@ -62,7 +69,9 @@ public final class LogUtils {
      *
      * @param <T> The class of the object under test
      * @return a {@link TestAppender}
+     * @deprecated Use {@link LogRecorder#forRoot(Class)} instead.
      */
+    @Deprecated(since = "2.7.2")
     public static <T> TestAppender getTestingAppenderForRootLogger() {
         final LoggerContext context = (LoggerContext) LogManager.getContext(false);
 
