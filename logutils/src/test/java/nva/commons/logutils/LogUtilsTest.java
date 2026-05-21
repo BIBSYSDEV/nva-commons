@@ -6,6 +6,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringContains.containsString;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("deprecation")
 class LogUtilsTest {
 
     @Test
