@@ -92,10 +92,14 @@ public final class LogRecorder {
 
   private static ListAppender resolveAppender(
       LoggerContext loggerContext, Logger logger, String appenderName) {
-    var existing = loggerContext.getConfiguration().getAppenders().get(appenderName);
-    if (existing instanceof ListAppender listAppender) {
-      return listAppender;
-    }
+    var appenders = loggerContext.getConfiguration().getAppenders();
+    return appenders.get(appenderName) instanceof ListAppender existingListAppender
+        ? existingListAppender
+        : getNewListAppender(loggerContext, logger, appenderName);
+  }
+
+  private static ListAppender getNewListAppender(
+      LoggerContext loggerContext, Logger logger, String appenderName) {
     var appender = new ListAppender(appenderName);
     appender.start();
     loggerContext.getConfiguration().addLoggerAppender(logger, appender);
