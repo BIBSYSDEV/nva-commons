@@ -9,8 +9,7 @@ import static org.mockito.Mockito.mock;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayCustomAuthorizerEvent;
 import java.util.Map;
-import nva.commons.logutils.LogUtils;
-import nva.commons.logutils.TestAppender;
+import nva.commons.logutils.LogRecorder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
@@ -67,14 +66,14 @@ public class RequestAuthorizerTest {
 
     @Test
     void authorizerReturnsForbiddenWhenFetchingSecretThrowsExceptionAndLogsMessage() {
-        final TestAppender appender = LogUtils.getTestingAppender(RequestAuthorizer.class);
+        final var logRecorder = LogRecorder.forClass(RequestAuthorizer.class);
 
         var handler = handlerThrowingExceptionWhenFetchingSecret();
         var response = processRequestWithHandlerThrowingException(handler);
         var expectedPolicy = handler.createDenyAuthPolicy();
 
         assertThat(response.getPolicyDocument(), is(equalTo(expectedPolicy)));
-        assertThat(appender.getMessages(), containsString(UNEXPECTED_EXCEPTION_MESSAGE));
+        assertThat(logRecorder.asString(), containsString(UNEXPECTED_EXCEPTION_MESSAGE));
     }
 
     @Test

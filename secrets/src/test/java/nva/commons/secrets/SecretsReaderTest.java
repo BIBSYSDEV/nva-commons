@@ -12,8 +12,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Map;
-import nva.commons.logutils.LogUtils;
-import nva.commons.logutils.TestAppender;
+import nva.commons.logutils.LogRecorder;
 import nva.commons.secrets.testutils.Credentials;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -46,21 +45,21 @@ class SecretsReaderTest {
 
     @Test
     void fetchSecretLogsErrorWhenWrongSecretNameIsGiven() {
-        final TestAppender appender = LogUtils.getTestingAppender(SecretsReader.class);
+        final var logRecorder = LogRecorder.forClass(SecretsReader.class);
         Executable action = () -> secretsReader.fetchSecret(WRONG_SECRET_NAME, SECRET_KEY);
         assertThrows(ErrorReadingSecretException.class, action);
 
-        assertThat(appender.getMessages(), containsString(ERROR_MESSAGE_FROM_AWS_SECRET_MANAGER));
+        assertThat(logRecorder.asString(), containsString(ERROR_MESSAGE_FROM_AWS_SECRET_MANAGER));
     }
 
     @Test
     void fetchSecretLogsErrorWhenWrongSecretKeyIsGiven() {
-        final TestAppender appender = LogUtils.getTestingAppender(SecretsReader.class);
+        final var logRecorder = LogRecorder.forClass(SecretsReader.class);
         Executable action = () -> secretsReader.fetchSecret(SECRET_NAME, WRONG_SECRET_KEY);
 
         assertThrows(ErrorReadingSecretException.class, action);
 
-        assertThat(appender.getMessages(), containsString(SecretsReader.COULD_NOT_READ_SECRET_ERROR));
+        assertThat(logRecorder.asString(), containsString(SecretsReader.COULD_NOT_READ_SECRET_ERROR));
     }
 
     @Test
@@ -107,11 +106,11 @@ class SecretsReaderTest {
 
     @Test
     void fetchPlainTextSecretLogsErrorWhenWrongSecretNameIsGiven() {
-        final var appender = LogUtils.getTestingAppender(SecretsReader.class);
+        final var logRecorder = LogRecorder.forClass(SecretsReader.class);
         Executable action = () -> secretsReader.fetchPlainTextSecret(WRONG_SECRET_NAME);
         assertThrows(ErrorReadingSecretException.class, action);
 
-        assertThat(appender.getMessages(), containsString(ERROR_MESSAGE_FROM_AWS_SECRET_MANAGER));
+        assertThat(logRecorder.asString(), containsString(ERROR_MESSAGE_FROM_AWS_SECRET_MANAGER));
     }
 
     private SecretsReader createSecretsReaderMock() {

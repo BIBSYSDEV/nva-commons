@@ -70,8 +70,7 @@ import nva.commons.apigateway.testutils.RedirectHandler;
 import nva.commons.apigateway.testutils.RequestBody;
 import nva.commons.core.Environment;
 import nva.commons.core.ioutils.IoUtils;
-import nva.commons.logutils.LogUtils;
-import nva.commons.logutils.TestAppender;
+import nva.commons.logutils.LogRecorder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -263,11 +262,11 @@ class ApiGatewayHandlerTest {
     @Test
     @DisplayName("Logger logs the whole exception stacktrace when an exception has occurred 2")
     void loggerLogsTheWholeExceptionStackTraceWhenAnExceptionHasOccurred() throws IOException {
-        TestAppender appender = LogUtils.getTestingAppenderForRootLogger();
+        var logRecorder = LogRecorder.forRoot(ApiGatewayHandlerTest.class);
         Handler handler = handlerThatThrowsExceptions();
         handler.handleRequest(requestWithHeadersAndPath(), outputStream(), context);
 
-        String logs = appender.getMessages();
+        var logs = logRecorder.asString();
 
         assertThat(logs, containsString(URISyntaxException.class.getName()));
         assertThat(logs, containsString(XMLParseException.class.getName()));
@@ -280,12 +279,12 @@ class ApiGatewayHandlerTest {
     @Test
     @DisplayName("Logger logs the whole exception stacktrace when an exception has occurred")
     void loggerLogsTheWholeExceptionStackTraceWhenAnUncheckedExceptionHasOccurred() throws IOException {
-        TestAppender appender = LogUtils.getTestingAppenderForRootLogger();
+        var logRecorder = LogRecorder.forRoot(ApiGatewayHandlerTest.class);
         Handler handler = handlerThatThrowsUncheckedExceptions();
 
         handler.handleRequest(requestWithHeadersAndPath(), outputStream(), context);
 
-        String logs = appender.getMessages();
+        var logs = logRecorder.asString();
 
         assertThat(logs, containsString(IllegalStateException.class.getName()));
         assertThat(logs, containsString(IllegalArgumentException.class.getName()));
@@ -448,11 +447,11 @@ class ApiGatewayHandlerTest {
 
     @Test
     void handlerLogsRequestIdForEveryRequest() throws IOException {
-        var appender = LogUtils.getTestingAppenderForRootLogger();
+        var logRecorder = LogRecorder.forRoot(ApiGatewayHandlerTest.class);
         var output = outputStream();
         var expectedRequestId = context.getAwsRequestId();
         handler.handleRequest(requestWithHeadersAndPath(), output, context);
-        assertThat(appender.getMessages(), containsString(expectedRequestId));
+        assertThat(logRecorder.asString(), containsString(expectedRequestId));
     }
 
     @Test

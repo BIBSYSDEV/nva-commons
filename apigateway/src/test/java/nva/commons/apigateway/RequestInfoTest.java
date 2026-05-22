@@ -59,7 +59,7 @@ import nva.commons.apigateway.exceptions.ApiIoException;
 import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.core.paths.UriWrapper;
-import nva.commons.logutils.LogUtils;
+import nva.commons.logutils.LogRecorder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -600,9 +600,9 @@ class RequestInfoTest {
     void shouldLogWarningWhenAuthenticationFails() throws JsonProcessingException, ApiIoException {
         var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).build();
         var requestInfo = getRequestInfo(request);
-        var logger = LogUtils.getTestingAppenderForRootLogger();
+        var logRecorder = LogRecorder.forRoot(RequestInfoTest.class);
         requestInfo.userIsAuthorized(randomAccessRight());
-        assertThat(logger.getMessages(), containsString(AUTHORIZATION_FAILURE_WARNING));
+        assertThat(logRecorder.asString(), containsString(AUTHORIZATION_FAILURE_WARNING));
     }
 
     @Test

@@ -10,8 +10,7 @@ import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import java.net.URI;
 import java.util.stream.Stream;
-import nva.commons.logutils.LogUtils;
-import nva.commons.logutils.TestAppender;
+import nva.commons.logutils.LogRecorder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -66,10 +65,10 @@ public class LanguageMapperTest {
 
     @Test
     public void toUriWritesFailureMessageInLogWhenFailing() {
-        TestAppender appender = LogUtils.getTestingAppender(LanguageMapper.class);
+        var logRecorder = LogRecorder.forClass(LanguageMapper.class);
         LanguageMapper.toUri(NON_EXISTENT_CODE);
-        String expectedValue = ERROR_MESSAGE_MISSING_RESOURCE_EXCEPTION + NON_EXISTENT_CODE;
-        assertThat(appender.getMessages(), containsString(expectedValue));
+        var expectedValue = ERROR_MESSAGE_MISSING_RESOURCE_EXCEPTION + NON_EXISTENT_CODE;
+        assertThat(logRecorder.asString(), containsString(expectedValue));
     }
 
     @ParameterizedTest(name = "toUri returns {1} when input is ISO-639-2 code {0}")

@@ -14,8 +14,7 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.stream.Stream;
-import nva.commons.logutils.LogUtils;
-import nva.commons.logutils.TestAppender;
+import nva.commons.logutils.LogRecorder;
 import nva.commons.secrets.testutils.Credentials;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -91,11 +90,11 @@ class SecretsWriterTest {
     @ParameterizedTest(name = "Bad {index} -> k:{0}, v:{1}")
     void errorWhenWrongSecretNameIsGiven(String name, String value) {
 
-        final TestAppender appender = LogUtils.getTestingAppender(SecretsWriter.class);
+        final var logRecorder = LogRecorder.forClass(SecretsWriter.class);
         Executable action = () -> secretsWriter.updateSecretKey(SECRET_VAULT_ID,name, value);
 
         assertThrows(ErrorWritingSecretException.class, action);
-        assertThat(appender.getMessages(), containsString(COULD_NOT_WRITE_SECRET_ERROR));
+        assertThat(logRecorder.asString(), containsString(COULD_NOT_WRITE_SECRET_ERROR));
     }
 
     private SecretsWriter createSecretsWriterMock() {

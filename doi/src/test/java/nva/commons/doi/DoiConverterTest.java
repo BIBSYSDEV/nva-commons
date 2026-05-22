@@ -20,8 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import nva.commons.core.paths.UriWrapper;
 import nva.commons.doi.DoiSuppliers.DoiInput;
-import nva.commons.logutils.LogUtils;
-import nva.commons.logutils.TestAppender;
+import nva.commons.logutils.LogRecorder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -90,11 +89,11 @@ public class DoiConverterTest {
     @Test
     @DisplayName("toUri throws Exception when input is not a valid URI")
     public void toUriThrowsAnExceptionWhenInputIsNotValidUri() {
-        TestAppender appender = LogUtils.getTestingAppenderForRootLogger();
-        String input = "http://somethingelse.org/" + DOI;
-        InvalidDoiException exception = assertThrows(InvalidDoiException.class, () -> doiConverterImpl.toUri(input));
+        var logRecorder = LogRecorder.forRoot(DoiConverterTest.class);
+        var input = "http://somethingelse.org/" + DOI;
+        var exception = assertThrows(InvalidDoiException.class, () -> doiConverterImpl.toUri(input));
         assertThat(exception.getMessage(), containsString(input));
-        assertThat(appender.getMessages(), containsString(input));
+        assertThat(logRecorder.asString(), containsString(input));
     }
 
     @Test
@@ -108,11 +107,11 @@ public class DoiConverterTest {
     @Test
     @DisplayName("toURI throws Exception when input is an invalid DOI string")
     public void toUriThrowsExceptionWhenInputIsAnInvalidDoiString() {
-        TestAppender appender = LogUtils.getTestingAppenderForRootLogger();
-        String input = "213456";
-        InvalidDoiException exception = assertThrows(InvalidDoiException.class, () -> doiConverterImpl.toUri(input));
+        var logRecorder = LogRecorder.forRoot(DoiConverterTest.class);
+        var input = "213456";
+        var exception = assertThrows(InvalidDoiException.class, () -> doiConverterImpl.toUri(input));
         assertThat(exception.getMessage(), containsString(input));
-        assertThat(appender.getMessages(), containsString(input));
+        assertThat(logRecorder.asString(), containsString(input));
     }
 
     @ParameterizedTest(name = "should add https for doi missing scheme:{0}")
