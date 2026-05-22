@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+    annotationProcessor libs.log4j.core // TODO: Remove when TestAppender is deleted
     api libs.log4j.core
     implementation libs.log4j.api
     implementation(libs.log4j.core.test) {
