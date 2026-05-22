@@ -12,7 +12,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayCustomAuthorizerEvent;
 import java.util.Map;
 import no.unit.nva.commons.json.JsonUtils;
-import nva.commons.logutils.LogUtils;
+import nva.commons.logutils.LogRecorder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
@@ -49,23 +49,23 @@ class DefaultRequestAuthorizerTest {
 
     @Test
     void shouldReturnForbiddenWhenApiKeyIsInvalid() {
-        final var appender = LogUtils.getTestingAppenderForRootLogger();
+        final var logRecorder = LogRecorder.forRoot(DefaultRequestAuthorizerTest.class);
         var input = requestWithInvalidApiKey();
         var returnedPolicy = sendRequestToHandler(input);
         var expectedPolicy = handler.createDenyAuthPolicy();
         assertThat(returnedPolicy, is(equalTo(expectedPolicy)));
-        assertThat(appender.getMessages(), containsString(ForbiddenException.DEFAULT_MESSAGE));
+        assertThat(logRecorder.asString(), containsString(ForbiddenException.DEFAULT_MESSAGE));
     }
 
     @Test
     void shouldReturnForbiddenWhenApiKeyIsMissing() {
-        final var appender = LogUtils.getTestingAppenderForRootLogger();
+        final var logRecorder = LogRecorder.forRoot(DefaultRequestAuthorizerTest.class);
         var input = requestWithoutApiKey();
         var returnedPolicy = sendRequestToHandler(input);
         var expectedPolicy = handler.createDenyAuthPolicy();
         assertThat(returnedPolicy, is(equalTo(expectedPolicy)));
 
-        assertThat(appender.getMessages(), containsString(ForbiddenException.DEFAULT_MESSAGE));
+        assertThat(logRecorder.asString(), containsString(ForbiddenException.DEFAULT_MESSAGE));
     }
 
     private APIGatewayCustomAuthorizerEvent requestWithoutApiKey() {

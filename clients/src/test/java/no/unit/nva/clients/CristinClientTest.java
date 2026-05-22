@@ -18,22 +18,21 @@ import java.net.http.HttpRequest;
 import no.unit.nva.clients.cristin.CristinClient;
 import nva.commons.core.Environment;
 import nva.commons.core.paths.UriWrapper;
-import nva.commons.logutils.LogUtils;
-import nva.commons.logutils.TestAppender;
+import nva.commons.logutils.LogRecorder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class CristinClientTest {
+class CristinClientTest {
 
     private HttpClient httpClient;
     private CristinClient cristinClient;
-    private TestAppender appender;
+    private LogRecorder logRecorder;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         httpClient = mock(HttpClient.class);
         cristinClient = new CristinClient(httpClient);
-        appender = LogUtils.getTestingAppender(CristinClient.class);
+        logRecorder = LogRecorder.forClass(CristinClient.class);
     }
 
     @Test
@@ -45,10 +44,10 @@ public class CristinClientTest {
         when(httpClient.send(eq(request), any())).thenReturn(FakeHttpResponse.create(request, null, NOT_FOUND));
 
         var person = cristinClient.getPerson(cristinPersonId);
-        var loggMessage = appender.getMessages();
+        var message = logRecorder.asString();
 
         assertTrue(person.isEmpty());
-        assertTrue(loggMessage.contains("Cristin responded with not found: " + cristinPersonId));
+        assertTrue(message.contains("Cristin responded with not found: " + cristinPersonId));
     }
 
     @Test
@@ -60,10 +59,10 @@ public class CristinClientTest {
         when(httpClient.send(eq(request), any())).thenReturn(FakeHttpResponse.create(request, null, BAD_GATEWAY));
 
         var person = cristinClient.getPerson(cristinPersonId);
-        var loggMessage = appender.getMessages();
+        var message = logRecorder.asString();
 
         assertTrue(person.isEmpty());
-        assertTrue(loggMessage.contains("Cristin responded with 502 when fetching: " + cristinPersonId));
+        assertTrue(message.contains("Cristin responded with 502 when fetching: " + cristinPersonId));
     }
 
     @Test
@@ -90,10 +89,10 @@ public class CristinClientTest {
         when(httpClient.send(eq(request), any())).thenReturn(FakeHttpResponse.create(request, null, NOT_FOUND));
 
         var organization = cristinClient.getOrganization(organizationId);
-        var loggMessage = appender.getMessages();
+        var message = logRecorder.asString();
 
         assertTrue(organization.isEmpty());
-        assertTrue(loggMessage.contains("Cristin responded with not found: " + organizationId));
+        assertTrue(message.contains("Cristin responded with not found: " + organizationId));
     }
 
     @Test

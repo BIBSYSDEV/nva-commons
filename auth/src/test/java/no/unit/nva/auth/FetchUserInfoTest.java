@@ -16,8 +16,7 @@ import java.util.Map;
 import no.unit.nva.stubs.FakeAuthServer;
 import no.unit.nva.stubs.WiremockHttpClient;
 import nva.commons.core.paths.UriWrapper;
-import nva.commons.logutils.LogUtils;
-import nva.commons.logutils.TestAppender;
+import nva.commons.logutils.LogRecorder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,11 +54,11 @@ class FetchUserInfoTest {
         var fetchUserInfo =
             new FetchUserInfo(httpClient, this::createCognitoUri, bearerToken(ACCESS_TOKEN_FORBIDDEN));
 
-        var testAppender = LogUtils.getTestingAppenderForRootLogger();
+        var logRecorder = LogRecorder.forRoot(FetchUserInfoTest.class);
         assertThrows(RuntimeException.class, fetchUserInfo::fetch);
 
-        assertThat(testAppender.getMessages(), containsString("Got status code 403"));
-        assertThat(testAppender.getMessages(), containsString(FORBIDDEN_BODY));
+        assertThat(logRecorder.asString(), containsString("Got status code 403"));
+        assertThat(logRecorder.asString(), containsString(FORBIDDEN_BODY));
     }
 
     @Test

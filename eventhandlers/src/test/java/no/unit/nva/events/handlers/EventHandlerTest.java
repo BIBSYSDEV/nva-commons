@@ -21,8 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import no.unit.nva.events.models.AwsEventBridgeEvent;
 import no.unit.nva.stubs.FakeContext;
 import nva.commons.core.ioutils.IoUtils;
-import nva.commons.logutils.LogUtils;
-import nva.commons.logutils.TestAppender;
+import nva.commons.logutils.LogRecorder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -56,12 +55,12 @@ public class EventHandlerTest extends AbstractEventHandlerTest {
 
     @Test
     public void handleRequestLogsErrorWhenExceptionIsThrown() {
-        TestAppender appender = LogUtils.getTestingAppender(EventHandler.class);
+        var logRecorder = LogRecorder.forClass(EventHandler.class);
         var handler = new EventHandlerThrowingException();
         final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT);
         Executable action = () -> handler.handleRequest(input, outputStream, context);
         assertThrows(RuntimeException.class, action);
-        assertThat(appender.getMessages(), containsString(EXCEPTION_MESSAGE));
+        assertThat(logRecorder.asString(), containsString(EXCEPTION_MESSAGE));
     }
 
     @Test
