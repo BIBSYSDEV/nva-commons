@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<Configuration packages="com.amazonaws.services.lambda.runtime.log4j2,nva.commons.logutils"
+<Configuration packages="com.amazonaws.services.lambda.runtime.log4j2"
   strict="true">
   <Appenders>
     <Appender name="Lambda" type="Lambda">
