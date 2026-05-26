@@ -29,3 +29,9 @@ dependencies {
     testRuntimeOnly libs.junit.jupiter.engine
     testRuntimeOnly libs.junit.platform.launcher
 }
+
+// Mirror core's canonical nva-log4j2.xml into our test resources so LogRecorder/LogUtils
+// tests resolve `classpath:nva-log4j2.xml` without forcing a runtime dependency on :core.
+processTestResources {
+    from(project(':core').file('src/main/resources/nva-log4j2.xml'))
+}
