@@ -13,7 +13,7 @@ aws-ion = { strictly = '1.11.11' }
 aws-lambda-core = { strictly = '1.4.0' }
 aws-lambda-events = { strictly = '3.16.1' }
 aws-sdk = { strictly = '1.12.797' }
-aws-sdk2 = { strictly = '2.44.11' }
+aws-sdk2 = { strictly = '2.44.12' }
 aws-sdk2-dynamodblocal = { strictly = '3.3.0' }
 ben-manes-versions = { strictly = '0.53.0' }
 build-health = { strictly = '3.6.1' }
@@ -28,7 +28,7 @@ guava = { strictly = '33.6.0-jre' }
 hamcrest = { strictly = '3.0' }
 jackson = { strictly = '2.21.3' }
 jackson-annotations = { strictly = '2.21' }
-javers = { strictly = '7.11.0' }
+javers = { strictly = '7.11.1' }
 jena = { strictly = '6.1.0' }
 jupiter = { strictly = '6.1.0' }
 lambda-log4j = { strictly = '1.6.4' }
@@ -129,6 +129,7 @@ junit-jupiter-params = { group = 'org.junit.jupiter', name = 'junit-jupiter-para
 junit-platform-launcher = { group = 'org.junit.platform', name = 'junit-platform-launcher', version.ref = 'jupiter' }
 junit-platform-suite = { group = 'org.junit.platform', name = 'junit-platform-suite', version.ref = 'jupiter' }
 mockito-core = { group = 'org.mockito', name = 'mockito-core', version.ref = 'mockito' }
+mockito-junit-jupiter = { group= 'org.mockito', name= 'mockito-junit-jupiter', version.ref = 'mockito' }
 opensearch-java = { group = 'org.opensearch.client', name = 'opensearch-java', version.ref = 'opensearch-java' }
 opensearch-rest-client = { group = 'org.opensearch.client', name = 'opensearch-rest-client', version.ref = 'opensearch-rest' }
 testcontainers = { group = 'org.testcontainers', name = 'testcontainers', version.ref = 'testcontainers' }
