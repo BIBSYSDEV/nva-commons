@@ -3,7 +3,6 @@ package no.unit.nva.commons.dlq;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.firehose.FirehoseClient;
 import software.amazon.awssdk.services.firehose.model.PutRecordBatchRequest;
@@ -38,7 +37,7 @@ public class PushToFirehoseService implements FailedEventHandlingService {
     private void pushToFirehose(Collection<String> group) {
         var records = group.stream()
                           .map(PushToFirehoseService::createFirehoseRecord)
-                          .collect(Collectors.toList());
+                          .toList();
         var request = assemblePutBatchRequest(records);
         firehoseClient.putRecordBatch(request);
     }

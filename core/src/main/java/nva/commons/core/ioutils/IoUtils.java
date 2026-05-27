@@ -100,7 +100,7 @@ public final class IoUtils {
      */
     public static List<String> linesfromResource(Path path) {
         try (BufferedReader reader = new BufferedReader(newInputStreamReader(inputStreamFromResources(path)))) {
-            return reader.lines().collect(Collectors.toList());
+            return reader.lines().toList();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

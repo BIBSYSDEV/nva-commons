@@ -14,7 +14,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nva.commons.core.SingletonCollector;
 import nva.commons.core.attempt.Try;
@@ -64,7 +63,7 @@ public class FakeFirehoseClientTest {
 
         var request = PutRecordBatchRequest.builder().records(records).build();
         client.putRecordBatch(request);
-        var actualContent = client.extractPushedContent(this::parseString).collect(Collectors.toList());
+        var actualContent = client.extractPushedContent(this::parseString).toList();
 
         assertThat(actualContent, contains(expectedContent.toArray(JsonNode[]::new)));
     }
@@ -88,13 +87,13 @@ public class FakeFirehoseClientTest {
                    .map(attempt(OBJECT_MAPPER::writeValueAsString))
                    .flatMap(Try::stream)
                    .map(FakeFirehoseClientTest::toRecord)
-                   .collect(Collectors.toList());
+                   .toList();
     }
 
     private List<JsonNode> randomJsons() {
         return Stream.of(randomJson(), randomJson())
                    .map(this::parseString)
-                   .collect(Collectors.toList());
+                   .toList();
     }
 
     private JsonNode parseString(String jsonString) {

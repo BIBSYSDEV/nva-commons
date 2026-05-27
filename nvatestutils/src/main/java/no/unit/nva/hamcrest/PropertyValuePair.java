@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class PropertyValuePair {
 
@@ -62,7 +61,7 @@ public class PropertyValuePair {
         List<PropertyDescriptor> properties = collectPropertyDescriptors();
         return properties.stream()
                    .map(this::extractFieldValue)
-                   .collect(Collectors.toList());
+                   .toList();
     }
 
     public boolean isBaseType() {
@@ -143,7 +142,7 @@ public class PropertyValuePair {
     private List<PropertyDescriptor> collectPropertyDescriptors() {
         BeanInfo beanInfo = getBeanInfo(value);
         return Arrays.stream(beanInfo.getPropertyDescriptors())
-                   .collect(Collectors.toList());
+                   .toList();
     }
 
     private BeanInfo getBeanInfo(Object actual) {

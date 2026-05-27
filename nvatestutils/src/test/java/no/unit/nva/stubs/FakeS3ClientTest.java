@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nva.commons.core.ioutils.IoUtils;
 import nva.commons.core.paths.UnixPath;
@@ -221,7 +220,7 @@ class FakeS3ClientTest {
         return listingResult.contents()
                    .stream()
                    .map(S3Object::key)
-                   .collect(Collectors.toList());
+                   .toList();
     }
 
     private void createAMixOfExpectedAndUnexpectedFiles(FakeS3Client s3Client,
@@ -242,7 +241,7 @@ class FakeS3ClientTest {
                    .map(UnixPath::of)
                    .map(UnixPath::removeRoot)
                    .map(UnixPath::toString)
-                   .collect(Collectors.toList());
+                   .toList();
     }
 
     private ListObjectsRequest insertFilesToBucketInOrder(List<String> sampleFilenames,
@@ -260,7 +259,7 @@ class FakeS3ClientTest {
         return IntStream.range(0, 100)
                    .boxed()
                    .map(i -> randomString())
-                   .collect(Collectors.toList());
+                   .toList();
     }
 
     private ResponseBytes<GetObjectResponse> getObject(FakeS3Client fakeS3Client, URI s3Uri) {

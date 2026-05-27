@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -144,7 +143,7 @@ public class FailureTest {
     @DisplayName("stream returns an emptyStream")
     public void streamReturnsAnEmptyStream() {
         List<Integer> list = Try.of(sample).map(i -> throwCheckedException(NOT_EXPECTED_MESSAGE))
-            .stream().collect(Collectors.toList());
+            .stream().toList();
         assertThat(list, is(empty()));
     }
 

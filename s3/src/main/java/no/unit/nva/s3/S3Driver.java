@@ -175,7 +175,7 @@ public class S3Driver {
         return listAllFiles(folder)
                    .stream()
                    .map(this::getFile)
-                   .collect(Collectors.toList());
+                   .toList();
     }
 
     public List<UnixPath> listAllFiles(URI s3Uri) {
@@ -347,7 +347,7 @@ public class S3Driver {
         return result.contents().stream()
                    .map(S3Object::key)
                    .map(UnixPath::of)
-                   .collect(Collectors.toList());
+                   .toList();
     }
 
     private ListObjectsV2Request requestForListingFiles(UnixPath folder, String startingPoint, int responseSize) {

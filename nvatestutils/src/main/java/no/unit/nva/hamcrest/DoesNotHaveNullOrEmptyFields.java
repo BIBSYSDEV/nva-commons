@@ -61,7 +61,7 @@ public class DoesNotHaveNullOrEmptyFields<T> extends BaseMatcher<T> {
         emptyFields = properties
                           .map(prop -> readPropertyValue(prop, input))
                           .filter(this::isEmpty)
-                          .collect(Collectors.toList());
+                          .toList();
         return emptyFields.isEmpty();
     }
 

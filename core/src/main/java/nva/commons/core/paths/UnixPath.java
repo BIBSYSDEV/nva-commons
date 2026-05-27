@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.StringUtils;
@@ -36,7 +35,7 @@ public final class UnixPath {
     public static UnixPath of(String... path) {
         Stream<String> pathElements = extractAllPathElements(path);
         List<String> pathElementsList = addRootIfPresentInOriginalPath(pathElements, path)
-                                            .collect(Collectors.toList());
+                                            .toList();
         return pathIsEmpty(pathElementsList)
                    ? EMPTY_PATH
                    : new UnixPath(pathElementsList);

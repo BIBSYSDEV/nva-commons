@@ -85,7 +85,7 @@ public class FakeS3Client implements S3Client {
         var files = fileKeys.subList(startIndex, excludedEndIndex).stream()
                         .filter(filePath -> filePathIsInSpecifiedParentFolder(filePath, listObjectsRequest))
                         .map(filename -> S3Object.builder().key(filename).build())
-                        .collect(Collectors.toList());
+                        .toList();
         var nextStartListingPoint = calculateNestStartListingPoint(fileKeys, excludedEndIndex);
 
         return ListObjectsResponse.builder().contents(files)
