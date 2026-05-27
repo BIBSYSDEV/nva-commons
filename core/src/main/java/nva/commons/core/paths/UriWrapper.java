@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import nva.commons.core.JacocoGenerated;
 import nva.commons.core.attempt.Try;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
@@ -38,9 +37,7 @@ public class UriWrapper {
     private static final int NO_MATCH = -1;
     private URI uri;
 
-    @JacocoGenerated
-    @Deprecated(forRemoval = true)
-    public UriWrapper(URI uri) {
+    private UriWrapper(URI uri) {
         if (isNull(uri)) {
             throw new IllegalArgumentException(NULL_INPUT_ERROR);
         }
