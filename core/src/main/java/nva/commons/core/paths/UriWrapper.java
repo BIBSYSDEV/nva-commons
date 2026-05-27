@@ -47,18 +47,6 @@ public class UriWrapper {
         this.uri = uri;
     }
 
-    /**
-     * Utility for working with URIs in a consistent manner.
-     *
-     * @param uri the URI string
-     * @deprecated Use the static call {@link UriWrapper#fromUri(String)} instead.
-     */
-    @JacocoGenerated
-    @Deprecated(forRemoval = true)
-    public UriWrapper(String uri) {
-        this(URI.create(uri));
-    }
-
     public UriWrapper(String scheme, String host) {
         this(createUriWithSchemeAndHost(scheme, host, DEFAULT_PORT));
     }
@@ -155,18 +143,6 @@ public class UriWrapper {
 
     public String getLastPathElement() {
         return getPath().getLastPathElement();
-    }
-
-    /**
-     * Returns the last element from the URI path.
-     *
-     * @return element.
-     * @deprecated User getLastPathElement
-     */
-    @Deprecated(since = "getLastPathElement was introduced")
-    @JacocoGenerated
-    public String getFilename() {
-        return getLastPathElement();
     }
 
     public UriWrapper addQueryParameter(String param, String value) {
