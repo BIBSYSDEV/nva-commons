@@ -135,14 +135,6 @@ public class GatewayResponse<T> implements Serializable {
         return fromString(json, className);
     }
 
-    @Deprecated(forRemoval = true)
-    @JacocoGenerated
-    public static <T> GatewayResponse<T> fromOutputStream(ByteArrayOutputStream outputStream)
-        throws JsonProcessingException {
-        var json = outputStream.toString(StandardCharsets.UTF_8);
-        return fromString(json);
-    }
-
     /**
      * Create GatewayResponse object from a String. Used when we call the method {@code handleRequest()} of a Handler
      * directly and we want to read the output. Usually the String is the output of an OutputStream.
@@ -157,13 +149,6 @@ public class GatewayResponse<T> implements Serializable {
         return isString(className)
                    ? constructGatewayResponseWithStringBody(responseString)
                    : constructResponseWithJsonObjectBody(responseString);
-    }
-
-    @Deprecated(forRemoval = true)
-    @JacocoGenerated
-    public static <T> GatewayResponse<T> fromString(String responseString)
-        throws JsonProcessingException {
-        return constructResponseWithJsonObjectBody(responseString);
     }
 
     public String getBody() {
