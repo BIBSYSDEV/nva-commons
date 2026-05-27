@@ -326,20 +326,6 @@ public final class RequestInfo {
                    .toList();
     }
 
-    @JacocoGenerated
-    @JsonIgnore
-    @Deprecated(forRemoval = true)
-    public URI getCustomerId() throws UnauthorizedException {
-        return getCurrentCustomer();
-    }
-
-    @Deprecated(since = "1.25.5")
-    @JacocoGenerated
-    @JsonIgnore
-    public String getNvaUsername() throws UnauthorizedException {
-        return getUserName();
-    }
-
     @JsonIgnore
     public String getUserName() throws UnauthorizedException {
         return fetchUserName().orElseThrow(UnauthorizedException::new);
