@@ -70,7 +70,7 @@ public class DlqHandlerTest {
 
     private static SQSEvent createDlqEventContainingFailedEvents(Set<JsonNode> failedEvents) {
         var eventMessages =
-            failedEvents.stream().map(DlqHandlerTest::createEventMessage).collect(Collectors.toList());
+            failedEvents.stream().map(DlqHandlerTest::createEventMessage).toList();
         var event = new SQSEvent();
         event.setRecords(eventMessages);
         return event;

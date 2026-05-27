@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 
@@ -39,10 +38,10 @@ class ParallelMapperTest {
 
         List<String> actualExceptionMessages = actualExceptions.stream()
                                                    .map(Throwable::getMessage)
-                                                   .collect(Collectors.toList());
+                                                   .toList();
         List<String> expectedExceptionMessages = inputs.stream()
                                                      .map(this::constructExpectedMessage)
-                                                     .collect(Collectors.toList());
+                                                     .toList();
         assertThat(actualExceptionMessages, is(equalTo(expectedExceptionMessages)));
     }
 
@@ -55,7 +54,7 @@ class ParallelMapperTest {
                                               .stream()
                                               .map(ParallelExecutionException::getInput)
                                               .map(input -> (Integer) input)
-                                              .collect(Collectors.toList());
+                                              .toList();
 
         assertThat(regeneratedInputs, is(equalTo(inputs)));
     }
@@ -70,7 +69,7 @@ class ParallelMapperTest {
     }
 
     private List<Integer> sampleInputs(int i) {
-        return IntStream.range(0, i).boxed().collect(Collectors.toList());
+        return IntStream.range(0, i).boxed().toList();
     }
 
     private String processingWithTemporarilyLargeFootPrint(Integer input) {
@@ -105,7 +104,7 @@ class ParallelMapperTest {
                                                             List<Integer> inputs) {
 
         List<String> outputs = mapper.getSuccesses();
-        List<Integer> regeneratedInputs = outputs.stream().map(Integer::parseInt).collect(Collectors.toList());
+        List<Integer> regeneratedInputs = outputs.stream().map(Integer::parseInt).toList();
         assertThat(regeneratedInputs, is(equalTo(inputs)));
     }
 

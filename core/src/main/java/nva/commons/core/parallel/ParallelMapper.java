@@ -10,7 +10,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nva.commons.core.attempt.Failure;
 import nva.commons.core.attempt.Try;
@@ -71,7 +70,7 @@ public class ParallelMapper<I, O> {
 
     public ParallelMapper(Stream<I> inputs, Function<I, O> mappingFunction, int batchSize) {
         this.mappingFunction = mappingFunction;
-        actions = inputs.map(this::toCallable).collect(Collectors.toList());
+        actions = inputs.map(this::toCallable).toList();
         this.batchSize = batchSize;
         futures = new ArrayList<>();
     }
@@ -89,7 +88,7 @@ public class ParallelMapper<I, O> {
         return getCompleted()
                    .filter(Try::isSuccess)
                    .map(Try::orElseThrow)
-                   .collect(Collectors.toList());
+                   .toList();
     }
 
     public List<ParallelExecutionException> getExceptions() {
@@ -98,7 +97,7 @@ public class ParallelMapper<I, O> {
                    .map(Try::getException)
                    .map(this::getExceptionWithInputObject)
                    .map(exception -> (ParallelExecutionException) exception)
-                   .collect(Collectors.toList());
+                   .toList();
     }
 
     private void executeBatch(ExecutorService executor, int index) throws InterruptedException {

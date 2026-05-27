@@ -6,7 +6,6 @@ import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage;
 import nva.commons.core.CollectionUtils;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * This DLQ handler pushes the failed events to an S3 bucket through a firehose for automatically organizing the events
@@ -56,7 +55,7 @@ public class DlqHandler implements RequestHandler<SQSEvent, Void> {
     private static List<String> extractFailedEventsFromDlqMessages(SQSEvent input) {
         return input.getRecords().stream()
                    .map(SQSMessage::getBody)
-                   .collect(Collectors.toList());
+                   .toList();
     }
 }
 

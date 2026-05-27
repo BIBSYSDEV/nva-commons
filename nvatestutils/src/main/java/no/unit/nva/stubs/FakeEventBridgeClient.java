@@ -3,7 +3,6 @@ package no.unit.nva.stubs;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import nva.commons.core.JacocoGenerated;
 import software.amazon.awssdk.services.eventbridge.EventBridgeClient;
 import software.amazon.awssdk.services.eventbridge.model.EventBridgeException;
@@ -41,7 +40,7 @@ public class FakeEventBridgeClient implements EventBridgeClient {
     public ListEventBusesResponse listEventBuses(ListEventBusesRequest listEventBusesRequest) {
         var buses = eventBusNames.stream()
                         .map(busName -> EventBus.builder().name(busName).build())
-                        .collect(Collectors.toList());
+                        .toList();
         return ListEventBusesResponse.builder().eventBuses(buses).build();
     }
 

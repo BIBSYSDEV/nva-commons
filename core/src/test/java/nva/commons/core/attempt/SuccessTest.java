@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -99,7 +98,7 @@ public class SuccessTest {
     @DisplayName("stream returns an emptyStream")
     public void streamReturnsAStreamWithTheValue() {
         List<Integer> list = Try.of(sample).stream()
-            .collect(Collectors.toList());
+            .toList();
         Integer actual = list.stream().findFirst().get();
         assertThat(list, is(not(empty())));
         assertThat(actual, is(sample));

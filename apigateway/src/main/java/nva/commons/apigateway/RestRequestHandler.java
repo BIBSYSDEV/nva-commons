@@ -104,7 +104,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
         return Arrays.stream(header.replace(SPACE, EMPTY_STRING).split(COMMA))
                    .map(this::sanitizeMimeType)
                    .map(MediaType::parse)
-                   .collect(Collectors.toList());
+                   .toList();
     }
 
     private String sanitizeMimeType(String mimeType) {
@@ -119,7 +119,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
     protected List<MediaType> findMediaTypeMatches(List<MediaType> acceptMediaTypes) {
         return listSupportedMediaTypes().stream()
                    .filter(mediaType -> inAcceptedMediaTypeRange(mediaType, acceptMediaTypes))
-                   .collect(Collectors.toList());
+                   .toList();
     }
 
     private boolean inAcceptedMediaTypeRange(MediaType mediaType, List<MediaType> acceptMediaTypes) {

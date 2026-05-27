@@ -8,7 +8,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.core.Is.is;
 import java.time.Instant;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.services.eventbridge.model.EventBus;
 import software.amazon.awssdk.services.eventbridge.model.ListEventBusesRequest;
@@ -35,7 +34,7 @@ class FakeEventBridgeClientTest {
                                  .eventBuses()
                                  .stream()
                                  .map(EventBus::name)
-                                 .collect(Collectors.toList());
+                                 .toList();
         assertThat(actualBusNames, containsInAnyOrder(busNames));
     }
 

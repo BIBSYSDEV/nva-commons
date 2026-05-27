@@ -212,7 +212,7 @@ class S3DriverTest {
         URI fileLocation = s3Driver.insertAndCompressObjects(somePath, input);
         GZIPInputStream compressedData = s3Driver.getCompressedFile(toS3Path(fileLocation));
         BufferedReader inputReader = new BufferedReader(new InputStreamReader(compressedData));
-        List<String> actualContent = inputReader.lines().collect(Collectors.toList());
+        List<String> actualContent = inputReader.lines().toList();
         assertThat(actualContent, is(equalTo(input)));
     }
 
@@ -230,7 +230,7 @@ class S3DriverTest {
         GZIPInputStream compressedContent = s3Driver.getCompressedFile(toS3Path(fileLocation));
         List<String> actualContent = new BufferedReader(new InputStreamReader(compressedContent))
                                          .lines()
-                                         .collect(Collectors.toList());
+                                         .toList();
         assertThat(actualContent, is(equalTo(input)));
         assertThat(toS3Path(fileLocation).toString(), startsWith(expectedFolderNeverContainsRootFolder));
     }
