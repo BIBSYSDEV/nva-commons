@@ -15,6 +15,7 @@ dependencies {
     implementation project(":core")
     testImplementation libs.hamcrest
     testImplementation libs.junit.jupiter.api
+    testImplementation platform(libs.junit.bom)
     testImplementation project(":json")
     testRuntimeOnly libs.datafaker
     testRuntimeOnly libs.jackson.core

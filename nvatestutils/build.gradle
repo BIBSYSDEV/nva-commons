@@ -18,6 +18,7 @@ dependencies {
     api libs.jackson.databind
     api libs.mockito.core
     api libs.slf4j.api
+    api platform(libs.aws.sdk2.bom)
     api project(":apigateway")
     api project(":auth")
     api project(":eventhandlers")
@@ -30,6 +31,7 @@ dependencies {
     implementation libs.httpcore5
     implementation libs.junit.jupiter.api
     implementation libs.wiremock.core
+    implementation platform(libs.junit.bom)
     implementation project(":core")
     implementation project(":json")
     runtimeOnly libs.jackson.dataformat.xml

@@ -25,6 +25,7 @@ dependencies {
     testImplementation libs.jackson.annotations
     testImplementation libs.junit.jupiter.api
     testImplementation libs.log4j.core
+    testImplementation platform(libs.junit.bom)
     testRuntimeOnly libs.datafaker
     testRuntimeOnly libs.junit.jupiter.engine
     testRuntimeOnly libs.junit.platform.launcher

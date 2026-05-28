@@ -7,6 +7,7 @@ dependencies {
     api libs.aws.lambda.core
     api libs.aws.lambda.events
     api libs.aws.sdk2.firehose
+    api platform(libs.aws.sdk2.bom)
     compileOnly libs.jackson.annotations
     implementation libs.aws.sdk2.sdk.core
     implementation project(":core")
@@ -14,6 +15,7 @@ dependencies {
     testImplementation libs.jackson.databind
     testImplementation libs.junit.jupiter.api
     testImplementation libs.junit.jupiter.params
+    testImplementation platform(libs.junit.bom)
     testImplementation project(":nvatestutils")
     testRuntimeOnly libs.datafaker
     testRuntimeOnly libs.jackson.core

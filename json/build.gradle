@@ -17,6 +17,7 @@ dependencies {
     testImplementation libs.jackson.databind
     testImplementation libs.junit.jupiter.api
     testImplementation libs.junit.jupiter.params
+    testImplementation platform(libs.junit.bom)
     testImplementation project(":core")
     testRuntimeOnly libs.datafaker
     testRuntimeOnly libs.jackson.datatype.jdk8

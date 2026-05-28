@@ -11,6 +11,7 @@ dependencies {
     testImplementation libs.junit.jupiter.api
     testImplementation libs.junit.jupiter.params
     testImplementation libs.mockito.core
+    testImplementation platform(libs.junit.bom)
     testImplementation project(":json")
     testRuntimeOnly libs.datafaker
     testRuntimeOnly libs.jackson.dataformat.xml

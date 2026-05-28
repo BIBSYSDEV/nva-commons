@@ -13,6 +13,7 @@ dependencies {
     implementation libs.jackson.core
     implementation libs.jackson.databind
     implementation libs.slf4j.api
+    implementation platform(libs.aws.sdk2.bom)
     implementation project(":secrets")
     runtimeOnly libs.aws.sdk2.urlconnection
     runtimeOnly libs.jackson.core

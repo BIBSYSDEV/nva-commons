@@ -13,6 +13,7 @@ dependencies {
     api libs.jackson.core
     api libs.jackson.databind
     api libs.jackson.jr.objects
+    api platform(libs.aws.sdk2.bom)
     api project(":json")
     implementation libs.jackson.jr.annotations
     implementation libs.slf4j.api
@@ -28,6 +29,7 @@ dependencies {
     testImplementation libs.junit.jupiter.params
     testImplementation libs.log4j.core
     testImplementation libs.mockito.core
+    testImplementation platform(libs.junit.bom)
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")
     testRuntimeOnly libs.datafaker
