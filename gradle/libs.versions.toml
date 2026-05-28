@@ -101,11 +101,13 @@ jackson-jr-annotations = { group = 'com.fasterxml.jackson.jr', name = 'jackson-j
 jackson-jr-objects = { group = 'com.fasterxml.jackson.jr', name = 'jackson-jr-objects', version.ref = 'jackson' }
 jackson-module-parameter-names = { group = 'com.fasterxml.jackson.module', name = 'jackson-module-parameter-names', version.ref = 'jackson' }
 javers = { group = 'org.javers', name = 'javers-core', version.ref = 'javers' }
+jena-bom = { group = 'org.apache.jena', name = 'jena-bom', version.ref = 'jena' }
 jena-arq = { group = 'org.apache.jena', name = 'jena-arq', version.ref = 'jena' }
 jena-core = { group = 'org.apache.jena', name = 'jena-core', version.ref = 'jena' }
 jena-shacl = { group = 'org.apache.jena', name = 'jena-shacl', version.ref = 'jena'}
 nva-language = { group = 'com.github.bibsysdev', name = 'nva-language', version.ref = 'nva-language' }
 opencsv = { group = 'com.opencsv', name = 'opencsv', version.ref = 'opencsv' }
+resilience4j-bom = { group = 'io.github.resilience4j', name = 'resilience4j-bom', version.ref = 'resilience4j' }
 resilience4j-all = { group = 'io.github.resilience4j', name = 'resilience4j-all', version.ref = 'resilience4j' }
 resilience4j-core = { group = 'io.github.resilience4j', name = 'resilience4j-core', version.ref = 'resilience4j' }
 resilience4j-ratelimiter = { group = 'io.github.resilience4j', name = 'resilience4j-ratelimiter', version.ref = 'resilience4j' }
@@ -118,6 +120,7 @@ errorprone = { group = 'com.google.errorprone', name = 'error_prone_core', versi
 
 # Logging dependencies
 lambda-log4j = { group = 'com.amazonaws', name = 'aws-lambda-java-log4j2', version.ref = 'lambda-log4j' }
+log4j-bom = { group = 'org.apache.logging.log4j', name = 'log4j-bom', version.ref = 'log4j' }
 log4j-api = { group = 'org.apache.logging.log4j', name = 'log4j-api', version.ref = 'log4j' }
 log4j-core = { group = 'org.apache.logging.log4j', name = 'log4j-core', version.ref = 'log4j' }
 log4j-core-test = { group = 'org.apache.logging.log4j', name = 'log4j-core-test', version.ref = 'log4j' }
@@ -126,22 +129,26 @@ slf4j-api = { group = 'org.slf4j', name = 'slf4j-api', version.ref = 'slf4j' }
 
 # Test dependencies
 assertj-core = { group = 'org.assertj', name = 'assertj-core', version.ref = 'assertj' }
+cucumber-bom = { group = 'io.cucumber', name = 'cucumber-bom', version.ref = 'cucumber' }
 cucumber-java = { group = 'io.cucumber', name = 'cucumber-java', version.ref = 'cucumber' }
 cucumber-junit-platform-engine = { group = 'io.cucumber', name = 'cucumber-junit-platform-engine', version.ref = 'cucumber' }
 cucumber-picocontainer = { group = 'io.cucumber', name = 'cucumber-picocontainer', version.ref = 'cucumber' }
 datafaker = { group = 'net.datafaker', name = 'datafaker', version.ref = 'datafaker' }
 hamcrest = { group = 'org.hamcrest', name = 'hamcrest', version.ref = 'hamcrest' }
 hamcrest-core = { group = 'org.hamcrest', name = 'hamcrest-core', version.ref = 'hamcrest' }
+junit-bom = { group = 'org.junit', name = 'junit-bom', version.ref = 'jupiter' }
 junit-jupiter = { group = 'org.junit.jupiter', name = 'junit-jupiter', version.ref = 'jupiter' }
 junit-jupiter-api = { group = 'org.junit.jupiter', name = 'junit-jupiter-api', version.ref = 'jupiter' }
 junit-jupiter-engine = { group = 'org.junit.jupiter', name = 'junit-jupiter-engine', version.ref = 'jupiter' }
 junit-jupiter-params = { group = 'org.junit.jupiter', name = 'junit-jupiter-params', version.ref = 'jupiter' }
 junit-platform-launcher = { group = 'org.junit.platform', name = 'junit-platform-launcher', version.ref = 'jupiter' }
 junit-platform-suite = { group = 'org.junit.platform', name = 'junit-platform-suite', version.ref = 'jupiter' }
+mockito-bom = { group = 'org.mockito', name = 'mockito-bom', version.ref = 'mockito' }
 mockito-core = { group = 'org.mockito', name = 'mockito-core', version.ref = 'mockito' }
 mockito-junit-jupiter = { group= 'org.mockito', name= 'mockito-junit-jupiter', version.ref = 'mockito' }
 opensearch-java = { group = 'org.opensearch.client', name = 'opensearch-java', version.ref = 'opensearch-java' }
 opensearch-rest-client = { group = 'org.opensearch.client', name = 'opensearch-rest-client', version.ref = 'opensearch-rest' }
+testcontainers-bom = { group = 'org.testcontainers', name = 'testcontainers-bom', version.ref = 'testcontainers' }
 testcontainers = { group = 'org.testcontainers', name = 'testcontainers', version.ref = 'testcontainers' }
 testcontainers-junit = { group = 'org.testcontainers', name = 'testcontainers-junit-jupiter', version.ref = 'testcontainers' }
 testcontainers-opensearch = { group = 'org.opensearch', name = 'opensearch-testcontainers', version.ref = 'opensearch-testcontainer' }
