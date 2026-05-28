@@ -39,7 +39,7 @@ nexus-publish = { strictly = '2.0.0' }
 nva-language = { strictly = '1.2.1' }
 opencsv = { strictly = '5.12.0' }
 opensearch-java = { strictly = '3.8.0' }
-opensearch-rest = { strictly = '3.4.0' }
+opensearch-server = { strictly = '3.6.0' }
 opensearch-testcontainer = { strictly = '4.1.0' }
 slf4j = { strictly = '2.0.18' }
 spotless = { strictly = '8.2.0' }
@@ -56,6 +56,7 @@ apache-poi-ooxml = { group = 'org.apache.poi', name = 'poi-ooxml', version.ref =
 aws-apache-client = { group = 'software.amazon.awssdk', name = 'apache-client', version.ref = 'aws-sdk2' }
 aws-dynamodb-local = { group = 'com.amazonaws', name = 'DynamoDBLocal', version.ref = 'aws-ddb-local' }
 aws-ion = { group = 'com.amazon.ion', name = 'ion-java', version.ref = 'aws-ion' }
+aws-sdk-bom = { group = 'com.amazonaws', name = 'aws-java-sdk-bom', version.ref = 'aws-sdk' }
 aws-java-sdk-core = { group = 'com.amazonaws', name = 'aws-java-sdk-core', version.ref = 'aws-sdk' }
 aws-lambda-core = { group = 'com.amazonaws', name = 'aws-lambda-java-core', version.ref = 'aws-lambda-core' }
 aws-lambda-events = { group = 'com.amazonaws', name = 'aws-lambda-java-events', version.ref = 'aws-lambda-events' }
@@ -92,6 +93,7 @@ httpcore5 = { group = 'org.apache.httpcomponents.core5', name = 'httpcore5', ver
 jackson-annotations = { group = 'com.fasterxml.jackson.core', name = 'jackson-annotations', version.ref = 'jackson-annotations' }
 jackson-core = { group = 'com.fasterxml.jackson.core', name = 'jackson-core', version.ref = 'jackson' }
 jackson-databind = { group = 'com.fasterxml.jackson.core', name = 'jackson-databind', version.ref = 'jackson' }
+jackson-dataformat-cbor = { group = 'com.fasterxml.jackson.dataformat', name = 'jackson-dataformat-cbor', version.ref = 'jackson' }
 jackson-dataformat-csv = { group = 'com.fasterxml.jackson.dataformat', name = 'jackson-dataformat-csv', version.ref = 'jackson' }
 jackson-dataformat-xml = { group = 'com.fasterxml.jackson.dataformat', name = 'jackson-dataformat-xml', version.ref = 'jackson' }
 jackson-datatype-jdk8 = { group = 'com.fasterxml.jackson.datatype', name = 'jackson-datatype-jdk8', version.ref = 'jackson' }
@@ -143,11 +145,14 @@ junit-jupiter-engine = { group = 'org.junit.jupiter', name = 'junit-jupiter-engi
 junit-jupiter-params = { group = 'org.junit.jupiter', name = 'junit-jupiter-params', version.ref = 'jupiter' }
 junit-platform-launcher = { group = 'org.junit.platform', name = 'junit-platform-launcher', version.ref = 'jupiter' }
 junit-platform-suite = { group = 'org.junit.platform', name = 'junit-platform-suite', version.ref = 'jupiter' }
+junit-platform-suite-api = { group = 'org.junit.platform', name = 'junit-platform-suite-api', version.ref = 'jupiter' }
+junit-platform-suite-engine = { group = 'org.junit.platform', name = 'junit-platform-suite-engine', version.ref = 'jupiter' }
 mockito-bom = { group = 'org.mockito', name = 'mockito-bom', version.ref = 'mockito' }
 mockito-core = { group = 'org.mockito', name = 'mockito-core', version.ref = 'mockito' }
 mockito-junit-jupiter = { group= 'org.mockito', name= 'mockito-junit-jupiter', version.ref = 'mockito' }
 opensearch-java = { group = 'org.opensearch.client', name = 'opensearch-java', version.ref = 'opensearch-java' }
-opensearch-rest-client = { group = 'org.opensearch.client', name = 'opensearch-rest-client', version.ref = 'opensearch-rest' }
+opensearch-rest-client = { group = 'org.opensearch.client', name = 'opensearch-rest-client', version.ref = 'opensearch-server' }
+opensearch-rest-highlevel-client = { group = 'org.opensearch.client', name = 'opensearch-rest-high-level-client', version.ref = 'opensearch-server' }
 testcontainers-bom = { group = 'org.testcontainers', name = 'testcontainers-bom', version.ref = 'testcontainers' }
 testcontainers = { group = 'org.testcontainers', name = 'testcontainers', version.ref = 'testcontainers' }
 testcontainers-junit = { group = 'org.testcontainers', name = 'testcontainers-junit-jupiter', version.ref = 'testcontainers' }
