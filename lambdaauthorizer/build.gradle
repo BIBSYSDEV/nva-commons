@@ -18,6 +18,7 @@ dependencies {
     testImplementation libs.junit.jupiter.api
     testImplementation libs.log4j.core
     testImplementation libs.mockito.core
+    testImplementation platform(libs.junit.bom)
     testImplementation project(":json")
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")

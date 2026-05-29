@@ -6,6 +6,7 @@ plugins{
 dependencies {
     api libs.aws.sdk2.s3
     api libs.jackson.databind
+    api platform(libs.aws.sdk2.bom)
     api project(":core")
     implementation libs.aws.apache.client
     implementation libs.aws.ion
@@ -24,6 +25,7 @@ dependencies {
     testImplementation libs.hamcrest
     testImplementation libs.junit.jupiter.api
     testImplementation libs.junit.jupiter.params
+    testImplementation platform(libs.junit.bom)
     testImplementation project(":nvatestutils")
     testRuntimeOnly libs.datafaker
     testRuntimeOnly libs.junit.jupiter.engine
