@@ -12,7 +12,6 @@ catalog {
         library("core", "com.github.bibsysdev", "core").version(project.version)
         library("dlq", "com.github.bibsysdev", "dlq").version(project.version)
         library("doi", "com.github.bibsysdev", "doi").version(project.version)
-        library("dynamodb", "com.github.bibsysdev", "dynamodb").version(project.version)
         library("eventhandlers", "com.github.bibsysdev", "eventhandlers").version(project.version)
         library("identifiers", "com.github.bibsysdev", "identifiers").version(project.version)
         library("json", "com.github.bibsysdev", "json").version(project.version)
