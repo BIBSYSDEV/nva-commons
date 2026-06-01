@@ -1,5 +1,7 @@
 package no.unit.nva.commons.json;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 public interface JsonSerializable {
 
     /**
@@ -7,11 +9,10 @@ public interface JsonSerializable {
      *
      * @return JsonString
      */
-    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     default String toJsonString() {
         try {
             return JsonUtils.singleLineObjectMapper.writeValueAsString(this);
-        } catch (Exception e) {
+        } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
