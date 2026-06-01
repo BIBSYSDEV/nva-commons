@@ -8,7 +8,6 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.Objects;
 import no.unit.nva.commons.json.JsonSerializable;
-import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.core.JacocoGenerated;
 
 /**
@@ -80,16 +79,6 @@ public class EventReference implements JsonSerializable, EventBody {
         return uri.getHost();
     }
 
-
-    @Override
-    @SuppressWarnings("PMD.AvoidCatchingGenericException")
-    public String toJsonString() {
-        try {
-            return JsonUtils.singleLineObjectMapper.writeValueAsString(this);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Override
     @JacocoGenerated
