@@ -3,13 +3,12 @@ package no.unit.nva.testutils;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 /**
  * Provides random JWTs for testing purposes. It has DELIBERATELY limited functionality to avoid misuse.
  */
-@SuppressWarnings("PMD.ReplaceJavaUtilDate") // FIXME
 public final class JwtTestToken {
 
     private JwtTestToken() {
@@ -22,8 +21,8 @@ public final class JwtTestToken {
      * @return String representation of the JWT.
      */
     public static String randomToken() {
-        var issuedAt = new Date();
-        var expiresAt = new Date(issuedAt.getTime() + TimeUnit.HOURS.toMillis(1));
+        var issuedAt = Instant.now();
+        var expiresAt = issuedAt.plus(1, ChronoUnit.HOURS);
         return randomToken(issuedAt, expiresAt);
     }
 
@@ -33,12 +32,12 @@ public final class JwtTestToken {
      * @return String representation of the expired JWT.
      */
     public static String randomExpiredToken() {
-        var issuedAt = new Date(new Date().getTime() - TimeUnit.HOURS.toMillis(1));
-        var expiresAt = new Date(issuedAt.getTime() + TimeUnit.MINUTES.toMillis(1));
+        var issuedAt = Instant.now().minus(1, ChronoUnit.HOURS);
+        var expiresAt = issuedAt.plus(1, ChronoUnit.MINUTES);
         return randomToken(issuedAt, expiresAt);
     }
 
-    private static String randomToken(Date issuedAt, Date expiresAt) {
+    private static String randomToken(Instant issuedAt, Instant expiresAt) {
         return newToken(randomString(),
                         randomString(),
                         issuedAt,
@@ -48,8 +47,8 @@ public final class JwtTestToken {
 
     private static String newToken(String issuer,
                                    String subject,
-                                   Date issuedAt,
-                                   Date expiresAt,
+                                   Instant issuedAt,
+                                   Instant expiresAt,
                                    Algorithm algorithm) {
         return JWT.create()
                    .withIssuer(issuer)

@@ -7,6 +7,7 @@ dependencies {
     compileOnly libs.jackson.annotations
     implementation libs.httpcore5
     implementation libs.slf4j.api
+    runtimeOnly libs.lambda.log4j
     runtimeOnly libs.log4j.api
     runtimeOnly libs.log4j.core
     runtimeOnly libs.log4j.slf4j.impl
