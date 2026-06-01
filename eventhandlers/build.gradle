@@ -5,16 +5,15 @@ plugins {
 
 dependencies {
     api libs.aws.lambda.core
-    api libs.aws.sdk.dynamo
     api libs.aws.sdk2.dynamo
     api libs.aws.sdk2.eventbridge
     api libs.aws.sdk2.regions
     api libs.jackson.annotations
-    api libs.jackson.core
     api libs.jackson.databind
     api libs.jackson.jr.objects
     api platform(libs.aws.sdk2.bom)
     api project(":json")
+    implementation libs.jackson.core
     implementation libs.jackson.jr.annotations
     implementation libs.slf4j.api
     implementation project(":core")
@@ -28,7 +27,6 @@ dependencies {
     testImplementation libs.junit.jupiter.api
     testImplementation libs.junit.jupiter.params
     testImplementation libs.log4j.core
-    testImplementation libs.mockito.core
     testImplementation platform(libs.junit.bom)
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")
