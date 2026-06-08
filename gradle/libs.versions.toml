@@ -13,7 +13,7 @@ aws-ion = { strictly = '1.11.11' }
 aws-lambda-core = { strictly = '1.4.0' }
 aws-lambda-events = { strictly = '3.16.1' }
 aws-sdk = { strictly = '1.12.797' }
-aws-sdk2 = { strictly = '2.45.0' }
+aws-sdk2 = { strictly = '2.46.5' }
 aws-sdk2-dynamodblocal = { strictly = '3.3.0' }
 ben-manes-versions = { strictly = '0.53.0' }
 build-health = { strictly = '3.6.1' }
@@ -26,8 +26,8 @@ errorprone = { strictly = '2.49.0' }
 errorprone-plugin = { strictly = '5.1.0' }
 guava = { strictly = '33.6.0-jre' }
 hamcrest = { strictly = '3.0' }
-jackson = { strictly = '2.21.4' }
-jackson-annotations = { strictly = '2.21' }
+jackson = { strictly = '2.22.0' }
+jackson-annotations = { strictly = '2.22' }
 javers = { strictly = '7.11.1' }
 jena = { strictly = '6.1.0' }
 jupiter = { strictly = '6.1.0' }
@@ -44,7 +44,7 @@ opensearch-testcontainer = { strictly = '4.1.0' }
 slf4j = { strictly = '2.0.18' }
 spotless = { strictly = '8.2.0' }
 testcontainers = { strictly = '2.0.5' }
-wiremock = { strictly = '4.0.0-beta.34' }
+wiremock = { strictly = '4.0.0-beta.36' }
 zalando-problem = { strictly = '0.27.1' }
 resilience4j = { strictly = '2.4.0' }
 vavr = { strictly = '1.0.1' }
