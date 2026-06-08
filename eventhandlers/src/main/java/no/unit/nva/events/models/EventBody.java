@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @SuppressWarnings("PMD.ImplicitFunctionalInterface")
 public interface EventBody {
 
-    String TOPIC = "topic";
+  String TOPIC = "topic";
 
-    @JsonProperty(TOPIC)
-    String getTopic();
+  @JsonProperty(TOPIC)
+  String getTopic();
 }

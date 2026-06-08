@@ -7,9 +7,9 @@ import no.unit.nva.commons.json.JsonUtils;
 
 public final class EventsConfig {
 
-    public static final ObjectMapper objectMapper = JsonUtils.dtoObjectMapper;
-    public static final JSON objectMapperLight = JSON.builder().register(JacksonAnnotationExtension.std).build();
+  public static final ObjectMapper objectMapper = JsonUtils.dtoObjectMapper;
+  public static final JSON objectMapperLight =
+      JSON.builder().register(JacksonAnnotationExtension.std).build();
 
-    private EventsConfig() {
-    }
+  private EventsConfig() {}
 }

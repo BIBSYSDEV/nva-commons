@@ -14,85 +14,76 @@ import org.junit.jupiter.api.Assertions;
 @JacocoGenerated
 public final class WiremockHttpClient {
 
-    public static final String TEST_CONFIGURATION_TRUST_MANAGER_FAILURE =
-        "Failed to configure the trust everything rule for the http client, which is required to connect to "
-        + "wiremock server and local signed SSL certificate for now.";
+  public static final String TEST_CONFIGURATION_TRUST_MANAGER_FAILURE =
+      "Failed to configure the trust everything rule for the http client, which is required to"
+          + " connect to wiremock server and local signed SSL certificate for now.";
 
-    private static final HttpClient INSTANCE = init();
+  private static final HttpClient INSTANCE = init();
 
+  private WiremockHttpClient() {}
 
+  private static HttpClient init() {
+    return HttpClient.newBuilder().sslContext(createInsecureSslContextTrustingEverything()).build();
+  }
 
-    private WiremockHttpClient() {
+  /**
+   * This is actually "getInstance", but we preserve the naming to avoid having to re-write every
+   * test.
+   *
+   * @return HttpClient test instance that is insecure, and trusts everything
+   */
+  public static HttpClient create() {
+    return INSTANCE;
+  }
 
+  private static SSLContext createInsecureSslContextTrustingEverything() {
+    try {
+      var insecureSslContext = SSLContext.getInstance("SSL");
+      insecureSslContext.init(
+          null,
+          new X509ExtendedTrustManager[] {createTrustEverythingManager()},
+          new java.security.SecureRandom());
+      return insecureSslContext;
+    } catch (KeyManagementException | NoSuchAlgorithmException e) {
+      e.printStackTrace();
+      Assertions.fail(TEST_CONFIGURATION_TRUST_MANAGER_FAILURE);
+      return null;
     }
+  }
 
-    private static HttpClient init() {
-        return HttpClient.newBuilder()
-                   .sslContext(createInsecureSslContextTrustingEverything())
-                   .build();
-    }
+  private static X509ExtendedTrustManager createTrustEverythingManager() {
 
-    /**
-     * This is actually "getInstance", but we preserve the naming to avoid having to re-write every test.
-     * @return HttpClient test instance that is insecure, and trusts everything
-     */
-    public static HttpClient create() {
-        return INSTANCE;
-    }
+    return new X509ExtendedTrustManager() {
 
-    private static SSLContext createInsecureSslContextTrustingEverything() {
-        try {
-            var insecureSslContext = SSLContext.getInstance("SSL");
-            insecureSslContext.init(null, new X509ExtendedTrustManager[]{createTrustEverythingManager()},
-                                    new java.security.SecureRandom());
-            return insecureSslContext;
-        } catch (KeyManagementException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            Assertions.fail(TEST_CONFIGURATION_TRUST_MANAGER_FAILURE);
-            return null;
-        }
-    }
+      @JacocoGenerated
+      @Override
+      public void checkServerTrusted(X509Certificate[] chain, String authType) {}
 
-    private static X509ExtendedTrustManager createTrustEverythingManager() {
+      @JacocoGenerated
+      @Override
+      public X509Certificate[] getAcceptedIssuers() {
+        return new X509Certificate[0];
+      }
 
-        return new X509ExtendedTrustManager() {
+      @JacocoGenerated
+      @Override
+      public void checkClientTrusted(X509Certificate[] chain, String authType) {}
 
-            @JacocoGenerated
-            @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType) {
-            }
+      @JacocoGenerated
+      @Override
+      public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) {}
 
-            @JacocoGenerated
-            @Override
-            public X509Certificate[] getAcceptedIssuers() {
-                return new X509Certificate[0];
-            }
+      @JacocoGenerated
+      @Override
+      public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) {}
 
-            @JacocoGenerated
-            @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType) {
-            }
+      @JacocoGenerated
+      @Override
+      public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine) {}
 
-            @JacocoGenerated
-            @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) {
-            }
-
-            @JacocoGenerated
-            @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) {
-            }
-
-            @JacocoGenerated
-            @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine) {
-            }
-
-            @JacocoGenerated
-            @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) {
-            }
-        };
-    }
+      @JacocoGenerated
+      @Override
+      public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) {}
+    };
+  }
 }
-

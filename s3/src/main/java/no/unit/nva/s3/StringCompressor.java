@@ -10,31 +10,31 @@ import java.util.zip.GZIPOutputStream;
 
 public class StringCompressor {
 
-    public static final String LINE_SEPARATOR = System.lineSeparator();
-    private final List<String> input;
+  public static final String LINE_SEPARATOR = System.lineSeparator();
+  private final List<String> input;
 
-    public StringCompressor(List<String> input) {
-        this.input = input;
-    }
+  public StringCompressor(List<String> input) {
+    this.input = input;
+  }
 
-    public InputStream gzippedData() throws IOException {
-        byte[] bytes = dataToByteArray();
-        return new ByteArrayInputStream(bytes);
-    }
+  public InputStream gzippedData() throws IOException {
+    byte[] bytes = dataToByteArray();
+    return new ByteArrayInputStream(bytes);
+  }
 
-    private byte[] dataToByteArray() throws IOException {
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            compressData(outputStream);
-            return outputStream.toByteArray();
-        }
+  private byte[] dataToByteArray() throws IOException {
+    try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+      compressData(outputStream);
+      return outputStream.toByteArray();
     }
+  }
 
-    private void compressData(ByteArrayOutputStream outputStream) throws IOException {
-        try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream)) {
-            for (String line : input) {
-                gzipOutputStream.write(line.getBytes(StandardCharsets.UTF_8));
-                gzipOutputStream.write(LINE_SEPARATOR.getBytes(StandardCharsets.UTF_8));
-            }
-        }
+  private void compressData(ByteArrayOutputStream outputStream) throws IOException {
+    try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream)) {
+      for (String line : input) {
+        gzipOutputStream.write(line.getBytes(StandardCharsets.UTF_8));
+        gzipOutputStream.write(LINE_SEPARATOR.getBytes(StandardCharsets.UTF_8));
+      }
     }
+  }
 }

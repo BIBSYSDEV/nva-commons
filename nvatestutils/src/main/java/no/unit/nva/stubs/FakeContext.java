@@ -10,62 +10,62 @@ import nva.commons.core.JacocoGenerated;
 @JacocoGenerated
 public class FakeContext implements Context {
 
-    private final String awsRequestId = UUID.randomUUID().toString();
-    private final LambdaLogger logger = new TestLogger();
+  private final String awsRequestId = UUID.randomUUID().toString();
+  private final LambdaLogger logger = new TestLogger();
 
-    @Override
-    public String getAwsRequestId() {
-        return awsRequestId;
-    }
+  @Override
+  public String getAwsRequestId() {
+    return awsRequestId;
+  }
 
-    @Override
-    public String getLogGroupName() {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public String getLogGroupName() {
+    throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public String getLogStreamName() {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public String getLogStreamName() {
+    throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public String getFunctionName() {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public String getFunctionName() {
+    throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public String getFunctionVersion() {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public String getFunctionVersion() {
+    throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public String getInvokedFunctionArn() {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public String getInvokedFunctionArn() {
+    throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public CognitoIdentity getIdentity() {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public CognitoIdentity getIdentity() {
+    throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public ClientContext getClientContext() {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public ClientContext getClientContext() {
+    throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public int getRemainingTimeInMillis() {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public int getRemainingTimeInMillis() {
+    throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public int getMemoryLimitInMB() {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public int getMemoryLimitInMB() {
+    throw new UnsupportedOperationException();
+  }
 
-    @JacocoGenerated
-    @Override
-    public LambdaLogger getLogger() {
-        return logger;
-    }
+  @JacocoGenerated
+  @Override
+  public LambdaLogger getLogger() {
+    return logger;
+  }
 }

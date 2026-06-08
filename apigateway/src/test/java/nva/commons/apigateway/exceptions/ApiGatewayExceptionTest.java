@@ -6,6 +6,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
@@ -14,90 +15,95 @@ import org.junit.jupiter.api.Test;
 
 public class ApiGatewayExceptionTest {
 
-    private static final String MESSAGE = "someMessage";
-    public static final String STATUS_CODE_METHOD_NAME = "statusCode";
-    public static final String INT_PRIMITIVE_TYPE = "int";
+  private static final String MESSAGE = "someMessage";
+  public static final String STATUS_CODE_METHOD_NAME = "statusCode";
+  public static final String INT_PRIMITIVE_TYPE = "int";
 
-    @Test
-    @DisplayName("apiGatewayException has a constructor for message")
-    public void apiGatewayExceptionHasConstructorForMessage() {
-        ApiGatewayException exception = new TestException(MESSAGE);
-        assertThat(exception.getMessage(), is(equalTo(MESSAGE)));
+  @Test
+  @DisplayName("apiGatewayException has a constructor for message")
+  public void apiGatewayExceptionHasConstructorForMessage() {
+    ApiGatewayException exception = new TestException(MESSAGE);
+    assertThat(exception.getMessage(), is(equalTo(MESSAGE)));
+  }
+
+  @Test
+  @DisplayName("apiGatewayException has a constructor for exception")
+  public void apiGatewayExceptionHasConstructorForException() {
+    IOException inner = new IOException(MESSAGE);
+    ApiGatewayException exception = new TestException(inner);
+    assertThat(exception.getMessage(), containsString(MESSAGE));
+  }
+
+  @Test
+  @DisplayName(
+      "apiGatewayException contains innerClass name in the message when it is instantiated with an "
+          + "exception")
+  public void apiGatewayExceptionContainsInnerClassInMessage() {
+    IOException inner = new IOException(MESSAGE);
+    ApiGatewayException exception = new TestException(inner);
+    assertThat(exception.getMessage(), containsString(MESSAGE));
+    assertThat(exception.getMessage(), containsString(IOException.class.getName()));
+  }
+
+  @Test
+  @DisplayName("getStatusCode throws IllegalStateException when statusCode has not been set")
+  public void getStatusCodeThrowsIllegalStateExceptionWhenStatusCodeHasNotBeenSet() {
+    ApiGatewayException exception = new ExceptionWithoutStatusCode(MESSAGE);
+
+    IllegalStateException actual =
+        assertThrows(IllegalStateException.class, exception::getStatusCode);
+    assertThat(actual.getMessage(), containsString(exception.getClass().getCanonicalName()));
+  }
+
+  @Test
+  @DisplayName("statusCode returns Integer and not int")
+  public void statusCodeReturnsIntegerAndNotInt() throws NoSuchMethodException {
+    Method statusCodeMethod = ApiGatewayException.class.getDeclaredMethod(STATUS_CODE_METHOD_NAME);
+    String typeName = statusCodeMethod.getGenericReturnType().getTypeName();
+    assertThat(typeName, is(not(INT_PRIMITIVE_TYPE)));
+  }
+
+  @Test
+  @DisplayName(
+      "getStatusCode returns the status code provided in the constructor when such code is"
+          + " provided")
+  public void
+      getStatusCodeReturnsTheStatusCodeProvidedInTheConstructorWhenSuchStatusCodeisProvided() {
+    IOException ioException = new IOException();
+    Integer overideDefaultStatusCode = HttpURLConnection.HTTP_SEE_OTHER;
+    TestException exception = new TestException(ioException, overideDefaultStatusCode);
+    assertThat(exception.getStatusCode(), is(equalTo(overideDefaultStatusCode)));
+  }
+
+  private static class TestException extends ApiGatewayException {
+
+    public TestException(String message) {
+      super(message);
     }
 
-    @Test
-    @DisplayName("apiGatewayException has a constructor for exception")
-    public void apiGatewayExceptionHasConstructorForException() {
-        IOException inner = new IOException(MESSAGE);
-        ApiGatewayException exception = new TestException(inner);
-        assertThat(exception.getMessage(), containsString(MESSAGE));
+    public TestException(Exception e) {
+      super(e);
     }
 
-    @Test
-    @DisplayName("apiGatewayException contains innerClass name in the message when it is instantiated with an "
-        + "exception")
-    public void apiGatewayExceptionContainsInnerClassInMessage() {
-        IOException inner = new IOException(MESSAGE);
-        ApiGatewayException exception = new TestException(inner);
-        assertThat(exception.getMessage(), containsString(MESSAGE));
-        assertThat(exception.getMessage(), containsString(IOException.class.getName()));
+    public TestException(Exception e, Integer statusCode) {
+      super(e, statusCode);
     }
 
-    @Test
-    @DisplayName("getStatusCode throws IllegalStateException when statusCode has not been set")
-    public void getStatusCodeThrowsIllegalStateExceptionWhenStatusCodeHasNotBeenSet() {
-        ApiGatewayException exception = new ExceptionWithoutStatusCode(MESSAGE);
+    @Override
+    public Integer statusCode() {
+      return 0;
+    }
+  }
 
-        IllegalStateException actual = assertThrows(IllegalStateException.class, exception::getStatusCode);
-        assertThat(actual.getMessage(), containsString(exception.getClass().getCanonicalName()));
+  private static class ExceptionWithoutStatusCode extends ApiGatewayException {
+
+    public ExceptionWithoutStatusCode(String message) {
+      super(message);
     }
 
-    @Test
-    @DisplayName("statusCode returns Integer and not int")
-    public void statusCodeReturnsIntegerAndNotInt() throws NoSuchMethodException {
-        Method statusCodeMethod = ApiGatewayException.class.getDeclaredMethod(STATUS_CODE_METHOD_NAME);
-        String typeName = statusCodeMethod.getGenericReturnType().getTypeName();
-        assertThat(typeName, is(not(INT_PRIMITIVE_TYPE)));
+    @Override
+    protected Integer statusCode() {
+      return null;
     }
-
-    @Test
-    @DisplayName("getStatusCode returns the status code provided in the constructor when such code is provided")
-    public void getStatusCodeReturnsTheStatusCodeProvidedInTheConstructorWhenSuchStatusCodeisProvided() {
-        IOException ioException = new IOException();
-        Integer overideDefaultStatusCode = HttpURLConnection.HTTP_SEE_OTHER;
-        TestException exception = new TestException(ioException, overideDefaultStatusCode);
-        assertThat(exception.getStatusCode(), is(equalTo(overideDefaultStatusCode)));
-    }
-
-    private static class TestException extends ApiGatewayException {
-
-        public TestException(String message) {
-            super(message);
-        }
-
-        public TestException(Exception e) {
-            super(e);
-        }
-
-        public TestException(Exception e, Integer statusCode) {
-            super(e, statusCode);
-        }
-
-        @Override
-        public Integer statusCode() {
-            return 0;
-        }
-    }
-
-    private static class ExceptionWithoutStatusCode extends ApiGatewayException {
-
-        public ExceptionWithoutStatusCode(String message) {
-            super(message);
-        }
-
-        @Override
-        protected Integer statusCode() {
-            return null;
-        }
-    }
+  }
 }

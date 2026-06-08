@@ -10,6 +10,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.util.Map;
@@ -23,61 +24,61 @@ import org.junit.jupiter.api.Test;
 
 class FetchUserInfoTest {
 
-    private FakeAuthServer authServer;
-    private HttpClient httpClient;
+  private FakeAuthServer authServer;
+  private HttpClient httpClient;
 
-    @BeforeEach
-    public void init() {
-        this.authServer = new FakeAuthServer();
-        this.httpClient = WiremockHttpClient.create();
-    }
+  @BeforeEach
+  public void init() {
+    this.authServer = new FakeAuthServer();
+    this.httpClient = WiremockHttpClient.create();
+  }
 
-    @AfterEach
-    public void close() throws InterruptedException {
-        this.authServer.close();
-        Thread.sleep(100);
-    }
+  @AfterEach
+  public void close() throws InterruptedException {
+    this.authServer.close();
+    Thread.sleep(100);
+  }
 
-    @Test
-    void shouldReturnUserInfoWhenRequestWithAccessToken() {
-        var accessToken = randomString();
-        var expectedUserInfo = CognitoUserInfo.builder().withCurrentCustomer(randomUri()).build();
-        authServer.setUserBase(Map.of(accessToken, expectedUserInfo));
-        var fetchUserInfo =
-            new FetchUserInfo(httpClient, () -> createCognitoUri(), bearerToken(accessToken));
-        var actualUserInfo = fetchUserInfo.fetch();
-        assertThat(actualUserInfo, is(equalTo(expectedUserInfo)));
-    }
+  @Test
+  void shouldReturnUserInfoWhenRequestWithAccessToken() {
+    var accessToken = randomString();
+    var expectedUserInfo = CognitoUserInfo.builder().withCurrentCustomer(randomUri()).build();
+    authServer.setUserBase(Map.of(accessToken, expectedUserInfo));
+    var fetchUserInfo =
+        new FetchUserInfo(httpClient, () -> createCognitoUri(), bearerToken(accessToken));
+    var actualUserInfo = fetchUserInfo.fetch();
+    assertThat(actualUserInfo, is(equalTo(expectedUserInfo)));
+  }
 
-    @Test
-    void shouldLogResponseDetailsWhenHttpError() {
-        var fetchUserInfo =
-            new FetchUserInfo(httpClient, this::createCognitoUri, bearerToken(ACCESS_TOKEN_FORBIDDEN));
+  @Test
+  void shouldLogResponseDetailsWhenHttpError() {
+    var fetchUserInfo =
+        new FetchUserInfo(httpClient, this::createCognitoUri, bearerToken(ACCESS_TOKEN_FORBIDDEN));
 
-        var logRecorder = LogRecorder.forRoot(FetchUserInfoTest.class);
-        assertThrows(RuntimeException.class, fetchUserInfo::fetch);
+    var logRecorder = LogRecorder.forRoot(FetchUserInfoTest.class);
+    assertThrows(RuntimeException.class, fetchUserInfo::fetch);
 
-        assertThat(logRecorder.asString(), containsString("Got status code 403"));
-        assertThat(logRecorder.asString(), containsString(FORBIDDEN_BODY));
-    }
+    assertThat(logRecorder.asString(), containsString("Got status code 403"));
+    assertThat(logRecorder.asString(), containsString(FORBIDDEN_BODY));
+  }
 
-    @Test
-    void shouldThrowExceptionWhenFailingToFetchUserInfo() {
-        var accessToken = randomString();
-        var expectedUserInfo = CognitoUserInfo.builder().withCurrentCustomer(randomUri()).build();
-        authServer.setUserBase(Map.of(accessToken, expectedUserInfo));
-        String unexpectedToken = randomString();
-        var fetchUserInfo =
-            new FetchUserInfo(httpClient, () -> createCognitoUri(), bearerToken(unexpectedToken));
-        var exception = assertThrows(RuntimeException.class, fetchUserInfo::fetch);
-        assertThat(exception.getMessage(), containsString(FetchUserInfo.AUTHORIZATION_ERROR_MESSAGE));
-    }
+  @Test
+  void shouldThrowExceptionWhenFailingToFetchUserInfo() {
+    var accessToken = randomString();
+    var expectedUserInfo = CognitoUserInfo.builder().withCurrentCustomer(randomUri()).build();
+    authServer.setUserBase(Map.of(accessToken, expectedUserInfo));
+    String unexpectedToken = randomString();
+    var fetchUserInfo =
+        new FetchUserInfo(httpClient, () -> createCognitoUri(), bearerToken(unexpectedToken));
+    var exception = assertThrows(RuntimeException.class, fetchUserInfo::fetch);
+    assertThat(exception.getMessage(), containsString(FetchUserInfo.AUTHORIZATION_ERROR_MESSAGE));
+  }
 
-    private URI createCognitoUri() {
-        return UriWrapper.fromUri(authServer.getServerUri()).addChild(OAUTH_USER_INFO).getUri();
-    }
+  private URI createCognitoUri() {
+    return UriWrapper.fromUri(authServer.getServerUri()).addChild(OAUTH_USER_INFO).getUri();
+  }
 
-    private String bearerToken(String accessToken) {
-        return "Bearer " + accessToken;
-    }
+  private String bearerToken(String accessToken) {
+    return "Bearer " + accessToken;
+  }
 }

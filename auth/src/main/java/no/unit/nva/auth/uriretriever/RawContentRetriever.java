@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public interface RawContentRetriever {
 
-    Optional<String> getRawContent(URI uri, String mediaType);
+  Optional<String> getRawContent(URI uri, String mediaType);
 
-    Optional<HttpResponse<String>> fetchResponse(URI uri, String mediaType);
+  Optional<HttpResponse<String>> fetchResponse(URI uri, String mediaType);
 }

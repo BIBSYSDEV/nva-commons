@@ -10,35 +10,33 @@ import software.amazon.awssdk.services.firehose.model.Record;
 
 public class PushToFirehoseService implements FailedEventHandlingService {
 
-    private final FirehoseClient firehoseClient;
-    private final String deliveryStreamName;
+  private final FirehoseClient firehoseClient;
+  private final String deliveryStreamName;
 
-    public PushToFirehoseService(FirehoseClient firehoseClient, String deliveryStreamName) {
-        this.firehoseClient = firehoseClient;
-        this.deliveryStreamName = deliveryStreamName;
-    }
+  public PushToFirehoseService(FirehoseClient firehoseClient, String deliveryStreamName) {
+    this.firehoseClient = firehoseClient;
+    this.deliveryStreamName = deliveryStreamName;
+  }
 
-    @Override
-    public void handleFailedEvents(Collection<String> failedEvents) {
-        pushToFirehose(failedEvents);
-    }
+  @Override
+  public void handleFailedEvents(Collection<String> failedEvents) {
+    pushToFirehose(failedEvents);
+  }
 
-    private static Record createFirehoseRecord(String failedEvent) {
-        return Record.builder().data(SdkBytes.fromString(failedEvent, StandardCharsets.UTF_8)).build();
-    }
+  private static Record createFirehoseRecord(String failedEvent) {
+    return Record.builder().data(SdkBytes.fromString(failedEvent, StandardCharsets.UTF_8)).build();
+  }
 
-    private  PutRecordBatchRequest assemblePutBatchRequest(List<Record> records) {
-        return PutRecordBatchRequest.builder()
-                   .records(records)
-                   .deliveryStreamName(deliveryStreamName)
-                   .build();
-    }
+  private PutRecordBatchRequest assemblePutBatchRequest(List<Record> records) {
+    return PutRecordBatchRequest.builder()
+        .records(records)
+        .deliveryStreamName(deliveryStreamName)
+        .build();
+  }
 
-    private void pushToFirehose(Collection<String> group) {
-        var records = group.stream()
-                          .map(PushToFirehoseService::createFirehoseRecord)
-                          .toList();
-        var request = assemblePutBatchRequest(records);
-        firehoseClient.putRecordBatch(request);
-    }
+  private void pushToFirehose(Collection<String> group) {
+    var records = group.stream().map(PushToFirehoseService::createFirehoseRecord).toList();
+    var request = assemblePutBatchRequest(records);
+    firehoseClient.putRecordBatch(request);
+  }
 }

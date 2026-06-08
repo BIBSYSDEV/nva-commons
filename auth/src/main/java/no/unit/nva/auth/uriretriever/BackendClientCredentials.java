@@ -6,34 +6,37 @@ import nva.commons.core.JacocoGenerated;
 @JacocoGenerated
 public class BackendClientCredentials {
 
-    @JsonProperty("backendClientId")
-    public String id;
+  @JsonProperty("backendClientId")
+  public String id;
 
-    @JsonProperty("backendClientSecret")
-    public String secret;
+  @JsonProperty("backendClientSecret")
+  public String secret;
 
-    @JacocoGenerated
-    public BackendClientCredentials() {
-    }
+  @JacocoGenerated
+  public BackendClientCredentials() {}
 
-    public BackendClientCredentials(String id, String secret) {
-        this.id = id;
-        this.secret = secret;
-    }
+  public BackendClientCredentials(String id, String secret) {
+    this.id = id;
+    this.secret = secret;
+  }
 
-    public String getId() {
-        return id;
-    }
+  public String getId() {
+    return id;
+  }
 
-    public String getSecret() {
-        return secret;
-    }
+  public String getSecret() {
+    return secret;
+  }
 
-    @Override
-    public String toString() {
-        return "{" +
-               "\"backendClientId\": \"" + id + "\"" +
-               ", \"backendClientSecret\": \"" + secret + "\"" +
-               "}";
-    }
+  @Override
+  public String toString() {
+    return "{"
+        + "\"backendClientId\": \""
+        + id
+        + "\""
+        + ", \"backendClientSecret\": \""
+        + secret
+        + "\""
+        + "}";
+  }
 }

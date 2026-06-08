@@ -5,5 +5,5 @@ import java.util.Collection;
 @FunctionalInterface
 public interface FailedEventHandlingService {
 
-    void handleFailedEvents(Collection<String> failedEvents);
+  void handleFailedEvents(Collection<String> failedEvents);
 }

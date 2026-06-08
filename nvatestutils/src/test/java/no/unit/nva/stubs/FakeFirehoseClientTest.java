@@ -4,11 +4,11 @@ import static no.unit.nva.testutils.RandomDataGenerator.randomJson;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static nva.commons.core.attempt.Try.attempt;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
@@ -27,76 +27,72 @@ import software.amazon.awssdk.services.firehose.model.Record;
 
 public class FakeFirehoseClientTest {
 
-    private FakeFirehoseClient client;
-    private ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private FakeFirehoseClient client;
+  private ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    @BeforeEach
-    public void init() {
-        this.client = new FakeFirehoseClient();
-    }
+  @BeforeEach
+  public void init() {
+    this.client = new FakeFirehoseClient();
+  }
 
-    @Test
-    void shouldReturnTheRecordPushedToFirehoseAsIs() {
-        var expectedRecord = randomRecord();
-        var request = PutRecordRequest.builder().record(expectedRecord).build();
-        client.putRecord(request);
-        var actualRecord = client.getRecords().stream().collect(SingletonCollector.collect());
-        assertThat(actualRecord, is(equalTo(expectedRecord)));
-    }
+  @Test
+  void shouldReturnTheRecordPushedToFirehoseAsIs() {
+    var expectedRecord = randomRecord();
+    var request = PutRecordRequest.builder().record(expectedRecord).build();
+    client.putRecord(request);
+    var actualRecord = client.getRecords().stream().collect(SingletonCollector.collect());
+    assertThat(actualRecord, is(equalTo(expectedRecord)));
+  }
 
-    @Test
-    void shouldReturnAllRecordsWhenPushingABatchOfRecords() {
-        var expectedRecords = List.of(randomRecord(), randomRecord());
+  @Test
+  void shouldReturnAllRecordsWhenPushingABatchOfRecords() {
+    var expectedRecords = List.of(randomRecord(), randomRecord());
 
-        var request = PutRecordBatchRequest.builder()
-                          .records(expectedRecords)
-                          .build();
-        client.putRecordBatch(request);
-        var actualRecords = client.getRecords();
-        assertThat(actualRecords, contains(expectedRecords.toArray(Record[]::new)));
-    }
+    var request = PutRecordBatchRequest.builder().records(expectedRecords).build();
+    client.putRecordBatch(request);
+    var actualRecords = client.getRecords();
+    assertThat(actualRecords, contains(expectedRecords.toArray(Record[]::new)));
+  }
 
-    @Test
-    void shouldProvideParsedEmittedContent() {
-        var expectedContent = randomJsons();
-        var records = createRecords(expectedContent);
+  @Test
+  void shouldProvideParsedEmittedContent() {
+    var expectedContent = randomJsons();
+    var records = createRecords(expectedContent);
 
-        var request = PutRecordBatchRequest.builder().records(records).build();
-        client.putRecordBatch(request);
-        var actualContent = client.extractPushedContent(this::parseString).toList();
+    var request = PutRecordBatchRequest.builder().records(records).build();
+    client.putRecordBatch(request);
+    var actualContent = client.extractPushedContent(this::parseString).toList();
 
-        assertThat(actualContent, contains(expectedContent.toArray(JsonNode[]::new)));
-    }
+    assertThat(actualContent, contains(expectedContent.toArray(JsonNode[]::new)));
+  }
 
-    @Test
-    void shouldNotAcceptEmptyBatch() {
-        var request = PutRecordBatchRequest.builder().records(Collections.emptyList()).build();
-        assertThrows(FirehoseException.class, () -> client.putRecordBatch(request));
-    }
+  @Test
+  void shouldNotAcceptEmptyBatch() {
+    var request = PutRecordBatchRequest.builder().records(Collections.emptyList()).build();
+    assertThrows(FirehoseException.class, () -> client.putRecordBatch(request));
+  }
 
-    private static Record toRecord(String content) {
-        return Record.builder().data(SdkBytes.fromString(content, StandardCharsets.UTF_8)).build();
-    }
+  private static Record toRecord(String content) {
+    return Record.builder().data(SdkBytes.fromString(content, StandardCharsets.UTF_8)).build();
+  }
 
-    private static Record randomRecord() {
-        return toRecord(randomString());
-    }
+  private static Record randomRecord() {
+    return toRecord(randomString());
+  }
 
-    private List<Record> createRecords(List<JsonNode> expectedContent) {
-        return expectedContent.stream()
-                   .map(attempt(OBJECT_MAPPER::writeValueAsString))
-                   .flatMap(Try::stream)
-                   .map(FakeFirehoseClientTest::toRecord)
-                   .toList();
-    }
+  private List<Record> createRecords(List<JsonNode> expectedContent) {
+    return expectedContent.stream()
+        .map(attempt(OBJECT_MAPPER::writeValueAsString))
+        .flatMap(Try::stream)
+        .map(FakeFirehoseClientTest::toRecord)
+        .toList();
+  }
 
-    private List<JsonNode> randomJsons() {
-        return Stream.of(randomJson(), randomJson())
-                   .map(this::parseString)
-                   .toList();
-    }
+  private List<JsonNode> randomJsons() {
+    return Stream.of(randomJson(), randomJson()).map(this::parseString).toList();
+  }
 
-    private JsonNode parseString(String jsonString) {
-        return attempt(() -> OBJECT_MAPPER.readTree(jsonString)).orElseThrow();
-    }
+  private JsonNode parseString(String jsonString) {
+    return attempt(() -> OBJECT_MAPPER.readTree(jsonString)).orElseThrow();
+  }
 }

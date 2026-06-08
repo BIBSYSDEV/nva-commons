@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,71 +34,70 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 
 class ApiS3GatewayHandlerTest {
 
-    public static final String BUCKET_NAME = "large-bucket";
-    private S3Client s3Client;
-    private S3Presigner s3Presigner;
-    private ByteArrayOutputStream output;
-    private Environment environment;
+  public static final String BUCKET_NAME = "large-bucket";
+  private S3Client s3Client;
+  private S3Presigner s3Presigner;
+  private ByteArrayOutputStream output;
+  private Environment environment;
 
-    @BeforeEach
-    void init() {
-        s3Client = new FakeS3Client();
-        s3Presigner = mock(S3Presigner.class);
-        this.output = new ByteArrayOutputStream();
-        environment = mock(Environment.class);
-        when(environment.readEnv("ALLOWED_ORIGIN")).thenReturn("*");
-        when(environment.readEnv("COGNITO_AUTHORIZER_URLS")).thenReturn("http://localhost:3000");
-    }
+  @BeforeEach
+  void init() {
+    s3Client = new FakeS3Client();
+    s3Presigner = mock(S3Presigner.class);
+    this.output = new ByteArrayOutputStream();
+    environment = mock(Environment.class);
+    when(environment.readEnv("ALLOWED_ORIGIN")).thenReturn("*");
+    when(environment.readEnv("COGNITO_AUTHORIZER_URLS")).thenReturn("http://localhost:3000");
+  }
 
-    @Test
-    void shouldCallS3PutObjectWithCorrectData() throws IOException {
-        var expectedData = randomString();
-        var handler = createHandler(expectedData);
-        var context = new FakeContext();
-        var expectedFilename = context.getAwsRequestId();
+  @Test
+  void shouldCallS3PutObjectWithCorrectData() throws IOException {
+    var expectedData = randomString();
+    var handler = createHandler(expectedData);
+    var context = new FakeContext();
+    var expectedFilename = context.getAwsRequestId();
 
-        PresignedGetObjectRequest t = mockPresignResponse(expectedFilename);
-        when(s3Presigner.presignGetObject(any(GetObjectPresignRequest.class))).thenReturn(t);
+    PresignedGetObjectRequest t = mockPresignResponse(expectedFilename);
+    when(s3Presigner.presignGetObject(any(GetObjectPresignRequest.class))).thenReturn(t);
 
-        handler.handleRequest(IoUtils.stringToStream("{}"), this.output, context);
-        var response = GatewayResponse.fromOutputStream(output, Void.class);
+    handler.handleRequest(IoUtils.stringToStream("{}"), this.output, context);
+    var response = GatewayResponse.fromOutputStream(output, Void.class);
 
-        var getRequest = GetObjectRequest.builder()
-                             .bucket(BUCKET_NAME)
-                             .key(expectedFilename)
-                             .build();
+    var getRequest = GetObjectRequest.builder().bucket(BUCKET_NAME).key(expectedFilename).build();
 
-        var s3object = s3Client.getObject(getRequest, ResponseTransformer.toBytes());
-        assertThat(s3object.asUtf8String(), is(equalTo(expectedData)));
-        assertThat(response.getHeaders().get("Location"), containsString(expectedFilename));
-        assertThat(response.getStatusCode(), is(equalTo(HttpStatusCode.MOVED_TEMPORARILY)));
-    }
+    var s3object = s3Client.getObject(getRequest, ResponseTransformer.toBytes());
+    assertThat(s3object.asUtf8String(), is(equalTo(expectedData)));
+    assertThat(response.getHeaders().get("Location"), containsString(expectedFilename));
+    assertThat(response.getStatusCode(), is(equalTo(HttpStatusCode.MOVED_TEMPORARILY)));
+  }
 
-    private static PresignedGetObjectRequest mockPresignResponse(String filename) throws MalformedURLException {
-        var presignRequest = mock(PresignedGetObjectRequest.class);
-        var presignedUrl = "https://example.com/" + filename;
-        when(presignRequest.url()).thenReturn(new URL(presignedUrl));
-        return presignRequest;
-    }
+  private static PresignedGetObjectRequest mockPresignResponse(String filename)
+      throws MalformedURLException {
+    var presignRequest = mock(PresignedGetObjectRequest.class);
+    var presignedUrl = "https://example.com/" + filename;
+    when(presignRequest.url()).thenReturn(new URL(presignedUrl));
+    return presignRequest;
+  }
 
-    private ApiS3GatewayHandler<Void> createHandler(String data) {
-        return new ApiS3GatewayHandler<>(Void.class, s3Client, s3Presigner, environment) {
+  private ApiS3GatewayHandler<Void> createHandler(String data) {
+    return new ApiS3GatewayHandler<>(Void.class, s3Client, s3Presigner, environment) {
 
-            @Override
-            protected void validateRequest(Void input, RequestInfo requestInfo, Context context)
-                throws ApiGatewayException {
-                //no-op
-            }
+      @Override
+      protected void validateRequest(Void input, RequestInfo requestInfo, Context context)
+          throws ApiGatewayException {
+        // no-op
+      }
 
-            @Override
-            public String processS3Input(Void input, RequestInfo requestInfo, Context context) throws BadRequestException {
-                return data;
-            }
+      @Override
+      public String processS3Input(Void input, RequestInfo requestInfo, Context context)
+          throws BadRequestException {
+        return data;
+      }
 
-            @Override
-            public String getContentType() {
-                return randomString();
-            }
-        };
-    }
+      @Override
+      public String getContentType() {
+        return randomString();
+      }
+    };
+  }
 }

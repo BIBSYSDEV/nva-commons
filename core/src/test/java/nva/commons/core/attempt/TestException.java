@@ -2,16 +2,15 @@ package nva.commons.core.attempt;
 
 public class TestException extends Exception {
 
+  public TestException() {
+    super();
+  }
 
-    public TestException() {
-        super();
-    }
+  public TestException(String message) {
+    super(message);
+  }
 
-    public TestException(String message) {
-        super(message);
-    }
-
-    public TestException(Exception cause,String message) {
-        super(message,cause);
-    }
+  public TestException(Exception cause, String message) {
+    super(message, cause);
+  }
 }

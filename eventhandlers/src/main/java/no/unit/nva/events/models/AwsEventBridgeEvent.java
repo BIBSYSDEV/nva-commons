@@ -1,6 +1,7 @@
 package no.unit.nva.events.models;
 
 import static nva.commons.core.StringUtils.isNotBlank;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.Collection;
@@ -11,159 +12,173 @@ import software.amazon.awssdk.regions.Region;
 
 public class AwsEventBridgeEvent<I> implements JsonSerializable {
 
-    @JsonProperty("version")
-    private String version;
-    @JsonProperty("id")
-    private String id;
+  @JsonProperty("version")
+  private String version;
 
-    @JsonProperty("detail-type")
-    private String detailType;
-    @JsonProperty("source")
-    private String source;
-    @JsonProperty("account")
-    private String account;
-    @JsonProperty("time")
-    private Instant time;
-    // look at getter.
-    private Region region;
-    @JsonProperty("resources")
-    private Collection<String> resources;
+  @JsonProperty("id")
+  private String id;
 
-    @JsonProperty("detail")
-    private I detail;
+  @JsonProperty("detail-type")
+  private String detailType;
 
-    @JacocoGenerated
-    public AwsEventBridgeEvent() {
-        super();
+  @JsonProperty("source")
+  private String source;
+
+  @JsonProperty("account")
+  private String account;
+
+  @JsonProperty("time")
+  private Instant time;
+
+  // look at getter.
+  private Region region;
+
+  @JsonProperty("resources")
+  private Collection<String> resources;
+
+  @JsonProperty("detail")
+  private I detail;
+
+  @JacocoGenerated
+  public AwsEventBridgeEvent() {
+    super();
+  }
+
+  @JacocoGenerated
+  @JsonProperty("region")
+  public String getRegion() {
+    return region == null ? null : region.toString();
+  }
+
+  @JacocoGenerated
+  public void setRegion(String region) {
+    if (isNotBlank(region)) {
+      this.region = Region.of(region);
     }
+  }
 
-    @JacocoGenerated
-    @JsonProperty("region")
-    public String getRegion() {
-        return region == null ? null : region.toString();
-    }
+  @JacocoGenerated
+  public void setRegion(Region region) {
+    this.region = region;
+  }
 
-    @JacocoGenerated
-    public void setRegion(String region) {
-        if (isNotBlank(region)) {
-            this.region = Region.of(region);
-        }
-    }
+  @JacocoGenerated
+  public String getVersion() {
+    return version;
+  }
 
-    @JacocoGenerated
-    public void setRegion(Region region) {
-        this.region = region;
-    }
+  @JacocoGenerated
+  public void setVersion(String version) {
+    this.version = version;
+  }
 
-    @JacocoGenerated
-    public String getVersion() {
-        return version;
-    }
+  @JacocoGenerated
+  public String getId() {
+    return id;
+  }
 
-    @JacocoGenerated
-    public void setVersion(String version) {
-        this.version = version;
-    }
+  @JacocoGenerated
+  public void setId(String id) {
+    this.id = id;
+  }
 
-    @JacocoGenerated
-    public String getId() {
-        return id;
-    }
+  @JacocoGenerated
+  public String getDetailType() {
+    return detailType;
+  }
 
-    @JacocoGenerated
-    public void setId(String id) {
-        this.id = id;
-    }
+  @JacocoGenerated
+  public void setDetailType(String detailType) {
+    this.detailType = detailType;
+  }
 
-    @JacocoGenerated
-    public String getDetailType() {
-        return detailType;
-    }
+  @JacocoGenerated
+  public String getSource() {
+    return source;
+  }
 
-    @JacocoGenerated
-    public void setDetailType(String detailType) {
-        this.detailType = detailType;
-    }
+  @JacocoGenerated
+  public void setSource(String source) {
+    this.source = source;
+  }
 
-    @JacocoGenerated
-    public String getSource() {
-        return source;
-    }
+  @JacocoGenerated
+  public String getAccount() {
+    return account;
+  }
 
-    @JacocoGenerated
-    public void setSource(String source) {
-        this.source = source;
-    }
+  @JacocoGenerated
+  public void setAccount(String account) {
+    this.account = account;
+  }
 
-    @JacocoGenerated
-    public String getAccount() {
-        return account;
-    }
+  @JacocoGenerated
+  public Instant getTime() {
+    return time;
+  }
 
-    @JacocoGenerated
-    public void setAccount(String account) {
-        this.account = account;
-    }
+  @JacocoGenerated
+  public void setTime(Instant time) {
+    this.time = time;
+  }
 
-    @JacocoGenerated
-    public Instant getTime() {
-        return time;
-    }
+  @JacocoGenerated
+  public Collection<String> getResources() {
+    return resources;
+  }
 
-    @JacocoGenerated
-    public void setTime(Instant time) {
-        this.time = time;
-    }
+  @JacocoGenerated
+  public void setResources(Collection<String> resources) {
+    this.resources = resources;
+  }
 
-    @JacocoGenerated
-    public Collection<String> getResources() {
-        return resources;
-    }
+  @JacocoGenerated
+  public I getDetail() {
+    return detail;
+  }
 
-    @JacocoGenerated
-    public void setResources(Collection<String> resources) {
-        this.resources = resources;
-    }
+  @JacocoGenerated
+  public void setDetail(I detail) {
+    this.detail = detail;
+  }
 
-    @JacocoGenerated
-    public I getDetail() {
-        return detail;
-    }
+  @JacocoGenerated
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        getVersion(),
+        getId(),
+        getDetailType(),
+        getSource(),
+        getAccount(),
+        getTime(),
+        getRegion(),
+        getResources(),
+        getDetail());
+  }
 
-    @JacocoGenerated
-    public void setDetail(I detail) {
-        this.detail = detail;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
     }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    AwsEventBridgeEvent<?> that = (AwsEventBridgeEvent<?>) o;
+    return Objects.equals(getVersion(), that.getVersion())
+        && Objects.equals(getId(), that.getId())
+        && Objects.equals(getDetailType(), that.getDetailType())
+        && Objects.equals(getSource(), that.getSource())
+        && Objects.equals(getAccount(), that.getAccount())
+        && Objects.equals(getTime(), that.getTime())
+        && getRegion().equals(that.getRegion())
+        && Objects.equals(getResources(), that.getResources())
+        && Objects.equals(getDetail(), that.getDetail());
+  }
 
-    @JacocoGenerated
-    @Override
-    public int hashCode() {
-        return Objects.hash(getVersion(), getId(), getDetailType(), getSource(), getAccount(), getTime(), getRegion(),
-                            getResources(), getDetail());
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        AwsEventBridgeEvent<?> that = (AwsEventBridgeEvent<?>) o;
-        return Objects.equals(getVersion(), that.getVersion())
-               && Objects.equals(getId(), that.getId())
-               && Objects.equals(getDetailType(), that.getDetailType())
-               && Objects.equals(getSource(), that.getSource())
-               && Objects.equals(getAccount(), that.getAccount())
-               && Objects.equals(getTime(), that.getTime())
-               && getRegion().equals(that.getRegion())
-               && Objects.equals(getResources(), that.getResources())
-               && Objects.equals(getDetail(), that.getDetail());
-    }
-
-    @Override
-    public String toString() {
-        return toJsonString();
-    }
+  @Override
+  public String toString() {
+    return toJsonString();
+  }
 }

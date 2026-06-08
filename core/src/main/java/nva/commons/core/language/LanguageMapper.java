@@ -15,25 +15,23 @@ import org.slf4j.LoggerFactory;
 
 public final class LanguageMapper {
 
-    public static final Map<String, String> IS02_TO_ISO3_CODES = hardCodedMappings();
-    public static final String LEXVO_URI_PREFIX = "http://lexvo.org/id/iso639-3/";
-    public static final URI LEXVO_URI_UNDEFINED = URI.create(LEXVO_URI_PREFIX + "und");
-    public static final String ERROR_MESSAGE_MISSING_RESOURCE_EXCEPTION = "Failing to retrieve URI for the "
-                                                                          + "language code ";
-    private static final Logger logger = LoggerFactory.getLogger(LanguageMapper.class);
+  public static final Map<String, String> IS02_TO_ISO3_CODES = hardCodedMappings();
+  public static final String LEXVO_URI_PREFIX = "http://lexvo.org/id/iso639-3/";
+  public static final URI LEXVO_URI_UNDEFINED = URI.create(LEXVO_URI_PREFIX + "und");
+  public static final String ERROR_MESSAGE_MISSING_RESOURCE_EXCEPTION =
+      "Failing to retrieve URI for the " + "language code ";
+  private static final Logger logger = LoggerFactory.getLogger(LanguageMapper.class);
 
-    private LanguageMapper() {
+  private LanguageMapper() {}
 
-    }
+  public static URI toUri(String languageCode) {
+    return toIso3Code(languageCode)
+        .map(iso3 -> URI.create(LEXVO_URI_PREFIX + iso3))
+        .orElse(LEXVO_URI_UNDEFINED);
+  }
 
-    public static URI toUri(String languageCode) {
-        return toIso3Code(languageCode)
-                   .map(iso3 -> URI.create(LEXVO_URI_PREFIX + iso3))
-                   .orElse(LEXVO_URI_UNDEFINED);
-    }
-
-    private static Map<String, String> hardCodedMappings() {
-        return Stream.of(
+  private static Map<String, String> hardCodedMappings() {
+    return Stream.of(
             new AbstractMap.SimpleEntry<>("alb", "sqi"),
             new AbstractMap.SimpleEntry<>("arm", "hye"),
             new AbstractMap.SimpleEntry<>("baq", "eus"),
@@ -54,23 +52,23 @@ public final class LanguageMapper {
             new AbstractMap.SimpleEntry<>("slo", "slk"),
             new AbstractMap.SimpleEntry<>("tib", "bod"),
             new AbstractMap.SimpleEntry<>("wel", "cym"))
-                   .collect(Collectors.toUnmodifiableMap(SimpleEntry::getKey, SimpleEntry::getValue));
-    }
+        .collect(Collectors.toUnmodifiableMap(SimpleEntry::getKey, SimpleEntry::getValue));
+  }
 
-    private static Optional<String> toIso3Code(String languageCode) {
-        try {
-            return Optional.ofNullable(languageCode)
-                       .filter(StringUtils::isNotBlank)
-                       .map(LanguageMapper::returnHardCodedMappingIfExistsOrSameValue)
-                       .map(Locale::new)
-                       .map(Locale::getISO3Language);
-        } catch (MissingResourceException e) {
-            logger.warn(ERROR_MESSAGE_MISSING_RESOURCE_EXCEPTION + languageCode, e);
-            return Optional.empty();
-        }
+  private static Optional<String> toIso3Code(String languageCode) {
+    try {
+      return Optional.ofNullable(languageCode)
+          .filter(StringUtils::isNotBlank)
+          .map(LanguageMapper::returnHardCodedMappingIfExistsOrSameValue)
+          .map(Locale::new)
+          .map(Locale::getISO3Language);
+    } catch (MissingResourceException e) {
+      logger.warn(ERROR_MESSAGE_MISSING_RESOURCE_EXCEPTION + languageCode, e);
+      return Optional.empty();
     }
+  }
 
-    private static String returnHardCodedMappingIfExistsOrSameValue(String code) {
-        return IS02_TO_ISO3_CODES.getOrDefault(code, code);
-    }
+  private static String returnHardCodedMappingIfExistsOrSameValue(String code) {
+    return IS02_TO_ISO3_CODES.getOrDefault(code, code);
+  }
 }

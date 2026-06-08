@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -30,68 +31,70 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 
 class ApiS3PresignerGatewayHandlerTest {
 
-    private S3Presigner s3Presigner;
-    private ByteArrayOutputStream output;
-    private InputStream input;
-    private ApiS3PresignerGatewayHandler<Void> handler;
-    private Environment environment;
+  private S3Presigner s3Presigner;
+  private ByteArrayOutputStream output;
+  private InputStream input;
+  private ApiS3PresignerGatewayHandler<Void> handler;
+  private Environment environment;
 
-    @BeforeEach
-    void init() {
-        s3Presigner = mock(S3Presigner.class);
-        input = IoUtils.stringToStream("{}");
-        output = new ByteArrayOutputStream();
-        environment = mock(Environment.class);
-        when(environment.readEnv("ALLOWED_ORIGIN")).thenReturn("*");
-        when(environment.readEnv("COGNITO_AUTHORIZER_URLS")).thenReturn("http://localhost:3000");
-        when(environment.readEnv("AWS_REGION")).thenReturn("eu-west-1");
-        handler = createHandler();
-    }
+  @BeforeEach
+  void init() {
+    s3Presigner = mock(S3Presigner.class);
+    input = IoUtils.stringToStream("{}");
+    output = new ByteArrayOutputStream();
+    environment = mock(Environment.class);
+    when(environment.readEnv("ALLOWED_ORIGIN")).thenReturn("*");
+    when(environment.readEnv("COGNITO_AUTHORIZER_URLS")).thenReturn("http://localhost:3000");
+    when(environment.readEnv("AWS_REGION")).thenReturn("eu-west-1");
+    handler = createHandler();
+  }
 
-    @Test
-    void shouldSetLocationHeader() throws IOException {
-        var context = new FakeContext();
-        var expectedFilename = context.getAwsRequestId();
+  @Test
+  void shouldSetLocationHeader() throws IOException {
+    var context = new FakeContext();
+    var expectedFilename = context.getAwsRequestId();
 
-        var presignedGetObjectRequest = mockPresignResponse(expectedFilename);
-        when(s3Presigner.presignGetObject(any(GetObjectPresignRequest.class))).thenReturn(presignedGetObjectRequest);
+    var presignedGetObjectRequest = mockPresignResponse(expectedFilename);
+    when(s3Presigner.presignGetObject(any(GetObjectPresignRequest.class)))
+        .thenReturn(presignedGetObjectRequest);
 
-        handler.handleRequest(input, output, context);
-        var response = GatewayResponse.fromOutputStream(output, Void.class);
-        assertThat(response.getHeaders().get("Location"), containsString(expectedFilename));
-        assertThat(response.getStatusCode(), is(equalTo(HttpStatusCode.MOVED_TEMPORARILY)));
-    }
+    handler.handleRequest(input, output, context);
+    var response = GatewayResponse.fromOutputStream(output, Void.class);
+    assertThat(response.getHeaders().get("Location"), containsString(expectedFilename));
+    assertThat(response.getStatusCode(), is(equalTo(HttpStatusCode.MOVED_TEMPORARILY)));
+  }
 
-    private static PresignedGetObjectRequest mockPresignResponse(String filename) throws MalformedURLException {
-        var presignRequest = mock(PresignedGetObjectRequest.class);
-        var presignedUrl = "https://example.com/" + filename;
-        when(presignRequest.url()).thenReturn(new URL(presignedUrl));
-        return presignRequest;
-    }
+  private static PresignedGetObjectRequest mockPresignResponse(String filename)
+      throws MalformedURLException {
+    var presignRequest = mock(PresignedGetObjectRequest.class);
+    var presignedUrl = "https://example.com/" + filename;
+    when(presignRequest.url()).thenReturn(new URL(presignedUrl));
+    return presignRequest;
+  }
 
-    private ApiS3PresignerGatewayHandler<Void> createHandler() {
-        return new ApiS3PresignerGatewayHandler<>(Void.class, s3Presigner, environment) {
+  private ApiS3PresignerGatewayHandler<Void> createHandler() {
+    return new ApiS3PresignerGatewayHandler<>(Void.class, s3Presigner, environment) {
 
-            @Override
-            protected void validateRequest(Void input, RequestInfo requestInfo, Context context)
-                throws ApiGatewayException {
-                //no-op
-            }
+      @Override
+      protected void validateRequest(Void input, RequestInfo requestInfo, Context context)
+          throws ApiGatewayException {
+        // no-op
+      }
 
-            @Override
-            protected void generateAndWriteDataToS3(String filename, Void input, RequestInfo requestInfo,
-                                                    Context context) throws BadRequestException {
-            }
+      @Override
+      protected void generateAndWriteDataToS3(
+          String filename, Void input, RequestInfo requestInfo, Context context)
+          throws BadRequestException {}
 
-            @Override
-            protected String getBucketName() {
-                return "someTestBucket";
-            }
+      @Override
+      protected String getBucketName() {
+        return "someTestBucket";
+      }
 
-            @Override
-            protected Duration getSignDuration() {
-                return Duration.ofMinutes(60);
-            }
-        };
-    }
+      @Override
+      protected Duration getSignDuration() {
+        return Duration.ofMinutes(60);
+      }
+    };
+  }
 }

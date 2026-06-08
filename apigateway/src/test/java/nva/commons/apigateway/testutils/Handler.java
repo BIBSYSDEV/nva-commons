@@ -1,8 +1,8 @@
 package nva.commons.apigateway.testutils;
 
 import static nva.commons.apigateway.RequestInfoConstants.PROXY_TAG;
+
 import com.amazonaws.services.lambda.runtime.Context;
-import org.apache.hc.core5.http.HttpHeaders;
 import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.Map;
@@ -10,64 +10,63 @@ import nva.commons.apigateway.ApiGatewayHandler;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.core.Environment;
+import org.apache.hc.core5.http.HttpHeaders;
 
 public class Handler extends ApiGatewayHandler<RequestBody, RequestBody> {
 
-    private Map<String, String> headers;
-    private String proxy;
-    private String path;
-    private RequestBody body;
+  private Map<String, String> headers;
+  private String proxy;
+  private String path;
+  private RequestBody body;
 
-    public Handler() {
-        super(RequestBody.class, new Environment());
-    }
+  public Handler() {
+    super(RequestBody.class, new Environment());
+  }
 
-    /**
-     * Constructor that overrides default serialization.
-     */
-    public Handler(Environment environment) {
-        super(RequestBody.class, environment);
-    }
+  /** Constructor that overrides default serialization. */
+  public Handler(Environment environment) {
+    super(RequestBody.class, environment);
+  }
 
-    @Override
-    protected void validateRequest(RequestBody input, RequestInfo requestInfo, Context context)
-        throws ApiGatewayException {
-        //no-op
-    }
+  @Override
+  protected void validateRequest(RequestBody input, RequestInfo requestInfo, Context context)
+      throws ApiGatewayException {
+    // no-op
+  }
 
-    @Override
-    protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
-        throws ApiGatewayException {
-        this.headers = requestInfo.getHeaders();
-        this.proxy = requestInfo.getPathParameters().get(PROXY_TAG);
-        this.path = requestInfo.getPath();
-        this.body = input;
-        this.addAdditionalHeaders(() -> additionalHeaders(body));
-        return this.body;
-    }
+  @Override
+  protected RequestBody processInput(RequestBody input, RequestInfo requestInfo, Context context)
+      throws ApiGatewayException {
+    this.headers = requestInfo.getHeaders();
+    this.proxy = requestInfo.getPathParameters().get(PROXY_TAG);
+    this.path = requestInfo.getPath();
+    this.body = input;
+    this.addAdditionalHeaders(() -> additionalHeaders(body));
+    return this.body;
+  }
 
-    private Map<String, String> additionalHeaders(RequestBody input) {
-        return Collections.singletonMap(HttpHeaders.WARNING, body.getField1());
-    }
+  private Map<String, String> additionalHeaders(RequestBody input) {
+    return Collections.singletonMap(HttpHeaders.WARNING, body.getField1());
+  }
 
-    @Override
-    protected Integer getSuccessStatusCode(RequestBody input, RequestBody output) {
-        return HttpURLConnection.HTTP_OK;
-    }
+  @Override
+  protected Integer getSuccessStatusCode(RequestBody input, RequestBody output) {
+    return HttpURLConnection.HTTP_OK;
+  }
 
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
+  public Map<String, String> getHeaders() {
+    return headers;
+  }
 
-    public String getProxy() {
-        return proxy;
-    }
+  public String getProxy() {
+    return proxy;
+  }
 
-    public String getPath() {
-        return path;
-    }
+  public String getPath() {
+    return path;
+  }
 
-    public RequestBody getBody() {
-        return body;
-    }
+  public RequestBody getBody() {
+    return body;
+  }
 }

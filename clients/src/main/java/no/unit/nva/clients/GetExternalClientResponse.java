@@ -1,53 +1,54 @@
 package no.unit.nva.clients;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import nva.commons.core.JacocoGenerated;
-import java.net.URI;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static nva.commons.core.attempt.Try.attempt;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.net.URI;
+import nva.commons.core.JacocoGenerated;
+
 public class GetExternalClientResponse {
-    @JsonProperty("clientId")
-    public String clientId;
+  @JsonProperty("clientId")
+  public String clientId;
 
-    @JsonProperty("actingUser")
-    public String actingUser;
+  @JsonProperty("actingUser")
+  public String actingUser;
 
-    @JsonProperty("customerUri")
-    public URI customerUri;
+  @JsonProperty("customerUri")
+  public URI customerUri;
 
-    @JsonProperty("cristinOrgUri")
-    public URI cristinUrgUri;
+  @JsonProperty("cristinOrgUri")
+  public URI cristinUrgUri;
 
-    @JacocoGenerated
-    public GetExternalClientResponse() {
-    }
+  @JacocoGenerated
+  public GetExternalClientResponse() {}
 
-    public GetExternalClientResponse(String clientId, String actingUser, URI customerUri, URI cristinUrgUri) {
-        this.clientId = clientId;
-        this.actingUser = actingUser;
-        this.customerUri = customerUri;
-        this.cristinUrgUri = cristinUrgUri;
-    }
+  public GetExternalClientResponse(
+      String clientId, String actingUser, URI customerUri, URI cristinUrgUri) {
+    this.clientId = clientId;
+    this.actingUser = actingUser;
+    this.customerUri = customerUri;
+    this.cristinUrgUri = cristinUrgUri;
+  }
 
-    public String getClientId() {
-        return clientId;
-    }
+  public String getClientId() {
+    return clientId;
+  }
 
-    public String getActingUser() {
-        return actingUser;
-    }
+  public String getActingUser() {
+    return actingUser;
+  }
 
-    public URI getCustomerUri() {
-        return customerUri;
-    }
+  public URI getCustomerUri() {
+    return customerUri;
+  }
 
-    public URI getCristinUrgUri() {
-        return cristinUrgUri;
-    }
+  public URI getCristinUrgUri() {
+    return cristinUrgUri;
+  }
 
-    @Override
-    public String toString() {
-        return attempt(() -> dtoObjectMapper.writeValueAsString(this)).orElseThrow();
-    }
+  @Override
+  public String toString() {
+    return attempt(() -> dtoObjectMapper.writeValueAsString(this)).orElseThrow();
+  }
 }
