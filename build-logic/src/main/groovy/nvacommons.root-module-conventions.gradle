@@ -7,6 +7,6 @@ nva {
         enforced = true
     }
     spotless {
-        enabled = false
+        enabled = true
     }
 }
