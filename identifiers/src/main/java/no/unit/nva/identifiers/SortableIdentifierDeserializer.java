@@ -8,16 +8,16 @@ import nva.commons.core.JacocoGenerated;
 
 public class SortableIdentifierDeserializer extends JsonDeserializer<SortableIdentifier> {
 
-    @JacocoGenerated
-    public SortableIdentifierDeserializer() {
-        super();
-    }
+  @JacocoGenerated
+  public SortableIdentifierDeserializer() {
+    super();
+  }
 
-    @JacocoGenerated
-    @Override
-    public SortableIdentifier deserialize(JsonParser p, DeserializationContext ctxt)
-        throws IOException {
-        String value = p.getValueAsString();
-        return new SortableIdentifier(value);
-    }
+  @JacocoGenerated
+  @Override
+  public SortableIdentifier deserialize(JsonParser p, DeserializationContext ctxt)
+      throws IOException {
+    String value = p.getValueAsString();
+    return new SortableIdentifier(value);
+  }
 }

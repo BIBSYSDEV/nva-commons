@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -29,83 +30,89 @@ import org.junit.jupiter.api.Test;
 
 class CognitoAuthenticatorTest {
 
-    public static String TEST_TOKEN =
-        "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE2Njg1MTE4NTcsImV4cCI6MTcw"
-        + "MDA0Nzg1NywiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsIkdpdmVuTmFtZSI6IkpvaG5ueSI"
-        + "sIlN1cm5hbWUiOiJSb2NrZXQiLCJFbWFpbCI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJSb2xlIjoiTWFuYWdlciIsInNjb3BlIjoiZXhhbX"
-        + "BsZS1zY29wZSJ9.ne8Jb4f2xao1zSJFZxIBRrh4WFNjkaBRV3-Ybp6fHZU";
-    public static String TEST_SCOPE = "example-scope";
-    final HttpClient httpClient = mock(HttpClient.class);
-    HttpResponse<String> okResponse = mock(HttpResponse.class);
-    HttpResponse<String> invalidResponse = mock(HttpResponse.class);
-    HttpResponse<String> errorResponse = mock(HttpResponse.class);
-    private CognitoCredentials credentials;
-    private CognitoAuthenticator cognitoAuthenticator;
+  public static String TEST_TOKEN =
+      "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE2Njg1MTE4NTcsImV4cCI6MTcw"
+          + "MDA0Nzg1NywiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsIkdpdmVuTmFtZSI6IkpvaG5ueSI"
+          + "sIlN1cm5hbWUiOiJSb2NrZXQiLCJFbWFpbCI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJSb2xlIjoiTWFuYWdlciIsInNjb3BlIjoiZXhhbX"
+          + "BsZS1zY29wZSJ9.ne8Jb4f2xao1zSJFZxIBRrh4WFNjkaBRV3-Ybp6fHZU";
+  public static String TEST_SCOPE = "example-scope";
+  final HttpClient httpClient = mock(HttpClient.class);
+  HttpResponse<String> okResponse = mock(HttpResponse.class);
+  HttpResponse<String> invalidResponse = mock(HttpResponse.class);
+  HttpResponse<String> errorResponse = mock(HttpResponse.class);
+  private CognitoCredentials credentials;
+  private CognitoAuthenticator cognitoAuthenticator;
 
-    @BeforeEach
-    public void setup() {
-        var authServer = "http://localhost";
-        var clientId = randomString();
-        var clientSecret = randomString();
-        credentials = new CognitoCredentials(() -> clientId, () -> clientSecret, URI.create(authServer));
-        cognitoAuthenticator = new CognitoAuthenticator(httpClient, credentials);
+  @BeforeEach
+  public void setup() {
+    var authServer = "http://localhost";
+    var clientId = randomString();
+    var clientSecret = randomString();
+    credentials =
+        new CognitoCredentials(() -> clientId, () -> clientSecret, URI.create(authServer));
+    cognitoAuthenticator = new CognitoAuthenticator(httpClient, credentials);
 
-        when(okResponse.statusCode()).thenReturn(HTTP_OK);
-        when(okResponse.body()).thenReturn("{\"access_token\": \"" + TEST_TOKEN + "\"}");
+    when(okResponse.statusCode()).thenReturn(HTTP_OK);
+    when(okResponse.body()).thenReturn("{\"access_token\": \"" + TEST_TOKEN + "\"}");
 
-        when(invalidResponse.statusCode()).thenReturn(HTTP_OK);
-        when(invalidResponse.body()).thenReturn("{}");
+    when(invalidResponse.statusCode()).thenReturn(HTTP_OK);
+    when(invalidResponse.body()).thenReturn("{}");
 
-        when(errorResponse.statusCode()).thenReturn(HTTP_FORBIDDEN);
-        when(errorResponse.body()).thenReturn("{}");
-    }
+    when(errorResponse.statusCode()).thenReturn(HTTP_FORBIDDEN);
+    when(errorResponse.body()).thenReturn("{}");
+  }
 
-    @Test
-    void shouldReturnJwtTokenFromHttpRequestToCognito() throws IOException, InterruptedException {
-        when(httpClient.<String>send(any(), any())).thenReturn(okResponse);
+  @Test
+  void shouldReturnJwtTokenFromHttpRequestToCognito() throws IOException, InterruptedException {
+    when(httpClient.<String>send(any(), any())).thenReturn(okResponse);
 
-        var jwt = cognitoAuthenticator.fetchBearerToken();
-        assertThat(jwt.getToken(), is(TEST_TOKEN));
-    }
+    var jwt = cognitoAuthenticator.fetchBearerToken();
+    assertThat(jwt.getToken(), is(TEST_TOKEN));
+  }
 
-    @Test
-    void shouldReturnDecodedJwtWithClaims() throws IOException, InterruptedException {
-        when(httpClient.<String>send(any(), any())).thenReturn(okResponse);
+  @Test
+  void shouldReturnDecodedJwtWithClaims() throws IOException, InterruptedException {
+    when(httpClient.<String>send(any(), any())).thenReturn(okResponse);
 
-        var jwt = cognitoAuthenticator.fetchBearerToken();
-        assertThat(jwt.getClaim("scope").asString(), is(TEST_SCOPE));
-    }
+    var jwt = cognitoAuthenticator.fetchBearerToken();
+    assertThat(jwt.getClaim("scope").asString(), is(TEST_SCOPE));
+  }
 
-    @Test
-    void shouldReturnDecodedJwtWhenSendingBasicAuthentication() throws IOException, InterruptedException {
-        var uri = URI.create(credentials.getCognitoOAuthServerUri().toString() + "/oauth2/token");
-        var usernamePassword = credentials.getCognitoAppClientId() + ":" + credentials.getCognitoAppClientSecret();
-        var encodedAuth = Base64.getEncoder().encodeToString(usernamePassword.getBytes(StandardCharsets.UTF_8));
+  @Test
+  void shouldReturnDecodedJwtWhenSendingBasicAuthentication()
+      throws IOException, InterruptedException {
+    var uri = URI.create(credentials.getCognitoOAuthServerUri().toString() + "/oauth2/token");
+    var usernamePassword =
+        credentials.getCognitoAppClientId() + ":" + credentials.getCognitoAppClientSecret();
+    var encodedAuth =
+        Base64.getEncoder().encodeToString(usernamePassword.getBytes(StandardCharsets.UTF_8));
 
-        var expectedRequest = HttpRequest.newBuilder()
-                                  .uri(uri)
-                                  .setHeader(AUTHORIZATION, "Basic " + encodedAuth)
-                                  .setHeader(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
-                                  .POST(BodyPublishers.noBody())
-                                  .build();
+    var expectedRequest =
+        HttpRequest.newBuilder()
+            .uri(uri)
+            .setHeader(AUTHORIZATION, "Basic " + encodedAuth)
+            .setHeader(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
+            .POST(BodyPublishers.noBody())
+            .build();
 
-        when(httpClient.<String>send(argThat(new HttpRequestMetadataMatcher(expectedRequest)), any()))
-            .thenReturn(okResponse);
+    when(httpClient.<String>send(argThat(new HttpRequestMetadataMatcher(expectedRequest)), any()))
+        .thenReturn(okResponse);
 
-        var jwt = cognitoAuthenticator.fetchBearerToken();
-        assertNotNull(jwt);
-    }
+    var jwt = cognitoAuthenticator.fetchBearerToken();
+    assertNotNull(jwt);
+  }
 
-    @Test
-    void shouldThrowWhenResponseIsNotStructuredLikeAToken() throws IOException, InterruptedException {
-        when(httpClient.<String>send(any(), any())).thenReturn(invalidResponse);
-        assertThrows(IllegalStateException.class, () -> cognitoAuthenticator.fetchBearerToken());
-    }
+  @Test
+  void shouldThrowWhenResponseIsNotStructuredLikeAToken() throws IOException, InterruptedException {
+    when(httpClient.<String>send(any(), any())).thenReturn(invalidResponse);
+    assertThrows(IllegalStateException.class, () -> cognitoAuthenticator.fetchBearerToken());
+  }
 
-    @Test
-    void shouldThrowWhenResponseIsNot200Ok() throws IOException, InterruptedException {
-        when(httpClient.<String>send(any(), any())).thenReturn(errorResponse);
-        var exception = assertThrows(RuntimeException.class, () -> cognitoAuthenticator.fetchBearerToken());
-        assertTrue(exception.getMessage().contains("Got unexpected http response"));
-    }
+  @Test
+  void shouldThrowWhenResponseIsNot200Ok() throws IOException, InterruptedException {
+    when(httpClient.<String>send(any(), any())).thenReturn(errorResponse);
+    var exception =
+        assertThrows(RuntimeException.class, () -> cognitoAuthenticator.fetchBearerToken());
+    assertTrue(exception.getMessage().contains("Got unexpected http response"));
+  }
 }

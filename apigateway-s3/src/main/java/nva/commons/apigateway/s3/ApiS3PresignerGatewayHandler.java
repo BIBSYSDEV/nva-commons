@@ -19,67 +19,65 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 
 public abstract class ApiS3PresignerGatewayHandler<I> extends ApiGatewayHandler<I, Void> {
 
-    public static final String LOCATION = "Location";
-    private final S3Presigner s3presigner;
+  public static final String LOCATION = "Location";
+  private final S3Presigner s3presigner;
 
-    @JacocoGenerated
-    public ApiS3PresignerGatewayHandler(Class<I> iclass,
-                                        S3Presigner s3Presigner,
-                                        Environment environment) {
-        super(iclass, environment);
-        this.s3presigner = s3Presigner;
-    }
+  @JacocoGenerated
+  public ApiS3PresignerGatewayHandler(
+      Class<I> iclass, S3Presigner s3Presigner, Environment environment) {
+    super(iclass, environment);
+    this.s3presigner = s3Presigner;
+  }
 
-    @JacocoGenerated
-    public static S3Presigner defaultS3Presigner() {
-        return S3Presigner.builder()
-                   .region(Region.of(new Environment().readEnv("AWS_REGION")))
-                   .credentialsProvider(DefaultCredentialsProvider.create())
-                   .build();
-    }
+  @JacocoGenerated
+  public static S3Presigner defaultS3Presigner() {
+    return S3Presigner.builder()
+        .region(Region.of(new Environment().readEnv("AWS_REGION")))
+        .credentialsProvider(DefaultCredentialsProvider.create())
+        .build();
+  }
 
-    @Override
-    protected Void processInput(I input, RequestInfo requestInfo, Context context) throws ApiGatewayException {
-        var filename = context.getAwsRequestId();
-        generateAndWriteDataToS3(filename, input, requestInfo, context);
-        var preSignedUrl = presignS3Object(filename);
-        setLocationHeader(preSignedUrl.url().toString());
-        return null;
-    }
+  @Override
+  protected Void processInput(I input, RequestInfo requestInfo, Context context)
+      throws ApiGatewayException {
+    var filename = context.getAwsRequestId();
+    generateAndWriteDataToS3(filename, input, requestInfo, context);
+    var preSignedUrl = presignS3Object(filename);
+    setLocationHeader(preSignedUrl.url().toString());
+    return null;
+  }
 
-    @Override
-    @JacocoGenerated
-    protected Integer getSuccessStatusCode(I input, Void output) {
-        return HttpURLConnection.HTTP_MOVED_TEMP;
-    }
+  @Override
+  @JacocoGenerated
+  protected Integer getSuccessStatusCode(I input, Void output) {
+    return HttpURLConnection.HTTP_MOVED_TEMP;
+  }
 
-    protected abstract void generateAndWriteDataToS3(String filename, I input, RequestInfo requestInfo, Context context)
-        throws BadRequestException;
+  protected abstract void generateAndWriteDataToS3(
+      String filename, I input, RequestInfo requestInfo, Context context)
+      throws BadRequestException;
 
-    protected abstract String getBucketName();
+  protected abstract String getBucketName();
 
-    protected abstract Duration getSignDuration();
+  protected abstract Duration getSignDuration();
 
-    protected void setLocationHeader(String uri) {
-        addAdditionalHeaders(() -> Map.of(LOCATION, uri));
-    }
+  protected void setLocationHeader(String uri) {
+    addAdditionalHeaders(() -> Map.of(LOCATION, uri));
+  }
 
-    protected PresignedGetObjectRequest presignS3Object(String filename) {
-        var presignRequest = createPresignRequest(filename);
-        return s3presigner.presignGetObject(presignRequest);
-    }
+  protected PresignedGetObjectRequest presignS3Object(String filename) {
+    var presignRequest = createPresignRequest(filename);
+    return s3presigner.presignGetObject(presignRequest);
+  }
 
-    protected GetObjectRequest buildRequest(String filename) {
-        return GetObjectRequest.builder()
-                   .bucket(getBucketName())
-                   .key(filename)
-                   .build();
-    }
+  protected GetObjectRequest buildRequest(String filename) {
+    return GetObjectRequest.builder().bucket(getBucketName()).key(filename).build();
+  }
 
-    protected GetObjectPresignRequest createPresignRequest(String filename) {
-        return GetObjectPresignRequest.builder()
-                   .signatureDuration(getSignDuration())
-                   .getObjectRequest(buildRequest(filename))
-                   .build();
-    }
+  protected GetObjectPresignRequest createPresignRequest(String filename) {
+    return GetObjectPresignRequest.builder()
+        .signatureDuration(getSignDuration())
+        .getObjectRequest(buildRequest(filename))
+        .build();
+  }
 }

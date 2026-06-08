@@ -9,29 +9,31 @@ import nva.commons.core.JacocoGenerated;
 
 public class SortableIdentifierSerializer extends JsonSerializer<SortableIdentifier> {
 
-    public static final String NULL_AS_STRING = "null";
-    public static final String SERIALIZATION_EXCEPTION_ERROR = "Could not serialize SortableIdentifier with value: ";
+  public static final String NULL_AS_STRING = "null";
+  public static final String SERIALIZATION_EXCEPTION_ERROR =
+      "Could not serialize SortableIdentifier with value: ";
 
-    @JacocoGenerated
-    public SortableIdentifierSerializer() {
-        super();
-    }
+  @JacocoGenerated
+  public SortableIdentifierSerializer() {
+    super();
+  }
 
-    @Override
-    @SuppressWarnings("PMD.AvoidCatchingGenericException")
-    public void serialize(SortableIdentifier value, JsonGenerator gen, SerializerProvider serializers) {
-        try {
-            if (Objects.nonNull(value)) {
-                gen.writeString(value.toString());
-            } else {
-                gen.writeNull();
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(SERIALIZATION_EXCEPTION_ERROR + printIdentifierValue(value), e);
-        }
+  @Override
+  @SuppressWarnings("PMD.AvoidCatchingGenericException")
+  public void serialize(
+      SortableIdentifier value, JsonGenerator gen, SerializerProvider serializers) {
+    try {
+      if (Objects.nonNull(value)) {
+        gen.writeString(value.toString());
+      } else {
+        gen.writeNull();
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(SERIALIZATION_EXCEPTION_ERROR + printIdentifierValue(value), e);
     }
+  }
 
-    private String printIdentifierValue(SortableIdentifier value) {
-        return Optional.ofNullable(value).map(SortableIdentifier::toString).orElse(NULL_AS_STRING);
-    }
+  private String printIdentifierValue(SortableIdentifier value) {
+    return Optional.ofNullable(value).map(SortableIdentifier::toString).orElse(NULL_AS_STRING);
+  }
 }

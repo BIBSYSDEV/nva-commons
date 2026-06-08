@@ -5,5 +5,5 @@ import java.util.List;
 @FunctionalInterface
 public interface WithErrors {
 
-    List<ValidationError> getErrors();
+  List<ValidationError> getErrors();
 }

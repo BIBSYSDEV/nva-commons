@@ -13,8 +13,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  *         "type" : "@type"
  *     }
  * </pre>
+ *
  * @param context The inline JSON-LD context object.
  */
-public record JsonLdInlineContext(@JsonValue JsonNode context) implements JsonLdContext {
-
-}
+public record JsonLdInlineContext(@JsonValue JsonNode context) implements JsonLdContext {}

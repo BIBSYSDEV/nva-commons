@@ -1,4 +1,3 @@
 package nva.commons.core;
 
-public @interface JacocoGenerated {
-}
+public @interface JacocoGenerated {}

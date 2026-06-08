@@ -13,47 +13,46 @@ import nva.commons.core.JacocoGenerated;
  */
 public abstract class ApiGatewayProxyHandler<I, O> extends ApiGatewayHandler<I, O> {
 
-    private Integer statusCode;
+  private Integer statusCode;
 
-    @JacocoGenerated
-    protected ApiGatewayProxyHandler(Class<I> iclass) {
-        this(iclass, new Environment());
-    }
-    
-    @JacocoGenerated
-    protected ApiGatewayProxyHandler(Class<I> iclass, Environment environment) {
-        super(iclass, environment);
-    }
+  @JacocoGenerated
+  protected ApiGatewayProxyHandler(Class<I> iclass) {
+    this(iclass, new Environment());
+  }
 
-    @Override
-    protected O processInput(I input, RequestInfo requestInfo, Context context) throws ApiGatewayException {
-        var result = processProxyInput(input, requestInfo, context);
-        statusCode = result.getStatusCode();
-        return result.getBody();
-    }
+  @JacocoGenerated
+  protected ApiGatewayProxyHandler(Class<I> iclass, Environment environment) {
+    super(iclass, environment);
+  }
 
-    @Override
-    protected Integer getSuccessStatusCode(I input, O output) {
-        if (statusCode == null) {
-            throw new IllegalStateException("getSuccessStatusCode was called before processInput");
-        }
-        return statusCode;
-    }
+  @Override
+  protected O processInput(I input, RequestInfo requestInfo, Context context)
+      throws ApiGatewayException {
+    var result = processProxyInput(input, requestInfo, context);
+    statusCode = result.getStatusCode();
+    return result.getBody();
+  }
 
-    /**
-     * Implements the main logic of the handler. Any exception thrown by this method will be handled by {@link
-     * RestRequestHandler#handleExpectedException} method.
-     *
-     * @param input       The input object to the method. Usually a deserialized json.
-     * @param requestInfo Request headers and path.
-     * @param context     the ApiGateway context.
-     *
-     * @return A Pair which consists of:
-     *     - the Response body that is going to be serialized in json
-     *     - the http response code
-     * @throws ApiGatewayException all exceptions are caught by writeFailure and mapped to error codes through the
-     *                             method {@link RestRequestHandler#getFailureStatusCode}
-     */
-    protected abstract ProxyResponse<O> processProxyInput(I input, RequestInfo requestInfo, Context context)
-        throws ApiGatewayException;
+  @Override
+  protected Integer getSuccessStatusCode(I input, O output) {
+    if (statusCode == null) {
+      throw new IllegalStateException("getSuccessStatusCode was called before processInput");
+    }
+    return statusCode;
+  }
+
+  /**
+   * Implements the main logic of the handler. Any exception thrown by this method will be handled
+   * by {@link RestRequestHandler#handleExpectedException} method.
+   *
+   * @param input The input object to the method. Usually a deserialized json.
+   * @param requestInfo Request headers and path.
+   * @param context the ApiGateway context.
+   * @return A Pair which consists of: - the Response body that is going to be serialized in json -
+   *     the http response code
+   * @throws ApiGatewayException all exceptions are caught by writeFailure and mapped to error codes
+   *     through the method {@link RestRequestHandler#getFailureStatusCode}
+   */
+  protected abstract ProxyResponse<O> processProxyInput(
+      I input, RequestInfo requestInfo, Context context) throws ApiGatewayException;
 }

@@ -4,16 +4,16 @@ import java.net.HttpURLConnection;
 
 public class UnauthorizedException extends ApiGatewayException {
 
-    public UnauthorizedException(String message) {
-        super(message);
-    }
+  public UnauthorizedException(String message) {
+    super(message);
+  }
 
-    public UnauthorizedException() {
-        this("Unauthorized");
-    }
+  public UnauthorizedException() {
+    this("Unauthorized");
+  }
 
-    @Override
-    protected Integer statusCode() {
-        return HttpURLConnection.HTTP_UNAUTHORIZED;
-    }
+  @Override
+  protected Integer statusCode() {
+    return HttpURLConnection.HTTP_UNAUTHORIZED;
+  }
 }

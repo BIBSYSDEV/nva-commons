@@ -6,6 +6,4 @@ import java.net.URI;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonTypeName("Affiliation")
-public record Affiliation(URI organization, boolean active, Role role) {
-
-}
+public record Affiliation(URI organization, boolean active, Role role) {}

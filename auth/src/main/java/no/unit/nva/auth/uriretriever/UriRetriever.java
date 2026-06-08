@@ -1,6 +1,7 @@
 package no.unit.nva.auth.uriretriever;
 
 import static nva.commons.core.attempt.Try.attempt;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -13,41 +14,43 @@ import nva.commons.core.JacocoGenerated;
 @JacocoGenerated
 public class UriRetriever implements RawContentRetriever {
 
-    public static final String ACCEPT = "Accept";
-    private final HttpClient httpClient;
+  public static final String ACCEPT = "Accept";
+  private final HttpClient httpClient;
 
-    public UriRetriever() {
-        this.httpClient = newHttpClient();
-    }
+  public UriRetriever() {
+    this.httpClient = newHttpClient();
+  }
 
-    public UriRetriever(HttpClient httpClient) {
-        this.httpClient = httpClient;
-    }
+  public UriRetriever(HttpClient httpClient) {
+    this.httpClient = httpClient;
+  }
 
-    @Override
-    public Optional<String> getRawContent(URI uri, String mediaType) {
-        return attempt(() -> httpClient.send(createHttpRequest(uri, mediaType),
-                                             BodyHandlers.ofString(StandardCharsets.UTF_8)))
-                   .map(HttpResponse::body)
-                   .toOptional();
-    }
+  @Override
+  public Optional<String> getRawContent(URI uri, String mediaType) {
+    return attempt(
+            () ->
+                httpClient.send(
+                    createHttpRequest(uri, mediaType),
+                    BodyHandlers.ofString(StandardCharsets.UTF_8)))
+        .map(HttpResponse::body)
+        .toOptional();
+  }
 
-    @Override
-    public Optional<HttpResponse<String>> fetchResponse(URI uri, String mediaType) {
-        return attempt(() -> httpClient.send(createHttpRequest(uri, mediaType),
-                                             BodyHandlers.ofString(StandardCharsets.UTF_8)))
-                   .toOptional();
-    }
+  @Override
+  public Optional<HttpResponse<String>> fetchResponse(URI uri, String mediaType) {
+    return attempt(
+            () ->
+                httpClient.send(
+                    createHttpRequest(uri, mediaType),
+                    BodyHandlers.ofString(StandardCharsets.UTF_8)))
+        .toOptional();
+  }
 
-    private static HttpClient newHttpClient() {
-        return HttpClient.newHttpClient();
-    }
+  private static HttpClient newHttpClient() {
+    return HttpClient.newHttpClient();
+  }
 
-    private HttpRequest createHttpRequest(URI uri, String mediaType) {
-        return HttpRequest.newBuilder()
-                   .uri(uri)
-                   .headers(ACCEPT, mediaType)
-                   .GET()
-                   .build();
-    }
+  private HttpRequest createHttpRequest(URI uri, String mediaType) {
+    return HttpRequest.newBuilder().uri(uri).headers(ACCEPT, mediaType).GET().build();
+  }
 }

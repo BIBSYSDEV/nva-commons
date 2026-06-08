@@ -7,6 +7,4 @@ import java.util.Map;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonTypeName("Role")
-public record Role(URI id, Map<String, String> labels) {
-
-}
+public record Role(URI id, Map<String, String> labels) {}

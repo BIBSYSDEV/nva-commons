@@ -8,15 +8,15 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 @JsonTypeInfo(use = Id.NAME, property = "type")
 public class JsonLdTestObject {
 
-    @JsonProperty("@context")
-    private JsonLdContext context;
+  @JsonProperty("@context")
+  private JsonLdContext context;
 
-    @JsonCreator
-    public JsonLdTestObject(JsonLdContext context) {
-        this.context = context;
-    }
+  @JsonCreator
+  public JsonLdTestObject(JsonLdContext context) {
+    this.context = context;
+  }
 
-    public JsonLdContext getContext() {
-        return context;
-    }
+  public JsonLdContext getContext() {
+    return context;
+  }
 }

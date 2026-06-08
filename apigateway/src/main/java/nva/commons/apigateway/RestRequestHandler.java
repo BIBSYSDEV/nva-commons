@@ -4,6 +4,7 @@ import static java.util.Objects.isNull;
 import static nva.commons.apigateway.MediaType.JSON_UTF_8;
 import static nva.commons.core.attempt.Try.attempt;
 import static nva.commons.core.exceptions.ExceptionUtils.stackTraceInSingleLine;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.auth0.jwk.InvalidPublicKeyException;
@@ -15,7 +16,6 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.hc.core5.http.HttpHeaders;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -35,311 +35,312 @@ import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
 import nva.commons.core.Environment;
 import nva.commons.core.attempt.Failure;
 import nva.commons.core.ioutils.IoUtils;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Template class for implementing Lambda function handlers that get activated through a call to ApiGateway. This class
- * is for processing a HTTP query directly without the usage of a Jersey-server or a SpringBoot template.
+ * Template class for implementing Lambda function handlers that get activated through a call to
+ * ApiGateway. This class is for processing a HTTP query directly without the usage of a
+ * Jersey-server or a SpringBoot template.
  *
  * @param <I> Class of the object in the body field of the ApiGateway message.
  * @param <O> Class of the response object.
- * @see <a href="https://github.com/awslabs/aws-serverless-java-container">aws-serverless-container</a> for
- *     alternative solutions.
+ * @see <a
+ *     href="https://github.com/awslabs/aws-serverless-java-container">aws-serverless-container</a>
+ *     for alternative solutions.
  */
 @SuppressWarnings("PMD.GodClass")
 public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
-    public static final String REQUEST_ID = "RequestId:";
-    public static final String SPACE = " ";
-    public static final String EMPTY_STRING = "";
-    public static final String COMMA = ",";
-    public static final String PREFIX_SINGLE_WILDCARD_TYPE = "*/";
-    private static final String COGNITO_AUTHORIZER_URLS = "COGNITO_AUTHORIZER_URLS";
-    protected final Environment environment;
-    private static final Logger logger = LoggerFactory.getLogger(RestRequestHandler.class);
-    private final transient Class<I> iclass;
-    private final transient ApiMessageParser<I> inputParser;
-    protected final ObjectMapper objectMapper;
-    private final String[] authorizerUrls;
-    private final Map<String, JwkProvider> jwkProviders;
+  public static final String REQUEST_ID = "RequestId:";
+  public static final String SPACE = " ";
+  public static final String EMPTY_STRING = "";
+  public static final String COMMA = ",";
+  public static final String PREFIX_SINGLE_WILDCARD_TYPE = "*/";
+  private static final String COGNITO_AUTHORIZER_URLS = "COGNITO_AUTHORIZER_URLS";
+  protected final Environment environment;
+  private static final Logger logger = LoggerFactory.getLogger(RestRequestHandler.class);
+  private final transient Class<I> iclass;
+  private final transient ApiMessageParser<I> inputParser;
+  protected final ObjectMapper objectMapper;
+  private final String[] authorizerUrls;
+  private final Map<String, JwkProvider> jwkProviders;
 
-    protected transient OutputStream outputStream;
-    protected transient String allowedOrigin;
+  protected transient OutputStream outputStream;
+  protected transient String allowedOrigin;
 
-    private static final List<MediaType> DEFAULT_SUPPORTED_MEDIA_TYPES = List.of(JSON_UTF_8);
-    private static final String WILDCARD_TYPE = "*";
-    public static final String ALLOW_ALL_ORIGINS = "*";
+  private static final List<MediaType> DEFAULT_SUPPORTED_MEDIA_TYPES = List.of(JSON_UTF_8);
+  private static final String WILDCARD_TYPE = "*";
+  public static final String ALLOW_ALL_ORIGINS = "*";
 
-    /**
-     * Calculates the Content MediaType of the response based on the supported Media Types and the requested Media
-     * Types.
-     *
-     * @param requestInfo The request as sent by ApiGateway
-     * @return the MediaType value of the Response. Basically the value of the Content header.
-     * @throws UnsupportedAcceptHeaderException when no provided Accept header media types are supported in this
-     *                                          handler.
-     */
-    protected MediaType calculateContentTypeHeaderReturnValue(RequestInfo requestInfo)
-        throws UnsupportedAcceptHeaderException {
-        if (requestInfo.getHeaders().containsKey(HttpHeaders.ACCEPT)) {
-            var acceptHeader = requestInfo.getHeaderOptional(HttpHeaders.ACCEPT).orElseThrow();
-            return bestMatchingMediaTypeBasedOnRequestAcceptHeader(acceptHeader);
-        }
-        return defaultResponseContentTypeWhenNotSpecifiedByClientRequest();
+  /**
+   * Calculates the Content MediaType of the response based on the supported Media Types and the
+   * requested Media Types.
+   *
+   * @param requestInfo The request as sent by ApiGateway
+   * @return the MediaType value of the Response. Basically the value of the Content header.
+   * @throws UnsupportedAcceptHeaderException when no provided Accept header media types are
+   *     supported in this handler.
+   */
+  protected MediaType calculateContentTypeHeaderReturnValue(RequestInfo requestInfo)
+      throws UnsupportedAcceptHeaderException {
+    if (requestInfo.getHeaders().containsKey(HttpHeaders.ACCEPT)) {
+      var acceptHeader = requestInfo.getHeaderOptional(HttpHeaders.ACCEPT).orElseThrow();
+      return bestMatchingMediaTypeBasedOnRequestAcceptHeader(acceptHeader);
     }
+    return defaultResponseContentTypeWhenNotSpecifiedByClientRequest();
+  }
 
-    private MediaType bestMatchingMediaTypeBasedOnRequestAcceptHeader(String acceptHeader)
-        throws UnsupportedAcceptHeaderException {
-        var acceptMediaTypes = parseAcceptHeader(acceptHeader);
+  private MediaType bestMatchingMediaTypeBasedOnRequestAcceptHeader(String acceptHeader)
+      throws UnsupportedAcceptHeaderException {
+    var acceptMediaTypes = parseAcceptHeader(acceptHeader);
 
-        var matches = findMediaTypeMatches(acceptMediaTypes);
-        if (matches.isEmpty()) {
-            throw new UnsupportedAcceptHeaderException(acceptMediaTypes, listSupportedMediaTypes());
-        }
-        return matches.get(0);
+    var matches = findMediaTypeMatches(acceptMediaTypes);
+    if (matches.isEmpty()) {
+      throw new UnsupportedAcceptHeaderException(acceptMediaTypes, listSupportedMediaTypes());
     }
+    return matches.get(0);
+  }
 
-    private List<MediaType> parseAcceptHeader(String header) {
-        return Arrays.stream(header.replace(SPACE, EMPTY_STRING).split(COMMA))
-                   .map(this::sanitizeMimeType)
-                   .map(MediaType::parse)
-                   .toList();
+  private List<MediaType> parseAcceptHeader(String header) {
+    return Arrays.stream(header.replace(SPACE, EMPTY_STRING).split(COMMA))
+        .map(this::sanitizeMimeType)
+        .map(MediaType::parse)
+        .toList();
+  }
+
+  private String sanitizeMimeType(String mimeType) {
+    int index = mimeType.indexOf(';');
+    String fullType = (index >= 0 ? mimeType.substring(0, index) : mimeType).trim();
+    if (!fullType.isEmpty() && WILDCARD_TYPE.equals(fullType)) {
+      return PREFIX_SINGLE_WILDCARD_TYPE + mimeType;
     }
+    return mimeType;
+  }
 
-    private String sanitizeMimeType(String mimeType) {
-        int index = mimeType.indexOf(';');
-        String fullType = (index >= 0 ? mimeType.substring(0, index) : mimeType).trim();
-        if (!fullType.isEmpty() && WILDCARD_TYPE.equals(fullType)) {
-            return PREFIX_SINGLE_WILDCARD_TYPE + mimeType;
-        }
-        return mimeType;
+  protected List<MediaType> findMediaTypeMatches(List<MediaType> acceptMediaTypes) {
+    return listSupportedMediaTypes().stream()
+        .filter(mediaType -> inAcceptedMediaTypeRange(mediaType, acceptMediaTypes))
+        .toList();
+  }
+
+  private boolean inAcceptedMediaTypeRange(MediaType mediaType, List<MediaType> acceptMediaTypes) {
+    return acceptMediaTypes.stream().map(MediaType::withoutParameters).anyMatch(mediaType::matches);
+  }
+
+  /**
+   * Override this method to change the supported media types for the handler.
+   *
+   * @return a list of supported media types
+   */
+  protected List<MediaType> listSupportedMediaTypes() {
+    return DEFAULT_SUPPORTED_MEDIA_TYPES;
+  }
+
+  protected MediaType getDefaultResponseContentTypeHeaderValue(RequestInfo requestInfo)
+      throws UnsupportedAcceptHeaderException {
+    return calculateContentTypeHeaderReturnValue(requestInfo);
+  }
+
+  private MediaType defaultResponseContentTypeWhenNotSpecifiedByClientRequest() {
+    return listSupportedMediaTypes().get(0);
+  }
+
+  /**
+   * The input class should be set explicitly by the inheriting class.
+   *
+   * @param iclass The class object of the input class.
+   * @param environment the Environment from where the handler will read ENV variables.
+   */
+  public RestRequestHandler(Class<I> iclass, Environment environment, ObjectMapper objectMapper) {
+    this.iclass = iclass;
+    this.environment = environment;
+    this.inputParser = new ApiMessageParser<>(objectMapper);
+    this.objectMapper = objectMapper;
+    this.authorizerUrls = this.environment.readEnv(COGNITO_AUTHORIZER_URLS).split(",");
+    this.jwkProviders = getJwkProviders(authorizerUrls);
+  }
+
+  @Override
+  @SuppressWarnings("PMD.AvoidCatchingGenericException")
+  public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context)
+      throws IOException {
+    logger.info(REQUEST_ID + context.getAwsRequestId());
+    I inputObject = null;
+    try {
+      init(outputStream, context);
+      String inputString = IoUtils.streamToString(inputStream);
+      inputObject =
+          attempt(() -> parseInput(inputString))
+              .orElseThrow(this::parsingExceptionToBadRequestException);
+
+      RequestInfo requestInfo = RequestInfo.fromString(inputString);
+
+      validateAuthorization(requestInfo);
+
+      setAllowedOrigin(requestInfo);
+
+      validateRequest(inputObject, requestInfo, context);
+
+      O response = processInput(inputObject, requestInfo, context);
+
+      writeOutput(inputObject, response, requestInfo);
+    } catch (ApiGatewayException e) {
+      handleExpectedException(context, inputObject, e);
+    } catch (Exception e) {
+      handleUnexpectedException(context, inputObject, e);
     }
+  }
 
-    protected List<MediaType> findMediaTypeMatches(List<MediaType> acceptMediaTypes) {
-        return listSupportedMediaTypes().stream()
-                   .filter(mediaType -> inAcceptedMediaTypeRange(mediaType, acceptMediaTypes))
-                   .toList();
+  private Map<String, JwkProvider> getJwkProviders(String... authorizerUrls) {
+    return Stream.of(authorizerUrls)
+        .collect(Collectors.toMap(domain -> domain, RestRequestHandler::createJwkProvider));
+  }
+
+  private static JwkProvider createJwkProvider(String domain) {
+    var provider = new UrlJwkProvider(domain);
+    return new CachedJwkProvider(provider, 1, TimeUnit.HOURS);
+  }
+
+  private void validateAuthorization(RequestInfo requestInfo) throws UnauthorizedException {
+    var bearerToken = requestInfo.getBearerToken();
+    if (bearerToken.isPresent() && !requestInfo.isGatewayAuthorized()) {
+      try {
+        var decodedJWT = JWT.decode(bearerToken.get());
+        var jwkProvider = getJwkProvider(decodedJWT.getIssuer());
+
+        var jwk = jwkProvider.get(decodedJWT.getKeyId());
+
+        var algorithm = getAlgorithm(jwk, decodedJWT.getAlgorithm());
+
+        var jwtVerifier = JWT.require(algorithm).withIssuer(authorizerUrls).build();
+
+        jwtVerifier.verify(decodedJWT);
+      } catch (JwkException | JWTVerificationException e) {
+        logger.error("Failed to verify token", e);
+        throw new UnauthorizedException("Failed to verify token");
+      }
     }
+  }
 
-    private boolean inAcceptedMediaTypeRange(MediaType mediaType, List<MediaType> acceptMediaTypes) {
-        return acceptMediaTypes.stream()
-                   .map(MediaType::withoutParameters)
-                   .anyMatch(mediaType::matches);
+  private static Algorithm getAlgorithm(Jwk jwk, String algorithm)
+      throws InvalidPublicKeyException, UnauthorizedException {
+    return switch (algorithm) {
+      case "RS256" -> Algorithm.RSA256((RSAPublicKey) jwk.getPublicKey());
+      case "RS384" -> Algorithm.RSA384((RSAPublicKey) jwk.getPublicKey());
+      case "RS512" -> Algorithm.RSA512((RSAPublicKey) jwk.getPublicKey());
+      case "ES256" -> Algorithm.ECDSA256((ECPublicKey) jwk.getPublicKey());
+      case "ES384" -> Algorithm.ECDSA384((ECPublicKey) jwk.getPublicKey());
+      case "ES512" -> Algorithm.ECDSA512((ECPublicKey) jwk.getPublicKey());
+      default -> throw new UnauthorizedException("Unsupported algorithm");
+    };
+  }
+
+  private JwkProvider getJwkProvider(String issuer) throws UnauthorizedException {
+    var jwkProvider = jwkProviders.get(issuer);
+    if (isNull(jwkProvider)) {
+      logger.error("JWK provider for issuer {} not found", issuer);
+      throw new UnauthorizedException("No JWK provider found for issuer");
     }
+    return jwkProvider;
+  }
 
-    /**
-     * Override this method to change the supported media types for the handler.
-     *
-     * @return a list of supported media types
-     */
-    protected List<MediaType> listSupportedMediaTypes() {
-        return DEFAULT_SUPPORTED_MEDIA_TYPES;
-    }
+  protected abstract void setAllowedOrigin(RequestInfo requestInfo);
 
-    protected MediaType getDefaultResponseContentTypeHeaderValue(RequestInfo requestInfo)
-        throws UnsupportedAcceptHeaderException {
-        return calculateContentTypeHeaderReturnValue(requestInfo);
-    }
+  /**
+   * Implements input validation and access control. {@link
+   * RestRequestHandler#handleExpectedException} method.
+   *
+   * @param input The input object to the method. Usually a deserialized json.
+   * @param requestInfo Request headers and path.
+   * @param context the ApiGateway context.
+   * @throws ApiGatewayException all exceptions are caught by writeFailure and mapped to error codes
+   *     through the method {@link RestRequestHandler#getFailureStatusCode}
+   */
+  protected abstract void validateRequest(I input, RequestInfo requestInfo, Context context)
+      throws ApiGatewayException;
 
-    private MediaType defaultResponseContentTypeWhenNotSpecifiedByClientRequest() {
-        return listSupportedMediaTypes().get(0);
-    }
+  protected ApiGatewayException parsingExceptionToBadRequestException(Failure<I> fail) {
+    return new BadRequestException(fail.getException().getMessage(), fail.getException());
+  }
 
-    /**
-     * The input class should be set explicitly by the inheriting class.
-     *
-     * @param iclass      The class object of the input class.
-     * @param environment the Environment from where the handler will read ENV variables.
-     */
-    public RestRequestHandler(Class<I> iclass, Environment environment, ObjectMapper objectMapper) {
-        this.iclass = iclass;
-        this.environment = environment;
-        this.inputParser = new ApiMessageParser<>(objectMapper);
-        this.objectMapper = objectMapper;
-        this.authorizerUrls = this.environment.readEnv(COGNITO_AUTHORIZER_URLS).split(",");
-        this.jwkProviders = getJwkProviders(authorizerUrls);
-    }
+  protected void handleUnexpectedException(Context context, I inputObject, Exception e)
+      throws IOException {
+    logger.error(e.getMessage());
+    logger.error(stackTraceInSingleLine(e));
+    writeUnexpectedFailure(inputObject, e, context.getAwsRequestId());
+  }
 
-    @Override
-    @SuppressWarnings("PMD.AvoidCatchingGenericException")
-    public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
-        logger.info(REQUEST_ID + context.getAwsRequestId());
-        I inputObject = null;
-        try {
-            init(outputStream, context);
-            String inputString = IoUtils.streamToString(inputStream);
-            inputObject = attempt(() -> parseInput(inputString))
-                              .orElseThrow(this::parsingExceptionToBadRequestException);
+  protected void handleExpectedException(Context context, I inputObject, ApiGatewayException e)
+      throws IOException {
+    logger.warn(e.getMessage());
+    logger.warn(stackTraceInSingleLine(e));
+    writeExpectedFailure(inputObject, e, context.getAwsRequestId());
+  }
 
-            RequestInfo requestInfo = RequestInfo.fromString(inputString);
+  protected void init(OutputStream outputStream, Context context) {
+    this.outputStream = outputStream;
+    this.allowedOrigin =
+        ALLOW_ALL_ORIGINS; // anti-pattern: this will be overwritten later on, but in the event
+    // that we get an exception before we get there, there is this.
+  }
 
-            validateAuthorization(requestInfo);
+  /**
+   * Implements the main logic of the handler. Any exception thrown by this method will be handled
+   * by {@link RestRequestHandler#handleExpectedException} method.
+   *
+   * @param input The input object to the method. Usually a deserialized json.
+   * @param requestInfo Request headers and path.
+   * @param context the ApiGateway context.
+   * @return the Response body that is going to be serialized in json
+   * @throws ApiGatewayException all exceptions are caught by writeFailure and mapped to error codes
+   *     through the method {@link RestRequestHandler#getFailureStatusCode}
+   */
+  protected abstract O processInput(I input, RequestInfo requestInfo, Context context)
+      throws ApiGatewayException;
 
-            setAllowedOrigin(requestInfo);
+  /**
+   * Define the response statusCode in case of failure.
+   *
+   * @param input The request input.
+   * @param error The exception that caused the failure.
+   * @return the failure status code.
+   */
+  protected int getFailureStatusCode(I input, ApiGatewayException error) {
+    return error.getStatusCode();
+  }
 
-            validateRequest(inputObject, requestInfo, context);
+  /**
+   * Method for parsing the input object from the ApiGateway message.
+   *
+   * @param inputString the ApiGateway message.
+   * @return an object of class I.
+   * @throws IOException when parsing fails.
+   */
+  protected I parseInput(String inputString) throws IOException {
+    return inputParser.getBodyElementFromJson(inputString, getIClass());
+  }
 
-            O response = processInput(inputObject, requestInfo, context);
+  /**
+   * Define the success status code.
+   *
+   * @param input The request input.
+   * @param output The response output
+   * @return the success status code.
+   */
+  protected abstract Integer getSuccessStatusCode(I input, O output);
 
-            writeOutput(inputObject, response, requestInfo);
-        } catch (ApiGatewayException e) {
-            handleExpectedException(context, inputObject, e);
-        } catch (Exception e) {
-            handleUnexpectedException(context, inputObject, e);
-        }
-    }
+  protected abstract void writeOutput(I input, O output, RequestInfo requestInfo)
+      throws IOException, GatewayResponseSerializingException, UnsupportedAcceptHeaderException;
 
-    private Map<String, JwkProvider> getJwkProviders(String... authorizerUrls) {
-        return Stream.of(authorizerUrls)
-                   .collect(Collectors.toMap(
-                       domain -> domain,
-                       RestRequestHandler::createJwkProvider
-                   ));
-    }
+  protected abstract void writeExpectedFailure(
+      I input, ApiGatewayException exception, String requestId) throws IOException;
 
-    private static JwkProvider createJwkProvider(String domain) {
-        var provider = new UrlJwkProvider(domain);
-        return new CachedJwkProvider(provider, 1, TimeUnit.HOURS);
-    }
+  protected abstract void writeUnexpectedFailure(I input, Exception exception, String requestId)
+      throws IOException;
 
-    private void validateAuthorization(RequestInfo requestInfo) throws UnauthorizedException {
-        var bearerToken = requestInfo.getBearerToken();
-        if (bearerToken.isPresent() && !requestInfo.isGatewayAuthorized()) {
-            try {
-                var decodedJWT = JWT.decode(bearerToken.get());
-                var jwkProvider = getJwkProvider(decodedJWT.getIssuer());
-
-                var jwk = jwkProvider.get(decodedJWT.getKeyId());
-
-                var algorithm = getAlgorithm(jwk, decodedJWT.getAlgorithm());
-
-                var jwtVerifier = JWT.require(algorithm)
-                                      .withIssuer(authorizerUrls)
-                                      .build();
-
-                jwtVerifier.verify(decodedJWT);
-            } catch (JwkException | JWTVerificationException e) {
-                logger.error("Failed to verify token", e);
-                throw new UnauthorizedException("Failed to verify token");
-            }
-        }
-    }
-
-    private static Algorithm getAlgorithm(Jwk jwk, String algorithm)
-        throws InvalidPublicKeyException, UnauthorizedException {
-        return switch (algorithm) {
-            case "RS256" -> Algorithm.RSA256((RSAPublicKey) jwk.getPublicKey());
-            case "RS384" -> Algorithm.RSA384((RSAPublicKey) jwk.getPublicKey());
-            case "RS512" -> Algorithm.RSA512((RSAPublicKey) jwk.getPublicKey());
-            case "ES256" -> Algorithm.ECDSA256((ECPublicKey) jwk.getPublicKey());
-            case "ES384" -> Algorithm.ECDSA384((ECPublicKey) jwk.getPublicKey());
-            case "ES512" -> Algorithm.ECDSA512((ECPublicKey) jwk.getPublicKey());
-            default -> throw new UnauthorizedException("Unsupported algorithm");
-        };
-    }
-
-    private JwkProvider getJwkProvider(String issuer) throws UnauthorizedException {
-        var jwkProvider = jwkProviders.get(issuer);
-        if (isNull(jwkProvider)) {
-            logger.error("JWK provider for issuer {} not found", issuer);
-            throw new UnauthorizedException("No JWK provider found for issuer");
-        }
-        return jwkProvider;
-    }
-
-    protected abstract void setAllowedOrigin(RequestInfo requestInfo);
-
-    /**
-     * Implements input validation and access control. {@link RestRequestHandler#handleExpectedException} method.
-     *
-     * @param input       The input object to the method. Usually a deserialized json.
-     * @param requestInfo Request headers and path.
-     * @param context     the ApiGateway context.
-     * @throws ApiGatewayException all exceptions are caught by writeFailure and mapped to error codes through the
-     *                             method {@link RestRequestHandler#getFailureStatusCode}
-     */
-    protected abstract void validateRequest(I input, RequestInfo requestInfo, Context context)
-        throws ApiGatewayException;
-
-    protected ApiGatewayException parsingExceptionToBadRequestException(Failure<I> fail) {
-        return new BadRequestException(fail.getException().getMessage(), fail.getException());
-    }
-
-    protected void handleUnexpectedException(Context context, I inputObject, Exception e)
-        throws IOException {
-        logger.error(e.getMessage());
-        logger.error(stackTraceInSingleLine(e));
-        writeUnexpectedFailure(inputObject, e, context.getAwsRequestId());
-    }
-
-    protected void handleExpectedException(Context context, I inputObject, ApiGatewayException e)
-        throws IOException {
-        logger.warn(e.getMessage());
-        logger.warn(stackTraceInSingleLine(e));
-        writeExpectedFailure(inputObject, e, context.getAwsRequestId());
-    }
-
-    protected void init(OutputStream outputStream, Context context) {
-        this.outputStream = outputStream;
-        this.allowedOrigin = ALLOW_ALL_ORIGINS; //anti-pattern: this will be overwritten later on, but in the event
-        // that we get an exception before we get there, there is this.
-    }
-
-    /**
-     * Implements the main logic of the handler. Any exception thrown by this method will be handled by
-     * {@link RestRequestHandler#handleExpectedException} method.
-     *
-     * @param input       The input object to the method. Usually a deserialized json.
-     * @param requestInfo Request headers and path.
-     * @param context     the ApiGateway context.
-     * @return the Response body that is going to be serialized in json
-     * @throws ApiGatewayException all exceptions are caught by writeFailure and mapped to error codes through the
-     *                             method {@link RestRequestHandler#getFailureStatusCode}
-     */
-    protected abstract O processInput(I input, RequestInfo requestInfo, Context context) throws ApiGatewayException;
-
-    /**
-     * Define the response statusCode in case of failure.
-     *
-     * @param input The request input.
-     * @param error The exception that caused the failure.
-     * @return the failure status code.
-     */
-    protected int getFailureStatusCode(I input, ApiGatewayException error) {
-        return error.getStatusCode();
-    }
-
-    /**
-     * Method for parsing the input object from the ApiGateway message.
-     *
-     * @param inputString the ApiGateway message.
-     * @return an object of class I.
-     * @throws IOException when parsing fails.
-     */
-    protected I parseInput(String inputString) throws IOException {
-        return inputParser.getBodyElementFromJson(inputString, getIClass());
-    }
-
-    /**
-     * Define the success status code.
-     *
-     * @param input  The request input.
-     * @param output The response output
-     * @return the success status code.
-     */
-    protected abstract Integer getSuccessStatusCode(I input, O output);
-
-    protected abstract void writeOutput(I input, O output, RequestInfo requestInfo)
-        throws IOException, GatewayResponseSerializingException, UnsupportedAcceptHeaderException;
-
-    protected abstract void writeExpectedFailure(I input, ApiGatewayException exception, String requestId)
-        throws IOException;
-
-    protected abstract void writeUnexpectedFailure(I input, Exception exception, String requestId) throws IOException;
-
-    private Class<I> getIClass() {
-        return iclass;
-    }
+  private Class<I> getIClass() {
+    return iclass;
+  }
 }
-

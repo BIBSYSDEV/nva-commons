@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -44,389 +45,445 @@ import org.mockito.stubbing.Answer;
 
 class IdentityServiceClientTest {
 
-    public static final String BEARER_TOKEN = "Bearer 123";
-    public static final String clientId = randomString();
-    public static final String actingUser = randomString();
-    public static final URI customer = randomUri();
-    public static final URI cristinOrgUri = randomUri();
-    public static final String BEARER_BEARER_TOKEN_TEST = "Bearer BEARER_TOKEN_TEST";
-    public static final String OPERATION_REQUIRES_AN_AUTHORIZED_CLIENT_MESSAGE = "This operation requires an authorized client";
-    HttpClient httpClient = mock(HttpClient.class);
-    CognitoCredentials cognitoCredentials;
-    HttpResponse<String> okResponseWithBody = mock(HttpResponse.class);
-    HttpResponse<String> notOkResponse = mock(HttpResponse.class);
-    HttpResponse<String> notFoundResponse = mock(HttpResponse.class);
-    private IdentityServiceClient authorizedIdentityServiceClient;
+  public static final String BEARER_TOKEN = "Bearer 123";
+  public static final String clientId = randomString();
+  public static final String actingUser = randomString();
+  public static final URI customer = randomUri();
+  public static final URI cristinOrgUri = randomUri();
+  public static final String BEARER_BEARER_TOKEN_TEST = "Bearer BEARER_TOKEN_TEST";
+  public static final String OPERATION_REQUIRES_AN_AUTHORIZED_CLIENT_MESSAGE =
+      "This operation requires an authorized client";
+  HttpClient httpClient = mock(HttpClient.class);
+  CognitoCredentials cognitoCredentials;
+  HttpResponse<String> okResponseWithBody = mock(HttpResponse.class);
+  HttpResponse<String> notOkResponse = mock(HttpResponse.class);
+  HttpResponse<String> notFoundResponse = mock(HttpResponse.class);
+  private IdentityServiceClient authorizedIdentityServiceClient;
 
-    @SuppressWarnings("unchecked")
-    static HttpResponse<String> mockResponse(String body) {
-        var response = (HttpResponse<String>) mock(HttpResponse.class);
-        when(response.statusCode()).thenReturn(200);
-        when(response.body()).thenReturn(body);
-        return response;
-    }
+  @SuppressWarnings("unchecked")
+  static HttpResponse<String> mockResponse(String body) {
+    var response = (HttpResponse<String>) mock(HttpResponse.class);
+    when(response.statusCode()).thenReturn(200);
+    when(response.body()).thenReturn(body);
+    return response;
+  }
 
-    @BeforeEach
-    void setup() throws IOException, InterruptedException {
-        cognitoCredentials = new CognitoCredentials(() -> "id", () -> "secret", URI.create("https://backend-auth/"));
+  @BeforeEach
+  void setup() throws IOException, InterruptedException {
+    cognitoCredentials =
+        new CognitoCredentials(() -> "id", () -> "secret", URI.create("https://backend-auth/"));
 
-        when(okResponseWithBody.statusCode()).thenReturn(500);
-        when(okResponseWithBody.body()).thenReturn("");
+    when(okResponseWithBody.statusCode()).thenReturn(500);
+    when(okResponseWithBody.body()).thenReturn("");
 
-        when(notFoundResponse.statusCode()).thenReturn(404);
-        when(notFoundResponse.body()).thenReturn("");
+    when(notFoundResponse.statusCode()).thenReturn(404);
+    when(notFoundResponse.body()).thenReturn("");
 
-        var response = new GetExternalClientResponse(clientId, actingUser, customer, cristinOrgUri);
-        when(okResponseWithBody.statusCode()).thenReturn(200);
-        when(okResponseWithBody.body()).thenReturn(response.toString());
+    var response = new GetExternalClientResponse(clientId, actingUser, customer, cristinOrgUri);
+    when(okResponseWithBody.statusCode()).thenReturn(200);
+    when(okResponseWithBody.body()).thenReturn(response.toString());
 
-        when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(okResponseWithBody);
+    when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class)))
+        .thenReturn(okResponseWithBody);
 
-        authorizedIdentityServiceClient = new IdentityServiceClient(httpClient, BEARER_TOKEN, cognitoCredentials);
-    }
+    authorizedIdentityServiceClient =
+        new IdentityServiceClient(httpClient, BEARER_TOKEN, cognitoCredentials);
+  }
 
-    @Test
-    void shouldSendRequestToCorrectUrlWhenGettingExternalClients()
-        throws IOException, InterruptedException, NotFoundException {
-        when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class)))
-            .thenAnswer((Answer) invocation -> {
-                Object[] args = invocation.getArguments();
-                HttpRequest request = (HttpRequest) args[0];
-                var path = request.uri().getPath();
-                if (path.equals("/users-roles/external-clients/" + clientId)) {
+  @Test
+  void shouldSendRequestToCorrectUrlWhenGettingExternalClients()
+      throws IOException, InterruptedException, NotFoundException {
+    when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class)))
+        .thenAnswer(
+            (Answer)
+                invocation -> {
+                  Object[] args = invocation.getArguments();
+                  HttpRequest request = (HttpRequest) args[0];
+                  var path = request.uri().getPath();
+                  if (path.equals("/users-roles/external-clients/" + clientId)) {
                     return okResponseWithBody;
-                }
-                return null;
-            });
+                  }
+                  return null;
+                });
 
-        var externalClient = authorizedIdentityServiceClient.getExternalClient(clientId);
-        assertNotNull(externalClient);
-    }
+    var externalClient = authorizedIdentityServiceClient.getExternalClient(clientId);
+    assertNotNull(externalClient);
+  }
 
-    @Test
-    void shouldReturnExternalClientWhenRequested() throws NotFoundException {
+  @Test
+  void shouldReturnExternalClientWhenRequested() throws NotFoundException {
 
-        var externalClient = authorizedIdentityServiceClient.getExternalClient(clientId);
+    var externalClient = authorizedIdentityServiceClient.getExternalClient(clientId);
 
-        assertThat(externalClient.getClientId(), is(equalTo(clientId)));
-        assertThat(externalClient.getActingUser(), is(equalTo(actingUser)));
-        assertThat(externalClient.getCustomerUri(), is(equalTo(customer)));
-        assertThat(externalClient.getCristinUrgUri(), is(equalTo(cristinOrgUri)));
-    }
+    assertThat(externalClient.getClientId(), is(equalTo(clientId)));
+    assertThat(externalClient.getActingUser(), is(equalTo(actingUser)));
+    assertThat(externalClient.getCustomerUri(), is(equalTo(customer)));
+    assertThat(externalClient.getCristinUrgUri(), is(equalTo(cristinOrgUri)));
+  }
 
-    @Test
-    void shouldReturnUserWhenRequested() throws NotFoundException, IOException, InterruptedException {
-        var userName = "userName";
-        var expectedUser = createUser(userName);
-        var mockedResponse = mockResponse(expectedUser.toJsonString());
-        when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(mockedResponse);
-        var actual = authorizedIdentityServiceClient.getUser(userName);
-        assertEquals(expectedUser, actual);
-    }
+  @Test
+  void shouldReturnUserWhenRequested() throws NotFoundException, IOException, InterruptedException {
+    var userName = "userName";
+    var expectedUser = createUser(userName);
+    var mockedResponse = mockResponse(expectedUser.toJsonString());
+    when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class)))
+        .thenReturn(mockedResponse);
+    var actual = authorizedIdentityServiceClient.getUser(userName);
+    assertEquals(expectedUser, actual);
+  }
 
-    @Test
-    void shouldThrowNotFoundWhenUserNotFound() throws IOException, InterruptedException {
-        when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(notFoundResponse);
-        assertThrows(NotFoundException.class, () -> authorizedIdentityServiceClient.getUser(randomString()));
-    }
+  @Test
+  void shouldThrowNotFoundWhenUserNotFound() throws IOException, InterruptedException {
+    when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class)))
+        .thenReturn(notFoundResponse);
+    assertThrows(
+        NotFoundException.class, () -> authorizedIdentityServiceClient.getUser(randomString()));
+  }
 
-    @Test
-    void shouldSendRequestToCorrectUrlWhenGettingUser()
-        throws IOException, InterruptedException, NotFoundException {
-        var userName = "userName";
-        when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class)))
-            .thenAnswer((Answer) invocation -> {
-                Object[] args = invocation.getArguments();
-                HttpRequest request = (HttpRequest) args[0];
-                var path = request.uri().getPath();
-                if (path.equals("/users-roles/users/" + userName)) {
+  @Test
+  void shouldSendRequestToCorrectUrlWhenGettingUser()
+      throws IOException, InterruptedException, NotFoundException {
+    var userName = "userName";
+    when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class)))
+        .thenAnswer(
+            (Answer)
+                invocation -> {
+                  Object[] args = invocation.getArguments();
+                  HttpRequest request = (HttpRequest) args[0];
+                  var path = request.uri().getPath();
+                  if (path.equals("/users-roles/users/" + userName)) {
                     return okResponseWithBody;
-                }
-                return null;
-            });
+                  }
+                  return null;
+                });
 
-        var user = authorizedIdentityServiceClient.getUser(userName);
-        assertNotNull(user);
-    }
+    var user = authorizedIdentityServiceClient.getUser(userName);
+    assertNotNull(user);
+  }
 
-    @Test
-    void shouldReturnExternalClientWhenRequestedWithBearerToken()
-        throws NotFoundException, IOException, InterruptedException {
+  @Test
+  void shouldReturnExternalClientWhenRequestedWithBearerToken()
+      throws NotFoundException, IOException, InterruptedException {
 
-        var externalClient = authorizedIdentityServiceClient.getExternalClientByToken(BEARER_BEARER_TOKEN_TEST);
+    var externalClient =
+        authorizedIdentityServiceClient.getExternalClientByToken(BEARER_BEARER_TOKEN_TEST);
 
-        ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
-        verify(httpClient).send(requestCaptor.capture(), any(BodyHandler.class));
-        HttpRequest request = requestCaptor.getValue();
-        var actualAuthorizationHeader = request.headers().firstValue(AUTHORIZATION_HEADER).orElse("");
+    ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
+    verify(httpClient).send(requestCaptor.capture(), any(BodyHandler.class));
+    HttpRequest request = requestCaptor.getValue();
+    var actualAuthorizationHeader = request.headers().firstValue(AUTHORIZATION_HEADER).orElse("");
 
-        assertThat(actualAuthorizationHeader, is(equalTo(BEARER_BEARER_TOKEN_TEST)));
-        assertThat(externalClient.getClientId(), is(equalTo(clientId)));
-        assertThat(externalClient.getActingUser(), is(equalTo(actingUser)));
-        assertThat(externalClient.getCustomerUri(), is(equalTo(customer)));
-        assertThat(externalClient.getCristinUrgUri(), is(equalTo(cristinOrgUri)));
-    }
+    assertThat(actualAuthorizationHeader, is(equalTo(BEARER_BEARER_TOKEN_TEST)));
+    assertThat(externalClient.getClientId(), is(equalTo(clientId)));
+    assertThat(externalClient.getActingUser(), is(equalTo(actingUser)));
+    assertThat(externalClient.getCustomerUri(), is(equalTo(customer)));
+    assertThat(externalClient.getCristinUrgUri(), is(equalTo(cristinOrgUri)));
+  }
 
-    @Test
-    void shouldThrowRuntimeExceptionWhenHttpClientReturnsUnhandledError() throws IOException,
-                                                                                 InterruptedException {
-        when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(notOkResponse);
+  @Test
+  void shouldThrowRuntimeExceptionWhenHttpClientReturnsUnhandledError()
+      throws IOException, InterruptedException {
+    when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(notOkResponse);
 
-        Executable action = () -> authorizedIdentityServiceClient.getExternalClient(clientId);
+    Executable action = () -> authorizedIdentityServiceClient.getExternalClient(clientId);
 
-        assertThrows(RuntimeException.class, action);
-    }
+    assertThrows(RuntimeException.class, action);
+  }
 
-    @Test
-    void shouldThrowNotFoundWhenHttpClientNotFound() throws IOException, InterruptedException {
-        when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(notFoundResponse);
+  @Test
+  void shouldThrowNotFoundWhenHttpClientNotFound() throws IOException, InterruptedException {
+    when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class)))
+        .thenReturn(notFoundResponse);
 
-        Executable action = () -> authorizedIdentityServiceClient.getExternalClient(clientId);
+    Executable action = () -> authorizedIdentityServiceClient.getExternalClient(clientId);
 
-        assertThrows(NotFoundException.class, action);
-    }
+    assertThrows(NotFoundException.class, action);
+  }
 
-    @Test
-    void shouldReturnCustomerByCristinIdWhenRequested() throws NotFoundException, IOException, InterruptedException {
-        var customerCristinId = randomUri();
-        var expectedCustomer = createCustomer(customerCristinId);
-        var request = HttpRequest.newBuilder()
-                          .GET()
-                          .uri(createFetchCustomerByCristinIdUri(customerCristinId))
-                          .build();
+  @Test
+  void shouldReturnCustomerByCristinIdWhenRequested()
+      throws NotFoundException, IOException, InterruptedException {
+    var customerCristinId = randomUri();
+    var expectedCustomer = createCustomer(customerCristinId);
+    var request =
+        HttpRequest.newBuilder()
+            .GET()
+            .uri(createFetchCustomerByCristinIdUri(customerCristinId))
+            .build();
 
-        when(okResponseWithBody.body()).thenReturn(expectedCustomer.toJsonString());
-        when(okResponseWithBody.statusCode()).thenReturn(200);
-        when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8))).thenReturn(okResponseWithBody);
+    when(okResponseWithBody.body()).thenReturn(expectedCustomer.toJsonString());
+    when(okResponseWithBody.statusCode()).thenReturn(200);
+    when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8)))
+        .thenReturn(okResponseWithBody);
 
-        var actual = authorizedIdentityServiceClient.getCustomerByCristinId(customerCristinId);
+    var actual = authorizedIdentityServiceClient.getCustomerByCristinId(customerCristinId);
 
-        assertEquals(expectedCustomer, actual);
-    }
+    assertEquals(expectedCustomer, actual);
+  }
 
-    @Test
-    void shouldThrowNotFoundWhenFetchingCustomerByCristinIdReturnsNotFound() throws IOException, InterruptedException {
-        var topLevelOrgCristinId = randomUri();
+  @Test
+  void shouldThrowNotFoundWhenFetchingCustomerByCristinIdReturnsNotFound()
+      throws IOException, InterruptedException {
+    var topLevelOrgCristinId = randomUri();
 
-        var request = HttpRequest.newBuilder()
-                          .GET()
-                          .uri(createFetchCustomerByCristinIdUri(topLevelOrgCristinId))
-                          .build();
+    var request =
+        HttpRequest.newBuilder()
+            .GET()
+            .uri(createFetchCustomerByCristinIdUri(topLevelOrgCristinId))
+            .build();
 
-        when(okResponseWithBody.body()).thenReturn(null);
-        when(okResponseWithBody.statusCode()).thenReturn(404);
-        when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8))).thenReturn(okResponseWithBody);
+    when(okResponseWithBody.body()).thenReturn(null);
+    when(okResponseWithBody.statusCode()).thenReturn(404);
+    when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8)))
+        .thenReturn(okResponseWithBody);
 
-        assertThrows(NotFoundException.class, () -> authorizedIdentityServiceClient.getCustomerByCristinId(
-            topLevelOrgCristinId));
-    }
+    assertThrows(
+        NotFoundException.class,
+        () -> authorizedIdentityServiceClient.getCustomerByCristinId(topLevelOrgCristinId));
+  }
 
-    @Test
-    void shouldReturnCustomerByIdWhenRequested() throws NotFoundException, IOException, InterruptedException {
-        var customerId = randomCustomerId();
-        var expectedCustomer = createCustomerWithCristinId(customerId);
-        var request = HttpRequest.newBuilder()
-                          .GET()
-                          .uri(customerId)
-                          .build();
+  @Test
+  void shouldReturnCustomerByIdWhenRequested()
+      throws NotFoundException, IOException, InterruptedException {
+    var customerId = randomCustomerId();
+    var expectedCustomer = createCustomerWithCristinId(customerId);
+    var request = HttpRequest.newBuilder().GET().uri(customerId).build();
 
-        when(okResponseWithBody.body()).thenReturn(expectedCustomer.toJsonString());
-        when(okResponseWithBody.statusCode()).thenReturn(200);
-        when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8))).thenReturn(okResponseWithBody);
+    when(okResponseWithBody.body()).thenReturn(expectedCustomer.toJsonString());
+    when(okResponseWithBody.statusCode()).thenReturn(200);
+    when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8)))
+        .thenReturn(okResponseWithBody);
 
-        var actual = authorizedIdentityServiceClient.getCustomerById(customerId);
+    var actual = authorizedIdentityServiceClient.getCustomerById(customerId);
 
-        assertEquals(expectedCustomer, actual);
-    }
+    assertEquals(expectedCustomer, actual);
+  }
 
-    private static URI randomCustomerId() {
-        return randomBackendUri("customer");
-    }
+  private static URI randomCustomerId() {
+    return randomBackendUri("customer");
+  }
 
-    private static URI randomBackendUri(String path) {
-        return UriWrapper.fromHost(new Environment().readEnv("API_HOST"))
-                   .addChild(path)
-                   .addChild(randomString())
-                   .getUri();
-    }
+  private static URI randomBackendUri(String path) {
+    return UriWrapper.fromHost(new Environment().readEnv("API_HOST"))
+        .addChild(path)
+        .addChild(randomString())
+        .getUri();
+  }
 
-    @Test
-    void shouldThrowNotFoundWhenFetchingCustomerByIdReturnsNotFound() throws IOException, InterruptedException {
-        var customerId = randomCustomerId();
+  @Test
+  void shouldThrowNotFoundWhenFetchingCustomerByIdReturnsNotFound()
+      throws IOException, InterruptedException {
+    var customerId = randomCustomerId();
 
-        var request = HttpRequest.newBuilder()
-                          .GET()
-                          .uri(customerId)
-                          .build();
+    var request = HttpRequest.newBuilder().GET().uri(customerId).build();
 
-        when(okResponseWithBody.body()).thenReturn(null);
-        when(okResponseWithBody.statusCode()).thenReturn(404);
-        when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8))).thenReturn(okResponseWithBody);
+    when(okResponseWithBody.body()).thenReturn(null);
+    when(okResponseWithBody.statusCode()).thenReturn(404);
+    when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8)))
+        .thenReturn(okResponseWithBody);
 
-        assertThrows(NotFoundException.class, () -> authorizedIdentityServiceClient.getCustomerById(
-            customerId));
-    }
+    assertThrows(
+        NotFoundException.class, () -> authorizedIdentityServiceClient.getCustomerById(customerId));
+  }
 
-    @Test
-    void shouldReturnAllCustomers() throws IOException, InterruptedException, ApiGatewayException {
-        var customerList = new CustomerList(List.of(createCustomer(randomCustomerId()), createCustomer(randomUri())));
-        var uri = randomUri();
-        var request = HttpRequest.newBuilder()
-                          .GET()
-                          .uri(uri)
-                          .build();
+  @Test
+  void shouldReturnAllCustomers() throws IOException, InterruptedException, ApiGatewayException {
+    var customerList =
+        new CustomerList(List.of(createCustomer(randomCustomerId()), createCustomer(randomUri())));
+    var uri = randomUri();
+    var request = HttpRequest.newBuilder().GET().uri(uri).build();
 
-        when(okResponseWithBody.body()).thenReturn(JsonUtils.dtoObjectMapper.writeValueAsString(customerList));
-        when(okResponseWithBody.statusCode()).thenReturn(200);
-        when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8))).thenReturn(okResponseWithBody);
+    when(okResponseWithBody.body())
+        .thenReturn(JsonUtils.dtoObjectMapper.writeValueAsString(customerList));
+    when(okResponseWithBody.statusCode()).thenReturn(200);
+    when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8)))
+        .thenReturn(okResponseWithBody);
 
-        var actual = authorizedIdentityServiceClient.getAllCustomers();
+    var actual = authorizedIdentityServiceClient.getAllCustomers();
 
-        assertEquals(customerList, actual);
-    }
+    assertEquals(customerList, actual);
+  }
 
-    @Test
-    void shouldThrowRuntimeExceptionWhenFetchingAllCustomersFails() throws IOException, InterruptedException {
-        var request = HttpRequest.newBuilder()
-                          .GET()
-                          .uri(randomUri())
-                          .build();
+  @Test
+  void shouldThrowRuntimeExceptionWhenFetchingAllCustomersFails()
+      throws IOException, InterruptedException {
+    var request = HttpRequest.newBuilder().GET().uri(randomUri()).build();
 
-        when(okResponseWithBody.body()).thenReturn(null);
-        when(okResponseWithBody.statusCode()).thenReturn(502);
-        when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8))).thenReturn(okResponseWithBody);
+    when(okResponseWithBody.body()).thenReturn(null);
+    when(okResponseWithBody.statusCode()).thenReturn(502);
+    when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8)))
+        .thenReturn(okResponseWithBody);
 
-        assertThrows(RuntimeException.class, () -> authorizedIdentityServiceClient.getAllCustomers());
-    }
+    assertThrows(RuntimeException.class, () -> authorizedIdentityServiceClient.getAllCustomers());
+  }
 
-    @Test
-    void shouldReturnChannelClaimByIdWhenRequested() throws NotFoundException, IOException, InterruptedException {
-        var channelClaim = randomBackendUri("customer/channel-claim");
-        var expectedChannelClaim = channelClaimWithId(channelClaim);
-        var request = HttpRequest.newBuilder()
-                          .GET()
-                          .uri(channelClaim)
-                          .build();
+  @Test
+  void shouldReturnChannelClaimByIdWhenRequested()
+      throws NotFoundException, IOException, InterruptedException {
+    var channelClaim = randomBackendUri("customer/channel-claim");
+    var expectedChannelClaim = channelClaimWithId(channelClaim);
+    var request = HttpRequest.newBuilder().GET().uri(channelClaim).build();
 
-        when(okResponseWithBody.body()).thenReturn(expectedChannelClaim.toJsonString());
-        when(okResponseWithBody.statusCode()).thenReturn(200);
-        when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8))).thenReturn(okResponseWithBody);
+    when(okResponseWithBody.body()).thenReturn(expectedChannelClaim.toJsonString());
+    when(okResponseWithBody.statusCode()).thenReturn(200);
+    when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8)))
+        .thenReturn(okResponseWithBody);
 
-        var actual = authorizedIdentityServiceClient.getChannelClaim(channelClaim);
+    var actual = authorizedIdentityServiceClient.getChannelClaim(channelClaim);
 
-        assertEquals(expectedChannelClaim, actual);
-    }
+    assertEquals(expectedChannelClaim, actual);
+  }
 
-    @Test
-    void shouldThrowNotFoundWhenIdentityServiceRespondsWithNoFoundWhenFetchingChannelClaim() throws IOException,
-                                                                                                     InterruptedException {
-        var channelClaim = randomBackendUri("customer/channel-claim");
-        var request = HttpRequest.newBuilder()
-                          .GET()
-                          .uri(channelClaim)
-                          .build();
+  @Test
+  void shouldThrowNotFoundWhenIdentityServiceRespondsWithNoFoundWhenFetchingChannelClaim()
+      throws IOException, InterruptedException {
+    var channelClaim = randomBackendUri("customer/channel-claim");
+    var request = HttpRequest.newBuilder().GET().uri(channelClaim).build();
 
-        when(okResponseWithBody.statusCode()).thenReturn(404);
-        when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8))).thenReturn(okResponseWithBody);
+    when(okResponseWithBody.statusCode()).thenReturn(404);
+    when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8)))
+        .thenReturn(okResponseWithBody);
 
-        assertThrows(NotFoundException.class, () -> authorizedIdentityServiceClient.getChannelClaim(channelClaim));
-    }
+    assertThrows(
+        NotFoundException.class,
+        () -> authorizedIdentityServiceClient.getChannelClaim(channelClaim));
+  }
 
-    @Test
-    void shouldThrowRuntimeExceptionWhenUnhandledExceptionWhenFetchingChannelClaim() throws IOException, InterruptedException {
-        var channelClaim = randomUri();
-        var request = HttpRequest.newBuilder()
-                          .GET()
-                          .uri(channelClaim)
-                          .build();
+  @Test
+  void shouldThrowRuntimeExceptionWhenUnhandledExceptionWhenFetchingChannelClaim()
+      throws IOException, InterruptedException {
+    var channelClaim = randomUri();
+    var request = HttpRequest.newBuilder().GET().uri(channelClaim).build();
 
-        when(okResponseWithBody.statusCode()).thenReturn(500);
-        when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8))).thenReturn(okResponseWithBody);
+    when(okResponseWithBody.statusCode()).thenReturn(500);
+    when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8)))
+        .thenReturn(okResponseWithBody);
 
-        assertThrows(RuntimeException.class, () -> authorizedIdentityServiceClient.getChannelClaim(channelClaim));
-    }
+    assertThrows(
+        RuntimeException.class,
+        () -> authorizedIdentityServiceClient.getChannelClaim(channelClaim));
+  }
 
-    @Test
-    void shouldThrowIllegalStateExceptionWhenFetchingCustomerWithUnauthorizedHttpClient() {
-        var service = new IdentityServiceClient(mock(HttpClient.class));
-        var throwable = assertThrows(IllegalStateException.class, () -> service.getCustomerById(randomUri()));
+  @Test
+  void shouldThrowIllegalStateExceptionWhenFetchingCustomerWithUnauthorizedHttpClient() {
+    var service = new IdentityServiceClient(mock(HttpClient.class));
+    var throwable =
+        assertThrows(IllegalStateException.class, () -> service.getCustomerById(randomUri()));
 
-        assertEquals(OPERATION_REQUIRES_AN_AUTHORIZED_CLIENT_MESSAGE,  throwable.getMessage());
-    }
+    assertEquals(OPERATION_REQUIRES_AN_AUTHORIZED_CLIENT_MESSAGE, throwable.getMessage());
+  }
 
-    @Test
-    void shouldThrowIllegalStateExceptionWhenFetchingUserWithUnauthorizedHttpClient() {
-        var service = new IdentityServiceClient(mock(HttpClient.class));
-        var throwable = assertThrows(IllegalStateException.class, () -> service.getUser(randomString()));
+  @Test
+  void shouldThrowIllegalStateExceptionWhenFetchingUserWithUnauthorizedHttpClient() {
+    var service = new IdentityServiceClient(mock(HttpClient.class));
+    var throwable =
+        assertThrows(IllegalStateException.class, () -> service.getUser(randomString()));
 
-        assertEquals(OPERATION_REQUIRES_AN_AUTHORIZED_CLIENT_MESSAGE,  throwable.getMessage());
-    }
+    assertEquals(OPERATION_REQUIRES_AN_AUTHORIZED_CLIENT_MESSAGE, throwable.getMessage());
+  }
 
-    @Test
-    void shouldThrowIllegalStateExceptionWhenFetchingCustomerByCristinIdWithUnauthorizedHttpClient() {
-        var service = new IdentityServiceClient(mock(HttpClient.class));
-        var throwable = assertThrows(IllegalStateException.class, () -> service.getCustomerByCristinId(randomUri()));
+  @Test
+  void shouldThrowIllegalStateExceptionWhenFetchingCustomerByCristinIdWithUnauthorizedHttpClient() {
+    var service = new IdentityServiceClient(mock(HttpClient.class));
+    var throwable =
+        assertThrows(
+            IllegalStateException.class, () -> service.getCustomerByCristinId(randomUri()));
 
-        assertEquals(OPERATION_REQUIRES_AN_AUTHORIZED_CLIENT_MESSAGE,  throwable.getMessage());
-    }
+    assertEquals(OPERATION_REQUIRES_AN_AUTHORIZED_CLIENT_MESSAGE, throwable.getMessage());
+  }
 
-    @Test
-    void shouldThrowIllegalStateExceptionWhenFetchingExternalClientWithUnauthorizedHttpClient() {
-        var service = new IdentityServiceClient(mock(HttpClient.class));
-        var throwable = assertThrows(IllegalStateException.class, () -> service.getExternalClient(randomString()));
+  @Test
+  void shouldThrowIllegalStateExceptionWhenFetchingExternalClientWithUnauthorizedHttpClient() {
+    var service = new IdentityServiceClient(mock(HttpClient.class));
+    var throwable =
+        assertThrows(IllegalStateException.class, () -> service.getExternalClient(randomString()));
 
-        assertEquals(OPERATION_REQUIRES_AN_AUTHORIZED_CLIENT_MESSAGE,  throwable.getMessage());
-    }
+    assertEquals(OPERATION_REQUIRES_AN_AUTHORIZED_CLIENT_MESSAGE, throwable.getMessage());
+  }
 
-    private ChannelClaimDto channelClaimWithId(URI channelClaim) {
-        return new ChannelClaimDto(channelClaim, new CustomerSummaryDto(
-            randomUri(), randomUri()), new ChannelClaim(channelClaim,
-                                                        new ChannelConstraint(randomString(), randomString(),
-                                                                                                       List.of(randomString(), randomString()))));
-    }
+  private ChannelClaimDto channelClaimWithId(URI channelClaim) {
+    return new ChannelClaimDto(
+        channelClaim,
+        new CustomerSummaryDto(randomUri(), randomUri()),
+        new ChannelClaim(
+            channelClaim,
+            new ChannelConstraint(
+                randomString(), randomString(), List.of(randomString(), randomString()))));
+  }
 
-    private static URI createFetchCustomerByCristinIdUri(URI customerCristinId) {
-        var fetchCustomerUri = UriWrapper.fromHost(new Environment().readEnv("API_HOST"))
-                                   .addChild("customer")
-                                   .addChild("cristinId")
-                                   .getUri();
-        return URI.create(fetchCustomerUri + "/" + URLEncoder.encode(customerCristinId.toString(),
-                                                                     StandardCharsets.UTF_8));
-    }
+  private static URI createFetchCustomerByCristinIdUri(URI customerCristinId) {
+    var fetchCustomerUri =
+        UriWrapper.fromHost(new Environment().readEnv("API_HOST"))
+            .addChild("customer")
+            .addChild("cristinId")
+            .getUri();
+    return URI.create(
+        fetchCustomerUri
+            + "/"
+            + URLEncoder.encode(customerCristinId.toString(), StandardCharsets.UTF_8));
+  }
 
-    private CustomerDto createCustomerWithCristinId(URI customerCristinId) {
-        return new CustomerDto(randomUri(), UUID.randomUUID(), randomString(), randomString(), randomString(),
-                               customerCristinId, null, false, false, false, null,
-                               new RightsRetentionStrategy(randomString(), randomUri()), true, randomString());
-    }
+  private CustomerDto createCustomerWithCristinId(URI customerCristinId) {
+    return new CustomerDto(
+        randomUri(),
+        UUID.randomUUID(),
+        randomString(),
+        randomString(),
+        randomString(),
+        customerCristinId,
+        null,
+        false,
+        false,
+        false,
+        null,
+        new RightsRetentionStrategy(randomString(), randomUri()),
+        true,
+        randomString());
+  }
 
-    private CustomerDto createCustomer(URI customerId) {
-        return new CustomerDto(customerId, UUID.randomUUID(), randomString(), randomString(), randomString(),
-                               randomUri(), null, false, false, false, null, null, false, randomString());
-    }
+  private CustomerDto createCustomer(URI customerId) {
+    return new CustomerDto(
+        customerId,
+        UUID.randomUUID(),
+        randomString(),
+        randomString(),
+        randomString(),
+        randomUri(),
+        null,
+        false,
+        false,
+        false,
+        null,
+        null,
+        false,
+        randomString());
+  }
 
-    private UserDto createUser(String userName) {
-        return UserDto.builder()
-                   .withUsername(userName)
-                   .withInstitution(randomUri())
-                   .withGivenName("Test")
-                   .withFamilyName("Testing")
-                   .withViewingScope(ViewingScope.builder()
-                                         .withType("ViewingScope")
-                                         .withIncludedUnits(List.of(randomUri()))
-                                         .withExcludedUnits(List.of(randomUri()))
-                                         .build())
-                   .withRoles(List.of(Role.builder()
-                                          .withRolename("Publishing-Curator")
-                                          .withAccessRights(List.of("MANAGE_PUBLISHING_REQUESTS"))
-                                          .withType("Role")
-                                          .build()))
-                   .withCristinId(randomUri())
-                   .withFeideIdentifier("feideIdentifier")
-                   .withInstitutionCristinId(randomUri())
-                   .withAffiliation(randomUri())
-                   .withType("User")
-                   .withAccessRights(List.of("MANAGE_PUBLISHING_REQUESTS"))
-                   .build();
-    }
+  private UserDto createUser(String userName) {
+    return UserDto.builder()
+        .withUsername(userName)
+        .withInstitution(randomUri())
+        .withGivenName("Test")
+        .withFamilyName("Testing")
+        .withViewingScope(
+            ViewingScope.builder()
+                .withType("ViewingScope")
+                .withIncludedUnits(List.of(randomUri()))
+                .withExcludedUnits(List.of(randomUri()))
+                .build())
+        .withRoles(
+            List.of(
+                Role.builder()
+                    .withRolename("Publishing-Curator")
+                    .withAccessRights(List.of("MANAGE_PUBLISHING_REQUESTS"))
+                    .withType("Role")
+                    .build()))
+        .withCristinId(randomUri())
+        .withFeideIdentifier("feideIdentifier")
+        .withInstitutionCristinId(randomUri())
+        .withAffiliation(randomUri())
+        .withType("User")
+        .withAccessRights(List.of("MANAGE_PUBLISHING_REQUESTS"))
+        .build();
+  }
 }

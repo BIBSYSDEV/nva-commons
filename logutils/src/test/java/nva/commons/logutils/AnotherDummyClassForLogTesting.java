@@ -5,14 +5,14 @@ import org.slf4j.LoggerFactory;
 
 public class AnotherDummyClassForLogTesting {
 
-    private static final Logger LOGGER
-        = LoggerFactory.getLogger(AnotherDummyClassForLogTesting.class);
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(AnotherDummyClassForLogTesting.class);
 
-    public void logInfo(String message) {
-        LOGGER.info(message);
-    }
+  public void logInfo(String message) {
+    LOGGER.info(message);
+  }
 
-    public void logError(String message, Throwable cause) {
-        LOGGER.error(message, cause);
-    }
+  public void logError(String message, Throwable cause) {
+    LOGGER.error(message, cause);
+  }
 }
