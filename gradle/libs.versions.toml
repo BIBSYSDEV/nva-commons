@@ -15,15 +15,11 @@ aws-lambda-events = { strictly = '3.16.1' }
 aws-sdk = { strictly = '1.12.797' }
 aws-sdk2 = { strictly = '2.46.17' }
 aws-sdk2-dynamodblocal = { strictly = '3.3.0' }
-ben-manes-versions = { strictly = '0.53.0' }
-build-health = { strictly = '3.6.1' }
 com-auth0-jwks = { strictly = '0.24.1' }
 com-auth0-jwt = { strictly = '4.5.2' }
 commons-validator = { strictly = '1.10.1' }
 cucumber = { strictly = '7.34.4' }
 datafaker = { strictly = '2.7.0' }
-errorprone = { strictly = '2.49.0' }
-errorprone-plugin = { strictly = '5.1.0' }
 guava = { strictly = '33.6.0-jre' }
 hamcrest = { strictly = '3.0' }
 jackson = { strictly = '2.22.0' }
@@ -34,7 +30,6 @@ jupiter = { strictly = '6.1.1' }
 lambda-log4j = { strictly = '1.6.4' }
 log4j = { strictly = '2.26.0' }
 mockito = { strictly = '5.23.0' }
-nebula-lint = { strictly = '20.6.2' }
 nexus-publish = { strictly = '2.0.0' }
 nva-language = { strictly = '1.2.3' }
 opencsv = { strictly = '5.12.0' }
@@ -42,7 +37,6 @@ opensearch-java = { strictly = '3.9.0' }
 opensearch-server = { strictly = '3.6.0' }
 opensearch-testcontainer = { strictly = '4.1.0' }
 slf4j = { strictly = '2.0.18' }
-spotless = { strictly = '8.2.0' }
 testcontainers = { strictly = '2.0.5' }
 wiremock = { strictly = '4.0.0-beta.37' }
 zalando-problem = { strictly = '0.27.1' }
@@ -67,7 +61,6 @@ aws-sdk-sqs = {group = 'com.amazonaws', name = 'aws-java-sdk-sqs', version.ref =
 aws-sdk2-auth = { group = 'software.amazon.awssdk', name = 'auth', version.ref = 'aws-sdk2' }
 aws-sdk2-bom = { group = 'software.amazon.awssdk', name = 'bom', version.ref = 'aws-sdk2' }
 aws-sdk2-aws-core = { group = 'software.amazon.awssdk', name = 'aws-core', version.ref = 'aws-sdk2' }
-aws-sdk2-core = { group = 'software.amazon.awssdk', name = 'sdk-core', version.ref = 'aws-sdk2' } # Duplicate, kept temporarily for backwards compatibility
 aws-sdk2-dynamo = { group = 'software.amazon.awssdk', name = 'dynamodb', version.ref = 'aws-sdk2' }
 aws-sdk2-dynamodblocal = { group = 'software.amazon.dynamodb', name = 'DynamoDBLocal', version.ref = 'aws-sdk2-dynamodblocal' }
 aws-sdk2-dynamodbenhanced = { group = 'software.amazon.awssdk', name = 'dynamodb-enhanced', version.ref = 'aws-sdk2' }
@@ -117,9 +110,6 @@ resilience4j-retry = { group = 'io.github.resilience4j', name = 'resilience4j-re
 vavr = { group = 'io.vavr', name = 'vavr', version.ref = 'vavr' }
 zalando = { group = 'org.zalando', name = 'problem', version.ref = 'zalando-problem' }
 
-# Build tools
-errorprone = { group = 'com.google.errorprone', name = 'error_prone_core', version.ref = 'errorprone' }
-
 # Logging dependencies
 lambda-log4j = { group = 'com.amazonaws', name = 'aws-lambda-java-log4j2', version.ref = 'lambda-log4j' }
 log4j-bom = { group = 'org.apache.logging.log4j', name = 'log4j-bom', version.ref = 'log4j' }
@@ -163,42 +153,4 @@ wiremock-junit5 = { group = 'org.wiremock', name = 'wiremock-junit5', version.re
 
 [plugins]
 # IMPORTANT: Renaming or removing a plugin is a breaking change
-build-health = { id = 'com.autonomousapps.build-health', version.ref = 'build-health' }
-errorprone = { id = 'net.ltgt.errorprone', version.ref = 'errorprone-plugin' }
-gradle-versions = { id = 'com.github.ben-manes.versions', version.ref = 'ben-manes-versions' }
-nebula-lint = { id = 'nebula.lint', version.ref = 'nebula-lint' }
 nexus-publish = { id = 'io.github.gradle-nexus.publish-plugin', version.ref = 'nexus-publish' }
-spotless = { id = 'com.diffplug.spotless', version.ref = 'spotless' }
-
-[bundles]
-# IMPORTANT: Renaming a bundle or removing elements from it is a breaking change
-apache-poi = ['apache-poi', 'apache-poi-ooxml']
-jackson = [
-    'jackson-annotations',
-    'jackson-core',
-    'jackson-databind',
-    'jackson-dataformat-xml',
-    'jackson-datatype-jdk8',
-    'jackson-datatype-jsr310',
-    'jackson-datatype-problem',
-    'jackson-module-parameter-names']
-jacksonjr = ['jackson-jr-objects', 'jackson-jr-annotations']
-jena = ['jena-core', 'jena-arq']
-logging = [
-    'lambda-log4j',
-    'log4j-api',
-    'log4j-core',
-    'log4j-slf4j-impl',
-    'slf4j-api']
-
-testing-cucumber = ['cucumber-java', 'cucumber-junit-platform-engine', 'cucumber-picocontainer']
-testing-hamcrest = ['hamcrest', 'hamcrest-core']
-testing-junit = [
-    'junit-jupiter',
-    'junit-jupiter-api',
-    'junit-jupiter-engine',
-    'junit-jupiter-params',
-    'junit-platform-launcher']
-testing-mockito = ['mockito-core']
-testing-testcontainers = ['testcontainers', 'testcontainers-junit', 'testcontainers-opensearch']
-wiremock = ['wiremock', 'wiremock-junit5']
