@@ -36,11 +36,13 @@ opencsv = { strictly = '5.12.0' }
 opensearch-java = { strictly = '3.9.0' }
 opensearch-server = { strictly = '3.6.0' }
 opensearch-testcontainer = { strictly = '4.1.0' }
+picocontainer = { strictly = '2.15.2'}
 slf4j = { strictly = '2.0.18' }
 testcontainers = { strictly = '2.0.5' }
 wiremock = { strictly = '4.0.0-beta.37' }
 zalando-problem = { strictly = '0.27.1' }
 resilience4j = { strictly = '2.4.0' }
+titanium-json-ld = { strictly = '1.7.0'}
 vavr = { strictly = '1.0.1' }
 
 [libraries]
@@ -107,6 +109,7 @@ resilience4j-all = { group = 'io.github.resilience4j', name = 'resilience4j-all'
 resilience4j-core = { group = 'io.github.resilience4j', name = 'resilience4j-core', version.ref = 'resilience4j' }
 resilience4j-ratelimiter = { group = 'io.github.resilience4j', name = 'resilience4j-ratelimiter', version.ref = 'resilience4j' }
 resilience4j-retry = { group = 'io.github.resilience4j', name = 'resilience4j-retry', version.ref = 'resilience4j' }
+titanium-json-ld = { group = 'com.apicatalog', name = 'titanium-json-ld', version.ref = 'titanium-json-ld' }
 vavr = { group = 'io.vavr', name = 'vavr', version.ref = 'vavr' }
 zalando = { group = 'org.zalando', name = 'problem', version.ref = 'zalando-problem' }
 
@@ -122,6 +125,8 @@ slf4j-api = { group = 'org.slf4j', name = 'slf4j-api', version.ref = 'slf4j' }
 # Test dependencies
 assertj-core = { group = 'org.assertj', name = 'assertj-core', version.ref = 'assertj' }
 cucumber-bom = { group = 'io.cucumber', name = 'cucumber-bom', version.ref = 'cucumber' }
+cucumber-core = { group = 'io.cucumber', name = 'cucumber-core', version.ref = 'cucumber' }
+cucumber-datatable = { group = 'io.cucumber', name = 'datatable', version.ref = 'cucumber' }
 cucumber-java = { group = 'io.cucumber', name = 'cucumber-java', version.ref = 'cucumber' }
 cucumber-junit-platform-engine = { group = 'io.cucumber', name = 'cucumber-junit-platform-engine', version.ref = 'cucumber' }
 cucumber-picocontainer = { group = 'io.cucumber', name = 'cucumber-picocontainer', version.ref = 'cucumber' }
@@ -133,6 +138,7 @@ junit-jupiter = { group = 'org.junit.jupiter', name = 'junit-jupiter', version.r
 junit-jupiter-api = { group = 'org.junit.jupiter', name = 'junit-jupiter-api', version.ref = 'jupiter' }
 junit-jupiter-engine = { group = 'org.junit.jupiter', name = 'junit-jupiter-engine', version.ref = 'jupiter' }
 junit-jupiter-params = { group = 'org.junit.jupiter', name = 'junit-jupiter-params', version.ref = 'jupiter' }
+junit-platform-commons = { group = 'org.junit.platform', name = 'junit-platform-commons', version.ref = 'jupiter' }
 junit-platform-launcher = { group = 'org.junit.platform', name = 'junit-platform-launcher', version.ref = 'jupiter' }
 junit-platform-suite = { group = 'org.junit.platform', name = 'junit-platform-suite', version.ref = 'jupiter' }
 junit-platform-suite-api = { group = 'org.junit.platform', name = 'junit-platform-suite-api', version.ref = 'jupiter' }
@@ -143,6 +149,7 @@ mockito-junit-jupiter = { group= 'org.mockito', name= 'mockito-junit-jupiter', v
 opensearch-java = { group = 'org.opensearch.client', name = 'opensearch-java', version.ref = 'opensearch-java' }
 opensearch-rest-client = { group = 'org.opensearch.client', name = 'opensearch-rest-client', version.ref = 'opensearch-server' }
 opensearch-rest-highlevel-client = { group = 'org.opensearch.client', name = 'opensearch-rest-high-level-client', version.ref = 'opensearch-server' }
+picocontainer = { group = 'org.picocontainer', name = 'picocontainer', version.ref = 'picocontainer' }
 testcontainers-bom = { group = 'org.testcontainers', name = 'testcontainers-bom', version.ref = 'testcontainers' }
 testcontainers = { group = 'org.testcontainers', name = 'testcontainers', version.ref = 'testcontainers' }
 testcontainers-junit = { group = 'org.testcontainers', name = 'testcontainers-junit-jupiter', version.ref = 'testcontainers' }
