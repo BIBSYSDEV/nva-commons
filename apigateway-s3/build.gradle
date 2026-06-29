@@ -19,7 +19,6 @@ dependencies {
     testImplementation libs.junit.jupiter.api
     testImplementation libs.mockito.core
     testImplementation project(':nvatestutils')
-    testRuntimeOnly libs.jackson.dataformat.xml
 }
 
 test {

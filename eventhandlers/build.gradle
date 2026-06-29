@@ -17,9 +17,6 @@ dependencies {
     implementation libs.jackson.jr.annotations
     implementation libs.slf4j.api
     implementation project(":core")
-    runtimeOnly libs.jackson.datatype.jdk8
-    runtimeOnly libs.jackson.datatype.jsr310
-    runtimeOnly libs.jackson.datatype.problem
     runtimeOnly libs.log4j.api
     runtimeOnly libs.log4j.core
     runtimeOnly libs.log4j.slf4j.impl
@@ -30,10 +27,6 @@ dependencies {
     testImplementation platform(libs.junit.bom)
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")
-    testRuntimeOnly libs.datafaker
-    testRuntimeOnly libs.jackson.dataformat.xml
-    testRuntimeOnly libs.junit.jupiter.engine
-    testRuntimeOnly libs.junit.platform.launcher
 }
 
 

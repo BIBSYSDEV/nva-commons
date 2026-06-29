@@ -12,14 +12,10 @@ dependencies {
     compileOnly libs.jackson.datatype.jsr310
     compileOnly libs.zalando
     implementation project(":core")
-    runtimeOnly libs.jackson.datatype.problem
     testImplementation libs.hamcrest
     testImplementation libs.jackson.databind
     testImplementation libs.junit.jupiter.api
     testImplementation libs.junit.jupiter.params
     testImplementation platform(libs.junit.bom)
     testImplementation project(":nvatestutils")
-    testRuntimeOnly libs.datafaker
-    testRuntimeOnly libs.junit.jupiter.engine
-    testRuntimeOnly libs.junit.platform.launcher
 }

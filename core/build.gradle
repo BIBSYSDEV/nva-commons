@@ -21,14 +21,6 @@ dependencies {
     testImplementation platform(libs.junit.bom)
     testImplementation project(":logutils")
     testImplementation project(":nvatestutils")
-    testRuntimeOnly libs.datafaker
-    testRuntimeOnly libs.jackson.dataformat.xml
-    testRuntimeOnly libs.jackson.datatype.jdk8
-    testRuntimeOnly libs.jackson.datatype.jsr310
-    testRuntimeOnly libs.jackson.datatype.problem
-    testRuntimeOnly libs.jackson.module.parameter.names
-    testRuntimeOnly libs.junit.jupiter.engine
-    testRuntimeOnly libs.junit.platform.launcher
 }
 
 test {
