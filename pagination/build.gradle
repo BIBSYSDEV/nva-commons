@@ -4,16 +4,11 @@ plugins {
 }
 
 dependencies {
+    api libs.jackson.annotations
+    api libs.jackson.databind
     api project(":apigateway")
-    compileOnly libs.jackson.annotations
-    compileOnly libs.jackson.core
-    compileOnly libs.jackson.databind
-    compileOnly libs.jackson.datatype.jdk8
-    compileOnly libs.jackson.datatype.jsr310
-    compileOnly libs.zalando
     implementation project(":core")
     testImplementation libs.hamcrest
-    testImplementation libs.jackson.databind
     testImplementation libs.junit.jupiter.api
     testImplementation libs.junit.jupiter.params
     testImplementation platform(libs.junit.bom)

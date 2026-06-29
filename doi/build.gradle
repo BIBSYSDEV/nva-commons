@@ -4,7 +4,6 @@ plugins {
 }
 dependencies {
     api libs.jackson.annotations
-    compileOnly libs.jackson.annotations
     implementation libs.commons.validator
     implementation libs.slf4j.api
     implementation project(":core")

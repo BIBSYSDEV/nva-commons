@@ -7,7 +7,6 @@ dependencies {
     api libs.jackson.annotations
     api libs.jackson.core
     api libs.jackson.databind
-    compileOnly libs.zalando
     implementation libs.jackson.datatype.jdk8
     implementation libs.jackson.datatype.jsr310
     implementation libs.jackson.datatype.problem
