@@ -103,7 +103,7 @@ public final class MediaTypeParser {
     return new ParseContext(config(), true).parseList(input);
   }
 
-  @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName", "PMD.TooManyFields"})
+  @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
   public static final class Builder {
     private int maxInputLength = DEFAULT_MAX_INPUT_LENGTH;
     private int maxListElements = DEFAULT_MAX_LIST_ELEMENTS;
