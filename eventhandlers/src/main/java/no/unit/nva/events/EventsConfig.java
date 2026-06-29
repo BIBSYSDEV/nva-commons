@@ -5,6 +5,7 @@ import com.fasterxml.jackson.jr.annotationsupport.JacksonAnnotationExtension;
 import com.fasterxml.jackson.jr.ob.JSON;
 import no.unit.nva.commons.json.JsonUtils;
 
+@SuppressWarnings("PMD.FieldNamingConventions")
 public final class EventsConfig {
 
   public static final ObjectMapper objectMapper = JsonUtils.dtoObjectMapper;

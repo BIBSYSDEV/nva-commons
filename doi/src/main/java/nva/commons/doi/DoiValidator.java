@@ -34,7 +34,7 @@ public class DoiValidator {
   public static final Pattern DOI_STRING_PATTERN =
       Pattern.compile(DOI_STRING_REGEX_START + DOI_SUFFIX_REGEX, Pattern.CASE_INSENSITIVE);
   public static final String INVALID_DOI_ERROR = "Invalid DOI";
-  private static final Logger logger = LoggerFactory.getLogger(DoiValidator.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DoiValidator.class);
   private final UnitHttpClient httpClient;
 
   @JacocoGenerated
@@ -50,7 +50,7 @@ public class DoiValidator {
     if (validateOffline(doi)) {
       return true;
     } else {
-      logger.error(INVALID_DOI_ERROR + doi);
+      LOGGER.error(INVALID_DOI_ERROR + doi);
     }
     throw new InvalidDoiException(doi);
   }

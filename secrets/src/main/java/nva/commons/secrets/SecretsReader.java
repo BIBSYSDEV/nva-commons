@@ -20,7 +20,7 @@ import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRespon
 public class SecretsReader {
 
   public static final String COULD_NOT_READ_SECRET_ERROR = "Could not read secret: ";
-  private static final Logger logger = LoggerFactory.getLogger(SecretsReader.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SecretsReader.class);
   private static final String AWS_REGION =
       new Environment().readEnvOpt("AWS_REGION").orElse(Region.EU_WEST_1.id());
 
@@ -111,7 +111,7 @@ public class SecretsReader {
   }
 
   private <T> ErrorReadingSecretException errorReadingSecret(Failure<T> fail, String secretName) {
-    logger.error(errorReadingSecretMessage(secretName), fail.getException());
+    LOGGER.error(errorReadingSecretMessage(secretName), fail.getException());
     return new ErrorReadingSecretException();
   }
 
@@ -120,7 +120,7 @@ public class SecretsReader {
   }
 
   private <I> ErrorReadingSecretException logErrorAndThrowException(Failure<I> failure) {
-    logger.error(failure.getException().getMessage(), failure.getException());
+    LOGGER.error(failure.getException().getMessage(), failure.getException());
     return new ErrorReadingSecretException();
   }
 }

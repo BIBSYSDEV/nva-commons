@@ -58,9 +58,9 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
   public static final String EMPTY_STRING = "";
   public static final String COMMA = ",";
   public static final String PREFIX_SINGLE_WILDCARD_TYPE = "*/";
+  private static final Logger LOGGER = LoggerFactory.getLogger(RestRequestHandler.class);
   private static final String COGNITO_AUTHORIZER_URLS = "COGNITO_AUTHORIZER_URLS";
   protected final Environment environment;
-  private static final Logger logger = LoggerFactory.getLogger(RestRequestHandler.class);
   private final transient Class<I> iclass;
   private final transient ApiMessageParser<I> inputParser;
   protected final ObjectMapper objectMapper;
@@ -166,7 +166,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
   @SuppressWarnings("PMD.AvoidCatchingGenericException")
   public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context)
       throws IOException {
-    logger.info(REQUEST_ID + context.getAwsRequestId());
+    LOGGER.info(REQUEST_ID + context.getAwsRequestId());
     I inputObject = null;
     try {
       init(outputStream, context);
@@ -218,7 +218,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
         jwtVerifier.verify(decodedJWT);
       } catch (JwkException | JWTVerificationException e) {
-        logger.error("Failed to verify token", e);
+        LOGGER.error("Failed to verify token", e);
         throw new UnauthorizedException("Failed to verify token");
       }
     }
@@ -240,7 +240,7 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
   private JwkProvider getJwkProvider(String issuer) throws UnauthorizedException {
     var jwkProvider = jwkProviders.get(issuer);
     if (isNull(jwkProvider)) {
-      logger.error("JWK provider for issuer {} not found", issuer);
+      LOGGER.error("JWK provider for issuer {} not found", issuer);
       throw new UnauthorizedException("No JWK provider found for issuer");
     }
     return jwkProvider;
@@ -267,15 +267,15 @@ public abstract class RestRequestHandler<I, O> implements RequestStreamHandler {
 
   protected void handleUnexpectedException(Context context, I inputObject, Exception e)
       throws IOException {
-    logger.error(e.getMessage());
-    logger.error(stackTraceInSingleLine(e));
+    LOGGER.error(e.getMessage());
+    LOGGER.error(stackTraceInSingleLine(e));
     writeUnexpectedFailure(inputObject, e, context.getAwsRequestId());
   }
 
   protected void handleExpectedException(Context context, I inputObject, ApiGatewayException e)
       throws IOException {
-    logger.warn(e.getMessage());
-    logger.warn(stackTraceInSingleLine(e));
+    LOGGER.warn(e.getMessage());
+    LOGGER.warn(stackTraceInSingleLine(e));
     writeExpectedFailure(inputObject, e, context.getAwsRequestId());
   }
 

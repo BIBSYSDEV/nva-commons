@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 public class Environment {
 
-  private static final Logger logger = LoggerFactory.getLogger(Environment.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(Environment.class);
   public static final String ENVIRONMENT_VARIABLE_NOT_SET = "Environment variable not set: ";
 
   /**
@@ -32,7 +32,7 @@ public class Environment {
 
   private IllegalStateException variableNotSetException(String variableName) {
     String message = ENVIRONMENT_VARIABLE_NOT_SET + variableName;
-    logger.error(message);
+    LOGGER.error(message);
     return new IllegalStateException(message);
   }
 }

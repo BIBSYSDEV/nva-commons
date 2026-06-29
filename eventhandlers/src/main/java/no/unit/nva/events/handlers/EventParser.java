@@ -16,7 +16,7 @@ public class EventParser<I> {
   public static final String ERROR_PARSING_INPUT = "Could not parse input: ";
   public static final int SKIP_BOTTOM_TYPE = 2;
   public static final String RAWTYPES = "rawtypes";
-  private static final Logger logger = LoggerFactory.getLogger(EventParser.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(EventParser.class);
   private final String input;
   private final ObjectMapper objectMapper;
 
@@ -61,8 +61,8 @@ public class EventParser<I> {
   }
 
   private <O> RuntimeException handleParsingError(Failure<O> fail) {
-    logger.error(ERROR_PARSING_INPUT + input);
-    logger.error(stackTraceInSingleLine(fail.getException()));
+    LOGGER.error(ERROR_PARSING_INPUT + input);
+    LOGGER.error(stackTraceInSingleLine(fail.getException()));
     return new RuntimeException(fail.getException());
   }
 

@@ -33,7 +33,7 @@ public abstract class RequestAuthorizer
   public static final String COULD_NOT_READ_PRINCIPAL_ID_ERROR =
       "Error while trying to get the principal ID.";
   private static final String DENY_EFFECT = "Deny";
-  private static final Logger logger = LoggerFactory.getLogger(RequestAuthorizer.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(RequestAuthorizer.class);
 
   protected RequestAuthorizer() {}
 
@@ -109,7 +109,7 @@ public abstract class RequestAuthorizer
   }
 
   private AuthorizerResponse createForbiddenResponse(Exception exception) {
-    logger.warn(ExceptionUtils.stackTraceInSingleLine(exception));
+    LOGGER.warn(ExceptionUtils.stackTraceInSingleLine(exception));
     return AuthorizerResponse.newBuilder()
         .withPrincipalId(readPrincipalId())
         .withPolicyDocument(createDenyAuthPolicy())
@@ -133,7 +133,7 @@ public abstract class RequestAuthorizer
   }
 
   private RuntimeException logErrorAndThrowException(Failure<String> failure) {
-    logger.error(failure.getException().getMessage(), failure.getException());
+    LOGGER.error(failure.getException().getMessage(), failure.getException());
     return new RuntimeException(failure.getException());
   }
 }

@@ -27,7 +27,7 @@ public abstract class EventHandler<I, O> implements RequestStreamHandler {
   public static final String HANDLER_INPUT = "Handler input:\n";
   public static final String ERROR_WRITING_TO_OUTPUT_STREAM =
       "Error writing output to output stream. Output is: ";
-  private static final Logger logger = LoggerFactory.getLogger(EventHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(EventHandler.class);
   protected final ObjectMapper objectMapper;
   private final Class<I> iclass;
 
@@ -53,7 +53,7 @@ public abstract class EventHandler<I, O> implements RequestStreamHandler {
     String inputString = null;
     try {
       inputString = IoUtils.streamToString(inputStream);
-      logger.trace(HANDLER_INPUT + inputString);
+      LOGGER.trace(HANDLER_INPUT + inputString);
       AwsEventBridgeEvent<I> input = parseEvent(inputString);
       O output = processInput(input.getDetail(), input, context);
 
@@ -71,7 +71,7 @@ public abstract class EventHandler<I, O> implements RequestStreamHandler {
         String responseJson = objectMapper.writeValueAsString(output);
         writer.write(responseJson);
       } catch (IOException e) {
-        logger.error(ERROR_WRITING_TO_OUTPUT_STREAM + output.toString());
+        LOGGER.error(ERROR_WRITING_TO_OUTPUT_STREAM + output.toString());
         throw new UncheckedIOException(e);
       }
     }
@@ -84,6 +84,6 @@ public abstract class EventHandler<I, O> implements RequestStreamHandler {
   }
 
   protected void handleError(Exception e, String inputString) {
-    logger.error(stackTraceInSingleLine(e));
+    LOGGER.error(stackTraceInSingleLine(e));
   }
 }
