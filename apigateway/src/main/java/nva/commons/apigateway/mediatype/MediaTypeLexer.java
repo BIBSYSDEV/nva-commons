@@ -114,8 +114,8 @@ final class MediaTypeLexer {
   }
 
   private static boolean isAlnum(char character) {
-    return (character >= 'a' && character <= 'z')
-        || (character >= 'A' && character <= 'Z')
-        || (character >= '0' && character <= '9');
+    return character >= 'a' && character <= 'z'
+        || character >= 'A' && character <= 'Z'
+        || character >= '0' && character <= '9';
   }
 }

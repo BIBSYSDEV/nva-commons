@@ -21,6 +21,11 @@ import java.util.Map;
  */
 public final class MediaTypeParser {
 
+  private static final int DEFAULT_MAX_INPUT_LENGTH = 8 * 1024;
+  private static final int DEFAULT_MAX_LIST_ELEMENTS = 64;
+  private static final int DEFAULT_MAX_PARAMETERS_PER_TYPE = 32;
+  private static final int DEFAULT_MAX_PROFILE_URIS = 16;
+
   private final int maxInputLength;
   private final int maxListElements;
   private final int maxParametersPerType;
@@ -56,10 +61,10 @@ public final class MediaTypeParser {
   /** A sensible, secure default: strong limits, web-friendly leniency, allow-lists left open. */
   public static MediaTypeParser defaultParser() {
     return builder()
-        .maxInputLength(Builder.DEFAULT_MAX_INPUT_LENGTH)
-        .maxListElements(Builder.DEFAULT_MAX_LIST_ELEMENTS)
-        .maxParametersPerType(Builder.DEFAULT_MAX_PARAMETERS_PER_TYPE)
-        .maxProfileUris(Builder.DEFAULT_MAX_PROFILE_URIS)
+        .maxInputLength(DEFAULT_MAX_INPUT_LENGTH)
+        .maxListElements(DEFAULT_MAX_LIST_ELEMENTS)
+        .maxParametersPerType(DEFAULT_MAX_PARAMETERS_PER_TYPE)
+        .maxProfileUris(DEFAULT_MAX_PROFILE_URIS)
         .lenientWhitespaceAroundEquals()
         .acceptEmptyParameters()
         .acceptSingleUnquotedProfileString()
@@ -100,11 +105,6 @@ public final class MediaTypeParser {
 
   @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
   public static final class Builder {
-    private static final int DEFAULT_MAX_INPUT_LENGTH = 8 * 1024;
-    private static final int DEFAULT_MAX_LIST_ELEMENTS = 64;
-    private static final int DEFAULT_MAX_PARAMETERS_PER_TYPE = 32;
-    private static final int DEFAULT_MAX_PROFILE_URIS = 16;
-
     private int maxInputLength = DEFAULT_MAX_INPUT_LENGTH;
     private int maxListElements = DEFAULT_MAX_LIST_ELEMENTS;
     private int maxParametersPerType = DEFAULT_MAX_PARAMETERS_PER_TYPE;

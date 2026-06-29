@@ -136,7 +136,7 @@ public record MediaType(String type, String subtype, Map<String, String> paramet
   }
 
   private static String normaliseName(String value) {
-    return (Objects.isNull(value) || value.isBlank())
+    return Objects.isNull(value) || value.isBlank()
         ? WILDCARD
         : value.strip().toLowerCase(Locale.ROOT);
   }
@@ -178,7 +178,7 @@ public record MediaType(String type, String subtype, Map<String, String> paramet
   }
 
   private static String escape(char character) {
-    return (character == DQUOTE || character == BACKSLASH)
+    return character == DQUOTE || character == BACKSLASH
         ? String.valueOf(BACKSLASH) + character
         : String.valueOf(character);
   }

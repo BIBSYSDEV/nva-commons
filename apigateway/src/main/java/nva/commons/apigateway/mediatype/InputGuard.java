@@ -63,7 +63,7 @@ final class InputGuard {
   }
 
   private static boolean isControlCharacter(char character) {
-    return (character < LOWEST_PRINTABLE_ASCII && character != TAB)
+    return character < LOWEST_PRINTABLE_ASCII && character != TAB
         || character == DELETE_CONTROL_CHARACTER;
   }
 
