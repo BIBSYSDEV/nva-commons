@@ -2,12 +2,12 @@ package no.unit.nva.stubs;
 
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
+import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringContains.containsString;
 
-import com.google.common.net.HttpHeaders;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.http.HttpClient;
@@ -48,9 +48,7 @@ class FakeAuthServerTest {
     var getUri =
         UriWrapper.fromUri(authServer.getServerUri()).addChild(OAUTH_USER_INFO_ENDPOINT).getUri();
     var request =
-        HttpRequest.newBuilder(getUri)
-            .header(HttpHeaders.AUTHORIZATION, bearerToken(userAccessToken))
-            .build();
+        HttpRequest.newBuilder(getUri).header(AUTHORIZATION, bearerToken(userAccessToken)).build();
     var response = httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
     assertThat(response.statusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
     var actualUserInfo = CognitoUserInfo.fromString(response.body());
@@ -70,7 +68,7 @@ class FakeAuthServerTest {
         UriWrapper.fromUri(authServer.getServerUri()).addChild(exampleResourcePath).getUri();
     var request =
         HttpRequest.newBuilder(requestUri)
-            .header(HttpHeaders.AUTHORIZATION, bearerToken(accessToken))
+            .header(AUTHORIZATION, bearerToken(accessToken))
             .GET()
             .build();
     var response = httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));
@@ -89,7 +87,7 @@ class FakeAuthServerTest {
         UriWrapper.fromUri(authServer.getServerUri()).addChild(exampleResourcePath).getUri();
     var request =
         HttpRequest.newBuilder(requestUri)
-            .header(HttpHeaders.AUTHORIZATION, bearerToken(randomString()))
+            .header(AUTHORIZATION, bearerToken(randomString()))
             .GET()
             .build();
     var response = httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));

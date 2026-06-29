@@ -15,13 +15,13 @@ import static no.unit.nva.auth.OAuthConstants.OAUTH_TOKEN;
 import static no.unit.nva.auth.OAuthConstants.OAUTH_USER_INFO;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static nva.commons.core.attempt.Try.attempt;
+import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.ContainsPattern;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
-import com.google.common.net.HttpHeaders;
 import java.net.URI;
 import java.util.Map;
 import no.unit.nva.auth.CognitoUserInfo;
@@ -112,14 +112,14 @@ public class FakeAuthServer {
   private void stubEndpointForUserEntry(String accessToken) {
     stubFor(
         get(OAUTH_USER_INFO)
-            .withHeader(HttpHeaders.AUTHORIZATION, equalTo(bearerToken(accessToken)))
+            .withHeader(AUTHORIZATION, equalTo(bearerToken(accessToken)))
             .willReturn(createUserInfoResponse(accessToken)));
   }
 
   private void stubForbidden() {
     stubFor(
         get(OAUTH_USER_INFO)
-            .withHeader(HttpHeaders.AUTHORIZATION, equalTo(bearerToken(ACCESS_TOKEN_FORBIDDEN)))
+            .withHeader(AUTHORIZATION, equalTo(bearerToken(ACCESS_TOKEN_FORBIDDEN)))
             .willReturn(createForbiddenResponse()));
   }
 

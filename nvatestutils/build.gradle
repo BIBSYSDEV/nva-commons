@@ -27,7 +27,6 @@ dependencies {
     implementation libs.aws.sdk2.regions
     implementation libs.com.auth0.jwt
     implementation libs.commons.lang
-    implementation libs.guava
     implementation libs.httpcore5
     implementation libs.junit.jupiter.api
     implementation libs.wiremock.core
