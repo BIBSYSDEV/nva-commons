@@ -16,9 +16,6 @@ dependencies {
     implementation libs.zalando
     implementation project(":auth")
     implementation project(":json")
-    runtimeOnly libs.log4j.api
-    runtimeOnly libs.log4j.core
-    runtimeOnly libs.log4j.slf4j.impl
     testImplementation libs.assertj.core
     testImplementation libs.hamcrest
     testImplementation libs.jackson.dataformat.xml

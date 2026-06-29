@@ -17,9 +17,6 @@ dependencies {
     implementation libs.jackson.jr.annotations
     implementation libs.slf4j.api
     implementation project(":core")
-    runtimeOnly libs.log4j.api
-    runtimeOnly libs.log4j.core
-    runtimeOnly libs.log4j.slf4j.impl
     testImplementation libs.hamcrest
     testImplementation libs.junit.jupiter.api
     testImplementation libs.junit.jupiter.params

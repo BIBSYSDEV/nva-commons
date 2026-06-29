@@ -15,9 +15,6 @@ dependencies {
     implementation libs.slf4j.api
     implementation platform(libs.aws.sdk2.bom)
     implementation project(":secrets")
-    runtimeOnly libs.log4j.api
-    runtimeOnly libs.log4j.core
-    runtimeOnly libs.log4j.slf4j.impl
     testImplementation libs.hamcrest
     testImplementation libs.junit.jupiter.api
     testImplementation libs.log4j.core
