@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Stateless-per-type parameter parser. Handles splitting, whitespace normalisation, value
+ * Stateless-per-type parameter parser. Handles splitting, whitespace normalization, value
  * resolution, and handler dispatch for a single media-type's parameter segment list.
  *
  * <p>Package-private: not part of the public API.
@@ -90,13 +90,13 @@ final class ParameterParser {
         context.reject(DUPLICATE_PARAMETER, "Parameter specified more than once");
         return false;
       }
-      context.normalise(DUPLICATE_PARAMETER, "Duplicate parameter, keeping last");
+      context.normalize(DUPLICATE_PARAMETER, "Duplicate parameter, keeping last");
     }
     return true;
   }
 
   /**
-   * Splits on {@code =} and normalises any whitespace around it.
+   * Splits on {@code =} and normalizes any whitespace around it.
    *
    * @return the name/value pair, or empty if rejected.
    */
@@ -113,7 +113,7 @@ final class ParameterParser {
       return Optional.of(new NameValue(name, value));
     }
     if (configuration.lenientWhitespaceAroundEquals()) {
-      context.normalise(SPACE_AROUND_EQUALS, "Trimmed whitespace around '='");
+      context.normalize(SPACE_AROUND_EQUALS, "Trimmed whitespace around '='");
       return Optional.of(new NameValue(name.strip(), value.strip()));
     }
     context.reject(SPACE_AROUND_EQUALS, "Whitespace around '=' not allowed");
@@ -173,7 +173,7 @@ final class ParameterParser {
       return Optional.empty();
     }
     if (isUnquotedProfileException(name)) {
-      context.normalise(UNQUOTED_PROFILE, "Accepted unquoted profile value");
+      context.normalize(UNQUOTED_PROFILE, "Accepted unquoted profile value");
     }
     return Optional.of(value);
   }

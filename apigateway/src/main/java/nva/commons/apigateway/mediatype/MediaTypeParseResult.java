@@ -35,7 +35,7 @@ public record MediaTypeParseResult(List<MediaType> mediaTypes, List<Violation> v
     /** Fatal: the offending element was discarded (or the whole parse refused). */
     REJECTED,
     /** Tolerated and silently corrected (e.g. trimmed whitespace, lower-cased). */
-    NORMALISED,
+    NORMALIZED,
     /** Parsed as-is, but worth surfacing (e.g. name over 64 chars). */
     WARNING
   }
@@ -53,7 +53,7 @@ public record MediaTypeParseResult(List<MediaType> mediaTypes, List<Violation> v
 
   /** No {@link Severity#REJECTED} findings — nothing dangerous or unrecoverable was seen. */
   public boolean isValid() {
-    return violations.stream().noneMatch(v -> v.severity() == Severity.REJECTED);
+    return violations.stream().noneMatch(violation -> violation.severity() == Severity.REJECTED);
   }
 
   /** Valid and produced at least one usable media type. */

@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 /**
  * An immutable, already-validated media type such as {@code text/html; charset=utf-8}.
  *
- * <p>This is a pure value type: it does no parsing and no validation. All parsing, normalisation
+ * <p>This is a pure value type: it does no parsing and no validation. All parsing, normalization
  * and security checking lives in {@link MediaTypeParser}. By the time a {@code MediaType} exists,
  * its parameter values are unquoted/unescaped and its names are lower-cased.
  *
@@ -39,11 +39,11 @@ public record MediaType(String type, String subtype, Map<String, String> paramet
   private static final double DEFAULT_QUALITY = 1.0;
   private static final double MINIMUM_QUALITY = 0.0;
 
-  /** Canonical constructor: normalises names and defensively copies the map. */
+  /** Canonical constructor: normalizes names and defensively copies the map. */
   public MediaType {
-    type = normaliseName(type);
-    subtype = normaliseName(subtype);
-    parameters = normaliseParameters(parameters);
+    type = normalizeName(type);
+    subtype = normalizeName(subtype);
+    parameters = normalizeParameters(parameters);
   }
 
   public MediaType(String type, String subtype) {
@@ -135,13 +135,13 @@ public record MediaType(String type, String subtype, Map<String, String> paramet
     return typeOk && subtypeOk;
   }
 
-  private static String normaliseName(String value) {
+  private static String normalizeName(String value) {
     return Objects.isNull(value) || value.isBlank()
         ? WILDCARD
         : value.strip().toLowerCase(Locale.ROOT);
   }
 
-  private static Map<String, String> normaliseParameters(Map<String, String> source) {
+  private static Map<String, String> normalizeParameters(Map<String, String> source) {
     return Objects.isNull(source)
         ? Collections.emptyMap()
         : source.entrySet().stream()

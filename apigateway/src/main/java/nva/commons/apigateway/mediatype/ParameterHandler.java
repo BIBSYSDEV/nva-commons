@@ -27,10 +27,10 @@ public interface ParameterHandler {
   String name();
 
   /**
-   * Validate (and optionally flag) the value. Record findings via {@code ctx}; a REJECTED finding
-   * drops the type.
+   * Validate (and optionally flag) the value. Record findings via {@code context}; a REJECTED
+   * finding drops the type.
    */
-  void validate(String value, Context ctx);
+  void validate(String value, Context context);
 
   /** The slice of parser state a handler is allowed to see and affect. */
   interface Context {
@@ -41,7 +41,7 @@ public interface ParameterHandler {
 
     void warn(String code, String detail);
 
-    void normalise(String code, String detail);
+    void normalize(String code, String detail);
   }
 
   static ParameterHandler charsetHandler(List<Charset> allowed) {
@@ -55,14 +55,14 @@ public interface ParameterHandler {
       }
 
       @Override
-      public void validate(String value, Context ctx) {
+      public void validate(String value, Context context) {
         try {
           var resolved = Charset.forName(value);
           if (!allowed.isEmpty() && !allowed.contains(resolved)) {
-            ctx.reject(CHARSET_NOT_ALLOWED, "Charset not in allow-list: " + resolved.name());
+            context.reject(CHARSET_NOT_ALLOWED, "Charset not in allow-list: " + resolved.name());
           }
         } catch (IllegalArgumentException ignored) {
-          ctx.reject(UNKNOWN_CHARSET, "Unresolvable charset");
+          context.reject(UNKNOWN_CHARSET, "Unresolvable charset");
         }
       }
     };
@@ -81,12 +81,12 @@ public interface ParameterHandler {
       }
 
       @Override
-      public void validate(String value, Context ctx) {
-        if (!ctx.isAcceptList()) {
-          ctx.warn(Q_IN_CONTENT_TYPE, "'q' weight is only meaningful in Accept");
+      public void validate(String value, Context context) {
+        if (!context.isAcceptList()) {
+          context.warn(Q_IN_CONTENT_TYPE, "'q' weight is only meaningful in Accept");
         }
         if (!QVALUE_PATTERN.matcher(value).matches()) {
-          ctx.warn(
+          context.warn(
               INVALID_QVALUE,
               "q value violates the qvalue grammar (0-1, <=3 decimals); clamped to [0,1]");
         }
@@ -108,46 +108,46 @@ public interface ParameterHandler {
       }
 
       @Override
-      public void validate(String value, Context ctx) {
-        var tokens = tokenise(value);
+      public void validate(String value, Context context) {
+        var tokens = tokenize(value);
         if (tokens.size() > maxUris) {
-          ctx.reject(TOO_MANY_PROFILES, tokens.size() + " profile URIs, limit " + maxUris);
+          context.reject(TOO_MANY_PROFILES, tokens.size() + " profile URIs, limit " + maxUris);
           return;
         }
         for (var token : tokens) {
-          if (!isValidProfileUri(token, ctx)) {
+          if (!isValidProfileUri(token, context)) {
             return;
           }
         }
       }
 
-      private List<String> tokenise(String value) {
+      private List<String> tokenize(String value) {
         return WHITESPACE_PATTERN
             .splitAsStream(value.strip())
             .filter(Predicate.not(String::isEmpty))
             .toList();
       }
 
-      private boolean isValidProfileUri(String token, Context ctx) {
-        return parseUri(token, ctx).map(uri -> validateProfileUri(uri, ctx)).orElse(false);
+      private boolean isValidProfileUri(String token, Context context) {
+        return parseUri(token, context).map(uri -> validateProfileUri(uri, context)).orElse(false);
       }
 
-      private Optional<URI> parseUri(String token, Context ctx) {
+      private Optional<URI> parseUri(String token, Context context) {
         try {
           return Optional.of(new URI(token));
         } catch (URISyntaxException ignored) {
-          ctx.reject(INVALID_PROFILE_URI, "Not a valid URI");
+          context.reject(INVALID_PROFILE_URI, "Not a valid URI");
           return Optional.empty();
         }
       }
 
-      private boolean validateProfileUri(URI uri, Context ctx) {
+      private boolean validateProfileUri(URI uri, Context context) {
         if (!uri.isAbsolute()) {
-          ctx.reject(RELATIVE_PROFILE_URI, "Profile URI must be absolute");
+          context.reject(RELATIVE_PROFILE_URI, "Profile URI must be absolute");
           return false;
         }
         if (!allowed.isEmpty() && !allowed.contains(uri)) {
-          ctx.reject(PROFILE_NOT_ALLOWED, "Profile not in allow-list");
+          context.reject(PROFILE_NOT_ALLOWED, "Profile not in allow-list");
           return false;
         }
         return true;

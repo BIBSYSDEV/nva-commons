@@ -78,8 +78,8 @@ final class ParseContext implements ParameterHandler.Context {
   }
 
   @Override
-  public void normalise(String code, String detail) {
-    violations.add(new Violation(Severity.NORMALISED, code, detail));
+  public void normalize(String code, String detail) {
+    violations.add(new Violation(Severity.NORMALIZED, code, detail));
   }
 
   @Override

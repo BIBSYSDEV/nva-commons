@@ -39,19 +39,19 @@ public final class MediaTypeParser {
   private final Map<String, ParameterHandler> handlers;
   private final List<MediaType> allowedTypes;
 
-  private MediaTypeParser(Builder b) {
-    this.maxInputLength = b.maxInputLength;
-    this.maxListElements = b.maxListElements;
-    this.maxParametersPerType = b.maxParametersPerType;
-    this.lenientWhitespaceAroundEquals = b.lenientWhitespaceAroundEquals;
-    this.acceptEmptyParameters = b.acceptEmptyParameters;
-    this.acceptSingleUnquotedProfileString = b.acceptSingleUnquotedProfileString;
-    this.rejectDuplicateParameters = b.rejectDuplicateParameters;
-    this.rejectUnknownParameters = b.rejectUnknownParameters;
-    this.allowObsText = b.allowObsText;
-    this.enforceRestrictedNames = b.enforceRestrictedNames;
-    this.handlers = Map.copyOf(b.buildHandlers());
-    this.allowedTypes = List.copyOf(b.allowedTypes);
+  private MediaTypeParser(Builder builder) {
+    this.maxInputLength = builder.maxInputLength;
+    this.maxListElements = builder.maxListElements;
+    this.maxParametersPerType = builder.maxParametersPerType;
+    this.lenientWhitespaceAroundEquals = builder.lenientWhitespaceAroundEquals;
+    this.acceptEmptyParameters = builder.acceptEmptyParameters;
+    this.acceptSingleUnquotedProfileString = builder.acceptSingleUnquotedProfileString;
+    this.rejectDuplicateParameters = builder.rejectDuplicateParameters;
+    this.rejectUnknownParameters = builder.rejectUnknownParameters;
+    this.allowObsText = builder.allowObsText;
+    this.enforceRestrictedNames = builder.enforceRestrictedNames;
+    this.handlers = Map.copyOf(builder.buildHandlers());
+    this.allowedTypes = List.copyOf(builder.allowedTypes);
   }
 
   public static Builder builder() {
@@ -180,8 +180,8 @@ public final class MediaTypeParser {
     }
 
     /** Configure the built-in {@code charset} handler's allow-list. */
-    public Builder allowedCharsets(Charset... cs) {
-      this.allowedCharsets.addAll(List.of(cs));
+    public Builder allowedCharsets(Charset... charsets) {
+      this.allowedCharsets.addAll(List.of(charsets));
       return this;
     }
 
@@ -221,7 +221,7 @@ public final class MediaTypeParser {
                 ParameterHandler.charsetHandler(List.copyOf(allowedCharsets)),
                 ParameterHandler.qualityHandler(),
                 ParameterHandler.profileHandler(maxProfileUris, List.copyOf(allowedProfiles)));
-        defaults.forEach(h -> map.put(h.name(), h));
+        defaults.forEach(handler -> map.put(handler.name(), handler));
       }
       map.putAll(customHandlers);
       return map;
