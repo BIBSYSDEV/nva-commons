@@ -43,9 +43,6 @@ public final class ContentNegotiator {
           .reversed()
           .thenComparing(Comparator.comparingInt(Preference::profileMatchScore).reversed());
 
-  private static final int WILDCARD_TYPE_BASE = 0;
-  private static final int WILDCARD_SUBTYPE_BASE = 1;
-  private static final int FULL_TYPE_BASE = 2;
   private static final int SPECIFICITY_SCALE = 100;
   private static final int EMPTY_PROFILE_SET = 0;
 
@@ -133,8 +130,8 @@ public final class ContentNegotiator {
   private Optional<Preference> bestMatchingRange(List<MediaType> ranges, MediaType representation) {
     return ranges.stream()
         .filter(range -> matches(range, representation))
-        .filter(this::hasPositiveQuality)
         .max(rangePrecedenceFor(representation))
+        .filter(this::hasPositiveQuality)
         .map(range -> new Preference(representation, range, range.quality()));
   }
 
@@ -172,18 +169,8 @@ public final class ContentNegotiator {
    * Higher is more specific: type/subtype dominates wildcards, then more constraining parameters.
    */
   private int specificity(MediaType range) {
-    return typeBase(range) * SPECIFICITY_SCALE
+    return range.typeSpecificity() * SPECIFICITY_SCALE
         + (int) range.parameters().keySet().stream().filter(this::isHardConstraint).count();
-  }
-
-  private static int typeBase(MediaType range) {
-    if (range.isWildcardType()) {
-      return WILDCARD_TYPE_BASE;
-    }
-    if (range.isWildcardSubtype()) {
-      return WILDCARD_SUBTYPE_BASE;
-    }
-    return FULL_TYPE_BASE;
   }
 
   /** Size of the intersection between the range's requested profiles and the representation's. */

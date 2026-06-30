@@ -11,7 +11,7 @@ import java.util.Map;
  * <p>Package-private: not part of the public API.
  */
 record ParserConfig(
-    int maxInputLength,
+    int maxInputChars,
     int maxListElements,
     int maxParametersPerType,
     boolean lenientWhitespaceAroundEquals,

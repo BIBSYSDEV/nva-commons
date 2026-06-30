@@ -131,6 +131,16 @@ class MediaTypeComplianceTest {
     }
 
     @Test
+    void shouldNotCountBlankSlotsAgainstListElementCap() {
+      var input = "text/html" + ",".repeat(64);
+
+      var result = PARSER.parseList(input);
+
+      assertThat(rejected(result, "too_many_elements")).isFalse();
+      assertThat(result.mediaTypes()).hasSize(1);
+    }
+
+    @Test
     void shouldRejectTooManyParameters() {
       var input = new StringBuilder("text/plain");
       for (int parameterIndex = 0; parameterIndex < 40; parameterIndex++) {
@@ -321,7 +331,7 @@ class MediaTypeComplianceTest {
     }
 
     @ParameterizedTest(name = "invalid q={0} -> warned, clamped to {1}")
-    @CsvSource({"1.5, 1.0", "2, 1.0", "-1, 0.0", "0.5555, 0.5555", "abc, 1.0"})
+    @CsvSource({"1.5, 1.0", "2, 1.0", "-1, 0.0", "0.5555, 0.5555", "abc, 0.0"})
     void shouldWarnAndClampInvalidQValues(String qValue, double expectedClamped) {
       var result = PARSER.parseList(acceptWithQuality(qValue));
 

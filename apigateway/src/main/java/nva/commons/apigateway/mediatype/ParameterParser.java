@@ -37,7 +37,7 @@ final class ParameterParser {
     this.context = context;
   }
 
-  private record NameValue(String name, String value) {}
+  private record Parameter(String name, String value) {}
 
   Optional<Map<String, String>> buildParameters(List<String> parts) {
     var params = new LinkedHashMap<String, String>();
@@ -100,21 +100,21 @@ final class ParameterParser {
    *
    * @return the name/value pair, or empty if rejected.
    */
-  Optional<NameValue> splitOnEquals(String raw) {
+  Optional<Parameter> splitOnEquals(String raw) {
     int equalsIndex = raw.indexOf(EQUALS_SIGN);
     if (equalsIndex < 0) {
-      return Optional.of(new NameValue(raw, ""));
+      return Optional.of(new Parameter(raw, ""));
     }
     return resolveWhitespace(raw.substring(0, equalsIndex), raw.substring(equalsIndex + 1));
   }
 
-  private Optional<NameValue> resolveWhitespace(String name, String value) {
+  private Optional<Parameter> resolveWhitespace(String name, String value) {
     if (isStripped(name) && isStripped(value)) {
-      return Optional.of(new NameValue(name, value));
+      return Optional.of(new Parameter(name, value));
     }
     if (configuration.lenientWhitespaceAroundEquals()) {
       context.normalize(SPACE_AROUND_EQUALS, "Trimmed whitespace around '='");
-      return Optional.of(new NameValue(name.strip(), value.strip()));
+      return Optional.of(new Parameter(name.strip(), value.strip()));
     }
     context.reject(SPACE_AROUND_EQUALS, "Whitespace around '=' not allowed");
     return Optional.empty();

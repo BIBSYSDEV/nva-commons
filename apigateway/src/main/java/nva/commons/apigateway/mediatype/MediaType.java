@@ -86,13 +86,13 @@ public record MediaType(String type, String subtype, Map<String, String> paramet
     try {
       return clampedQuality(Double.parseDouble(qualityValue));
     } catch (NumberFormatException ignored) {
-      return DEFAULT_QUALITY;
+      return MINIMUM_QUALITY;
     }
   }
 
   private static double clampedQuality(double value) {
-    return Double.isNaN(value)
-        ? DEFAULT_QUALITY
+    return (Double.isNaN(value) || Double.isInfinite(value))
+        ? MINIMUM_QUALITY
         : Math.clamp(value, MINIMUM_QUALITY, DEFAULT_QUALITY);
   }
 
@@ -123,6 +123,17 @@ public record MediaType(String type, String subtype, Map<String, String> paramet
 
   public boolean isWildcardSubtype() {
     return WILDCARD.equals(subtype);
+  }
+
+  /**
+   * Type/subtype specificity score used in RFC 9110 §12.5.1 range matching: 2 = fully specified, 1
+   * = {@code type/*}, 0 = {@code *}{@code /*}. Does not account for parameters.
+   */
+  public int typeSpecificity() {
+    if (isWildcardType()) {
+      return 0;
+    }
+    return isWildcardSubtype() ? 1 : 2;
   }
 
   /**

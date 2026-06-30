@@ -1,5 +1,7 @@
 package nva.commons.apigateway.mediatype;
 
+import static java.util.Objects.isNull;
+
 /**
  * Pre-parse security checks applied to every input string before structural parsing begins.
  * Enforces null safety, length limits, and control-character exclusion.
@@ -32,7 +34,7 @@ final class InputGuard {
   }
 
   private boolean notNull(String input) {
-    if (java.util.Objects.isNull(input)) {
+    if (isNull(input)) {
       context.reject(NULL_INPUT, "Input was null");
       return false;
     }
@@ -40,10 +42,13 @@ final class InputGuard {
   }
 
   private boolean withinLengthLimit(String input) {
-    if (input.length() > configuration.maxInputLength()) {
+    if (input.length() > configuration.maxInputChars()) {
       context.reject(
           INPUT_TOO_LONG,
-          "Input length " + input.length() + " exceeds " + configuration.maxInputLength());
+          "Input length "
+              + input.length()
+              + " chars exceeds limit of "
+              + configuration.maxInputChars());
       return false;
     }
     return true;

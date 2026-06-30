@@ -18,13 +18,10 @@ public record MediaTypeParseResult(List<MediaType> mediaTypes, List<Violation> v
 
   private static final MediaType WILDCARD_RANGE =
       new MediaType(MediaType.WILDCARD, MediaType.WILDCARD);
-  private static final int WILDCARD_TYPE_SPECIFICITY = 0;
-  private static final int WILDCARD_SUBTYPE_SPECIFICITY = 1;
-  private static final int FULL_TYPE_SPECIFICITY = 2;
   private static final Comparator<MediaType> MOST_PREFERRED_RANGE_FIRST =
       Comparator.comparingDouble(MediaType::quality)
           .reversed()
-          .thenComparing(MediaTypeParseResult::specificity, Comparator.reverseOrder());
+          .thenComparing(MediaType::typeSpecificity, Comparator.reverseOrder());
 
   public MediaTypeParseResult {
     mediaTypes = List.copyOf(mediaTypes);
@@ -80,13 +77,5 @@ public record MediaTypeParseResult(List<MediaType> mediaTypes, List<Violation> v
   /** Accept ranges ordered most-preferred first: higher q wins, ties broken by specificity. */
   public List<MediaType> preferenceOrder() {
     return mediaTypes.stream().sorted(MOST_PREFERRED_RANGE_FIRST).toList();
-  }
-
-  /** 2 = fully specified, 1 = {@code type/*}, 0 = {@code *}/{@code *}. */
-  private static int specificity(MediaType mediaType) {
-    if (mediaType.isWildcardType()) {
-      return WILDCARD_TYPE_SPECIFICITY;
-    }
-    return mediaType.isWildcardSubtype() ? WILDCARD_SUBTYPE_SPECIFICITY : FULL_TYPE_SPECIFICITY;
   }
 }

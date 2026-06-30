@@ -91,8 +91,10 @@ class MediaTypeApiTest {
       "0.333, 0.333",
       "1.5, 1.0",
       "-1, 0.0",
-      "abc, 1.0",
-      "NaN, 1.0"
+      "abc, 0.0",
+      "NaN, 0.0",
+      "Infinity, 0.0",
+      "+Infinity, 0.0"
     })
     void shouldClampQualityToValidRange(String qValue, double expected) {
       assertThat(new MediaType("a", "b", Map.of("q", qValue)).quality()).isEqualTo(expected);
@@ -689,7 +691,7 @@ class MediaTypeApiTest {
 
       assertThat(preference.charsetName()).isEmpty();
       assertThat(preference.profiles()).hasSize(1);
-      assertThat(preference.profiles().get(0)).isEqualTo(URI.create("https://schema.org"));
+      assertThat(preference.profiles().getFirst()).isEqualTo(URI.create("https://schema.org"));
     }
 
     @Test
@@ -700,7 +702,8 @@ class MediaTypeApiTest {
       var preference = NEGOTIATOR.rank(accept, List.of(rep)).getFirst();
 
       assertThat(preference.requestedProfiles()).hasSize(1);
-      assertThat(preference.requestedProfiles().get(0)).isEqualTo(URI.create("https://schema.org"));
+      assertThat(preference.requestedProfiles().getFirst())
+          .isEqualTo(URI.create("https://schema.org"));
     }
 
     @Test
@@ -745,6 +748,16 @@ class MediaTypeApiTest {
 
       assertThat(NEGOTIATOR.best(accept, List.of(json))).isEmpty();
       assertThat(NEGOTIATOR.rank(accept, List.of(json))).isEmpty();
+    }
+
+    @Test
+    @DisplayName("q=0 on more-specific range wins over q>0 on wildcard — RFC 9110 §12.5.1")
+    void shouldExcludeRepresentationWhenMostSpecificMatchingRangeHasQualityZero() {
+      var html = new MediaType("text", "html");
+      var accept = PARSER.parseList("text/*;q=1.0, text/html;q=0");
+
+      assertThat(NEGOTIATOR.best(accept, List.of(html))).isEmpty();
+      assertThat(NEGOTIATOR.rank(accept, List.of(html))).isEmpty();
     }
 
     @Test

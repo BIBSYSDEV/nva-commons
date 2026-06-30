@@ -21,12 +21,12 @@ import java.util.Map;
  */
 public final class MediaTypeParser {
 
-  private static final int DEFAULT_MAX_INPUT_LENGTH = 8 * 1024;
+  private static final int DEFAULT_MAX_INPUT_CHARS = 8192;
   private static final int DEFAULT_MAX_LIST_ELEMENTS = 64;
   private static final int DEFAULT_MAX_PARAMETERS_PER_TYPE = 32;
   private static final int DEFAULT_MAX_PROFILE_URIS = 16;
 
-  private final int maxInputLength;
+  private final int maxInputChars;
   private final int maxListElements;
   private final int maxParametersPerType;
   private final boolean lenientWhitespaceAroundEquals;
@@ -40,7 +40,7 @@ public final class MediaTypeParser {
   private final List<MediaType> allowedTypes;
 
   private MediaTypeParser(Builder builder) {
-    this.maxInputLength = builder.maxInputLength;
+    this.maxInputChars = builder.maxInputChars;
     this.maxListElements = builder.maxListElements;
     this.maxParametersPerType = builder.maxParametersPerType;
     this.lenientWhitespaceAroundEquals = builder.lenientWhitespaceAroundEquals;
@@ -61,7 +61,7 @@ public final class MediaTypeParser {
   /** A sensible, secure default: strong limits, web-friendly leniency, allow-lists left open. */
   public static MediaTypeParser defaultParser() {
     return builder()
-        .maxInputLength(DEFAULT_MAX_INPUT_LENGTH)
+        .maxInputChars(DEFAULT_MAX_INPUT_CHARS)
         .maxListElements(DEFAULT_MAX_LIST_ELEMENTS)
         .maxParametersPerType(DEFAULT_MAX_PARAMETERS_PER_TYPE)
         .maxProfileUris(DEFAULT_MAX_PROFILE_URIS)
@@ -76,7 +76,7 @@ public final class MediaTypeParser {
   /** Returns a configuration snapshot for use by {@link ParseContext}. */
   ParserConfig config() {
     return new ParserConfig(
-        maxInputLength,
+        maxInputChars,
         maxListElements,
         maxParametersPerType,
         lenientWhitespaceAroundEquals,
@@ -105,7 +105,7 @@ public final class MediaTypeParser {
 
   @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
   public static final class Builder {
-    private int maxInputLength = DEFAULT_MAX_INPUT_LENGTH;
+    private int maxInputChars = DEFAULT_MAX_INPUT_CHARS;
     private int maxListElements = DEFAULT_MAX_LIST_ELEMENTS;
     private int maxParametersPerType = DEFAULT_MAX_PARAMETERS_PER_TYPE;
     private int maxProfileUris = DEFAULT_MAX_PROFILE_URIS;
@@ -124,8 +124,12 @@ public final class MediaTypeParser {
 
     private Builder() {}
 
-    public Builder maxInputLength(int value) {
-      this.maxInputLength = value;
+    /**
+     * Maximum input length in Java {@code char} units ({@link String#length()}). For US-ASCII
+     * content — which all valid media types are — this equals the byte count. Default: 8192.
+     */
+    public Builder maxInputChars(int value) {
+      this.maxInputChars = value;
       return this;
     }
 

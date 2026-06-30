@@ -56,7 +56,7 @@ final class ParseContext implements ParameterHandler.Context {
     this.parameterParser = new ParameterParser(configuration, this);
   }
 
-  private record NameValue(String name, String value) {}
+  private record TypeSubtype(String name, String value) {}
 
   @Override
   public boolean isAcceptList() {
@@ -109,13 +109,16 @@ final class ParseContext implements ParameterHandler.Context {
 
   MediaTypeParseResult parseList(String input) {
     if (inputGuard.validate(input)) {
-      var elements = MediaTypeLexer.split(input.strip(), COMMA_SEPARATOR);
-      if (elements.size() > configuration.maxListElements()) {
+      var nonBlank =
+          MediaTypeLexer.split(input.strip(), COMMA_SEPARATOR).stream()
+              .filter(not(String::isBlank))
+              .toList();
+      if (nonBlank.size() > configuration.maxListElements()) {
         reject(
             TOO_MANY_ELEMENTS,
-            "List has " + elements.size() + " entries, limit " + configuration.maxListElements());
+            "List has " + nonBlank.size() + " entries, limit " + configuration.maxListElements());
       } else {
-        elements.stream().filter(not(String::isBlank)).forEach(this::parseOne);
+        nonBlank.forEach(this::parseOne);
       }
     }
     return result();
@@ -143,7 +146,7 @@ final class ParseContext implements ParameterHandler.Context {
     add(candidate);
   }
 
-  private Optional<NameValue> extractTypeSubtype(String fullType) {
+  private Optional<TypeSubtype> extractTypeSubtype(String fullType) {
     int slash = fullType.indexOf(TYPE_SUBTYPE_SEPARATOR);
     if (slash < 0) {
       reject(MISSING_SUBTYPE, "No '/' in media type");
@@ -154,7 +157,7 @@ final class ParseContext implements ParameterHandler.Context {
     if (nameIsInvalid(type, TYPE_ROLE) || nameIsInvalid(subtype, SUBTYPE_ROLE)) {
       return Optional.empty();
     }
-    return Optional.of(new NameValue(type, subtype));
+    return Optional.of(new TypeSubtype(type, subtype));
   }
 
   private boolean validateForContext(String type, String subtype) {
