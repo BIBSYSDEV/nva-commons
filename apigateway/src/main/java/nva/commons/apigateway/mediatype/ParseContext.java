@@ -116,7 +116,8 @@ final class ParseContext implements ParameterHandler.Context {
       if (nonBlank.size() > configuration.maxListElements()) {
         reject(
             TOO_MANY_ELEMENTS,
-            "List has " + nonBlank.size() + " entries, limit " + configuration.maxListElements());
+            "List has %d entries, limit %d"
+                .formatted(nonBlank.size(), configuration.maxListElements()));
       } else {
         nonBlank.forEach(this::parseOne);
       }

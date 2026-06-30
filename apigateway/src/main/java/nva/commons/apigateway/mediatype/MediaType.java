@@ -73,8 +73,9 @@ public record MediaType(String type, String subtype, Map<String, String> paramet
   }
 
   /**
-   * The {@code q} weight (RFC 9110 §12.4.2), clamped to the valid range [0,1]. Absent or
-   * unparseable weights default to {@code 1.0}; the parser separately flags malformed weights.
+   * The {@code q} weight (RFC 9110 §12.4.2), clamped to the valid range [0,1]. An absent weight
+   * defaults to {@code 1.0} (RFC default); an unparseable weight (non-numeric, NaN, infinite)
+   * defaults to {@code 0.0} (fail-low). The parser separately flags malformed weights.
    */
   public double quality() {
     return Optional.ofNullable(parameters.get(QUALITY))
@@ -147,9 +148,8 @@ public record MediaType(String type, String subtype, Map<String, String> paramet
   }
 
   private static String normalizeName(String value) {
-    return Objects.isNull(value) || value.isBlank()
-        ? WILDCARD
-        : value.strip().toLowerCase(Locale.ROOT);
+    var stripped = Objects.isNull(value) ? "" : value.strip();
+    return stripped.isEmpty() ? WILDCARD : stripped.toLowerCase(Locale.ROOT);
   }
 
   private static Map<String, String> normalizeParameters(Map<String, String> source) {
