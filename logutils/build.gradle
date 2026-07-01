@@ -4,7 +4,6 @@ plugins {
 }
 
 dependencies {
-    annotationProcessor libs.log4j.core // TODO: Remove when TestAppender is deleted
     api libs.log4j.core
     implementation libs.log4j.api
     implementation(libs.log4j.core.test) {
@@ -12,25 +11,13 @@ dependencies {
         exclude group: 'org.hamcrest', module: 'hamcrest-core'
     }
     implementation libs.slf4j.api
-    runtimeOnly libs.jackson.core
-    runtimeOnly libs.jackson.databind
-    runtimeOnly libs.jackson.dataformat.xml
-    runtimeOnly libs.jackson.datatype.jdk8
-    runtimeOnly libs.jackson.datatype.jsr310
-    runtimeOnly libs.jackson.datatype.problem
-    runtimeOnly libs.jackson.module.parameter.names
     runtimeOnly libs.log4j.slf4j.impl
     testImplementation libs.assertj.core
-    testImplementation libs.hamcrest
-    testImplementation libs.jackson.annotations
     testImplementation libs.junit.jupiter.api
     testImplementation platform(libs.junit.bom)
-    testRuntimeOnly libs.datafaker
-    testRuntimeOnly libs.junit.jupiter.engine
-    testRuntimeOnly libs.junit.platform.launcher
 }
 
-// Mirror core's canonical nva-log4j2.xml into our test resources so LogRecorder/LogUtils
+// Mirror core's canonical nva-log4j2.xml into our test resources so LogRecorder
 // tests resolve `classpath:nva-log4j2.xml` without forcing a runtime dependency on :core.
 processTestResources {
     from(project(':core').file('src/main/resources/nva-log4j2.xml'))

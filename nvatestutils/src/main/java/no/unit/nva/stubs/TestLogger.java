@@ -10,15 +10,15 @@ import org.slf4j.LoggerFactory;
 @JacocoGenerated
 public class TestLogger implements LambdaLogger {
 
-  public final Logger logger = LoggerFactory.getLogger(TestLogger.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(TestLogger.class);
 
   @Override
   public void log(String message) {
-    logger.info(message);
+    LOGGER.info(message);
   }
 
   @Override
   public void log(byte[] message) {
-    logger.info(new String(message, StandardCharsets.UTF_8));
+    LOGGER.info(new String(message, StandardCharsets.UTF_8));
   }
 }

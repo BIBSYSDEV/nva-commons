@@ -20,6 +20,7 @@ import no.unit.nva.commons.json.ld.JsonLdContext;
 import no.unit.nva.commons.json.ld.deserialization.JsonLdContextDeserializer;
 import org.zalando.problem.jackson.ProblemModule;
 
+@SuppressWarnings("PMD.FieldNamingConventions")
 public final class JsonUtils {
 
   private static final boolean PRETTY_JSON = true;

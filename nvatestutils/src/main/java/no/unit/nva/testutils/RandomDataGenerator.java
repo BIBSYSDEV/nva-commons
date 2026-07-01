@@ -23,13 +23,15 @@ import org.apache.commons.lang3.RandomStringUtils;
 @JacocoGenerated
 public final class RandomDataGenerator {
 
+  @SuppressWarnings("PMD.FieldNamingConventions")
+  public static final ObjectMapper objectMapper = JsonUtils.dtoObjectMapper;
+
   public static final int MIN_RANDOM_STRING_LENGTH = 10;
   public static final int MAX_RANDOM_STRING_LENGTH = 20;
   public static final Random RANDOM = new Random();
   public static final Faker FAKER = new Faker();
   public static final Instant BEGINNING_OF_TIME =
       LocalDateTime.of(1971, Month.JANUARY, 2, 0, 0).toInstant(ZoneOffset.UTC);
-  public static final ObjectMapper objectMapper = JsonUtils.dtoObjectMapper;
   private static final Instant END_OF_TIME = Instant.now();
   private static final int ARBITRARY_FIELDS_NUMBER = 5;
   private static final ZoneId ZONE_ID = ZoneId.systemDefault();

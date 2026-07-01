@@ -20,7 +20,7 @@ public final class LanguageMapper {
   public static final URI LEXVO_URI_UNDEFINED = URI.create(LEXVO_URI_PREFIX + "und");
   public static final String ERROR_MESSAGE_MISSING_RESOURCE_EXCEPTION =
       "Failing to retrieve URI for the " + "language code ";
-  private static final Logger logger = LoggerFactory.getLogger(LanguageMapper.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(LanguageMapper.class);
 
   private LanguageMapper() {}
 
@@ -63,7 +63,7 @@ public final class LanguageMapper {
           .map(Locale::new)
           .map(Locale::getISO3Language);
     } catch (MissingResourceException e) {
-      logger.warn(ERROR_MESSAGE_MISSING_RESOURCE_EXCEPTION + languageCode, e);
+      LOGGER.warn(ERROR_MESSAGE_MISSING_RESOURCE_EXCEPTION + languageCode, e);
       return Optional.empty();
     }
   }

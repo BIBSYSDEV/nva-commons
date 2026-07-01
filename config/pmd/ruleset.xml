@@ -46,13 +46,6 @@
     <exclude name="UseExplicitTypes"/>
     <exclude name="ConfusingTernary"/>
 
-
-    <!-- This rule does not allow us the following:
-            private static final Logger logger=...
-         It requires:
-            private static final Logger LOGGER=... -->
-    <exclude name="FieldNamingConventions"/>
-
     <!-- Sometimes it is useful in debugging to assign the return value to a local variable  -->
     <exclude name="UnnecessaryLocalBeforeReturn"/>
 

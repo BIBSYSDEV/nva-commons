@@ -25,7 +25,7 @@ public class DoiConverter {
   public static final String NON_ALPHANUMERIC_CHARACTERS_AT_THE_END_OF_STRING = "[^\\w\\d]+$";
   private static final String ERROR_WHEN_SETTING_DOI_HOST =
       "Unexpected error while setting host for DOI URI:";
-  private static final Logger logger = LoggerFactory.getLogger(DoiConverter.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DoiConverter.class);
   private static final String NOT_HTTP_URI_REGEX = "([^/]+:)";
   public static final Pattern CONTAINS_BASE_PATH_BUT_NOT_SCHEME =
       Pattern.compile("(?<!https?://)(?:dx\\.)?doi\\.org/.*", Pattern.CASE_INSENSITIVE);
@@ -100,7 +100,7 @@ public class DoiConverter {
     try {
       return new URI(HTTPS, DOI_HOST, uri.getPath(), EMPTY_FRAGMENT);
     } catch (URISyntaxException e) {
-      logger.error(ERROR_WHEN_SETTING_DOI_HOST + uri);
+      LOGGER.error(ERROR_WHEN_SETTING_DOI_HOST + uri);
       throw new IllegalStateException(e);
     }
   }

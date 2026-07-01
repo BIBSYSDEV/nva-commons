@@ -10,9 +10,9 @@ import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.test.appender.ListAppender;
 
 /**
- * Records log events emitted during a test. Unlike {@link LogUtils}, this helper does not
- * reconfigure the Log4j context: it attaches a {@link ListAppender} to either a single class logger
- * or the root logger, leaving the rest of the configuration untouched.
+ * Records log events emitted during a test. This helper does not reconfigure the Log4j context: it
+ * attaches a {@link ListAppender} to either a single class logger or the root logger, leaving the
+ * rest of the configuration untouched.
  */
 public final class LogRecorder {
 

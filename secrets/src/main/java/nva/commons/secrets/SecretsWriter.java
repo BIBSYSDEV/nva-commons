@@ -25,7 +25,7 @@ import software.amazon.awssdk.services.secretsmanager.model.PutSecretValueRespon
 public class SecretsWriter {
 
   public static final String COULD_NOT_WRITE_SECRET_ERROR = "Could not write secret: ";
-  private static final Logger logger = LoggerFactory.getLogger(SecretsWriter.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SecretsWriter.class);
   private static final String AWS_REGION =
       new Environment().readEnvOpt("AWS_REGION").orElse(Region.EU_WEST_1.id());
   private static final String EMPTY_STRING = "";
@@ -125,7 +125,7 @@ public class SecretsWriter {
   }
 
   private <I> ErrorWritingSecretException logErrorAndThrowException(Failure<I> failure) {
-    logger.error(failure.getException().getMessage(), failure.getException());
+    LOGGER.error(failure.getException().getMessage(), failure.getException());
     return new ErrorWritingSecretException();
   }
 }

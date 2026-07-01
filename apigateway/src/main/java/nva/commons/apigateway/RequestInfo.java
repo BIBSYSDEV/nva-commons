@@ -34,7 +34,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
@@ -63,8 +62,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({"PMD.GodClass", "PMD.ExcessivePublicCount", "PMD.CouplingBetweenObjects"})
 public final class RequestInfo {
 
-  private static final Logger logger = LoggerFactory.getLogger(RequestInfo.class);
-  private static final ObjectMapper mapper = defaultRestObjectMapper;
+  private static final Logger LOGGER = LoggerFactory.getLogger(RequestInfo.class);
   private static final String THIRD_PARTY_SCOPE_PREFIX =
       "https://api.nva.unit.no/scopes/third-party";
   private static final String COMMA = ",";
@@ -111,7 +109,7 @@ public final class RequestInfo {
   }
 
   public static RequestInfo fromString(String inputString) throws ApiIoException {
-    return new ApiMessageParser<>(mapper).getRequestInfo(inputString);
+    return new ApiMessageParser<>(defaultRestObjectMapper).getRequestInfo(inputString);
   }
 
   @Deprecated(forRemoval = true)
@@ -296,7 +294,7 @@ public final class RequestInfo {
   }
 
   private boolean handleAuthorizationFailure() {
-    logger.warn(AUTHORIZATION_FAILURE_WARNING);
+    LOGGER.warn(AUTHORIZATION_FAILURE_WARNING);
     return false;
   }
 

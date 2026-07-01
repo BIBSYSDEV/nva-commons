@@ -16,18 +16,10 @@ dependencies {
     implementation libs.aws.sdk2.regions
     implementation libs.aws.sdk2.sdk.core
     implementation project(":json")
-    runtimeOnly libs.jackson.core
-    runtimeOnly libs.jackson.dataformat.xml
-    runtimeOnly libs.jackson.datatype.jdk8
-    runtimeOnly libs.jackson.datatype.jsr310
-    runtimeOnly libs.jackson.datatype.problem
-    runtimeOnly libs.jackson.module.parameter.names
+    testImplementation libs.datafaker
     testImplementation libs.hamcrest
     testImplementation libs.junit.jupiter.api
     testImplementation libs.junit.jupiter.params
     testImplementation platform(libs.junit.bom)
     testImplementation project(":nvatestutils")
-    testRuntimeOnly libs.datafaker
-    testRuntimeOnly libs.junit.jupiter.engine
-    testRuntimeOnly libs.junit.platform.launcher
 }

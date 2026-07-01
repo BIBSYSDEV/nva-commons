@@ -17,7 +17,6 @@ dependencies {
     api libs.jackson.core
     api libs.jackson.databind
     api libs.mockito.core
-    api libs.slf4j.api
     api platform(libs.aws.sdk2.bom)
     api project(":apigateway")
     api project(":auth")
@@ -27,20 +26,13 @@ dependencies {
     implementation libs.aws.sdk2.regions
     implementation libs.com.auth0.jwt
     implementation libs.commons.lang
-    implementation libs.guava
     implementation libs.httpcore5
     implementation libs.junit.jupiter.api
+    implementation libs.slf4j.api
     implementation libs.wiremock.core
     implementation platform(libs.junit.bom)
     implementation project(":core")
     implementation project(":json")
-    runtimeOnly libs.jackson.dataformat.xml
-    runtimeOnly libs.jackson.datatype.jdk8
-    runtimeOnly libs.jackson.datatype.jsr310
-    runtimeOnly libs.jackson.datatype.problem
-    runtimeOnly libs.jackson.module.parameter.names
-    runtimeOnly libs.junit.jupiter.engine
-    runtimeOnly libs.junit.platform.launcher
     runtimeOnly libs.wiremock
     testImplementation libs.commons.validator
     testImplementation libs.junit.jupiter.params

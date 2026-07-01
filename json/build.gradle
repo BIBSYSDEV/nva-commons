@@ -7,7 +7,6 @@ dependencies {
     api libs.jackson.annotations
     api libs.jackson.core
     api libs.jackson.databind
-    compileOnly libs.zalando
     implementation libs.jackson.datatype.jdk8
     implementation libs.jackson.datatype.jsr310
     implementation libs.jackson.datatype.problem
@@ -16,7 +15,4 @@ dependencies {
     testImplementation libs.junit.jupiter.params
     testImplementation platform(libs.junit.bom)
     testImplementation project(":core")
-    testRuntimeOnly libs.datafaker
-    testRuntimeOnly libs.junit.jupiter.engine
-    testRuntimeOnly libs.junit.platform.launcher
 }

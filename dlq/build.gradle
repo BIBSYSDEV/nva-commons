@@ -17,16 +17,4 @@ dependencies {
     testImplementation libs.junit.jupiter.params
     testImplementation platform(libs.junit.bom)
     testImplementation project(":nvatestutils")
-    testRuntimeOnly libs.datafaker
-    testRuntimeOnly libs.jackson.core
-    testRuntimeOnly libs.jackson.dataformat.xml
-    testRuntimeOnly libs.jackson.datatype.jdk8
-    testRuntimeOnly libs.jackson.datatype.jsr310
-    testRuntimeOnly libs.jackson.datatype.problem
-    testRuntimeOnly libs.jackson.module.parameter.names
-    testRuntimeOnly libs.junit.jupiter.engine
-    testRuntimeOnly libs.junit.platform.launcher
-    testRuntimeOnly libs.log4j.api
-    testRuntimeOnly libs.log4j.core
-    testRuntimeOnly libs.log4j.slf4j.impl
 }

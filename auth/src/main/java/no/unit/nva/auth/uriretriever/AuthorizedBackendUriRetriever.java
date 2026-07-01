@@ -26,7 +26,7 @@ public class AuthorizedBackendUriRetriever implements RawContentRetriever {
   public static final String FAILED_TO_RETRIEVE_URI = "Failed to retrieve uri {}";
   public static final String API_RESPONDED_WITH_ERROR_CODE = "Api responded with: ";
   public static final String ACCEPT = "Accept";
-  private static final Logger logger = LoggerFactory.getLogger(AuthorizedBackendUriRetriever.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizedBackendUriRetriever.class);
   private final SecretsReader secretsReader;
 
   private final String backendClientAuthUrl;
@@ -74,7 +74,7 @@ public class AuthorizedBackendUriRetriever implements RawContentRetriever {
 
   private String getRawContentFromHttpResponse(HttpResponse<String> response) {
     if (HttpStatusFamily.SUCCESSFUL != HttpStatusFamily.of(response.statusCode())) {
-      logger.error(FAILED_TO_RETRIEVE_URI, response);
+      LOGGER.error(FAILED_TO_RETRIEVE_URI, response);
       throw new RuntimeException(API_RESPONDED_WITH_ERROR_CODE + response.statusCode());
     }
     return response.body();
