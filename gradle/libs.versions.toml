@@ -11,21 +11,21 @@ assertj = { strictly = '3.27.7' }
 aws-ion = { strictly = '1.12.0' }
 aws-lambda-core = { strictly = '1.4.0' }
 aws-lambda-events = { strictly = '3.16.1' }
-aws-sdk2 = { strictly = '2.46.17' }
+aws-sdk2 = { strictly = '2.49.4' }
 aws-sdk2-dynamodblocal = { strictly = '3.3.0' }
 com-auth0-jwks = { strictly = '0.24.1' }
-com-auth0-jwt = { strictly = '4.5.2' }
+com-auth0-jwt = { strictly = '4.6.0' }
 commons-validator = { strictly = '1.10.1' }
 cucumber = { strictly = '7.34.4' }
 datafaker = { strictly = '2.7.0' }
 hamcrest = { strictly = '3.0' }
-jackson = { strictly = '2.22.0' }
+jackson = { strictly = '2.22.1' }
 jackson-annotations = { strictly = '2.22' }
 javers = { strictly = '7.11.4' }
 jena = { strictly = '6.1.0' }
-jupiter = { strictly = '6.1.1' }
+jupiter = { strictly = '6.1.2' }
 lambda-log4j = { strictly = '1.6.4' }
-log4j = { strictly = '2.26.0' }
+log4j = { strictly = '2.26.1' }
 mockito = { strictly = '5.23.0' }
 nexus-publish = { strictly = '2.0.0' }
 nva-language = { strictly = '1.2.3' }
@@ -36,7 +36,7 @@ opensearch-testcontainer = { strictly = '4.1.0' }
 picocontainer = { strictly = '2.15.2'}
 slf4j = { strictly = '2.0.18' }
 testcontainers = { strictly = '2.0.5' }
-wiremock = { strictly = '4.0.0-beta.37' }
+wiremock = { strictly = '4.0.0-beta.38' }
 zalando-problem = { strictly = '0.27.1' }
 resilience4j = { strictly = '2.4.0' }
 titanium-json-ld = { strictly = '1.7.0'}
