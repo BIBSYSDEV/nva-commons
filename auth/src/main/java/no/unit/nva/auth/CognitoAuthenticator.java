@@ -1,8 +1,8 @@
 package no.unit.nva.auth;
 
-import static com.amazonaws.auth.internal.SignerConstants.AUTHORIZATION;
 import static java.util.Objects.isNull;
 import static no.unit.nva.auth.AuthorizedBackendClient.APPLICATION_X_WWW_FORM_URLENCODED;
+import static no.unit.nva.auth.AuthorizedBackendClient.AUTHORIZATION_HEADER;
 import static nva.commons.core.attempt.Try.attempt;
 import static org.apache.http.protocol.HTTP.CONTENT_TYPE;
 
@@ -103,7 +103,7 @@ public class CognitoAuthenticator {
 
   private HttpRequest formatRequestForJwtToken(URI tokenUri) {
     return HttpRequest.newBuilder(tokenUri)
-        .setHeader(AUTHORIZATION, formatBasicAuthenticationHeader())
+        .setHeader(AUTHORIZATION_HEADER, formatBasicAuthenticationHeader())
         .setHeader(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
         .POST(clientCredentialsAuthType())
         .build();

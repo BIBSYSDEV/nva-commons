@@ -8,7 +8,6 @@ dependencies {
     api libs.com.auth0.jwt
     api libs.jackson.annotations
     api platform(libs.aws.sdk2.bom)
-    implementation libs.aws.java.sdk.core
     implementation libs.aws.sdk2.http.client
     implementation libs.httpcore4
     implementation libs.jackson.jr.annotations
