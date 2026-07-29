@@ -5,7 +5,7 @@
 apache-commons = { require = '3.20.0' }
 apache-http-core = { strictly = '5.4.3' }
 apache-http-core4 = { strictly = '4.4.16' }
-apache-http-client = { strictly = '5.6.1' }
+apache-http-client = { strictly = '5.6.2' }
 apache-poi = { strictly = '5.5.1' }
 assertj = { strictly = '3.27.7' }
 aws-ion = { strictly = '1.12.0' }
@@ -16,7 +16,7 @@ aws-sdk2-dynamodblocal = { strictly = '3.3.0' }
 com-auth0-jwks = { strictly = '0.24.1' }
 com-auth0-jwt = { strictly = '4.6.0' }
 commons-validator = { strictly = '1.10.1' }
-cucumber = { strictly = '7.34.4' }
+cucumber = { strictly = '7.34.6' }
 datafaker = { strictly = '2.7.0' }
 hamcrest = { strictly = '3.0' }
 jackson = { strictly = '2.22.1' }
