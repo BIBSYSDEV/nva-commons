@@ -16,8 +16,10 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import nva.commons.core.ioutils.exceptions.FileNotFoundUncheckedException;
 import nva.commons.core.ioutils.exceptions.ResourceNotFoundException;
@@ -59,6 +61,27 @@ public class IoUtilsTest {
             .lines()
             .collect(Collectors.joining(System.lineSeparator()));
     assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  @DisplayName(
+      "stringFromResources falls back to the class's own class loader when the context class"
+          + " loader cannot see the resource")
+  public void stringFromResourcesFallsBackToOwnClassLoaderWhenContextClassLoaderCannotSeeResource()
+      throws InterruptedException {
+    var classLoaderWithoutResources = new URLClassLoader(new URL[0], null);
+    var actual = stringFromResourcesWithContextClassLoader(classLoaderWithoutResources);
+    assertThat(actual, is(equalTo(IoUtils.stringFromResources(RESOURCE))));
+  }
+
+  @Test
+  @DisplayName(
+      "stringFromResources falls back to the class's own class loader when the context class"
+          + " loader is null")
+  public void stringFromResourcesFallsBackToOwnClassLoaderWhenContextClassLoaderIsNull()
+      throws InterruptedException {
+    var actual = stringFromResourcesWithContextClassLoader(null);
+    assertThat(actual, is(equalTo(IoUtils.stringFromResources(RESOURCE))));
   }
 
   @Test
@@ -143,6 +166,16 @@ public class IoUtilsTest {
     byte[] bytes = IoUtils.inputStreamToBytes(stream);
     String regeneratedSample = IoUtils.streamToString(new ByteArrayInputStream(bytes));
     assertThat(regeneratedSample, is(equalTo(sample)));
+  }
+
+  private String stringFromResourcesWithContextClassLoader(ClassLoader contextClassLoader)
+      throws InterruptedException {
+    var result = new AtomicReference<String>();
+    var thread = new Thread(() -> result.set(IoUtils.stringFromResources(RESOURCE)));
+    thread.setContextClassLoader(contextClassLoader);
+    thread.start();
+    thread.join();
+    return result.get();
   }
 
   private String createSampleString() {
