@@ -1,5 +1,7 @@
 package nva.commons.core.ioutils;
 
+import static java.util.Objects.nonNull;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -44,18 +46,33 @@ public final class IoUtils {
    * to be the folders src/main/resources and src/test/resources/, or any other standard reosources
    * folder.
    *
+   * <p>The resource is first looked up via the thread context class loader, falling back to the
+   * class loader that loaded this class. The fallback is required on threads whose context class
+   * loader cannot see application classes, such as {@link java.util.concurrent.ForkJoinPool}
+   * common-pool workers on AWS Lambda.
+   *
    * @param path the path to the resource.
    * @return an InputStream with the data.
    */
   @SuppressWarnings("PMD.AvoidCatchingGenericException")
   public static InputStream inputStreamFromResources(String path) {
     try {
-      InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
+      var stream = resolveResource(path);
       requireResourceExists(stream);
       return stream;
     } catch (Exception e) {
       throw new ResourceNotFoundException(path, e);
     }
+  }
+
+  private static InputStream resolveResource(String path) {
+    var stream = resourceFromContextClassLoader(path);
+    return nonNull(stream) ? stream : IoUtils.class.getResourceAsStream(ROOT + path);
+  }
+
+  private static InputStream resourceFromContextClassLoader(String path) {
+    var contextClassLoader = Thread.currentThread().getContextClassLoader();
+    return nonNull(contextClassLoader) ? contextClassLoader.getResourceAsStream(path) : null;
   }
 
   public static String pathToString(Path path) {
