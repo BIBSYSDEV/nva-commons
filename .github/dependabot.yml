@@ -1,0 +1,38 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directories:
+      - "/"
+      - "/build-logic"
+    schedule:
+      interval: weekly
+      day: 'monday'
+      time: '07:00'
+      timezone: Europe/Oslo
+    open-pull-requests-limit: 10
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "build"
+    groups:
+      gradle-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: 'monday'
+      time: '07:00'
+      timezone: Europe/Oslo
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
