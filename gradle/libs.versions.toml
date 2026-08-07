@@ -90,6 +90,8 @@ javers = { group = 'org.javers', name = 'javers-core', version.ref = 'javers' }
 jena-bom = { group = 'org.apache.jena', name = 'jena-bom', version.ref = 'jena' }
 jena-arq = { group = 'org.apache.jena', name = 'jena-arq', version.ref = 'jena' }
 jena-core = { group = 'org.apache.jena', name = 'jena-core', version.ref = 'jena' }
+jena-fuseki = { group = 'org.apache.jena', name = 'jena-fuseki-main', version.ref = 'jena' }
+jena-fuseki-server = { group = 'org.apache.jena', name = 'jena-fuseki-server', version.ref = 'jena' }
 jena-shacl = { group = 'org.apache.jena', name = 'jena-shacl', version.ref = 'jena'}
 nva-language = { group = 'com.github.bibsysdev', name = 'nva-language', version.ref = 'nva-language' }
 opencsv = { group = 'com.opencsv', name = 'opencsv', version.ref = 'opencsv' }
