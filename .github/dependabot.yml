@@ -6,8 +6,8 @@ updates:
       - "/build-logic"
     schedule:
       interval: weekly
-      day: 'monday'
-      time: '07:00'
+      day: "monday"
+      time: "07:00"
       timezone: Europe/Oslo
     open-pull-requests-limit: 10
     cooldown:
@@ -24,8 +24,8 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
-      day: 'monday'
-      time: '07:00'
+      day: "monday"
+      time: "07:00"
       timezone: Europe/Oslo
     cooldown:
       default-days: 7
