@@ -5,7 +5,7 @@
 apache-commons = { require = '3.20.0' }
 apache-http-core = { strictly = '5.4.3' }
 apache-http-core4 = { strictly = '4.4.16' }
-apache-http-client = { strictly = '5.6.3' }
+apache-http-client = { strictly = '5.6.4' }
 apache-poi = { strictly = '5.5.1' }
 assertj = { strictly = '3.27.7' }
 aws-ion = { strictly = '1.12.0' }
