@@ -23,5 +23,5 @@ public record CustomerDto(
     String sector)
     implements JsonSerializable {
 
-  public record RightsRetentionStrategy(String type, URI id) {}
+  public record RightsRetentionStrategy(String type, URI policyUri) {}
 }
