@@ -11,7 +11,7 @@ catalog {
 
 publishing {
     publications {
-        create("versionCatalog", MavenPublication)  {
+        create("versionCatalog", MavenPublication) {
             artifactId = project.name
             from components.versionCatalog
             pom(configureCommonPom)
