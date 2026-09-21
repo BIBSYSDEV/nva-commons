@@ -65,15 +65,13 @@ public abstract class EventHandler<I, O> implements RequestStreamHandler {
   }
 
   protected void writeOutput(OutputStream outputStream, O output) {
-    {
-      try (BufferedWriter writer =
-          new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-        String responseJson = objectMapper.writeValueAsString(output);
-        writer.write(responseJson);
-      } catch (IOException e) {
-        LOGGER.error(ERROR_WRITING_TO_OUTPUT_STREAM + output.toString());
-        throw new UncheckedIOException(e);
-      }
+    try (BufferedWriter writer =
+        new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
+      String responseJson = objectMapper.writeValueAsString(output);
+      writer.write(responseJson);
+    } catch (IOException e) {
+      LOGGER.error(ERROR_WRITING_TO_OUTPUT_STREAM + output.toString());
+      throw new UncheckedIOException(e);
     }
   }
 
