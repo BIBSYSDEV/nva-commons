@@ -1,5 +1,6 @@
 package nva.commons.apigateway.exceptions;
 
+import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -14,4 +15,11 @@ public class ForbiddenExceptionTest {
     ForbiddenException exception = new ForbiddenException();
     assertThat(exception.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_FORBIDDEN)));
   }
+
+    @Test
+    public void forbiddenExceptionReturnsCustomMessage() {
+      var message = randomString();
+      var exception = new ForbiddenException(message);
+      assertThat(exception.getMessage(), is(equalTo(message)));
+    }
 }
