@@ -10,6 +10,10 @@ public class ForbiddenException extends ApiGatewayException {
     super(DEFAULT_MESSAGE);
   }
 
+  public ForbiddenException(String message) {
+    super(message);
+  }
+
   @Override
   protected Integer statusCode() {
     return HttpURLConnection.HTTP_FORBIDDEN;
