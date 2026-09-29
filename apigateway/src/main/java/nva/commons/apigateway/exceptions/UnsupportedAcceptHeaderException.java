@@ -30,6 +30,6 @@ public class UnsupportedAcceptHeaderException extends ApiGatewayException {
 
   @Override
   protected Integer statusCode() {
-    return HttpURLConnection.HTTP_UNSUPPORTED_TYPE;
+    return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
   }
 }
