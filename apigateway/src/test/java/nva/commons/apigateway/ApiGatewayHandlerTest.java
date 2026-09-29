@@ -194,19 +194,16 @@ class ApiGatewayHandlerTest {
                     is(equalTo(expectedHeaders.get(expectedHeader).textValue()))));
   }
 
-  // TODO: Should return 415 when the Content-type header of request is unsupported (i.e., the one
-  //  describing the content of the body of a post request)
-  // TODO: Should return 406 when Accept header contains unsupported media type
   @ParameterizedTest(name = "handleRequest should return Unsupported media-type when input is {0}")
   @ValueSource(strings = {"application/xml", "text/plain; charset=UTF-8"})
-  void handleRequestShouldReturnUnsupportedMediaTypeOnUnsupportedAcceptHeader(String mediaType)
+  void handleRequestShouldReturnNotAcceptableOnUnsupportedAcceptHeader(String mediaType)
       throws IOException {
     InputStream input = requestWithAcceptHeader(mediaType);
 
     GatewayResponse<String> response = getStringResponse(input, handler);
 
-    assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_UNSUPPORTED_TYPE)));
-    String expectedMessage = getUnsupportedMediaTypeErrorMessage(mediaType);
+    assertThat(response.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_NOT_ACCEPTABLE)));
+    var expectedMessage = getUnsupportedMediaTypeErrorMessage(mediaType);
     assertThat(response.getBody(), containsString(expectedMessage));
   }
 

@@ -16,10 +16,10 @@ public class ForbiddenExceptionTest {
     assertThat(exception.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_FORBIDDEN)));
   }
 
-    @Test
-    public void forbiddenExceptionReturnsCustomMessage() {
-      var message = randomString();
-      var exception = new ForbiddenException(message);
-      assertThat(exception.getMessage(), is(equalTo(message)));
-    }
+  @Test
+  public void forbiddenExceptionReturnsCustomMessage() {
+    var message = randomString();
+    var exception = new ForbiddenException(message);
+    assertThat(exception.getMessage(), is(equalTo(message)));
+  }
 }
