@@ -3,6 +3,7 @@ package no.unit.nva.identifiers;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.net.URI;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -33,6 +34,11 @@ public final class SortableIdentifier implements Comparable<SortableIdentifier> 
 
   public static SortableIdentifier next() {
     return new SortableIdentifier(newIdentifierString());
+  }
+
+  public static SortableIdentifier create(Instant timestamp, UUID uuid) {
+    return new SortableIdentifier(
+        String.format(IDENTIFIER_FORMATTING, timestamp.toEpochMilli(), uuid));
   }
 
   @SuppressWarnings("PMD.AvoidCatchingGenericException")
