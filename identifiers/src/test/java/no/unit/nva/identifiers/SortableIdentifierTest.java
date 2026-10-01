@@ -1,9 +1,12 @@
 package no.unit.nva.identifiers;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.hamcrest.core.StringEndsWith.endsWith;
+import static org.hamcrest.core.StringStartsWith.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -15,6 +18,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -42,6 +46,8 @@ public class SortableIdentifierTest {
   public static final String EXAMPLE_HOST = "www.example.org";
   public static final String EXAMPLE_SCHEME = "https";
   public static final String EMPTY_FRAGMENT = null;
+  private static final Instant PAST_INSTANT = Instant.parse("2020-01-01T00:00:00Z");
+  private static final String PAST_INSTANT_HEX_PREFIX = "016f5e66e800-";
 
   @Test
   public void sortableIdentifierStringContainsSixParts() {
@@ -139,6 +145,27 @@ public class SortableIdentifierTest {
     Executable action = () -> SortableIdentifier.fromUri(sampleUri);
     IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, action);
     assertThat(exception.getMessage(), containsString(sampleUri.toString()));
+  }
+
+  @Test
+  void shouldCreateSortableIdentifierWithGivenUuidWhenCreatedFromInstantAndUuid() {
+    var uuid = UUID.randomUUID();
+    var identifier = SortableIdentifier.create(Instant.now(), uuid);
+    assertThat(identifier.toString(), endsWith(uuid.toString()));
+  }
+
+  @Test
+  void
+      shouldCreateSortableIdentifierEncodeInstantAsTwelveHexDigitPrefixWhenCreatedFromInstantAndUuid() {
+    var identifier = SortableIdentifier.create(PAST_INSTANT, UUID.randomUUID());
+    assertThat(identifier.toString(), startsWith(PAST_INSTANT_HEX_PREFIX));
+  }
+
+  @Test
+  void shouldSortBeforeIdentifierFromNextWhenCreatedWithPastInstant() {
+    var pastIdentifier = SortableIdentifier.create(PAST_INSTANT, UUID.randomUUID());
+    var currentIdentifier = SortableIdentifier.next();
+    assertThat(pastIdentifier, is(lessThan(currentIdentifier)));
   }
 
   @ParameterizedTest
