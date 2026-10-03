@@ -7,7 +7,7 @@ import java.net.URI;
  * resource not existing, such as an unexpected status code, a network error, a failure to obtain a
  * backend access token, or a response body that cannot be parsed.
  */
-public class IdentityServiceUnavailableException extends RuntimeException {
+public class IdentityServiceUnavailableException extends IdentityServiceException {
 
   public IdentityServiceUnavailableException(URI requestUri, Throwable cause) {
     super("Request to identity service failed: " + requestUri, cause);

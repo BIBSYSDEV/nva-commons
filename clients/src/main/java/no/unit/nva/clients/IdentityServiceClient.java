@@ -14,10 +14,11 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
+import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 import no.unit.nva.auth.AuthorizedBackendClient;
 import no.unit.nva.auth.CognitoCredentials;
-import nva.commons.apigateway.exceptions.ApiGatewayException;
 import nva.commons.apigateway.exceptions.NotFoundException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
@@ -26,6 +27,7 @@ import nva.commons.core.paths.UriWrapper;
 import nva.commons.secrets.SecretsReader;
 import software.amazon.awssdk.http.HttpStatusCode;
 
+@SuppressWarnings("PMD.CouplingBetweenObjects")
 public class IdentityServiceClient {
 
   private static final String CREDENTIALS_SECRET_NAME = "BackendCognitoClientCredentials";
@@ -128,12 +130,12 @@ public class IdentityServiceClient {
    *
    * @param clientId the client ID to retrieve
    * @return the external client response
-   * @throws NotFoundException if the client is not found
+   * @throws IdentityServiceNotFoundException if the client does not exist
    * @throws IdentityServiceUnavailableException if the identity service request fails for any other
    *     reason
    * @throws IllegalStateException if the client was created without authorization support
    */
-  public GetExternalClientResponse getExternalClient(String clientId) throws NotFoundException {
+  public GetExternalClientResponse getExternalClient(String clientId) {
     var requestUri = constructExternalClientsGetPath(clientId);
     var request = getRequestBuilderFromUri(requestUri);
     return fetch(
@@ -141,16 +143,28 @@ public class IdentityServiceClient {
   }
 
   /**
+   * Looks up an external client by client ID. Requires an authorized client.
+   *
+   * @param clientId the client ID to look up
+   * @return the external client, or an empty Optional if it does not exist
+   * @throws IdentityServiceUnavailableException if the identity service request fails for any other
+   *     reason
+   * @throws IllegalStateException if the client was created without authorization support
+   */
+  public Optional<GetExternalClientResponse> findExternalClient(String clientId) {
+    return emptyIfNotFound(() -> getExternalClient(clientId));
+  }
+
+  /**
    * Retrieves an external client using a bearer token. Does not require an authorized client.
    *
    * @param bearerToken the bearer token to use for authentication
    * @return the external client response
-   * @throws NotFoundException if the client is not found
+   * @throws IdentityServiceNotFoundException if no client matches the token
    * @throws IdentityServiceUnavailableException if the identity service request fails for any other
    *     reason
    */
-  public GetExternalClientResponse getExternalClientByToken(String bearerToken)
-      throws NotFoundException {
+  public GetExternalClientResponse getExternalClientByToken(String bearerToken) {
     var requestUri = constructExternalClientsUserinfoGetPath();
     var request =
         HttpRequest.newBuilder().GET().uri(requestUri).setHeader(AUTHORIZATION_HEADER, bearerToken);
@@ -164,15 +178,28 @@ public class IdentityServiceClient {
    *
    * @param userName the username to retrieve
    * @return the user data
-   * @throws NotFoundException if the user is not found
+   * @throws IdentityServiceNotFoundException if the user does not exist
    * @throws IdentityServiceUnavailableException if the identity service request fails for any other
    *     reason
    * @throws IllegalStateException if the client was created without authorization support
    */
-  public UserDto getUser(String userName) throws NotFoundException {
+  public UserDto getUser(String userName) {
     var requestUri = constructUserGetPath(userName);
     var request = getRequestBuilderFromUri(requestUri);
     return fetch(getAuthorizedHttpResponseCallable(request), requestUri, UserDto.class);
+  }
+
+  /**
+   * Looks up a user by username. Requires an authorized client.
+   *
+   * @param userName the username to look up
+   * @return the user data, or an empty Optional if the user does not exist
+   * @throws IdentityServiceUnavailableException if the identity service request fails for any other
+   *     reason
+   * @throws IllegalStateException if the client was created without authorization support
+   */
+  public Optional<UserDto> findUser(String userName) {
+    return emptyIfNotFound(() -> getUser(userName));
   }
 
   /**
@@ -180,15 +207,28 @@ public class IdentityServiceClient {
    *
    * @param topLevelOrgCristinId the Cristin ID of the top-level organization
    * @return the customer data
-   * @throws NotFoundException if the customer is not found
+   * @throws IdentityServiceNotFoundException if the customer does not exist
    * @throws IdentityServiceUnavailableException if the identity service request fails for any other
    *     reason
    * @throws IllegalStateException if the client was created without authorization support
    */
-  public CustomerDto getCustomerByCristinId(URI topLevelOrgCristinId) throws NotFoundException {
+  public CustomerDto getCustomerByCristinId(URI topLevelOrgCristinId) {
     var requestUri = constructCustomerGetPath(topLevelOrgCristinId);
     var request = getRequestBuilderFromUri(requestUri);
     return fetch(getAuthorizedHttpResponseCallable(request), requestUri, CustomerDto.class);
+  }
+
+  /**
+   * Looks up a customer by Cristin ID. Requires an authorized client.
+   *
+   * @param topLevelOrgCristinId the Cristin ID of the top-level organization
+   * @return the customer data, or an empty Optional if the customer does not exist
+   * @throws IdentityServiceUnavailableException if the identity service request fails for any other
+   *     reason
+   * @throws IllegalStateException if the client was created without authorization support
+   */
+  public Optional<CustomerDto> findCustomerByCristinId(URI topLevelOrgCristinId) {
+    return emptyIfNotFound(() -> getCustomerByCristinId(topLevelOrgCristinId));
   }
 
   /**
@@ -196,14 +236,27 @@ public class IdentityServiceClient {
    *
    * @param customerId the customer ID URI
    * @return the customer data
-   * @throws NotFoundException if the customer is not found
+   * @throws IdentityServiceNotFoundException if the customer does not exist
    * @throws IdentityServiceUnavailableException if the identity service request fails for any other
    *     reason
    * @throws IllegalStateException if the client was created without authorization support
    */
-  public CustomerDto getCustomerById(URI customerId) throws NotFoundException {
+  public CustomerDto getCustomerById(URI customerId) {
     var request = getRequestBuilderFromUri(customerId);
     return fetch(getAuthorizedHttpResponseCallable(request), customerId, CustomerDto.class);
+  }
+
+  /**
+   * Looks up a customer by customer ID. Requires an authorized client.
+   *
+   * @param customerId the customer ID URI
+   * @return the customer data, or an empty Optional if the customer does not exist
+   * @throws IdentityServiceUnavailableException if the identity service request fails for any other
+   *     reason
+   * @throws IllegalStateException if the client was created without authorization support
+   */
+  public Optional<CustomerDto> findCustomerById(URI customerId) {
+    return emptyIfNotFound(() -> getCustomerById(customerId));
   }
 
   /**
@@ -211,13 +264,25 @@ public class IdentityServiceClient {
    *
    * @param channelClaim the channel claim URI
    * @return the channel claim data
-   * @throws NotFoundException if the channel claim is not found
+   * @throws IdentityServiceNotFoundException if the channel claim does not exist
    * @throws IdentityServiceUnavailableException if the identity service request fails for any other
    *     reason
    */
-  public ChannelClaimDto getChannelClaim(URI channelClaim) throws NotFoundException {
+  public ChannelClaimDto getChannelClaim(URI channelClaim) {
     var request = getRequestBuilderFromUri(channelClaim);
     return fetch(getUnauthorizedHttpResponseCallable(request), channelClaim, ChannelClaimDto.class);
+  }
+
+  /**
+   * Looks up a channel claim. Does not require an authorized client.
+   *
+   * @param channelClaim the channel claim URI
+   * @return the channel claim data, or an empty Optional if the channel claim does not exist
+   * @throws IdentityServiceUnavailableException if the identity service request fails for any other
+   *     reason
+   */
+  public Optional<ChannelClaimDto> findChannelClaim(URI channelClaim) {
+    return emptyIfNotFound(() -> getChannelClaim(channelClaim));
   }
 
   private static Builder getRequestBuilderFromUri(URI uri) {
@@ -228,11 +293,9 @@ public class IdentityServiceClient {
    * Retrieves all customers. Does not require an authorized client.
    *
    * @return a list of all customers
-   * @throws ApiGatewayException if the request fails
-   * @throws IdentityServiceUnavailableException if the identity service request fails for any other
-   *     reason
+   * @throws IdentityServiceException if the identity service request fails
    */
-  public CustomerList getAllCustomers() throws ApiGatewayException {
+  public CustomerList getAllCustomers() {
     var requestUri = constructListCustomerUri();
     var request = getRequestBuilderFromUri(requestUri);
     return fetch(getUnauthorizedHttpResponseCallable(request), requestUri, CustomerList.class);
@@ -284,27 +347,33 @@ public class IdentityServiceClient {
   }
 
   private <T> T fetch(
-      Callable<HttpResponse<String>> sendRequest, URI requestUri, Class<T> responseType)
-      throws NotFoundException {
+      Callable<HttpResponse<String>> sendRequest, URI requestUri, Class<T> responseType) {
     return attempt(sendRequest)
         .map(this::validateResponse)
         .map(response -> mapResponse(responseType, response))
-        .orElseThrow(failure -> handleFailure(failure, requestUri));
+        .orElseThrow(failure -> toIdentityServiceException(failure, requestUri));
   }
 
-  private NotFoundException handleFailure(Failure<?> responseFailure, URI requestUri) {
-    var exception = responseFailure.getException();
-    if (exception instanceof NotFoundException) {
-      return new NotFoundException(exception);
+  private static <T> Optional<T> emptyIfNotFound(Supplier<T> lookup) {
+    try {
+      return Optional.of(lookup.get());
+    } catch (IdentityServiceNotFoundException notFound) {
+      return Optional.empty();
     }
+  }
 
-    throw new IdentityServiceUnavailableException(requestUri, exception);
+  private static IdentityServiceException toIdentityServiceException(
+      Failure<?> responseFailure, URI requestUri) {
+    var exception = responseFailure.getException();
+    return exception instanceof NotFoundException
+        ? new IdentityServiceNotFoundException(requestUri, exception)
+        : new IdentityServiceUnavailableException(requestUri, exception);
   }
 
   private <S> HttpResponse<String> validateResponse(HttpResponse<String> response)
       throws NotFoundException {
     if (response.statusCode() == HttpStatusCode.NOT_FOUND) {
-      throw new NotFoundException("Client not found");
+      throw new NotFoundException("Received 404 from identity service");
     }
 
     if (response.statusCode() != HttpStatusCode.OK) {

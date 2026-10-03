@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 import no.unit.nva.clients.ChannelClaimDto;
@@ -25,9 +26,9 @@ import no.unit.nva.clients.ChannelClaimDto.ChannelClaim.ChannelConstraint;
 import no.unit.nva.clients.ChannelClaimDto.CustomerSummaryDto;
 import no.unit.nva.clients.CustomerDto;
 import no.unit.nva.clients.GetExternalClientResponse;
+import no.unit.nva.clients.IdentityServiceNotFoundException;
 import no.unit.nva.clients.IdentityServiceUnavailableException;
 import no.unit.nva.clients.UserDto;
-import nva.commons.apigateway.exceptions.NotFoundException;
 import nva.commons.core.Environment;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -44,12 +45,11 @@ class FakeIdentityServiceClientTest {
   void shouldThrowNotFoundForUnknownCustomerByDefault() {
     var client = new FakeIdentityServiceClient();
 
-    assertThrows(NotFoundException.class, () -> client.getCustomerById(randomUri()));
+    assertThrows(IdentityServiceNotFoundException.class, () -> client.getCustomerById(randomUri()));
   }
 
   @Test
-  void shouldReturnDefaultCustomerWithRequestedIdWhenDefaultCustomersAreEnabled()
-      throws NotFoundException {
+  void shouldReturnDefaultCustomerWithRequestedIdWhenDefaultCustomersAreEnabled() {
     var customerId = randomUri();
 
     var customer =
@@ -62,7 +62,7 @@ class FakeIdentityServiceClientTest {
   }
 
   @Test
-  void shouldGiveDefaultCustomerByIdTopLevelOrganizationCristinId() throws NotFoundException {
+  void shouldGiveDefaultCustomerByIdTopLevelOrganizationCristinId() {
     var customer =
         new FakeIdentityServiceClient().withDefaultCustomers().getCustomerById(randomUri());
 
@@ -89,7 +89,7 @@ class FakeIdentityServiceClientTest {
   }
 
   @Test
-  void shouldReturnSameDefaultCustomerForRepeatedRequests() throws NotFoundException {
+  void shouldReturnSameDefaultCustomerForRepeatedRequests() {
     var customerId = randomUri();
     var client = new FakeIdentityServiceClient().withDefaultCustomers();
 
@@ -97,7 +97,7 @@ class FakeIdentityServiceClientTest {
   }
 
   @Test
-  void shouldReturnDefaultCustomerWithConfiguredPublicationWorkflow() throws NotFoundException {
+  void shouldReturnDefaultCustomerWithConfiguredPublicationWorkflow() {
     var publicationWorkflow = randomString();
     var client = new FakeIdentityServiceClient().withDefaultCustomers(publicationWorkflow);
 
@@ -107,7 +107,7 @@ class FakeIdentityServiceClientTest {
   }
 
   @Test
-  void shouldReturnGivenCustomerForItsId() throws NotFoundException {
+  void shouldReturnGivenCustomerForItsId() {
     var customer = randomCustomer();
     var client = new FakeIdentityServiceClient().withCustomer(customer.id(), customer);
 
@@ -115,7 +115,7 @@ class FakeIdentityServiceClientTest {
   }
 
   @Test
-  void shouldReturnGivenCustomerOverDefaultCustomer() throws NotFoundException {
+  void shouldReturnGivenCustomerOverDefaultCustomer() {
     var customer = randomCustomer();
     var client =
         new FakeIdentityServiceClient()
@@ -126,7 +126,7 @@ class FakeIdentityServiceClientTest {
   }
 
   @Test
-  void shouldLeaveDefaultCustomersOutOfAllCustomers() throws NotFoundException {
+  void shouldLeaveDefaultCustomersOutOfAllCustomers() {
     var client = new FakeIdentityServiceClient().withDefaultCustomers();
     client.getCustomerById(randomUri());
     client.getCustomerByCristinId(randomUri());
@@ -135,7 +135,7 @@ class FakeIdentityServiceClientTest {
   }
 
   @Test
-  void shouldReturnGivenCustomerByCristinId() throws NotFoundException {
+  void shouldReturnGivenCustomerByCristinId() {
     var customer = randomCustomer();
     var client = new FakeIdentityServiceClient().withCustomer(customer.id(), customer);
 
@@ -146,12 +146,12 @@ class FakeIdentityServiceClientTest {
   void shouldThrowNotFoundForUnknownCristinId() {
     var client = new FakeIdentityServiceClient();
 
-    assertThrows(NotFoundException.class, () -> client.getCustomerByCristinId(randomUri()));
+    assertThrows(
+        IdentityServiceNotFoundException.class, () -> client.getCustomerByCristinId(randomUri()));
   }
 
   @Test
-  void shouldReturnDefaultCustomerWithRequestedCristinIdWhenDefaultCustomersAreEnabled()
-      throws NotFoundException {
+  void shouldReturnDefaultCustomerWithRequestedCristinIdWhenDefaultCustomersAreEnabled() {
     var cristinId = randomUri();
 
     var customer =
@@ -164,7 +164,7 @@ class FakeIdentityServiceClientTest {
   }
 
   @Test
-  void shouldReturnSameDefaultCustomerForRepeatedCristinIdLookups() throws NotFoundException {
+  void shouldReturnSameDefaultCustomerForRepeatedCristinIdLookups() {
     var cristinId = randomUri();
     var client = new FakeIdentityServiceClient().withDefaultCustomers();
 
@@ -173,7 +173,7 @@ class FakeIdentityServiceClientTest {
   }
 
   @Test
-  void shouldReturnGivenCustomerOverDefaultCustomerForCristinId() throws NotFoundException {
+  void shouldReturnGivenCustomerOverDefaultCustomerForCristinId() {
     var customer = randomCustomer();
     var client =
         new FakeIdentityServiceClient()
@@ -192,7 +192,7 @@ class FakeIdentityServiceClientTest {
   }
 
   @Test
-  void shouldReturnGivenUser() throws NotFoundException {
+  void shouldReturnGivenUser() {
     var user = randomUser();
     var client = new FakeIdentityServiceClient().withUser(user);
 
@@ -200,7 +200,7 @@ class FakeIdentityServiceClientTest {
   }
 
   @Test
-  void shouldReturnGivenExternalClient() throws NotFoundException {
+  void shouldReturnGivenExternalClient() {
     var externalClient = randomExternalClient();
     var client = new FakeIdentityServiceClient().withExternalClient(externalClient);
 
@@ -208,7 +208,7 @@ class FakeIdentityServiceClientTest {
   }
 
   @Test
-  void shouldReturnExternalClientGivenForToken() throws NotFoundException {
+  void shouldReturnExternalClientGivenForToken() {
     var bearerToken = randomString();
     var externalClient = randomExternalClient();
     var client =
@@ -218,7 +218,7 @@ class FakeIdentityServiceClientTest {
   }
 
   @Test
-  void shouldReturnGivenChannelClaim() throws NotFoundException {
+  void shouldReturnGivenChannelClaim() {
     var channelClaim = randomChannelClaim();
     var client = new FakeIdentityServiceClient().withChannelClaim(channelClaim);
 
@@ -229,10 +229,61 @@ class FakeIdentityServiceClientTest {
   void shouldThrowNotFoundForUnknownNonCustomerResources() {
     var client = new FakeIdentityServiceClient();
 
-    assertThrows(NotFoundException.class, () -> client.getUser(randomString()));
-    assertThrows(NotFoundException.class, () -> client.getExternalClient(randomString()));
-    assertThrows(NotFoundException.class, () -> client.getExternalClientByToken(randomString()));
-    assertThrows(NotFoundException.class, () -> client.getChannelClaim(randomUri()));
+    assertThrows(IdentityServiceNotFoundException.class, () -> client.getUser(randomString()));
+    assertThrows(
+        IdentityServiceNotFoundException.class, () -> client.getExternalClient(randomString()));
+    assertThrows(
+        IdentityServiceNotFoundException.class,
+        () -> client.getExternalClientByToken(randomString()));
+    assertThrows(IdentityServiceNotFoundException.class, () -> client.getChannelClaim(randomUri()));
+  }
+
+  @Test
+  void shouldFindGivenResources() {
+    var customer = randomCustomer();
+    var user = randomUser();
+    var externalClient = randomExternalClient();
+    var channelClaim = randomChannelClaim();
+    var client =
+        new FakeIdentityServiceClient()
+            .withCustomer(customer.id(), customer)
+            .withUser(user)
+            .withExternalClient(externalClient)
+            .withChannelClaim(channelClaim);
+
+    assertEquals(Optional.of(customer), client.findCustomerById(customer.id()));
+    assertEquals(Optional.of(customer), client.findCustomerByCristinId(customer.cristinId()));
+    assertEquals(Optional.of(user), client.findUser(user.username()));
+    assertEquals(
+        Optional.of(externalClient), client.findExternalClient(externalClient.getClientId()));
+    assertEquals(Optional.of(channelClaim), client.findChannelClaim(channelClaim.id()));
+  }
+
+  @Test
+  void shouldReturnEmptyFromFindersForUnknownResources() {
+    var client = new FakeIdentityServiceClient();
+
+    assertEquals(Optional.empty(), client.findCustomerById(randomUri()));
+    assertEquals(Optional.empty(), client.findCustomerByCristinId(randomUri()));
+    assertEquals(Optional.empty(), client.findUser(randomString()));
+    assertEquals(Optional.empty(), client.findExternalClient(randomString()));
+    assertEquals(Optional.empty(), client.findChannelClaim(randomUri()));
+  }
+
+  @Test
+  void shouldThrowIdentityServiceUnavailableFromFindersWhenServiceIsUnavailable() {
+    var client = new FakeIdentityServiceClient().withUnavailableIdentityService();
+
+    assertThrows(
+        IdentityServiceUnavailableException.class, () -> client.findCustomerById(randomUri()));
+    assertThrows(
+        IdentityServiceUnavailableException.class,
+        () -> client.findCustomerByCristinId(randomUri()));
+    assertThrows(IdentityServiceUnavailableException.class, () -> client.findUser(randomString()));
+    assertThrows(
+        IdentityServiceUnavailableException.class, () -> client.findExternalClient(randomString()));
+    assertThrows(
+        IdentityServiceUnavailableException.class, () -> client.findChannelClaim(randomUri()));
   }
 
   @ParameterizedTest(name = "{0}")
