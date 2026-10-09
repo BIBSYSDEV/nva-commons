@@ -25,9 +25,7 @@ class IdentityServiceExceptionTest {
 
   @Test
   void shouldKeepFullRequestUri() {
-    var exception =
-        new IdentityServiceNotFoundException(
-            REQUEST_URI_WITH_SENSITIVE_PARTS, new IOException("Connection reset"));
+    var exception = new IdentityServiceNotFoundException(REQUEST_URI_WITH_SENSITIVE_PARTS);
 
     assertEquals(REQUEST_URI_WITH_SENSITIVE_PARTS, exception.getRequestUri());
   }

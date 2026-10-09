@@ -19,7 +19,6 @@ import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 import no.unit.nva.auth.AuthorizedBackendClient;
 import no.unit.nva.auth.CognitoCredentials;
-import nva.commons.apigateway.exceptions.NotFoundException;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.attempt.Failure;
@@ -368,7 +367,7 @@ public class IdentityServiceClient {
   private <T> T fetch(
       Callable<HttpResponse<String>> sendRequest, URI requestUri, Class<T> responseType) {
     return attempt(sendRequest)
-        .map(this::validateResponse)
+        .map(response -> validateResponse(response, requestUri))
         .map(response -> mapResponse(responseType, response))
         .orElseThrow(failure -> toIdentityServiceException(failure, requestUri));
   }
@@ -384,15 +383,15 @@ public class IdentityServiceClient {
   private static IdentityServiceException toIdentityServiceException(
       Failure<?> responseFailure, URI requestUri) {
     var exception = responseFailure.getException();
-    return exception instanceof NotFoundException
-        ? new IdentityServiceNotFoundException(requestUri, exception)
+    return exception instanceof IdentityServiceException identityServiceException
+        ? identityServiceException
         : new IdentityServiceUnavailableException(requestUri, exception);
   }
 
-  private <S> HttpResponse<String> validateResponse(HttpResponse<String> response)
-      throws NotFoundException {
+  private static HttpResponse<String> validateResponse(
+      HttpResponse<String> response, URI requestUri) {
     if (response.statusCode() == HttpStatusCode.NOT_FOUND) {
-      throw new NotFoundException("Received 404 from identity service");
+      throw new IdentityServiceNotFoundException(requestUri);
     }
 
     if (response.statusCode() != HttpStatusCode.OK) {

@@ -20,7 +20,6 @@ import no.unit.nva.clients.IdentityServiceClient;
 import no.unit.nva.clients.IdentityServiceNotFoundException;
 import no.unit.nva.clients.IdentityServiceUnavailableException;
 import no.unit.nva.clients.UserDto;
-import nva.commons.apigateway.exceptions.NotFoundException;
 import nva.commons.core.Environment;
 import nva.commons.core.paths.UriWrapper;
 
@@ -197,8 +196,7 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
   }
 
   private static IdentityServiceNotFoundException notFound(URI requestUri) {
-    return new IdentityServiceNotFoundException(
-        requestUri, new NotFoundException("Simulated 404 from identity service"));
+    return new IdentityServiceNotFoundException(requestUri);
   }
 
   private UriWrapper usersAndRolesUri() {

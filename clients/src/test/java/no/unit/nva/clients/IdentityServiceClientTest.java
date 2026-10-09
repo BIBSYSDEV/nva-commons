@@ -9,6 +9,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,7 +40,6 @@ import no.unit.nva.clients.CustomerDto.RightsRetentionStrategy;
 import no.unit.nva.clients.UserDto.Role;
 import no.unit.nva.clients.UserDto.ViewingScope;
 import no.unit.nva.commons.json.JsonUtils;
-import nva.commons.apigateway.exceptions.NotFoundException;
 import nva.commons.core.Environment;
 import nva.commons.core.paths.UriWrapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -241,7 +241,7 @@ class IdentityServiceClientTest {
     Executable action = () -> authorizedIdentityServiceClient.getExternalClient(clientId);
 
     var exception = assertThrows(IdentityServiceNotFoundException.class, action);
-    assertInstanceOf(NotFoundException.class, exception.getCause());
+    assertNull(exception.getCause());
     assertTrue(exception.getMessage().contains("/users-roles/external-clients/" + clientId));
   }
 
