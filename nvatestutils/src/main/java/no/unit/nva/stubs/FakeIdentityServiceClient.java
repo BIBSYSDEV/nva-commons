@@ -7,11 +7,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import no.unit.nva.clients.ChannelClaimDto;
 import no.unit.nva.clients.CustomerDto;
@@ -27,12 +25,12 @@ import nva.commons.core.paths.UriWrapper;
 /**
  * In-memory replacement for {@link IdentityServiceClient}.
  *
- * <p>{@link #getCustomerById(URI)} returns a default customer for any customer ID, unless the ID
- * has been given its own customer, or made missing or unavailable. Every other operation only
- * returns what was given with the matching {@code with...} method and throws {@link
- * NotFoundException} for anything else. {@link #withUnavailableIdentityService()} makes every
- * operation throw {@link IdentityServiceUnavailableException}, with the same request URI the real
- * client would use.
+ * <p>The fake starts empty: every operation only returns what was given with the matching {@code
+ * with...} method and throws {@link NotFoundException} for anything else. For tests that need some
+ * customer but do not care which, {@link #withDefaultCustomers()} makes {@link
+ * #getCustomerById(URI)} return a default customer for any customer ID that was not given its own.
+ * {@link #withUnavailableIdentityService()} makes every operation throw {@link
+ * IdentityServiceUnavailableException}, with the same request URI the real client would use.
  */
 public class FakeIdentityServiceClient extends IdentityServiceClient {
 
@@ -47,12 +45,11 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
 
   private final String apiHost;
   private final Map<URI, CustomerDto> customers = new HashMap<>();
-  private final Set<URI> missingCustomers = new HashSet<>();
-  private final Set<URI> unavailableCustomers = new HashSet<>();
   private final Map<String, UserDto> users = new HashMap<>();
   private final Map<String, GetExternalClientResponse> externalClients = new HashMap<>();
   private final Map<String, GetExternalClientResponse> externalClientsByToken = new HashMap<>();
   private final Map<URI, ChannelClaimDto> channelClaims = new HashMap<>();
+  private boolean defaultCustomersEnabled;
   private String defaultPublicationWorkflow = DEFAULT_PUBLICATION_WORKFLOW;
   private boolean identityServiceUnavailable;
 
@@ -65,23 +62,27 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
     this.apiHost = environment.readEnv(API_HOST);
   }
 
-  public FakeIdentityServiceClient withDefaultPublicationWorkflow(String publicationWorkflow) {
+  /**
+   * Makes {@link #getCustomerById(URI)} return a default customer with the {@link
+   * #DEFAULT_PUBLICATION_WORKFLOW} for any customer ID that was not given its own customer. Default
+   * customers are not part of {@link #getAllCustomers()} or {@link #getCustomerByCristinId(URI)}.
+   */
+  public FakeIdentityServiceClient withDefaultCustomers() {
+    return withDefaultCustomers(DEFAULT_PUBLICATION_WORKFLOW);
+  }
+
+  /**
+   * Like {@link #withDefaultCustomers()}, with the given publication workflow on the default
+   * customers.
+   */
+  public FakeIdentityServiceClient withDefaultCustomers(String publicationWorkflow) {
+    this.defaultCustomersEnabled = true;
     this.defaultPublicationWorkflow = publicationWorkflow;
     return this;
   }
 
   public FakeIdentityServiceClient withCustomer(URI customerId, CustomerDto customer) {
     customers.put(customerId, customer);
-    return this;
-  }
-
-  public FakeIdentityServiceClient withMissingCustomer(URI customerId) {
-    missingCustomers.add(customerId);
-    return this;
-  }
-
-  public FakeIdentityServiceClient withUnavailableCustomer(URI customerId) {
-    unavailableCustomers.add(customerId);
     return this;
   }
 
@@ -113,13 +114,14 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
 
   @Override
   public CustomerDto getCustomerById(URI customerId) throws NotFoundException {
-    if (identityServiceUnavailable || unavailableCustomers.contains(customerId)) {
-      throw unavailable(customerId);
+    throwIfUnavailable(customerId);
+    if (customers.containsKey(customerId)) {
+      return customers.get(customerId);
     }
-    if (missingCustomers.contains(customerId)) {
-      throw new NotFoundException("Customer not found: " + customerId);
+    if (defaultCustomersEnabled) {
+      return defaultCustomer(customerId);
     }
-    return customers.getOrDefault(customerId, defaultCustomer(customerId));
+    throw new NotFoundException("Customer not found: " + customerId);
   }
 
   /** Looks up a customer given with {@link #withCustomer(URI, CustomerDto)} by its Cristin ID. */

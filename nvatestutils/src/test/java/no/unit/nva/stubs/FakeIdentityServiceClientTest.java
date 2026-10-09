@@ -38,10 +38,19 @@ class FakeIdentityServiceClientTest {
   private static final String PLACEHOLDER_API_HOST = "https://localhost";
 
   @Test
-  void shouldReturnDefaultCustomerWithRequestedIdForUnknownCustomer() throws NotFoundException {
+  void shouldThrowNotFoundForUnknownCustomerByDefault() {
+    var client = new FakeIdentityServiceClient();
+
+    assertThrows(NotFoundException.class, () -> client.getCustomerById(randomUri()));
+  }
+
+  @Test
+  void shouldReturnDefaultCustomerWithRequestedIdWhenDefaultCustomersAreEnabled()
+      throws NotFoundException {
     var customerId = randomUri();
 
-    var customer = new FakeIdentityServiceClient().getCustomerById(customerId);
+    var customer =
+        new FakeIdentityServiceClient().withDefaultCustomers().getCustomerById(customerId);
 
     assertEquals(customerId, customer.id());
     assertEquals(DEFAULT_PUBLICATION_WORKFLOW, customer.publicationWorkflow());
@@ -65,7 +74,7 @@ class FakeIdentityServiceClientTest {
   @Test
   void shouldReturnSameDefaultCustomerForRepeatedRequests() throws NotFoundException {
     var customerId = randomUri();
-    var client = new FakeIdentityServiceClient();
+    var client = new FakeIdentityServiceClient().withDefaultCustomers();
 
     assertEquals(client.getCustomerById(customerId), client.getCustomerById(customerId));
   }
@@ -73,8 +82,7 @@ class FakeIdentityServiceClientTest {
   @Test
   void shouldReturnDefaultCustomerWithConfiguredPublicationWorkflow() throws NotFoundException {
     var publicationWorkflow = randomString();
-    var client =
-        new FakeIdentityServiceClient().withDefaultPublicationWorkflow(publicationWorkflow);
+    var client = new FakeIdentityServiceClient().withDefaultCustomers(publicationWorkflow);
 
     var customer = client.getCustomerById(randomUri());
 
@@ -90,23 +98,22 @@ class FakeIdentityServiceClientTest {
   }
 
   @Test
-  void shouldThrowNotFoundForMissingCustomer() {
-    var customerId = randomUri();
-    var client = new FakeIdentityServiceClient().withMissingCustomer(customerId);
+  void shouldReturnGivenCustomerOverDefaultCustomer() throws NotFoundException {
+    var customer = randomCustomer();
+    var client =
+        new FakeIdentityServiceClient()
+            .withDefaultCustomers()
+            .withCustomer(customer.id(), customer);
 
-    assertThrows(NotFoundException.class, () -> client.getCustomerById(customerId));
+    assertEquals(customer, client.getCustomerById(customer.id()));
   }
 
   @Test
-  void shouldThrowIdentityServiceUnavailableForUnavailableCustomer() {
-    var customerId = randomUri();
-    var client = new FakeIdentityServiceClient().withUnavailableCustomer(customerId);
+  void shouldLeaveDefaultCustomersOutOfAllCustomers() throws NotFoundException {
+    var client = new FakeIdentityServiceClient().withDefaultCustomers();
+    client.getCustomerById(randomUri());
 
-    var exception =
-        assertThrows(
-            IdentityServiceUnavailableException.class, () -> client.getCustomerById(customerId));
-
-    assertEquals(UNAVAILABLE_MESSAGE_PREFIX + customerId, exception.getMessage());
+    assertEquals(emptyList(), client.getAllCustomers().customers());
   }
 
   @Test
