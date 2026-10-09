@@ -10,6 +10,7 @@ import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -33,7 +34,7 @@ import nva.commons.core.Environment;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.Arguments.ArgumentSet;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class FakeIdentityServiceClientTest {
@@ -164,8 +165,7 @@ class FakeIdentityServiceClientTest {
         new FakeIdentityServiceClient().withDefaultCustomers().getCustomerByCristinId(cristinId);
 
     assertEquals(cristinId, customer.cristinId());
-    assertEquals(
-        URI.create(PLACEHOLDER_API_HOST + "/customer/" + customer.identifier()), customer.id());
+    assertEquals(apiUri("/customer/" + customer.identifier()), customer.id());
     assertEquals(DEFAULT_PUBLICATION_WORKFLOW, customer.publicationWorkflow());
   }
 
@@ -294,17 +294,17 @@ class FakeIdentityServiceClientTest {
         IdentityServiceRequestFailedException.class, () -> client.findChannelClaim(randomUri()));
   }
 
-  @ParameterizedTest(name = "{0}")
+  @ParameterizedTest
   @MethodSource("operationsWithExpectedRequestUri")
   void shouldThrowIdentityServiceRequestFailedWithRealRequestUriWhenServiceIsUnavailable(
-      String operationName, Executable operation, URI expectedRequestUri) {
+      Executable operation, URI expectedRequestUri) {
     var exception = assertThrows(IdentityServiceRequestFailedException.class, operation);
 
     assertEquals(expectedRequestUri, exception.getRequestUri());
     assertEquals(REQUEST_FAILED_MESSAGE_PREFIX + expectedRequestUri, exception.getMessage());
   }
 
-  private static Stream<Arguments> operationsWithExpectedRequestUri() {
+  private static Stream<ArgumentSet> operationsWithExpectedRequestUri() {
     var client = new FakeIdentityServiceClient().withUnavailableIdentityService();
     var customerId = randomUri();
     var cristinId = randomUri();
@@ -312,35 +312,32 @@ class FakeIdentityServiceClientTest {
     var clientId = randomString();
     var channelClaimId = randomUri();
     return Stream.of(
-        Arguments.of(
-            "getCustomerById", (Executable) () -> client.getCustomerById(customerId), customerId),
-        Arguments.of(
+        operation("getCustomerById", () -> client.getCustomerById(customerId), customerId),
+        operation(
             "getCustomerByCristinId",
-            (Executable) () -> client.getCustomerByCristinId(cristinId),
-            URI.create(
-                PLACEHOLDER_API_HOST
-                    + "/customer/cristinId/"
-                    + URLEncoder.encode(cristinId.toString(), UTF_8))),
-        Arguments.of(
-            "getAllCustomers",
-            (Executable) client::getAllCustomers,
-            URI.create(PLACEHOLDER_API_HOST + "/customer")),
-        Arguments.of(
-            "getUser",
-            (Executable) () -> client.getUser(userName),
-            URI.create(PLACEHOLDER_API_HOST + "/users-roles/users/" + userName)),
-        Arguments.of(
+            () -> client.getCustomerByCristinId(cristinId),
+            apiUri("/customer/cristinId/" + URLEncoder.encode(cristinId.toString(), UTF_8))),
+        operation("getAllCustomers", client::getAllCustomers, apiUri("/customer")),
+        operation(
+            "getUser", () -> client.getUser(userName), apiUri("/users-roles/users/" + userName)),
+        operation(
             "getExternalClient",
-            (Executable) () -> client.getExternalClient(clientId),
-            URI.create(PLACEHOLDER_API_HOST + "/users-roles/external-clients/" + clientId)),
-        Arguments.of(
+            () -> client.getExternalClient(clientId),
+            apiUri("/users-roles/external-clients/" + clientId)),
+        operation(
             "getExternalClientByToken",
-            (Executable) () -> client.getExternalClientByToken(randomString()),
-            URI.create(PLACEHOLDER_API_HOST + "/users-roles/external-clients")),
-        Arguments.of(
-            "getChannelClaim",
-            (Executable) () -> client.getChannelClaim(channelClaimId),
-            channelClaimId));
+            () -> client.getExternalClientByToken(randomString()),
+            apiUri("/users-roles/external-clients")),
+        operation("getChannelClaim", () -> client.getChannelClaim(channelClaimId), channelClaimId));
+  }
+
+  private static ArgumentSet operation(
+      String operationName, Executable operation, URI expectedRequestUri) {
+    return argumentSet(operationName, operation, expectedRequestUri);
+  }
+
+  private static URI apiUri(String path) {
+    return URI.create(PLACEHOLDER_API_HOST + path);
   }
 
   private static CustomerDto randomCustomer() {

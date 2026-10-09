@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -46,7 +47,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.Arguments.ArgumentSet;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.stubbing.Answer;
@@ -292,10 +293,10 @@ class IdentityServiceClientTest {
     assertEquals(clientId, actual.orElseThrow().getClientId());
   }
 
-  @ParameterizedTest(name = "{0}")
+  @ParameterizedTest
   @MethodSource("finders")
   void shouldReturnEmptyFromFinderWhenIdentityServiceRespondsNotFound(
-      String finderName, Function<IdentityServiceClient, Optional<?>> finder)
+      Function<IdentityServiceClient, Optional<?>> finder)
       throws IOException, InterruptedException {
     when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class)))
         .thenReturn(notFoundResponse);
@@ -303,10 +304,10 @@ class IdentityServiceClientTest {
     assertEquals(Optional.empty(), finder.apply(authorizedIdentityServiceClient));
   }
 
-  @ParameterizedTest(name = "{0}")
+  @ParameterizedTest
   @MethodSource("finders")
   void shouldThrowIdentityServiceRequestFailedFromFinderWhenRequestFails(
-      String finderName, Function<IdentityServiceClient, Optional<?>> finder)
+      Function<IdentityServiceClient, Optional<?>> finder)
       throws IOException, InterruptedException {
     when(notOkResponse.statusCode()).thenReturn(500);
     when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(notOkResponse);
@@ -316,7 +317,7 @@ class IdentityServiceClientTest {
         () -> finder.apply(authorizedIdentityServiceClient));
   }
 
-  private static Stream<Arguments> finders() {
+  private static Stream<ArgumentSet> finders() {
     return Stream.of(
         finder("findCustomerById", client -> client.findCustomerById(randomCustomerId())),
         finder("findCustomerByCristinId", client -> client.findCustomerByCristinId(randomUri())),
@@ -325,9 +326,9 @@ class IdentityServiceClientTest {
         finder("findExternalClient", client -> client.findExternalClient(randomString())));
   }
 
-  private static Arguments finder(
+  private static ArgumentSet finder(
       String finderName, Function<IdentityServiceClient, Optional<?>> finder) {
-    return Arguments.of(finderName, finder);
+    return argumentSet(finderName, finder);
   }
 
   private void stubResponseBody(String body) throws IOException, InterruptedException {
