@@ -69,7 +69,7 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
    * Makes customer lookups return a default customer instead of not found. The missing ID or
    * Cristin ID is derived from the requested one, so repeated lookups return equal customers. The
    * two lookups are not linked and default customers are not in {@link #getAllCustomers()}, so use
-   * {@link #withCustomer(URI, CustomerDto)} when a test needs related customers.
+   * {@link #withCustomer(CustomerDto)} when a test needs related customers.
    */
   public FakeIdentityServiceClient withDefaultCustomers() {
     return withDefaultCustomers(DEFAULT_PUBLICATION_WORKFLOW);
@@ -82,8 +82,8 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
     return this;
   }
 
-  public FakeIdentityServiceClient withCustomer(URI customerId, CustomerDto customer) {
-    customers.put(customerId, customer);
+  public FakeIdentityServiceClient withCustomer(CustomerDto customer) {
+    customers.put(customer.id(), customer);
     return this;
   }
 
@@ -146,7 +146,7 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
     throw notFound(requestUri);
   }
 
-  /** Returns the customers given with {@link #withCustomer(URI, CustomerDto)}. */
+  /** Returns the customers given with {@link #withCustomer(CustomerDto)}. */
   @Override
   public CustomerList getAllCustomers() {
     throwIfUnavailable(UriWrapper.fromHost(apiHost).addChild(CUSTOMER_PATH).getUri());

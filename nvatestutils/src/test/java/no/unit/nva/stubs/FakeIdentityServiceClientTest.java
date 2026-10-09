@@ -116,7 +116,7 @@ class FakeIdentityServiceClientTest {
   @Test
   void shouldReturnGivenCustomerForItsId() {
     var customer = randomCustomer();
-    var client = new FakeIdentityServiceClient().withCustomer(customer.id(), customer);
+    var client = new FakeIdentityServiceClient().withCustomer(customer);
 
     assertEquals(customer, client.getCustomerById(customer.id()));
   }
@@ -124,10 +124,7 @@ class FakeIdentityServiceClientTest {
   @Test
   void shouldReturnGivenCustomerOverDefaultCustomer() {
     var customer = randomCustomer();
-    var client =
-        new FakeIdentityServiceClient()
-            .withDefaultCustomers()
-            .withCustomer(customer.id(), customer);
+    var client = new FakeIdentityServiceClient().withDefaultCustomers().withCustomer(customer);
 
     assertEquals(customer, client.getCustomerById(customer.id()));
   }
@@ -144,7 +141,7 @@ class FakeIdentityServiceClientTest {
   @Test
   void shouldReturnGivenCustomerByCristinId() {
     var customer = randomCustomer();
-    var client = new FakeIdentityServiceClient().withCustomer(customer.id(), customer);
+    var client = new FakeIdentityServiceClient().withCustomer(customer);
 
     assertEquals(customer, client.getCustomerByCristinId(customer.cristinId()));
   }
@@ -181,10 +178,7 @@ class FakeIdentityServiceClientTest {
   @Test
   void shouldReturnGivenCustomerOverDefaultCustomerForCristinId() {
     var customer = randomCustomer();
-    var client =
-        new FakeIdentityServiceClient()
-            .withDefaultCustomers()
-            .withCustomer(customer.id(), customer);
+    var client = new FakeIdentityServiceClient().withDefaultCustomers().withCustomer(customer);
 
     assertEquals(customer, client.getCustomerByCristinId(customer.cristinId()));
   }
@@ -192,7 +186,7 @@ class FakeIdentityServiceClientTest {
   @Test
   void shouldReturnAllGivenCustomers() {
     var customer = randomCustomer();
-    var client = new FakeIdentityServiceClient().withCustomer(customer.id(), customer);
+    var client = new FakeIdentityServiceClient().withCustomer(customer);
 
     assertEquals(List.of(customer), client.getAllCustomers().customers());
   }
@@ -252,7 +246,7 @@ class FakeIdentityServiceClientTest {
     var channelClaim = randomChannelClaim();
     var client =
         new FakeIdentityServiceClient()
-            .withCustomer(customer.id(), customer)
+            .withCustomer(customer)
             .withUser(user)
             .withExternalClient(externalClient)
             .withChannelClaim(channelClaim);
