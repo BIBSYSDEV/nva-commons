@@ -24,14 +24,8 @@ import nva.commons.core.Environment;
 import nva.commons.core.paths.UriWrapper;
 
 /**
- * In-memory replacement for {@link IdentityServiceClient}.
- *
- * <p>The fake starts empty: every operation only returns what was given with the matching {@code
- * with...} method and throws {@link NotFoundException} for anything else. For tests that need some
- * customer but do not care which, {@link #withDefaultCustomers()} makes the customer lookups return
- * a default customer when no given customer matches. {@link #withUnavailableIdentityService()}
- * makes every operation throw {@link IdentityServiceUnavailableException}, with the same request
- * URI the real client would use.
+ * In-memory {@link IdentityServiceClient} for tests. It starts empty: lookups return only what was
+ * given with the {@code with...} methods and throw {@link NotFoundException} otherwise.
  */
 public class FakeIdentityServiceClient extends IdentityServiceClient {
 
@@ -71,32 +65,16 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
   }
 
   /**
-   * Makes the customer lookups return a default customer with the {@link
-   * #DEFAULT_PUBLICATION_WORKFLOW} when no customer given with {@link #withCustomer(URI,
-   * CustomerDto)} matches. Default customers have {@link #DEFAULT_SECTOR} and {@link
-   * #DEFAULT_RIGHTS_RETENTION_STRATEGY}, which is what the identity service returns for a customer
-   * where these are not set.
-   *
-   * <ul>
-   *   <li>{@link #getCustomerById(URI)} returns a default customer with the requested ID and a
-   *       top-level organization Cristin ID derived from it.
-   *   <li>{@link #getCustomerByCristinId(URI)} returns a default customer with the requested
-   *       Cristin ID and an ID derived from it.
-   * </ul>
-   *
-   * <p>The same lookup always returns an equal customer, but the two lookups do not know about each
-   * other, and default customers are not part of {@link #getAllCustomers()}. Tests that need
-   * consistent relationships between customers should give them with {@link #withCustomer(URI,
-   * CustomerDto)}.
+   * Makes customer lookups return a default customer instead of not found. The missing ID or
+   * Cristin ID is derived from the requested one, so repeated lookups return equal customers. The
+   * two lookups are not linked and default customers are not in {@link #getAllCustomers()}, so use
+   * {@link #withCustomer(URI, CustomerDto)} when a test needs related customers.
    */
   public FakeIdentityServiceClient withDefaultCustomers() {
     return withDefaultCustomers(DEFAULT_PUBLICATION_WORKFLOW);
   }
 
-  /**
-   * Like {@link #withDefaultCustomers()}, with the given publication workflow on the default
-   * customers.
-   */
+  /** Like {@link #withDefaultCustomers()}, with the given publication workflow. */
   public FakeIdentityServiceClient withDefaultCustomers(String publicationWorkflow) {
     this.defaultCustomersEnabled = true;
     this.defaultPublicationWorkflow = publicationWorkflow;
@@ -129,6 +107,10 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
     return this;
   }
 
+  /**
+   * Makes every operation throw {@link IdentityServiceUnavailableException} for the request URI the
+   * real client would use.
+   */
   public FakeIdentityServiceClient withUnavailableIdentityService() {
     this.identityServiceUnavailable = true;
     return this;
