@@ -43,9 +43,14 @@ class FakeIdentityServiceClientTest {
 
   @Test
   void shouldThrowNotFoundForUnknownCustomerByDefault() {
+    var customerId = randomUri();
     var client = new FakeIdentityServiceClient();
 
-    assertThrows(IdentityServiceNotFoundException.class, () -> client.getCustomerById(randomUri()));
+    var exception =
+        assertThrows(
+            IdentityServiceNotFoundException.class, () -> client.getCustomerById(customerId));
+
+    assertEquals(customerId, exception.getRequestUri());
   }
 
   @Test
@@ -292,6 +297,7 @@ class FakeIdentityServiceClientTest {
       String operationName, Executable operation, URI expectedRequestUri) {
     var exception = assertThrows(IdentityServiceUnavailableException.class, operation);
 
+    assertEquals(expectedRequestUri, exception.getRequestUri());
     assertEquals(UNAVAILABLE_MESSAGE_PREFIX + expectedRequestUri, exception.getMessage());
   }
 

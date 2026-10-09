@@ -10,6 +10,6 @@ import java.net.URI;
 public class IdentityServiceUnavailableException extends IdentityServiceException {
 
   public IdentityServiceUnavailableException(URI requestUri, Throwable cause) {
-    super("Request to identity service failed: " + requestUri, cause);
+    super("Request to identity service failed: ", requestUri, cause);
   }
 }

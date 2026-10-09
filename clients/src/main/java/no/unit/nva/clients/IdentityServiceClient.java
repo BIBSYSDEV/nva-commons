@@ -27,6 +27,25 @@ import nva.commons.core.paths.UriWrapper;
 import nva.commons.secrets.SecretsReader;
 import software.amazon.awssdk.http.HttpStatusCode;
 
+/**
+ * Client for the NVA identity service (customers, users, external clients and channel claims).
+ *
+ * <p>Each lookup by key comes in two forms. Choose deliberately:
+ *
+ * <ul>
+ *   <li>{@code getX} when the resource must exist, for example a customer referenced by the
+ *       caller's token or by stored data. A missing resource throws {@link
+ *       IdentityServiceNotFoundException}, which should usually end as a 500 or a retry.
+ *   <li>{@code findX} when absence is a normal outcome. A missing resource returns an empty {@link
+ *       Optional}, so the caller decides what absence means, for example a 401 or a default.
+ * </ul>
+ *
+ * <p>Every other failure, such as an unexpected status code, a network error, a token failure or an
+ * unparsable response, throws {@link IdentityServiceUnavailableException} from both forms. API
+ * handlers should map it to 502, and event handlers can let it propagate so the event is retried.
+ * All of these exceptions are unchecked and extend {@link IdentityServiceException}, which carries
+ * the URI of the failed request.
+ */
 @SuppressWarnings("PMD.CouplingBetweenObjects")
 public class IdentityServiceClient {
 

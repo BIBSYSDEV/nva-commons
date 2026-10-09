@@ -229,6 +229,7 @@ class IdentityServiceClientTest {
             () -> authorizedIdentityServiceClient.getCustomerById(customerId));
 
     assertInstanceOf(JsonProcessingException.class, exception.getCause());
+    assertEquals(customerId, exception.getRequestUri());
     assertTrue(exception.getMessage().contains(customerId.toString()));
   }
 
@@ -414,9 +415,12 @@ class IdentityServiceClientTest {
     when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8)))
         .thenReturn(okResponseWithBody);
 
-    assertThrows(
-        IdentityServiceNotFoundException.class,
-        () -> authorizedIdentityServiceClient.getCustomerById(customerId));
+    var exception =
+        assertThrows(
+            IdentityServiceNotFoundException.class,
+            () -> authorizedIdentityServiceClient.getCustomerById(customerId));
+
+    assertEquals(customerId, exception.getRequestUri());
   }
 
   @Test
