@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 import no.unit.nva.clients.ChannelClaimDto;
 import no.unit.nva.clients.CustomerDto;
+import no.unit.nva.clients.CustomerDto.RightsRetentionStrategy;
 import no.unit.nva.clients.CustomerList;
 import no.unit.nva.clients.GetExternalClientResponse;
 import no.unit.nva.clients.IdentityServiceClient;
@@ -27,17 +28,24 @@ import nva.commons.core.paths.UriWrapper;
  *
  * <p>The fake starts empty: every operation only returns what was given with the matching {@code
  * with...} method and throws {@link NotFoundException} for anything else. For tests that need some
- * customer but do not care which, {@link #withDefaultCustomers()} makes {@link
- * #getCustomerById(URI)} return a default customer for any customer ID that was not given its own.
- * {@link #withUnavailableIdentityService()} makes every operation throw {@link
- * IdentityServiceUnavailableException}, with the same request URI the real client would use.
+ * customer but do not care which, {@link #withDefaultCustomers()} makes the customer lookups return
+ * a default customer when no given customer matches. {@link #withUnavailableIdentityService()}
+ * makes every operation throw {@link IdentityServiceUnavailableException}, with the same request
+ * URI the real client would use.
  */
 public class FakeIdentityServiceClient extends IdentityServiceClient {
 
   public static final String DEFAULT_PUBLICATION_WORKFLOW = "RegistratorPublishesMetadataOnly";
   public static final String DEFAULT_CUSTOMER_NAME = "Fake customer";
+  public static final String DEFAULT_SECTOR = "UHI";
+  public static final RightsRetentionStrategy DEFAULT_RIGHTS_RETENTION_STRATEGY =
+      new RightsRetentionStrategy("NullRightsRetentionStrategy", null);
   private static final String API_HOST = "API_HOST";
   private static final String CUSTOMER_PATH = "customer";
+  private static final String CRISTIN_PATH = "cristin";
+  private static final String ORGANIZATION_PATH = "organization";
+  private static final String TOP_LEVEL_ORGANIZATION_SUFFIX = ".0.0.0";
+  private static final int CRISTIN_INSTITUTION_NUMBER_RANGE = 100_000;
   private static final String CRISTIN_ID_PATH = "cristinId";
   private static final String USERS_AND_ROLES_PATH = "users-roles";
   private static final String USERS_PATH = "users";
@@ -63,9 +71,23 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
   }
 
   /**
-   * Makes {@link #getCustomerById(URI)} return a default customer with the {@link
-   * #DEFAULT_PUBLICATION_WORKFLOW} for any customer ID that was not given its own customer. Default
-   * customers are not part of {@link #getAllCustomers()} or {@link #getCustomerByCristinId(URI)}.
+   * Makes the customer lookups return a default customer with the {@link
+   * #DEFAULT_PUBLICATION_WORKFLOW} when no customer given with {@link #withCustomer(URI,
+   * CustomerDto)} matches. Default customers have {@link #DEFAULT_SECTOR} and {@link
+   * #DEFAULT_RIGHTS_RETENTION_STRATEGY}, which is what the identity service returns for a customer
+   * where these are not set.
+   *
+   * <ul>
+   *   <li>{@link #getCustomerById(URI)} returns a default customer with the requested ID and a
+   *       top-level organization Cristin ID derived from it.
+   *   <li>{@link #getCustomerByCristinId(URI)} returns a default customer with the requested
+   *       Cristin ID and an ID derived from it.
+   * </ul>
+   *
+   * <p>The same lookup always returns an equal customer, but the two lookups do not know about each
+   * other, and default customers are not part of {@link #getAllCustomers()}. Tests that need
+   * consistent relationships between customers should give them with {@link #withCustomer(URI,
+   * CustomerDto)}.
    */
   public FakeIdentityServiceClient withDefaultCustomers() {
     return withDefaultCustomers(DEFAULT_PUBLICATION_WORKFLOW);
@@ -124,17 +146,20 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
     throw new NotFoundException("Customer not found: " + customerId);
   }
 
-  /** Looks up a customer given with {@link #withCustomer(URI, CustomerDto)} by its Cristin ID. */
   @Override
   public CustomerDto getCustomerByCristinId(URI topLevelOrgCristinId) throws NotFoundException {
     throwIfUnavailable(customerByCristinIdUri(topLevelOrgCristinId));
-    return customers.values().stream()
-        .filter(customer -> topLevelOrgCristinId.equals(customer.cristinId()))
-        .findFirst()
-        .orElseThrow(
-            () ->
-                new NotFoundException(
-                    "Customer not found for Cristin ID: " + topLevelOrgCristinId));
+    var givenCustomer =
+        customers.values().stream()
+            .filter(customer -> topLevelOrgCristinId.equals(customer.cristinId()))
+            .findFirst();
+    if (givenCustomer.isPresent()) {
+      return givenCustomer.get();
+    }
+    if (defaultCustomersEnabled) {
+      return defaultCustomerForCristinId(topLevelOrgCristinId);
+    }
+    throw new NotFoundException("Customer not found for Cristin ID: " + topLevelOrgCristinId);
   }
 
   /** Returns the customers given with {@link #withCustomer(URI, CustomerDto)}. */
@@ -204,21 +229,50 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
   }
 
   private CustomerDto defaultCustomer(URI customerId) {
+    var identifier = deterministicUuid(customerId);
+    return defaultCustomer(customerId, identifier, derivedCristinId(identifier));
+  }
+
+  private URI derivedCristinId(UUID identifier) {
+    var institutionNumber =
+        Math.floorMod(identifier.getLeastSignificantBits(), CRISTIN_INSTITUTION_NUMBER_RANGE);
+    return UriWrapper.fromHost(apiHost)
+        .addChild(CRISTIN_PATH)
+        .addChild(ORGANIZATION_PATH)
+        .addChild(institutionNumber + TOP_LEVEL_ORGANIZATION_SUFFIX)
+        .getUri();
+  }
+
+  private CustomerDto defaultCustomerForCristinId(URI cristinId) {
+    var identifier = deterministicUuid(cristinId);
+    var customerId =
+        UriWrapper.fromHost(apiHost)
+            .addChild(CUSTOMER_PATH)
+            .addChild(identifier.toString())
+            .getUri();
+    return defaultCustomer(customerId, identifier, cristinId);
+  }
+
+  private static UUID deterministicUuid(URI source) {
+    return UUID.nameUUIDFromBytes(source.toString().getBytes(UTF_8));
+  }
+
+  private CustomerDto defaultCustomer(URI customerId, UUID identifier, URI cristinId) {
     return new CustomerDto(
         customerId,
-        UUID.nameUUIDFromBytes(customerId.toString().getBytes(UTF_8)),
+        identifier,
         DEFAULT_CUSTOMER_NAME,
         DEFAULT_CUSTOMER_NAME,
         DEFAULT_CUSTOMER_NAME,
-        null,
+        cristinId,
         defaultPublicationWorkflow,
         false,
         false,
         false,
         emptyList(),
-        null,
+        DEFAULT_RIGHTS_RETENTION_STRATEGY,
         false,
-        null);
+        DEFAULT_SECTOR);
   }
 
   /** Lets the fake be created without the environment variables the real client requires. */

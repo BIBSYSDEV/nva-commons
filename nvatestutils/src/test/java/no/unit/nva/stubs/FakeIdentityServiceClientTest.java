@@ -3,10 +3,13 @@ package no.unit.nva.stubs;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
 import static no.unit.nva.stubs.FakeIdentityServiceClient.DEFAULT_PUBLICATION_WORKFLOW;
+import static no.unit.nva.stubs.FakeIdentityServiceClient.DEFAULT_RIGHTS_RETENTION_STRATEGY;
+import static no.unit.nva.stubs.FakeIdentityServiceClient.DEFAULT_SECTOR;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -54,6 +57,20 @@ class FakeIdentityServiceClientTest {
 
     assertEquals(customerId, customer.id());
     assertEquals(DEFAULT_PUBLICATION_WORKFLOW, customer.publicationWorkflow());
+    assertEquals(DEFAULT_SECTOR, customer.sector());
+    assertEquals(DEFAULT_RIGHTS_RETENTION_STRATEGY, customer.rightsRetentionStrategy());
+  }
+
+  @Test
+  void shouldGiveDefaultCustomerByIdTopLevelOrganizationCristinId() throws NotFoundException {
+    var customer =
+        new FakeIdentityServiceClient().withDefaultCustomers().getCustomerById(randomUri());
+
+    assertTrue(
+        customer
+            .cristinId()
+            .toString()
+            .matches(PLACEHOLDER_API_HOST + "/cristin/organization/\\d+\\.0\\.0\\.0"));
   }
 
   @Test
@@ -112,6 +129,7 @@ class FakeIdentityServiceClientTest {
   void shouldLeaveDefaultCustomersOutOfAllCustomers() throws NotFoundException {
     var client = new FakeIdentityServiceClient().withDefaultCustomers();
     client.getCustomerById(randomUri());
+    client.getCustomerByCristinId(randomUri());
 
     assertEquals(emptyList(), client.getAllCustomers().customers());
   }
@@ -129,6 +147,40 @@ class FakeIdentityServiceClientTest {
     var client = new FakeIdentityServiceClient();
 
     assertThrows(NotFoundException.class, () -> client.getCustomerByCristinId(randomUri()));
+  }
+
+  @Test
+  void shouldReturnDefaultCustomerWithRequestedCristinIdWhenDefaultCustomersAreEnabled()
+      throws NotFoundException {
+    var cristinId = randomUri();
+
+    var customer =
+        new FakeIdentityServiceClient().withDefaultCustomers().getCustomerByCristinId(cristinId);
+
+    assertEquals(cristinId, customer.cristinId());
+    assertEquals(
+        URI.create(PLACEHOLDER_API_HOST + "/customer/" + customer.identifier()), customer.id());
+    assertEquals(DEFAULT_PUBLICATION_WORKFLOW, customer.publicationWorkflow());
+  }
+
+  @Test
+  void shouldReturnSameDefaultCustomerForRepeatedCristinIdLookups() throws NotFoundException {
+    var cristinId = randomUri();
+    var client = new FakeIdentityServiceClient().withDefaultCustomers();
+
+    assertEquals(
+        client.getCustomerByCristinId(cristinId), client.getCustomerByCristinId(cristinId));
+  }
+
+  @Test
+  void shouldReturnGivenCustomerOverDefaultCustomerForCristinId() throws NotFoundException {
+    var customer = randomCustomer();
+    var client =
+        new FakeIdentityServiceClient()
+            .withDefaultCustomers()
+            .withCustomer(customer.id(), customer);
+
+    assertEquals(customer, client.getCustomerByCristinId(customer.cristinId()));
   }
 
   @Test
