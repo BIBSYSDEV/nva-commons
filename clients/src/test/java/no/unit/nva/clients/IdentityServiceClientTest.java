@@ -189,34 +189,34 @@ class IdentityServiceClientTest {
   }
 
   @Test
-  void shouldThrowIdentityServiceUnavailableWhenHttpClientReturnsUnhandledError()
+  void shouldThrowIdentityServiceRequestFailedWhenHttpClientReturnsUnhandledError()
       throws IOException, InterruptedException {
     when(notOkResponse.statusCode()).thenReturn(500);
     when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(notOkResponse);
 
     Executable action = () -> authorizedIdentityServiceClient.getExternalClient(clientId);
 
-    var exception = assertThrows(IdentityServiceUnavailableException.class, action);
+    var exception = assertThrows(IdentityServiceRequestFailedException.class, action);
     assertInstanceOf(IllegalStateException.class, exception.getCause());
     assertTrue(exception.getMessage().contains("/users-roles/external-clients/" + clientId));
   }
 
   @Test
-  void shouldThrowIdentityServiceUnavailableWithCauseWhenHttpClientThrowsIOException()
+  void shouldThrowIdentityServiceRequestFailedWithCauseWhenHttpClientThrowsIOException()
       throws IOException, InterruptedException {
     var networkError = new IOException("Connection reset");
     when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenThrow(networkError);
 
     var exception =
         assertThrows(
-            IdentityServiceUnavailableException.class,
+            IdentityServiceRequestFailedException.class,
             () -> authorizedIdentityServiceClient.getUser(randomString()));
 
     assertEquals(networkError, exception.getCause());
   }
 
   @Test
-  void shouldThrowIdentityServiceUnavailableWhenResponseBodyCannotBeParsed()
+  void shouldThrowIdentityServiceRequestFailedWhenResponseBodyCannotBeParsed()
       throws IOException, InterruptedException {
     var customerId = randomCustomerId();
     var unparsableResponse = mockResponse("not json");
@@ -225,7 +225,7 @@ class IdentityServiceClientTest {
 
     var exception =
         assertThrows(
-            IdentityServiceUnavailableException.class,
+            IdentityServiceRequestFailedException.class,
             () -> authorizedIdentityServiceClient.getCustomerById(customerId));
 
     assertInstanceOf(JsonProcessingException.class, exception.getCause());
@@ -305,14 +305,14 @@ class IdentityServiceClientTest {
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("finders")
-  void shouldThrowIdentityServiceUnavailableFromFinderWhenRequestFails(
+  void shouldThrowIdentityServiceRequestFailedFromFinderWhenRequestFails(
       String finderName, Function<IdentityServiceClient, Optional<?>> finder)
       throws IOException, InterruptedException {
     when(notOkResponse.statusCode()).thenReturn(500);
     when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(notOkResponse);
 
     assertThrows(
-        IdentityServiceUnavailableException.class,
+        IdentityServiceRequestFailedException.class,
         () -> finder.apply(authorizedIdentityServiceClient));
   }
 
@@ -442,7 +442,7 @@ class IdentityServiceClientTest {
   }
 
   @Test
-  void shouldThrowIdentityServiceUnavailableWhenFetchingAllCustomersFails()
+  void shouldThrowIdentityServiceRequestFailedWhenFetchingAllCustomersFails()
       throws IOException, InterruptedException {
     var request = HttpRequest.newBuilder().GET().uri(randomUri()).build();
 
@@ -452,7 +452,7 @@ class IdentityServiceClientTest {
         .thenReturn(okResponseWithBody);
 
     assertThrows(
-        IdentityServiceUnavailableException.class,
+        IdentityServiceRequestFailedException.class,
         () -> authorizedIdentityServiceClient.getAllCustomers());
   }
 
@@ -488,7 +488,7 @@ class IdentityServiceClientTest {
   }
 
   @Test
-  void shouldThrowIdentityServiceUnavailableWhenUnhandledExceptionWhenFetchingChannelClaim()
+  void shouldThrowIdentityServiceRequestFailedWhenUnhandledExceptionWhenFetchingChannelClaim()
       throws IOException, InterruptedException {
     var channelClaim = randomUri();
     var request = HttpRequest.newBuilder().GET().uri(channelClaim).build();
@@ -498,7 +498,7 @@ class IdentityServiceClientTest {
         .thenReturn(okResponseWithBody);
 
     assertThrows(
-        IdentityServiceUnavailableException.class,
+        IdentityServiceRequestFailedException.class,
         () -> authorizedIdentityServiceClient.getChannelClaim(channelClaim));
   }
 

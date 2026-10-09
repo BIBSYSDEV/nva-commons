@@ -18,7 +18,7 @@ import no.unit.nva.clients.CustomerList;
 import no.unit.nva.clients.GetExternalClientResponse;
 import no.unit.nva.clients.IdentityServiceClient;
 import no.unit.nva.clients.IdentityServiceNotFoundException;
-import no.unit.nva.clients.IdentityServiceUnavailableException;
+import no.unit.nva.clients.IdentityServiceRequestFailedException;
 import no.unit.nva.clients.UserDto;
 import nva.commons.core.Environment;
 import nva.commons.core.paths.UriWrapper;
@@ -109,8 +109,8 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
   }
 
   /**
-   * Makes every operation throw {@link IdentityServiceUnavailableException} for the request URI the
-   * real client would use.
+   * Makes every operation throw {@link IdentityServiceRequestFailedException} for the request URI
+   * the real client would use.
    */
   public FakeIdentityServiceClient withUnavailableIdentityService() {
     this.identityServiceUnavailable = true;
@@ -190,8 +190,8 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
     }
   }
 
-  private static IdentityServiceUnavailableException unavailable(URI requestUri) {
-    return new IdentityServiceUnavailableException(
+  private static IdentityServiceRequestFailedException unavailable(URI requestUri) {
+    return new IdentityServiceRequestFailedException(
         requestUri, new IOException("Simulated identity service outage"));
   }
 

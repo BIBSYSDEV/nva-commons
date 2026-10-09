@@ -15,7 +15,7 @@ class IdentityServiceExceptionTest {
   @Test
   void shouldLeaveUserInfoPortQueryAndFragmentOutOfMessage() {
     var exception =
-        new IdentityServiceUnavailableException(
+        new IdentityServiceRequestFailedException(
             REQUEST_URI_WITH_SENSITIVE_PARTS, new IOException("Connection reset"));
 
     assertEquals(

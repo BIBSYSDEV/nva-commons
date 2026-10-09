@@ -27,7 +27,7 @@ import no.unit.nva.clients.ChannelClaimDto.CustomerSummaryDto;
 import no.unit.nva.clients.CustomerDto;
 import no.unit.nva.clients.GetExternalClientResponse;
 import no.unit.nva.clients.IdentityServiceNotFoundException;
-import no.unit.nva.clients.IdentityServiceUnavailableException;
+import no.unit.nva.clients.IdentityServiceRequestFailedException;
 import no.unit.nva.clients.UserDto;
 import nva.commons.core.Environment;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class FakeIdentityServiceClientTest {
 
-  private static final String UNAVAILABLE_MESSAGE_PREFIX = "Request to identity service failed: ";
+  private static final String REQUEST_FAILED_MESSAGE_PREFIX =
+      "Request to identity service failed: ";
   private static final String PLACEHOLDER_API_HOST = "https://localhost";
 
   @Test
@@ -86,10 +87,10 @@ class FakeIdentityServiceClientTest {
     var client = new FakeIdentityServiceClient(environment).withUnavailableIdentityService();
 
     var exception =
-        assertThrows(IdentityServiceUnavailableException.class, () -> client.getUser(userName));
+        assertThrows(IdentityServiceRequestFailedException.class, () -> client.getUser(userName));
 
     assertEquals(
-        UNAVAILABLE_MESSAGE_PREFIX + "https://api.example.org/users-roles/users/" + userName,
+        REQUEST_FAILED_MESSAGE_PREFIX + "https://api.example.org/users-roles/users/" + userName,
         exception.getMessage());
   }
 
@@ -276,29 +277,31 @@ class FakeIdentityServiceClientTest {
   }
 
   @Test
-  void shouldThrowIdentityServiceUnavailableFromFindersWhenServiceIsUnavailable() {
+  void shouldThrowIdentityServiceRequestFailedFromFindersWhenServiceIsUnavailable() {
     var client = new FakeIdentityServiceClient().withUnavailableIdentityService();
 
     assertThrows(
-        IdentityServiceUnavailableException.class, () -> client.findCustomerById(randomUri()));
+        IdentityServiceRequestFailedException.class, () -> client.findCustomerById(randomUri()));
     assertThrows(
-        IdentityServiceUnavailableException.class,
+        IdentityServiceRequestFailedException.class,
         () -> client.findCustomerByCristinId(randomUri()));
-    assertThrows(IdentityServiceUnavailableException.class, () -> client.findUser(randomString()));
     assertThrows(
-        IdentityServiceUnavailableException.class, () -> client.findExternalClient(randomString()));
+        IdentityServiceRequestFailedException.class, () -> client.findUser(randomString()));
     assertThrows(
-        IdentityServiceUnavailableException.class, () -> client.findChannelClaim(randomUri()));
+        IdentityServiceRequestFailedException.class,
+        () -> client.findExternalClient(randomString()));
+    assertThrows(
+        IdentityServiceRequestFailedException.class, () -> client.findChannelClaim(randomUri()));
   }
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("operationsWithExpectedRequestUri")
-  void shouldThrowIdentityServiceUnavailableWithRealRequestUriWhenServiceIsUnavailable(
+  void shouldThrowIdentityServiceRequestFailedWithRealRequestUriWhenServiceIsUnavailable(
       String operationName, Executable operation, URI expectedRequestUri) {
-    var exception = assertThrows(IdentityServiceUnavailableException.class, operation);
+    var exception = assertThrows(IdentityServiceRequestFailedException.class, operation);
 
     assertEquals(expectedRequestUri, exception.getRequestUri());
-    assertEquals(UNAVAILABLE_MESSAGE_PREFIX + expectedRequestUri, exception.getMessage());
+    assertEquals(REQUEST_FAILED_MESSAGE_PREFIX + expectedRequestUri, exception.getMessage());
   }
 
   private static Stream<Arguments> operationsWithExpectedRequestUri() {

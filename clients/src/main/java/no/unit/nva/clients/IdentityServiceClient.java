@@ -40,7 +40,7 @@ import software.amazon.awssdk.http.HttpStatusCode;
  * </ul>
  *
  * <p>Every other failure, such as an unexpected status code, a network error, a token failure or an
- * unparsable response, throws {@link IdentityServiceUnavailableException} from both forms. API
+ * unparsable response, throws {@link IdentityServiceRequestFailedException} from both forms. API
  * handlers should map it to 502, and event handlers can let it propagate so the event is retried.
  * All of these exceptions are unchecked and extend {@link IdentityServiceException}, which carries
  * the URI of the failed request.
@@ -149,8 +149,8 @@ public class IdentityServiceClient {
    * @param clientId the client ID to retrieve
    * @return the external client response
    * @throws IdentityServiceNotFoundException if the client does not exist
-   * @throws IdentityServiceUnavailableException if the identity service request fails for any other
-   *     reason
+   * @throws IdentityServiceRequestFailedException if the identity service request fails for any
+   *     other reason
    * @throws IllegalStateException if the client was created without authorization support
    */
   public GetExternalClientResponse getExternalClient(String clientId) {
@@ -165,8 +165,8 @@ public class IdentityServiceClient {
    *
    * @param clientId the client ID to look up
    * @return the external client, or an empty Optional if it does not exist
-   * @throws IdentityServiceUnavailableException if the identity service request fails for any other
-   *     reason
+   * @throws IdentityServiceRequestFailedException if the identity service request fails for any
+   *     other reason
    * @throws IllegalStateException if the client was created without authorization support
    */
   public Optional<GetExternalClientResponse> findExternalClient(String clientId) {
@@ -179,8 +179,8 @@ public class IdentityServiceClient {
    * @param bearerToken the bearer token to use for authentication
    * @return the external client response
    * @throws IdentityServiceNotFoundException if no client matches the token
-   * @throws IdentityServiceUnavailableException if the identity service request fails for any other
-   *     reason
+   * @throws IdentityServiceRequestFailedException if the identity service request fails for any
+   *     other reason
    */
   public GetExternalClientResponse getExternalClientByToken(String bearerToken) {
     var requestUri = constructExternalClientsUserinfoGetPath();
@@ -197,8 +197,8 @@ public class IdentityServiceClient {
    * @param userName the username to retrieve
    * @return the user data
    * @throws IdentityServiceNotFoundException if the user does not exist
-   * @throws IdentityServiceUnavailableException if the identity service request fails for any other
-   *     reason
+   * @throws IdentityServiceRequestFailedException if the identity service request fails for any
+   *     other reason
    * @throws IllegalStateException if the client was created without authorization support
    */
   public UserDto getUser(String userName) {
@@ -212,8 +212,8 @@ public class IdentityServiceClient {
    *
    * @param userName the username to look up
    * @return the user data, or an empty Optional if the user does not exist
-   * @throws IdentityServiceUnavailableException if the identity service request fails for any other
-   *     reason
+   * @throws IdentityServiceRequestFailedException if the identity service request fails for any
+   *     other reason
    * @throws IllegalStateException if the client was created without authorization support
    */
   public Optional<UserDto> findUser(String userName) {
@@ -226,8 +226,8 @@ public class IdentityServiceClient {
    * @param topLevelOrgCristinId the Cristin ID of the top-level organization
    * @return the customer data
    * @throws IdentityServiceNotFoundException if the customer does not exist
-   * @throws IdentityServiceUnavailableException if the identity service request fails for any other
-   *     reason
+   * @throws IdentityServiceRequestFailedException if the identity service request fails for any
+   *     other reason
    * @throws IllegalStateException if the client was created without authorization support
    */
   public CustomerDto getCustomerByCristinId(URI topLevelOrgCristinId) {
@@ -241,8 +241,8 @@ public class IdentityServiceClient {
    *
    * @param topLevelOrgCristinId the Cristin ID of the top-level organization
    * @return the customer data, or an empty Optional if the customer does not exist
-   * @throws IdentityServiceUnavailableException if the identity service request fails for any other
-   *     reason
+   * @throws IdentityServiceRequestFailedException if the identity service request fails for any
+   *     other reason
    * @throws IllegalStateException if the client was created without authorization support
    */
   public Optional<CustomerDto> findCustomerByCristinId(URI topLevelOrgCristinId) {
@@ -255,8 +255,8 @@ public class IdentityServiceClient {
    * @param customerId the customer ID URI
    * @return the customer data
    * @throws IdentityServiceNotFoundException if the customer does not exist
-   * @throws IdentityServiceUnavailableException if the identity service request fails for any other
-   *     reason
+   * @throws IdentityServiceRequestFailedException if the identity service request fails for any
+   *     other reason
    * @throws IllegalStateException if the client was created without authorization support
    */
   public CustomerDto getCustomerById(URI customerId) {
@@ -269,8 +269,8 @@ public class IdentityServiceClient {
    *
    * @param customerId the customer ID URI
    * @return the customer data, or an empty Optional if the customer does not exist
-   * @throws IdentityServiceUnavailableException if the identity service request fails for any other
-   *     reason
+   * @throws IdentityServiceRequestFailedException if the identity service request fails for any
+   *     other reason
    * @throws IllegalStateException if the client was created without authorization support
    */
   public Optional<CustomerDto> findCustomerById(URI customerId) {
@@ -283,8 +283,8 @@ public class IdentityServiceClient {
    * @param channelClaim the channel claim URI
    * @return the channel claim data
    * @throws IdentityServiceNotFoundException if the channel claim does not exist
-   * @throws IdentityServiceUnavailableException if the identity service request fails for any other
-   *     reason
+   * @throws IdentityServiceRequestFailedException if the identity service request fails for any
+   *     other reason
    */
   public ChannelClaimDto getChannelClaim(URI channelClaim) {
     var request = getRequestBuilderFromUri(channelClaim);
@@ -296,8 +296,8 @@ public class IdentityServiceClient {
    *
    * @param channelClaim the channel claim URI
    * @return the channel claim data, or an empty Optional if the channel claim does not exist
-   * @throws IdentityServiceUnavailableException if the identity service request fails for any other
-   *     reason
+   * @throws IdentityServiceRequestFailedException if the identity service request fails for any
+   *     other reason
    */
   public Optional<ChannelClaimDto> findChannelClaim(URI channelClaim) {
     return emptyIfNotFound(() -> getChannelClaim(channelClaim));
@@ -385,7 +385,7 @@ public class IdentityServiceClient {
     var exception = responseFailure.getException();
     return exception instanceof IdentityServiceException identityServiceException
         ? identityServiceException
-        : new IdentityServiceUnavailableException(requestUri, exception);
+        : new IdentityServiceRequestFailedException(requestUri, exception);
   }
 
   private static HttpResponse<String> validateResponse(
