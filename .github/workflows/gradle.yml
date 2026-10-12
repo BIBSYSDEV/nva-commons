@@ -24,7 +24,7 @@ jobs:
         run: sudo apt-get install -y jq
 
       - name: Cache Gradle packages
-        uses: actions/cache@v3
+        uses: actions/cache@v6
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
