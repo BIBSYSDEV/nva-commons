@@ -17,15 +17,16 @@ import no.unit.nva.clients.CustomerDto.RightsRetentionStrategy;
 import no.unit.nva.clients.CustomerList;
 import no.unit.nva.clients.GetExternalClientResponse;
 import no.unit.nva.clients.IdentityServiceClient;
-import no.unit.nva.clients.IdentityServiceUnavailableException;
+import no.unit.nva.clients.IdentityServiceNotFoundException;
+import no.unit.nva.clients.IdentityServiceRequestFailedException;
 import no.unit.nva.clients.UserDto;
-import nva.commons.apigateway.exceptions.NotFoundException;
 import nva.commons.core.Environment;
 import nva.commons.core.paths.UriWrapper;
 
 /**
  * In-memory {@link IdentityServiceClient} for tests. It starts empty: lookups return only what was
- * given with the {@code with...} methods and throw {@link NotFoundException} otherwise.
+ * given with the {@code with...} methods and throw {@link IdentityServiceNotFoundException}
+ * otherwise, and the inherited {@code find...} methods return an empty Optional.
  */
 public class FakeIdentityServiceClient extends IdentityServiceClient {
 
@@ -68,7 +69,7 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
    * Makes customer lookups return a default customer instead of not found. The missing ID or
    * Cristin ID is derived from the requested one, so repeated lookups return equal customers. The
    * two lookups are not linked and default customers are not in {@link #getAllCustomers()}, so use
-   * {@link #withCustomer(URI, CustomerDto)} when a test needs related customers.
+   * {@link #withCustomer(CustomerDto)} when a test needs related customers.
    */
   public FakeIdentityServiceClient withDefaultCustomers() {
     return withDefaultCustomers(DEFAULT_PUBLICATION_WORKFLOW);
@@ -81,8 +82,8 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
     return this;
   }
 
-  public FakeIdentityServiceClient withCustomer(URI customerId, CustomerDto customer) {
-    customers.put(customerId, customer);
+  public FakeIdentityServiceClient withCustomer(CustomerDto customer) {
+    customers.put(customer.id(), customer);
     return this;
   }
 
@@ -108,8 +109,8 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
   }
 
   /**
-   * Makes every operation throw {@link IdentityServiceUnavailableException} for the request URI the
-   * real client would use.
+   * Makes every operation throw {@link IdentityServiceRequestFailedException} for the request URI
+   * the real client would use.
    */
   public FakeIdentityServiceClient withUnavailableIdentityService() {
     this.identityServiceUnavailable = true;
@@ -117,7 +118,7 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
   }
 
   @Override
-  public CustomerDto getCustomerById(URI customerId) throws NotFoundException {
+  public CustomerDto getCustomerById(URI customerId) {
     throwIfUnavailable(customerId);
     if (customers.containsKey(customerId)) {
       return customers.get(customerId);
@@ -125,12 +126,13 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
     if (defaultCustomersEnabled) {
       return defaultCustomer(customerId);
     }
-    throw new NotFoundException("Customer not found: " + customerId);
+    throw notFound(customerId);
   }
 
   @Override
-  public CustomerDto getCustomerByCristinId(URI topLevelOrgCristinId) throws NotFoundException {
-    throwIfUnavailable(customerByCristinIdUri(topLevelOrgCristinId));
+  public CustomerDto getCustomerByCristinId(URI topLevelOrgCristinId) {
+    var requestUri = customerByCristinIdUri(topLevelOrgCristinId);
+    throwIfUnavailable(requestUri);
     var givenCustomer =
         customers.values().stream()
             .filter(customer -> topLevelOrgCristinId.equals(customer.cristinId()))
@@ -141,10 +143,10 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
     if (defaultCustomersEnabled) {
       return defaultCustomerForCristinId(topLevelOrgCristinId);
     }
-    throw new NotFoundException("Customer not found for Cristin ID: " + topLevelOrgCristinId);
+    throw notFound(requestUri);
   }
 
-  /** Returns the customers given with {@link #withCustomer(URI, CustomerDto)}. */
+  /** Returns the customers given with {@link #withCustomer(CustomerDto)}. */
   @Override
   public CustomerList getAllCustomers() {
     throwIfUnavailable(UriWrapper.fromHost(apiHost).addChild(CUSTOMER_PATH).getUri());
@@ -152,38 +154,32 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
   }
 
   @Override
-  public UserDto getUser(String userName) throws NotFoundException {
-    throwIfUnavailable(usersAndRolesUri().addChild(USERS_PATH).addChild(userName).getUri());
-    return findOrThrowNotFound(users, userName, "User not found: ");
+  public UserDto getUser(String userName) {
+    var requestUri = usersAndRolesUri().addChild(USERS_PATH).addChild(userName).getUri();
+    return lookUp(users, userName, requestUri);
   }
 
   @Override
-  public GetExternalClientResponse getExternalClient(String clientId) throws NotFoundException {
-    throwIfUnavailable(
-        usersAndRolesUri().addChild(EXTERNAL_CLIENTS_PATH).addChild(clientId).getUri());
-    return findOrThrowNotFound(externalClients, clientId, "External client not found: ");
+  public GetExternalClientResponse getExternalClient(String clientId) {
+    var requestUri = usersAndRolesUri().addChild(EXTERNAL_CLIENTS_PATH).addChild(clientId).getUri();
+    return lookUp(externalClients, clientId, requestUri);
   }
 
   @Override
-  public GetExternalClientResponse getExternalClientByToken(String bearerToken)
-      throws NotFoundException {
-    throwIfUnavailable(usersAndRolesUri().addChild(EXTERNAL_CLIENTS_PATH).getUri());
-    if (!externalClientsByToken.containsKey(bearerToken)) {
-      throw new NotFoundException("External client not found for the given token");
-    }
-    return externalClientsByToken.get(bearerToken);
+  public GetExternalClientResponse getExternalClientByToken(String bearerToken) {
+    var requestUri = usersAndRolesUri().addChild(EXTERNAL_CLIENTS_PATH).getUri();
+    return lookUp(externalClientsByToken, bearerToken, requestUri);
   }
 
   @Override
-  public ChannelClaimDto getChannelClaim(URI channelClaim) throws NotFoundException {
-    throwIfUnavailable(channelClaim);
-    return findOrThrowNotFound(channelClaims, channelClaim, "Channel claim not found: ");
+  public ChannelClaimDto getChannelClaim(URI channelClaim) {
+    return lookUp(channelClaims, channelClaim, channelClaim);
   }
 
-  private static <K, V> V findOrThrowNotFound(Map<K, V> values, K key, String notFoundMessage)
-      throws NotFoundException {
+  private <K, V> V lookUp(Map<K, V> values, K key, URI requestUri) {
+    throwIfUnavailable(requestUri);
     if (!values.containsKey(key)) {
-      throw new NotFoundException(notFoundMessage + key);
+      throw notFound(requestUri);
     }
     return values.get(key);
   }
@@ -194,9 +190,13 @@ public class FakeIdentityServiceClient extends IdentityServiceClient {
     }
   }
 
-  private static IdentityServiceUnavailableException unavailable(URI requestUri) {
-    return new IdentityServiceUnavailableException(
+  private static IdentityServiceRequestFailedException unavailable(URI requestUri) {
+    return new IdentityServiceRequestFailedException(
         requestUri, new IOException("Simulated identity service outage"));
+  }
+
+  private static IdentityServiceNotFoundException notFound(URI requestUri) {
+    return new IdentityServiceNotFoundException(requestUri);
   }
 
   private UriWrapper usersAndRolesUri() {

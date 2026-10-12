@@ -9,8 +9,10 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -27,7 +29,10 @@ import java.net.http.HttpResponse.BodyHandler;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Stream;
 import no.unit.nva.auth.CognitoCredentials;
 import no.unit.nva.clients.ChannelClaimDto.ChannelClaim;
 import no.unit.nva.clients.ChannelClaimDto.ChannelClaim.ChannelConstraint;
@@ -36,13 +41,14 @@ import no.unit.nva.clients.CustomerDto.RightsRetentionStrategy;
 import no.unit.nva.clients.UserDto.Role;
 import no.unit.nva.clients.UserDto.ViewingScope;
 import no.unit.nva.commons.json.JsonUtils;
-import nva.commons.apigateway.exceptions.ApiGatewayException;
-import nva.commons.apigateway.exceptions.NotFoundException;
 import nva.commons.core.Environment;
 import nva.commons.core.paths.UriWrapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments.ArgumentSet;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.stubbing.Answer;
 
@@ -95,7 +101,7 @@ class IdentityServiceClientTest {
 
   @Test
   void shouldSendRequestToCorrectUrlWhenGettingExternalClients()
-      throws IOException, InterruptedException, NotFoundException {
+      throws IOException, InterruptedException {
     when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class)))
         .thenAnswer(
             (Answer)
@@ -114,7 +120,7 @@ class IdentityServiceClientTest {
   }
 
   @Test
-  void shouldReturnExternalClientWhenRequested() throws NotFoundException {
+  void shouldReturnExternalClientWhenRequested() {
 
     var externalClient = authorizedIdentityServiceClient.getExternalClient(clientId);
 
@@ -125,7 +131,7 @@ class IdentityServiceClientTest {
   }
 
   @Test
-  void shouldReturnUserWhenRequested() throws NotFoundException, IOException, InterruptedException {
+  void shouldReturnUserWhenRequested() throws IOException, InterruptedException {
     var userName = "userName";
     var expectedUser = createUser(userName);
     var mockedResponse = mockResponse(expectedUser.toJsonString());
@@ -140,12 +146,12 @@ class IdentityServiceClientTest {
     when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class)))
         .thenReturn(notFoundResponse);
     assertThrows(
-        NotFoundException.class, () -> authorizedIdentityServiceClient.getUser(randomString()));
+        IdentityServiceNotFoundException.class,
+        () -> authorizedIdentityServiceClient.getUser(randomString()));
   }
 
   @Test
-  void shouldSendRequestToCorrectUrlWhenGettingUser()
-      throws IOException, InterruptedException, NotFoundException {
+  void shouldSendRequestToCorrectUrlWhenGettingUser() throws IOException, InterruptedException {
     var userName = "userName";
     when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class)))
         .thenAnswer(
@@ -166,7 +172,7 @@ class IdentityServiceClientTest {
 
   @Test
   void shouldReturnExternalClientWhenRequestedWithBearerToken()
-      throws NotFoundException, IOException, InterruptedException {
+      throws IOException, InterruptedException {
 
     var externalClient =
         authorizedIdentityServiceClient.getExternalClientByToken(BEARER_BEARER_TOKEN_TEST);
@@ -184,34 +190,34 @@ class IdentityServiceClientTest {
   }
 
   @Test
-  void shouldThrowIdentityServiceUnavailableWhenHttpClientReturnsUnhandledError()
+  void shouldThrowIdentityServiceRequestFailedWhenHttpClientReturnsUnhandledError()
       throws IOException, InterruptedException {
     when(notOkResponse.statusCode()).thenReturn(500);
     when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(notOkResponse);
 
     Executable action = () -> authorizedIdentityServiceClient.getExternalClient(clientId);
 
-    var exception = assertThrows(IdentityServiceUnavailableException.class, action);
+    var exception = assertThrows(IdentityServiceRequestFailedException.class, action);
     assertInstanceOf(IllegalStateException.class, exception.getCause());
     assertTrue(exception.getMessage().contains("/users-roles/external-clients/" + clientId));
   }
 
   @Test
-  void shouldThrowIdentityServiceUnavailableWithCauseWhenHttpClientThrowsIOException()
+  void shouldThrowIdentityServiceRequestFailedWithCauseWhenHttpClientThrowsIOException()
       throws IOException, InterruptedException {
     var networkError = new IOException("Connection reset");
     when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenThrow(networkError);
 
     var exception =
         assertThrows(
-            IdentityServiceUnavailableException.class,
+            IdentityServiceRequestFailedException.class,
             () -> authorizedIdentityServiceClient.getUser(randomString()));
 
     assertEquals(networkError, exception.getCause());
   }
 
   @Test
-  void shouldThrowIdentityServiceUnavailableWhenResponseBodyCannotBeParsed()
+  void shouldThrowIdentityServiceRequestFailedWhenResponseBodyCannotBeParsed()
       throws IOException, InterruptedException {
     var customerId = randomCustomerId();
     var unparsableResponse = mockResponse("not json");
@@ -220,10 +226,11 @@ class IdentityServiceClientTest {
 
     var exception =
         assertThrows(
-            IdentityServiceUnavailableException.class,
+            IdentityServiceRequestFailedException.class,
             () -> authorizedIdentityServiceClient.getCustomerById(customerId));
 
     assertInstanceOf(JsonProcessingException.class, exception.getCause());
+    assertEquals(customerId, exception.getRequestUri());
     assertTrue(exception.getMessage().contains(customerId.toString()));
   }
 
@@ -234,12 +241,103 @@ class IdentityServiceClientTest {
 
     Executable action = () -> authorizedIdentityServiceClient.getExternalClient(clientId);
 
-    assertThrows(NotFoundException.class, action);
+    var exception = assertThrows(IdentityServiceNotFoundException.class, action);
+    assertNull(exception.getCause());
+    assertTrue(exception.getMessage().contains("/users-roles/external-clients/" + clientId));
   }
 
   @Test
-  void shouldReturnCustomerByCristinIdWhenRequested()
-      throws NotFoundException, IOException, InterruptedException {
+  void shouldFindCustomerById() throws IOException, InterruptedException {
+    var customer = createCustomer(randomCustomerId());
+    stubResponseBody(customer.toJsonString());
+
+    var actual = authorizedIdentityServiceClient.findCustomerById(customer.id());
+
+    assertEquals(Optional.of(customer), actual);
+  }
+
+  @Test
+  void shouldFindCustomerByCristinId() throws IOException, InterruptedException {
+    var customer = createCustomer(randomCustomerId());
+    stubResponseBody(customer.toJsonString());
+
+    var actual = authorizedIdentityServiceClient.findCustomerByCristinId(customer.cristinId());
+
+    assertEquals(Optional.of(customer), actual);
+  }
+
+  @Test
+  void shouldFindUser() throws IOException, InterruptedException {
+    var user = createUser(randomString());
+    stubResponseBody(user.toJsonString());
+
+    var actual = authorizedIdentityServiceClient.findUser(user.username());
+
+    assertEquals(Optional.of(user), actual);
+  }
+
+  @Test
+  void shouldFindChannelClaim() throws IOException, InterruptedException {
+    var channelClaim = channelClaimWithId(randomBackendUri("customer/channel-claim"));
+    stubResponseBody(channelClaim.toJsonString());
+
+    var actual = authorizedIdentityServiceClient.findChannelClaim(channelClaim.id());
+
+    assertEquals(Optional.of(channelClaim), actual);
+  }
+
+  @Test
+  void shouldFindExternalClient() {
+    var actual = authorizedIdentityServiceClient.findExternalClient(clientId);
+
+    assertEquals(clientId, actual.orElseThrow().getClientId());
+  }
+
+  @ParameterizedTest
+  @MethodSource("finders")
+  void shouldReturnEmptyFromFinderWhenIdentityServiceRespondsNotFound(
+      Function<IdentityServiceClient, Optional<?>> finder)
+      throws IOException, InterruptedException {
+    when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class)))
+        .thenReturn(notFoundResponse);
+
+    assertEquals(Optional.empty(), finder.apply(authorizedIdentityServiceClient));
+  }
+
+  @ParameterizedTest
+  @MethodSource("finders")
+  void shouldThrowIdentityServiceRequestFailedFromFinderWhenRequestFails(
+      Function<IdentityServiceClient, Optional<?>> finder)
+      throws IOException, InterruptedException {
+    when(notOkResponse.statusCode()).thenReturn(500);
+    when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(notOkResponse);
+
+    assertThrows(
+        IdentityServiceRequestFailedException.class,
+        () -> finder.apply(authorizedIdentityServiceClient));
+  }
+
+  private static Stream<ArgumentSet> finders() {
+    return Stream.of(
+        finder("findCustomerById", client -> client.findCustomerById(randomCustomerId())),
+        finder("findCustomerByCristinId", client -> client.findCustomerByCristinId(randomUri())),
+        finder("findUser", client -> client.findUser(randomString())),
+        finder("findChannelClaim", client -> client.findChannelClaim(randomUri())),
+        finder("findExternalClient", client -> client.findExternalClient(randomString())));
+  }
+
+  private static ArgumentSet finder(
+      String finderName, Function<IdentityServiceClient, Optional<?>> finder) {
+    return argumentSet(finderName, finder);
+  }
+
+  private void stubResponseBody(String body) throws IOException, InterruptedException {
+    var response = mockResponse(body);
+    when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(response);
+  }
+
+  @Test
+  void shouldReturnCustomerByCristinIdWhenRequested() throws IOException, InterruptedException {
     var customerCristinId = randomUri();
     var expectedCustomer = createCustomer(customerCristinId);
     var request =
@@ -275,13 +373,12 @@ class IdentityServiceClientTest {
         .thenReturn(okResponseWithBody);
 
     assertThrows(
-        NotFoundException.class,
+        IdentityServiceNotFoundException.class,
         () -> authorizedIdentityServiceClient.getCustomerByCristinId(topLevelOrgCristinId));
   }
 
   @Test
-  void shouldReturnCustomerByIdWhenRequested()
-      throws NotFoundException, IOException, InterruptedException {
+  void shouldReturnCustomerByIdWhenRequested() throws IOException, InterruptedException {
     var customerId = randomCustomerId();
     var expectedCustomer = createCustomerWithCristinId(customerId);
     var request = HttpRequest.newBuilder().GET().uri(customerId).build();
@@ -319,12 +416,16 @@ class IdentityServiceClientTest {
     when(httpClient.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8)))
         .thenReturn(okResponseWithBody);
 
-    assertThrows(
-        NotFoundException.class, () -> authorizedIdentityServiceClient.getCustomerById(customerId));
+    var exception =
+        assertThrows(
+            IdentityServiceNotFoundException.class,
+            () -> authorizedIdentityServiceClient.getCustomerById(customerId));
+
+    assertEquals(customerId, exception.getRequestUri());
   }
 
   @Test
-  void shouldReturnAllCustomers() throws IOException, InterruptedException, ApiGatewayException {
+  void shouldReturnAllCustomers() throws IOException, InterruptedException {
     var customerList =
         new CustomerList(List.of(createCustomer(randomCustomerId()), createCustomer(randomUri())));
     var uri = randomUri();
@@ -342,7 +443,7 @@ class IdentityServiceClientTest {
   }
 
   @Test
-  void shouldThrowIdentityServiceUnavailableWhenFetchingAllCustomersFails()
+  void shouldThrowIdentityServiceRequestFailedWhenFetchingAllCustomersFails()
       throws IOException, InterruptedException {
     var request = HttpRequest.newBuilder().GET().uri(randomUri()).build();
 
@@ -352,13 +453,12 @@ class IdentityServiceClientTest {
         .thenReturn(okResponseWithBody);
 
     assertThrows(
-        IdentityServiceUnavailableException.class,
+        IdentityServiceRequestFailedException.class,
         () -> authorizedIdentityServiceClient.getAllCustomers());
   }
 
   @Test
-  void shouldReturnChannelClaimByIdWhenRequested()
-      throws NotFoundException, IOException, InterruptedException {
+  void shouldReturnChannelClaimByIdWhenRequested() throws IOException, InterruptedException {
     var channelClaim = randomBackendUri("customer/channel-claim");
     var expectedChannelClaim = channelClaimWithId(channelClaim);
     var request = HttpRequest.newBuilder().GET().uri(channelClaim).build();
@@ -384,12 +484,12 @@ class IdentityServiceClientTest {
         .thenReturn(okResponseWithBody);
 
     assertThrows(
-        NotFoundException.class,
+        IdentityServiceNotFoundException.class,
         () -> authorizedIdentityServiceClient.getChannelClaim(channelClaim));
   }
 
   @Test
-  void shouldThrowIdentityServiceUnavailableWhenUnhandledExceptionWhenFetchingChannelClaim()
+  void shouldThrowIdentityServiceRequestFailedWhenUnhandledExceptionWhenFetchingChannelClaim()
       throws IOException, InterruptedException {
     var channelClaim = randomUri();
     var request = HttpRequest.newBuilder().GET().uri(channelClaim).build();
@@ -399,7 +499,7 @@ class IdentityServiceClientTest {
         .thenReturn(okResponseWithBody);
 
     assertThrows(
-        IdentityServiceUnavailableException.class,
+        IdentityServiceRequestFailedException.class,
         () -> authorizedIdentityServiceClient.getChannelClaim(channelClaim));
   }
 
