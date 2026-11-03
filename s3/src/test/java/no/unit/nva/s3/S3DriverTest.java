@@ -1,6 +1,7 @@
 package no.unit.nva.s3;
 
 import static no.unit.nva.s3.S3Driver.S3_SCHEME;
+import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -316,10 +317,6 @@ class S3DriverTest {
 
   private static String randomFileName() {
     return FAKER.file().fileName();
-  }
-
-  private static String randomString() {
-    return FAKER.lorem().word();
   }
 
   private static UnixPath constructNestedPath() {
