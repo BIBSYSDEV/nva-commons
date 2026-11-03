@@ -9,17 +9,17 @@ apache-http-client = { strictly = '5.6.4' }
 apache-poi = { strictly = '5.5.1' }
 assertj = { strictly = '3.27.7' }
 aws-ion = { strictly = '1.12.1' }
-aws-lambda-core = { strictly = '1.4.0' }
+aws-lambda-core = { strictly = '1.4.1' }
 aws-lambda-events = { strictly = '3.16.1' }
-aws-sdk2 = { strictly = '2.55.11' }
+aws-sdk2 = { strictly = '2.57.4' }
 aws-sdk2-dynamodblocal = { strictly = '3.3.1' }
 com-auth0-jwks = { strictly = '0.24.1' }
-com-auth0-jwt = { strictly = '4.6.1' }
+com-auth0-jwt = { strictly = '4.6.2' }
 commons-validator = { strictly = '1.11.0' }
 cucumber = { strictly = '7.34.6' }
 datafaker = { strictly = '2.7.0' }
 hamcrest = { strictly = '3.0' }
-jackson = { strictly = '2.22.3' }
+jackson = { strictly = '2.22.4' }
 jackson-annotations = { strictly = '2.22' }
 javers = { strictly = '7.11.4' }
 jena = { strictly = '6.2.0' }
@@ -36,7 +36,7 @@ opensearch-testcontainer = { strictly = '4.1.0' }
 picocontainer = { strictly = '2.15.2'}
 slf4j = { strictly = '2.0.20' }
 testcontainers = { strictly = '2.0.5' }
-wiremock = { strictly = '4.0.0-beta.39' }
+wiremock = { strictly = '4.0.0-beta.41' }
 zalando-problem = { strictly = '1.0.0' }
 resilience4j = { strictly = '2.4.0' }
 titanium-json-ld = { strictly = '1.7.0'}
