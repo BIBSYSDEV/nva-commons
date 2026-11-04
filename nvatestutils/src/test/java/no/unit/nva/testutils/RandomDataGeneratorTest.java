@@ -116,7 +116,7 @@ class RandomDataGeneratorTest {
 
   @Test
   void shouldReturnRandomBoolean() {
-    boolean firstValue = RandomDataGenerator.randomBoolean();
+    boolean firstValue = randomBoolean();
     boolean oppositeValue =
         IntStream.range(0, BIG_ENOUGH_NUMBER_TO_PRODUCE_ALl_POSSIBLE_VALUES)
             .boxed()
@@ -172,7 +172,7 @@ class RandomDataGeneratorTest {
   @Test
   void shouldReturnRandomDoubleUpToSpecifiedCeiling() {
     var ceiling = VALUE_MUCH_LOWER_THAN_DEFAULT_MAX_VALUE_OF_STANDARD_JAVA_RANDOM_VALUE;
-    var randomDouble = RandomDataGenerator.randomDouble(ceiling);
+    var randomDouble = randomDouble(ceiling);
     assertThat(randomDouble, is(lessThan(ceiling)));
     assertThat(randomDouble, is(greaterThan(ZERO)));
   }
@@ -185,7 +185,7 @@ class RandomDataGeneratorTest {
   @Test
   void shouldReturnRandomDoubleSpreadingToWholeSpaceBetweenZeroAndCeiling() {
     var ceiling = VALUE_MUCH_HIGHER_THAN_STANDARD_MAX_VALUE_OF_JAVA_RANDOM_DOUBLE;
-    var randomDouble = RandomDataGenerator.randomDouble(ceiling);
+    var randomDouble = randomDouble(ceiling);
     assertThat(randomDouble, is(lessThan(ceiling)));
     assertThat(randomDouble, is(greaterThan(DEFAULT_MAX_RANDOM_VALUE_FOR_DOUBLES)));
   }

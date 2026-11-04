@@ -141,8 +141,7 @@ class DoiTest {
 
   private URI createExpectedSandboxDoiUri(URI seedValue, String hostOfSandboxEnvironment)
       throws URISyntaxException {
-    return new URI(
-        UriWrapper.HTTPS, hostOfSandboxEnvironment, seedValue.getPath(), DoiTest.EMPTY_FRAGMENT);
+    return new URI(UriWrapper.HTTPS, hostOfSandboxEnvironment, seedValue.getPath(), EMPTY_FRAGMENT);
   }
 
   private String removeRoot(String path) {

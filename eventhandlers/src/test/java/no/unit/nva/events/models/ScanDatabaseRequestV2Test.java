@@ -56,8 +56,7 @@ class ScanDatabaseRequestV2Test {
   @Test
   void shouldDeserializeEmptyObject() throws JsonProcessingException {
     var deserializedFromEmptyJson = ScanDatabaseRequestV2.fromJson(emptyJson());
-    var expectedDeserializedObject =
-        new ScanDatabaseRequestV2(null, ScanDatabaseRequestV2.DEFAULT_PAGE_SIZE, null);
+    var expectedDeserializedObject = new ScanDatabaseRequestV2(null, DEFAULT_PAGE_SIZE, null);
     assertThat(deserializedFromEmptyJson, is(equalTo(expectedDeserializedObject)));
   }
 

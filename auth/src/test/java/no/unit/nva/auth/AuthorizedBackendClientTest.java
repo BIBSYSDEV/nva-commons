@@ -103,7 +103,7 @@ class AuthorizedBackendClientTest {
   void shouldSendRequestsContainingTheUserAccessTokenWhenUserAccessTokenIsSubmitted()
       throws IOException, InterruptedException {
     String bearerToken = "Bearer " + expectedAccessToken;
-    var client = AuthorizedBackendClient.prepareWithBearerToken(httpClient, bearerToken);
+    var client = prepareWithBearerToken(httpClient, bearerToken);
     var request = buildRequest();
 
     var response = client.send(request, BodyHandlers.ofString(StandardCharsets.UTF_8));

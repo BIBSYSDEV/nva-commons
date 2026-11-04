@@ -81,8 +81,7 @@ class DoesNotHaveEmptyValuesTest {
 
     AssertionError exception =
         assertThrows(
-            AssertionError.class,
-            () -> assertThat(withEmptyInt, DoesNotHaveEmptyValues.doesNotHaveEmptyValues()));
+            AssertionError.class, () -> assertThat(withEmptyInt, doesNotHaveEmptyValues()));
     assertThat(exception.getMessage(), containsString(EMPTY_FIELD_ERROR));
     assertThat(exception.getMessage(), containsString(INT_FIELD));
   }
@@ -101,9 +100,7 @@ class DoesNotHaveEmptyValuesTest {
         new ClassWithChildrenWithMultipleFields(
             SAMPLE_STRING, objectMissingStringField(), SAMPLE_INT);
     AssertionError error =
-        assertThrows(
-            AssertionError.class,
-            () -> assertThat(testObject, DoesNotHaveEmptyValues.doesNotHaveEmptyValues()));
+        assertThrows(AssertionError.class, () -> assertThat(testObject, doesNotHaveEmptyValues()));
     assertThat(
         error.getMessage(), containsString(OBJECT_FIELD + FIELD_PATH_DELIMITER + STRING_FIELD));
   }
