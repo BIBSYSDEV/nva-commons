@@ -68,7 +68,7 @@ class StringUtilsTest {
   @Test
   @DisplayName("StringUtils should have a method for checking if a string is empty (null or blank)")
   void stringUtilsHasAMethodForCheckingIfAStringIsEmpty() {
-    boolean result = StringUtils.isEmpty(null);
+    assertThat(StringUtils.isEmpty(null), is(equalTo(true)));
   }
 
   @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)

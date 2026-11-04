@@ -8,6 +8,7 @@ import static org.apache.hc.core5.http.HttpHeaders.CONTENT_TYPE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -48,8 +49,8 @@ class ApiGatewayProxyHandlerTest {
   @Test
   @DisplayName("ApiGatewayProxyHandlerTest has a constructor with input class as only parameter")
   void apiGatewayHandlerHasACostructorWithInputClassAsOnlyParameter() {
-    RestRequestHandler<String, String> handler =
-        new ApiGatewayProxyHandler<>(String.class, environment) {
+    assertDoesNotThrow(() ->
+        new ApiGatewayProxyHandler<String, String>(String.class, environment) {
 
           @Override
           protected void validateRequest(String input, RequestInfo requestInfo, Context context)
@@ -62,7 +63,7 @@ class ApiGatewayProxyHandlerTest {
               String input, RequestInfo requestInfo, Context context) {
             return null;
           }
-        };
+        });
   }
 
   @Test
