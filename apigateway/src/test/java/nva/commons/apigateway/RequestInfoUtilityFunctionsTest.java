@@ -25,8 +25,8 @@ import org.junit.jupiter.api.function.Executable;
 class RequestInfoUtilityFunctionsTest {
 
   private RequestInfo requestInfo;
-  public static String KEY = "key";
-  public static String VALUE = "value";
+  public static final String KEY = "key";
+  public static final String VALUE = "value";
 
   @BeforeEach
   void setUp() throws JsonProcessingException, ApiIoException {
