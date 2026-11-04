@@ -10,21 +10,26 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class MediaTypeTest {
 
+  private static final String APPLICATION_JSON = "application/json";
+  private static final String APPLICATION_JSON_UTF_8 = "application/json; charset=utf-8";
+  private static final String TEXT_HTML_UTF_8 = "text/html; charset=utf-8";
+  private static final String ANY_APPLICATION = "application/*";
+
   static Stream<Arguments> parseProvider() {
     return Stream.of(
-        Arguments.of("application/json", "application/json"),
-        Arguments.of("application/json; charset=utf-8", "application/json; charset=utf-8"),
-        Arguments.of("  text/html ;  charset=utf-8 ", "text/html; charset=utf-8"));
+        Arguments.of(APPLICATION_JSON, APPLICATION_JSON),
+        Arguments.of(APPLICATION_JSON_UTF_8, APPLICATION_JSON_UTF_8),
+        Arguments.of("  text/html ;  charset=utf-8 ", TEXT_HTML_UTF_8));
   }
 
   static Stream<Arguments> predefinedConstantsProvider() {
     return Stream.of(
         Arguments.of(MediaType.CSV_UTF_8, "text/csv; charset=utf-8"),
-        Arguments.of(MediaType.JSON_UTF_8, "application/json; charset=utf-8"),
+        Arguments.of(MediaType.JSON_UTF_8, APPLICATION_JSON_UTF_8),
         Arguments.of(MediaType.XML_UTF_8, "text/xml; charset=utf-8"),
-        Arguments.of(MediaType.HTML_UTF_8, "text/html; charset=utf-8"),
+        Arguments.of(MediaType.HTML_UTF_8, TEXT_HTML_UTF_8),
         Arguments.of(MediaType.ANY_TYPE, "*/*"),
-        Arguments.of(MediaType.ANY_APPLICATION_TYPE, "application/*"),
+        Arguments.of(MediaType.ANY_APPLICATION_TYPE, ANY_APPLICATION),
         Arguments.of(MediaType.ANY_TEXT_TYPE, "text/*"),
         Arguments.of(MediaType.XHTML_UTF_8, "application/xhtml+xml; charset=utf-8"),
         Arguments.of(MediaType.MICROSOFT_EXCEL, "application/vnd.ms-excel"),
@@ -35,15 +40,15 @@ class MediaTypeTest {
 
   static Stream<Arguments> matchingProvider() {
     return Stream.of(
-        Arguments.of("application/json", "*/*", true),
-        Arguments.of("application/json", "application/*", true),
-        Arguments.of("application/json", "application/json", true),
-        Arguments.of("application/json", "text/plain", false),
-        Arguments.of("application/json", "application/xml", false),
-        Arguments.of("application/json; charset=utf-8", "application/*", true),
-        Arguments.of("text/html; charset=utf-8", "application/*", false),
-        Arguments.of("text/html; charset=utf-8", "text/*", true),
-        Arguments.of("application/json; charset=utf-8", "text/*", false));
+        Arguments.of(APPLICATION_JSON, "*/*", true),
+        Arguments.of(APPLICATION_JSON, ANY_APPLICATION, true),
+        Arguments.of(APPLICATION_JSON, APPLICATION_JSON, true),
+        Arguments.of(APPLICATION_JSON, "text/plain", false),
+        Arguments.of(APPLICATION_JSON, "application/xml", false),
+        Arguments.of(APPLICATION_JSON_UTF_8, ANY_APPLICATION, true),
+        Arguments.of(TEXT_HTML_UTF_8, ANY_APPLICATION, false),
+        Arguments.of(TEXT_HTML_UTF_8, "text/*", true),
+        Arguments.of(APPLICATION_JSON_UTF_8, "text/*", false));
   }
 
   @ParameterizedTest
@@ -75,9 +80,9 @@ class MediaTypeTest {
 
   @Test
   void shouldStripCharsetWithWithoutParameters() {
-    var withCharset = MediaType.parse("application/json; charset=utf-8");
+    var withCharset = MediaType.parse(APPLICATION_JSON_UTF_8);
     var withoutParams = withCharset.withoutParameters();
-    assertThat(withoutParams.toString()).isEqualTo("application/json");
+    assertThat(withoutParams.toString()).isEqualTo(APPLICATION_JSON);
   }
 
   @Test
@@ -88,8 +93,8 @@ class MediaTypeTest {
 
   @Test
   void shouldBeEqualAndHaveSameHashCodeForEqualTypes() {
-    var a = MediaType.parse("application/json; charset=utf-8");
-    var b = MediaType.parse("application/json; charset=utf-8");
+    var a = MediaType.parse(APPLICATION_JSON_UTF_8);
+    var b = MediaType.parse(APPLICATION_JSON_UTF_8);
     assertThat(a).isEqualTo(b);
     assertThat(a.hashCode()).isEqualTo(b.hashCode());
   }
@@ -97,21 +102,21 @@ class MediaTypeTest {
   @Test
   void shouldBeEqualRegardlessOfCase() {
     var a = MediaType.parse("Application/JSON; charset=utf-8");
-    var b = MediaType.parse("application/json; charset=utf-8");
+    var b = MediaType.parse(APPLICATION_JSON_UTF_8);
     assertThat(a).isEqualTo(b);
     assertThat(a.hashCode()).isEqualTo(b.hashCode());
   }
 
   @Test
   void shouldNotBeEqualWhenDifferentCharset() {
-    var a = MediaType.parse("text/html; charset=utf-8");
+    var a = MediaType.parse(TEXT_HTML_UTF_8);
     var b = MediaType.parse("text/html; charset=iso-8859-1");
     assertThat(a).isNotEqualTo(b);
   }
 
   @Test
   void shouldNotBeEqualWhenOnlyOneHasCharset() {
-    var a = MediaType.parse("text/html; charset=utf-8");
+    var a = MediaType.parse(TEXT_HTML_UTF_8);
     var b = MediaType.create("text", "html");
     assertThat(a).isNotEqualTo(b);
   }

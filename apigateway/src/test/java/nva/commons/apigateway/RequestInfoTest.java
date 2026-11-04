@@ -895,8 +895,8 @@ class RequestInfoTest {
     var authorizer = dtoObjectMapper.createObjectNode();
     var requestContext = dtoObjectMapper.createObjectNode();
     claims.put(CognitoUserInfo.USER_NAME_CLAIM, expectedUsername);
-    authorizer.set("claims", claims);
-    requestContext.set("authorizer", authorizer);
+    authorizer.set(CLAIMS, claims);
+    requestContext.set(AUTHORIZER, authorizer);
     requestInfo.setRequestContext(requestContext);
   }
 
@@ -906,8 +906,8 @@ class RequestInfoTest {
     var authorizer = dtoObjectMapper.createObjectNode();
     var requestContext = dtoObjectMapper.createObjectNode();
     claims.put(CognitoUserInfo.PERSON_CRISTIN_ID_CLAIM, expectedPersonCristinId.toString());
-    authorizer.set("claims", claims);
-    requestContext.set("authorizer", authorizer);
+    authorizer.set(CLAIMS, claims);
+    requestContext.set(AUTHORIZER, authorizer);
     requestInfo.setRequestContext(requestContext);
   }
 
@@ -917,8 +917,8 @@ class RequestInfoTest {
     var authorizer = dtoObjectMapper.createObjectNode();
     var requestContext = dtoObjectMapper.createObjectNode();
     claims.put(CognitoUserInfo.PERSON_AFFILIATION_CLAIM, expectedPersonAffiliation.toString());
-    authorizer.set("claims", claims);
-    requestContext.set("authorizer", authorizer);
+    authorizer.set(CLAIMS, claims);
+    requestContext.set(AUTHORIZER, authorizer);
     requestInfo.setRequestContext(requestContext);
   }
 
@@ -928,8 +928,8 @@ class RequestInfoTest {
     var authorizer = dtoObjectMapper.createObjectNode();
     var requestContext = dtoObjectMapper.createObjectNode();
     claims.put(CognitoUserInfo.PERSON_NIN_CLAIM, expectedPersonNinDifferentFromCognito);
-    authorizer.set("claims", claims);
-    requestContext.set("authorizer", authorizer);
+    authorizer.set(CLAIMS, claims);
+    requestContext.set(AUTHORIZER, authorizer);
     requestInfo.setRequestContext(requestContext);
   }
 
@@ -940,8 +940,8 @@ class RequestInfoTest {
     var requestContext = dtoObjectMapper.createObjectNode();
     claims.put(CognitoUserInfo.PERSON_FEIDE_ID_CLAIM, expectedFeideIdDifferentFromCognito);
     claims.put(COGNITO_USER_NAME, randomString());
-    authorizer.set("claims", claims);
-    requestContext.set("authorizer", authorizer);
+    authorizer.set(CLAIMS, claims);
+    requestContext.set(AUTHORIZER, authorizer);
     requestInfo.setRequestContext(requestContext);
   }
 
@@ -959,8 +959,8 @@ class RequestInfoTest {
       claims.put(PERSON_GROUPS_CLAIM, customerAccessRigts);
     }
     claims.put(COGNITO_USER_NAME, user.getCognitoUsername());
-    authorizer.set("claims", claims);
-    requestContext.set("authorizer", authorizer);
+    authorizer.set(CLAIMS, claims);
+    requestContext.set(AUTHORIZER, authorizer);
     return requestContext;
   }
 

@@ -32,6 +32,17 @@ class MediaTypeApiTest {
 
   private static final MediaTypeParser PARSER = MediaTypeParser.defaultParser();
   private static final ContentNegotiator NEGOTIATOR = ContentNegotiator.defaultNegotiator();
+  private static final String TEXT = "text";
+  private static final String HTML = "html";
+  private static final String APPLICATION = "application";
+  private static final String LD_JSON = "ld+json";
+  private static final String TEXT_HTML = "text/html";
+  private static final String ANY_TEXT = "text/*";
+  private static final String PROFILE = "profile";
+  private static final String NOTE = "note";
+  private static final String SCHEMA_ORG = "https://schema.org";
+  private static final String CONTROL_CHARACTER = "control_character";
+  private static final String NONE = "NONE";
 
   // ============================================================ MediaType
   @Nested
@@ -57,8 +68,8 @@ class MediaTypeApiTest {
 
     static Stream<Arguments> blankTypeNormalizationCases() {
       return Stream.of(
-          Arguments.of(new MediaType("  ", "html"), "*/html"),
-          Arguments.of(new MediaType("text", "  "), "text/*"));
+          Arguments.of(new MediaType("  ", HTML), "*/html"),
+          Arguments.of(new MediaType(TEXT, "  "), ANY_TEXT));
     }
 
     @ParameterizedTest(name = "null parameters normalizes to empty map")
@@ -68,7 +79,7 @@ class MediaTypeApiTest {
     }
 
     static Stream<Arguments> nullParametersCases() {
-      return Stream.of(Arguments.of(new MediaType("text", "html", null)));
+      return Stream.of(Arguments.of(new MediaType(TEXT, HTML, null)));
     }
 
     @ParameterizedTest(name = "subtype {0} -> suffix {1}")
@@ -80,7 +91,7 @@ class MediaTypeApiTest {
       "cbor,         NONE"
     })
     void shouldExtractStructuredSyntaxSuffix(String subtype, String expected) {
-      assertThat(new MediaType("application", subtype).structuredSyntaxSuffix().orElse("NONE"))
+      assertThat(new MediaType(APPLICATION, subtype).structuredSyntaxSuffix().orElse(NONE))
           .isEqualTo(expected);
     }
 
@@ -114,7 +125,7 @@ class MediaTypeApiTest {
       "text,        plain,false"
     })
     void shouldHonourWildcardsInMatchedBy(String rangeType, String rangeSub, boolean expected) {
-      assertThat(new MediaType("text", "html").matchedBy(new MediaType(rangeType, rangeSub)))
+      assertThat(new MediaType(TEXT, HTML).matchedBy(new MediaType(rangeType, rangeSub)))
           .isEqualTo(expected);
     }
 
@@ -126,15 +137,15 @@ class MediaTypeApiTest {
 
     static Stream<Arguments> profilesCases() {
       return Stream.of(
-          Arguments.of(new MediaType("a", "b", Map.of("profile", "https://a https://b")), 2),
-          Arguments.of(new MediaType("a", "b", Map.of("profile", "https://a")), 1),
-          Arguments.of(new MediaType("a", "b", Map.of("profile", "")), 0),
-          Arguments.of(new MediaType("a", "b", Map.of("profile", "[invalid")), 0));
+          Arguments.of(new MediaType("a", "b", Map.of(PROFILE, "https://a https://b")), 2),
+          Arguments.of(new MediaType("a", "b", Map.of(PROFILE, "https://a")), 1),
+          Arguments.of(new MediaType("a", "b", Map.of(PROFILE, "")), 0),
+          Arguments.of(new MediaType("a", "b", Map.of(PROFILE, "[invalid")), 0));
     }
 
     @Test
     void shouldBeEqualRegardlessOfCase() {
-      assertThat(new MediaType("Text", "HTML")).isEqualTo(new MediaType("text", "html"));
+      assertThat(new MediaType("Text", "HTML")).isEqualTo(new MediaType(TEXT, HTML));
     }
 
     @ParameterizedTest(name = "round-trips: {0}")
@@ -145,17 +156,16 @@ class MediaTypeApiTest {
 
     static Stream<Arguments> roundTripValues() {
       return Stream.of(
-          Arguments.of(new MediaType("text", "html")),
-          Arguments.of(new MediaType("text", "html", Map.of("charset", "utf-8"))),
-          Arguments.of(new MediaType("text", "plain", Map.of("note", "a, b; c"))),
-          Arguments.of(
-              new MediaType("application", "ld+json", Map.of("profile", "https://schema.org"))));
+          Arguments.of(new MediaType(TEXT, HTML)),
+          Arguments.of(new MediaType(TEXT, HTML, Map.of("charset", "utf-8"))),
+          Arguments.of(new MediaType(TEXT, "plain", Map.of(NOTE, "a, b; c"))),
+          Arguments.of(new MediaType(APPLICATION, LD_JSON, Map.of(PROFILE, SCHEMA_ORG))));
     }
 
     @Test
     @DisplayName("backslash in parameter value is escaped in toString")
     void shouldEscapeBackslashInParameterValue() {
-      var mediaType = new MediaType("text", "plain", Map.of("note", "a\\b"));
+      var mediaType = new MediaType(TEXT, "plain", Map.of(NOTE, "a\\b"));
 
       String serialised = mediaType.toString();
 
@@ -166,7 +176,7 @@ class MediaTypeApiTest {
     @Test
     @DisplayName("double-quote in parameter value is escaped in toString")
     void shouldEscapeDoubleQuoteInParameterValue() {
-      var mediaType = new MediaType("text", "plain", Map.of("note", "a\"b"));
+      var mediaType = new MediaType(TEXT, "plain", Map.of(NOTE, "a\"b"));
 
       String serialised = mediaType.toString();
 
@@ -191,12 +201,12 @@ class MediaTypeApiTest {
 
     static Stream<Arguments> rejectionCases() {
       return Stream.of(
-          Arguments.of("text/html\r\nSet-Cookie: x", false, "control_character"),
-          Arguments.of("text/html\u0000", false, "control_character"),
+          Arguments.of("text/html\r\nSet-Cookie: x", false, CONTROL_CHARACTER),
+          Arguments.of("text/html\u0000", false, CONTROL_CHARACTER),
           Arguments.of("text/" + "a".repeat(9000), false, "input_too_long"),
           Arguments.of("x/y,".repeat(70), true, "too_many_elements"),
-          Arguments.of("text", false, "missing_subtype"),
-          Arguments.of("text/*", false, "wildcard_in_content_type"),
+          Arguments.of(TEXT, false, "missing_subtype"),
+          Arguments.of(ANY_TEXT, false, "wildcard_in_content_type"),
           Arguments.of("text/html, application/json", false, "unexpected_list"),
           Arguments.of(
               "text/html; charset=utf-8; charset=iso-8859-1", false, "duplicate_parameter"),
@@ -207,12 +217,12 @@ class MediaTypeApiTest {
           Arguments.of("application/ld+json; profile=\"[\"", false, "invalid_profile_uri"),
           Arguments.of("text/plain; key", false, "invalid_token_value"),
           Arguments.of("text/plain; note=\"\"", false, "obs_text"),
-          Arguments.of("text/html\u0001", false, "control_character"),
+          Arguments.of("text/html\u0001", false, CONTROL_CHARACTER),
           Arguments.of(null, false, "null_input"),
           Arguments.of(null, true, "null_input"),
           Arguments.of("/html", false, "empty_type"),
           Arguments.of("text/", false, "empty_subtype"),
-          Arguments.of("text/html\u007f", false, "control_character"),
+          Arguments.of("text/html\u007f", false, CONTROL_CHARACTER),
           Arguments.of("text/plain; @key=value", false, "invalid_parameter_name"));
     }
 
@@ -256,15 +266,15 @@ class MediaTypeApiTest {
       var mediaType = parseMediaType(input);
 
       assertThat(mediaType.essence()).isEqualTo(essence);
-      assertThat(mediaType.charsetName().orElse("NONE")).isEqualTo(charset);
+      assertThat(mediaType.charsetName().orElse(NONE)).isEqualTo(charset);
     }
 
     @Test
     @DisplayName("quoted-pair escaping and embedded separators survive")
     void shouldHandleQuotedValues() {
-      assertThat(parseMediaType("text/plain; note=\"a\\\"b\"").parameters().get("note"))
+      assertThat(parseMediaType("text/plain; note=\"a\\\"b\"").parameters().get(NOTE))
           .isEqualTo("a\"b");
-      assertThat(parseMediaType("text/plain; note=\"a, b; c\"").parameters().get("note"))
+      assertThat(parseMediaType("text/plain; note=\"a, b; c\"").parameters().get(NOTE))
           .isEqualTo("a, b; c");
     }
 
@@ -399,9 +409,9 @@ class MediaTypeApiTest {
 
     @Test
     void shouldEnforceAllowedTypes() {
-      var parser = MediaTypeParser.builder().allowedTypes(new MediaType("text", "html")).build();
+      var parser = MediaTypeParser.builder().allowedTypes(new MediaType(TEXT, HTML)).build();
 
-      assertThat(parser.parse("text/html").isAcceptable()).isTrue();
+      assertThat(parser.parse(TEXT_HTML).isAcceptable()).isTrue();
       assertThat(rejected(parser.parse("application/json"), "type_not_allowed")).isTrue();
     }
 
@@ -526,7 +536,7 @@ class MediaTypeApiTest {
 
     @Test
     void shouldHaveNoMediaTypesWhenRejected() {
-      assertThat(PARSER.parse("text/*").first()).isEmpty();
+      assertThat(PARSER.parse(ANY_TEXT).first()).isEmpty();
     }
 
     @ParameterizedTest(name = "Violation.toString starts with {0}")
@@ -557,8 +567,8 @@ class MediaTypeApiTest {
       var result = PARSER.parseList("*/*;q=0.1, text/*;q=0.5, text/html");
       var order = result.preferenceOrder();
 
-      assertThat(order.get(0).essence()).isEqualTo("text/html");
-      assertThat(order.get(1).essence()).isEqualTo("text/*");
+      assertThat(order.get(0).essence()).isEqualTo(TEXT_HTML);
+      assertThat(order.get(1).essence()).isEqualTo(ANY_TEXT);
       assertThat(order.get(2).essence()).isEqualTo("*/*");
     }
 
@@ -568,7 +578,7 @@ class MediaTypeApiTest {
       var result = PARSER.parseList("*/*;q=0.5, text/*;q=0.5, text/html;q=0.5");
       var order = result.preferenceOrder();
 
-      assertThat(order.get(1).essence()).isEqualTo("text/*");
+      assertThat(order.get(1).essence()).isEqualTo(ANY_TEXT);
     }
   }
 
@@ -602,27 +612,27 @@ class MediaTypeApiTest {
     @MethodSource("negotiationCases")
     void shouldSelectBestMatch(String accept, List<MediaType> offered, String expectedEssence) {
       String got =
-          NEGOTIATOR.best(PARSER.parseList(accept), offered).map(MediaType::essence).orElse("NONE");
+          NEGOTIATOR.best(PARSER.parseList(accept), offered).map(MediaType::essence).orElse(NONE);
 
       assertThat(got).isEqualTo(expectedEssence);
     }
 
     static Stream<Arguments> negotiationCases() {
-      var json = new MediaType("application", "json");
-      var xml = new MediaType("application", "xml");
-      var html = new MediaType("text", "html");
+      var json = new MediaType(APPLICATION, "json");
+      var xml = new MediaType(APPLICATION, "xml");
+      var html = new MediaType(TEXT, HTML);
       return Stream.of(
           Arguments.of("application/xml;q=0.9, */*;q=0.8", List.of(json, xml), "application/xml"),
-          Arguments.of("application/json;q=0, text/plain", List.of(json), "NONE"),
-          Arguments.of("", List.of(html, json), "text/html"),
-          Arguments.of("text/html;level=1", List.of(html), "NONE"));
+          Arguments.of("application/json;q=0, text/plain", List.of(json), NONE),
+          Arguments.of("", List.of(html, json), TEXT_HTML),
+          Arguments.of("text/html;level=1", List.of(html), NONE));
     }
 
     @Test
     @DisplayName("charset ignored by default, a hard constraint under strict()")
     void shouldIgnoreCharsetByDefaultAndRespectUnderStrict() {
       var accept = PARSER.parseList("text/html;charset=utf-8");
-      var html = new MediaType("text", "html");
+      var html = new MediaType(TEXT, HTML);
 
       assertThat(NEGOTIATOR.best(accept, List.of(html))).isPresent();
       assertThat(ContentNegotiator.strict().best(accept, List.of(html))).isEmpty();
@@ -638,9 +648,9 @@ class MediaTypeApiTest {
     void shouldTreatProfileAsUnorderedSetPreference(String profileValue) {
       var both =
           new MediaType(
-              "application",
-              "ld+json",
-              Map.of("profile", "http://www.w3.org/ns/json-ld#compacted https://schema.org"));
+              APPLICATION,
+              LD_JSON,
+              Map.of(PROFILE, "http://www.w3.org/ns/json-ld#compacted https://schema.org"));
       var accept = PARSER.parseList("application/ld+json; profile=\"" + profileValue + "\"");
 
       assertThat(NEGOTIATOR.rank(accept, List.of(both)).getFirst().profileMatchScore())
@@ -650,8 +660,8 @@ class MediaTypeApiTest {
     @Test
     @DisplayName("honor-recognized: unknown profile ignored, recognized one wins")
     void shouldHonourRecognisedProfiles() {
-      var plain = new MediaType("application", "ld+json");
-      var schema = new MediaType("application", "ld+json", Map.of("profile", "https://schema.org"));
+      var plain = new MediaType(APPLICATION, LD_JSON);
+      var schema = new MediaType(APPLICATION, LD_JSON, Map.of(PROFILE, SCHEMA_ORG));
       var accept =
           PARSER.parseList(
               "application/ld+json; profile=\"http://www.w3.org/ns/json-ld#compacted"
@@ -661,56 +671,54 @@ class MediaTypeApiTest {
 
       assertThat(best).isEqualTo(schema);
       assertThat(NEGOTIATOR.rank(accept, List.of(schema)).getFirst().honoredProfiles())
-          .isEqualTo(List.of(URI.create("https://schema.org")));
+          .isEqualTo(List.of(URI.create(SCHEMA_ORG)));
     }
 
     @Test
     @DisplayName("equal quality preserves the server's offered order")
     void shouldPreferServerOrderWhenQualityTied() {
-      var offered = List.of(new MediaType("text", "html"), new MediaType("application", "json"));
+      var offered = List.of(new MediaType(TEXT, HTML), new MediaType(APPLICATION, "json"));
 
       assertThat(NEGOTIATOR.best(PARSER.parseList("*/*"), offered).orElseThrow().essence())
-          .isEqualTo("text/html");
+          .isEqualTo(TEXT_HTML);
     }
 
     @Test
     void shouldNotBeAcceptableWhenPreferenceQualityIsZero() {
       var preference =
-          new ContentNegotiator.Preference(
-              new MediaType("text", "html"), new MediaType("*", "*"), 0.0);
+          new ContentNegotiator.Preference(new MediaType(TEXT, HTML), new MediaType("*", "*"), 0.0);
 
       assertThat(preference.isAcceptable()).isFalse();
     }
 
     @Test
     void shouldExposeCharsetAndProfilesFromRepresentation() {
-      var rep = new MediaType("application", "ld+json", Map.of("profile", "https://schema.org"));
+      var rep = new MediaType(APPLICATION, LD_JSON, Map.of(PROFILE, SCHEMA_ORG));
       var accept = PARSER.parseList("application/ld+json; profile=\"https://schema.org\"");
 
       var preference = NEGOTIATOR.rank(accept, List.of(rep)).getFirst();
 
       assertThat(preference.charsetName()).isEmpty();
       assertThat(preference.profiles()).hasSize(1);
-      assertThat(preference.profiles().getFirst()).isEqualTo(URI.create("https://schema.org"));
+      assertThat(preference.profiles().getFirst()).isEqualTo(URI.create(SCHEMA_ORG));
     }
 
     @Test
     void shouldExposeRequestedProfilesFromMatchedRange() {
-      var rep = new MediaType("application", "ld+json");
+      var rep = new MediaType(APPLICATION, LD_JSON);
       var accept = PARSER.parseList("application/ld+json; profile=\"https://schema.org\"");
 
       var preference = NEGOTIATOR.rank(accept, List.of(rep)).getFirst();
 
       assertThat(preference.requestedProfiles()).hasSize(1);
-      assertThat(preference.requestedProfiles().getFirst())
-          .isEqualTo(URI.create("https://schema.org"));
+      assertThat(preference.requestedProfiles().getFirst()).isEqualTo(URI.create(SCHEMA_ORG));
     }
 
     @Test
     @DisplayName("ignoring() excludes the named parameter from matching")
     void shouldExcludeIgnoredParameterFromMatching() {
       var negotiator = ContentNegotiator.ignoring("level");
-      var html = new MediaType("text", "html");
+      var html = new MediaType(TEXT, HTML);
 
       assertThat(negotiator.best(PARSER.parseList("text/html;level=1"), List.of(html))).isPresent();
     }
@@ -718,7 +726,7 @@ class MediaTypeApiTest {
     @Test
     @DisplayName("profileOverlap returns 0 when representation has no matching profiles")
     void shouldReturnZeroProfileOverlapWhenNoMatch() {
-      var noProfile = new MediaType("application", "ld+json");
+      var noProfile = new MediaType(APPLICATION, LD_JSON);
       var accept = PARSER.parseList("application/ld+json; profile=\"https://schema.org\"");
 
       assertThat(NEGOTIATOR.best(accept, List.of(noProfile))).isPresent();
@@ -729,8 +737,7 @@ class MediaTypeApiTest {
     @Test
     @DisplayName("profileOverlap is used as tiebreaker when specificity and quality are equal")
     void shouldUseProfileOverlapAsTiebreaker() {
-      var schemaLd =
-          new MediaType("application", "ld+json", Map.of("profile", "https://schema.org"));
+      var schemaLd = new MediaType(APPLICATION, LD_JSON, Map.of(PROFILE, SCHEMA_ORG));
       var accept =
           PARSER.parseList(
               "application/ld+json," + " application/ld+json; profile=\"https://schema.org\"");
@@ -743,7 +750,7 @@ class MediaTypeApiTest {
     @Test
     @DisplayName("representation matched only by q=0 range is excluded from results")
     void shouldReturnEmptyWhenBestMatchRangeHasQualityZero() {
-      var json = new MediaType("application", "json");
+      var json = new MediaType(APPLICATION, "json");
       var accept = PARSER.parseList("application/json;q=0");
 
       assertThat(NEGOTIATOR.best(accept, List.of(json))).isEmpty();
@@ -753,7 +760,7 @@ class MediaTypeApiTest {
     @Test
     @DisplayName("q=0 on more-specific range wins over q>0 on wildcard — RFC 9110 §12.5.1")
     void shouldExcludeRepresentationWhenMostSpecificMatchingRangeHasQualityZero() {
-      var html = new MediaType("text", "html");
+      var html = new MediaType(TEXT, HTML);
       var accept = PARSER.parseList("text/*;q=1.0, text/html;q=0");
 
       assertThat(NEGOTIATOR.best(accept, List.of(html))).isEmpty();
@@ -763,8 +770,8 @@ class MediaTypeApiTest {
     @Test
     @DisplayName("preference with quality > 0 is acceptable")
     void shouldBeAcceptableWhenPreferenceQualityIsPositive() {
-      var accept = PARSER.parseList("text/html");
-      var html = new MediaType("text", "html");
+      var accept = PARSER.parseList(TEXT_HTML);
+      var html = new MediaType(TEXT, HTML);
 
       var preference = NEGOTIATOR.rank(accept, List.of(html)).getFirst();
 

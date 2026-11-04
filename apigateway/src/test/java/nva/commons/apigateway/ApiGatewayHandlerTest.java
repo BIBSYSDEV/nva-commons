@@ -90,24 +90,28 @@ class ApiGatewayHandlerTest {
   private static final String TOP_EXCEPTION_MESSAGE = "TOP Exception";
   private static final String MIDDLE_EXCEPTION_MESSAGE = "MIDDLE Exception";
   private static final String BOTTOM_EXCEPTION_MESSAGE = "BOTTOM Exception";
+  private static final String API_GATEWAY_MESSAGES_FOLDER = "apiGatewayMessages";
+  private static final String ORIGIN_HEADER = "Origin";
+  private static final String BODY_FIELD = "body";
+  private static final String HEADERS_FIELD = "headers";
   private static final int OVERRIDDEN_STATUS_CODE = 418; // I'm a teapot
   private static final Path EVENT_WITH_UNKNOWN_REQUEST_INFO =
-      Path.of("apiGatewayMessages", "eventWithUnknownRequestInfo.json");
+      Path.of(API_GATEWAY_MESSAGES_FOLDER, "eventWithUnknownRequestInfo.json");
   private static final Path EVENT_WITH_ACCESS_RIGHTS_CLAIMS =
-      Path.of("apiGatewayMessages", "event_with_access_rights_claim.json");
+      Path.of(API_GATEWAY_MESSAGES_FOLDER, "event_with_access_rights_claim.json");
   private static final Path EVENT_WITH_MANIPULATED_TOKEN =
-      Path.of("apiGatewayMessages", "event_with_manipulated_token.json");
+      Path.of(API_GATEWAY_MESSAGES_FOLDER, "event_with_manipulated_token.json");
   private static final Path EVENT_WITH_NO_AUTHORIZER =
-      Path.of("apiGatewayMessages", "event_without_authorizer_but_auth_header.json");
+      Path.of(API_GATEWAY_MESSAGES_FOLDER, "event_without_authorizer_but_auth_header.json");
   private static final Path EVENT_WITH_WRONG_ISSUER =
-      Path.of("apiGatewayMessages", "event_without_authorizer_wrong_issuer.json");
+      Path.of(API_GATEWAY_MESSAGES_FOLDER, "event_without_authorizer_wrong_issuer.json");
   private static final Path EVENT_SIGNED_UNSUPPORTED =
-      Path.of("apiGatewayMessages", "event_signed_unsupported.json");
+      Path.of(API_GATEWAY_MESSAGES_FOLDER, "event_signed_unsupported.json");
   private static final Path EVENT_UNSIGNED =
-      Path.of("apiGatewayMessages", "event_signed_none.json");
+      Path.of(API_GATEWAY_MESSAGES_FOLDER, "event_signed_none.json");
   private static final Path EVENT_EXTERNAL_CLIENT =
-      Path.of("apiGatewayMessages", "event_external_client.json");
-  private static final Path TEST_JWKS = Path.of("apiGatewayMessages", "test-jwks.json");
+      Path.of(API_GATEWAY_MESSAGES_FOLDER, "event_external_client.json");
+  private static final Path TEST_JWKS = Path.of(API_GATEWAY_MESSAGES_FOLDER, "test-jwks.json");
   private static final String PATH = "path1/path2/path3";
   private static final int PORT_NUMBER = 3000;
   private Context context;
@@ -598,7 +602,7 @@ class ApiGatewayHandlerTest {
     var response = GatewayResponse.fromOutputStream(outputStream, String.class);
     var responseHeaders = response.getHeaders();
     assertThat(responseHeaders.get(ACCESS_CONTROL_ALLOW_ORIGIN), is(equalTo(ALL_ORIGINS_ALLOWED)));
-    assertThat(responseHeaders.get(VARY), containsString("Origin"));
+    assertThat(responseHeaders.get(VARY), containsString(ORIGIN_HEADER));
   }
 
   @Test
@@ -614,7 +618,7 @@ class ApiGatewayHandlerTest {
     var response = GatewayResponse.fromOutputStream(outputStream, String.class);
     var responseHeaders = response.getHeaders();
     assertThat(responseHeaders.get(ACCESS_CONTROL_ALLOW_ORIGIN), is(equalTo(FALLBACK_ORIGIN)));
-    assertThat(responseHeaders.get(VARY), containsString("Origin"));
+    assertThat(responseHeaders.get(VARY), containsString(ORIGIN_HEADER));
   }
 
   @Test
@@ -632,7 +636,7 @@ class ApiGatewayHandlerTest {
     var response = GatewayResponse.fromOutputStream(outputStream, String.class);
     var responseHeaders = response.getHeaders();
     assertThat(responseHeaders.get(ACCESS_CONTROL_ALLOW_ORIGIN), is(equalTo(originInHeader)));
-    assertThat(responseHeaders.get(VARY), containsString("Origin"));
+    assertThat(responseHeaders.get(VARY), containsString(ORIGIN_HEADER));
   }
 
   @Test
@@ -742,7 +746,8 @@ class ApiGatewayHandlerTest {
   @ParameterizedTest
   @ValueSource(strings = {"rs256", "rs384", "rs512", "es256", "es384", "es512"})
   void shouldAcceptAlgorithms(String algorithm) throws IOException {
-    var path = Path.of("apiGatewayMessages", String.format("event_signed_with_%s.json", algorithm));
+    var path =
+        Path.of(API_GATEWAY_MESSAGES_FOLDER, String.format("event_signed_with_%s.json", algorithm));
     var inputStream = IoUtils.inputStreamFromResources(path.toString());
 
     stubJwks(TEST_JWKS);
@@ -825,7 +830,7 @@ class ApiGatewayHandlerTest {
     var responseHeaders = response.getHeaders();
     var originInHeader = "https://example.com";
     assertThat(responseHeaders.get(ACCESS_CONTROL_ALLOW_ORIGIN), not(equalTo(originInHeader)));
-    assertThat(responseHeaders.get(VARY), containsString("Origin"));
+    assertThat(responseHeaders.get(VARY), containsString(ORIGIN_HEADER));
   }
 
   @Test
@@ -841,7 +846,7 @@ class ApiGatewayHandlerTest {
     var response = GatewayResponse.fromOutputStream(outputStream, String.class);
     var responseHeaders = response.getHeaders();
     assertThat(responseHeaders.get(ACCESS_CONTROL_ALLOW_ORIGIN), equalTo(header1));
-    assertThat(responseHeaders.get(VARY), containsString("Origin"));
+    assertThat(responseHeaders.get(VARY), containsString(ORIGIN_HEADER));
   }
 
   private String getUnsupportedMediaTypeErrorMessage(String mediaType) {
@@ -1021,8 +1026,8 @@ class ApiGatewayHandlerTest {
   private InputStream requestWithHeadersAndPath() throws JsonProcessingException {
     ObjectNode request = defaultRestObjectMapper.createObjectNode();
     ObjectNode node = createBody();
-    request.set("body", node);
-    request.set("headers", createHeaders());
+    request.set(BODY_FIELD, node);
+    request.set(HEADERS_FIELD, createHeaders());
     request.put("path", PATH);
     return jsonNodeToInputStream(request);
   }
@@ -1042,16 +1047,16 @@ class ApiGatewayHandlerTest {
       throws JsonProcessingException {
     ObjectNode request = defaultRestObjectMapper.createObjectNode();
     ObjectNode node = createBody();
-    request.set("body", node);
-    request.set("headers", createHeaders(headers));
+    request.set(BODY_FIELD, node);
+    request.set(HEADERS_FIELD, createHeaders(headers));
     return jsonNodeToInputStream(request);
   }
 
   private InputStream requestWithMissingOriginHeader() throws JsonProcessingException {
     ObjectNode request = defaultRestObjectMapper.createObjectNode();
     ObjectNode node = createBody();
-    request.set("body", node);
-    request.set("headers", createHeadersWithMissingOrigin());
+    request.set(BODY_FIELD, node);
+    request.set(HEADERS_FIELD, createHeadersWithMissingOrigin());
     return jsonNodeToInputStream(request);
   }
 
@@ -1067,8 +1072,8 @@ class ApiGatewayHandlerTest {
   private InputStream requestWithHeaders() throws JsonProcessingException {
     ObjectNode request = defaultRestObjectMapper.createObjectNode();
     ObjectNode node = createBody();
-    request.set("body", node);
-    request.set("headers", createHeaders());
+    request.set(BODY_FIELD, node);
+    request.set(HEADERS_FIELD, createHeaders());
     return jsonNodeToInputStream(request);
   }
 
@@ -1079,8 +1084,8 @@ class ApiGatewayHandlerTest {
 
     ObjectNode request = defaultRestObjectMapper.createObjectNode();
     ObjectNode node = createBody();
-    request.set("body", node);
-    request.set("headers", createHeaders(headers));
+    request.set(BODY_FIELD, node);
+    request.set(HEADERS_FIELD, createHeaders(headers));
     return jsonNodeToInputStream(request);
   }
 

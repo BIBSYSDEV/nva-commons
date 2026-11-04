@@ -30,6 +30,14 @@ class MediaTypeComplianceTest {
 
   private static final MediaTypeParser PARSER = MediaTypeParser.defaultParser();
   private static final ContentNegotiator NEGOTIATOR = ContentNegotiator.defaultNegotiator();
+  private static final String TEXT = "text";
+  private static final String HTML = "html";
+  private static final String APPLICATION = "application";
+  private static final String JSON = "json";
+  private static final String LD_JSON = "ld+json";
+  private static final String TEXT_TYPE_PREFIX = "text/";
+  private static final String TEXT_HTML = "text/html";
+  private static final String PROFILE = "profile";
 
   private static double effectiveQuality(MediaTypeParseResult accept, MediaType rep) {
     var ranked = NEGOTIATOR.rank(accept, List.of(rep));
@@ -42,15 +50,15 @@ class MediaTypeComplianceTest {
 
     @ParameterizedTest(name = "valid subtype token: {0}")
     @ValueSource(
-        strings = {"plain", "html", "vnd.api+json", "x-custom", "a", "foo123", "a!b", "a#b", "a~b"})
+        strings = {"plain", HTML, "vnd.api+json", "x-custom", "a", "foo123", "a!b", "a#b", "a~b"})
     void shouldAcceptValidTokens(String subtype) {
-      assertThat(PARSER.parse("text/" + subtype).isAcceptable()).isTrue();
+      assertThat(PARSER.parse(TEXT_TYPE_PREFIX + subtype).isAcceptable()).isTrue();
     }
 
     @ParameterizedTest(name = "invalid subtype token: {0}")
     @ValueSource(strings = {"a b", "a/b", "a@b", "a:b", "a(b)c", "a;b"})
     void shouldRejectNonTokenSubtypes(String subtype) {
-      var result = PARSER.parse("text/" + subtype);
+      var result = PARSER.parse(TEXT_TYPE_PREFIX + subtype);
 
       assertThat(result.isAcceptable()).isFalse();
     }
@@ -58,7 +66,7 @@ class MediaTypeComplianceTest {
     @ParameterizedTest(name = "{0} == text/html (case-insensitive)")
     @ValueSource(strings = {"Text/HTML", "TEXT/HTML", "text/Html"})
     void shouldTreatTypeAndSubtypeAsCaseInsensitive(String input) {
-      assertThat(parseMediaType(input).essence()).isEqualTo("text/html");
+      assertThat(parseMediaType(input).essence()).isEqualTo(TEXT_HTML);
     }
 
     @Test
@@ -102,7 +110,7 @@ class MediaTypeComplianceTest {
     @ParameterizedTest(name = "control char U+{0} rejected before parsing")
     @ValueSource(chars = {'\r', '\n', '\u0000', '\u007f', '\u0001', '\u001f'})
     void shouldRejectControlCharacters(char character) {
-      var result = PARSER.parse("text/html" + character);
+      var result = PARSER.parse(TEXT_HTML + character);
 
       assertThat(rejected(result, "control_character")).isTrue();
       assertThat(result.mediaTypes()).as("nothing should be salvaged").isEmpty();
@@ -118,7 +126,7 @@ class MediaTypeComplianceTest {
 
     @Test
     void shouldRejectOverLengthInput() {
-      var result = PARSER.parse("text/" + "a".repeat(9000));
+      var result = PARSER.parse(TEXT_TYPE_PREFIX + "a".repeat(9000));
 
       assertThat(rejected(result, "input_too_long")).isTrue();
     }
@@ -132,7 +140,7 @@ class MediaTypeComplianceTest {
 
     @Test
     void shouldNotCountBlankSlotsAgainstListElementCap() {
-      var input = "text/html" + ",".repeat(64);
+      var input = TEXT_HTML + ",".repeat(64);
 
       var result = PARSER.parseList(input);
 
@@ -169,13 +177,13 @@ class MediaTypeComplianceTest {
 
     @Test
     void shouldAcceptNamesWithinSoftLimit() {
-      assertThat(PARSER.parse("text/" + "a".repeat(60)).isAcceptable()).isTrue();
+      assertThat(PARSER.parse(TEXT_TYPE_PREFIX + "a".repeat(60)).isAcceptable()).isTrue();
     }
 
     @ParameterizedTest(name = "name length {0} warns but is still acceptable")
     @ValueSource(ints = {65, 127})
     void shouldWarnOnNamesExceedingSoftLimit(int length) {
-      var result = PARSER.parse("text/" + "a".repeat(length));
+      var result = PARSER.parse(TEXT_TYPE_PREFIX + "a".repeat(length));
 
       assertThat(result.isAcceptable()).isTrue();
       assertThat(hasCode(result, "name_over_soft_limit")).isTrue();
@@ -183,7 +191,7 @@ class MediaTypeComplianceTest {
 
     @Test
     void shouldRejectNamesExceedingHardLimit() {
-      var result = PARSER.parse("text/" + "a".repeat(128));
+      var result = PARSER.parse(TEXT_TYPE_PREFIX + "a".repeat(128));
 
       assertThat(rejected(result, "name_too_long")).isTrue();
     }
@@ -437,13 +445,13 @@ class MediaTypeComplianceTest {
     void shouldPerformParameterAwareMatching() {
       var accept = PARSER.parseList("text/html;level=1");
 
-      assertThat(NEGOTIATOR.best(accept, List.of(new MediaType("text", "html")))).isEmpty();
+      assertThat(NEGOTIATOR.best(accept, List.of(new MediaType(TEXT, HTML)))).isEmpty();
     }
 
     @Test
     void shouldIgnoreCharsetByDefaultInNegotiation() {
       var accept = PARSER.parseList("text/html;charset=utf-8");
-      var bareHtml = new MediaType("text", "html");
+      var bareHtml = new MediaType(TEXT, HTML);
 
       assertThat(NEGOTIATOR.best(accept, List.of(bareHtml))).isPresent();
     }
@@ -451,7 +459,7 @@ class MediaTypeComplianceTest {
     @Test
     void shouldHonourCharsetAsHardConstraintWhenStrict() {
       var accept = PARSER.parseList("text/html;charset=utf-8");
-      var bareHtml = new MediaType("text", "html");
+      var bareHtml = new MediaType(TEXT, HTML);
 
       assertThat(ContentNegotiator.strict().best(accept, List.of(bareHtml))).isEmpty();
     }
@@ -462,16 +470,16 @@ class MediaTypeComplianceTest {
 
       var best =
           NEGOTIATOR.best(
-              any, List.of(new MediaType("text", "html"), new MediaType("application", "json")));
+              any, List.of(new MediaType(TEXT, HTML), new MediaType(APPLICATION, JSON)));
 
-      assertThat(best.orElseThrow().essence()).isEqualTo("text/html");
+      assertThat(best.orElseThrow().essence()).isEqualTo(TEXT_HTML);
     }
 
     @Test
     void shouldTreatQZeroAsNotAcceptable() {
       var accept = PARSER.parseList("application/json;q=0, text/plain");
 
-      assertThat(NEGOTIATOR.best(accept, List.of(new MediaType("application", "json")))).isEmpty();
+      assertThat(NEGOTIATOR.best(accept, List.of(new MediaType(APPLICATION, JSON)))).isEmpty();
     }
   }
 
@@ -482,8 +490,7 @@ class MediaTypeComplianceTest {
     @Test
     void shouldSelectHigherQualityRepresentation() {
       var accept = PARSER.parseList("application/xml;q=0.9, */*;q=0.8");
-      var offered =
-          List.of(new MediaType("application", "json"), new MediaType("application", "xml"));
+      var offered = List.of(new MediaType(APPLICATION, JSON), new MediaType(APPLICATION, "xml"));
 
       assertThat(NEGOTIATOR.best(accept, offered).orElseThrow().essence())
           .isEqualTo("application/xml");
@@ -492,9 +499,9 @@ class MediaTypeComplianceTest {
     @Test
     void shouldPreferServerOrderOnTie() {
       var accept = PARSER.parseList("*/*");
-      var offered = List.of(new MediaType("text", "html"), new MediaType("application", "json"));
+      var offered = List.of(new MediaType(TEXT, HTML), new MediaType(APPLICATION, JSON));
 
-      assertThat(NEGOTIATOR.best(accept, offered).orElseThrow().essence()).isEqualTo("text/html");
+      assertThat(NEGOTIATOR.best(accept, offered).orElseThrow().essence()).isEqualTo(TEXT_HTML);
     }
   }
 
@@ -502,15 +509,15 @@ class MediaTypeComplianceTest {
   @DisplayName("RFC 6906 — profile as an unordered-set preference")
   class ProfilePreference {
 
-    private final MediaType plainLd = new MediaType("application", "ld+json");
+    private final MediaType plainLd = new MediaType(APPLICATION, LD_JSON);
     private final MediaType schemaLd =
-        new MediaType("application", "ld+json", Map.of("profile", "https://schema.org"));
+        new MediaType(APPLICATION, LD_JSON, Map.of(PROFILE, "https://schema.org"));
     private final MediaType expandedLd =
         new MediaType(
-            "application", "ld+json", Map.of("profile", "http://www.w3.org/ns/json-ld#expanded"));
+            APPLICATION, LD_JSON, Map.of(PROFILE, "http://www.w3.org/ns/json-ld#expanded"));
     private final MediaType compactedLd =
         new MediaType(
-            "application", "ld+json", Map.of("profile", "http://www.w3.org/ns/json-ld#compacted"));
+            APPLICATION, LD_JSON, Map.of(PROFILE, "http://www.w3.org/ns/json-ld#compacted"));
 
     @Test
     void shouldHonourRecognizedProfileAndIgnoreRest() {
@@ -541,9 +548,9 @@ class MediaTypeComplianceTest {
     void shouldTreatProfileOrderAndDuplicatesAsInsignificant(String profileValue) {
       var both =
           new MediaType(
-              "application",
-              "ld+json",
-              Map.of("profile", "http://www.w3.org/ns/json-ld#compacted https://schema.org"));
+              APPLICATION,
+              LD_JSON,
+              Map.of(PROFILE, "http://www.w3.org/ns/json-ld#compacted https://schema.org"));
       var accept = PARSER.parseList("application/ld+json; profile=\"" + profileValue + "\"");
 
       assertThat(NEGOTIATOR.rank(accept, List.of(both)).getFirst().profileMatchScore())
@@ -582,7 +589,7 @@ class MediaTypeComplianceTest {
 
     @Test
     void shouldBeEqualRegardlessOfCase() {
-      assertThat(parseMediaType("text/html")).isEqualTo(parseMediaType("Text/HTML"));
+      assertThat(parseMediaType(TEXT_HTML)).isEqualTo(parseMediaType("Text/HTML"));
     }
 
     @ParameterizedTest(name = "round-trips: {0}")
@@ -595,7 +602,7 @@ class MediaTypeComplianceTest {
 
     static Stream<Arguments> roundTripCases() {
       return Stream.of(
-          Arguments.of("text/html"),
+          Arguments.of(TEXT_HTML),
           Arguments.of("text/html; charset=utf-8"),
           Arguments.of("text/plain; note=\"a, b; c\""),
           Arguments.of("application/vnd.api+json; profile=\"https://schema.org\""));

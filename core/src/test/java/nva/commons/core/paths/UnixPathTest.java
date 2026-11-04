@@ -31,16 +31,22 @@ class UnixPathTest {
   public static final String EMPTY_STRING = "";
   public static final String NULL_STRING = null;
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final String FIRST = "first";
+  private static final String SECOND = "second";
+  private static final String THIRD = "third";
+  private static final String FIRST_SECOND_THIRD = "first/second/third";
+  private static final String SOME_PATH = "some/path";
+  private static final String REPLACEMENT = "replacement";
 
   @Test
   void shouldReturnPathWithAllPathElementsInOrderWhenInputArrayIsNotEmpty() {
-    UnixPath unixPath = UnixPath.of("first", "second", "third");
-    assertThat(unixPath.toString(), is(equalTo("first/second/third")));
+    UnixPath unixPath = UnixPath.of(FIRST, SECOND, THIRD);
+    assertThat(unixPath.toString(), is(equalTo(FIRST_SECOND_THIRD)));
   }
 
   @Test
   void shouldReturnPathWithRootWhenRootIsFirstElement() {
-    UnixPath unixPath = UnixPath.of(PATH_DELIMITER, "first", "second", "third");
+    UnixPath unixPath = UnixPath.of(PATH_DELIMITER, FIRST, SECOND, THIRD);
     assertThat(unixPath.toString(), is(equalTo("/first/second/third")));
   }
 
@@ -91,7 +97,7 @@ class UnixPathTest {
   @Test
   void
       shouldReturnPathElementsWhenInputIsRelativePathStringWithElementsDividedByUnixPathDelimiter() {
-    String originalPathString = "first/second/third";
+    String originalPathString = FIRST_SECOND_THIRD;
     UnixPath unixPath = UnixPath.fromString(originalPathString);
     assertThat(unixPath.toString(), is(equalTo(originalPathString)));
   }
@@ -106,7 +112,7 @@ class UnixPathTest {
   @Test
   void shouldReturnNewUnixPathWithChildPathAppendedToParentPath() {
     String parentPath = "first/second";
-    String childPath = "third";
+    String childPath = THIRD;
     String grandChildPath = "fourth/fifth";
     UnixPath actualPath =
         UnixPath.fromString(parentPath).addChild(childPath).addChild(grandChildPath);
@@ -132,33 +138,32 @@ class UnixPathTest {
 
   @Test
   void shouldReturnEqualTrueWhenTwoUnixPathsAreGeneratedFromEquivalentDefinitions() {
-    UnixPath left = UnixPath.of("first", "second", "third");
-    UnixPath right = UnixPath.fromString("first/second/third");
+    UnixPath left = UnixPath.of(FIRST, SECOND, THIRD);
+    UnixPath right = UnixPath.fromString(FIRST_SECOND_THIRD);
     assertThat(left, is(equalTo(right)));
     assertThat(left, is(not(sameInstance(right))));
   }
 
   @Test
   void shouldReturnEqualTrueWhenTwoUnixPathsAreGeneratedFromEquivalentStrings() {
-    UnixPath left = UnixPath.fromString("first/second/third");
+    UnixPath left = UnixPath.fromString(FIRST_SECOND_THIRD);
     UnixPath right = UnixPath.fromString("first//second//third");
     assertThat(left, is(equalTo(right)));
     assertThat(left, is(not(sameInstance(right))));
-    assertThat(right.toString(), is(equalTo("first/second/third")));
+    assertThat(right.toString(), is(equalTo(FIRST_SECOND_THIRD)));
   }
 
   @Test
   void shouldReturnEqualFalseWhenTwoUnixPathsAreNotEqual() {
-    UnixPath left = UnixPath.fromString("first/second/third");
+    UnixPath left = UnixPath.fromString(FIRST_SECOND_THIRD);
     UnixPath right = UnixPath.fromString("first/second");
     assertThat(left, is(not(equalTo(right))));
   }
 
   @Test
   void shouldReturnPathIgnoringEmptyStrings() {
-    UnixPath left =
-        UnixPath.of("first", EMPTY_STRING, EMPTY_STRING, "second", EMPTY_STRING, "third");
-    UnixPath right = UnixPath.of("first", "second", "third");
+    UnixPath left = UnixPath.of(FIRST, EMPTY_STRING, EMPTY_STRING, SECOND, EMPTY_STRING, THIRD);
+    UnixPath right = UnixPath.of(FIRST, SECOND, THIRD);
     assertThat(left, is(equalTo(right)));
     assertThat(left, is(not(sameInstance(right))));
   }
@@ -198,7 +203,7 @@ class UnixPathTest {
   @ParameterizedTest
   @ValueSource(ints = {0, 1, 2, 3, 4})
   void shouldReturnPathElementByIndexFromEndOfaUnixPath(int value) {
-    var pathElements = Arrays.asList("first", "second", "third", "fourth", "fifth");
+    var pathElements = Arrays.asList(FIRST, SECOND, THIRD, "fourth", "fifth");
     var unixPath = UnixPath.of(pathElements.toArray(new String[0]));
     Collections.reverse(pathElements);
     var expected = pathElements.get(value);
@@ -234,7 +239,7 @@ class UnixPathTest {
 
   @Test
   void shouldAddRootToNonAbsoluteUnixPath() {
-    String pathString = "some/path";
+    String pathString = SOME_PATH;
     String expectedPathString = UnixPath.ROOT + pathString;
     String actualPathString = UnixPath.fromString(pathString).addRoot().toString();
     assertThat(actualPathString, is(equalTo(expectedPathString)));
@@ -242,14 +247,14 @@ class UnixPathTest {
 
   @Test
   void shouldReturnSamePathWhenAddingRootAndPathIsAbsolute() {
-    String expectedPathString = UnixPath.ROOT + "some/path";
+    String expectedPathString = UnixPath.ROOT + SOME_PATH;
     String actualPathString = UnixPath.fromString(expectedPathString).addRoot().toString();
     assertThat(actualPathString, is(equalTo(expectedPathString)));
   }
 
   @Test
   void shouldRemoveRootFromAbsolutePath() {
-    String expectedPathString = "some/path";
+    String expectedPathString = SOME_PATH;
     String actualPathString =
         UnixPath.fromString(UnixPath.ROOT + expectedPathString).removeRoot().toString();
     assertThat(actualPathString, is(equalTo(expectedPathString)));
@@ -257,7 +262,7 @@ class UnixPathTest {
 
   @Test
   void shouldPreserveRelativePathWhenRemovingRootFromRelativePath() {
-    String expectedPathString = "some/path";
+    String expectedPathString = SOME_PATH;
     String actualPathString = UnixPath.fromString(expectedPathString).removeRoot().toString();
     assertThat(actualPathString, is(equalTo(expectedPathString)));
   }
@@ -275,7 +280,7 @@ class UnixPathTest {
   @ValueSource(ints = {0, 1, 2, 3, 4})
   void shouldReplacePathElementByIndexFromEnd(int indexFromEnd) {
     var originalPathElements = new String[] {"one", "two", "three", "four", "five"};
-    var replacement = "replacement";
+    var replacement = REPLACEMENT;
 
     var expectedPathElements = new ArrayList<>(List.of(originalPathElements));
     expectedPathElements.set(originalPathElements.length - indexFromEnd - 1, replacement);
@@ -290,20 +295,20 @@ class UnixPathTest {
 
   @Test
   void shouldReturnEmptyPathWhenReplacingElementByIndexFromEndInEmptyPath() {
-    var actualPath = UnixPath.EMPTY_PATH.replacePathElementByIndexFromEnd(0, "replacement");
+    var actualPath = UnixPath.EMPTY_PATH.replacePathElementByIndexFromEnd(0, REPLACEMENT);
     assertThat(actualPath, is(equalTo(UnixPath.EMPTY_PATH)));
   }
 
   @Test
   void shouldDoNothingWhenReplacingElementByIndexFromEndInRootPath() {
-    var actualPath = UnixPath.ROOT_PATH.replacePathElementByIndexFromEnd(0, "replacement");
+    var actualPath = UnixPath.ROOT_PATH.replacePathElementByIndexFromEnd(0, REPLACEMENT);
     assertThat(actualPath, is(equalTo(UnixPath.ROOT_PATH)));
   }
 
   @Test
   void shouldDoNothingWhenReplacingIndexThatDoesNotExist() {
     var originalPath = UnixPath.of("justASingleElement");
-    var actualPath = originalPath.replacePathElementByIndexFromEnd(1, "replacement");
+    var actualPath = originalPath.replacePathElementByIndexFromEnd(1, REPLACEMENT);
     assertThat(actualPath, is(equalTo(originalPath)));
   }
 

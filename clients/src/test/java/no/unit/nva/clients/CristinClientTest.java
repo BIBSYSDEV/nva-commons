@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 class CristinClientTest {
 
+  private static final String ID_PLACEHOLDER = "_ID_";
   private HttpClient httpClient;
   private CristinClient cristinClient;
   private LogRecorder logRecorder;
@@ -79,7 +80,7 @@ class CristinClientTest {
         .thenReturn(
             FakeHttpResponse.create(
                 request,
-                cristinPersonResponseBody().replace("_ID_", cristinPersonId.toString()),
+                cristinPersonResponseBody().replace(ID_PLACEHOLDER, cristinPersonId.toString()),
                 OK));
 
     var person = cristinClient.getPerson(cristinPersonId).orElseThrow();
@@ -116,7 +117,8 @@ class CristinClientTest {
         .thenReturn(
             FakeHttpResponse.create(
                 request,
-                cristinOrganizationResponseBody().replace("_ID_", organizationId.toString()),
+                cristinOrganizationResponseBody()
+                    .replace(ID_PLACEHOLDER, organizationId.toString()),
                 OK));
 
     var organization = cristinClient.getOrganization(organizationId).orElseThrow();
@@ -140,7 +142,9 @@ class CristinClientTest {
     when(httpClient.send(eq(request), any()))
         .thenReturn(
             FakeHttpResponse.create(
-                request, cristinPersonResponseBody().replace("_ID_", personIdentifier), OK));
+                request,
+                cristinPersonResponseBody().replace(ID_PLACEHOLDER, personIdentifier),
+                OK));
 
     var organization = cristinClient.getPerson(personIdentifier);
 
@@ -157,7 +161,7 @@ class CristinClientTest {
         .thenReturn(
             FakeHttpResponse.create(
                 request,
-                cristinOrganizationResponseBody().replace("_ID_", organizationIdentifier),
+                cristinOrganizationResponseBody().replace(ID_PLACEHOLDER, organizationIdentifier),
                 OK));
 
     var organization = cristinClient.getOrganization(organizationIdentifier);
