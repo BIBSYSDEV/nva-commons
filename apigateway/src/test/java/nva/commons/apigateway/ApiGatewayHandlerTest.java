@@ -1122,6 +1122,7 @@ class ApiGatewayHandlerTest {
 
   private record CustomObject(String firstValue, String secondValue) implements JsonSerializable {
 
+    @Override
     public String toString() {
       return this.toJsonString();
     }
