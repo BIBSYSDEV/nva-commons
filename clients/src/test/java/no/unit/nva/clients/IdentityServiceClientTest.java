@@ -55,10 +55,10 @@ import org.mockito.stubbing.Answer;
 class IdentityServiceClientTest {
 
   public static final String BEARER_TOKEN = "Bearer 123";
-  public static final String clientId = randomString();
-  public static final String actingUser = randomString();
-  public static final URI customer = randomUri();
-  public static final URI cristinOrgUri = randomUri();
+  public static final String CLIENT_ID = randomString();
+  public static final String ACTING_USER = randomString();
+  public static final URI CUSTOMER = randomUri();
+  public static final URI CRISTIN_ORG_URI = randomUri();
   public static final String BEARER_BEARER_TOKEN_TEST = "Bearer BEARER_TOKEN_TEST";
   public static final String OPERATION_REQUIRES_AN_AUTHORIZED_CLIENT_MESSAGE =
       "This operation requires an authorized client";
@@ -88,7 +88,7 @@ class IdentityServiceClientTest {
     when(notFoundResponse.statusCode()).thenReturn(404);
     when(notFoundResponse.body()).thenReturn("");
 
-    var response = new GetExternalClientResponse(clientId, actingUser, customer, cristinOrgUri);
+    var response = new GetExternalClientResponse(CLIENT_ID, ACTING_USER, CUSTOMER, CRISTIN_ORG_URI);
     when(okResponseWithBody.statusCode()).thenReturn(200);
     when(okResponseWithBody.body()).thenReturn(response.toString());
 
@@ -109,25 +109,25 @@ class IdentityServiceClientTest {
                   Object[] args = invocation.getArguments();
                   HttpRequest request = (HttpRequest) args[0];
                   var path = request.uri().getPath();
-                  if (path.equals("/users-roles/external-clients/" + clientId)) {
+                  if (path.equals("/users-roles/external-clients/" + CLIENT_ID)) {
                     return okResponseWithBody;
                   }
                   return null;
                 });
 
-    var externalClient = authorizedIdentityServiceClient.getExternalClient(clientId);
+    var externalClient = authorizedIdentityServiceClient.getExternalClient(CLIENT_ID);
     assertNotNull(externalClient);
   }
 
   @Test
   void shouldReturnExternalClientWhenRequested() {
 
-    var externalClient = authorizedIdentityServiceClient.getExternalClient(clientId);
+    var externalClient = authorizedIdentityServiceClient.getExternalClient(CLIENT_ID);
 
-    assertThat(externalClient.getClientId(), is(equalTo(clientId)));
-    assertThat(externalClient.getActingUser(), is(equalTo(actingUser)));
-    assertThat(externalClient.getCustomerUri(), is(equalTo(customer)));
-    assertThat(externalClient.getCristinUrgUri(), is(equalTo(cristinOrgUri)));
+    assertThat(externalClient.getClientId(), is(equalTo(CLIENT_ID)));
+    assertThat(externalClient.getActingUser(), is(equalTo(ACTING_USER)));
+    assertThat(externalClient.getCustomerUri(), is(equalTo(CUSTOMER)));
+    assertThat(externalClient.getCristinUrgUri(), is(equalTo(CRISTIN_ORG_URI)));
   }
 
   @Test
@@ -183,10 +183,10 @@ class IdentityServiceClientTest {
     var actualAuthorizationHeader = request.headers().firstValue(AUTHORIZATION_HEADER).orElse("");
 
     assertThat(actualAuthorizationHeader, is(equalTo(BEARER_BEARER_TOKEN_TEST)));
-    assertThat(externalClient.getClientId(), is(equalTo(clientId)));
-    assertThat(externalClient.getActingUser(), is(equalTo(actingUser)));
-    assertThat(externalClient.getCustomerUri(), is(equalTo(customer)));
-    assertThat(externalClient.getCristinUrgUri(), is(equalTo(cristinOrgUri)));
+    assertThat(externalClient.getClientId(), is(equalTo(CLIENT_ID)));
+    assertThat(externalClient.getActingUser(), is(equalTo(ACTING_USER)));
+    assertThat(externalClient.getCustomerUri(), is(equalTo(CUSTOMER)));
+    assertThat(externalClient.getCristinUrgUri(), is(equalTo(CRISTIN_ORG_URI)));
   }
 
   @Test
@@ -195,11 +195,11 @@ class IdentityServiceClientTest {
     when(notOkResponse.statusCode()).thenReturn(500);
     when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class))).thenReturn(notOkResponse);
 
-    Executable action = () -> authorizedIdentityServiceClient.getExternalClient(clientId);
+    Executable action = () -> authorizedIdentityServiceClient.getExternalClient(CLIENT_ID);
 
     var exception = assertThrows(IdentityServiceRequestFailedException.class, action);
     assertInstanceOf(IllegalStateException.class, exception.getCause());
-    assertTrue(exception.getMessage().contains("/users-roles/external-clients/" + clientId));
+    assertTrue(exception.getMessage().contains("/users-roles/external-clients/" + CLIENT_ID));
   }
 
   @Test
@@ -239,11 +239,11 @@ class IdentityServiceClientTest {
     when(httpClient.send(any(HttpRequest.class), any(BodyHandler.class)))
         .thenReturn(notFoundResponse);
 
-    Executable action = () -> authorizedIdentityServiceClient.getExternalClient(clientId);
+    Executable action = () -> authorizedIdentityServiceClient.getExternalClient(CLIENT_ID);
 
     var exception = assertThrows(IdentityServiceNotFoundException.class, action);
     assertNull(exception.getCause());
-    assertTrue(exception.getMessage().contains("/users-roles/external-clients/" + clientId));
+    assertTrue(exception.getMessage().contains("/users-roles/external-clients/" + CLIENT_ID));
   }
 
   @Test
@@ -288,9 +288,9 @@ class IdentityServiceClientTest {
 
   @Test
   void shouldFindExternalClient() {
-    var actual = authorizedIdentityServiceClient.findExternalClient(clientId);
+    var actual = authorizedIdentityServiceClient.findExternalClient(CLIENT_ID);
 
-    assertEquals(clientId, actual.orElseThrow().getClientId());
+    assertEquals(CLIENT_ID, actual.orElseThrow().getClientId());
   }
 
   @ParameterizedTest

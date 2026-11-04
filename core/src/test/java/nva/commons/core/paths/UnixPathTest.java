@@ -30,7 +30,7 @@ class UnixPathTest {
 
   public static final String EMPTY_STRING = "";
   public static final String NULL_STRING = null;
-  private static final ObjectMapper objectMapper = new ObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   @Test
   void shouldReturnPathWithAllPathElementsInOrderWhenInputArrayIsNotEmpty() {
@@ -211,10 +211,10 @@ class UnixPathTest {
 
     ClassWithUnixPath classWithUnixPath = new ClassWithUnixPath();
     classWithUnixPath.setField(UnixPath.of(unixPath));
-    String jsonString = objectMapper.writeValueAsString(classWithUnixPath);
-    JsonNode actualJson = objectMapper.readTree(jsonString);
+    String jsonString = OBJECT_MAPPER.writeValueAsString(classWithUnixPath);
+    JsonNode actualJson = OBJECT_MAPPER.readTree(jsonString);
 
-    ObjectNode expectedJson = objectMapper.createObjectNode();
+    ObjectNode expectedJson = OBJECT_MAPPER.createObjectNode();
     expectedJson.put(ClassWithUnixPath.fieldName(), unixPath);
 
     assertThat(actualJson, is(equalTo(expectedJson)));
@@ -223,11 +223,11 @@ class UnixPathTest {
   @Test
   void shouldDeserializeValidUnixPath() throws JsonProcessingException {
     String expectedPath = "/some/folder";
-    ObjectNode json = objectMapper.createObjectNode();
+    ObjectNode json = OBJECT_MAPPER.createObjectNode();
     json.put(ClassWithUnixPath.fieldName(), expectedPath);
-    String jsonString = objectMapper.writeValueAsString(json);
+    String jsonString = OBJECT_MAPPER.writeValueAsString(json);
     ClassWithUnixPath objectContainingUnixPath =
-        objectMapper.readValue(jsonString, ClassWithUnixPath.class);
+        OBJECT_MAPPER.readValue(jsonString, ClassWithUnixPath.class);
 
     assertThat(objectContainingUnixPath.getField().toString(), is(equalTo(expectedPath)));
   }
