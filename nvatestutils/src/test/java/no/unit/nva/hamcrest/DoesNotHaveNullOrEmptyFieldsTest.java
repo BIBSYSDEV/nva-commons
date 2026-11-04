@@ -180,7 +180,7 @@ class DoesNotHaveNullOrEmptyFieldsTest {
 
     private List<String> collectionField;
     private Map<String, String> mapField;
-    private Integer boxedField = null;
+    private Integer boxedField;
 
     private JsonNode jsonNodeField;
     private TestClass classObject;
