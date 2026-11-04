@@ -81,11 +81,10 @@ class DefaultRequestAuthorizerTest {
   private SecretsManagerClient setupSecretsClient() {
     var secretsClient = mock(SecretsManagerClient.class);
     when(secretsClient.getSecretValue(any(GetSecretValueRequest.class)))
-        .thenAnswer(
-            invocation -> {
-              GetSecretValueRequest request = invocation.getArgument(0);
-              return constructSecretsClientResponse(request);
-            });
+        .thenAnswer(invocation -> {
+          GetSecretValueRequest request = invocation.getArgument(0);
+          return constructSecretsClientResponse(request);
+        });
     return secretsClient;
   }
 

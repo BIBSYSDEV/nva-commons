@@ -89,32 +89,30 @@ public class UriWrapper {
     UnixPath thisPath = getPath();
     UnixPath totalPath = thisPath.addChild(childPath).addRoot();
 
-    return attempt(
-            () ->
-                new URI(
-                    uri.getScheme(),
-                    uri.getUserInfo(),
-                    uri.getHost(),
-                    uri.getPort(),
-                    totalPath.toString(),
-                    uri.getQuery(),
-                    EMPTY_FRAGMENT))
+    return attempt(() ->
+            new URI(
+                uri.getScheme(),
+                uri.getUserInfo(),
+                uri.getHost(),
+                uri.getPort(),
+                totalPath.toString(),
+                uri.getQuery(),
+                EMPTY_FRAGMENT))
         .map(UriWrapper::new)
         .orElseThrow();
   }
 
   public UriWrapper replacePathElementByIndexFromEnd(int index, String replacement) {
     var newPath = getPath().replacePathElementByIndexFromEnd(index, replacement);
-    return attempt(
-            () ->
-                new URI(
-                    uri.getScheme(),
-                    uri.getUserInfo(),
-                    uri.getHost(),
-                    uri.getPort(),
-                    newPath.toString(),
-                    uri.getQuery(),
-                    uri.getFragment()))
+    return attempt(() ->
+            new URI(
+                uri.getScheme(),
+                uri.getUserInfo(),
+                uri.getHost(),
+                uri.getPort(),
+                newPath.toString(),
+                uri.getQuery(),
+                uri.getFragment()))
         .map(UriWrapper::new)
         .orElseThrow();
   }
@@ -134,16 +132,15 @@ public class UriWrapper {
         .map(UnixPath::of)
         .flatMap(UnixPath::getParent)
         .map(
-            attempt(
-                p ->
-                    new URI(
-                        uri.getScheme(),
-                        uri.getUserInfo(),
-                        uri.getHost(),
-                        uri.getPort(),
-                        p.toString(),
-                        EMPTY_QUERY,
-                        EMPTY_FRAGMENT)))
+            attempt(p ->
+                new URI(
+                    uri.getScheme(),
+                    uri.getUserInfo(),
+                    uri.getHost(),
+                    uri.getPort(),
+                    p.toString(),
+                    EMPTY_QUERY,
+                    EMPTY_FRAGMENT)))
         .map(Try::orElseThrow)
         .map(UriWrapper::new);
   }
@@ -154,13 +151,12 @@ public class UriWrapper {
 
   public UriWrapper addQueryParameter(String param, String value) {
     this.uri =
-        attempt(
-                () ->
-                    new URIBuilder(uri)
-                        .removeQuery()
-                        .addParameters(extractUriQueryParameters())
-                        .addParameter(param, value)
-                        .build())
+        attempt(() ->
+                new URIBuilder(uri)
+                    .removeQuery()
+                    .addParameters(extractUriQueryParameters())
+                    .addParameter(param, value)
+                    .build())
             .orElseThrow();
     return this;
   }

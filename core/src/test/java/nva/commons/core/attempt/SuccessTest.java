@@ -176,7 +176,5 @@ public class SuccessTest {
     throw new TestException(message);
   }
 
-  private void doNothing() {
-    ;
-  }
+  private void doNothing() {}
 }

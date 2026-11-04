@@ -107,9 +107,8 @@ public final class DoiSuppliers {
   private static String randomDoiSuffix() {
     return IntStream.range(1, 2 + RANDOM.nextInt(4))
         .boxed()
-        .map(
-            ignored ->
-                RandomStringUtils.randomAlphanumeric(MIN_ARBITRARY_LENGTH, MAX_ARBITRARY_LENGTH))
+        .map(ignored ->
+            RandomStringUtils.randomAlphanumeric(MIN_ARBITRARY_LENGTH, MAX_ARBITRARY_LENGTH))
         .collect(Collectors.joining(DOI_SUBPART_DELIMITER));
   }
 

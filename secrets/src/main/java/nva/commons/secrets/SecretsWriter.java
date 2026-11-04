@@ -94,11 +94,10 @@ public class SecretsWriter {
     return Try.of(secretValueResponse)
         .map(GetSecretValueResponse::secretString)
         .map(objectMapper::readTree)
-        .map(
-            secretJson -> {
-              ((ObjectNode) secretJson).put(secretKey, secretValue);
-              return updateSecretJsonToAws(secretValueResponse.name(), secretJson);
-            })
+        .map(secretJson -> {
+          ((ObjectNode) secretJson).put(secretKey, secretValue);
+          return updateSecretJsonToAws(secretValueResponse.name(), secretJson);
+        })
         .orElseThrow(this::logErrorAndThrowException);
   }
 

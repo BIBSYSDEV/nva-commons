@@ -44,7 +44,6 @@ public class StringUtilsTest {
   public void removeMultipleWhitespacesRemovesDoubleSpaces() {
     String doubleSpaces = "The  quick  brown  fox  jumps over the lazy dog";
     String output = StringUtils.removeMultipleWhiteSpaces(doubleSpaces);
-    ;
     assertThat(output, is(equalTo(EXPECTED_OUTPUT)));
   }
 

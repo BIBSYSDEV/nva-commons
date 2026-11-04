@@ -38,7 +38,7 @@ public class DoiConverterTest {
   private static final String DOI_ORG_DOMAIN = "doi.org/";
   private static final String OLD_DOI_DOMAIN = "dx.doi.org/";
   private static final String SCHEME = "https://";
-  DoiConverter doiConverterImpl = new DoiConverter((uri) -> DO_NOT_VALIDATE_ONLINE);
+  DoiConverter doiConverterImpl = new DoiConverter(uri -> DO_NOT_VALIDATE_ONLINE);
 
   @Tag("RemoteTest")
   @ParameterizedTest(name = "validateOnline returns true for doi:{0}")

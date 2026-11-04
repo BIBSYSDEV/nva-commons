@@ -18,8 +18,7 @@ public abstract class AbstractEventHandlerTest {
 
   protected void assertThatJsonNodeDoesNotContainEmptyFields(ObjectNode objectNode) {
     var properties = SampleEventDetail.propertyNamesOfEmptyFields();
-    properties.forEach(
-        property ->
-            assertThat(property, objectNode.has(property), is(DOES_NOT_CONTAIN_EMPTY_FIELDS)));
+    properties.forEach(property ->
+        assertThat(property, objectNode.has(property), is(DOES_NOT_CONTAIN_EMPTY_FIELDS)));
   }
 }

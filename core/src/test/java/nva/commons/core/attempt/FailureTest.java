@@ -239,7 +239,5 @@ public class FailureTest {
     throw new TestException(FailureTest.EXPECTED_EXCEPTION_MESSAGE);
   }
 
-  private void doNothing() {
-    ;
-  }
+  private void doNothing() {}
 }
