@@ -42,12 +42,12 @@ public class RedirectHandler extends Handler {
   private static final class ExampleRedirectException extends RedirectException {
 
     private final URI location;
-    private final Integer statusCode;
+    private final Integer redirectStatusCode;
 
     public ExampleRedirectException(Integer statusCode, URI location) {
       super("Redirection");
       this.location = location;
-      this.statusCode = statusCode;
+      this.redirectStatusCode = statusCode;
     }
 
     @Override
@@ -57,7 +57,7 @@ public class RedirectHandler extends Handler {
 
     @Override
     protected Integer statusCode() {
-      return statusCode;
+      return redirectStatusCode;
     }
   }
 }
