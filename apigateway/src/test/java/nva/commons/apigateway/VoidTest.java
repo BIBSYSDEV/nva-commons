@@ -34,7 +34,6 @@ class VoidTest {
 
   /** Setup. */
   @BeforeEach
-  @Test
   void setup() {
     environment = mock(Environment.class);
     context = new FakeContext();
