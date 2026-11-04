@@ -193,7 +193,7 @@ class FakeS3ClientTest {
     return PutObjectRequest.builder().bucket(bucket).key(filePath.toString()).build();
   }
 
-  private static ArrayList<String> fetchAllExpectedFilesUsingPagination(
+  private static List<String> fetchAllExpectedFilesUsingPagination(
       FakeS3Client s3Client, String bucket, UnixPath expectedFolder) {
     final int smallPage = 3;
 
