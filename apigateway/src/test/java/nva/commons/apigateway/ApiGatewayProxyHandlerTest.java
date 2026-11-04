@@ -37,7 +37,7 @@ class ApiGatewayProxyHandlerTest {
   private Environment environment;
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     environment = mock(Environment.class);
     when(environment.readEnv("COGNITO_AUTHORIZER_URLS")).thenReturn("https://localhost:3000");
     when(environment.readEnv("ALLOWED_ORIGIN")).thenReturn("*");

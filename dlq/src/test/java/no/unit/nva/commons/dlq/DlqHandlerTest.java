@@ -43,7 +43,7 @@ class DlqHandlerTest {
   }
 
   @BeforeEach
-  public void init() {
+  void init() {
     this.firehoseClient = new FakeFirehoseClient();
     this.handler = new SampleDlqHandler(firehoseClient, SOME_FIREHOSE);
   }

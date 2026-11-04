@@ -29,7 +29,7 @@ class RequestInfoUtilityFunctionsTest {
   public static String VALUE = "value";
 
   @BeforeEach
-  public void setUp() throws JsonProcessingException, ApiIoException {
+  void setUp() throws JsonProcessingException, ApiIoException {
     var request = new HandlerRequestBuilder<String>(defaultRestObjectMapper).build();
     RequestInfo spiedObject = RequestInfo.fromRequest(request);
     requestInfo = spy(spiedObject);

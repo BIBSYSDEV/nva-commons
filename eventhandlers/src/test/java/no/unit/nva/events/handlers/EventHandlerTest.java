@@ -38,7 +38,7 @@ class EventHandlerTest extends AbstractEventHandlerTest {
   private Context context;
 
   @BeforeEach
-  public void init() {
+  void init() {
     this.outputStream = new ByteArrayOutputStream();
     this.context = new FakeContext();
   }

@@ -52,7 +52,7 @@ class S3DriverTest {
   private S3Client s3Client;
 
   @BeforeEach
-  public void init() {
+  void init() {
     s3Client = new FakeS3Client();
     s3Driver = new S3Driver(s3Client, SAMPLE_BUCKET);
   }

@@ -31,7 +31,7 @@ class FakeFirehoseClientTest {
   private ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   @BeforeEach
-  public void init() {
+  void init() {
     this.client = new FakeFirehoseClient();
   }
 

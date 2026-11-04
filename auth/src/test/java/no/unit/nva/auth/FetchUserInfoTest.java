@@ -28,13 +28,13 @@ class FetchUserInfoTest {
   private HttpClient httpClient;
 
   @BeforeEach
-  public void init() {
+  void init() {
     this.authServer = new FakeAuthServer();
     this.httpClient = WiremockHttpClient.create();
   }
 
   @AfterEach
-  public void close() throws InterruptedException {
+  void close() throws InterruptedException {
     this.authServer.close();
     Thread.sleep(100);
   }
