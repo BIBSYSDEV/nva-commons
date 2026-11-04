@@ -36,7 +36,7 @@ public class ProxyHandler extends ApiGatewayProxyHandler<RequestBody, RequestBod
     this.proxy = requestInfo.getPathParameters().get(PROXY_TAG);
     this.path = requestInfo.getPath();
     this.body = input;
-    this.addAdditionalHeaders(() -> additionalHeaders(body));
+    this.addAdditionalHeaders(this::additionalHeaders);
     return new ProxyResponse<>(HTTP_STATUS_CODE_TEST, this.body);
   }
 
@@ -46,7 +46,7 @@ public class ProxyHandler extends ApiGatewayProxyHandler<RequestBody, RequestBod
     // no-op
   }
 
-  private Map<String, String> additionalHeaders(RequestBody input) {
+  private Map<String, String> additionalHeaders() {
     return Collections.singletonMap(HttpHeaders.WARNING, body.getField1());
   }
 

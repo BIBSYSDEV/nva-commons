@@ -198,15 +198,15 @@ class TryTest {
     return x / y;
   }
 
-  private String throwCheckedException(String input) throws IOException {
+  private String throwCheckedException(String ignoredInput) throws IOException {
     throw new IOException(EXCEPTION_MESSAGE);
   }
 
-  private Try<String> throwCheckedExceptionForFlatMap(String input) throws IOException {
+  private Try<String> throwCheckedExceptionForFlatMap(String ignoredInput) throws IOException {
     throw new IOException(EXCEPTION_MESSAGE);
   }
 
-  private String throwUnCheckedException(String input) {
+  private String throwUnCheckedException(String ignoredInput) {
     throw SAMPLE_UNCHECKED_EXCEPTION;
   }
 }
