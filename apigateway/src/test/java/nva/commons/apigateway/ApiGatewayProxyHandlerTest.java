@@ -47,7 +47,7 @@ class ApiGatewayProxyHandlerTest {
 
   @Test
   @DisplayName("ApiGatewayProxyHandlerTest has a constructor with input class as only parameter")
-  public void apiGatewayHandlerHasACostructorWithInputClassAsOnlyParameter() {
+  void apiGatewayHandlerHasACostructorWithInputClassAsOnlyParameter() {
     RestRequestHandler<String, String> handler =
         new ApiGatewayProxyHandler<>(String.class, environment) {
 
@@ -67,7 +67,7 @@ class ApiGatewayProxyHandlerTest {
 
   @Test
   @DisplayName("handleRequest should get the status and body")
-  public void handleRequestShouldGetTheStatusCodeAndBody() throws IOException {
+  void handleRequestShouldGetTheStatusCodeAndBody() throws IOException {
     var input = createBody();
     var expectedOutput = objectMapper.convertValue(input, RequestBody.class);
     var inputStream = requestWithHeaders(input);

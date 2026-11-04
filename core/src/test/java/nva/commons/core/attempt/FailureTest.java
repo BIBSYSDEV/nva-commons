@@ -20,7 +20,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-public class FailureTest {
+class FailureTest {
 
   public static final String EXPECTED_EXCEPTION_MESSAGE = "Expected exception message";
   public static final String NESTED_EXCEPTION_MESSAGE = "Nested exception message";
@@ -30,7 +30,7 @@ public class FailureTest {
 
   @Test
   @DisplayName("orElseThrow throws illegalStateException for null argument")
-  public void orElseThrowsIllegalStateExceptionForNullArgument() {
+  void orElseThrowsIllegalStateExceptionForNullArgument() {
 
     Executable action =
         () ->
@@ -43,7 +43,7 @@ public class FailureTest {
 
   @Test
   @DisplayName("orElseThrow throws the specified exception when checked exception is thrown")
-  public void orElseThrowsTheSpecifiedExceptionWhenCheckedExceptionIsThrown() {
+  void orElseThrowsTheSpecifiedExceptionWhenCheckedExceptionIsThrown() {
     Executable action =
         () ->
             Try.of(sample)
@@ -56,7 +56,7 @@ public class FailureTest {
 
   @Test
   @DisplayName("orElseThrow throws the specified exception when unchecked exception is thrown")
-  public void orElseThrowThrowsTheSpecifiedExceptionWhenUncheckedExceptionIsThrown() {
+  void orElseThrowThrowsTheSpecifiedExceptionWhenUncheckedExceptionIsThrown() {
     Executable action =
         () ->
             Try.of(sample)
@@ -69,7 +69,7 @@ public class FailureTest {
 
   @Test
   @DisplayName("orElse returns the specified value")
-  public void orElseReturnsTheSpecifiedValue() {
+  void orElseReturnsTheSpecifiedValue() {
 
     Integer actual =
         Try.of(sample)
@@ -81,7 +81,7 @@ public class FailureTest {
 
   @Test
   @DisplayName("orElse throws exception when the final method throws an exception")
-  public void orElseThrowsExceptionWhenTheFinalMethodThrowsAnException() {
+  void orElseThrowsExceptionWhenTheFinalMethodThrowsAnException() {
 
     Executable action =
         () ->
@@ -95,7 +95,7 @@ public class FailureTest {
 
   @Test
   @DisplayName("orElse throws IllegalStateException when the input arg is null")
-  public void orElseThrowsIllegalStateExceptionWhenTheInputArgumentIsNull() {
+  void orElseThrowsIllegalStateExceptionWhenTheInputArgumentIsNull() {
 
     Executable action =
         () -> Try.of(sample).map(i -> throwCheckedException(NESTED_EXCEPTION_MESSAGE)).orElse(null);
@@ -104,7 +104,7 @@ public class FailureTest {
   }
 
   @Test
-  public void orElseThrowThrowsRuntimeExceptionWhenActionThrowsCheckedException() {
+  void orElseThrowThrowsRuntimeExceptionWhenActionThrowsCheckedException() {
     String someString = "hello";
     Executable action =
         () ->
@@ -117,7 +117,7 @@ public class FailureTest {
   }
 
   @Test
-  public void orElseThrowThrowsOriginalExceptionWhenActionThrowsUncheckedException() {
+  void orElseThrowThrowsOriginalExceptionWhenActionThrowsUncheckedException() {
     String someString = "hello";
     Executable action =
         () ->
@@ -131,7 +131,7 @@ public class FailureTest {
 
   @Test
   @DisplayName("flatMap returns a failure with the first Exception")
-  public void flatMapReturnsAFailureWithTheFirstException() {
+  void flatMapReturnsAFailureWithTheFirstException() {
     Try<Integer> actual =
         Try.of(sample)
             .map(i -> throwCheckedException(EXPECTED_EXCEPTION_MESSAGE))
@@ -143,7 +143,7 @@ public class FailureTest {
 
   @Test
   @DisplayName("get throws IllegalStateException")
-  public void getThrowsIllegalStateException() {
+  void getThrowsIllegalStateException() {
     Executable action =
         () -> Try.of(sample).map(i -> throwCheckedException(NOT_EXPECTED_MESSAGE)).get();
     assertThrows(IllegalStateException.class, action);
@@ -151,7 +151,7 @@ public class FailureTest {
 
   @Test
   @DisplayName("stream returns an emptyStream")
-  public void streamReturnsAnEmptyStream() {
+  void streamReturnsAnEmptyStream() {
     List<Integer> list =
         Try.of(sample).map(i -> throwCheckedException(NOT_EXPECTED_MESSAGE)).stream().toList();
     assertThat(list, is(empty()));
@@ -159,7 +159,7 @@ public class FailureTest {
 
   @Test
   @DisplayName("isSuccess returns false")
-  public void isSuccessReturnsFalse() {
+  void isSuccessReturnsFalse() {
     boolean actual =
         Try.of(sample).map(i -> throwCheckedException(NOT_EXPECTED_MESSAGE)).isSuccess();
     assertFalse(actual);
@@ -167,21 +167,21 @@ public class FailureTest {
 
   @Test
   @DisplayName("isFailure returns true")
-  public void isFailureReturnsTrue() {
+  void isFailureReturnsTrue() {
     boolean actual =
         Try.of(sample).map(i -> throwCheckedException(NOT_EXPECTED_MESSAGE)).isFailure();
     assertTrue(actual);
   }
 
   @Test
-  public void forEachDoesNotExecuteTheFunction() {
+  void forEachDoesNotExecuteTheFunction() {
     Try<Integer> failure =
         Try.of(sample).map(i -> throwCheckedException(EXPECTED_EXCEPTION_MESSAGE));
     Assertions.assertDoesNotThrow(() -> failure.forEach(this::consumeWithException));
   }
 
   @Test
-  public void forEachReturnsFailure() {
+  void forEachReturnsFailure() {
     Try<Integer> failure =
         Try.of(sample).map(i -> throwCheckedException(EXPECTED_EXCEPTION_MESSAGE));
     Try<Void> actual = failure.forEach(this::consumeWithException);
@@ -189,7 +189,7 @@ public class FailureTest {
   }
 
   @Test
-  public void toOptionalWithFunctionReturnsEmptyOptional() {
+  void toOptionalWithFunctionReturnsEmptyOptional() {
     Try<Integer> failure =
         Try.of(sample).map(i -> throwCheckedException(EXPECTED_EXCEPTION_MESSAGE));
 
@@ -199,7 +199,7 @@ public class FailureTest {
   }
 
   @Test
-  public void toOptionalReturnsEmptyOptional() {
+  void toOptionalReturnsEmptyOptional() {
     Try<Integer> failure =
         Try.of(sample).map(i -> throwCheckedException(EXPECTED_EXCEPTION_MESSAGE));
 
@@ -209,7 +209,7 @@ public class FailureTest {
   }
 
   @Test
-  public void toOptionalWithFunctionRunsFunctionOnFailure() {
+  void toOptionalWithFunctionRunsFunctionOnFailure() {
     Try<Integer> failure =
         Try.of(sample).map(i -> throwCheckedException(EXPECTED_EXCEPTION_MESSAGE));
     AtomicBoolean actionAfterFailureRun = new AtomicBoolean(false);

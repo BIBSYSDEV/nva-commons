@@ -10,7 +10,7 @@ import nva.commons.secrets.SecretsReader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-public class FakeSecretsManagerClientTest {
+class FakeSecretsManagerClientTest {
 
   @Test
   void shouldBeUsableWithSecretsReader() {

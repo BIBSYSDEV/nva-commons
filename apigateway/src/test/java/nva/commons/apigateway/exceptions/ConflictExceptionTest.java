@@ -10,19 +10,19 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import org.junit.jupiter.api.Test;
 
-public class ConflictExceptionTest {
+class ConflictExceptionTest {
 
   public static final String SOME_MESSAGE = "Some message";
   private static final String CAUSE_MESSAGE = "Cause message";
 
   @Test
-  public void conflictExceptionShowsSuppliedMessage() {
+  void conflictExceptionShowsSuppliedMessage() {
     ConflictException exception = new ConflictException(SOME_MESSAGE);
     assertThat(exception.getMessage(), containsString(SOME_MESSAGE));
   }
 
   @Test
-  public void conflictExceptionShowsSuppliedCause() {
+  void conflictExceptionShowsSuppliedCause() {
     Exception cause = new Exception(CAUSE_MESSAGE);
     ConflictException exception = new ConflictException(cause);
     ByteArrayOutputStream stackTraceOutput = getStackTraceMessage(exception);
@@ -31,7 +31,7 @@ public class ConflictExceptionTest {
   }
 
   @Test
-  public void conflictExceptionShowsSuppliedMessageAndSuppliedCause() {
+  void conflictExceptionShowsSuppliedMessageAndSuppliedCause() {
     Exception cause = new Exception(CAUSE_MESSAGE);
     ConflictException exception = new ConflictException(cause, SOME_MESSAGE);
     ByteArrayOutputStream stackTraceOutput = getStackTraceMessage(exception);
@@ -42,7 +42,7 @@ public class ConflictExceptionTest {
   }
 
   @Test
-  public void conflictExceptionReturnsNotFoundStatusCode() {
+  void conflictExceptionReturnsNotFoundStatusCode() {
     ConflictException exception = new ConflictException(SOME_MESSAGE);
     assertThat(exception.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_CONFLICT)));
   }

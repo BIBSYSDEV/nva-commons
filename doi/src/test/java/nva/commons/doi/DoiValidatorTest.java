@@ -13,7 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class DoiValidatorTest {
+class DoiValidatorTest {
 
   private static final String DOI = "10.1000/182";
   private static final String DOI_PREFIX = "doi:";

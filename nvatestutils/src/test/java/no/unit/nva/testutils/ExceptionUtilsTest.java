@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
-public class ExceptionUtilsTest {
+class ExceptionUtilsTest {
 
   public static final String TOP_MESSAGE = "Top message";
   public static final String NESTED_MESSAGE = "Nested message";

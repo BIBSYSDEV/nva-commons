@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 class BackendClientCredentialsTest {
 
   @Test
-  public void gettersShouldReturnCorrectValues() {
+  void gettersShouldReturnCorrectValues() {
     var credentials = new BackendClientCredentials("id", "secret");
 
     assertThat(credentials.getId(), is(equalTo("id")));
@@ -19,7 +19,7 @@ class BackendClientCredentialsTest {
   }
 
   @Test
-  public void toStringShouldCorrectlyRepresentObjectAsJson() throws JsonProcessingException {
+  void toStringShouldCorrectlyRepresentObjectAsJson() throws JsonProcessingException {
     var originalCredentials = new BackendClientCredentials("id", "secret");
     var str = originalCredentials.toString();
     var parsedCredentials =

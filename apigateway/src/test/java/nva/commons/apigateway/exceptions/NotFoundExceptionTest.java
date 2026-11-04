@@ -10,19 +10,19 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import org.junit.jupiter.api.Test;
 
-public class NotFoundExceptionTest {
+class NotFoundExceptionTest {
 
   public static final String SOME_MESSAGE = "Some message";
   private static final String CAUSE_MESSAGE = "Cause message";
 
   @Test
-  public void notFoundExceptionShowsSuppliedMessage() {
+  void notFoundExceptionShowsSuppliedMessage() {
     NotFoundException exception = new NotFoundException(SOME_MESSAGE);
     assertThat(exception.getMessage(), containsString(SOME_MESSAGE));
   }
 
   @Test
-  public void notFoundExceptionShowsSuppliedCause() {
+  void notFoundExceptionShowsSuppliedCause() {
     Exception cause = new Exception(CAUSE_MESSAGE);
     NotFoundException exception = new NotFoundException(cause);
     ByteArrayOutputStream stackTraceOutput = getStackTraceMessage(exception);
@@ -31,7 +31,7 @@ public class NotFoundExceptionTest {
   }
 
   @Test
-  public void notFoundExceptionShowsSuppliedMessageAndSuppliedCause() {
+  void notFoundExceptionShowsSuppliedMessageAndSuppliedCause() {
     Exception cause = new Exception(CAUSE_MESSAGE);
     NotFoundException exception = new NotFoundException(cause, SOME_MESSAGE);
     ByteArrayOutputStream stackTraceOutput = getStackTraceMessage(exception);
@@ -42,7 +42,7 @@ public class NotFoundExceptionTest {
   }
 
   @Test
-  public void notFoundExceptionReturnsNotFoundStatusCode() {
+  void notFoundExceptionReturnsNotFoundStatusCode() {
     NotFoundException exception = new NotFoundException(SOME_MESSAGE);
     assertThat(exception.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_NOT_FOUND)));
   }

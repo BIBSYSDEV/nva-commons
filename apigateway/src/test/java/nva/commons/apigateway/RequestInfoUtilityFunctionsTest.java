@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-public class RequestInfoUtilityFunctionsTest {
+class RequestInfoUtilityFunctionsTest {
 
   private RequestInfo requestInfo;
   public static String KEY = "key";
@@ -36,14 +36,14 @@ public class RequestInfoUtilityFunctionsTest {
   }
 
   @Test
-  public void getHeaderReturnsValueOnValidKey() {
+  void getHeaderReturnsValueOnValidKey() {
     when(requestInfo.getHeaders()).thenReturn(Map.of(KEY, VALUE));
     String value = requestInfo.getHeader(KEY);
     assertEquals(VALUE, value);
   }
 
   @Test
-  public void getHeaderThrowsExceptionOnMissingKey() {
+  void getHeaderThrowsExceptionOnMissingKey() {
     when(requestInfo.getHeaders()).thenReturn(Map.of());
     Executable action = () -> requestInfo.getHeader(KEY);
     IllegalArgumentException exception =
@@ -53,14 +53,14 @@ public class RequestInfoUtilityFunctionsTest {
   }
 
   @Test
-  public void getQueryParameterReturnsValueOnValidKey() throws BadRequestException {
+  void getQueryParameterReturnsValueOnValidKey() throws BadRequestException {
     when(requestInfo.getQueryParameters()).thenReturn(Map.of(KEY, VALUE));
     String value = requestInfo.getQueryParameter(KEY);
     assertEquals(VALUE, value);
   }
 
   @Test
-  public void getQueryParameterThrowsExceptionOnMissingKey() {
+  void getQueryParameterThrowsExceptionOnMissingKey() {
     when(requestInfo.getQueryParameters()).thenReturn(Map.of());
     Executable action = () -> requestInfo.getQueryParameter(KEY);
     BadRequestException exception = Assertions.assertThrows(BadRequestException.class, action);
@@ -69,28 +69,28 @@ public class RequestInfoUtilityFunctionsTest {
   }
 
   @Test
-  public void getMultiValueParameterReturnsValueOnValidKey() {
+  void getMultiValueParameterReturnsValueOnValidKey() {
     when(requestInfo.getMultiValueQueryStringParameters()).thenReturn(Map.of(KEY, List.of(VALUE)));
     var values = requestInfo.getMultiValueQueryParameter(KEY);
     assertEquals(VALUE, values.get(0));
   }
 
   @Test
-  public void getMultiValueParameterReturnsEmptyListOnUnknownKey() {
+  void getMultiValueParameterReturnsEmptyListOnUnknownKey() {
     when(requestInfo.getMultiValueQueryStringParameters()).thenReturn(Map.of());
     var values = requestInfo.getMultiValueQueryParameter(KEY);
     assertEquals(0, values.size());
   }
 
   @Test
-  public void getPathParameterReturnsValueOnValidKey() {
+  void getPathParameterReturnsValueOnValidKey() {
     when(requestInfo.getPathParameters()).thenReturn(Map.of(KEY, VALUE));
     String value = requestInfo.getPathParameter(KEY);
     assertEquals(VALUE, value);
   }
 
   @Test
-  public void getPathParametersThrowsExceptionOnMissingKey() {
+  void getPathParametersThrowsExceptionOnMissingKey() {
     when(requestInfo.getPathParameters()).thenReturn(Map.of());
     Executable action = () -> requestInfo.getPathParameter(KEY);
     IllegalArgumentException exception =
@@ -100,7 +100,7 @@ public class RequestInfoUtilityFunctionsTest {
   }
 
   @Test
-  public void getRequestContextParameterReturnsValueOnValidJsonPointer() {
+  void getRequestContextParameterReturnsValueOnValidJsonPointer() {
     when(requestInfo.getRequestContext())
         .thenReturn(defaultRestObjectMapper.convertValue(Map.of(KEY, VALUE), JsonNode.class));
     String value = requestInfo.getRequestContextParameter(JsonPointer.compile("/" + KEY));
@@ -108,7 +108,7 @@ public class RequestInfoUtilityFunctionsTest {
   }
 
   @Test
-  public void getRequestContextParameterThrowsExceptionOnInvalidJsonPointer() {
+  void getRequestContextParameterThrowsExceptionOnInvalidJsonPointer() {
     when(requestInfo.getRequestContext()).thenReturn(defaultRestObjectMapper.createObjectNode());
     JsonPointer jsonPointer = JsonPointer.compile("/" + KEY);
 

@@ -19,7 +19,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class LanguageMapperTest {
+class LanguageMapperTest {
 
   public static final String ISO_639_3_LANGUAGE_CODE = "eng";
   public static final String ISO_639_1_LANGUAGE_CODE = "en";
@@ -30,28 +30,28 @@ public class LanguageMapperTest {
   public static final int LEXVO_URI_INDEX = 1;
 
   @Test
-  public void toUriReturnsUriWhenInputIsIso3() {
+  void toUriReturnsUriWhenInputIsIso3() {
     URI expectedOutput = URI.create(LEXVO_URI_PREFIX + ISO_639_3_LANGUAGE_CODE);
     URI actualOutput = LanguageMapper.toUri(ISO_639_3_LANGUAGE_CODE);
     assertThat(actualOutput, is(equalTo(expectedOutput)));
   }
 
   @Test
-  public void toUriReturnsUriWhenInputIsIso1() {
+  void toUriReturnsUriWhenInputIsIso1() {
     URI expectedOutput = URI.create(LEXVO_URI_PREFIX + ISO_639_3_LANGUAGE_CODE);
     URI actualOutput = LanguageMapper.toUri(ISO_639_1_LANGUAGE_CODE);
     assertThat(actualOutput, is(equalTo(expectedOutput)));
   }
 
   @Test
-  public void toUriReturnsUndefinedWhenInputLanguageCodeIsNotFound() {
+  void toUriReturnsUndefinedWhenInputLanguageCodeIsNotFound() {
     URI actualOutput = LanguageMapper.toUri(NON_EXISTENT_CODE);
     assertThat(actualOutput, is(equalTo(LEXVO_URI_UNDEFINED)));
   }
 
   @ParameterizedTest(name = "LanguageMapper.toUri returns URI when input is code: {0}")
   @ValueSource(strings = {ISO_639_3_LANGUAGE_CODE_UPPERCASE, ISO_639_1_LANGUAGE_CODE_UPPERCASE})
-  public void toUriReturnsUriWhenInputIsUpperCase(String upperCaseLangCode) {
+  void toUriReturnsUriWhenInputIsUpperCase(String upperCaseLangCode) {
     URI expectedOutput = URI.create(LEXVO_URI_PREFIX + ISO_639_3_LANGUAGE_CODE);
     URI actualOutput = LanguageMapper.toUri(upperCaseLangCode);
     assertThat(actualOutput, is(equalTo(expectedOutput)));
@@ -60,13 +60,13 @@ public class LanguageMapperTest {
   @ParameterizedTest(
       name = "LanguageMapper.toUri returns URI for undefined language when input is code: \"{0}\"")
   @NullAndEmptySource
-  public void toUriReturnUndefinedWhenInputIsEmpty(String emptyLanguageCode) {
+  void toUriReturnUndefinedWhenInputIsEmpty(String emptyLanguageCode) {
     URI actualOutput = LanguageMapper.toUri(emptyLanguageCode);
     assertThat(actualOutput, is(equalTo(LEXVO_URI_UNDEFINED)));
   }
 
   @Test
-  public void toUriWritesFailureMessageInLogWhenFailing() {
+  void toUriWritesFailureMessageInLogWhenFailing() {
     var logRecorder = LogRecorder.forClass(LanguageMapper.class);
     LanguageMapper.toUri(NON_EXISTENT_CODE);
     var expectedValue = ERROR_MESSAGE_MISSING_RESOURCE_EXCEPTION + NON_EXISTENT_CODE;
@@ -75,7 +75,7 @@ public class LanguageMapperTest {
 
   @ParameterizedTest(name = "toUri returns {1} when input is ISO-639-2 code {0}")
   @MethodSource("uriProviderForHardCodedMappings")
-  public void toUriReturnsUriWithHardCodedMappingWhenInputMatchesHardcodedInputs(
+  void toUriReturnsUriWithHardCodedMappingWhenInputMatchesHardcodedInputs(
       String iso2Code, URI expectedUri) {
     assertThat(LanguageMapper.toUri(iso2Code), is(equalTo(expectedUri)));
   }

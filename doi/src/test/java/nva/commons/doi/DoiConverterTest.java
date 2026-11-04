@@ -30,7 +30,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.invocation.InvocationOnMock;
 
-public class DoiConverterTest {
+class DoiConverterTest {
 
   public static final boolean DO_NOT_VALIDATE_ONLINE = true;
   private static final String DOI = "10.1000/182";
@@ -43,14 +43,14 @@ public class DoiConverterTest {
   @Tag("RemoteTest")
   @ParameterizedTest(name = "validateOnline returns true for doi:{0}")
   @MethodSource("resolvableDois")
-  public void toUriReturnsUrisWhenInputCanBeEasilyConvertedToValidDoi(String doi) {
+  void toUriReturnsUrisWhenInputCanBeEasilyConvertedToValidDoi(String doi) {
     DoiConverter doiConverter = new DoiConverter();
     assertThat(doiConverter.toUri(doi), is(not(nullValue())));
   }
 
   @ParameterizedTest(name = "toUri returns a URI if input is a valid DOI string")
   @MethodSource("validDois")
-  public void toUriReturnsAUriIfInputIsAValidDoiUri(DoiInput inputDoi) {
+  void toUriReturnsAUriIfInputIsAValidDoiUri(DoiInput inputDoi) {
     URI actual = doiConverterImpl.toUri(inputDoi.getDoi());
     assertThat(actual, is(equalTo(inputDoi.getExpectedUri())));
   }
@@ -60,13 +60,13 @@ public class DoiConverterTest {
           "doi returns URI when input is valid URI but does not have alphanumeric char at the end")
   @ValueSource(
       strings = {"doi:10.1016/j.seares.2007.02.001.", "doi:10.1016/j.seares.2007.02.001.."})
-  public void toUriReturnsUriWhenInputIsValidUriButHasNonAlphanumericCharacterAtTheEnd(String doi) {
+  void toUriReturnsUriWhenInputIsValidUriButHasNonAlphanumericCharacterAtTheEnd(String doi) {
     URI actual = doiConverterImpl.toUri(doi);
     assertThat(actual, is(equalTo(URI.create("https://doi.org/10.1016/j.seares.2007.02.001"))));
   }
 
   @Test
-  public void toUriThrowsExceptionWhenInputCannotBeResolvedOnline() {
+  void toUriThrowsExceptionWhenInputCannotBeResolvedOnline() {
     String doi = "10.1016/j.jngse.2015.08.051";
     UnitHttpClient unitClient = mock(UnitHttpClient.class);
     when(unitClient.sendAsync(any(HttpRequest.Builder.class), any(HttpResponse.BodyHandler.class)))
@@ -77,14 +77,14 @@ public class DoiConverterTest {
 
   @DisplayName("toUri returns a URI when input is a doi identifier")
   @Test
-  public void toUriReturnsAUriIfInputIsADoiIdentifier() {
+  void toUriReturnsAUriIfInputIsADoiIdentifier() {
     URI actual = doiConverterImpl.toUri(DOI);
     assertThat(actual.toString(), is(equalTo(EXPECTED)));
   }
 
   @DisplayName("toUri returns an HTTPS URI when input is an HTTP URI")
   @Test
-  public void toUriReturnsAUriIfInputIsAnHttpDoiUri() {
+  void toUriReturnsAUriIfInputIsAnHttpDoiUri() {
     String input = "http://doi.org/" + DOI;
     URI actual = doiConverterImpl.toUri(input);
     assertThat(actual.toString(), is(equalTo(EXPECTED)));
@@ -92,7 +92,7 @@ public class DoiConverterTest {
 
   @Test
   @DisplayName("toUri throws Exception when input is not a valid URI")
-  public void toUriThrowsAnExceptionWhenInputIsNotValidUri() {
+  void toUriThrowsAnExceptionWhenInputIsNotValidUri() {
     var logRecorder = LogRecorder.forRoot(DoiConverterTest.class);
     var input = "http://somethingelse.org/" + DOI;
     var exception = assertThrows(InvalidDoiException.class, () -> doiConverterImpl.toUri(input));
@@ -102,7 +102,7 @@ public class DoiConverterTest {
 
   @Test
   @DisplayName("toURI returns a URI when input is a DOI string with DOI prefix")
-  public void toUriReturnsAUriIfUriWhenInputIsDoiStringWithDoiPrefix() {
+  void toUriReturnsAUriIfUriWhenInputIsDoiStringWithDoiPrefix() {
     String input = "doi:" + DOI;
     URI actual = doiConverterImpl.toUri(input);
     assertThat(actual.toString(), is(equalTo(EXPECTED)));
@@ -110,7 +110,7 @@ public class DoiConverterTest {
 
   @Test
   @DisplayName("toURI throws Exception when input is an invalid DOI string")
-  public void toUriThrowsExceptionWhenInputIsAnInvalidDoiString() {
+  void toUriThrowsExceptionWhenInputIsAnInvalidDoiString() {
     var logRecorder = LogRecorder.forRoot(DoiConverterTest.class);
     var input = "213456";
     var exception = assertThrows(InvalidDoiException.class, () -> doiConverterImpl.toUri(input));
@@ -120,7 +120,7 @@ public class DoiConverterTest {
 
   @ParameterizedTest(name = "should add https for doi missing scheme:{0}")
   @MethodSource("doiMissingScheme")
-  public void shouldAddHttpsWhenInputContainsDomainNameButNotScheme(String inputDoi) {
+  void shouldAddHttpsWhenInputContainsDomainNameButNotScheme(String inputDoi) {
     var doi = assertDoesNotThrow(() -> doiConverterImpl.toUri(inputDoi));
     assertThat(doi, is(not(nullValue())));
     assertThat(doi, is(equalTo(UriWrapper.fromUri(SCHEME + DOI_ORG_DOMAIN + DOI).getUri())));

@@ -17,7 +17,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class StringUtilsTest {
+class StringUtilsTest {
 
   public static final String EMPTY_STRING = "";
   public static final String BLANK_STRING = " ";
@@ -32,7 +32,7 @@ public class StringUtilsTest {
 
   @Test
   @DisplayName("removeMultipleWhitespaces preserves single whitespaces")
-  public void removeMulitpleWhitespacesPreserversSingleWhitespacess() {
+  void removeMulitpleWhitespacesPreserversSingleWhitespacess() {
     String input = EXPECTED_OUTPUT;
     String output = StringUtils.removeMultipleWhiteSpaces(input);
 
@@ -41,7 +41,7 @@ public class StringUtilsTest {
 
   @Test
   @DisplayName("removeMultipleWhitespaces removes double spaces")
-  public void removeMultipleWhitespacesRemovesDoubleSpaces() {
+  void removeMultipleWhitespacesRemovesDoubleSpaces() {
     String doubleSpaces = "The  quick  brown  fox  jumps over the lazy dog";
     String output = StringUtils.removeMultipleWhiteSpaces(doubleSpaces);
     assertThat(output, is(equalTo(EXPECTED_OUTPUT)));
@@ -49,7 +49,7 @@ public class StringUtilsTest {
 
   @Test
   @DisplayName("removeMultipleWhitespaces removes double spaces")
-  public void removeMultipleWhitespacesRemovesCombinationOfSpaces() {
+  void removeMultipleWhitespacesRemovesCombinationOfSpaces() {
     String combinationOfSpaces = "The \n quick\n brown\n fox  jumps over the lazy dog";
     String output = StringUtils.removeMultipleWhiteSpaces(combinationOfSpaces);
 
@@ -58,7 +58,7 @@ public class StringUtilsTest {
 
   @Test
   @DisplayName("removeWhitespaces removes whitespaces")
-  public void removeWhiteSpacesRemovesWhiteSpaces() {
+  void removeWhiteSpacesRemovesWhiteSpaces() {
     String combinationOfSpaces = "The \n quick\n brown\n fox  jumps over the lazy dog";
     String expected = "Thequickbrownfoxjumpsoverthelazydog";
     String output = StringUtils.removeWhiteSpaces(combinationOfSpaces);
@@ -67,32 +67,32 @@ public class StringUtilsTest {
 
   @Test
   @DisplayName("StringUtils should have a method for checking if a string is empty (null or blank)")
-  public void stringUtilsHasAMethodForCheckingIfAStringIsEmpty() {
+  void stringUtilsHasAMethodForCheckingIfAStringIsEmpty() {
     boolean result = StringUtils.isEmpty(null);
   }
 
   @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
   @ValueSource(strings = {"abc", "\t", "\n", " "})
-  public void isEmptyReturnsFalseForANonEmptyString(String input) {
+  void isEmptyReturnsFalseForANonEmptyString(String input) {
     assertThat(StringUtils.isEmpty(input), is(equalTo(false)));
   }
 
   @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
   @ValueSource(strings = {"abc", " a", "a "})
-  public void isBlankReturnsFalseForANonBlankString(String input) {
+  void isBlankReturnsFalseForANonBlankString(String input) {
     assertThat(StringUtils.isBlank(input), is(equalTo(false)));
   }
 
   @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
   @ValueSource(strings = {"abc", " a", "a "})
   @DisplayName("isNotBlank should return true where string is neither null or blank.")
-  public void stringUtilIsNotBlank(String input) {
+  void stringUtilIsNotBlank(String input) {
     assertThat(StringUtils.isNotBlank(input), is(equalTo(true)));
   }
 
   @Test
   @DisplayName("replaceWhitespacesWithSpace replaces all white spaces with space")
-  public void replaceWhiteSpacesWithSpaceReturnsStringWithspaces() {
+  void replaceWhiteSpacesWithSpaceReturnsStringWithspaces() {
     String inputString = "This is a\ntest\tfor\n\rwhitespaces";
     String expectedString = "This is a test for  whitespaces";
     String actual = StringUtils.replaceWhiteSpacesWithSpace(inputString);

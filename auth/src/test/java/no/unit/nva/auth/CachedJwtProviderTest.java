@@ -13,7 +13,7 @@ import java.util.Date;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class CachedJwtProviderTest {
+class CachedJwtProviderTest {
 
   public static final Instant TOKEN_EXPIRE_AT = Instant.parse("2006-12-03T10:15:30.00Z");
   CachedJwtProvider cachedJwtProvider;

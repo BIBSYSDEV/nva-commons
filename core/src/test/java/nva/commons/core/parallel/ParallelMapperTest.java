@@ -15,7 +15,7 @@ class ParallelMapperTest {
   private static final int SIGNIFICANT_PART_OF_AVAILABLE_MEMORY = 3;
 
   @Test
-  public void parallelMapperReturnsFunctionResultsOnSetOfInputs() throws InterruptedException {
+  void parallelMapperReturnsFunctionResultsOnSetOfInputs() throws InterruptedException {
     List<Integer> inputs = sampleInputs(1_000);
 
     ParallelMapper<Integer, String> mapper =
@@ -25,7 +25,7 @@ class ParallelMapperTest {
   }
 
   @Test
-  public void parallelMapperAcceptsStreamsAsInput() throws InterruptedException {
+  void parallelMapperAcceptsStreamsAsInput() throws InterruptedException {
     List<Integer> inputs = sampleInputs(100);
     ParallelMapper<Integer, String> mapper =
         new ParallelMapper<>(inputs.stream(), this::integerToString).map();
@@ -33,7 +33,7 @@ class ParallelMapperTest {
   }
 
   @Test
-  public void parallelMapperReturnsExceptionsForFailedExecutions() throws InterruptedException {
+  void parallelMapperReturnsExceptionsForFailedExecutions() throws InterruptedException {
     List<Integer> inputs = sampleInputs(100);
     ParallelMapper<Integer, String> mapper =
         new ParallelMapper<>(inputs, this::failingIntegerToString).map();
@@ -48,8 +48,7 @@ class ParallelMapperTest {
   }
 
   @Test
-  public void parallelMapperReturnsExceptionsContainingTheFailingInputs()
-      throws InterruptedException {
+  void parallelMapperReturnsExceptionsContainingTheFailingInputs() throws InterruptedException {
     List<Integer> inputs = sampleInputs(100);
     ParallelMapper<Integer, String> mapper =
         new ParallelMapper<>(inputs, this::failingIntegerToString).map();

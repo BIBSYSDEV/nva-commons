@@ -13,7 +13,7 @@ import java.net.HttpURLConnection;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class ApiGatewayExceptionTest {
+class ApiGatewayExceptionTest {
 
   private static final String MESSAGE = "someMessage";
   public static final String STATUS_CODE_METHOD_NAME = "statusCode";
@@ -21,14 +21,14 @@ public class ApiGatewayExceptionTest {
 
   @Test
   @DisplayName("apiGatewayException has a constructor for message")
-  public void apiGatewayExceptionHasConstructorForMessage() {
+  void apiGatewayExceptionHasConstructorForMessage() {
     ApiGatewayException exception = new TestException(MESSAGE);
     assertThat(exception.getMessage(), is(equalTo(MESSAGE)));
   }
 
   @Test
   @DisplayName("apiGatewayException has a constructor for exception")
-  public void apiGatewayExceptionHasConstructorForException() {
+  void apiGatewayExceptionHasConstructorForException() {
     IOException inner = new IOException(MESSAGE);
     ApiGatewayException exception = new TestException(inner);
     assertThat(exception.getMessage(), containsString(MESSAGE));
@@ -38,7 +38,7 @@ public class ApiGatewayExceptionTest {
   @DisplayName(
       "apiGatewayException contains innerClass name in the message when it is instantiated with an "
           + "exception")
-  public void apiGatewayExceptionContainsInnerClassInMessage() {
+  void apiGatewayExceptionContainsInnerClassInMessage() {
     IOException inner = new IOException(MESSAGE);
     ApiGatewayException exception = new TestException(inner);
     assertThat(exception.getMessage(), containsString(MESSAGE));
@@ -47,7 +47,7 @@ public class ApiGatewayExceptionTest {
 
   @Test
   @DisplayName("getStatusCode throws IllegalStateException when statusCode has not been set")
-  public void getStatusCodeThrowsIllegalStateExceptionWhenStatusCodeHasNotBeenSet() {
+  void getStatusCodeThrowsIllegalStateExceptionWhenStatusCodeHasNotBeenSet() {
     ApiGatewayException exception = new ExceptionWithoutStatusCode(MESSAGE);
 
     IllegalStateException actual =
@@ -57,7 +57,7 @@ public class ApiGatewayExceptionTest {
 
   @Test
   @DisplayName("statusCode returns Integer and not int")
-  public void statusCodeReturnsIntegerAndNotInt() throws NoSuchMethodException {
+  void statusCodeReturnsIntegerAndNotInt() throws NoSuchMethodException {
     Method statusCodeMethod = ApiGatewayException.class.getDeclaredMethod(STATUS_CODE_METHOD_NAME);
     String typeName = statusCodeMethod.getGenericReturnType().getTypeName();
     assertThat(typeName, is(not(INT_PRIMITIVE_TYPE)));
@@ -67,8 +67,7 @@ public class ApiGatewayExceptionTest {
   @DisplayName(
       "getStatusCode returns the status code provided in the constructor when such code is"
           + " provided")
-  public void
-      getStatusCodeReturnsTheStatusCodeProvidedInTheConstructorWhenSuchStatusCodeisProvided() {
+  void getStatusCodeReturnsTheStatusCodeProvidedInTheConstructorWhenSuchStatusCodeisProvided() {
     IOException ioException = new IOException();
     Integer overideDefaultStatusCode = HttpURLConnection.HTTP_SEE_OTHER;
     TestException exception = new TestException(ioException, overideDefaultStatusCode);

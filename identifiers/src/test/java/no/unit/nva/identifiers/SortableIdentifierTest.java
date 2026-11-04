@@ -34,7 +34,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class SortableIdentifierTest {
+class SortableIdentifierTest {
 
   public static final int MIN_NUMBER_OF_SHUFFLES = 5;
   public static final int ADDITIONAL_SHUFFLES = 10;
@@ -50,7 +50,7 @@ public class SortableIdentifierTest {
   private static final String PAST_INSTANT_HEX_PREFIX = "016f5e66e800-";
 
   @Test
-  public void sortableIdentifierStringContainsSixParts() {
+  void sortableIdentifierStringContainsSixParts() {
     SortableIdentifier identifier = SortableIdentifier.next();
     String identifierString = identifier.toString();
     String[] identifierParts = identifierString.split(DELIMITER);
@@ -58,14 +58,14 @@ public class SortableIdentifierTest {
   }
 
   @Test
-  public void sortableIdentifierAcceptsUuidString() {
+  void sortableIdentifierAcceptsUuidString() {
     UUID oldId = UUID.randomUUID();
     SortableIdentifier identifier = new SortableIdentifier(oldId.toString());
     assertThat(identifier.toString(), is(equalTo(oldId.toString())));
   }
 
   @Test
-  public void sortableIdentifierSerializesAsString() throws JsonProcessingException {
+  void sortableIdentifierSerializesAsString() throws JsonProcessingException {
     ExampleClass exampleClass = new ExampleClass();
     exampleClass.setId(SAMPLE_IDENTIFIER);
     String json = JsonUtils.dtoObjectMapper.writeValueAsString(exampleClass);
@@ -73,7 +73,7 @@ public class SortableIdentifierTest {
   }
 
   @Test
-  public void sortableIdentifierDeserializesFromString() throws JsonProcessingException {
+  void sortableIdentifierDeserializesFromString() throws JsonProcessingException {
     ExampleClass actual =
         JsonUtils.dtoObjectMapper.readValue(SAMPLE_EXAMPLE_CLASS_JSON, ExampleClass.class);
     SortableIdentifier actualIdentifier = actual.getId();
@@ -81,7 +81,7 @@ public class SortableIdentifierTest {
   }
 
   @Test
-  public void sortableIdentifierIsSortable() throws InterruptedException {
+  void sortableIdentifierIsSortable() throws InterruptedException {
     final Map<SortableIdentifier, Integer> expectedIdentifierOrder =
         sortableIdentifiersWithExpectedOrder();
     List<SortableIdentifier> idStrings = new ArrayList<>(expectedIdentifierOrder.keySet());
@@ -96,7 +96,7 @@ public class SortableIdentifierTest {
   }
 
   @Test
-  public void serializationErrorReturnsMessageWithSortableIdentifierValue() throws IOException {
+  void serializationErrorReturnsMessageWithSortableIdentifierValue() throws IOException {
     SortableIdentifier identifier = SortableIdentifier.next();
     String expectedMessage = "expectedMessage";
 
@@ -117,7 +117,7 @@ public class SortableIdentifierTest {
   }
 
   @Test
-  public void fromUriReturnsSortableIdentifierWhenUriContainsSortableIdentifierAsLastPartOfItsPath()
+  void fromUriReturnsSortableIdentifierWhenUriContainsSortableIdentifierAsLastPartOfItsPath()
       throws URISyntaxException {
     SortableIdentifier identifier = SortableIdentifier.next();
     String path = "/this/is/a/path/after/the/host/" + identifier.toString();
@@ -127,7 +127,7 @@ public class SortableIdentifierTest {
   }
 
   @Test
-  public void
+  void
       fromUriThrowsIllegalArgumentExceptionContainingTheInvalidUriWhenPathDoesNotContainSortableIdentifier()
           throws URISyntaxException {
     String path = "/this/is/a/path/after/the/host";
@@ -138,7 +138,7 @@ public class SortableIdentifierTest {
   }
 
   @Test
-  public void fromUriThrowsIllegalArgumentExceptionContainingTheInvalidUriWhenThereIsNoPath()
+  void fromUriThrowsIllegalArgumentExceptionContainingTheInvalidUriWhenThereIsNoPath()
       throws URISyntaxException {
     String path = null;
     var sampleUri = new URI(EXAMPLE_SCHEME, EXAMPLE_HOST, path, EMPTY_FRAGMENT);
@@ -170,7 +170,7 @@ public class SortableIdentifierTest {
 
   @ParameterizedTest
   @MethodSource("caseSensitiveIdentifierProvider")
-  public void shouldIgnoreCaseWhenComparingSortableIdentifiers(String left, String right) {
+  void shouldIgnoreCaseWhenComparingSortableIdentifiers(String left, String right) {
     var leftSortableIdentifier = new SortableIdentifier(left);
     var rightSortableIdentifier = new SortableIdentifier(right);
     assertEquals(leftSortableIdentifier, rightSortableIdentifier);

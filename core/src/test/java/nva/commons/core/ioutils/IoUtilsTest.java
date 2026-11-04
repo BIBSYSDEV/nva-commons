@@ -26,15 +26,14 @@ import nva.commons.core.ioutils.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class IoUtilsTest {
+class IoUtilsTest {
 
   private static final Path NON_EXISTING_RESOURCE = Path.of("sampleFolder", "nonExisting.txt");
   private static final Path RESOURCE = Path.of("sampleFolder", "sampleResource.txt");
 
   @Test
   @DisplayName("inputStreamFromResources returns a non empty stream for existing resources")
-  public void inputStreamFromResourcesReturnANonEmptyStreamForExistingResource()
-      throws IOException {
+  void inputStreamFromResourcesReturnANonEmptyStreamForExistingResource() throws IOException {
     InputStream stream = IoUtils.inputStreamFromResources(RESOURCE);
     String line = new BufferedReader(new InputStreamReader(stream)).readLine();
     assertThat(line, is(not(emptyOrNullString())));
@@ -43,7 +42,7 @@ public class IoUtilsTest {
   @Test
   @DisplayName(
       "inputStreamFromResources throws a ResourceNotFoundException for non existing resources")
-  public void inputStreamFromResourcesReturnsAResourceNotFoundExceptionForNonExistingResources() {
+  void inputStreamFromResourcesReturnsAResourceNotFoundExceptionForNonExistingResources() {
     ResourceNotFoundException exc =
         assertThrows(
             ResourceNotFoundException.class,
@@ -54,7 +53,7 @@ public class IoUtilsTest {
 
   @Test
   @DisplayName("stringFromResources returns the whole content of a resource file in a string")
-  public void stringFromResourcesReturnsTheWholeContentOfAResourceFileInAString() {
+  void stringFromResourcesReturnsTheWholeContentOfAResourceFileInAString() {
     String actual = IoUtils.stringFromResources(RESOURCE);
     String expected =
         new BufferedReader(new InputStreamReader(IoUtils.inputStreamFromResources(RESOURCE)))
@@ -67,7 +66,7 @@ public class IoUtilsTest {
   @DisplayName(
       "stringFromResources falls back to the class's own class loader when the context class"
           + " loader cannot see the resource")
-  public void stringFromResourcesFallsBackToOwnClassLoaderWhenContextClassLoaderCannotSeeResource()
+  void stringFromResourcesFallsBackToOwnClassLoaderWhenContextClassLoaderCannotSeeResource()
       throws InterruptedException {
     var classLoaderWithoutResources = new URLClassLoader(new URL[0], null);
     var actual = stringFromResourcesWithContextClassLoader(classLoaderWithoutResources);
@@ -78,7 +77,7 @@ public class IoUtilsTest {
   @DisplayName(
       "stringFromResources falls back to the class's own class loader when the context class"
           + " loader is null")
-  public void stringFromResourcesFallsBackToOwnClassLoaderWhenContextClassLoaderIsNull()
+  void stringFromResourcesFallsBackToOwnClassLoaderWhenContextClassLoaderIsNull()
       throws InterruptedException {
     var actual = stringFromResourcesWithContextClassLoader(null);
     assertThat(actual, is(equalTo(IoUtils.stringFromResources(RESOURCE))));
@@ -86,7 +85,7 @@ public class IoUtilsTest {
 
   @Test
   @DisplayName("stringFromResources throws a ResourceNotFoundException for non existing resources")
-  public void stringFromResourcesReturnsAResourceNotFoundExceptionForNonExistingResources() {
+  void stringFromResourcesReturnsAResourceNotFoundExceptionForNonExistingResources() {
     ResourceNotFoundException exc =
         assertThrows(
             ResourceNotFoundException.class,
@@ -97,7 +96,7 @@ public class IoUtilsTest {
 
   @Test
   @DisplayName("stringFromFile return file contents a string")
-  public void fileAsStringReturnsFileContentsAsString() throws URISyntaxException {
+  void fileAsStringReturnsFileContentsAsString() throws URISyntaxException {
     URL file = Thread.currentThread().getContextClassLoader().getResource(RESOURCE.toString());
     Path filePath = Path.of(file.toURI());
     String actual = IoUtils.stringFromFile(filePath);
@@ -107,7 +106,7 @@ public class IoUtilsTest {
 
   @Test
   @DisplayName("stringFromFile throws an FileNotFoundUncheckedException when file does not exist")
-  public void stringFromFileThrowsAFileNotFoundUncheckedExceptionWhenFileDoesNotExist() {
+  void stringFromFileThrowsAFileNotFoundUncheckedExceptionWhenFileDoesNotExist() {
     FileNotFoundUncheckedException exception =
         assertThrows(
             FileNotFoundUncheckedException.class,
@@ -121,7 +120,7 @@ public class IoUtilsTest {
   @Test
   @DisplayName(
       "streamToString throws UncheckedIOException when there is an error reading from a stream")
-  public void streamToStringThrowsUncheckedIoExceptionWhenThereIsAnErrorReadingFromAStream()
+  void streamToStringThrowsUncheckedIoExceptionWhenThereIsAnErrorReadingFromAStream()
       throws IOException {
     InputStream errorWhenClosingStream = streamThrowingIoException();
     Exception e =
@@ -133,7 +132,7 @@ public class IoUtilsTest {
   @Test
   @DisplayName(
       "streamToString throws UncheckedIOException when there is an error closing the stream")
-  public void streamToStringThrowsUncheckedIoExceptionWhenThereIsAnErrorClosingTheStream()
+  void streamToStringThrowsUncheckedIoExceptionWhenThereIsAnErrorClosingTheStream()
       throws IOException {
     InputStream unavailableStream = streamThrowingIoException();
     Exception e =
@@ -143,14 +142,14 @@ public class IoUtilsTest {
 
   @Test
   @DisplayName("linesFromResource returns the resource contents one line per list element")
-  public void linesFromResourceReturnsTheContentsOfResourceOnelinePerListElement() {
+  void linesFromResourceReturnsTheContentsOfResourceOnelinePerListElement() {
     List<String> lines = IoUtils.linesfromResource(RESOURCE);
     int linesOfResourceFile = 3;
     assertThat(lines.size(), is(equalTo(linesOfResourceFile)));
   }
 
   @Test
-  public void stringToStreamReturnsAnInputStreamWithTheStringContents() {
+  void stringToStreamReturnsAnInputStreamWithTheStringContents() {
     String sample = createSampleString();
     InputStream stream = IoUtils.stringToStream(sample);
     BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
@@ -159,8 +158,7 @@ public class IoUtilsTest {
   }
 
   @Test
-  public void inputStreamToBytesReturnsBytesOfInputStreamWithoutLossOfInformation()
-      throws IOException {
+  void inputStreamToBytesReturnsBytesOfInputStreamWithoutLossOfInformation() throws IOException {
     String sample = createSampleString();
     InputStream stream = IoUtils.stringToStream(sample);
     byte[] bytes = IoUtils.inputStreamToBytes(stream);

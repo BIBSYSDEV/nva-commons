@@ -19,7 +19,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 
-public class DoesNotHaveNullOrEmptyFieldsTest {
+class DoesNotHaveNullOrEmptyFieldsTest {
 
   public static final int SOME_BOXED_VALUE = 5;
   public static final String SOME_STRING_VALUE = "someStringValue";
@@ -38,7 +38,7 @@ public class DoesNotHaveNullOrEmptyFieldsTest {
   }
 
   @Test
-  public void matchesReturnsTrueWhenAllFieldsAreNotEmpty() {
+  void matchesReturnsTrueWhenAllFieldsAreNotEmpty() {
     TestClass testObject =
         TestClass.newBuilder()
             .withBoxedField(SOME_BOXED_VALUE)
@@ -54,7 +54,7 @@ public class DoesNotHaveNullOrEmptyFieldsTest {
 
   @ParameterizedTest
   @NullAndEmptySource
-  public void matchesReturnsFalseWhenStringFieldIsEmpty(String input) {
+  void matchesReturnsFalseWhenStringFieldIsEmpty(String input) {
     TestClass testObject =
         TestClass.newBuilder()
             .withBoxedField(SOME_BOXED_VALUE)
@@ -70,7 +70,7 @@ public class DoesNotHaveNullOrEmptyFieldsTest {
 
   @ParameterizedTest
   @NullAndEmptySource
-  public void matchesReturnsFalseWhenCollectionFieldIsEmpty(List<String> input) {
+  void matchesReturnsFalseWhenCollectionFieldIsEmpty(List<String> input) {
     TestClass testObject =
         TestClass.newBuilder()
             .withBoxedField(SOME_BOXED_VALUE)
@@ -86,7 +86,7 @@ public class DoesNotHaveNullOrEmptyFieldsTest {
 
   @ParameterizedTest
   @NullAndEmptySource
-  public void matchesReturnsFalseWhenCollectionFieldIsEmpty(Map<String, String> input) {
+  void matchesReturnsFalseWhenCollectionFieldIsEmpty(Map<String, String> input) {
     TestClass testObject =
         TestClass.newBuilder()
             .withBoxedField(SOME_BOXED_VALUE)
@@ -101,7 +101,7 @@ public class DoesNotHaveNullOrEmptyFieldsTest {
   }
 
   @Test
-  public void matchesReturnsFalseWhenJsonNodeFieldIsNull() {
+  void matchesReturnsFalseWhenJsonNodeFieldIsNull() {
     TestClass testObject =
         TestClass.newBuilder()
             .withBoxedField(SOME_BOXED_VALUE)
@@ -117,7 +117,7 @@ public class DoesNotHaveNullOrEmptyFieldsTest {
   }
 
   @Test
-  public void matchesReturnsFalseWhenJsonNodeFieldIsEmpty() {
+  void matchesReturnsFalseWhenJsonNodeFieldIsEmpty() {
     TestClass testObject =
         TestClass.newBuilder()
             .withBoxedField(SOME_BOXED_VALUE)
@@ -133,7 +133,7 @@ public class DoesNotHaveNullOrEmptyFieldsTest {
   }
 
   @Test
-  public void matchesReturnsFalseWhenBoxedFieldIsEmpty() {
+  void matchesReturnsFalseWhenBoxedFieldIsEmpty() {
     TestClass testObject =
         TestClass.newBuilder()
             .withBoxedField(null)
@@ -148,7 +148,7 @@ public class DoesNotHaveNullOrEmptyFieldsTest {
   }
 
   @Test
-  public void matchesReturnsFalseWhenClassFieldIsEmpty() {
+  void matchesReturnsFalseWhenClassFieldIsEmpty() {
     TestClass testObject =
         TestClass.newBuilder()
             .withBoxedField(SOME_BOXED_VALUE)

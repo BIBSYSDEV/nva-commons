@@ -20,7 +20,7 @@ class ExceptionUtilsTest {
   public static final String NEW_LINE = System.lineSeparator();
 
   @Test
-  public void stackTraceInSingleLineReturnsExceptionMessageInOneLine() {
+  void stackTraceInSingleLineReturnsExceptionMessageInOneLine() {
     Executable action = this::throwsException;
     ArithmeticException exception = assertThrows(ArithmeticException.class, action);
     verifyOriginalMessageContainsNewLine(exception);
@@ -31,7 +31,7 @@ class ExceptionUtilsTest {
   }
 
   @Test
-  public void stackTraceInSingleLineThrowsNoExceptionWhenThereIsNoMessage() {
+  void stackTraceInSingleLineThrowsNoExceptionWhenThereIsNoMessage() {
     Exception exception = new Exception((String) null);
     Executable action = () -> stackTraceInSingleLine(exception);
     Assertions.assertDoesNotThrow(action);
