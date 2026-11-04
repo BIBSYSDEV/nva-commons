@@ -10,7 +10,6 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import no.unit.nva.commons.json.JsonUtils;
 import no.unit.nva.events.EventsConfig;
@@ -117,9 +116,5 @@ class ScanDatabaseRequestV2Test {
 
   private String emptyJson() {
     return JsonUtils.dtoObjectMapper.createObjectNode().toString();
-  }
-
-  private ObjectMapper objectMapperWithoutSpecialConfig() {
-    return new ObjectMapper();
   }
 }
