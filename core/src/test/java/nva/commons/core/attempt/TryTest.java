@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -74,10 +75,10 @@ class TryTest {
 
   @Test
   void flatMapFlattensNestedTry() {
-    Function<String, Try<String>> fun1 = attempt(String::toUpperCase);
+    Function<String, Try<String>> fun1 = attempt(string -> string.toUpperCase(Locale.ROOT));
     String input = "input";
     Try<String> nestedTry = attempt(() -> input).flatMap(fun1::apply);
-    assertThat(nestedTry.get(), is(equalTo(input.toUpperCase())));
+    assertThat(nestedTry.get(), is(equalTo(input.toUpperCase(Locale.ROOT))));
   }
 
   @Test
