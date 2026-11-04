@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 public class JsonLdTestObject {
 
   @JsonProperty("@context")
-  private JsonLdContext context;
+  private final JsonLdContext context;
 
   @JsonCreator
   public JsonLdTestObject(JsonLdContext context) {

@@ -17,7 +17,7 @@ class EnvironmentTest {
   private static final String EXISTING_EMPTY_VARIABLE = "EXISTING_EMPTY_VARIABLE";
   private static final String NON_EXISTING_ENV_VARIABLE = "SOMETHING_ELSE";
 
-  private Environment environment = new Environment();
+  private final Environment environment = new Environment();
 
   @Test
   @DisplayName("readEnvOpt returns an empty optional when env variable does not exist")

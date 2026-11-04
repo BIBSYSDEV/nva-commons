@@ -28,7 +28,7 @@ import software.amazon.awssdk.services.firehose.model.Record;
 class FakeFirehoseClientTest {
 
   private FakeFirehoseClient client;
-  private ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   @BeforeEach
   void init() {
