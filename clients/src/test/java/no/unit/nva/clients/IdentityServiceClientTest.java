@@ -454,7 +454,7 @@ class IdentityServiceClientTest {
 
     assertThrows(
         IdentityServiceRequestFailedException.class,
-        () -> authorizedIdentityServiceClient.getAllCustomers());
+        authorizedIdentityServiceClient::getAllCustomers);
   }
 
   @Test

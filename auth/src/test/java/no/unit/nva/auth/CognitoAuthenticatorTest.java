@@ -105,14 +105,13 @@ class CognitoAuthenticatorTest {
   @Test
   void shouldThrowWhenResponseIsNotStructuredLikeAToken() throws IOException, InterruptedException {
     when(httpClient.<String>send(any(), any())).thenReturn(invalidResponse);
-    assertThrows(IllegalStateException.class, () -> cognitoAuthenticator.fetchBearerToken());
+    assertThrows(IllegalStateException.class, cognitoAuthenticator::fetchBearerToken);
   }
 
   @Test
   void shouldThrowWhenResponseIsNot200Ok() throws IOException, InterruptedException {
     when(httpClient.<String>send(any(), any())).thenReturn(errorResponse);
-    var exception =
-        assertThrows(RuntimeException.class, () -> cognitoAuthenticator.fetchBearerToken());
+    var exception = assertThrows(RuntimeException.class, cognitoAuthenticator::fetchBearerToken);
     assertTrue(exception.getMessage().contains("Got unexpected http response"));
   }
 }
