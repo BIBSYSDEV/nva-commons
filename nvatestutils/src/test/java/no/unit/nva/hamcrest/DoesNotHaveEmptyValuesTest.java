@@ -310,7 +310,7 @@ class DoesNotHaveEmptyValuesTest {
     }
   }
 
-  private static class ClassWithUri<T> {
+  private static final class ClassWithUri<T> {
 
     private final T uri;
     private final List<T> uris;

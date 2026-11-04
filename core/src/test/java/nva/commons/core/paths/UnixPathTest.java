@@ -307,7 +307,7 @@ class UnixPathTest {
     assertThat(actualPath, is(equalTo(originalPath)));
   }
 
-  private static class ClassWithUnixPath {
+  private static final class ClassWithUnixPath {
 
     private UnixPath field;
 

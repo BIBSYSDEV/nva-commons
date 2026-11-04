@@ -223,7 +223,7 @@ class JsonUtilsTest {
   }
 
   @SuppressWarnings("unused")
-  private static class TestForEmptyFields {
+  private static final class TestForEmptyFields {
 
     @JsonProperty(EMPTY_STRING_FIELD)
     private final String emptyString = "";

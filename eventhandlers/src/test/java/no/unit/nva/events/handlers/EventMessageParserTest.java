@@ -63,7 +63,7 @@ class EventMessageParserTest {
     return top;
   }
 
-  private static class OuterClass<InputType> implements WithType {
+  private static final class OuterClass<InputType> implements WithType {
 
     private InputType fieldA;
 
@@ -93,7 +93,7 @@ class EventMessageParserTest {
     }
   }
 
-  private static class MiddleClass<InputType> implements WithType {
+  private static final class MiddleClass<InputType> implements WithType {
 
     private InputType fieldB;
 
@@ -123,7 +123,7 @@ class EventMessageParserTest {
     }
   }
 
-  private static class InnerClass<InputType> implements WithType {
+  private static final class InnerClass<InputType> implements WithType {
 
     private InputType fieldC;
 
