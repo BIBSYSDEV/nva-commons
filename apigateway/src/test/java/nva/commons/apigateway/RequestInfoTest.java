@@ -101,7 +101,7 @@ class RequestInfoTest {
   private static final String EXTERNAL_USER_POOL_URL = "https//user-pool.example.com/123";
   private static final String THIRD_PARTY_PUBLICATION_UPSERT_SCOPE =
       "https://api.nva.unit" + ".no/scopes/third-party/publication-upsert";
-  public static final String EMPTY_JSON = "{}";
+  static final String EMPTY_JSON = "{}";
 
   static {
     QUERY_PARAMS_FOUND_IN_RESOURCE_FILE = new TreeMap<>();
@@ -861,7 +861,7 @@ class RequestInfoTest {
     assertTrue(requestInfo.getUserNameOptional().isPresent());
   }
 
-  public static Stream<Arguments> emptyViewingScopeInputsProvider() {
+  static Stream<Arguments> emptyViewingScopeInputsProvider() {
     return Stream.of(
         argumentSet("both includes and excludes is null", null, null),
         argumentSet("both includes and excludes is empty", "", ""),

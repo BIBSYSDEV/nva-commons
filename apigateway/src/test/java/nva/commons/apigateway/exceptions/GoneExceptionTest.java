@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 class GoneExceptionTest {
 
-  public static final String SOME_MESSAGE = "Some message";
+  static final String SOME_MESSAGE = "Some message";
   private static final String CAUSE_MESSAGE = "Cause message";
 
   @Test

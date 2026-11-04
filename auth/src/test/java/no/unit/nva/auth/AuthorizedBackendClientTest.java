@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 
 class AuthorizedBackendClientTest {
 
-  public static final String EXAMPLE_RESOURCE_PATH = "/example";
+  static final String EXAMPLE_RESOURCE_PATH = "/example";
   private URI serverUri;
   private HttpClient httpClient;
   private String protectedContent;

@@ -36,23 +36,23 @@ import org.junit.jupiter.api.Test;
 
 class HandlerRequestBuilderTest {
 
-  public static final String KEY = "key";
-  public static final String VALUE = "value";
-  public static final String BODY = "body";
-  public static final String HEADERS = "headers";
-  public static final String PATH_PARAMETERS = "pathParameters";
-  public static final String QUERY_PARAMETERS = "queryStringParameters";
-  public static final String REQUEST_CONTEXT = "requestContext";
-  public static final String SOME_METHOD = "POST";
+  static final String KEY = "key";
+  static final String VALUE = "value";
+  static final String BODY = "body";
+  static final String HEADERS = "headers";
+  static final String PATH_PARAMETERS = "pathParameters";
+  static final String QUERY_PARAMETERS = "queryStringParameters";
+  static final String REQUEST_CONTEXT = "requestContext";
+  static final String SOME_METHOD = "POST";
 
   // copy-pasted values to avoid circular dependencies.
-  public static final JsonPointer USER_NAME =
+  static final JsonPointer USER_NAME =
       JsonPointer.compile("/requestContext/authorizer/claims/custom:nvaUsername");
-  public static final JsonPointer PERSON_CRISTIN_ID =
+  static final JsonPointer PERSON_CRISTIN_ID =
       JsonPointer.compile("/requestContext/authorizer/claims/custom:cristinId");
-  public static final String TOP_ORG_CRISTIN_ID_CLAIM_PATH =
+  static final String TOP_ORG_CRISTIN_ID_CLAIM_PATH =
       "/requestContext/authorizer/claims/custom:topOrgCristinId";
-  public static final JsonPointer PERSON_NIN =
+  static final JsonPointer PERSON_NIN =
       JsonPointer.compile("/requestContext/authorizer/claims/custom:nin");
   private static final String HTTP_METHOD = "httpMethod";
   // Can not use ObjectMapper from nva-commons because it would create a circular dependency

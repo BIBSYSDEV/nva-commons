@@ -16,8 +16,8 @@ import org.junit.jupiter.api.Test;
 class ApiGatewayExceptionTest {
 
   private static final String MESSAGE = "someMessage";
-  public static final String STATUS_CODE_METHOD_NAME = "statusCode";
-  public static final String INT_PRIMITIVE_TYPE = "int";
+  static final String STATUS_CODE_METHOD_NAME = "statusCode";
+  static final String INT_PRIMITIVE_TYPE = "int";
 
   @Test
   @DisplayName("apiGatewayException has a constructor for message")
@@ -76,27 +76,27 @@ class ApiGatewayExceptionTest {
 
   private static class TestException extends ApiGatewayException {
 
-    public TestException(String message) {
+    TestException(String message) {
       super(message);
     }
 
-    public TestException(Exception e) {
+    TestException(Exception e) {
       super(e);
     }
 
-    public TestException(Exception e, Integer statusCode) {
+    TestException(Exception e, Integer statusCode) {
       super(e, statusCode);
     }
 
     @Override
-    public Integer statusCode() {
+    protected Integer statusCode() {
       return 0;
     }
   }
 
   private static class ExceptionWithoutStatusCode extends ApiGatewayException {
 
-    public ExceptionWithoutStatusCode(String message) {
+    ExceptionWithoutStatusCode(String message) {
       super(message);
     }
 

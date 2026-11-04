@@ -41,10 +41,10 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 class S3DriverTest {
 
-  public static final int LARGE_NUMBER_OF_INPUTS = 10_000;
-  public static final String EMPTY_STRING = "";
-  public static final String ROOT = "/";
-  public static final String MARKER_INDICATING_END_OF_LISTING = null;
+  static final int LARGE_NUMBER_OF_INPUTS = 10_000;
+  static final String EMPTY_STRING = "";
+  static final String ROOT = "/";
+  static final String MARKER_INDICATING_END_OF_LISTING = null;
   private static final BaseFaker FAKER = new BaseFaker();
   private static final String SAMPLE_BUCKET = "sampleBucket";
   private static final String SOME_PATH = randomString();

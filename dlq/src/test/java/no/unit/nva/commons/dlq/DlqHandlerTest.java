@@ -27,15 +27,15 @@ import software.amazon.awssdk.services.firehose.FirehoseClient;
 
 class DlqHandlerTest {
 
-  public static final String DLQ_IS_SOURCE = "aws:sqs";
-  public static final Context EMPTY_CONTEXT = null;
-  public static final String SOME_FIREHOSE = "someFirehose";
+  static final String DLQ_IS_SOURCE = "aws:sqs";
+  static final Context EMPTY_CONTEXT = null;
+  static final String SOME_FIREHOSE = "someFirehose";
   private static final String DLQ_ARN = randomString();
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private FakeFirehoseClient firehoseClient;
   private SampleDlqHandler handler;
 
-  public static Stream<Arguments> eventProvider() {
+  static Stream<Arguments> eventProvider() {
     return IntStream.of(1, 2, 10, 245)
         .boxed()
         .map(numberOfMessages ->
@@ -93,7 +93,7 @@ class DlqHandlerTest {
 
   private static class SampleDlqHandler extends DlqHandler {
 
-    public SampleDlqHandler(FirehoseClient firehoseClient, String deliveryStreamName) {
+    SampleDlqHandler(FirehoseClient firehoseClient, String deliveryStreamName) {
       super(new PushToFirehoseService(firehoseClient, deliveryStreamName));
     }
   }

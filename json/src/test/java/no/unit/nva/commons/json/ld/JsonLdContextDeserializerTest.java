@@ -15,9 +15,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class JsonLdContextDeserializerTest {
 
-  public static final ObjectMapper DTO_OBJECT_MAPPER = JsonUtils.dtoObjectMapper;
+  static final ObjectMapper DTO_OBJECT_MAPPER = JsonUtils.dtoObjectMapper;
 
-  public static Stream<Named<String>> jsonLdProvider() {
+  static Stream<Named<String>> jsonLdProvider() {
     return Stream.of(
         Named.of("Inline context", generateWrappedJsonLdInlineContext()),
         Named.of("URI context", generateWrappedJsonLdUriContext()));

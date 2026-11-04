@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 
 class FakeAuthServerTest {
 
-  public static final String OAUTH_USER_INFO_ENDPOINT = "oauth2/userInfo";
-  public static final int WIREMOCK_DEFAULT_FAILURE_STATUS_CODE = HttpURLConnection.HTTP_NOT_FOUND;
+  static final String OAUTH_USER_INFO_ENDPOINT = "oauth2/userInfo";
+  static final int WIREMOCK_DEFAULT_FAILURE_STATUS_CODE = HttpURLConnection.HTTP_NOT_FOUND;
   private FakeAuthServer authServer;
   private HttpClient httpClient;
 

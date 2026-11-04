@@ -24,10 +24,10 @@ import org.junit.jupiter.api.Test;
 
 class VoidTest {
 
-  public static final String APIGATEWAY_MESSAGES_FOLDER = "apiGatewayMessages";
-  public static final String MISSING_BODY_REQUEST = "missingBody.json";
-  public static final String SOME_ENV_VALUE = "some_env_value";
-  public static final String EMPT_BODY_REQUEST = "bodyIsAnEmptyObject.json";
+  static final String APIGATEWAY_MESSAGES_FOLDER = "apiGatewayMessages";
+  static final String MISSING_BODY_REQUEST = "missingBody.json";
+  static final String SOME_ENV_VALUE = "some_env_value";
+  static final String EMPT_BODY_REQUEST = "bodyIsAnEmptyObject.json";
 
   private Environment environment;
   private Context context;
@@ -75,9 +75,9 @@ class VoidTest {
 
   private class VoidHandler extends ApiGatewayHandler<Void, String> {
 
-    public static final String SAMPLE_STRING = "sampleString";
+    static final String SAMPLE_STRING = "sampleString";
 
-    public VoidHandler(Environment environment) {
+    VoidHandler(Environment environment) {
       super(Void.class, environment);
     }
 

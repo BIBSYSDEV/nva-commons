@@ -34,7 +34,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 
 class ApiS3GatewayHandlerTest {
 
-  public static final String BUCKET_NAME = "large-bucket";
+  static final String BUCKET_NAME = "large-bucket";
   private S3Client s3Client;
   private S3Presigner s3Presigner;
   private ByteArrayOutputStream output;
@@ -89,13 +89,13 @@ class ApiS3GatewayHandlerTest {
       }
 
       @Override
-      public String processS3Input(Void input, RequestInfo requestInfo, Context context)
+      protected String processS3Input(Void input, RequestInfo requestInfo, Context context)
           throws BadRequestException {
         return data;
       }
 
       @Override
-      public String getContentType() {
+      protected String getContentType() {
         return randomString();
       }
     };

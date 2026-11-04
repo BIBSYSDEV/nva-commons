@@ -21,13 +21,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class LanguageMapperTest {
 
-  public static final String ISO_639_3_LANGUAGE_CODE = "eng";
-  public static final String ISO_639_1_LANGUAGE_CODE = "en";
-  public static final String ISO_639_3_LANGUAGE_CODE_UPPERCASE = "ENG";
-  public static final String ISO_639_1_LANGUAGE_CODE_UPPERCASE = "EN";
-  public static final String NON_EXISTENT_CODE = "afadfad";
-  public static final int ISO_CODE_INDEX = 0;
-  public static final int LEXVO_URI_INDEX = 1;
+  static final String ISO_639_3_LANGUAGE_CODE = "eng";
+  static final String ISO_639_1_LANGUAGE_CODE = "en";
+  static final String ISO_639_3_LANGUAGE_CODE_UPPERCASE = "ENG";
+  static final String ISO_639_1_LANGUAGE_CODE_UPPERCASE = "EN";
+  static final String NON_EXISTENT_CODE = "afadfad";
+  static final int ISO_CODE_INDEX = 0;
+  static final int LEXVO_URI_INDEX = 1;
 
   @Test
   void toUriReturnsUriWhenInputIsIso3() {

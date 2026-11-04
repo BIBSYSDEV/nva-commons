@@ -30,27 +30,26 @@ import org.junit.jupiter.api.function.Executable;
 
 class DoesNotHaveEmptyValuesTest {
 
-  public static final String SAMPLE_STRING = "sampleString";
-  public static final Map<String, String> SAMPLE_MAP = Map.of(SAMPLE_STRING, SAMPLE_STRING);
-  public static final List<String> SAMPLE_LIST = Collections.singletonList(SAMPLE_STRING);
-  public static final int SAMPLE_INT = 16;
-  public static final String EMPTY_STRING = "";
-  public static final String INT_FIELD = "intField";
-  public static final String OBJECT_FIELD = "objectWithFields";
-  public static final String STRING_FIELD = "stringField";
-  public static final String LIST_FIELD = "list";
-  public static final String MAP_FIELD = "map";
-  public static final String JSON_FIELD = "jsonNode";
+  static final String SAMPLE_STRING = "sampleString";
+  static final Map<String, String> SAMPLE_MAP = Map.of(SAMPLE_STRING, SAMPLE_STRING);
+  static final List<String> SAMPLE_LIST = Collections.singletonList(SAMPLE_STRING);
+  static final int SAMPLE_INT = 16;
+  static final String EMPTY_STRING = "";
+  static final String INT_FIELD = "intField";
+  static final String OBJECT_FIELD = "objectWithFields";
+  static final String STRING_FIELD = "stringField";
+  static final String LIST_FIELD = "list";
+  static final String MAP_FIELD = "map";
+  static final String JSON_FIELD = "jsonNode";
 
-  public static final String LIST_WITH_INCOMPLETE_ENTRIES_FIELD = "listWithIncompleteEntries";
+  static final String LIST_WITH_INCOMPLETE_ENTRIES_FIELD = "listWithIncompleteEntries";
 
-  public static final URI EXAMPLE_URI = URI.create("http://example.org");
+  static final URI EXAMPLE_URI = URI.create("http://example.org");
 
-  public static final String MISSING_VALUE_IN_ARRAY_ELEMENT =
-      "listWithIncompleteEntries[0].stringField";
-  public static final String GENERIC_PATH_TO_FIELD_IN_ARRAY_ELEMENT =
+  static final String MISSING_VALUE_IN_ARRAY_ELEMENT = "listWithIncompleteEntries[0].stringField";
+  static final String GENERIC_PATH_TO_FIELD_IN_ARRAY_ELEMENT =
       "listWithIncompleteEntries.stringField";
-  public static final Integer NULL_INTEGER = null;
+  static final Integer NULL_INTEGER = null;
   private static final JsonNode SAMPLE_JSON_NODE = nonEmptyJsonNode();
   private static final String NULL_STRING = null;
   private DoesNotHaveEmptyValues<Object> matcher;
@@ -250,7 +249,7 @@ class DoesNotHaveEmptyValuesTest {
     private final Map<String, String> map;
     private final JsonNode jsonNode;
 
-    public WithBaseTypes(
+    WithBaseTypes(
         String stringField,
         Integer intField,
         List<String> list,
@@ -290,7 +289,7 @@ class DoesNotHaveEmptyValuesTest {
     private final WithBaseTypes objectWithFields;
     private final Integer someIntField;
 
-    public ClassWithChildrenWithMultipleFields(
+    ClassWithChildrenWithMultipleFields(
         String someStringField, WithBaseTypes objectWithFields, Integer someIntField) {
       this.someStringField = someStringField;
       this.objectWithFields = objectWithFields;
@@ -339,7 +338,7 @@ class DoesNotHaveEmptyValuesTest {
 
     private final List<WithBaseTypes> listWithIncompleteEntries;
 
-    public ClassWithList(List<WithBaseTypes> listWithIncompleteEntries) {
+    ClassWithList(List<WithBaseTypes> listWithIncompleteEntries) {
       this.listWithIncompleteEntries = listWithIncompleteEntries;
     }
 

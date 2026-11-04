@@ -30,10 +30,10 @@ import org.junit.jupiter.api.function.Executable;
 
 class EventHandlerTest extends AbstractEventHandlerTest {
 
-  public static final String AWS_EVENT_BRIDGE_EVENT =
+  static final String AWS_EVENT_BRIDGE_EVENT =
       IoUtils.stringFromResources(Path.of("validEventBridgeEvent.json"));
 
-  public static final String EXCEPTION_MESSAGE = "EXCEPTION_MESSAGE";
+  static final String EXCEPTION_MESSAGE = "EXCEPTION_MESSAGE";
 
   private ByteArrayOutputStream outputStream;
   private Context context;

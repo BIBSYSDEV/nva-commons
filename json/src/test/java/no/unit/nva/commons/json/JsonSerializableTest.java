@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 class JsonSerializableTest {
 
-  public static final String EXAMPLE_NAME = "Ola Nordmann";
+  static final String EXAMPLE_NAME = "Ola Nordmann";
   private static final ObjectNode JSON_OBJECT_WITH_NAME =
       dtoObjectMapper.createObjectNode().put("name", EXAMPLE_NAME);
 
@@ -28,11 +28,11 @@ class JsonSerializableTest {
 
     private final String name;
 
-    public Dummy() {
+    Dummy() {
       this(null);
     }
 
-    public Dummy(String name) {
+    Dummy(String name) {
       this.name = name;
     }
 

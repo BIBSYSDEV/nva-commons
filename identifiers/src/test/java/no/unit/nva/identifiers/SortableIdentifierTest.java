@@ -36,16 +36,15 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class SortableIdentifierTest {
 
-  public static final int MIN_NUMBER_OF_SHUFFLES = 5;
-  public static final int ADDITIONAL_SHUFFLES = 10;
-  public static final String DELIMITER = "-";
-  public static final SortableIdentifier SAMPLE_IDENTIFIER = SortableIdentifier.next();
-  public static final String SAMPLE_CLASS_ID_FIELD =
-      String.format("\"id\" : \"%s\"", SAMPLE_IDENTIFIER);
-  public static final String SAMPLE_EXAMPLE_CLASS_JSON = "{" + SAMPLE_CLASS_ID_FIELD + "}";
-  public static final String EXAMPLE_HOST = "www.example.org";
-  public static final String EXAMPLE_SCHEME = "https";
-  public static final String EMPTY_FRAGMENT = null;
+  static final int MIN_NUMBER_OF_SHUFFLES = 5;
+  static final int ADDITIONAL_SHUFFLES = 10;
+  static final String DELIMITER = "-";
+  static final SortableIdentifier SAMPLE_IDENTIFIER = SortableIdentifier.next();
+  static final String SAMPLE_CLASS_ID_FIELD = String.format("\"id\" : \"%s\"", SAMPLE_IDENTIFIER);
+  static final String SAMPLE_EXAMPLE_CLASS_JSON = "{" + SAMPLE_CLASS_ID_FIELD + "}";
+  static final String EXAMPLE_HOST = "www.example.org";
+  static final String EXAMPLE_SCHEME = "https";
+  static final String EMPTY_FRAGMENT = null;
   private static final Instant PAST_INSTANT = Instant.parse("2020-01-01T00:00:00Z");
   private static final String PAST_INSTANT_HEX_PREFIX = "016f5e66e800-";
   private static final String SORTABLE_IDENTIFIER_UPPER_CASE =

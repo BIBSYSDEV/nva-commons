@@ -16,7 +16,7 @@ import org.junit.jupiter.api.function.Executable;
 
 class ExceptionUtilsTest {
 
-  public static final String NEW_LINE = System.lineSeparator();
+  static final String NEW_LINE = System.lineSeparator();
 
   @Test
   void stackTraceInSingleLineReturnsExceptionMessageInOneLine() {

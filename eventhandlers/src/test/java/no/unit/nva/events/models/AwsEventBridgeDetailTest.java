@@ -21,7 +21,7 @@ class AwsEventBridgeDetailTest {
 
   private static final String SAMPLE_EVENT_DETAIL =
       IoUtils.stringFromResources(Path.of("validEventBridgeDetailSample.json"));
-  public static final String RESPONSE_PAYLOAD_FIELD = "responsePayload";
+  static final String RESPONSE_PAYLOAD_FIELD = "responsePayload";
 
   @Test
   void objectMapperReturnsAwsEverBridgeDetailObjectForValidJson() throws JsonProcessingException {

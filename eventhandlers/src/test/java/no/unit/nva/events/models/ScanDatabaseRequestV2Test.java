@@ -20,7 +20,7 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 class ScanDatabaseRequestV2Test {
 
-  public static final String EVENT_TOPIC = "topic";
+  static final String EVENT_TOPIC = "topic";
   private static final Map<String, String> EMPTY_MARKER = null;
 
   @Test
