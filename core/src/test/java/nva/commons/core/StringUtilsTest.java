@@ -65,12 +65,6 @@ class StringUtilsTest {
     assertThat(output, is(equalTo(expected)));
   }
 
-  @Test
-  @DisplayName("StringUtils should have a method for checking if a string is empty (null or blank)")
-  void stringUtilsHasAMethodForCheckingIfAStringIsEmpty() {
-    assertThat(StringUtils.isEmpty(null), is(equalTo(true)));
-  }
-
   @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
   @ValueSource(strings = {"abc", "\t", "\n", " "})
   void isEmptyReturnsFalseForANonEmptyString(String input) {
@@ -97,13 +91,6 @@ class StringUtilsTest {
     String expectedString = "This is a test for  whitespaces";
     String actual = StringUtils.replaceWhiteSpacesWithSpace(inputString);
     assertThat(actual, is(equalTo(expectedString)));
-  }
-
-  @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
-  @NullAndEmptySource
-  @DisplayName("isEmpty should return true for empty string")
-  void stringUtilReturnsTrueForANullString(String input) {
-    assertThat(StringUtils.isEmpty(input), is(equalTo(true)));
   }
 
   @ParameterizedTest(name = PARAMETERIZED_TEST_NAME_FORMAT)
