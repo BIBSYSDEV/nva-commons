@@ -6,6 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -54,8 +55,7 @@ class TryTest {
     Try<Integer> attempt = attempt(() -> divide(6, 0));
     assertThat(attempt.isSuccess(), is(equalTo(false)));
     assertThat(attempt.isFailure(), is(equalTo(true)));
-    Exception e = attempt.getException();
-    assertTrue(e instanceof ArithmeticException);
+    assertInstanceOf(ArithmeticException.class, attempt.getException());
   }
 
   @Test
