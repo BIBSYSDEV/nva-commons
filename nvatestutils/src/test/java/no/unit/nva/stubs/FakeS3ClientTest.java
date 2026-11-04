@@ -252,9 +252,7 @@ class FakeS3ClientTest {
   private ResponseBytes<GetObjectResponse> getObject(FakeS3Client fakeS3Client, URI s3Uri) {
     GetObjectRequest getObjectRequest =
         GetObjectRequest.builder().bucket(s3Uri.getHost()).key(s3Uri.getPath()).build();
-    ResponseBytes<GetObjectResponse> result =
-        fakeS3Client.getObject(getObjectRequest, ResponseTransformer.toBytes());
-    return result;
+    return fakeS3Client.getObject(getObjectRequest, ResponseTransformer.toBytes());
   }
 
   private void putObject(FakeS3Client fakeS3Client, URI s3Uri, String expectedContent) {
