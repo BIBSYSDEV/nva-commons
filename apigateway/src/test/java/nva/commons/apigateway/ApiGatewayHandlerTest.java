@@ -1,5 +1,6 @@
 package nva.commons.apigateway;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.objectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
@@ -897,7 +898,7 @@ class ApiGatewayHandlerTest {
             .getTypeFactory()
             .constructParametricType(GatewayResponse.class, Problem.class);
     GatewayResponse<Problem> response =
-        defaultRestObjectMapper.readValue(outputStream.toString(), javaType);
+        defaultRestObjectMapper.readValue(outputStream.toString(UTF_8), javaType);
     return response.getBodyObject(Problem.class);
   }
 

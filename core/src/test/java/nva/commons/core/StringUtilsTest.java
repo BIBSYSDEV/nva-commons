@@ -1,5 +1,6 @@
 package nva.commons.core;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -119,7 +120,7 @@ class StringUtilsTest {
   void stringToStreamReturnsAnInputStreamWithTheStringContents() throws IOException {
     String sample = "sample string";
     InputStream inputStream = IoUtils.stringToStream(sample);
-    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, UTF_8));
     String actualContent = reader.readLine();
     assertThat(actualContent, is(equalTo(sample)));
   }

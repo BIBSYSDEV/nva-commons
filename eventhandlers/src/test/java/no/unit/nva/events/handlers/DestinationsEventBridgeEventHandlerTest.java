@@ -1,5 +1,6 @@
 package no.unit.nva.events.handlers;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -58,7 +59,7 @@ class DestinationsEventBridgeEventHandlerTest extends AbstractEventHandlerTest {
     ObjectMapper injectedMapper = dtoObjectMapper;
     DestinationsHandlerTestClass handler = new DestinationsHandlerTestClass(injectedMapper);
     handler.handleRequest(input, outputStream, context);
-    ObjectNode outputObject = (ObjectNode) injectedMapper.readTree(outputStream.toString());
+    ObjectNode outputObject = (ObjectNode) injectedMapper.readTree(outputStream.toString(UTF_8));
     assertThatJsonObjectContainsEmptyFields(outputObject);
   }
 
@@ -69,7 +70,7 @@ class DestinationsEventBridgeEventHandlerTest extends AbstractEventHandlerTest {
     ObjectMapper injectedMapper = JsonUtils.dynamoObjectMapper;
     DestinationsHandlerTestClass handler = new DestinationsHandlerTestClass(injectedMapper);
     handler.handleRequest(input, outputStream, context);
-    ObjectNode outputObject = (ObjectNode) injectedMapper.readTree(outputStream.toString());
+    ObjectNode outputObject = (ObjectNode) injectedMapper.readTree(outputStream.toString(UTF_8));
     assertThatJsonNodeDoesNotContainEmptyFields(outputObject);
   }
 

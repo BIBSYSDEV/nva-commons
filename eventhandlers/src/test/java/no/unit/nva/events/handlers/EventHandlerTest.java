@@ -1,5 +1,6 @@
 package no.unit.nva.events.handlers;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.commons.json.JsonUtils.dynamoObjectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -94,7 +95,7 @@ class EventHandlerTest extends AbstractEventHandlerTest {
   private ObjectNode sendEventAndCollectOutputAsJsonObject(
       InputStream input, EventHandlerTestClass handler) throws JsonProcessingException {
     handler.handleRequest(input, outputStream, context);
-    String output = outputStream.toString();
+    String output = outputStream.toString(UTF_8);
     assertThat(output, is(not(emptyString())));
     return (ObjectNode) dtoObjectMapper.readTree(output);
   }
