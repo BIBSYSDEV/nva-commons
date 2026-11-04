@@ -28,6 +28,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
+/** Fixture getters must stay public for java.beans.Introspector, which the matcher uses. */
+@SuppressWarnings("PMD.PublicMemberInNonPublicType")
 class DoesNotHaveEmptyValuesTest {
 
   static final String SAMPLE_STRING = "sampleString";

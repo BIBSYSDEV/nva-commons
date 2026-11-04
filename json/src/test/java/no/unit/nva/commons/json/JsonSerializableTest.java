@@ -24,6 +24,8 @@ class JsonSerializableTest {
     assertThat(jsonNode, is(equalTo(JSON_OBJECT_WITH_NAME)));
   }
 
+  /** Getters must stay public for Jackson to serialize them. */
+  @SuppressWarnings("PMD.PublicMemberInNonPublicType")
   private static class Dummy implements JsonSerializable {
 
     private final String name;

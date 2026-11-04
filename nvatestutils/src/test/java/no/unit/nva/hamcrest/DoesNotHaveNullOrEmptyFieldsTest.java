@@ -173,6 +173,8 @@ class DoesNotHaveNullOrEmptyFieldsTest {
     assertThat(error.getMessage(), containsString(fieldName));
   }
 
+  /** Getters must stay public for java.beans.Introspector, which the matcher uses. */
+  @SuppressWarnings("PMD.PublicMemberInNonPublicType")
   private static class TestClass {
 
     private String stringField;

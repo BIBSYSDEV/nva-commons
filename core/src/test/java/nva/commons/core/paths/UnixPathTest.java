@@ -312,6 +312,8 @@ class UnixPathTest {
     assertThat(actualPath, is(equalTo(originalPath)));
   }
 
+  /** Getters must stay public for Jackson to serialize them. */
+  @SuppressWarnings("PMD.PublicMemberInNonPublicType")
   private static final class ClassWithUnixPath {
 
     private UnixPath field;

@@ -211,6 +211,8 @@ class SortableIdentifierTest {
     return expectedIdentifierIndices;
   }
 
+  /** Getters must stay public for Jackson to serialize them. */
+  @SuppressWarnings("PMD.PublicMemberInNonPublicType")
   private static final class ExampleClass {
 
     private SortableIdentifier id;

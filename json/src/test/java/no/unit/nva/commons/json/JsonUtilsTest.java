@@ -218,12 +218,13 @@ class JsonUtilsTest {
     }
 
     @JsonProperty(JSON_KEY)
-    public Optional<String> getTest() {
+    Optional<String> getTest() {
       return Optional.ofNullable(test);
     }
   }
 
-  @SuppressWarnings("unused")
+  /** Jackson serializes these, so the fields stay instance fields and the getters stay public. */
+  @SuppressWarnings({"PMD.PublicMemberInNonPublicType", "PMD.FinalFieldCouldBeStatic"})
   private static final class TestForEmptyFields {
 
     @JsonProperty(EMPTY_STRING_FIELD)
