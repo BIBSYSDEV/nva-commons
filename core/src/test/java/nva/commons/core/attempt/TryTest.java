@@ -194,7 +194,7 @@ class TryTest {
     assertThat(finalSucceeds, is(equalTo(3)));
   }
 
-  private int divide(int x, int y) throws IllegalArgumentException {
+  private int divide(int x, int y) {
     return x / y;
   }
 

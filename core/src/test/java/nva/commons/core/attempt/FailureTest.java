@@ -219,7 +219,7 @@ class FailureTest {
     assertThat(actionAfterFailureRun.get(), is(true));
   }
 
-  private void consumeWithException(int ignoredInput) throws RuntimeException {
+  private void consumeWithException(int ignoredInput) {
     throw new RuntimeException(NOT_EXPECTED_MESSAGE);
   }
 
