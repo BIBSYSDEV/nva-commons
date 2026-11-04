@@ -480,7 +480,7 @@ class MediaTypeApiTest {
 
                     @Override
                     public void validate(String value, ParameterHandler.Context context) {
-                      if (!value.equalsIgnoreCase("utf-8")) {
+                      if (!"utf-8".equalsIgnoreCase(value)) {
                         context.reject("charset_locked", "utf-8 only");
                       }
                     }
