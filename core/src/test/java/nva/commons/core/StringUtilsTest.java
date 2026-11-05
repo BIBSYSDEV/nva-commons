@@ -137,6 +137,15 @@ class StringUtilsTest {
     assertThat(updatedString, is(equalTo(expected)));
   }
 
+  @Test
+  void shouldReturnInputWithNormalizedWhitespaceWhenInputIsNotValidXml() {
+    var invalidXml = "  Fish &  Chips <sup>2nd edition  ";
+    var updatedString = StringUtils.removeXmlTags(invalidXml);
+    var expected = "Fish & Chips <sup>2nd edition";
+
+    assertThat(updatedString, is(equalTo(expected)));
+  }
+
   static Stream<String> blankStrings() {
     return Stream.of(
         EMPTY_STRING, BLANK_STRING, TAB_STRING, CARRIAGE_RETURN, LINE_FEED, END_OF_LINE, NULL);

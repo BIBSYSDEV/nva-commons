@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
@@ -18,6 +17,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 public final class StringUtils {
 
@@ -108,23 +108,16 @@ public final class StringUtils {
   }
 
   public static String removeXmlTags(String input) {
-    String output = null;
-    DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newDefaultInstance();
     try {
-      Document document = createXmlDocumentFromInput(input, documentBuilderFactory);
-      NodeList nodeList = getDocumentNodes(document);
-      output = textWithoutXmlTags(nodeList);
+      var document = createXmlDocumentFromInput(input, DocumentBuilderFactory.newDefaultInstance());
+      var textNodes = getDocumentNodes(document);
+      return removeMultipleWhiteSpaces(textWithoutXmlTags(textNodes)).trim();
     } catch (XPathExpressionException
         | ParserConfigurationException
         | IOException
-        | SAXException e) {
-      System.out.println(e.getMessage());
-    } finally {
-      if (isNull(output)) {
-        output = input;
-      }
+        | SAXException exception) {
+      return removeMultipleWhiteSpaces(input).trim();
     }
-    return removeMultipleWhiteSpaces(output).trim();
   }
 
   private static String textWithoutXmlTags(NodeList nodeList) {
@@ -145,7 +138,8 @@ public final class StringUtils {
   private static Document createXmlDocumentFromInput(
       String input, DocumentBuilderFactory documentBuilderFactory)
       throws ParserConfigurationException, SAXException, IOException {
-    DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+    var documentBuilder = documentBuilderFactory.newDocumentBuilder();
+    documentBuilder.setErrorHandler(new DefaultHandler());
     try (Reader reader = new StringReader(wrapInXml(input))) {
       InputSource inputSource = new InputSource(reader);
       inputSource.setEncoding(StandardCharsets.UTF_8.name());

@@ -8,7 +8,6 @@ nva {
         excludedRules = [
                 'AvoidThrowingRawExceptionTypes',
                 'GuardLogStatement',
-                'SystemPrintln',
                 'UnitTestContainsTooManyAsserts'
         ]
     }
