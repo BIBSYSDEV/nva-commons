@@ -28,23 +28,23 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class JsonUtilsTest {
 
-  public static final String JSON_UTILS_RESOURCES = "jsonutils";
+  static final String JSON_UTILS_RESOURCES = "jsonutils";
 
-  public static final String SAMPLE_VALUE = "foo";
-  public static final String JSON_KEY = "keyInsideObject";
-  public static final JsonNode JSON_OBJECT_WITH_VALUE = sampleJsonObjectWithSomeValue();
-  public static final JsonNode JSON_OBJECT_WITHOUT_VALUE = sampleJsonObjectWithoutValue();
-  public static final String UPPER_CASE_ENUM_JSON = "\"ANOTHER_ENUM\"";
-  public static final String MIXED_CASE_ENUM_JSON = "\"SomE_enUm\"";
+  static final String SAMPLE_VALUE = "foo";
+  static final String JSON_KEY = "keyInsideObject";
+  static final JsonNode JSON_OBJECT_WITH_VALUE = sampleJsonObjectWithSomeValue();
+  static final JsonNode JSON_OBJECT_WITHOUT_VALUE = sampleJsonObjectWithoutValue();
+  static final String UPPER_CASE_ENUM_JSON = "\"ANOTHER_ENUM\"";
+  static final String MIXED_CASE_ENUM_JSON = "\"SomE_enUm\"";
 
-  public static final String EMPTY_STRING_FIELD = "emptyString";
-  public static final String NON_EMPTY_STRING_FIELD = "nonEmptyString";
-  public static final String NULL_LIST_FIELD = "nullList";
-  public static final String EMPTY_LIST_FIELD = "emptyList";
-  public static final String NULL_MAP_FIELD = "nullMap";
-  public static final String EMPTY_MAP_FIELD = "emptyMap";
-  public static final String NULL_STRING_FIELD = "nullString";
-  public static final String EMPTY_STRING = "";
+  static final String EMPTY_STRING_FIELD = "emptyString";
+  static final String NON_EMPTY_STRING_FIELD = "nonEmptyString";
+  static final String NULL_LIST_FIELD = "nullList";
+  static final String EMPTY_LIST_FIELD = "emptyList";
+  static final String NULL_MAP_FIELD = "nullMap";
+  static final String EMPTY_MAP_FIELD = "emptyMap";
+  static final String NULL_STRING_FIELD = "nullString";
+  static final String EMPTY_STRING = "";
   private static final String POJO_WITH_MISSING_VALUES = "missingStringValues.json";
   private static final String POJO_WITH_EMPTY_VALUES = "emptyStringValues.json";
   private static final String SOME_FIELD_VALUE = "someValue";
@@ -213,17 +213,18 @@ class JsonUtilsTest {
     private final String test;
 
     @JsonCreator
-    public TestObjectForOptionals(@JsonProperty(JSON_KEY) String test) {
+    TestObjectForOptionals(@JsonProperty(JSON_KEY) String test) {
       this.test = test;
     }
 
     @JsonProperty(JSON_KEY)
-    public Optional<String> getTest() {
+    Optional<String> getTest() {
       return Optional.ofNullable(test);
     }
   }
 
-  @SuppressWarnings("unused")
+  /** Jackson serializes these, so the fields stay instance fields and the getters stay public. */
+  @SuppressWarnings({"PMD.PublicMemberInNonPublicType", "PMD.FinalFieldCouldBeStatic"})
   private static final class TestForEmptyFields {
 
     @JsonProperty(EMPTY_STRING_FIELD)

@@ -21,12 +21,11 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 
 class DoesNotHaveNullOrEmptyFieldsTest {
 
-  public static final int SOME_BOXED_VALUE = 5;
-  public static final String SOME_STRING_VALUE = "someStringValue";
-  public static final Map<String, String> NON_EMPTY_MAP =
+  static final int SOME_BOXED_VALUE = 5;
+  static final String SOME_STRING_VALUE = "someStringValue";
+  static final Map<String, String> NON_EMPTY_MAP =
       Collections.singletonMap(SOME_STRING_VALUE, SOME_STRING_VALUE);
-  public static final List<String> NON_EMPTY_COLLECTION =
-      Collections.singletonList(SOME_STRING_VALUE);
+  static final List<String> NON_EMPTY_COLLECTION = Collections.singletonList(SOME_STRING_VALUE);
   private static final TestClass SOME_OBJECT = new TestClass();
   private static final JsonNode NON_EMPTY_JSON_NODE = nonEmptyJsonNode();
   private DoesNotHaveNullOrEmptyFields<TestClass> matcher;
@@ -174,6 +173,8 @@ class DoesNotHaveNullOrEmptyFieldsTest {
     assertThat(error.getMessage(), containsString(fieldName));
   }
 
+  /** Getters must stay public for java.beans.Introspector, which the matcher uses. */
+  @SuppressWarnings("PMD.PublicMemberInNonPublicType")
   private static class TestClass {
 
     private String stringField;
@@ -185,7 +186,7 @@ class DoesNotHaveNullOrEmptyFieldsTest {
     private JsonNode jsonNodeField;
     private TestClass classObject;
 
-    public TestClass() {}
+    TestClass() {}
 
     private TestClass(Builder builder) {
       stringField = builder.stringField;
@@ -196,7 +197,7 @@ class DoesNotHaveNullOrEmptyFieldsTest {
       jsonNodeField = builder.jsonNodeField;
     }
 
-    public static Builder newBuilder() {
+    static Builder newBuilder() {
       return new Builder();
     }
 
@@ -236,37 +237,37 @@ class DoesNotHaveNullOrEmptyFieldsTest {
 
       private Builder() {}
 
-      public Builder withStringField(String val) {
+      Builder withStringField(String val) {
         stringField = val;
         return this;
       }
 
-      public Builder withCollectionField(List<String> val) {
+      Builder withCollectionField(List<String> val) {
         collectionField = val;
         return this;
       }
 
-      public Builder withMapField(Map<String, String> val) {
+      Builder withMapField(Map<String, String> val) {
         mapField = val;
         return this;
       }
 
-      public Builder withBoxedField(Integer val) {
+      Builder withBoxedField(Integer val) {
         boxedField = val;
         return this;
       }
 
-      public Builder withClassObject(TestClass val) {
+      Builder withClassObject(TestClass val) {
         classObject = val;
         return this;
       }
 
-      public Builder withJsonNodeField(JsonNode jsonNodeField) {
+      Builder withJsonNodeField(JsonNode jsonNodeField) {
         this.jsonNodeField = jsonNodeField;
         return this;
       }
 
-      public TestClass build() {
+      TestClass build() {
         return new TestClass(this);
       }
     }

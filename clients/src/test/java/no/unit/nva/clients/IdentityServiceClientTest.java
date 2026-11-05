@@ -54,13 +54,13 @@ import org.mockito.stubbing.Answer;
 
 class IdentityServiceClientTest {
 
-  public static final String BEARER_TOKEN = "Bearer 123";
-  public static final String CLIENT_ID = randomString();
-  public static final String ACTING_USER = randomString();
-  public static final URI CUSTOMER = randomUri();
-  public static final URI CRISTIN_ORG_URI = randomUri();
-  public static final String BEARER_BEARER_TOKEN_TEST = "Bearer BEARER_TOKEN_TEST";
-  public static final String OPERATION_REQUIRES_AN_AUTHORIZED_CLIENT_MESSAGE =
+  static final String BEARER_TOKEN = "Bearer 123";
+  static final String CLIENT_ID = randomString();
+  static final String ACTING_USER = randomString();
+  static final URI CUSTOMER = randomUri();
+  static final URI CRISTIN_ORG_URI = randomUri();
+  static final String BEARER_BEARER_TOKEN_TEST = "Bearer BEARER_TOKEN_TEST";
+  static final String OPERATION_REQUIRES_AN_AUTHORIZED_CLIENT_MESSAGE =
       "This operation requires an authorized client";
   HttpClient httpClient = mock(HttpClient.class);
   CognitoCredentials cognitoCredentials;

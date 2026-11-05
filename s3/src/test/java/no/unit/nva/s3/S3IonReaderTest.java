@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 class S3IonReaderTest {
 
-  public static final String ION_DATA_FILE = "ion_data.ion.gz";
+  static final String ION_DATA_FILE = "ion_data.ion.gz";
 
   @Test
   void ionReaderReadsFileWhereEachLineIsAnIonObject() throws IOException {

@@ -120,7 +120,7 @@ class ApiGatewayHandlerTest {
   private Environment environment;
   private WireMockServer wireMockServer;
 
-  public static Stream<String> mediaTypeProvider() {
+  static Stream<String> mediaTypeProvider() {
     return Stream.of(
         MediaTypes.APPLICATION_JSON_LD.toString(),
         MediaTypes.APPLICATION_DATACITE_XML.toString(),
@@ -972,7 +972,7 @@ class ApiGatewayHandlerTest {
   private Handler handlerThatOverridesListSupportedMediaTypes() {
     return new Handler(environment) {
       @Override
-      public List<MediaType> listSupportedMediaTypes() {
+      protected List<MediaType> listSupportedMediaTypes() {
         return List.of(
             MediaType.JSON_UTF_8, MediaTypes.APPLICATION_JSON_LD,
             MediaTypes.APPLICATION_DATACITE_XML, MediaTypes.SCHEMA_ORG);
@@ -983,7 +983,7 @@ class ApiGatewayHandlerTest {
   private Handler handlerThatOverridesGetFailureStatusCode() {
     return new Handler(environment) {
       @Override
-      public int getFailureStatusCode(RequestBody input, ApiGatewayException exception) {
+      protected int getFailureStatusCode(RequestBody input, ApiGatewayException exception) {
         return OVERRIDDEN_STATUS_CODE;
       }
 

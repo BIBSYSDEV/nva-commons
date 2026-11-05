@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 
 class RandomDataGeneratorTest {
 
-  public static final int BIG_ENOUGH_NUMBER_TO_PRODUCE_ALL_POSSIBLE_VALUES = 100;
+  static final int BIG_ENOUGH_NUMBER_TO_PRODUCE_ALL_POSSIBLE_VALUES = 100;
   private static final double
       VALUE_MUCH_LOWER_THAN_DEFAULT_MAX_VALUE_OF_STANDARD_JAVA_RANDOM_VALUE = 0.001;
   private static final double DEFAULT_MAX_RANDOM_VALUE_FOR_DOUBLES = 1;

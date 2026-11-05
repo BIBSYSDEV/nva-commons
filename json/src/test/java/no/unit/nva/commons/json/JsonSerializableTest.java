@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 class JsonSerializableTest {
 
-  public static final String EXAMPLE_NAME = "Ola Nordmann";
+  static final String EXAMPLE_NAME = "Ola Nordmann";
   private static final ObjectNode JSON_OBJECT_WITH_NAME =
       dtoObjectMapper.createObjectNode().put("name", EXAMPLE_NAME);
 
@@ -24,15 +24,17 @@ class JsonSerializableTest {
     assertThat(jsonNode, is(equalTo(JSON_OBJECT_WITH_NAME)));
   }
 
+  /** Getters must stay public for Jackson to serialize them. */
+  @SuppressWarnings("PMD.PublicMemberInNonPublicType")
   private static class Dummy implements JsonSerializable {
 
     private final String name;
 
-    public Dummy() {
+    Dummy() {
       this(null);
     }
 
-    public Dummy(String name) {
+    Dummy(String name) {
       this.name = name;
     }
 

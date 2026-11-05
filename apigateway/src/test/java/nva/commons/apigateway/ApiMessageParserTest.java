@@ -24,9 +24,9 @@ import org.junit.jupiter.api.Test;
 
 class ApiMessageParserTest {
 
-  public static final String API_GATEWAY_MESSAGES_FOLDER = "apiGatewayMessages";
-  public static final String SOME_EXCEPTION_MESSAGE = "Some error message";
-  public static final String NON_JSON_STRING_BODY = "Hello world";
+  static final String API_GATEWAY_MESSAGES_FOLDER = "apiGatewayMessages";
+  static final String SOME_EXCEPTION_MESSAGE = "Some error message";
+  static final String NON_JSON_STRING_BODY = "Hello world";
   private static final Path MISSING_BODY = Path.of(API_GATEWAY_MESSAGES_FOLDER, "missingBody.json");
   private static final Path BODY_NON_JSON_STRING =
       Path.of(API_GATEWAY_MESSAGES_FOLDER, "bodyIsNonJsonString.json");

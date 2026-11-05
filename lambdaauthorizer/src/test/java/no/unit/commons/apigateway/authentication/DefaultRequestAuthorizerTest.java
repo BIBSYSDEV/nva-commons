@@ -22,8 +22,8 @@ import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRespon
 
 class DefaultRequestAuthorizerTest {
 
-  public static final String WILDCARD = "*";
-  public static final Context CONTEXT = mock(Context.class);
+  static final String WILDCARD = "*";
+  static final Context CONTEXT = mock(Context.class);
   private static final String SECRET_NAME_SET_IN_TEST = "secretName-1234";
   private static final String SECRET_KEY_SET_IN_TEST = "secretKey-1234";
   private String expectedApiKey;

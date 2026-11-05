@@ -24,9 +24,9 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 class PaginatedSearchResultTest {
 
-  public static final String QUERY_PARAM_FIELD_NAME = "key";
-  public static final String QUERY_PARAM_FIELD_VALUE = "value";
-  public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  static final String QUERY_PARAM_FIELD_NAME = "key";
+  static final String QUERY_PARAM_FIELD_VALUE = "value";
+  static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final URI BASE_URI = URI.create("https://localhost");
 
   @Test

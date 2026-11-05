@@ -35,11 +35,11 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 
 class FakeS3ClientTest {
 
-  public static final URI SOME_URI = URI.create("s3://bucket/some/path/file.txt");
-  public static final String SOME_BUCKET = "somebucket";
-  public static final String SOME_BUCKET_URI = "s3://" + SOME_BUCKET;
-  public static final int SOME_PAGE_SIZE = 10;
-  public static final String LIST_FROM_BEGINNING = null;
+  static final URI SOME_URI = URI.create("s3://bucket/some/path/file.txt");
+  static final String SOME_BUCKET = "somebucket";
+  static final String SOME_BUCKET_URI = "s3://" + SOME_BUCKET;
+  static final int SOME_PAGE_SIZE = 10;
+  static final String LIST_FROM_BEGINNING = null;
 
   @Test
   void putObjectMakesContentAvailableForGetting() {

@@ -22,12 +22,12 @@ import org.junit.jupiter.api.Test;
 
 class GatewayResponseTest {
 
-  public static final String SOME_VALUE = "Some value";
-  public static final String SOME_OTHER_VALUE = "Some other value";
-  public static final String SOME_KEY = "key1";
-  public static final String SOME_OTHER_KEY = "key2";
-  public static final String API_GATEWAY_RESOURCES = "apiGatewayResponses";
-  public static final String SAMPLE_RESPONSE_JSON = "sampleResponse.json";
+  static final String SOME_VALUE = "Some value";
+  static final String SOME_OTHER_VALUE = "Some other value";
+  static final String SOME_KEY = "key1";
+  static final String SOME_OTHER_KEY = "key2";
+  static final String API_GATEWAY_RESOURCES = "apiGatewayResponses";
+  static final String SAMPLE_RESPONSE_JSON = "sampleResponse.json";
 
   @Test
   @DisplayName("hashCode is the same for equivalent GatewayResponses")

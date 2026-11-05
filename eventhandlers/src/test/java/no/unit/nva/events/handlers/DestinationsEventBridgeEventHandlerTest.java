@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 
 class DestinationsEventBridgeEventHandlerTest extends AbstractEventHandlerTest {
 
-  public static final String VALID_AWS_EVENT_BRIDGE_EVENT =
+  static final String VALID_AWS_EVENT_BRIDGE_EVENT =
       IoUtils.stringFromResources(Path.of("validAwsEventBridgeEvent.json"));
 
   private static final JsonPointer RESPONSE_PAYLOAD_POINTER =

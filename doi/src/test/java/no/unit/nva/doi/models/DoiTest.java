@@ -20,10 +20,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class DoiTest {
 
-  public static final int SECOND_CHARACTER = 1;
-  public static final String EMPTY_FRAGMENT = null;
-  public static final String DEFAULT_DOI_URI_PREFIX = "https://doi.org";
-  public static final String URI_PATH_SEPARATOR = "/";
+  static final int SECOND_CHARACTER = 1;
+  static final String EMPTY_FRAGMENT = null;
+  static final String DEFAULT_DOI_URI_PREFIX = "https://doi.org";
+  static final String URI_PATH_SEPARATOR = "/";
 
   @Test
   void shouldBeGeneratedFromUriAndBeThatUri() {

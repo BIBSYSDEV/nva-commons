@@ -32,7 +32,7 @@ import org.mockito.invocation.InvocationOnMock;
 
 class DoiConverterTest {
 
-  public static final boolean DO_NOT_VALIDATE_ONLINE = true;
+  static final boolean DO_NOT_VALIDATE_ONLINE = true;
   private static final String DOI = "10.1000/182";
   private static final String EXPECTED = "https://doi.org/" + DOI;
   private static final String DOI_ORG_DOMAIN = "doi.org/";

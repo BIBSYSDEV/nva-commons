@@ -19,9 +19,9 @@ import org.junit.jupiter.api.function.Executable;
 
 class SingletonCollectorTest {
 
-  public static final String ALTERNATIVE = "alternative";
-  public static final List<String> TWO_ELEMENT_LIST = List.of("A", "B");
-  public static final int TWO = 2;
+  static final String ALTERNATIVE = "alternative";
+  static final List<String> TWO_ELEMENT_LIST = List.of("A", "B");
+  static final int TWO = 2;
 
   @DisplayName("SingletonCollector::collect collects a single element")
   @Test

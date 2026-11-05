@@ -63,6 +63,8 @@ class EventMessageParserTest {
     return top;
   }
 
+  /** Getters must stay public for Jackson to serialize them. */
+  @SuppressWarnings("PMD.PublicMemberInNonPublicType")
   private static final class OuterClass<T> implements WithType {
 
     private T fieldA;
@@ -93,6 +95,8 @@ class EventMessageParserTest {
     }
   }
 
+  /** Getters must stay public for Jackson to serialize them. */
+  @SuppressWarnings("PMD.PublicMemberInNonPublicType")
   private static final class MiddleClass<T> implements WithType {
 
     private T fieldB;
@@ -123,6 +127,8 @@ class EventMessageParserTest {
     }
   }
 
+  /** Getters must stay public for Jackson to serialize them. */
+  @SuppressWarnings("PMD.PublicMemberInNonPublicType")
   private static final class InnerClass<T> implements WithType {
 
     private T fieldC;

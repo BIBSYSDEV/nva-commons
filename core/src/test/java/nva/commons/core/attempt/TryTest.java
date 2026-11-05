@@ -24,7 +24,7 @@ import org.junit.jupiter.api.function.Executable;
 
 class TryTest {
 
-  public static final int PROVOKE_ERROR = 0;
+  static final int PROVOKE_ERROR = 0;
   private static final String SOME_STRING = "SomeString";
   private static final String EXCEPTION_MESSAGE = "ExceptionMessage";
   private static final ArithmeticException SAMPLE_UNCHECKED_EXCEPTION =

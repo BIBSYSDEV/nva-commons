@@ -47,7 +47,7 @@ class UriWrapperTest {
   private static final String SECOND_QUERY_VALUE = "value2";
   private static final String REPLACEMENT = "replacement";
 
-  public static Stream<Named<Map<String, String>>> queryParameterProvider() {
+  static Stream<Named<Map<String, String>>> queryParameterProvider() {
     return Stream.of(
         Named.of("Unencoded query parameter", Map.of("q", "høhë")),
         Named.of("Multiple unencoded query parameters", Map.of("q", "høhë", "param2", "åpen")),
@@ -57,7 +57,7 @@ class UriWrapperTest {
             Map.of("q", "h%C3%B8h%C3%AB", "param2", "%C3%A5pen")));
   }
 
-  public static Stream<Named<URI>> encodedParameterProvider() {
+  static Stream<Named<URI>> encodedParameterProvider() {
     return Stream.of(
         Named.of(
             "Key containing encoded assignment character",
@@ -67,7 +67,7 @@ class UriWrapperTest {
             URI.create("https://example.org?kes=%3Ds")));
   }
 
-  public static Stream<Named<String>> valuelessParameterProvider() {
+  static Stream<Named<String>> valuelessParameterProvider() {
     return Stream.of(
         Named.of("URI with key only", "https://example.org?param"),
         Named.of("URI with key and assignment symbol", "https://example.org?param="),

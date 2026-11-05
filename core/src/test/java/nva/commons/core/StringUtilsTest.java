@@ -20,13 +20,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class StringUtilsTest {
 
-  public static final String EMPTY_STRING = "";
-  public static final String BLANK_STRING = " ";
-  public static final String TAB_STRING = "\t";
-  public static final String LINE_FEED = "\n";
-  public static final String END_OF_LINE = "\r\n";
-  public static final String NULL = null;
-  public static final String CARRIAGE_RETURN = "\r";
+  static final String EMPTY_STRING = "";
+  static final String BLANK_STRING = " ";
+  static final String TAB_STRING = "\t";
+  static final String LINE_FEED = "\n";
+  static final String END_OF_LINE = "\r\n";
+  static final String NULL = null;
+  static final String CARRIAGE_RETURN = "\r";
   private static final String EXPECTED_OUTPUT = "The quick brown fox jumps over the lazy dog";
   private static final String PARAMETERIZED_TEST_NAME_FORMAT =
       "[{index}]  {displayName} with input: \"{0}\"";

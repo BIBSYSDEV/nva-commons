@@ -22,9 +22,9 @@ import org.junit.jupiter.api.function.Executable;
 
 class FailureTest {
 
-  public static final String EXPECTED_EXCEPTION_MESSAGE = "Expected exception message";
-  public static final String NESTED_EXCEPTION_MESSAGE = "Nested exception message";
-  public static final String NOT_EXPECTED_MESSAGE = "NotExpectedMessage";
+  static final String EXPECTED_EXCEPTION_MESSAGE = "Expected exception message";
+  static final String NESTED_EXCEPTION_MESSAGE = "Nested exception message";
+  static final String NOT_EXPECTED_MESSAGE = "NotExpectedMessage";
   private static final Integer DEFAULT_VALUE = 100;
   private static final Integer SAMPLE = 1;
 

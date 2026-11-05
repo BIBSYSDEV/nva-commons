@@ -44,7 +44,7 @@ public class RedirectHandler extends Handler {
     private final URI location;
     private final Integer redirectStatusCode;
 
-    public ExampleRedirectException(Integer statusCode, URI location) {
+    ExampleRedirectException(Integer statusCode, URI location) {
       super("Redirection");
       this.location = location;
       this.redirectStatusCode = statusCode;

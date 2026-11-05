@@ -54,7 +54,7 @@ class SecretsWriterTest {
         Arguments.of(SECRET_NAME, SECRET_VALUE), Arguments.of(JSON_SECRET_NAME, JSON_SECRET_VALUE));
   }
 
-  public SecretsWriterTest() {
+  SecretsWriterTest() {
     secretsWriter = createSecretsWriterMock();
     credentials = createCredentialsMock();
   }

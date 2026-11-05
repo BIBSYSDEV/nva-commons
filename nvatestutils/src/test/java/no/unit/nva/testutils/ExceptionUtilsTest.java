@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 
 class ExceptionUtilsTest {
 
-  public static final String TOP_MESSAGE = "Top message";
-  public static final String NESTED_MESSAGE = "Nested message";
+  static final String TOP_MESSAGE = "Top message";
+  static final String NESTED_MESSAGE = "Nested message";
 
   @Test
   void stackTraceReturnsStackTraceStringOfException() {

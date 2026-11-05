@@ -28,8 +28,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class UnixPathTest {
 
-  public static final String EMPTY_STRING = "";
-  public static final String NULL_STRING = null;
+  static final String EMPTY_STRING = "";
+  static final String NULL_STRING = null;
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final String FIRST = "first";
   private static final String SECOND = "second";
@@ -312,12 +312,14 @@ class UnixPathTest {
     assertThat(actualPath, is(equalTo(originalPath)));
   }
 
+  /** Getters must stay public for Jackson to serialize them. */
+  @SuppressWarnings("PMD.PublicMemberInNonPublicType")
   private static final class ClassWithUnixPath {
 
     private UnixPath field;
 
     @JsonIgnore
-    public static String fieldName() {
+    static String fieldName() {
       return "field";
     }
 

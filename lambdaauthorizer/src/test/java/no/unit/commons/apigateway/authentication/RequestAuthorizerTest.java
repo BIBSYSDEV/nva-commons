@@ -16,26 +16,26 @@ import org.junit.jupiter.api.function.Executable;
 
 class RequestAuthorizerTest {
 
-  public static final String SOME_PRINCIPAL_ID = "somePrincipalId";
-  public static final String CORRECT_KEY = "SOME_KEY";
-  public static final String DEFAULT_METHOD_ARN =
+  static final String SOME_PRINCIPAL_ID = "somePrincipalId";
+  static final String CORRECT_KEY = "SOME_KEY";
+  static final String DEFAULT_METHOD_ARN =
       "arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod/GET"
           + "/service/users/orestis@unit.no";
-  public static final String EXPECTED_RESOURCE =
+  static final String EXPECTED_RESOURCE =
       "arn:aws:execute-api:eu-west-1:884807050265:2lcqynkwke/Prod/*/*";
-  public static final String UNEXPECTED_EXCEPTION_MESSAGE = "UnexpectedExceptionMessage";
+  static final String UNEXPECTED_EXCEPTION_MESSAGE = "UnexpectedExceptionMessage";
   private static final String WRONG_KEY = "WrongKey";
   private final Context context = mock(Context.class);
   private final RequestAuthorizer handler = sampleHandler();
 
-  public static APIGatewayCustomAuthorizerEvent createRequestStream(String apiKey) {
+  static APIGatewayCustomAuthorizerEvent createRequestStream(String apiKey) {
     return APIGatewayCustomAuthorizerEvent.builder()
         .withHeaders(authHeaders(apiKey))
         .withMethodArn(DEFAULT_METHOD_ARN)
         .build();
   }
 
-  public static Map<String, String> authHeaders(String apiKey) {
+  static Map<String, String> authHeaders(String apiKey) {
     return Map.of("Authorization", apiKey);
   }
 
