@@ -1,3 +1,5 @@
 package nva.commons.apigateway.exceptions;
 
-public record ValidationError(String detail, String pointer) {}
+import java.io.Serializable;
+
+public record ValidationError(String detail, String pointer) implements Serializable {}

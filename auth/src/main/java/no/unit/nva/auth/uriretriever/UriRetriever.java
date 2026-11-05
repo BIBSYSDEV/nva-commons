@@ -27,22 +27,18 @@ public class UriRetriever implements RawContentRetriever {
 
   @Override
   public Optional<String> getRawContent(URI uri, String mediaType) {
-    return attempt(
-            () ->
-                httpClient.send(
-                    createHttpRequest(uri, mediaType),
-                    BodyHandlers.ofString(StandardCharsets.UTF_8)))
+    return attempt(() ->
+            httpClient.send(
+                createHttpRequest(uri, mediaType), BodyHandlers.ofString(StandardCharsets.UTF_8)))
         .map(HttpResponse::body)
         .toOptional();
   }
 
   @Override
   public Optional<HttpResponse<String>> fetchResponse(URI uri, String mediaType) {
-    return attempt(
-            () ->
-                httpClient.send(
-                    createHttpRequest(uri, mediaType),
-                    BodyHandlers.ofString(StandardCharsets.UTF_8)))
+    return attempt(() ->
+            httpClient.send(
+                createHttpRequest(uri, mediaType), BodyHandlers.ofString(StandardCharsets.UTF_8)))
         .toOptional();
   }
 

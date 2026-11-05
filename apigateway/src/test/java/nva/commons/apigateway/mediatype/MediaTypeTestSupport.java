@@ -13,9 +13,8 @@ final class MediaTypeTestSupport {
 
   static boolean rejected(MediaTypeParseResult result, String code) {
     return result.violations().stream()
-        .anyMatch(
-            violation ->
-                violation.severity() == Severity.REJECTED && violation.code().equals(code));
+        .anyMatch(violation ->
+            violation.severity() == Severity.REJECTED && violation.code().equals(code));
   }
 
   static boolean hasCode(MediaTypeParseResult result, String code) {

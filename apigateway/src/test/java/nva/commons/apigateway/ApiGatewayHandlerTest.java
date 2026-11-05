@@ -187,11 +187,10 @@ class ApiGatewayHandlerTest {
     JsonNode expectedHeaders = createHeaders();
     expectedHeaders
         .fieldNames()
-        .forEachRemaining(
-            expectedHeader ->
-                assertThat(
-                    headers.get(expectedHeader),
-                    is(equalTo(expectedHeaders.get(expectedHeader).textValue()))));
+        .forEachRemaining(expectedHeader ->
+            assertThat(
+                headers.get(expectedHeader),
+                is(equalTo(expectedHeaders.get(expectedHeader).textValue()))));
   }
 
   @ParameterizedTest(name = "handleRequest should return Unsupported media-type when input is {0}")

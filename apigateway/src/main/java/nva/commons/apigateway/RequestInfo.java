@@ -165,10 +165,8 @@ public final class RequestInfo {
   @JsonIgnore
   public String getRequestContextParameter(JsonPointer jsonPointer) {
     return getRequestContextParameterOpt(jsonPointer)
-        .orElseThrow(
-            () ->
-                new IllegalArgumentException(
-                    MISSING_FROM_REQUEST_CONTEXT + jsonPointer.toString()));
+        .orElseThrow(() ->
+            new IllegalArgumentException(MISSING_FROM_REQUEST_CONTEXT + jsonPointer.toString()));
   }
 
   /**
@@ -458,10 +456,9 @@ public final class RequestInfo {
 
   private Optional<ViewingScope> fetchViewingScope() {
     return fetchUserInfo()
-        .map(
-            userInfo ->
-                ViewingScope.from(
-                    userInfo.getViewingScopeIncluded(), userInfo.getViewingScopeExcluded()));
+        .map(userInfo ->
+            ViewingScope.from(
+                userInfo.getViewingScopeIncluded(), userInfo.getViewingScopeExcluded()));
   }
 
   private Optional<URI> fetchPersonCristinId() {

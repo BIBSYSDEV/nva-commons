@@ -38,10 +38,8 @@ public class DlqHandlerTest {
   public static Stream<Arguments> eventProvider() {
     return IntStream.of(1, 2, 10, 245)
         .boxed()
-        .map(
-            numberOfMessages ->
-                Arguments.of(
-                    Named.of(numberOfMessages + " messages", randomJsons(numberOfMessages))));
+        .map(numberOfMessages ->
+            Arguments.of(Named.of(numberOfMessages + " messages", randomJsons(numberOfMessages))));
   }
 
   @BeforeEach

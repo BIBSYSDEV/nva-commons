@@ -6,14 +6,15 @@ import static no.unit.nva.hamcrest.PropertyValuePair.FIELD_PATH_DELIMITER;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import java.util.stream.Collectors;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -128,7 +129,7 @@ public class DoesNotHaveEmptyValues<T> extends BaseMatcher<T> {
     var fieldsToBeChecked = new ArrayList<PropertyValuePair>();
     var fieldsToBeVisited = initializeFieldsToBeVisited(rootObject);
     while (!fieldsToBeVisited.isEmpty()) {
-      PropertyValuePair currentField = fieldsToBeVisited.pop();
+      var currentField = fieldsToBeVisited.removeLast();
       if (currentField.shouldBeChecked(stopRecursionClasses, ignoreFields)) {
         addNestedFieldsToFieldsToBeVisited(fieldsToBeVisited, currentField);
         fieldsToBeChecked.add(currentField);
@@ -137,9 +138,8 @@ public class DoesNotHaveEmptyValues<T> extends BaseMatcher<T> {
     return fieldsToBeChecked;
   }
 
-  @SuppressWarnings("PMD.LooseCoupling")
-  private Stack<PropertyValuePair> initializeFieldsToBeVisited(PropertyValuePair rootObject) {
-    var fieldsToBeVisited = new Stack<PropertyValuePair>();
+  private Deque<PropertyValuePair> initializeFieldsToBeVisited(PropertyValuePair rootObject) {
+    var fieldsToBeVisited = new ArrayDeque<PropertyValuePair>();
     fieldsToBeVisited.add(rootObject);
     return fieldsToBeVisited;
   }

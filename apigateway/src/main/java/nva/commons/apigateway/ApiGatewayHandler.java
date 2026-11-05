@@ -26,13 +26,13 @@ import nva.commons.apigateway.exceptions.ConflictException;
 import nva.commons.apigateway.exceptions.GatewayResponseSerializingException;
 import nva.commons.apigateway.exceptions.RedirectException;
 import nva.commons.apigateway.exceptions.UnsupportedAcceptHeaderException;
-import nva.commons.apigateway.exceptions.ValidationError;
 import nva.commons.apigateway.exceptions.WithErrors;
 import nva.commons.core.Environment;
 import nva.commons.core.JacocoGenerated;
 import nva.commons.core.StringUtils;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.zalando.problem.Problem;
+import org.zalando.problem.ProblemBuilder;
 import org.zalando.problem.Status;
 import org.zalando.problem.ThrowableProblem;
 
@@ -276,36 +276,30 @@ public abstract class ApiGatewayHandler<I, O> extends RestRequestHandler<I, O> {
 
   private ThrowableProblem createProblemDescription(
       Exception exception, Integer statusCode, String requestId) {
-    String errorMessage = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
-    Status status = Status.valueOf(statusCode);
-    return Problem.builder()
-        .withStatus(status)
-        .withTitle(status.getReasonPhrase())
-        .withDetail(errorMessage)
-        .with(REQUEST_ID, requestId)
-        .with(RESOURCE, getResource(exception))
-        .with(CONFLICTING_KEYS, getConflictingKeys(exception))
-        .with(ERRORS, getErrors(exception))
-        .build();
+    var errorMessage = Optional.ofNullable(exception.getMessage()).orElse(defaultErrorMessage());
+    var status = Status.valueOf(statusCode);
+    var problemBuilder =
+        Problem.builder()
+            .withStatus(status)
+            .withTitle(status.getReasonPhrase())
+            .withDetail(errorMessage)
+            .with(REQUEST_ID, requestId);
+    addExceptionSpecificParameters(problemBuilder, exception);
+    return problemBuilder.build();
   }
 
-  private Object getResource(Exception exception) {
-    return exception instanceof ApiGatewayException apiGatewayException
-        ? apiGatewayException.getInstance()
-        : null;
-  }
-
-  private Map<String, String> getConflictingKeys(Exception exception) {
-    return exception instanceof ConflictException conflictException
-            && !conflictException.getConflictingKeys().isEmpty()
-        ? conflictException.getConflictingKeys()
-        : null;
-  }
-
-  private List<ValidationError> getErrors(Exception exception) {
-    return exception instanceof WithErrors withErrors && !withErrors.getErrors().isEmpty()
-        ? withErrors.getErrors()
-        : null;
+  private static void addExceptionSpecificParameters(
+      ProblemBuilder problemBuilder, Exception exception) {
+    if (exception instanceof ApiGatewayException apiGatewayException) {
+      problemBuilder.with(RESOURCE, apiGatewayException.getInstance());
+    }
+    if (exception instanceof ConflictException conflictException
+        && !conflictException.getConflictingKeys().isEmpty()) {
+      problemBuilder.with(CONFLICTING_KEYS, conflictException.getConflictingKeys());
+    }
+    if (exception instanceof WithErrors withErrors && !withErrors.getErrors().isEmpty()) {
+      problemBuilder.with(ERRORS, withErrors.getErrors());
+    }
   }
 
   /**

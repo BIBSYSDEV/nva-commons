@@ -234,10 +234,9 @@ public class GatewayResponse<T> implements Serializable {
     var isBase64Encoded = hasIsBase64EncodedNode && jsonNode.get("isBase64Encoded").asBoolean();
 
     return (GatewayResponse<T>)
-        attempt(
-                () ->
-                    new GatewayResponse(
-                        body, headers, statusCode, isBase64Encoded, defaultRestObjectMapper))
+        attempt(() ->
+                new GatewayResponse(
+                    body, headers, statusCode, isBase64Encoded, defaultRestObjectMapper))
             .orElseThrow();
   }
 }
