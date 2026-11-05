@@ -813,7 +813,6 @@ class ApiGatewayHandlerTest {
   @Test
   void shouldReturnOneOfTheAllowedOriginsInEnvironmentWhenRequestOriginIsNotWhiteListed()
       throws IOException {
-    var originInHeader = "https://example.com";
     when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn("localhost, some-place-else");
 
     var handler = getRawStringResponseHandler();
@@ -824,6 +823,7 @@ class ApiGatewayHandlerTest {
 
     var response = GatewayResponse.fromOutputStream(outputStream, String.class);
     var responseHeaders = response.getHeaders();
+    var originInHeader = "https://example.com";
     assertThat(responseHeaders.get(ACCESS_CONTROL_ALLOW_ORIGIN), not(equalTo(originInHeader)));
     assertThat(responseHeaders.get(VARY), containsString("Origin"));
   }

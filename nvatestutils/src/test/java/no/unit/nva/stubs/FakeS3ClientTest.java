@@ -193,7 +193,7 @@ class FakeS3ClientTest {
     return PutObjectRequest.builder().bucket(bucket).key(filePath.toString()).build();
   }
 
-  private static ArrayList<String> fetchAllExpectedFilesUsingPagination(
+  private static List<String> fetchAllExpectedFilesUsingPagination(
       FakeS3Client s3Client, String bucket, UnixPath expectedFolder) {
     final int smallPage = 3;
 
@@ -252,9 +252,7 @@ class FakeS3ClientTest {
   private ResponseBytes<GetObjectResponse> getObject(FakeS3Client fakeS3Client, URI s3Uri) {
     GetObjectRequest getObjectRequest =
         GetObjectRequest.builder().bucket(s3Uri.getHost()).key(s3Uri.getPath()).build();
-    ResponseBytes<GetObjectResponse> result =
-        fakeS3Client.getObject(getObjectRequest, ResponseTransformer.toBytes());
-    return result;
+    return fakeS3Client.getObject(getObjectRequest, ResponseTransformer.toBytes());
   }
 
   private void putObject(FakeS3Client fakeS3Client, URI s3Uri, String expectedContent) {

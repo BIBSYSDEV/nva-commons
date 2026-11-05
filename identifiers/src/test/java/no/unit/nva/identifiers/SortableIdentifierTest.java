@@ -218,7 +218,7 @@ class SortableIdentifierTest {
     return expectedIdentifierIndices;
   }
 
-  private static class ExampleClass {
+  private static final class ExampleClass {
 
     private SortableIdentifier id;
 

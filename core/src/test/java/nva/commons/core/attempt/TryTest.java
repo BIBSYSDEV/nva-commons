@@ -6,11 +6,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -54,8 +56,7 @@ class TryTest {
     Try<Integer> attempt = attempt(() -> divide(6, 0));
     assertThat(attempt.isSuccess(), is(equalTo(false)));
     assertThat(attempt.isFailure(), is(equalTo(true)));
-    Exception e = attempt.getException();
-    assertTrue(e instanceof ArithmeticException);
+    assertInstanceOf(ArithmeticException.class, attempt.getException());
   }
 
   @Test
@@ -74,10 +75,10 @@ class TryTest {
 
   @Test
   void flatMapFlattensNestedTry() {
-    Function<String, Try<String>> fun1 = attempt(String::toUpperCase);
+    Function<String, Try<String>> fun1 = attempt(string -> string.toUpperCase(Locale.ROOT));
     String input = "input";
     Try<String> nestedTry = attempt(() -> input).flatMap(fun1::apply);
-    assertThat(nestedTry.get(), is(equalTo(input.toUpperCase())));
+    assertThat(nestedTry.get(), is(equalTo(input.toUpperCase(Locale.ROOT))));
   }
 
   @Test
@@ -194,7 +195,7 @@ class TryTest {
     assertThat(finalSucceeds, is(equalTo(3)));
   }
 
-  private int divide(int x, int y) throws IllegalArgumentException {
+  private int divide(int x, int y) {
     return x / y;
   }
 

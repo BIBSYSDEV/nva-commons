@@ -34,7 +34,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 class UriWrapperTest {
 
   private static final String HOST = "http://www.example.org";
-  private static final int MAX_PORT_NUMBER = 65535;
+  private static final int MAX_PORT_NUMBER = 65_535;
   private static final String ROOT = "/";
   private static final String AMPERSAND = "&";
   private static final String ASSIGNMENT = "=";

@@ -44,7 +44,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -262,7 +262,7 @@ class RequestInfoTest {
   }
 
   private static Set<AccessRight> randomAccessRights() {
-    return new HashSet<>(List.of(randomAccessRight(), randomAccessRight(), randomAccessRight()));
+    return EnumSet.of(randomAccessRight(), randomAccessRight(), randomAccessRight());
   }
 
   @Test

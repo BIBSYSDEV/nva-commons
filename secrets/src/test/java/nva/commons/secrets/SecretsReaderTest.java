@@ -73,8 +73,7 @@ class SecretsReaderTest {
   }
 
   @Test
-  void fetchSecretReturnsSecretValueWhenSecretNameAndSecretKeyAreCorrect()
-      throws ErrorReadingSecretException {
+  void fetchSecretReturnsSecretValueWhenSecretNameAndSecretKeyAreCorrect() {
     var value = secretsReader.fetchSecret(SECRET_NAME, SECRET_KEY);
     assertThat(value, is(equalTo(SECRET_VALUE)));
   }

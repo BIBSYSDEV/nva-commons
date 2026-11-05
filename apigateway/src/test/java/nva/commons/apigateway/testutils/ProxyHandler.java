@@ -1,7 +1,5 @@
 package nva.commons.apigateway.testutils;
 
-import static nva.commons.apigateway.RequestInfoConstants.PROXY_TAG;
-
 import com.amazonaws.services.lambda.runtime.Context;
 import java.util.Collections;
 import java.util.Map;
@@ -16,7 +14,6 @@ public class ProxyHandler extends ApiGatewayProxyHandler<RequestBody, RequestBod
 
   public static final int HTTP_STATUS_CODE_TEST = 999;
   private Map<String, String> headers;
-  private String proxy;
   private String path;
   private RequestBody body;
 
@@ -33,7 +30,6 @@ public class ProxyHandler extends ApiGatewayProxyHandler<RequestBody, RequestBod
   protected ProxyResponse<RequestBody> processProxyInput(
       RequestBody input, RequestInfo requestInfo, Context context) throws ApiGatewayException {
     this.headers = requestInfo.getHeaders();
-    this.proxy = requestInfo.getPathParameters().get(PROXY_TAG);
     this.path = requestInfo.getPath();
     this.body = input;
     this.addAdditionalHeaders(this::additionalHeaders);

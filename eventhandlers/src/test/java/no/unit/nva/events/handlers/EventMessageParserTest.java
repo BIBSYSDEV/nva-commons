@@ -63,15 +63,15 @@ class EventMessageParserTest {
     return top;
   }
 
-  private static class OuterClass<InputType> implements WithType {
+  private static final class OuterClass<T> implements WithType {
 
-    private InputType fieldA;
+    private T fieldA;
 
-    public InputType getFieldA() {
+    public T getFieldA() {
       return fieldA;
     }
 
-    public void setFieldA(InputType fieldA) {
+    public void setFieldA(T fieldA) {
       this.fieldA = fieldA;
     }
 
@@ -93,15 +93,15 @@ class EventMessageParserTest {
     }
   }
 
-  private static class MiddleClass<InputType> implements WithType {
+  private static final class MiddleClass<T> implements WithType {
 
-    private InputType fieldB;
+    private T fieldB;
 
-    public InputType getFieldB() {
+    public T getFieldB() {
       return fieldB;
     }
 
-    public void setFieldB(InputType fieldB) {
+    public void setFieldB(T fieldB) {
       this.fieldB = fieldB;
     }
 
@@ -123,15 +123,15 @@ class EventMessageParserTest {
     }
   }
 
-  private static class InnerClass<InputType> implements WithType {
+  private static final class InnerClass<T> implements WithType {
 
-    private InputType fieldC;
+    private T fieldC;
 
-    public InputType getFieldC() {
+    public T getFieldC() {
       return fieldC;
     }
 
-    public void setFieldC(InputType fieldC) {
+    public void setFieldC(T fieldC) {
       this.fieldC = fieldC;
     }
 

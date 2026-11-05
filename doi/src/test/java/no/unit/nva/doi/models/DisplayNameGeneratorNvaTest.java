@@ -28,8 +28,7 @@ public class DisplayNameGeneratorNvaTest {
       result.append(camelCase.charAt(0));
       for (int i = 1; i < camelCase.length(); i++) {
         if (Character.isUpperCase(camelCase.charAt(i))) {
-          result.append(' ');
-          result.append(Character.toLowerCase(camelCase.charAt(i)));
+          result.append(' ').append(Character.toLowerCase(camelCase.charAt(i)));
         } else {
           result.append(camelCase.charAt(i));
         }

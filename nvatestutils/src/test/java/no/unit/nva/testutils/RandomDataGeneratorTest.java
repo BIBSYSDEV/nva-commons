@@ -78,7 +78,7 @@ class RandomDataGeneratorTest {
 
   @Test
   void shouldReturnRandomElementOfArray() {
-    String[] elements = new String[] {"a", "b", "c"};
+    String[] elements = {"a", "b", "c"};
     String randomElement = RandomDataGenerator.randomElement(elements);
     assertThat(randomElement, is(in(elements)));
   }
