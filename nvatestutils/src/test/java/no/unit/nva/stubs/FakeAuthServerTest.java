@@ -29,13 +29,13 @@ class FakeAuthServerTest {
   private HttpClient httpClient;
 
   @BeforeEach
-  public void init() {
+  void init() {
     this.authServer = new FakeAuthServer();
     this.httpClient = WiremockHttpClient.create();
   }
 
   @AfterEach
-  public void close() {
+  void close() {
     this.authServer.close();
   }
 

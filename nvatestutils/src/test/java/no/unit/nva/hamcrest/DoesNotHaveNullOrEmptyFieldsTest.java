@@ -33,7 +33,7 @@ class DoesNotHaveNullOrEmptyFieldsTest {
 
   /** Initialize. */
   @BeforeEach
-  public void init() {
+  void init() {
     matcher = new DoesNotHaveNullOrEmptyFields<>();
   }
 

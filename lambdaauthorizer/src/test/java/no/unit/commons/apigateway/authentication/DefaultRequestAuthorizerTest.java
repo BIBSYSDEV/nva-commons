@@ -32,7 +32,7 @@ class DefaultRequestAuthorizerTest {
   private String arnForAllowingAllActionsOnLambda;
 
   @BeforeEach
-  public void init() {
+  void init() {
     this.expectedApiKey = randomString();
     this.inputMethodArn =
         String.join(RequestAuthorizer.PATH_DELIMITER, randomString(), randomString());

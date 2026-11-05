@@ -39,7 +39,7 @@ class AuthorizedBackendClientTest {
   private FakeAuthServer authServer;
 
   @BeforeEach
-  public void init() {
+  void init() {
     authServer = new FakeAuthServer();
     expectedAccessToken = createTestJwt(Instant.now().plus(Duration.ofMinutes(5)));
     var clientId = randomString();

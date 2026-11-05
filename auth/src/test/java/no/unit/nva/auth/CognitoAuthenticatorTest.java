@@ -44,7 +44,7 @@ class CognitoAuthenticatorTest {
   private CognitoAuthenticator cognitoAuthenticator;
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     var authServer = "http://localhost";
     var clientId = randomString();
     var clientSecret = randomString();

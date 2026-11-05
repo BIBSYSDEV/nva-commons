@@ -56,7 +56,7 @@ class DoesNotHaveEmptyValuesTest {
   private DoesNotHaveEmptyValues<Object> matcher;
 
   @BeforeEach
-  public void init() {
+  void init() {
     matcher = new DoesNotHaveEmptyValues<>();
   }
 
