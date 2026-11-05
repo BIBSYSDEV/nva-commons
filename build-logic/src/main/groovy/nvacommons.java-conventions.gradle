@@ -4,7 +4,13 @@ plugins {
 
 nva {
     pmd {
-        rulesetFile = rootProject.file('config/pmd/ruleset.xml')
+        analyzeTests = false
+        excludedRules = [
+                'AvoidThrowingRawExceptionTypes',
+                'GuardLogStatement',
+                'SystemPrintln',
+                'UnitTestContainsTooManyAsserts'
+        ]
     }
     spotless {
         enabled = true
