@@ -44,10 +44,8 @@ public final class WiremockHttpClient {
           new X509ExtendedTrustManager[] {createTrustEverythingManager()},
           new java.security.SecureRandom());
       return insecureSslContext;
-    } catch (KeyManagementException | NoSuchAlgorithmException e) {
-      e.printStackTrace();
-      Assertions.fail(TEST_CONFIGURATION_TRUST_MANAGER_FAILURE);
-      return null;
+    } catch (KeyManagementException | NoSuchAlgorithmException exception) {
+      return Assertions.fail(TEST_CONFIGURATION_TRUST_MANAGER_FAILURE, exception);
     }
   }
 

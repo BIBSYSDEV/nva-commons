@@ -7,6 +7,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
 import nva.commons.core.JacocoGenerated;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @JacocoGenerated
 public class RequestBodyReader {
@@ -34,6 +36,7 @@ public class RequestBodyReader {
   public static final class RequestBodySubscriber implements Subscriber<ByteBuffer> {
 
     public static final int NUMBER_OF_REQUESTS_TO_PUBLISHER = 1000;
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequestBodySubscriber.class);
 
     private final ByteBuffer cache = ByteBuffer.allocate(100);
 
@@ -53,7 +56,7 @@ public class RequestBodyReader {
 
     @Override
     public void onError(Throwable throwable) {
-      System.err.println(throwable.getMessage());
+      LOGGER.error("Failed to read request body", throwable);
     }
 
     @Override

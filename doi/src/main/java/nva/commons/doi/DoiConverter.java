@@ -81,11 +81,10 @@ public class DoiConverter {
   }
 
   private String doiToRelativePath(String stripedDoi) {
-    if (!stripedDoi.startsWith(PATH_SEPARATOR)) {
-      return PATH_SEPARATOR + stripedDoi;
-    } else {
+    if (stripedDoi.startsWith(PATH_SEPARATOR)) {
       return stripedDoi;
     }
+    return PATH_SEPARATOR + stripedDoi;
   }
 
   private String stripPrefix(String doi) {
