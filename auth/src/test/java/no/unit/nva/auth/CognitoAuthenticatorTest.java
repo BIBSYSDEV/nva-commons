@@ -30,12 +30,12 @@ import org.junit.jupiter.api.Test;
 
 class CognitoAuthenticatorTest {
 
-  public static String TEST_TOKEN =
+  public static final String TEST_TOKEN =
       "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE2Njg1MTE4NTcsImV4cCI6MTcw"
           + "MDA0Nzg1NywiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsIkdpdmVuTmFtZSI6IkpvaG5ueSI"
           + "sIlN1cm5hbWUiOiJSb2NrZXQiLCJFbWFpbCI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJSb2xlIjoiTWFuYWdlciIsInNjb3BlIjoiZXhhbX"
           + "BsZS1zY29wZSJ9.ne8Jb4f2xao1zSJFZxIBRrh4WFNjkaBRV3-Ybp6fHZU";
-  public static String TEST_SCOPE = "example-scope";
+  public static final String TEST_SCOPE = "example-scope";
   final HttpClient httpClient = mock(HttpClient.class);
   HttpResponse<String> okResponse = mock(HttpResponse.class);
   HttpResponse<String> invalidResponse = mock(HttpResponse.class);
@@ -105,14 +105,13 @@ class CognitoAuthenticatorTest {
   @Test
   void shouldThrowWhenResponseIsNotStructuredLikeAToken() throws IOException, InterruptedException {
     when(httpClient.<String>send(any(), any())).thenReturn(invalidResponse);
-    assertThrows(IllegalStateException.class, () -> cognitoAuthenticator.fetchBearerToken());
+    assertThrows(IllegalStateException.class, cognitoAuthenticator::fetchBearerToken);
   }
 
   @Test
   void shouldThrowWhenResponseIsNot200Ok() throws IOException, InterruptedException {
     when(httpClient.<String>send(any(), any())).thenReturn(errorResponse);
-    var exception =
-        assertThrows(RuntimeException.class, () -> cognitoAuthenticator.fetchBearerToken());
+    var exception = assertThrows(RuntimeException.class, cognitoAuthenticator::fetchBearerToken);
     assertTrue(exception.getMessage().contains("Got unexpected http response"));
   }
 }

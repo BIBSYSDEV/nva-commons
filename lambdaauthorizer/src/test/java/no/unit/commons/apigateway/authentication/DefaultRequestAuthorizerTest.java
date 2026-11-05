@@ -90,7 +90,7 @@ class DefaultRequestAuthorizerTest {
 
   private GetSecretValueResponse constructSecretsClientResponse(GetSecretValueRequest request) {
 
-    if (request.secretId().equals(SECRET_NAME_SET_IN_TEST)) {
+    if (SECRET_NAME_SET_IN_TEST.equals(request.secretId())) {
       var secret = JsonUtils.dtoObjectMapper.createObjectNode();
       secret.put(SECRET_KEY_SET_IN_TEST, expectedApiKey);
       return GetSecretValueResponse.builder().secretString(secret.toString()).build();

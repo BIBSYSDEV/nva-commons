@@ -19,8 +19,8 @@ class CachedJwtProviderTest {
   CachedJwtProvider cachedJwtProvider;
   private Clock mockedClock;
 
-  private DecodedJWT jwt1 = mock(DecodedJWT.class);
-  private DecodedJWT jwt2 = mock(DecodedJWT.class);
+  private final DecodedJWT jwt1 = mock(DecodedJWT.class);
+  private final DecodedJWT jwt2 = mock(DecodedJWT.class);
 
   @BeforeEach
   void setup() {

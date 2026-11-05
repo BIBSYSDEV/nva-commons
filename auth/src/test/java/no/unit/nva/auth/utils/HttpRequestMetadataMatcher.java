@@ -9,7 +9,7 @@ import org.mockito.ArgumentMatcher;
  */
 public class HttpRequestMetadataMatcher implements ArgumentMatcher<HttpRequest> {
 
-  private HttpRequest sourceRequest;
+  private final HttpRequest sourceRequest;
 
   public HttpRequestMetadataMatcher(HttpRequest sourceRequest) {
     this.sourceRequest = sourceRequest;

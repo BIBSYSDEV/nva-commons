@@ -27,20 +27,20 @@ class TryTest {
   private static final String EXCEPTION_MESSAGE = "ExceptionMessage";
   private static final ArithmeticException SAMPLE_UNCHECKED_EXCEPTION =
       new ArithmeticException(EXCEPTION_MESSAGE);
-  private static final Map<Integer, String> numbers;
+  private static final Map<Integer, String> NUMBERS;
 
   static {
-    numbers = new HashMap<>();
-    numbers.put(1, "one");
-    numbers.put(2, "two");
-    numbers.put(3, "three");
-    numbers.put(4, "four");
-    numbers.put(5, "five");
-    numbers.put(6, "six");
-    numbers.put(7, "seven");
-    numbers.put(8, "eight");
-    numbers.put(9, "nine");
-    numbers.put(0, "zero");
+    NUMBERS = new HashMap<>();
+    NUMBERS.put(1, "one");
+    NUMBERS.put(2, "two");
+    NUMBERS.put(3, "three");
+    NUMBERS.put(4, "four");
+    NUMBERS.put(5, "five");
+    NUMBERS.put(6, "six");
+    NUMBERS.put(7, "seven");
+    NUMBERS.put(8, "eight");
+    NUMBERS.put(9, "nine");
+    NUMBERS.put(0, "zero");
   }
 
   @Test
@@ -60,13 +60,13 @@ class TryTest {
 
   @Test
   void mapReturnsAMappableResult() {
-    Try<String> attempt = attempt(() -> divide(6, 3)).map(numbers::get).map(String::toUpperCase);
+    Try<String> attempt = attempt(() -> divide(6, 3)).map(NUMBERS::get).map(String::toUpperCase);
     assertThat(attempt.get(), is(equalTo("TWO")));
   }
 
   @Test
   void mapReportsTheFirstException() {
-    Try<String> attempt = attempt(() -> divide(6, 0)).map(numbers::get).map(String::toUpperCase);
+    Try<String> attempt = attempt(() -> divide(6, 0)).map(NUMBERS::get).map(String::toUpperCase);
 
     assertThat(attempt.isFailure(), is(true));
     assertThat(attempt.getException().getClass(), is(equalTo(ArithmeticException.class)));
@@ -149,7 +149,7 @@ class TryTest {
     int someInt = 2;
     Try<String> results =
         Stream.of(someInt)
-            .map(numbers::get)
+            .map(NUMBERS::get)
             .map(String::toUpperCase)
             .map(attempt(this::throwCheckedException))
             .map(att -> att.map(s -> s.replaceAll("o", "cc")))

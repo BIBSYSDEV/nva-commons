@@ -130,6 +130,7 @@ public final class DoiSuppliers {
       return expectedUri;
     }
 
+    @Override
     public String toString() {
       return doi;
     }
