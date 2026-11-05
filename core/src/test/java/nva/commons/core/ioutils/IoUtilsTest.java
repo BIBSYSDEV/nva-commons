@@ -1,5 +1,6 @@
 package nva.commons.core.ioutils;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -35,7 +36,7 @@ class IoUtilsTest {
   @DisplayName("inputStreamFromResources returns a non empty stream for existing resources")
   void inputStreamFromResourcesReturnANonEmptyStreamForExistingResource() throws IOException {
     InputStream stream = IoUtils.inputStreamFromResources(RESOURCE);
-    String line = new BufferedReader(new InputStreamReader(stream)).readLine();
+    String line = new BufferedReader(new InputStreamReader(stream, UTF_8)).readLine();
     assertThat(line, is(not(emptyOrNullString())));
   }
 
@@ -56,7 +57,7 @@ class IoUtilsTest {
   void stringFromResourcesReturnsTheWholeContentOfAResourceFileInAString() {
     String actual = IoUtils.stringFromResources(RESOURCE);
     String expected =
-        new BufferedReader(new InputStreamReader(IoUtils.inputStreamFromResources(RESOURCE)))
+        new BufferedReader(new InputStreamReader(IoUtils.inputStreamFromResources(RESOURCE), UTF_8))
             .lines()
             .collect(Collectors.joining(System.lineSeparator()));
     assertThat(actual, is(equalTo(expected)));
@@ -152,7 +153,7 @@ class IoUtilsTest {
   void stringToStreamReturnsAnInputStreamWithTheStringContents() {
     String sample = createSampleString();
     InputStream stream = IoUtils.stringToStream(sample);
-    BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(stream, UTF_8));
     String actualString = reader.lines().collect(Collectors.joining(System.lineSeparator()));
     assertThat(actualString, is(equalTo(sample)));
   }

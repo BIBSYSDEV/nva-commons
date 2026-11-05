@@ -156,7 +156,9 @@ class FakeS3ClientTest {
     var s3Client = new FakeS3Client();
     var bucket = randomString();
     var putRequest = insertFileToS3(bucket, UnixPath.of(randomString()));
-    var response = s3Client.putObject(putRequest, RequestBody.fromBytes(randomString().getBytes()));
+    var response =
+        s3Client.putObject(
+            putRequest, RequestBody.fromBytes(randomString().getBytes(StandardCharsets.UTF_8)));
     assertThat(response.sdkHttpResponse().statusCode(), is(equalTo(200)));
   }
 
@@ -178,14 +180,16 @@ class FakeS3ClientTest {
       S3Client s3Client, String bucket, UnixPath subfolder) {
     var filePath = subfolder.addChild(randomString()).addChild(randomString());
     var putRequest = insertFileToS3(bucket, filePath);
-    s3Client.putObject(putRequest, RequestBody.fromBytes(randomString().getBytes()));
+    s3Client.putObject(
+        putRequest, RequestBody.fromBytes(randomString().getBytes(StandardCharsets.UTF_8)));
     return filePath;
   }
 
   private static UnixPath insertRandomFileToS3(S3Client s3Client, String bucket) {
     var filePath = UnixPath.of(randomString(), randomString(), randomString());
     var putRequest = insertFileToS3(bucket, filePath);
-    s3Client.putObject(putRequest, RequestBody.fromBytes(randomString().getBytes()));
+    s3Client.putObject(
+        putRequest, RequestBody.fromBytes(randomString().getBytes(StandardCharsets.UTF_8)));
     return filePath;
   }
 

@@ -217,7 +217,8 @@ class S3DriverTest {
     UnixPath somePath = UnixPath.of(randomString());
     URI fileLocation = s3Driver.insertAndCompressObjects(somePath, input);
     GZIPInputStream compressedData = s3Driver.getCompressedFile(toS3Path(fileLocation));
-    BufferedReader inputReader = new BufferedReader(new InputStreamReader(compressedData));
+    BufferedReader inputReader =
+        new BufferedReader(new InputStreamReader(compressedData, StandardCharsets.UTF_8));
     List<String> actualContent = inputReader.lines().toList();
     assertThat(actualContent, is(equalTo(input)));
   }
@@ -235,7 +236,9 @@ class S3DriverTest {
             UnixPath.of(pathPrefix + expectedFolderNeverContainsRootFolder), input);
     GZIPInputStream compressedContent = s3Driver.getCompressedFile(toS3Path(fileLocation));
     List<String> actualContent =
-        new BufferedReader(new InputStreamReader(compressedContent)).lines().toList();
+        new BufferedReader(new InputStreamReader(compressedContent, StandardCharsets.UTF_8))
+            .lines()
+            .toList();
     assertThat(actualContent, is(equalTo(input)));
     assertThat(
         toS3Path(fileLocation).toString(), startsWith(expectedFolderNeverContainsRootFolder));
@@ -330,7 +333,8 @@ class S3DriverTest {
   }
 
   private String readCompressedContents(GZIPInputStream contents) {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(contents));
+    BufferedReader reader =
+        new BufferedReader(new InputStreamReader(contents, StandardCharsets.UTF_8));
     return reader.lines().collect(Collectors.joining());
   }
 

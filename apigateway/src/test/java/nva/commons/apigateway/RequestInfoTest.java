@@ -1,5 +1,6 @@
 package nva.commons.apigateway;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.nonNull;
 import static no.unit.nva.auth.CognitoUserInfo.COGNITO_USER_NAME;
 import static no.unit.nva.auth.CognitoUserInfo.PERSON_GROUPS_CLAIM;
@@ -335,7 +336,7 @@ class RequestInfoTest {
         }
         """
             .formatted(claims);
-    var request = getRequestInfo(new ByteArrayInputStream(payload.getBytes()));
+    var request = getRequestInfo(new ByteArrayInputStream(payload.getBytes(UTF_8)));
 
     assertThrows(UnauthorizedException.class, request::getCurrentCustomer);
   }
@@ -350,7 +351,7 @@ class RequestInfoTest {
           }
         }
         """;
-    var request = getRequestInfo(new ByteArrayInputStream(payload.getBytes()));
+    var request = getRequestInfo(new ByteArrayInputStream(payload.getBytes(UTF_8)));
 
     assertThrows(UnauthorizedException.class, request::getCurrentCustomer);
   }
@@ -363,7 +364,7 @@ class RequestInfoTest {
           "requestContext": {}
         }
         """;
-    var request = getRequestInfo(new ByteArrayInputStream(payload.getBytes()));
+    var request = getRequestInfo(new ByteArrayInputStream(payload.getBytes(UTF_8)));
 
     assertThrows(UnauthorizedException.class, request::getCurrentCustomer);
   }
@@ -987,7 +988,7 @@ class RequestInfoTest {
 
   private RequestInfo extractAccessRightsFromApiGatewayEvent() throws ApiIoException {
     String event = IoUtils.stringFromResources(AWS_SAMPLE_PROXY_EVENT);
-    return getRequestInfo(new ByteArrayInputStream(event.getBytes()));
+    return getRequestInfo(new ByteArrayInputStream(event.getBytes(UTF_8)));
   }
 
   private void checkForNonNullMap(Path resourceFile, Function<RequestInfo, Object> getObject)

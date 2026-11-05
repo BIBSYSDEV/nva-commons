@@ -47,7 +47,7 @@ class ExceptionUtilsTest {
 
   private String originalMessage(Exception e) {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    PrintWriter pw = new PrintWriter(outputStream);
+    PrintWriter pw = new PrintWriter(outputStream, false, StandardCharsets.UTF_8);
     e.printStackTrace(pw);
     pw.close();
     return outputStream.toString(StandardCharsets.UTF_8);

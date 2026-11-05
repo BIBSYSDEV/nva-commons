@@ -1,5 +1,6 @@
 package nva.commons.apigateway.exceptions;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.Is.is;
@@ -27,7 +28,7 @@ class GoneExceptionTest {
     GoneException exception = new GoneException(cause);
     ByteArrayOutputStream stackTraceOutput = getStackTraceMessage(exception);
     assertThat(exception.getCause(), is(equalTo(cause)));
-    assertThat(stackTraceOutput.toString(), containsString(CAUSE_MESSAGE));
+    assertThat(stackTraceOutput.toString(UTF_8), containsString(CAUSE_MESSAGE));
   }
 
   @Test
@@ -36,7 +37,7 @@ class GoneExceptionTest {
     GoneException exception = new GoneException(cause, SOME_MESSAGE);
     ByteArrayOutputStream stackTraceOutput = getStackTraceMessage(exception);
     assertThat(exception.getCause(), is(equalTo(cause)));
-    String stackTraceOutputString = stackTraceOutput.toString();
+    String stackTraceOutputString = stackTraceOutput.toString(UTF_8);
     assertThat(stackTraceOutputString, containsString(CAUSE_MESSAGE));
     assertThat(stackTraceOutputString, containsString(SOME_MESSAGE));
   }
@@ -49,7 +50,7 @@ class GoneExceptionTest {
 
   private ByteArrayOutputStream getStackTraceMessage(GoneException exception) {
     ByteArrayOutputStream stackTraceOutput = new ByteArrayOutputStream();
-    PrintWriter writer = new PrintWriter(stackTraceOutput, true);
+    PrintWriter writer = new PrintWriter(stackTraceOutput, true, UTF_8);
     exception.printStackTrace(writer);
     writer.close();
     return stackTraceOutput;

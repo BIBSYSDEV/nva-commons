@@ -1,5 +1,6 @@
 package no.unit.nva.s3;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -27,7 +28,7 @@ class S3IonReaderTest {
   private long dataFileNumberOfLines() throws IOException {
     GZIPInputStream inputStream =
         new GZIPInputStream(IoUtils.inputStreamFromResources(ION_DATA_FILE));
-    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, UTF_8));
     return reader.lines().count();
   }
 }
