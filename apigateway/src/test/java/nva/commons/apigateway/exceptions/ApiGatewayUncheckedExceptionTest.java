@@ -7,11 +7,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class ApiGatewayUncheckedExceptionTest {
+class ApiGatewayUncheckedExceptionTest {
 
   @DisplayName("ApiGatewayUncheckedException return Internal Server Error")
   @Test
-  public void apiGatewayUncheckedExceptionReturnsInternalServerError() {
+  void apiGatewayUncheckedExceptionReturnsInternalServerError() {
     ApiGatewayException cause = new TestException("some message");
     ApiGatewayUncheckedException exception = new ApiGatewayUncheckedException(cause);
     assertThat(exception.getStatusCode(), is(equalTo(cause.getStatusCode())));

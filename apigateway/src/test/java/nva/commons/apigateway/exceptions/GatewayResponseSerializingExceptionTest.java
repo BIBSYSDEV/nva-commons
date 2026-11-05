@@ -9,13 +9,13 @@ import java.net.HttpURLConnection;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class GatewayResponseSerializingExceptionTest {
+class GatewayResponseSerializingExceptionTest {
 
   private static final String MESSAGE = "Some message";
 
   @DisplayName("Exception contains cause")
   @Test
-  public void exceptionContainsCause() {
+  void exceptionContainsCause() {
 
     Exception cause = new Exception(MESSAGE);
     GatewayResponseSerializingException exception = new GatewayResponseSerializingException(cause);
@@ -25,7 +25,7 @@ public class GatewayResponseSerializingExceptionTest {
 
   @DisplayName("Exception returns Internal Server Error")
   @Test
-  public void exceptionReturnsInternalServerError() {
+  void exceptionReturnsInternalServerError() {
     Exception cause = new Exception(MESSAGE);
     GatewayResponseSerializingException exception = new GatewayResponseSerializingException(cause);
     assertThat(exception.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_INTERNAL_ERROR)));

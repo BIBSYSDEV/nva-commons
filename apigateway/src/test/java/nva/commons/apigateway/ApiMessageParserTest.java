@@ -22,7 +22,7 @@ import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class ApiMessageParserTest {
+class ApiMessageParserTest {
 
   public static final String API_GATEWAY_MESSAGES_FOLDER = "apiGatewayMessages";
   public static final String SOME_EXCEPTION_MESSAGE = "Some error message";
@@ -37,7 +37,7 @@ public class ApiMessageParserTest {
 
   @DisplayName("getRequestInfo throws ApiIoException when parser throws an exception")
   @Test
-  public void getRequestInfoThrowsApiIoExceptionWhenParserThrowsAnException()
+  void getRequestInfoThrowsApiIoExceptionWhenParserThrowsAnException()
       throws JsonProcessingException {
     String notImportantInput = "{}";
     ApiMessageParser<String> parser = parserWithMapperThatThrowsIoException();
@@ -49,7 +49,7 @@ public class ApiMessageParserTest {
 
   @DisplayName("getRequestInfo throws ApiIoException when input string does is not a JSON string")
   @Test
-  public void getRequestInfoThrowsApiIoExceptionWhenInputStringIsNotAJsonString()
+  void getRequestInfoThrowsApiIoExceptionWhenInputStringIsNotAJsonString()
       throws JsonProcessingException {
     String notJsonString = "some value";
     ApiMessageParser<String> parser = new ApiMessageParser<>();
@@ -63,9 +63,8 @@ public class ApiMessageParserTest {
       "getRequestInfo includes the request info string in the exception message when an exception"
           + " in thrown")
   @Test
-  public void
-      getRequestInfoIncludesTheRequestInfoStringInTheExceptionMessageWhenAnExceptionIsThrown()
-          throws JsonProcessingException {
+  void getRequestInfoIncludesTheRequestInfoStringInTheExceptionMessageWhenAnExceptionIsThrown()
+      throws JsonProcessingException {
     String notImportantInput = "JSON or not JSON, is not important";
     ApiMessageParser<String> parser = parserWithMapperThatThrowsIoException();
     ApiIoException exception =
@@ -75,8 +74,7 @@ public class ApiMessageParserTest {
 
   @DisplayName("getBodyElementFromJson returns null for empty body")
   @Test
-  public void getBodyElementFromJsonReturnsEmptyStringForEmptyBodyAndStringParser()
-      throws IOException {
+  void getBodyElementFromJsonReturnsEmptyStringForEmptyBodyAndStringParser() throws IOException {
 
     String json = IoUtils.stringFromResources(MISSING_BODY);
     ApiMessageParser<String> parser = new ApiMessageParser<>();
@@ -86,7 +84,7 @@ public class ApiMessageParserTest {
 
   @DisplayName("getBodyElementFromJson returns a String for a non JSON string valued body")
   @Test
-  public void getBodyElementFromJsonReturnsAStringForAStringValuedBody() throws IOException {
+  void getBodyElementFromJsonReturnsAStringForAStringValuedBody() throws IOException {
     String json = IoUtils.stringFromResources(BODY_NON_JSON_STRING);
     ApiMessageParser<String> parser = new ApiMessageParser<>();
     String body = parser.getBodyElementFromJson(json, String.class);
@@ -95,7 +93,7 @@ public class ApiMessageParserTest {
 
   @DisplayName("getBodyElementFromJson returns a requestObject for a JSON string body")
   @Test
-  public void getBodyElementFromJsonReturnsAStringForAJsonStringBody() throws IOException {
+  void getBodyElementFromJsonReturnsAStringForAJsonStringBody() throws IOException {
     String json = IoUtils.stringFromResources(BODY_JSON_STRING);
     ApiMessageParser<RequestBody> parser = new ApiMessageParser<>();
     RequestBody body = parser.getBodyElementFromJson(json, RequestBody.class);
@@ -105,7 +103,7 @@ public class ApiMessageParserTest {
 
   @DisplayName("getBodyElementFromJson returns a requestObject for a JSON element")
   @Test
-  public void getBodyElementFromJsonReturnsAStringForAJsonElement() throws IOException {
+  void getBodyElementFromJsonReturnsAStringForAJsonElement() throws IOException {
     String json = IoUtils.stringFromResources(BODY_JSON_ELEMENT);
     ApiMessageParser<RequestBody> parser = new ApiMessageParser<>();
     RequestBody body = parser.getBodyElementFromJson(json, RequestBody.class);

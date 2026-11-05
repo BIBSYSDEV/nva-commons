@@ -27,7 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-public class EventHandlerTest extends AbstractEventHandlerTest {
+class EventHandlerTest extends AbstractEventHandlerTest {
 
   public static final String AWS_EVENT_BRIDGE_EVENT =
       IoUtils.stringFromResources(Path.of("validEventBridgeEvent.json"));
@@ -44,7 +44,7 @@ public class EventHandlerTest extends AbstractEventHandlerTest {
   }
 
   @Test
-  public void handleRequestAcceptsValidEvent() throws JsonProcessingException {
+  void handleRequestAcceptsValidEvent() throws JsonProcessingException {
     EventHandlerTestClass handler = new EventHandlerTestClass();
     final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT);
     handler.handleRequest(input, outputStream, context);
@@ -54,7 +54,7 @@ public class EventHandlerTest extends AbstractEventHandlerTest {
   }
 
   @Test
-  public void handleRequestLogsErrorWhenExceptionIsThrown() {
+  void handleRequestLogsErrorWhenExceptionIsThrown() {
     var logRecorder = LogRecorder.forClass(EventHandler.class);
     var handler = new EventHandlerThrowingException();
     final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT);
@@ -64,7 +64,7 @@ public class EventHandlerTest extends AbstractEventHandlerTest {
   }
 
   @Test
-  public void handleRequestReThrowsExceptionWhenExceptionIsThrown() {
+  void handleRequestReThrowsExceptionWhenExceptionIsThrown() {
     var handler = new EventHandlerThrowingException();
     Executable action =
         () ->
@@ -74,7 +74,7 @@ public class EventHandlerTest extends AbstractEventHandlerTest {
   }
 
   @Test
-  public void handleRequestSerializesObjectsWithoutOmittingEmptyValuesWhenSuchMapperHasBeenSet()
+  void handleRequestSerializesObjectsWithoutOmittingEmptyValuesWhenSuchMapperHasBeenSet()
       throws JsonProcessingException {
     final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT);
     EventHandlerTestClass handler = new EventHandlerTestClass(dtoObjectMapper);
@@ -83,7 +83,7 @@ public class EventHandlerTest extends AbstractEventHandlerTest {
   }
 
   @Test
-  public void handleRequestSerializesObjectsOmittingEmptyValuesWhenSuchMapperHasBeenSet()
+  void handleRequestSerializesObjectsOmittingEmptyValuesWhenSuchMapperHasBeenSet()
       throws JsonProcessingException {
     final InputStream input = sampleInputStream(AWS_EVENT_BRIDGE_EVENT);
     EventHandlerTestClass handler = new EventHandlerTestClass(dynamoObjectMapper);

@@ -25,7 +25,7 @@ import software.amazon.awssdk.services.firehose.model.PutRecordBatchRequest;
 import software.amazon.awssdk.services.firehose.model.PutRecordRequest;
 import software.amazon.awssdk.services.firehose.model.Record;
 
-public class FakeFirehoseClientTest {
+class FakeFirehoseClientTest {
 
   private FakeFirehoseClient client;
   private ObjectMapper OBJECT_MAPPER = new ObjectMapper();

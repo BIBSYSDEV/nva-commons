@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 class BadRequestExceptionTest {
 
   @Test
-  public void statusCodeReturnsBadRequest() {
+  void statusCodeReturnsBadRequest() {
     var exception = new BadRequestException("some message");
     assertThat(exception.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_BAD_REQUEST)));
   }

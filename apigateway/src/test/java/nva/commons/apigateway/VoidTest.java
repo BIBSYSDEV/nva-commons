@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class VoidTest {
+class VoidTest {
 
   public static final String APIGATEWAY_MESSAGES_FOLDER = "apiGatewayMessages";
   public static final String MISSING_BODY_REQUEST = "missingBody.json";
@@ -35,7 +35,7 @@ public class VoidTest {
   /** Setup. */
   @BeforeEach
   @Test
-  public void setup() {
+  void setup() {
     environment = mock(Environment.class);
     context = new FakeContext();
     when(environment.readEnv(anyString())).thenReturn(SOME_ENV_VALUE);
@@ -46,9 +46,8 @@ public class VoidTest {
       "handleRequest returns success when input class is void and body field is missing from "
           + "ApiGateway event")
   @Test
-  public void
-      handleRequestReturnsSuccessWhenInputClassIsVoidAndBodyFieldIsMissingFromApiGatewayEvent()
-          throws IOException {
+  void handleRequestReturnsSuccessWhenInputClassIsVoidAndBodyFieldIsMissingFromApiGatewayEvent()
+      throws IOException {
     ByteArrayOutputStream outputStream = responseFromVoidHandler(MISSING_BODY_REQUEST);
     GatewayResponse<String> output = GatewayResponse.fromOutputStream(outputStream, String.class);
     assertThat(output.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));
@@ -58,9 +57,8 @@ public class VoidTest {
       "handleRequest return success when input class is Void and body field is an empty object in "
           + "ApiGateway event")
   @Test
-  public void
-      handleRequestReturnsSuccessWhenInputClassIsVoidAndBodyFieldIsAnEmptyObjectInApiGatewayEvent()
-          throws IOException {
+  void handleRequestReturnsSuccessWhenInputClassIsVoidAndBodyFieldIsAnEmptyObjectInApiGatewayEvent()
+      throws IOException {
     ByteArrayOutputStream outputStream = responseFromVoidHandler(EMPT_BODY_REQUEST);
     GatewayResponse<String> output = GatewayResponse.fromOutputStream(outputStream, String.class);
     assertThat(output.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_OK)));

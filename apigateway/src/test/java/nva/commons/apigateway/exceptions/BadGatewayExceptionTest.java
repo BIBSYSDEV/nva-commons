@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 class BadGatewayExceptionTest {
 
   @Test
-  public void statusCodeReturnsBadGateway() {
+  void statusCodeReturnsBadGateway() {
     BadGatewayException exception = new BadGatewayException("some message");
     assertThat(exception.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_BAD_GATEWAY)));
   }

@@ -20,7 +20,7 @@ import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class GatewayResponseTest {
+class GatewayResponseTest {
 
   public static final String SOME_VALUE = "Some value";
   public static final String SOME_OTHER_VALUE = "Some other value";
@@ -31,8 +31,7 @@ public class GatewayResponseTest {
 
   @Test
   @DisplayName("hashCode is the same for equivalent GatewayResponses")
-  public void hashCodeIsTheSameForEquivalentGatewayResponses()
-      throws GatewayResponseSerializingException {
+  void hashCodeIsTheSameForEquivalentGatewayResponses() throws GatewayResponseSerializingException {
     var leftResponse = sampleGatewayResponse();
     var rightResponse = sampleGatewayResponse();
 
@@ -41,8 +40,7 @@ public class GatewayResponseTest {
 
   @Test
   @DisplayName("equals returns true for equivalent Gateway responses")
-  public void equalsReturnsTrueForEquivalentGatewayResponses()
-      throws GatewayResponseSerializingException {
+  void equalsReturnsTrueForEquivalentGatewayResponses() throws GatewayResponseSerializingException {
     var leftResponse = sampleGatewayResponse();
     var rightResponse = sampleGatewayResponse();
 
@@ -51,7 +49,7 @@ public class GatewayResponseTest {
 
   @Test
   @DisplayName("fromOutputStream returns a GatewayResponse object for a valid json input")
-  public void fromOutputStreamReturnsGatewayResponseWhenInputIsOutputStreamContainingValidJson()
+  void fromOutputStreamReturnsGatewayResponseWhenInputIsOutputStreamContainingValidJson()
       throws IOException {
     var sampleResponse =
         IoUtils.stringFromResources(Path.of(API_GATEWAY_RESOURCES, SAMPLE_RESPONSE_JSON));
@@ -67,8 +65,7 @@ public class GatewayResponseTest {
 
   @Test
   @DisplayName("fromOutputStream returns a GatewayResponse object for a valid json input")
-  public void fromOutputStreamReturnsGatewayResponseWhenInputIsValidJsonString()
-      throws IOException {
+  void fromOutputStreamReturnsGatewayResponseWhenInputIsValidJsonString() throws IOException {
     var sampleResponse =
         IoUtils.stringFromResources(Path.of(API_GATEWAY_RESOURCES, SAMPLE_RESPONSE_JSON));
     var response = GatewayResponse.fromString(sampleResponse, Map.class);

@@ -20,7 +20,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-public class TryTest {
+class TryTest {
 
   public static final int PROVOKE_ERROR = 0;
   private static final String SOME_STRING = "SomeString";
@@ -44,13 +44,13 @@ public class TryTest {
   }
 
   @Test
-  public void attemptASuccessfulActionsReturnsSuccess() {
+  void attemptASuccessfulActionsReturnsSuccess() {
     Try<Integer> attempt = attempt(() -> divide(6, 3));
     assertThat(attempt.isSuccess(), is(equalTo(true)));
   }
 
   @Test
-  public void attemptAFailingActionThrowsException() {
+  void attemptAFailingActionThrowsException() {
     Try<Integer> attempt = attempt(() -> divide(6, 0));
     assertThat(attempt.isSuccess(), is(equalTo(false)));
     assertThat(attempt.isFailure(), is(equalTo(true)));
@@ -59,13 +59,13 @@ public class TryTest {
   }
 
   @Test
-  public void mapReturnsAMappableResult() {
+  void mapReturnsAMappableResult() {
     Try<String> attempt = attempt(() -> divide(6, 3)).map(numbers::get).map(String::toUpperCase);
     assertThat(attempt.get(), is(equalTo("TWO")));
   }
 
   @Test
-  public void mapReportsTheFirstException() {
+  void mapReportsTheFirstException() {
     Try<String> attempt = attempt(() -> divide(6, 0)).map(numbers::get).map(String::toUpperCase);
 
     assertThat(attempt.isFailure(), is(true));
@@ -73,7 +73,7 @@ public class TryTest {
   }
 
   @Test
-  public void flatMapFlattensNestedTry() {
+  void flatMapFlattensNestedTry() {
     Function<String, Try<String>> fun1 = attempt(String::toUpperCase);
     String input = "input";
     Try<String> nestedTry = attempt(() -> input).flatMap(fun1::apply);
@@ -81,7 +81,7 @@ public class TryTest {
   }
 
   @Test
-  public void attemptReturnsFailureWhenCheckedExceptionIsThrown() {
+  void attemptReturnsFailureWhenCheckedExceptionIsThrown() {
     Optional<Exception> exception =
         Stream.of(SOME_STRING)
             .map(attempt(this::throwCheckedException))
@@ -93,7 +93,7 @@ public class TryTest {
   }
 
   @Test
-  public void attemptReturnsFailureWhenNonCheckedExceptionIsThrown() {
+  void attemptReturnsFailureWhenNonCheckedExceptionIsThrown() {
     Try<String> effort = attempt(() -> throwUnCheckedException("someInput"));
     assertThat(effort.isFailure(), is(true));
     assertThat(
@@ -101,7 +101,7 @@ public class TryTest {
   }
 
   @Test
-  public void attemptReturnsFailureAtTheEndOfStreamProcessingWhenUncheckedExceptionIsThrown() {
+  void attemptReturnsFailureAtTheEndOfStreamProcessingWhenUncheckedExceptionIsThrown() {
     Optional<Exception> exception =
         Stream.of(SOME_STRING)
             .map(attempt(this::throwUnCheckedException))
@@ -113,7 +113,7 @@ public class TryTest {
   }
 
   @Test
-  public void orElseThrowsSpecifiedExceptionWhenUncheckedExceptionIsThrown() {
+  void orElseThrowsSpecifiedExceptionWhenUncheckedExceptionIsThrown() {
     Executable action =
         () ->
             attempt(() -> throwUnCheckedException("Some message"))
@@ -122,7 +122,7 @@ public class TryTest {
   }
 
   @Test
-  public void
+  void
       shouldThrowExceptionDiscardingTheCauseWhenThereIsFailureAndSuppliedWithExpectionInsteadOfFunction() {
     var unexpectedMessage = randomString();
     var expectedMessage = randomString();
@@ -136,7 +136,7 @@ public class TryTest {
   }
 
   @Test
-  public void shouldReturnValueWhenSuccessfulAndOrElseThrowsWithExceptionIsCalled() {
+  void shouldReturnValueWhenSuccessfulAndOrElseThrowsWithExceptionIsCalled() {
     var expectedMessage = randomString();
     var actualMessage =
         attempt(() -> expectedMessage).orElseThrow(new RuntimeException(randomString()));
@@ -145,7 +145,7 @@ public class TryTest {
   }
 
   @Test
-  public void failurePropagatesErrorThroughTheWholeChain() {
+  void failurePropagatesErrorThroughTheWholeChain() {
     int someInt = 2;
     Try<String> results =
         Stream.of(someInt)
@@ -164,7 +164,7 @@ public class TryTest {
 
   @Test
   @DisplayName("flatMap returns a failure with the first Exception")
-  public void flatMapPropagatesTheFirstException() {
+  void flatMapPropagatesTheFirstException() {
     Integer someInt = 2;
     Try<String> actual =
         Try.of(someInt).map(Object::toString).flatMap(this::throwCheckedExceptionForFlatMap);

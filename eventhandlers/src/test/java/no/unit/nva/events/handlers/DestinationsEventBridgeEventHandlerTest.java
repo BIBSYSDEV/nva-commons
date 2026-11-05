@@ -24,7 +24,7 @@ import nva.commons.core.ioutils.IoUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class DestinationsEventBridgeEventHandlerTest extends AbstractEventHandlerTest {
+class DestinationsEventBridgeEventHandlerTest extends AbstractEventHandlerTest {
 
   public static final String VALID_AWS_EVENT_BRIDGE_EVENT =
       IoUtils.stringFromResources(Path.of("validAwsEventBridgeEvent.json"));
@@ -42,7 +42,7 @@ public class DestinationsEventBridgeEventHandlerTest extends AbstractEventHandle
   }
 
   @Test
-  public void handleRequestAcceptsValidEvent() throws JsonProcessingException {
+  void handleRequestAcceptsValidEvent() throws JsonProcessingException {
     DestinationsHandlerTestClass handler = new DestinationsHandlerTestClass();
     InputStream requestInput = IoUtils.stringToStream(VALID_AWS_EVENT_BRIDGE_EVENT);
     handler.handleRequest(requestInput, outputStream, context);
@@ -52,7 +52,7 @@ public class DestinationsEventBridgeEventHandlerTest extends AbstractEventHandle
   }
 
   @Test
-  public void handleRequestSerializesObjectsWithoutOmittingEmptyValuesWhenSuchMapperHasBeenSet()
+  void handleRequestSerializesObjectsWithoutOmittingEmptyValuesWhenSuchMapperHasBeenSet()
       throws JsonProcessingException, IntrospectionException {
     final InputStream input = IoUtils.stringToStream(VALID_AWS_EVENT_BRIDGE_EVENT);
     ObjectMapper injectedMapper = JsonUtils.dtoObjectMapper;
@@ -63,7 +63,7 @@ public class DestinationsEventBridgeEventHandlerTest extends AbstractEventHandle
   }
 
   @Test
-  public void handleRequestSerializesObjectsOmittingEmptyValuesWhenSuchMapperHasBeenSet()
+  void handleRequestSerializesObjectsOmittingEmptyValuesWhenSuchMapperHasBeenSet()
       throws JsonProcessingException, IntrospectionException {
     final InputStream input = IoUtils.stringToStream(VALID_AWS_EVENT_BRIDGE_EVENT);
     ObjectMapper injectedMapper = JsonUtils.dynamoObjectMapper;

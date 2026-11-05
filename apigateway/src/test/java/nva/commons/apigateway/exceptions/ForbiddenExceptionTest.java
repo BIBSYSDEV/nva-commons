@@ -8,16 +8,16 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import java.net.HttpURLConnection;
 import org.junit.jupiter.api.Test;
 
-public class ForbiddenExceptionTest {
+class ForbiddenExceptionTest {
 
   @Test
-  public void forbiddenExceptionReturnsForbiddenStatusCode() {
+  void forbiddenExceptionReturnsForbiddenStatusCode() {
     ForbiddenException exception = new ForbiddenException();
     assertThat(exception.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_FORBIDDEN)));
   }
 
   @Test
-  public void forbiddenExceptionReturnsCustomMessage() {
+  void forbiddenExceptionReturnsCustomMessage() {
     var message = randomString();
     var exception = new ForbiddenException(message);
     assertThat(exception.getMessage(), is(equalTo(message)));

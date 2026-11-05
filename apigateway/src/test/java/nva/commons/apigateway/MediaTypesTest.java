@@ -7,10 +7,10 @@ import static org.hamcrest.Matchers.notNullValue;
 
 import org.junit.jupiter.api.Test;
 
-public class MediaTypesTest {
+class MediaTypesTest {
 
   @Test
-  public void test() {
+  void test() {
     assertThat(MediaTypes.APPLICATION_JSON_LD, notNullValue());
     assertThat(MediaTypes.APPLICATION_JSON_LD, is(instanceOf(MediaType.class)));
   }

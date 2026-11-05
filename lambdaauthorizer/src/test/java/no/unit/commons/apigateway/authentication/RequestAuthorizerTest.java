@@ -14,7 +14,7 @@ import nva.commons.logutils.LogRecorder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-public class RequestAuthorizerTest {
+class RequestAuthorizerTest {
 
   public static final String SOME_PRINCIPAL_ID = "somePrincipalId";
   public static final String CORRECT_KEY = "SOME_KEY";

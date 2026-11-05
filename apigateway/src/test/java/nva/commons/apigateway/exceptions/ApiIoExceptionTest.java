@@ -8,11 +8,11 @@ import java.net.HttpURLConnection;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class ApiIoExceptionTest {
+class ApiIoExceptionTest {
 
   @Test
   @DisplayName("statusCode returns Internal server error")
-  public void statusCodeReturnsInternalServerError() {
+  void statusCodeReturnsInternalServerError() {
     assertThat(
         new ApiIoException(null, null).statusCode(),
         is(equalTo(HttpURLConnection.HTTP_INTERNAL_ERROR)));

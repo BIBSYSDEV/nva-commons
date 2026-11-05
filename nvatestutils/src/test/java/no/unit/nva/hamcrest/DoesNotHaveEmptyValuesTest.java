@@ -28,7 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-public class DoesNotHaveEmptyValuesTest {
+class DoesNotHaveEmptyValuesTest {
 
   public static final String SAMPLE_STRING = "sampleString";
   public static final Map<String, String> SAMPLE_MAP = Map.of(SAMPLE_STRING, SAMPLE_STRING);
@@ -61,21 +61,21 @@ public class DoesNotHaveEmptyValuesTest {
   }
 
   @Test
-  public void matchesReturnsTrueWhenObjectWithSimpleFieldsHasNoNullValue() {
+  void matchesReturnsTrueWhenObjectWithSimpleFieldsHasNoNullValue() {
     WithBaseTypes nonEmptyObject =
         new WithBaseTypes(SAMPLE_STRING, SAMPLE_INT, SAMPLE_LIST, SAMPLE_MAP, SAMPLE_JSON_NODE);
     assertThat(matcher.matches(nonEmptyObject), is(true));
   }
 
   @Test
-  public void matchesReturnsFalseWhenStringIsEmpty() {
+  void matchesReturnsFalseWhenStringIsEmpty() {
     WithBaseTypes nonEmptyObject =
         new WithBaseTypes(EMPTY_STRING, SAMPLE_INT, SAMPLE_LIST, SAMPLE_MAP, SAMPLE_JSON_NODE);
     assertThat(matcher.matches(nonEmptyObject), is(false));
   }
 
   @Test
-  public void matcherReturnsMessageContainingTheFieldNameWhenFieldIsEmpty() {
+  void matcherReturnsMessageContainingTheFieldNameWhenFieldIsEmpty() {
     WithBaseTypes withEmptyInt =
         new WithBaseTypes(SAMPLE_STRING, null, SAMPLE_LIST, SAMPLE_MAP, SAMPLE_JSON_NODE);
 
@@ -88,7 +88,7 @@ public class DoesNotHaveEmptyValuesTest {
   }
 
   @Test
-  public void matcherReturnsFalseWhenObjectContainsChildWithEmptyField() {
+  void matcherReturnsFalseWhenObjectContainsChildWithEmptyField() {
     ClassWithChildrenWithMultipleFields testObject =
         new ClassWithChildrenWithMultipleFields(
             SAMPLE_STRING, objectMissingStringField(), SAMPLE_INT);
@@ -96,7 +96,7 @@ public class DoesNotHaveEmptyValuesTest {
   }
 
   @Test
-  public void matcherReturnsMessageWithMissingFieldsPath() {
+  void matcherReturnsMessageWithMissingFieldsPath() {
     ClassWithChildrenWithMultipleFields testObject =
         new ClassWithChildrenWithMultipleFields(
             SAMPLE_STRING, objectMissingStringField(), SAMPLE_INT);
@@ -109,14 +109,14 @@ public class DoesNotHaveEmptyValuesTest {
   }
 
   @Test
-  public void matchesReturnsFalseWhenBaseTypeIsNull() {
+  void matchesReturnsFalseWhenBaseTypeIsNull() {
     WithBaseTypes baseTypesObject =
         new WithBaseTypes(null, SAMPLE_INT, SAMPLE_LIST, SAMPLE_MAP, SAMPLE_JSON_NODE);
     assertThat(matcher.matches(baseTypesObject), is(false));
   }
 
   @Test
-  public void matchesReturnsFalseWhenListIsEmpty() {
+  void matchesReturnsFalseWhenListIsEmpty() {
     WithBaseTypes baseTypesObject =
         new WithBaseTypes(
             SAMPLE_STRING, SAMPLE_INT, Collections.emptyList(), SAMPLE_MAP, SAMPLE_JSON_NODE);
@@ -124,7 +124,7 @@ public class DoesNotHaveEmptyValuesTest {
   }
 
   @Test
-  public void matchesReturnsFalseWhenMapIsEmpty() {
+  void matchesReturnsFalseWhenMapIsEmpty() {
     WithBaseTypes baseTypesObject =
         new WithBaseTypes(
             SAMPLE_STRING, SAMPLE_INT, SAMPLE_LIST, Collections.emptyMap(), SAMPLE_JSON_NODE);
@@ -132,7 +132,7 @@ public class DoesNotHaveEmptyValuesTest {
   }
 
   @Test
-  public void matchesReturnsFalseWhenJsonNodeIsEmpty() {
+  void matchesReturnsFalseWhenJsonNodeIsEmpty() {
     WithBaseTypes baseTypesObject =
         new WithBaseTypes(
             SAMPLE_STRING,
@@ -144,21 +144,21 @@ public class DoesNotHaveEmptyValuesTest {
   }
 
   @Test
-  public void matchesDoesNotCheckUriFields() {
+  void matchesDoesNotCheckUriFields() {
     ClassWithUri<URI> withUri = new ClassWithUri<>(EXAMPLE_URI, "aNonEmptyValue");
     assertThat(withUri, doesNotHaveEmptyValues());
     assertThat(withUri, doesNotHaveEmptyValuesIgnoringFields(Set.of("someOtherField")));
   }
 
   @Test
-  public void matchesDoesNotCheckUrlFields() throws MalformedURLException {
+  void matchesDoesNotCheckUrlFields() throws MalformedURLException {
     ClassWithUri<URL> withUri = new ClassWithUri<>(EXAMPLE_URI.toURL(), "aNonEmptyValue");
     assertThat(withUri, doesNotHaveEmptyValues());
     assertThat(withUri, doesNotHaveEmptyValuesIgnoringFields(Set.of("someOtherField")));
   }
 
   @Test
-  public void matchesDoesNotCheckFieldInAdditionalCustomIgnoreClass() {
+  void matchesDoesNotCheckFieldInAdditionalCustomIgnoreClass() {
     WithBaseTypes ignoredObjectWithEmptyProperties =
         new WithBaseTypes(null, null, null, null, null);
 
@@ -171,7 +171,7 @@ public class DoesNotHaveEmptyValuesTest {
   }
 
   @Test
-  public void matchesReturnsFalseWhenListElementHasEmptyValues() {
+  void matchesReturnsFalseWhenListElementHasEmptyValues() {
     WithBaseTypes objectWithSomeEmptyValue =
         new WithBaseTypes(null, SAMPLE_INT, SAMPLE_LIST, SAMPLE_MAP, SAMPLE_JSON_NODE);
     ClassWithList withList = new ClassWithList(List.of(objectWithSomeEmptyValue));
@@ -184,14 +184,14 @@ public class DoesNotHaveEmptyValuesTest {
   }
 
   @Test
-  public void matchesReturnsTrueWhenIgnoredFieldIsNull() {
+  void matchesReturnsTrueWhenIgnoredFieldIsNull() {
     WithBaseTypes testObject =
         new WithBaseTypes(null, SAMPLE_INT, SAMPLE_LIST, SAMPLE_MAP, SAMPLE_JSON_NODE);
     assertThat(testObject, doesNotHaveEmptyValuesIgnoringFields(Set.of(STRING_FIELD)));
   }
 
   @Test
-  public void matchesReturnsTrueWhenIgnoredFieldPathPointsToFieldInObjectOfArray() {
+  void matchesReturnsTrueWhenIgnoredFieldPathPointsToFieldInObjectOfArray() {
     WithBaseTypes objectWithSomeEmptyValue =
         new WithBaseTypes(null, SAMPLE_INT, SAMPLE_LIST, SAMPLE_MAP, SAMPLE_JSON_NODE);
     ClassWithList withList = new ClassWithList(List.of(objectWithSomeEmptyValue));
