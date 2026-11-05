@@ -47,6 +47,7 @@ class JsonUtilsTest {
   public static final String EMPTY_STRING = "";
   private static final String POJO_WITH_MISSING_VALUES = "missingStringValues.json";
   private static final String POJO_WITH_EMPTY_VALUES = "emptyStringValues.json";
+  private static final String SOME_FIELD_VALUE = "someValue";
 
   @DisplayName("jsonParser serializes empty string as null")
   @Test
@@ -106,7 +107,7 @@ class JsonUtilsTest {
   @Test
   void objectMapperOmitsNullStrings() throws JsonProcessingException {
     SamplePojo pojo = new SamplePojo();
-    pojo.setField1("someValue");
+    pojo.setField1(SOME_FIELD_VALUE);
     pojo.setField2(null);
     ObjectNode actualJson = toObjectNode(pojo);
     assertThat(actualJson.has("field1"), is(true));
@@ -116,7 +117,7 @@ class JsonUtilsTest {
   @Test
   void objectMapperSerializesEmptyStringAsEmptyString() throws JsonProcessingException {
     SamplePojo samplePojoWithMissingValues = new SamplePojo();
-    samplePojoWithMissingValues.setField1("someValue");
+    samplePojoWithMissingValues.setField1(SOME_FIELD_VALUE);
     samplePojoWithMissingValues.setField2("");
     assertThat(samplePojoWithMissingValues.getField2(), is(not(nullValue())));
     ObjectNode actualJson = toObjectNode(samplePojoWithMissingValues);
@@ -155,8 +156,8 @@ class JsonUtilsTest {
   @Test
   void objectMapperSingleLineReturnsObjectsInSingleLine() throws JsonProcessingException {
     SamplePojo samplePojo = new SamplePojo();
-    samplePojo.setField1("someValue");
-    samplePojo.setField2("someValue");
+    samplePojo.setField1(SOME_FIELD_VALUE);
+    samplePojo.setField2(SOME_FIELD_VALUE);
     String jsonInSingleLine = singleLineObjectMapper.writeValueAsString(samplePojo);
     String prettyJson = dtoObjectMapper.writeValueAsString(samplePojo);
     assertThat(jsonInSingleLine, not(containsString(System.lineSeparator())));

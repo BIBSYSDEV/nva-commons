@@ -48,6 +48,12 @@ class SortableIdentifierTest {
   public static final String EMPTY_FRAGMENT = null;
   private static final Instant PAST_INSTANT = Instant.parse("2020-01-01T00:00:00Z");
   private static final String PAST_INSTANT_HEX_PREFIX = "016f5e66e800-";
+  private static final String SORTABLE_IDENTIFIER_UPPER_CASE =
+      "019716D1CB07-C12BEAB5-A45F-43AD-9496-8897A71D131B";
+  private static final String SORTABLE_IDENTIFIER_LOWER_CASE =
+      "019716d1cb07-c12beab5-a45f-43ad-9496-8897a71d131b";
+  private static final String UUID_UPPER_CASE = "2F451CDA-08A6-4469-9C26-72051632BB90";
+  private static final String UUID_LOWER_CASE = "2f451cda-08a6-4469-9c26-72051632bb90";
 
   @Test
   void sortableIdentifierStringContainsSixParts() {
@@ -178,26 +184,14 @@ class SortableIdentifierTest {
 
   private static Stream<Arguments> caseSensitiveIdentifierProvider() {
     return Stream.of(
-        Arguments.of(
-            "019716D1CB07-C12BEAB5-A45F-43AD-9496-8897A71D131B",
-            "019716d1cb07-c12beab5-a45f-43ad-9496-8897a71d131b"),
-        Arguments.of(
-            "019716d1cb07-c12beab5-a45f-43ad-9496-8897a71d131b",
-            "019716D1CB07-C12BEAB5-A45F-43AD-9496-8897A71D131B"),
-        Arguments.of(
-            "2f451cda-08a6-4469-9c26-72051632bb90", "2F451CDA-08A6-4469-9C26-72051632BB90"),
-        Arguments.of(
-            "2F451CDA-08A6-4469-9C26-72051632BB90", "2f451cda-08a6-4469-9c26-72051632bb90"),
-        Arguments.of(
-            "019716D1CB07-C12BEAB5-A45F-43AD-9496-8897A71D131B",
-            "019716D1CB07-C12BEAB5-A45F-43AD-9496-8897A71D131B"),
-        Arguments.of(
-            "019716d1cb07-c12beab5-a45f-43ad-9496-8897a71d131b",
-            "019716d1cb07-c12beab5-a45f-43ad-9496-8897a71d131b"),
-        Arguments.of(
-            "2F451CDA-08A6-4469-9C26-72051632BB90", "2F451CDA-08A6-4469-9C26-72051632BB90"),
-        Arguments.of(
-            "2f451cda-08a6-4469-9c26-72051632bb90", "2f451cda-08a6-4469-9c26-72051632bb90"));
+        Arguments.of(SORTABLE_IDENTIFIER_UPPER_CASE, SORTABLE_IDENTIFIER_LOWER_CASE),
+        Arguments.of(SORTABLE_IDENTIFIER_LOWER_CASE, SORTABLE_IDENTIFIER_UPPER_CASE),
+        Arguments.of(UUID_LOWER_CASE, UUID_UPPER_CASE),
+        Arguments.of(UUID_UPPER_CASE, UUID_LOWER_CASE),
+        Arguments.of(SORTABLE_IDENTIFIER_UPPER_CASE, SORTABLE_IDENTIFIER_UPPER_CASE),
+        Arguments.of(SORTABLE_IDENTIFIER_LOWER_CASE, SORTABLE_IDENTIFIER_LOWER_CASE),
+        Arguments.of(UUID_UPPER_CASE, UUID_UPPER_CASE),
+        Arguments.of(UUID_LOWER_CASE, UUID_LOWER_CASE));
   }
 
   private void shuffle(List<SortableIdentifier> idStrings) {

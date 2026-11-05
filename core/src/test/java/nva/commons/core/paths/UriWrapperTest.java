@@ -38,6 +38,14 @@ class UriWrapperTest {
   private static final String ROOT = "/";
   private static final String AMPERSAND = "&";
   private static final String ASSIGNMENT = "=";
+  private static final String EXAMPLE_URI = "https://www.example.org/";
+  private static final String FIRST_PATH_ELEMENT = "path1";
+  private static final String SECOND_PATH_ELEMENT = "path2";
+  private static final String FIRST_QUERY_KEY = "key1";
+  private static final String SECOND_QUERY_KEY = "key2";
+  private static final String FIRST_QUERY_VALUE = "value1";
+  private static final String SECOND_QUERY_VALUE = "value2";
+  private static final String REPLACEMENT = "replacement";
 
   public static Stream<Named<Map<String, String>>> queryParameterProvider() {
     return Stream.of(
@@ -148,12 +156,12 @@ class UriWrapperTest {
   @Test
   void shouldReturnUriWithQueryParametersWhenSingleQueryParameterIsPresent() {
     URI expectedUri = URI.create("https://www.example.org/path1/path2?key1=value1");
-    URI uri = URI.create("https://www.example.org/");
+    URI uri = URI.create(EXAMPLE_URI);
     URI actualUri =
         UriWrapper.fromUri(uri)
-            .addChild("path1")
-            .addQueryParameter("key1", "value1")
-            .addChild("path2")
+            .addChild(FIRST_PATH_ELEMENT)
+            .addQueryParameter(FIRST_QUERY_KEY, FIRST_QUERY_VALUE)
+            .addChild(SECOND_PATH_ELEMENT)
             .getUri();
     assertThat(actualUri, is(equalTo(expectedUri)));
   }
@@ -164,12 +172,12 @@ class UriWrapperTest {
         URI.create(
             "https://www.example.org/my-path?key1=someWonderfulSimpleValue&key2=some%20%26%20value&key3=valueWithout"
                 + "%26space");
-    URI uri = URI.create("https://www.example.org/");
+    URI uri = URI.create(EXAMPLE_URI);
     URI actualUri =
         UriWrapper.fromUri(uri)
             .addChild("my-path")
-            .addQueryParameter("key1", "someWonderfulSimpleValue")
-            .addQueryParameter("key2", "some & value")
+            .addQueryParameter(FIRST_QUERY_KEY, "someWonderfulSimpleValue")
+            .addQueryParameter(SECOND_QUERY_KEY, "some & value")
             .addQueryParameter("key3", "valueWithout&space")
             .getUri();
     assertThat(actualUri, is(equalTo(expectedUri)));
@@ -181,9 +189,9 @@ class UriWrapperTest {
     var host = URI.create("https://www.example.org:1234");
     var actualUri =
         UriWrapper.fromUri(host)
-            .addChild("path1")
-            .addQueryParameter("key1", "value1")
-            .addChild("path2")
+            .addChild(FIRST_PATH_ELEMENT)
+            .addQueryParameter(FIRST_QUERY_KEY, FIRST_QUERY_VALUE)
+            .addChild(SECOND_PATH_ELEMENT)
             .getUri();
     assertThat(actualUri, is(equalTo(expectedUri)));
   }
@@ -191,13 +199,13 @@ class UriWrapperTest {
   @Test
   void shouldReturnUriWithQueryParametersWhenManyQueryParametersArePresent() {
     URI expectedUri = URI.create("https://www.example.org/path1/path2?key1=value1&key2=value2");
-    URI uri = URI.create("https://www.example.org/");
+    URI uri = URI.create(EXAMPLE_URI);
     URI actualUri =
         UriWrapper.fromUri(uri)
-            .addChild("path1")
-            .addQueryParameter("key1", "value1")
-            .addQueryParameter("key2", "value2")
-            .addChild("path2")
+            .addChild(FIRST_PATH_ELEMENT)
+            .addQueryParameter(FIRST_QUERY_KEY, FIRST_QUERY_VALUE)
+            .addQueryParameter(SECOND_QUERY_KEY, SECOND_QUERY_VALUE)
+            .addChild(SECOND_PATH_ELEMENT)
             .getUri();
     assertThat(actualUri, is(equalTo(expectedUri)));
   }
@@ -206,13 +214,13 @@ class UriWrapperTest {
   void shouldReturnUriWithQueryParametersWhenQueryParametersAreMap() {
     URI expectedUri =
         URI.create("https://www.example.org/path1/path2?key1=value1&key2=value2&key3=value3");
-    URI uri = URI.create("https://www.example.org/");
+    URI uri = URI.create(EXAMPLE_URI);
     final Map<String, String> parameters = getOrderedParametersMap();
     URI actualUri =
         UriWrapper.fromUri(uri)
-            .addChild("path1")
+            .addChild(FIRST_PATH_ELEMENT)
             .addQueryParameters(parameters)
-            .addChild("path2")
+            .addChild(SECOND_PATH_ELEMENT)
             .addQueryParameter("key3", "value3")
             .getUri();
     assertThat(actualUri, is(equalTo(expectedUri)));
@@ -224,10 +232,10 @@ class UriWrapperTest {
         URI.create("https://www.example.org/path1/path2?key1=value1&key2=value2&key3=value3");
     UriWrapper uri =
         new UriWrapper("https", "www.example.org")
-            .addChild("path1")
-            .addChild("path2")
-            .addQueryParameter("key1", "value1")
-            .addQueryParameter("key2", "value2")
+            .addChild(FIRST_PATH_ELEMENT)
+            .addChild(SECOND_PATH_ELEMENT)
+            .addQueryParameter(FIRST_QUERY_KEY, FIRST_QUERY_VALUE)
+            .addQueryParameter(SECOND_QUERY_KEY, SECOND_QUERY_VALUE)
             .addQueryParameter("key3", "value3");
 
     assertThat(uri.toString(), is(equalTo(expectedUri.toString())));
@@ -335,7 +343,7 @@ class UriWrapperTest {
   void shouldReplacePathElementByIndexFromEnd(int indexFromEnd) {
     var base = "https://example.org/";
     var originalPathElements = new String[] {"one", "two", "three", "four", "five"};
-    var replacement = "replacement";
+    var replacement = REPLACEMENT;
 
     var expectedPathElements = new ArrayList<>(List.of(originalPathElements));
     expectedPathElements.set(originalPathElements.length - indexFromEnd - 1, replacement);
@@ -354,7 +362,7 @@ class UriWrapperTest {
   @Test
   void shouldHandleUriWithPathEndingWithSlashWhenReplacingPathElementByIndexFromEnd() {
     var originalUri = URI.create("https://example.org/path/");
-    var replacement = "replacement";
+    var replacement = REPLACEMENT;
     var expectedUri = URI.create("https://example.org/" + replacement);
     var actualUri =
         UriWrapper.fromUri(originalUri).replacePathElementByIndexFromEnd(0, replacement).getUri();
@@ -368,7 +376,7 @@ class UriWrapperTest {
     var expectedUri =
         URI.create("https://example.org/replacement?queryParam=a/b/c#/my/amazing/fragment");
     var actualUri =
-        UriWrapper.fromUri(originalUri).replacePathElementByIndexFromEnd(0, "replacement").getUri();
+        UriWrapper.fromUri(originalUri).replacePathElementByIndexFromEnd(0, REPLACEMENT).getUri();
     assertThat(actualUri, is(equalTo(expectedUri)));
   }
 
@@ -376,7 +384,7 @@ class UriWrapperTest {
   void shouldDoNothingWhenReplacingElementWhenPathIsRoot() {
     var originalUri = URI.create("https://example.org/");
     var actualUri =
-        UriWrapper.fromUri(originalUri).replacePathElementByIndexFromEnd(0, "replacement").getUri();
+        UriWrapper.fromUri(originalUri).replacePathElementByIndexFromEnd(0, REPLACEMENT).getUri();
     assertThat(actualUri, is(equalTo(originalUri)));
   }
 
@@ -384,7 +392,7 @@ class UriWrapperTest {
   void shouldDoNothingWhenReplacingElementForIndexThatDoesNotExist() {
     var originalUri = URI.create("https://example.org");
     var actualUri =
-        UriWrapper.fromUri(originalUri).replacePathElementByIndexFromEnd(0, "replacement").getUri();
+        UriWrapper.fromUri(originalUri).replacePathElementByIndexFromEnd(0, REPLACEMENT).getUri();
     assertThat(actualUri, is(equalTo(originalUri)));
   }
 
@@ -412,8 +420,8 @@ class UriWrapperTest {
 
   private Map<String, String> getOrderedParametersMap() {
     final Map<String, String> parameters = new TreeMap<>();
-    parameters.put("key1", "value1");
-    parameters.put("key2", "value2");
+    parameters.put(FIRST_QUERY_KEY, FIRST_QUERY_VALUE);
+    parameters.put(SECOND_QUERY_KEY, SECOND_QUERY_VALUE);
     return parameters;
   }
 }

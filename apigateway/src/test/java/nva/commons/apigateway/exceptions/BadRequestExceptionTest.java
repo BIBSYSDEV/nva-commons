@@ -12,35 +12,37 @@ import org.junit.jupiter.api.Test;
 
 class BadRequestExceptionTest {
 
+  private static final String MESSAGE = "some message";
+
   @Test
   void statusCodeReturnsBadRequest() {
-    var exception = new BadRequestException("some message");
+    var exception = new BadRequestException(MESSAGE);
     assertThat(exception.getStatusCode(), is(equalTo(HttpURLConnection.HTTP_BAD_REQUEST)));
   }
 
   @Test
   void errorsAreEmptyByDefault() {
-    var exception = new BadRequestException("some message");
+    var exception = new BadRequestException(MESSAGE);
     assertThat(exception.getErrors(), is(empty()));
   }
 
   @Test
   void errorsAreEmptyWhenConstructedWithCause() {
-    var exception = new BadRequestException("some message", new RuntimeException("cause"));
+    var exception = new BadRequestException(MESSAGE, new RuntimeException("cause"));
     assertThat(exception.getErrors(), is(empty()));
   }
 
   @Test
   void errorsAreReturnedWhenSuppliedAsCollection() {
     var validationError = new ValidationError("must not be blank", "#/title");
-    var exception = new BadRequestException("some message", List.of(validationError));
+    var exception = new BadRequestException(MESSAGE, List.of(validationError));
     assertThat(exception.getErrors(), contains(validationError));
   }
 
   @Test
   void errorsAreReturnedWhenSuppliedAsVarargs() {
     var validationError = new ValidationError("must not be blank", "#/title");
-    var exception = new BadRequestException("some message", validationError);
+    var exception = new BadRequestException(MESSAGE, validationError);
     assertThat(exception.getErrors(), contains(validationError));
   }
 }
