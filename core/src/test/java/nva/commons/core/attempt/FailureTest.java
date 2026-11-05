@@ -236,7 +236,7 @@ class FailureTest {
   }
 
   private int throwAnotherCheckedException() throws TestException {
-    throw new TestException(FailureTest.EXPECTED_EXCEPTION_MESSAGE);
+    throw new TestException(EXPECTED_EXCEPTION_MESSAGE);
   }
 
   private void doNothing() {}

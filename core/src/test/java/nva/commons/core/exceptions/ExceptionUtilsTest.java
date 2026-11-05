@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -38,8 +37,8 @@ class ExceptionUtilsTest {
   }
 
   private void verifyOriginalMessageContainsNewLine(ArithmeticException exception) {
-    MatcherAssert.assertThat(originalMessage(exception), is(not(Matchers.nullValue())));
-    MatcherAssert.assertThat(originalMessage(exception), Matchers.containsString(NEW_LINE));
+    assertThat(originalMessage(exception), is(not(Matchers.nullValue())));
+    assertThat(originalMessage(exception), Matchers.containsString(NEW_LINE));
   }
 
   private int throwsException() {

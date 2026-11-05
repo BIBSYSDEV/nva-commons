@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import no.unit.nva.auth.CognitoUserInfo;
-import no.unit.nva.commons.json.JsonUtils;
 import nva.commons.apigateway.AccessRight;
 import nva.commons.apigateway.RequestInfo;
 import nva.commons.apigateway.exceptions.ApiIoException;
@@ -119,7 +118,7 @@ class HandlerRequestBuilderTest {
 
   @Test
   void buildReturnsRequestWithRequestContextWhenWithRequestContext() throws Exception {
-    var requestContext = JsonUtils.dtoObjectMapper.createObjectNode();
+    var requestContext = dtoObjectMapper.createObjectNode();
     requestContext.put(KEY, VALUE);
     InputStream request =
         new HandlerRequestBuilder<String>(objectMapper).withRequestContext(requestContext).build();
@@ -149,7 +148,7 @@ class HandlerRequestBuilderTest {
             .withAllowedCustomers(Set.of(expectedCustomerId))
             .build();
     var request = IoUtils.streamToString(requestStream);
-    var requestInfo = JsonUtils.dtoObjectMapper.readValue(request, RequestInfo.class);
+    var requestInfo = dtoObjectMapper.readValue(request, RequestInfo.class);
     assertThat(requestInfo.getCurrentCustomer(), is(equalTo(expectedCustomerId)));
   }
 

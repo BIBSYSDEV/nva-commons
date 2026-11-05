@@ -55,7 +55,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import no.unit.nva.auth.CognitoUserInfo;
 import no.unit.nva.testutils.HandlerRequestBuilder;
-import no.unit.nva.testutils.RandomDataGenerator;
 import nva.commons.apigateway.exceptions.ApiIoException;
 import nva.commons.apigateway.exceptions.UnauthorizedException;
 import nva.commons.core.ioutils.IoUtils;
@@ -427,7 +426,7 @@ class RequestInfoTest {
   @Test
   void isThirdPartyShouldReturnFalseWhenScopeContainsOtherUserPool()
       throws JsonProcessingException, ApiIoException {
-    var issuer = RandomDataGenerator.randomUri().toString();
+    var issuer = randomUri().toString();
     var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withIssuer(issuer).build();
     var requestInfo = getRequestInfo(request);
     assertThat(requestInfo.clientIsThirdParty(), is(false));
@@ -448,7 +447,7 @@ class RequestInfoTest {
   @Test
   void getClientIdShouldReturnTheClientIdFromClaim()
       throws JsonProcessingException, ApiIoException {
-    var clientId = RandomDataGenerator.randomString();
+    var clientId = randomString();
     var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).withClientId(clientId).build();
     var requestInfo = getRequestInfo(request);
     assertThat(requestInfo.getClientId().get(), is(equalTo(clientId)));
@@ -987,7 +986,7 @@ class RequestInfoTest {
   }
 
   private RequestInfo extractAccessRightsFromApiGatewayEvent() throws ApiIoException {
-    String event = IoUtils.stringFromResources(RequestInfoTest.AWS_SAMPLE_PROXY_EVENT);
+    String event = IoUtils.stringFromResources(AWS_SAMPLE_PROXY_EVENT);
     return getRequestInfo(new ByteArrayInputStream(event.getBytes()));
   }
 

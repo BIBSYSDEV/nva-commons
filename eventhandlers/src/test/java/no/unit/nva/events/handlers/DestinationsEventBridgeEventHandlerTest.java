@@ -55,7 +55,7 @@ class DestinationsEventBridgeEventHandlerTest extends AbstractEventHandlerTest {
   void handleRequestSerializesObjectsWithoutOmittingEmptyValuesWhenSuchMapperHasBeenSet()
       throws JsonProcessingException, IntrospectionException {
     final InputStream input = IoUtils.stringToStream(VALID_AWS_EVENT_BRIDGE_EVENT);
-    ObjectMapper injectedMapper = JsonUtils.dtoObjectMapper;
+    ObjectMapper injectedMapper = dtoObjectMapper;
     DestinationsHandlerTestClass handler = new DestinationsHandlerTestClass(injectedMapper);
     handler.handleRequest(input, outputStream, context);
     ObjectNode outputObject = (ObjectNode) injectedMapper.readTree(outputStream.toString());
