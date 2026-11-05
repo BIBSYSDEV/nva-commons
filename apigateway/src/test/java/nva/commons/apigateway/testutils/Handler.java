@@ -41,11 +41,11 @@ public class Handler extends ApiGatewayHandler<RequestBody, RequestBody> {
     this.proxy = requestInfo.getPathParameters().get(PROXY_TAG);
     this.path = requestInfo.getPath();
     this.body = input;
-    this.addAdditionalHeaders(() -> additionalHeaders(body));
+    this.addAdditionalHeaders(this::additionalHeaders);
     return this.body;
   }
 
-  private Map<String, String> additionalHeaders(RequestBody input) {
+  private Map<String, String> additionalHeaders() {
     return Collections.singletonMap(HttpHeaders.WARNING, body.getField1());
   }
 

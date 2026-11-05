@@ -138,7 +138,8 @@ class DoiConverterTest {
     return Stream.of(DOI_ORG_DOMAIN + DOI, OLD_DOI_DOMAIN + DOI);
   }
 
-  private CompletableFuture<HttpResponse<String>> failedResponse(InvocationOnMock invocation) {
+  private CompletableFuture<HttpResponse<String>> failedResponse(
+      InvocationOnMock ignoredInvocation) {
     HttpResponse<String> response = mock(HttpResponse.class);
     when(response.statusCode()).thenReturn(HttpURLConnection.HTTP_NOT_FOUND);
     when(response.body()).thenReturn("Not Found");

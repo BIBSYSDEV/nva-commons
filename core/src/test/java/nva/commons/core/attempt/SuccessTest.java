@@ -157,7 +157,7 @@ class SuccessTest {
     assertThat(actualValue, is(equalTo(expectedValue)));
   }
 
-  private void consume(int value) {}
+  private void consume(int ignoredValue) {}
 
   private void throwException(int value) {
     throw new IllegalArgumentException(Integer.toString(value));

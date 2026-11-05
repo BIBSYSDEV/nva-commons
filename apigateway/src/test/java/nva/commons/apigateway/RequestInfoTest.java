@@ -870,7 +870,8 @@ class RequestInfoTest {
 
   private RequestInfo requestInfoWithCustomerId(URI userCustomer)
       throws JsonProcessingException, ApiIoException {
-    var request = new HandlerRequestBuilder<Void>(dtoObjectMapper).build();
+    var request =
+        new HandlerRequestBuilder<Void>(dtoObjectMapper).withCurrentCustomer(userCustomer).build();
     return getRequestInfo(request);
   }
 

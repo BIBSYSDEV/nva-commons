@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -156,8 +157,8 @@ class ApiGatewayHandlerTest {
   @Test
   @DisplayName("ApiGatewayHandler has a constructor with input class as only parameter")
   void apiGatewayHandlerHasAConstructorWithInputClassAsOnlyParameter() {
-    RestRequestHandler<String, String> handler =
-        new ApiGatewayHandler<>(String.class, environment) {
+    assertDoesNotThrow(() ->
+        new ApiGatewayHandler<String, String>(String.class, environment) {
           @Override
           protected void validateRequest(String input, RequestInfo requestInfo, Context context)
               throws ApiGatewayException {
@@ -173,7 +174,7 @@ class ApiGatewayHandlerTest {
           protected Integer getSuccessStatusCode(String input, String output) {
             return HttpURLConnection.HTTP_OK;
           }
-        };
+        });
   }
 
   @Test

@@ -94,7 +94,7 @@ class FakeS3ClientTest {
     var s3Client = new FakeS3Client();
     var bucket = randomString();
     var expectedFile1 = insertRandomFileToS3(s3Client, bucket);
-    var otherFile = insertRandomFileToS3(s3Client, bucket);
+    insertRandomFileToS3(s3Client, bucket);
 
     var listObjectRequest =
         createListObjectsRequest(
@@ -108,7 +108,7 @@ class FakeS3ClientTest {
     var s3Client = new FakeS3Client();
     var bucket = randomString();
     var expectedFile1 = insertRandomFileToS3(s3Client, bucket);
-    var otherFile = insertRandomFileToS3(s3Client, bucket);
+    insertRandomFileToS3(s3Client, bucket);
 
     var listObjectRequest =
         ListObjectsV2Request.builder()

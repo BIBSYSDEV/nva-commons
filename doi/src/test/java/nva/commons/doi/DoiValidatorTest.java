@@ -32,49 +32,49 @@ class DoiValidatorTest {
 
   @Test
   void validateReturnsTrueForDoiStringStartingWithTenDotPrefix() {
-    assertThat(DoiValidator.validateOffline(DOI), is((equalTo(true))));
+    assertThat(DoiValidator.validateOffline(DOI), is(equalTo(true)));
   }
 
   @Test
   void validateReturnsTrueForDoiStringWitDoiPrefix() {
     String input = DOI_PREFIX + DOI;
-    assertThat(DoiValidator.validateOffline(input), is((equalTo(true))));
+    assertThat(DoiValidator.validateOffline(input), is(equalTo(true)));
   }
 
   @Test
   void validateReturnsTrueForHttpsDoiWitDoiUri() {
     String input = HTTPS_DOI + DOI;
-    assertThat(DoiValidator.validateOffline(input), is((equalTo(true))));
+    assertThat(DoiValidator.validateOffline(input), is(equalTo(true)));
   }
 
   @Test
   void validateReturnsTrueForHttpDoiWitDoiUri() {
     String input = HTTP_DOI + DOI;
-    assertThat(DoiValidator.validateOffline(input), is((equalTo(true))));
+    assertThat(DoiValidator.validateOffline(input), is(equalTo(true)));
   }
 
   @Test
   void validateReturnsTrueForHttpsDxDoiWitDoiUri() {
     String input = HTTPS_DX_DOI + DOI;
-    assertThat(DoiValidator.validateOffline(input), is((equalTo(true))));
+    assertThat(DoiValidator.validateOffline(input), is(equalTo(true)));
   }
 
   @Test
   void validateReturnsFalseForInvalidDoiUri() {
     String input = INVALID_URL + DOI;
-    assertThat(DoiValidator.validateOffline(input), is((equalTo(false))));
+    assertThat(DoiValidator.validateOffline(input), is(equalTo(false)));
   }
 
   @Test
   void validateReturnsTrueForValidURL() {
     URI input = URI.create(HTTP_DOI + DOI);
-    assertThat(DoiValidator.validateOffline(input), is((equalTo(true))));
+    assertThat(DoiValidator.validateOffline(input), is(equalTo(true)));
   }
 
   @ParameterizedTest
   @ValueSource(strings = {ATTACHMENT + HTTPS_DOI + DOI, HTTPS_DOI + DOI + ATTACHMENT})
   void shouldReturnFalseForDoiWithPrefixStringOrPostfixString(String invalidUri) {
-    assertThat(DoiValidator.validateOffline(invalidUri), is((equalTo(false))));
+    assertThat(DoiValidator.validateOffline(invalidUri), is(equalTo(false)));
   }
 
   private static Stream<DoiInput> validDois() throws URISyntaxException {

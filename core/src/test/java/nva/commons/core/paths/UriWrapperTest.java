@@ -87,7 +87,7 @@ class UriWrapperTest {
 
   @Test
   void getParentReturnsEmptyWhenPathIsRoot() {
-    UriWrapper uriWrapper = UriWrapper.fromUri((HOST + "/"));
+    UriWrapper uriWrapper = UriWrapper.fromUri(HOST + "/");
     Optional<UriWrapper> parent = uriWrapper.getParent();
     assertThat(parent.isEmpty(), is(true));
   }

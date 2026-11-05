@@ -42,13 +42,13 @@ public class RawStringResponseHandler extends ApiGatewayHandler<RequestBody, Str
     this.proxy = requestInfo.getPathParameters().get(PROXY_TAG);
     this.path = requestInfo.getPath();
     this.body = input;
-    this.addAdditionalHeaders(() -> additionalHeaders(body));
+    this.addAdditionalHeaders(this::additionalHeaders);
 
     ObjectMapper objectMapper = getObjectMapper(requestInfo);
     return attempt(() -> objectMapper.writeValueAsString(body)).orElseThrow();
   }
 
-  private Map<String, String> additionalHeaders(RequestBody input) {
+  private Map<String, String> additionalHeaders() {
     return Collections.singletonMap(HttpHeaders.WARNING, body.getField1());
   }
 
