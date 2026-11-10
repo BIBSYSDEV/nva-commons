@@ -1,0 +1,30 @@
+[tasks."publish:local"]
+description = "Publish all modules to the local Maven repository as VERSION_NAME in gradle.properties plus a -local suffix"
+run = "./gradlew publishToMavenLocal -PlocalBuild"
+
+[tasks."publish:release"]
+description = "Create a GitHub release for the version on main, which triggers publishing to Maven Central"
+depends = ["publish:versions"]
+confirm = "Release the version on main to Maven Central?"
+run = '''
+version_on_main="$(mise run --quiet publish:version-on-main)"
+if [ -z "$version_on_main" ]; then
+  echo "Could not read VERSION_NAME from gradle.properties on main"
+  exit 1
+fi
+gh release create "v${version_on_main}" --title "v${version_on_main}" --generate-notes --target main
+'''
+
+[tasks."publish:versions"]
+description = "Show the latest GitHub release and VERSION_NAME in gradle.properties on main"
+env = { GH_PAGER = "cat" }
+run = '''
+echo "Latest release:  $(gh release view --json tagName --jq .tagName)"
+echo "Version on main: v$(mise run --quiet publish:version-on-main)"
+'''
+
+[tasks."publish:version-on-main"]
+hide = true
+run = '''
+gh api 'repos/{owner}/{repo}/contents/gradle.properties?ref=main' -H 'Accept: application/vnd.github.raw' | sed -n 's/^VERSION_NAME=//p'
+'''
