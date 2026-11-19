@@ -1,0 +1,96 @@
+package no.unit.nva.identifiers;
+
+import static no.unit.nva.testutils.RandomDataGenerator.randomString;
+import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.net.URI;
+import java.util.UUID;
+import nva.commons.core.paths.UriWrapper;
+import org.junit.jupiter.api.Test;
+
+class CustomerIdentifierTest {
+
+  private static final String HOST = randomUri().getHost();
+  private static final String CRISTIN = "cristin";
+  private static final String CUSTOMER = "customer";
+
+  @Test
+  void shouldCreateCustomerIdentifierFromCustomerUri() {
+    var identifier = UUID.randomUUID();
+
+    var customerIdentifier = CustomerIdentifier.fromUri(customerUri(identifier.toString()));
+
+    assertEquals(identifier, customerIdentifier.value());
+  }
+
+  @Test
+  void shouldThrowExceptionWhenCustomerUriIdentifierIsNotUuid() {
+    var uri = customerUri(randomString());
+
+    assertThrows(IllegalArgumentException.class, () -> CustomerIdentifier.fromUri(uri));
+  }
+
+  @Test
+  void shouldThrowExceptionWhenCustomerUriIdentifierIsNotCanonicalUuid() {
+    var uri = customerUri("1-2-3-4-5");
+
+    assertThrows(IllegalArgumentException.class, () -> CustomerIdentifier.fromUri(uri));
+  }
+
+  @Test
+  void shouldThrowExceptionWhenCustomerUriHasQueryParameters() {
+    var uri = customerUriWithRawPath(UUID.randomUUID() + "?depth=top");
+
+    assertThrows(IllegalArgumentException.class, () -> CustomerIdentifier.fromUri(uri));
+  }
+
+  @Test
+  void shouldThrowExceptionWhenCustomerUriHasFragment() {
+    var uri = customerUriWithRawPath(UUID.randomUUID() + "#affiliations");
+
+    assertThrows(IllegalArgumentException.class, () -> CustomerIdentifier.fromUri(uri));
+  }
+
+  @Test
+  void shouldThrowExceptionWhenCustomerUriHasUnexpectedResource() {
+    var uri =
+        UriWrapper.fromHost(HOST)
+            .addChild(CRISTIN)
+            .addChild(CUSTOMER)
+            .addChild(UUID.randomUUID().toString())
+            .getUri();
+
+    assertThrows(IllegalArgumentException.class, () -> CustomerIdentifier.fromUri(uri));
+  }
+
+  @Test
+  void shouldThrowExceptionWhenCustomerUriHasNoIdentifier() {
+    var uri = UriWrapper.fromHost(HOST).addChild(CUSTOMER).getUri();
+
+    assertThrows(IllegalArgumentException.class, () -> CustomerIdentifier.fromUri(uri));
+  }
+
+  @Test
+  void shouldThrowExceptionWhenCustomerIdentifierValueIsMissing() {
+    assertThrows(IllegalArgumentException.class, () -> new CustomerIdentifier(null));
+  }
+
+  @Test
+  void shouldCreateCustomerUriFromIdentifier() {
+    var identifier = UUID.randomUUID();
+
+    var uri = new CustomerIdentifier(identifier).toId(HOST);
+
+    assertEquals(customerUriWithRawPath(identifier.toString()), uri);
+  }
+
+  private URI customerUriWithRawPath(String identifier) {
+    return URI.create("https://%s/customer/%s".formatted(HOST, identifier));
+  }
+
+  private URI customerUri(String identifier) {
+    return UriWrapper.fromHost(HOST).addChild(CUSTOMER).addChild(identifier).getUri();
+  }
+}
