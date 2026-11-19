@@ -8,8 +8,8 @@ dependencies {
     api libs.jackson.databind
     api platform(libs.aws.sdk2.bom)
     api project(":core")
-    implementation libs.aws.apache.client
     implementation libs.aws.ion
+    implementation libs.aws.sdk2.apache5.client
     implementation libs.aws.sdk2.auth
     implementation libs.aws.sdk2.aws.core
     implementation libs.aws.sdk2.http.client
