@@ -50,6 +50,7 @@ aws-apache-client = { group = 'software.amazon.awssdk', name = 'apache-client', 
 aws-ion = { group = 'com.amazon.ion', name = 'ion-java', version.ref = 'aws-ion' }
 aws-lambda-core = { group = 'com.amazonaws', name = 'aws-lambda-java-core', version.ref = 'aws-lambda-core' }
 aws-lambda-events = { group = 'com.amazonaws', name = 'aws-lambda-java-events', version.ref = 'aws-lambda-events' }
+aws-sdk2-apache5-client = { group = 'software.amazon.awssdk', name = 'apache5-client', version.ref = 'aws-sdk2' }
 aws-sdk2-auth = { group = 'software.amazon.awssdk', name = 'auth', version.ref = 'aws-sdk2' }
 aws-sdk2-bom = { group = 'software.amazon.awssdk', name = 'bom', version.ref = 'aws-sdk2' }
 aws-sdk2-aws-core = { group = 'software.amazon.awssdk', name = 'aws-core', version.ref = 'aws-sdk2' }
