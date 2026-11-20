@@ -19,6 +19,8 @@ public sealed interface UriIdentifier<T> permits PersonIdentifier {
   static Optional<String> identifierFrom(URI uri, UnixPath expectedPath) {
     var parentPath = expectedPath.addRoot();
     return Optional.ofNullable(uri)
+        .filter(UriIdentifier::hasHttpsScheme)
+        .filter(UriIdentifier::hasHost)
         .filter(UriIdentifier::hasPathOnly)
         .filter(UriIdentifier::hasUnencodedPath)
         .map(URI::getPath)
@@ -30,6 +32,14 @@ public sealed interface UriIdentifier<T> permits PersonIdentifier {
 
   private static boolean isCanonical(UnixPath path, URI uri) {
     return path.addRoot().toString().equals(uri.getPath());
+  }
+
+  private static boolean hasHttpsScheme(URI uri) {
+    return UriWrapper.HTTPS.equalsIgnoreCase(uri.getScheme());
+  }
+
+  private static boolean hasHost(URI uri) {
+    return Objects.nonNull(uri.getHost());
   }
 
   private static boolean hasPathOnly(URI uri) {

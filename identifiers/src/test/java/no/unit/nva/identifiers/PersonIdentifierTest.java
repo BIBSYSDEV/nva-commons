@@ -84,6 +84,20 @@ class PersonIdentifierTest {
   }
 
   @Test
+  void shouldThrowExceptionWhenPersonUriIsNotHttps() {
+    var uri = URI.create("ftp://%s/cristin/person/%s".formatted(HOST, randomPersonIdentifier()));
+
+    assertThrows(IllegalArgumentException.class, () -> PersonIdentifier.fromUri(uri));
+  }
+
+  @Test
+  void shouldThrowExceptionWhenPersonUriHasNoHost() {
+    var uri = URI.create("/cristin/person/" + randomPersonIdentifier());
+
+    assertThrows(IllegalArgumentException.class, () -> PersonIdentifier.fromUri(uri));
+  }
+
+  @Test
   void shouldThrowExceptionWhenUriIsNull() {
     assertThrows(IllegalArgumentException.class, () -> PersonIdentifier.fromUri(null));
   }
