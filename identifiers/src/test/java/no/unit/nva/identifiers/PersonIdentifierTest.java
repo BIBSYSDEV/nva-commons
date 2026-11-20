@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.net.URI;
 import nva.commons.core.paths.UriWrapper;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class PersonIdentifierTest {
 
@@ -108,29 +110,10 @@ class PersonIdentifierTest {
     assertThrows(IllegalArgumentException.class, () -> new PersonIdentifier(" "));
   }
 
-  @Test
-  void shouldThrowExceptionWhenPersonIdentifierValueContainsPathDelimiter() {
-    assertThrows(IllegalArgumentException.class, () -> new PersonIdentifier("123/456"));
-  }
-
-  @Test
-  void shouldThrowExceptionWhenPersonIdentifierValueRequiresEncoding() {
-    assertThrows(IllegalArgumentException.class, () -> new PersonIdentifier("123 456"));
-  }
-
-  @Test
-  void shouldThrowExceptionWhenPersonIdentifierValueIsDotSegment() {
-    assertThrows(IllegalArgumentException.class, () -> new PersonIdentifier(".."));
-  }
-
-  @Test
-  void shouldThrowExceptionWhenPersonIdentifierValueIsNotNumeric() {
-    assertThrows(IllegalArgumentException.class, () -> new PersonIdentifier("abc"));
-  }
-
-  @Test
-  void shouldThrowExceptionWhenPersonIdentifierValueHasLeadingZero() {
-    assertThrows(IllegalArgumentException.class, () -> new PersonIdentifier("0123"));
+  @ParameterizedTest
+  @ValueSource(strings = {"abc", "0123", "123/456", "123 456", ".."})
+  void shouldThrowExceptionWhenValueIsNotCristinSequenceNumber(String value) {
+    assertThrows(IllegalArgumentException.class, () -> new PersonIdentifier(value));
   }
 
   @Test
