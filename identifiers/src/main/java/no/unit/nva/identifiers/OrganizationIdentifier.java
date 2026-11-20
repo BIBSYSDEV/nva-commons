@@ -1,11 +1,13 @@
 package no.unit.nva.identifiers;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.net.URI;
 import java.util.regex.Pattern;
 import nva.commons.core.StringUtils;
 import nva.commons.core.paths.UnixPath;
 
-public record OrganizationIdentifier(String value) implements UriIdentifier<String> {
+public record OrganizationIdentifier(@JsonValue String value) implements UriIdentifier<String> {
 
   private static final UnixPath ORGANIZATION_PATH = UnixPath.of("cristin", "organization");
   private static final Pattern CRISTIN_ORGANIZATION_NUMBER =
@@ -24,6 +26,11 @@ public record OrganizationIdentifier(String value) implements UriIdentifier<Stri
     if (!isCristinOrganizationNumber(value)) {
       throw new IllegalArgumentException(INVALID_ORGANIZATION_IDENTIFIER_VALUE_EXCEPTION);
     }
+  }
+
+  @JsonCreator
+  public static OrganizationIdentifier fromValue(String value) {
+    return new OrganizationIdentifier(value);
   }
 
   public static OrganizationIdentifier fromUri(URI uri) {

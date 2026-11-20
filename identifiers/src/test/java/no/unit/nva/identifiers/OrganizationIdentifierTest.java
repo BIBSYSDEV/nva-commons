@@ -1,11 +1,13 @@
 package no.unit.nva.identifiers;
 
+import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomInteger;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.URI;
 import nva.commons.core.paths.UriWrapper;
 import org.junit.jupiter.api.Test;
@@ -116,6 +118,24 @@ class OrganizationIdentifierTest {
     return URI.create(
         "https://%s/cristin/%s/%s"
             .formatted(HOST, OrganizationIdentifierTest.ORGANIZATION, identifier));
+  }
+
+  @Test
+  void shouldSerializeAsBareValue() throws JsonProcessingException {
+    var identifier = new OrganizationIdentifier(randomOrganizationIdentifier());
+
+    var json = dtoObjectMapper.writeValueAsString(identifier);
+
+    assertEquals("\"" + identifier.value() + "\"", json);
+  }
+
+  @Test
+  void shouldDeserializeFromBareValue() throws JsonProcessingException {
+    var identifier = new OrganizationIdentifier(randomOrganizationIdentifier());
+
+    var json = dtoObjectMapper.writeValueAsString(identifier);
+
+    assertEquals(identifier, dtoObjectMapper.readValue(json, OrganizationIdentifier.class));
   }
 
   private URI cristinUri(String resource, String identifier) {
