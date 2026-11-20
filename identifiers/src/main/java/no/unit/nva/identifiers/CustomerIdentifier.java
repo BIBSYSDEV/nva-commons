@@ -13,7 +13,7 @@ public record CustomerIdentifier(@JsonValue UUID value) implements UriIdentifier
 
   private static final UnixPath CUSTOMER_PATH = UnixPath.of("customer");
   private static final String INVALID_CUSTOMER_IDENTIFIER_EXCEPTION =
-      "Provided uri is not a customer identifier: ";
+      "Provided uri is not a customer identifier";
   private static final String INVALID_CUSTOMER_IDENTIFIER_VALUE_EXCEPTION =
       "Customer identifier must be a canonical uuid!";
   private static final String MISSING_CUSTOMER_IDENTIFIER_EXCEPTION =
@@ -33,8 +33,7 @@ public record CustomerIdentifier(@JsonValue UUID value) implements UriIdentifier
   public static CustomerIdentifier fromUri(URI uri) {
     return UriIdentifier.identifierFrom(uri, CUSTOMER_PATH)
         .map(CustomerIdentifier::fromValue)
-        .orElseThrow(
-            () -> new IllegalArgumentException(INVALID_CUSTOMER_IDENTIFIER_EXCEPTION + uri));
+        .orElseThrow(() -> new IllegalArgumentException(INVALID_CUSTOMER_IDENTIFIER_EXCEPTION));
   }
 
   @Override
