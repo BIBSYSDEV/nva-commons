@@ -26,7 +26,7 @@ import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.http.SdkHttpClient;
-import software.amazon.awssdk.http.apache.ApacheHttpClient;
+import software.amazon.awssdk.http.apache5.Apache5HttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
@@ -252,7 +252,7 @@ public class S3Driver {
 
   @JacocoGenerated
   private static SdkHttpClient httpClientForConcurrentQueries() {
-    return ApacheHttpClient.builder()
+    return Apache5HttpClient.builder()
         .useIdleConnectionReaper(true)
         .maxConnections(MAX_CONNECTIONS)
         .connectionMaxIdleTime(Duration.ofMinutes(IDLE_TIME))
