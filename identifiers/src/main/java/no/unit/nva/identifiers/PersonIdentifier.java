@@ -12,7 +12,7 @@ public record PersonIdentifier(@JsonValue String value) implements UriIdentifier
   private static final UnixPath PERSON_PATH = UnixPath.of("cristin", "person");
   private static final Pattern CRISTIN_SEQUENCE_NUMBER = Pattern.compile("0|[1-9][0-9]{0,18}");
   private static final String INVALID_PERSON_IDENTIFIER_EXCEPTION =
-      "Provided uri is not a person identifier: ";
+      "Provided uri is not a person identifier";
   private static final String INVALID_PERSON_IDENTIFIER_VALUE_EXCEPTION =
       "Person identifier must be a Cristin sequence number!";
   private static final String MISSING_PERSON_IDENTIFIER_EXCEPTION =
@@ -35,7 +35,7 @@ public record PersonIdentifier(@JsonValue String value) implements UriIdentifier
   public static PersonIdentifier fromUri(URI uri) {
     return UriIdentifier.identifierFrom(uri, PERSON_PATH)
         .map(PersonIdentifier::new)
-        .orElseThrow(() -> new IllegalArgumentException(INVALID_PERSON_IDENTIFIER_EXCEPTION + uri));
+        .orElseThrow(() -> new IllegalArgumentException(INVALID_PERSON_IDENTIFIER_EXCEPTION));
   }
 
   private static boolean isNotCristinSequenceNumber(String value) {

@@ -13,7 +13,7 @@ public record OrganizationIdentifier(@JsonValue String value) implements UriIden
   private static final Pattern CRISTIN_ORGANIZATION_NUMBER =
       Pattern.compile("(0|[1-9][0-9]{0,18})(\\.(0|[1-9][0-9]{0,18})){3}");
   private static final String INVALID_ORGANIZATION_IDENTIFIER_EXCEPTION =
-      "Provided uri is not an organization identifier: ";
+      "Provided uri is not an organization identifier";
   private static final String INVALID_ORGANIZATION_IDENTIFIER_VALUE_EXCEPTION =
       "Organization identifier must be four dot separated numbers!";
   private static final String MISSING_ORGANIZATION_IDENTIFIER_EXCEPTION =
@@ -36,8 +36,7 @@ public record OrganizationIdentifier(@JsonValue String value) implements UriIden
   public static OrganizationIdentifier fromUri(URI uri) {
     return UriIdentifier.identifierFrom(uri, ORGANIZATION_PATH)
         .map(OrganizationIdentifier::new)
-        .orElseThrow(
-            () -> new IllegalArgumentException(INVALID_ORGANIZATION_IDENTIFIER_EXCEPTION + uri));
+        .orElseThrow(() -> new IllegalArgumentException(INVALID_ORGANIZATION_IDENTIFIER_EXCEPTION));
   }
 
   private static boolean isCristinOrganizationNumber(String value) {
