@@ -111,7 +111,7 @@ class PersonIdentifierTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"abc", "0123", "123/456", "123 456", ".."})
+  @ValueSource(strings = {"abc", "0123", "123/456", "123 456", "..", "12345678901234567890"})
   void shouldThrowExceptionWhenValueIsNotCristinSequenceNumber(String value) {
     assertThrows(IllegalArgumentException.class, () -> new PersonIdentifier(value));
   }

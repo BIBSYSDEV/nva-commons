@@ -8,7 +8,7 @@ import nva.commons.core.paths.UnixPath;
 public record PersonIdentifier(String value) implements UriIdentifier<String> {
 
   private static final UnixPath PERSON_PATH = UnixPath.of("cristin", "person");
-  private static final Pattern CRISTIN_SEQUENCE_NUMBER = Pattern.compile("0|[1-9][0-9]*");
+  private static final Pattern CRISTIN_SEQUENCE_NUMBER = Pattern.compile("0|[1-9][0-9]{0,18}");
   private static final String INVALID_PERSON_IDENTIFIER_EXCEPTION =
       "Provided uri is not a person identifier: ";
   private static final String INVALID_PERSON_IDENTIFIER_VALUE_EXCEPTION =
