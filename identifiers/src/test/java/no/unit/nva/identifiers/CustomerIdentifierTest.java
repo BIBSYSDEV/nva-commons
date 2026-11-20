@@ -7,8 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.net.URI;
 import java.util.UUID;
+import java.util.stream.Stream;
 import nva.commons.core.paths.UriWrapper;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class CustomerIdentifierTest {
 
@@ -25,16 +28,10 @@ class CustomerIdentifierTest {
     assertEquals(identifier, customerIdentifier.value());
   }
 
-  @Test
-  void shouldThrowExceptionWhenCustomerUriIdentifierIsNotUuid() {
-    var uri = customerUri(randomString());
-
-    assertThrows(IllegalArgumentException.class, () -> CustomerIdentifier.fromUri(uri));
-  }
-
-  @Test
-  void shouldThrowExceptionWhenCustomerUriIdentifierIsNotCanonicalUuid() {
-    var uri = customerUri("1-2-3-4-5");
+  @ParameterizedTest
+  @MethodSource("identifiersThatAreNotCanonicalUuids")
+  void shouldThrowExceptionWhenCustomerUriIdentifierIsNotCanonicalUuid(String identifier) {
+    var uri = customerUri(identifier);
 
     assertThrows(IllegalArgumentException.class, () -> CustomerIdentifier.fromUri(uri));
   }
@@ -84,6 +81,10 @@ class CustomerIdentifierTest {
     var uri = new CustomerIdentifier(identifier).toId(HOST);
 
     assertEquals(customerUriWithRawPath(identifier.toString()), uri);
+  }
+
+  private static Stream<String> identifiersThatAreNotCanonicalUuids() {
+    return Stream.of(randomString(), "1-2-3-4-5");
   }
 
   private URI customerUriWithRawPath(String identifier) {
