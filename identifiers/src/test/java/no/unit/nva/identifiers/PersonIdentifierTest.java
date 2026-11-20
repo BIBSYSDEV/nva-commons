@@ -4,6 +4,9 @@ import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomInteger;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -159,6 +162,20 @@ class PersonIdentifierTest {
     var json = dtoObjectMapper.writeValueAsString(identifier);
 
     assertEquals(identifier, dtoObjectMapper.readValue(json, PersonIdentifier.class));
+  }
+
+  @Test
+  void shouldNotIncludeProvidedUriInExceptionMessage() {
+    var token = randomString();
+    var uri =
+        URI.create(
+            "https://%s/cristin/person/%s?access_token=%s"
+                .formatted(HOST, randomPersonIdentifier(), token));
+
+    var exception =
+        assertThrows(IllegalArgumentException.class, () -> PersonIdentifier.fromUri(uri));
+
+    assertThat(exception.getMessage(), not(containsString(token)));
   }
 
   private URI cristinUri(String resource, String identifier) {
