@@ -137,7 +137,7 @@ class PersonIdentifierTest {
   void shouldCreatePersonUriFromIdentifier() {
     var identifier = randomPersonIdentifier();
 
-    var uri = new PersonIdentifier(identifier).toUri(HOST);
+    var uri = new PersonIdentifier(identifier).toId(HOST);
 
     assertEquals(cristinUriWithRawPath(identifier), uri);
   }
@@ -146,7 +146,7 @@ class PersonIdentifierTest {
   void shouldReturnEqualIdentifierWhenPersonUriIsParsedBack() {
     var identifier = new PersonIdentifier(randomPersonIdentifier());
 
-    assertEquals(identifier, PersonIdentifier.fromUri(identifier.toUri(HOST)));
+    assertEquals(identifier, PersonIdentifier.fromUri(identifier.toId(HOST)));
   }
 
   private String randomPersonIdentifier() {

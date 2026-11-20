@@ -12,7 +12,7 @@ public sealed interface UriIdentifier<T> permits PersonIdentifier {
 
   UnixPath path();
 
-  default URI toUri(String host) {
+  default URI toId(String host) {
     return UriWrapper.fromHost(host).addChild(path()).addChild(value().toString()).getUri();
   }
 
