@@ -9,6 +9,21 @@ catalog {
     }
 }
 
+// Makes dependencyUpdates cover catalog entries that are only used by consuming repositories.
+configurations {
+    catalogAudit {
+        description = 'Catalog entries for dependencyUpdates only; never consumed.'
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+}
+
+def publishedCatalog = versionCatalogs.named('libs')
+publishedCatalog.libraryAliases.each { libraryAlias ->
+    dependencies.add('catalogAudit', publishedCatalog.findLibrary(libraryAlias).get())
+}
+
 publishing {
     publications {
         create("versionCatalog", MavenPublication) {
