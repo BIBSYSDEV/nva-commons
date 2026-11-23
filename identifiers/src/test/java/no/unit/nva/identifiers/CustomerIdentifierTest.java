@@ -1,10 +1,12 @@
 package no.unit.nva.identifiers;
 
+import static no.unit.nva.commons.json.JsonUtils.dtoObjectMapper;
 import static no.unit.nva.testutils.RandomDataGenerator.randomString;
 import static no.unit.nva.testutils.RandomDataGenerator.randomUri;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.URI;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -89,6 +91,24 @@ class CustomerIdentifierTest {
 
   private URI customerUriWithRawPath(String identifier) {
     return URI.create("https://%s/customer/%s".formatted(HOST, identifier));
+  }
+
+  @Test
+  void shouldSerializeAsBareValue() throws JsonProcessingException {
+    var identifier = new CustomerIdentifier(UUID.randomUUID());
+
+    var json = dtoObjectMapper.writeValueAsString(identifier);
+
+    assertEquals("\"" + identifier.value() + "\"", json);
+  }
+
+  @Test
+  void shouldDeserializeFromBareValue() throws JsonProcessingException {
+    var identifier = new CustomerIdentifier(UUID.randomUUID());
+
+    var json = dtoObjectMapper.writeValueAsString(identifier);
+
+    assertEquals(identifier, dtoObjectMapper.readValue(json, CustomerIdentifier.class));
   }
 
   private URI customerUri(String identifier) {
