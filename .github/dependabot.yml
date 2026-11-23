@@ -1,9 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "gradle"
-    directories:
-      - "/"
-      - "/build-logic"
+    directory: "/"
     schedule:
       interval: weekly
       day: "monday"
@@ -12,6 +10,8 @@ updates:
     open-pull-requests-limit: 10
     cooldown:
       default-days: 7
+      exclude:
+        - "com.github.bibsysdev:*"
     commit-message:
       prefix: "build"
     groups:
