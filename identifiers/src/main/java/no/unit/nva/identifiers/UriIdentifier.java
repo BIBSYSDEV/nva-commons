@@ -6,7 +6,7 @@ import java.util.Optional;
 import nva.commons.core.paths.UnixPath;
 import nva.commons.core.paths.UriWrapper;
 
-public sealed interface UriIdentifier<T> permits PersonIdentifier {
+public sealed interface UriIdentifier<T> permits PersonIdentifier, OrganizationIdentifier {
 
   T value();
 
