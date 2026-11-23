@@ -12,7 +12,7 @@ def signingKey = findProperty('signingKey')
 def hasSigningKey = signingKey?.trim() as boolean
 
 signing {
-    required = { hasSigningKey }
+    required = { hasSigningKey || gradle.taskGraph.allTasks.any { it instanceof PublishToMavenRepository } }
     if (hasSigningKey) {
         useInMemoryPgpKeys(signingKey, findProperty('signingPassword'))
     }
