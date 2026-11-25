@@ -3,9 +3,11 @@ plugins {
     alias(libs.plugins.nexus.publish)
 }
 
+def localBuildVersionSuffix = providers.gradleProperty("localBuild").isPresent() ? "-local" : ""
+
 allprojects {
     group = getProperty("GROUP")
-    version = getProperty("VERSION_NAME")
+    version = getProperty("VERSION_NAME") + localBuildVersionSuffix
 }
 
 nexusPublishing {
