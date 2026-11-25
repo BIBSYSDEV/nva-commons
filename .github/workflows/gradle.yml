@@ -43,10 +43,8 @@ jobs:
           project-token: ${{ env.CODACY_PROJECT_TOKEN }}
           coverage-reports: $(pwd)/build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml
 
+      # Runs without the signing key, so the publication is verified unsigned
       - name: Verify artifacts
-        env:
-          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
-          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
         run: ./gradlew publishToMavenLocal
 
       - name: Publish artifacts
