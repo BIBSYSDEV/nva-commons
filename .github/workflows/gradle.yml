@@ -47,8 +47,23 @@ jobs:
       - name: Verify artifacts
         run: ./gradlew publishToMavenLocal
 
+  # Holds the publish secrets, so it only compiles, signs and publishes: no tests, check tooling or Gradle cache
+  publish:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up JDK
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          java-version: "21"
+          distribution: "corretto"
+
       - name: Publish artifacts
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.OSSRH_USERNAME }}
           ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.OSSRH_PASSWORD }}
